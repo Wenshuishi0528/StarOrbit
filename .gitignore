@@ -1,0 +1,10 @@
+node_modules/
+output/
+.playwright-cli/
+assets/app.bundle.js
+assets/earth/source/
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*

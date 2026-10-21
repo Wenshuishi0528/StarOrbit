@@ -1,0 +1,22 @@
+{
+  "projection": "equirectangular; left=-180°, centre=0°, top=+90°",
+  "earth_source": "https://www.solarsystemscope.com/textures/",
+  "earth_license": "CC BY 4.0; Solar System Scope / INOVE",
+  "star_count": 41411,
+  "star_frame": "J2000 equatorial",
+  "files": {
+    "high/day.jpg": "f8c878354efdb96554aafbe58cc00c587398da0c890dfbcb49c46cea1ff36c5f",
+    "high/cloud.jpg": "367a57fd79e7bef679e15b41fc1fea2f751697b7c465b65ecb3fe56ff0cfa188",
+    "high/ocean.jpg": "e5adb6706227f7bf3cd8e2ff5de3b90cff60afbddf7a071b2c0996c78ff730ad",
+    "high/night.jpg": "616ea4c7b1f9668b842cb84d4cc00011f9add407965bbbcbfc9624e03d571604",
+    "source/8k_earth_clouds.jpg": "c792eca228989d36ebb45d3ea6ff1198be5e21a25d70d2fbcb2124ffd14ba7f5",
+    "source/8k_earth_nightmap.jpg": "9894e83a585a22c1c425e7ca4f987a9ba625bf08ecee45d3c9dcacae3c2ad5f7",
+    "source/8k_earth_daymap.jpg": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+    "source/2k_earth_specular_map.tif": "6b90ecfce248591a1ecc9a3e49acca1a7059b6828877e718302ed9a6b4471bd7",
+    "medium/day.jpg": "f68ae6a2e37616178dbaa7d617c3d4c25a62578f1664c788259c85191ccbd8f5",
+    "medium/cloud.jpg": "73d771e64299dc0de2802a1ea2b68f29b0875e66fd8ca827fc503873044be62e",
+    "medium/ocean.jpg": "e5adb6706227f7bf3cd8e2ff5de3b90cff60afbddf7a071b2c0996c78ff730ad",
+    "medium/night.jpg": "5c51b0436e237381fa9863c918bc92670aa1f58d1697ced0066850a8d7900d56",
+    "simple/day.jpg": "35ee9cfae3c422be7b92e1ec01ab473c62bc66cff47fb9c73e3b74f010f2fcab"
+  }
+}
