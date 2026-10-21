@@ -1,8 +1,8 @@
-# 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator
+# 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
 **v0.7 · 作者 / Author: wenshuishi0528**
 
-![Tiangong Orbit Simulator v0.7](docs/preview.png)
+![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
 
 ## 中文简介
 
