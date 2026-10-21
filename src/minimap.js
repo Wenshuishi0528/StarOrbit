@@ -1,3 +1,4 @@
+import {t,onLanguageChange} from './i18n.js';
 import {interpolate,earthAxes,dot,norm,unit} from './orbit.js';
 
 const $=id=>document.getElementById(id),DEG=Math.PI/180;
@@ -12,6 +13,7 @@ export class OrbitMinimap{
   $('showMinimap').checked=this.visible;this.panel.hidden=!this.visible;
   $('showMinimap').onchange=()=>this.setVisible($('showMinimap').checked);
   $('closeMinimap').onclick=()=>{this.setVisible(false);$('showMinimap').focus();};
+  onLanguageChange(()=>{this.lastDraw=-Infinity;});
   this.image=new Image();this.image.onload=()=>{this.lastDraw=-Infinity;};
   this.image.src=JSON.parse($('environmentAssets').textContent).simple.day;
   this.resizeObserver=new ResizeObserver(()=>{this.lastDraw=-Infinity;});this.resizeObserver.observe(this.canvas);
@@ -65,7 +67,7 @@ export class OrbitMinimap{
   for(const lat of [-60,-30,0,30,60]){const y=project(0,lat,w,h)[1];c.moveTo(0,y);c.lineTo(w,y);}
   c.stroke();c.font='9px -apple-system,sans-serif';c.fillStyle='#d2e5edb3';c.textAlign='center';
   for(const lon of [-120,0,120])c.fillText(`${lon}°`,project(lon,0,w,h)[0],h-5);
-  if(!q){$('minimapTime').textContent='轨道数据无效';$('minimapPosition').textContent='请选择有效时刻或更新轨道数据';return;}
+  if(!q){$('minimapTime').textContent=t('轨道数据无效');$('minimapPosition').textContent=t('请选择有效时刻或更新轨道数据');return;}
   if(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000)this.rebuild(q);
   const current=[q.t,q.longitude,q.latitude];
   this.trace([...this.points.filter(p=>p[0]<q.t),current],'#76e2fa',w,h);
@@ -73,7 +75,7 @@ export class OrbitMinimap{
   const [x,y]=project(q.longitude,q.latitude,w,h);
   c.fillStyle='#75e5ff33';c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();
   c.fillStyle='#fff';c.strokeStyle='#072b3c';c.lineWidth=1.7;c.beginPath();c.arc(x,y,3.7,0,Math.PI*2);c.fill();c.stroke();
-  $('minimapTime').textContent=`${this.sim.mode==='real'?'实时':'模拟'} · ${new Date(q.t+8*3600000).toISOString().slice(11,19)}`;
+  $('minimapTime').textContent=`${this.sim.mode==='real'?t('实时'):t('模拟')} · ${new Date(q.t+8*3600000).toISOString().slice(11,19)}`;
   $('minimapPosition').textContent=`${coordinate(q.latitude,'N','S')} / ${coordinate(q.longitude,'E','W')}`;
  }
 }

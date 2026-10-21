@@ -16,6 +16,7 @@
 - **三档地球**：1K 简易、2K 中等、8K 高清；中高档提供云层、大气与夜间灯光。
 - **真实星表星空**：最多 41,411 颗恒星，可选主星名称、示意银河和曝光风格。
 - **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
+- **中英文切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
 - **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示及三维画面截图。
 
 ### 使用
@@ -30,6 +31,8 @@
 
 ## English overview
 
+![English interface](docs/preview-en.png)
+
 An offline-capable interactive 3D viewer and orbital simulation of China's Tiangong space station. Built around the author's modular 1:200 models, it combines configurable spacecraft assemblies, published orbital ephemerides, solar geometry, Earth's day/night cycle, and automatic solar-array tracking in one browser interface.
 
 ### Features
@@ -40,6 +43,7 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 - **Three Earth quality levels:** 1K simple, 2K medium, and 8K high; medium/high modes include clouds, atmosphere, and night lights.
 - **Catalogue-based stars:** up to 41,411 stars, optional bright-star labels, an artistic Milky Way, and exposure styles.
 - **Toggleable orbit minimap:** current sub-satellite position with past and future ground tracks, synchronized with simulation time.
+- **Chinese / English UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
 - **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display, and 3D screenshot export.
 
 ### Getting started

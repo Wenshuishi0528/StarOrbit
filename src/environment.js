@@ -1,3 +1,4 @@
+import {t,setText,onLanguageChange} from './i18n.js';
 import * as THREE from 'three';
 import catalogue from '../assets/stars.json';
 import {QUALITY,equatorial,qualityFor} from './environment-math.js';
@@ -82,15 +83,15 @@ export class Environment{
   this.buildStars();this.buildMilkyWay();
   this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
-  this.bind();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();
+  this.bind();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();onLanguageChange(()=>this.translateStars());
  }
  buildStars(){
   const positions=[],colors=[],mags=[];this.labelGroup=new THREE.Group();this.backdrop.add(this.labelGroup);
   const names={91262:'织女星',97649:'牛郎星',102098:'天津四',11767:'北极星',32349:'天狼星'};
   for(const [id,ra,dec,mag,bv] of catalogue){const dir=V(equatorial(ra,dec));positions.push(...dir.clone().multiplyScalar(1000).toArray());mags.push(mag);
    const color=new THREE.Color(Number(bv)>.9?'#ffce9e':Number(bv)>.4?'#fff0dc':Number(bv)<.1?'#c0d7ff':'#e5ecff');colors.push(color.r,color.g,color.b);
-   if(names[id]){const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;const ctx=canvas.getContext('2d');ctx.fillStyle='#bdd6e6';ctx.font='28px sans-serif';ctx.fillText(names[id],6,44);
-    const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(canvas),transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));sprite.position.copy(dir.multiplyScalar(990));sprite.scale.set(42,10.5,1);sprite.center.set(-.12,.5);this.labelGroup.add(sprite);
+   if(names[id]){const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;const ctx=canvas.getContext('2d');ctx.fillStyle='#bdd6e6';ctx.font='28px sans-serif';ctx.fillText(t(names[id]),6,44);
+    const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(canvas),transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));sprite.position.copy(dir.multiplyScalar(990));sprite.scale.set(42,10.5,1);sprite.center.set(-.12,.5);sprite.userData.nameKey=names[id];this.labelGroup.add(sprite);
    }
   }
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setAttribute('mag',new THREE.Float32BufferAttribute(mags,1));
@@ -99,6 +100,9 @@ export class Environment{
    vertexShader:`attribute float mag;uniform float brightness,pixelRatio,high;varying vec3 tint;varying float flux;void main(){tint=color;flux=pow(10.,-.14*max(-1.,mag-1.))*brightness;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_PointSize=(2.1+max(0.,5.-mag)*.55+high)*pixelRatio;}`,
    fragmentShader:`varying vec3 tint;varying float flux;uniform float high;void main(){float r=length(gl_PointCoord-.5)*2.;if(r>1.)discard;float a=exp(-r*r*5.)+high*.08*exp(-r*r);gl_FragColor=vec4(tint*flux*a,1.);#include <colorspace_fragment>}`.replace(';#include',';\n#include')
   });this.stars=new THREE.Points(geometry,material);this.stars.frustumCulled=false;this.stars.renderOrder=1;this.backdrop.add(this.stars);
+ }
+ translateStars(){
+  for(const sprite of this.labelGroup.children){const map=sprite.material.map,canvas=map.image,ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#bdd6e6';ctx.font='28px sans-serif';ctx.fillText(t(sprite.userData.nameKey),6,44);map.needsUpdate=true;}
  }
  buildMilkyWay(){
   // StarSky Studio's artistic Galactic band, evaluated in fixed J2000 axes.
@@ -114,7 +118,7 @@ export class Environment{
   $('earthQuality').value=this.settings.quality;$('earthQuality').onchange=()=>this.setQuality($('earthQuality').value);
  }
  setQuality(requested){
-  const ticket=++this.ticket;this.loading=true;$('qualityStatus').textContent='正在准备画质素材…';
+  const ticket=++this.ticket;this.loading=true;setText('qualityStatus','正在准备画质素材…');
   const tier=qualityFor(requested,this.api.renderer.capabilities.maxTextureSize);
   if(tier!==requested)this.api.toast('设备纹理上限不足，已改用中等画质');
   this.ready=this.queue=this.queue.catch(()=>{}).then(async()=>{
@@ -136,17 +140,17 @@ export class Environment{
     const count=catalogue.filter(r=>r[3]<=QUALITY[tier].limit).length;this.stars.geometry.setDrawRange(0,count);this.starCount=count;
     this.api.renderer.setPixelRatio(Math.min(devicePixelRatio,QUALITY[tier].pixelRatio));this.api.resize();
     this.starUniforms.pixelRatio.value=this.api.renderer.getPixelRatio();this.starUniforms.high.value=tier==='high'?1:0;
-    $('earthQuality').value=tier;$('qualityStatus').textContent=`${QUALITY[tier].name} · 地表 ${QUALITY[tier].width/1024}K · ${count.toLocaleString()} 颗恒星上限`;
+    $('earthQuality').value=tier;setText('qualityStatus','{quality} · 地表 {size}K · {count} 颗恒星上限',{quality:QUALITY[tier].name,size:QUALITY[tier].width/1024,count:count.toLocaleString()});
     for(const id of ['showClouds','cloudOpacity','showMilky'])$(id).disabled=tier==='simple';this.save();
    }catch(e){
     loaded.forEach(t=>{t.dispose();t.image=null;});
     if(ticket!==this.ticket)return;
     $('earthQuality').value=this.quality||tier;
     if(!this.quality&&tier!=='simple'){
-     $('qualityStatus').textContent='素材载入失败，正在回退简易地图…';
+     setText('qualityStatus','素材载入失败，正在回退简易地图…');
      setTimeout(()=>{if(ticket===this.ticket)this.setQuality('simple');},0);
     }else{
-     $('qualityStatus').textContent=this.quality?'素材载入失败，已保留原画质；可重新选择重试。':'地球地图未能载入，请重新选择画质重试。';
+     setText('qualityStatus',this.quality?'素材载入失败，已保留原画质；可重新选择重试。':'地球地图未能载入，请重新选择画质重试。');
      this.api.toast('地球素材载入失败，请重试画质切换');
     }
     console.warn('Earth texture load failed:',e.message||String(e));
