@@ -6,6 +6,7 @@ import {EARTH_RADIUS,validateOrbit,snapshot,interpolate,sunlightFraction,parseOr
 import {SolarTracker} from './solar.js';
 import {Environment} from './environment.js';
 import {OrbitMinimap} from './minimap.js';
+import {groundTrackAttitude} from './attitude.js';
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a),basis=axes=>new THREE.Matrix4().makeBasis(...axes.map(V));
 const clockText=t=>new Date(t+8*3600000).toISOString().slice(0,19).replace('T',' ');
 const inputText=t=>new Date(t+8*3600000).toISOString().slice(0,19);
@@ -56,7 +57,7 @@ export class Simulation{
  update(wall){
   const elapsed=Math.max(0,(wall-this.lastWall)/1000);this.lastWall=wall;const old=this.time;
   if(this.mode==='real')this.time=Date.now();else if(!this.paused){this.time+=elapsed*this.speed*1000;if(this.time>=this.end){this.time=this.end;this.paused=true;setText('dataMessage','已到达数据终点，时间已暂停。');this.timeUI();}}
-  const q=snapshot(this.data,this.time);this.current=q;this.minimap.update(q,wall);
+  const q=groundTrackAttitude(snapshot(this.data,this.time));this.current=q;this.minimap.update(q,wall);
   if(!q){this.api.sunLight.intensity=0;$('simClock').textContent=clockText(this.time);for(const id of ['altitude','velocity','arrayYield','groundPoint'])$(id).textContent='—';this.marker.visible=false;this.api.modelRoot.visible=false;$('simNotice').textContent=t('轨道数据已失效：请更新数据或选择有效时刻');$('illumination').textContent=t('数据无效');return;}
   this.api.modelRoot.visible=true;this.earth.quaternion.setFromRotationMatrix(basis(q.earthAxes));this.earth.material.uniforms.sun.value.copy(V(q.sun).normalize());this.marker.position.copy(V(q.position));
   const localSun=V(q.sunLocal);this.api.sunLight.position.copy(this.center).addScaledVector(localSun,1000);this.api.sunLight.intensity=3.4*q.illumination;this.api.fillLight.intensity=$('fillLight').checked?.65:.025;this.localSunArrow.setDirection(localSun);
@@ -77,7 +78,7 @@ export class Simulation{
   $('arrayYield').textContent=(this.tracker.total*100||0).toFixed(1)+'%';const reading=this.tracker.readings[this.api.state.target];$('selectedYield').textContent=reading?t('所选实例有效受光：{percent}%',{percent:(reading.effective*100).toFixed(1)}):t('受光面积计算中');
   $('eventText').textContent=this.event?t(this.event.entering?'进入地影约 {minutes} 分钟':'离开地影约 {minutes} 分钟',{minutes:Math.max(0,(this.event.time-q.t)/60000).toFixed(1)}):t('未来两小时／剩余数据内无昼夜转换');
   $('timeline').value=(q.t-this.start)/(this.end-this.start)*10000;if(!this.inputDirty&&document.activeElement!==$('customTime'))$('customTime').value=inputText(q.t);
-  $('simNotice').textContent=(this.view==='orbit'?t('轨道总览 · 青点为放大的空间站标记'):t('空间站跟随 · 地球距离与角尺度按真实比例'))+t(' · 对地定向假设')+($('fillLight').checked?t(' · 辅助照明开启'):'');
+  $('simNotice').textContent=(this.view==='orbit'?t('轨道总览 · 青点为放大的空间站标记'):t('空间站跟随 · 地球距离与角尺度按真实比例'))+t(' · 沿地面轨迹定向')+($('fillLight').checked?t(' · 辅助照明开启'):'');
  }
  render(){
   const {renderer,camera,scene,stage}=this.api,q=this.current,overview=this.view==='orbit';this.spaceCamera.aspect=camera.aspect;this.spaceCamera.fov=camera.fov;

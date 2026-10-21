@@ -203,5 +203,7 @@
   "天和核心舱 {number}": "Tianhe core {number}",
   "{module} · {core} · {port}": "{module} · {core} · {port}",
   "尾口已连接：{core} · {port}": "Aft connected to: {core} · {port}",
-  "各接口可重复部署任意舱体。新增天和使用尾口接入，四个节点接口可继续扩展；左侧按核心舱编号列出。太阳翼独立控制，自选组合可能重叠。": "Deploy any module type at each port, including duplicates. New Tianhe cores connect aft-first and expose four node ports for further expansion. Cores are numbered in this list. Arrays remain independent; custom assemblies may overlap."
+  "各接口可重复部署任意舱体。新增天和使用尾口接入，四个节点接口可继续扩展；左侧按核心舱编号列出。太阳翼独立控制，自选组合可能重叠。": "Deploy any module type at each port, including duplicates. New Tianhe cores connect aft-first and expose four node ports for further expansion. Cores are numbered in this list. Arrays remain independent; custom assemblies may overlap.",
+  "内置官方轨道，超出有效期不外推。太阳位置按天文历表计算；地球为平均半径球体。整站前端按地面轨迹方向飞行、下方朝地，已计入地球自转；姿态和太阳翼角度均为模拟，不是遥测。独立巡天仅作同轨伴飞示意。": "The bundled official ephemeris is not extrapolated beyond its validity interval. The Sun uses astronomical ephemerides and Earth is a mean-radius sphere. The station front follows the ground track with Earth rotation included, and its ventral side faces Earth. Attitude and array angles are simulated, not telemetry. The independent Xuntian is only an illustrative companion in the same orbit.",
+  " · 沿地面轨迹定向": " · Ground-track aligned"
 }

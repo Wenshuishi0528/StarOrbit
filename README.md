@@ -1,6 +1,6 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.7 · 作者 / Author: wenshuishi0528**
+**v0.10 · 作者 / Author: wenshuishi0528**
 
 ![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
 
@@ -12,12 +12,13 @@
 
 - **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
 - **轨道与时间**：采用公开 OEM 轨道记录，在有效期内插值；支持现实时间、自定义时间、暂停和最高 1000× 播放。
+- **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
 - **三档地球**：1K 简易、2K 中等、8K 高清；中高档提供云层、大气与夜间灯光。
 - **真实星表星空**：最多 41,411 颗恒星，可选主星名称、示意银河和曝光风格。
 - **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
 - **中英文切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
-- **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示及三维画面截图。
+- **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示、全屏尺寸自适应及三维画面截图。
 
 ### 使用
 
@@ -39,12 +40,13 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 - **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
 - **Orbit and time controls:** interpolate published OEM records within their validity interval; use real time, a custom date, pause, or playback up to 1000×.
+- **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
 - **Three Earth quality levels:** 1K simple, 2K medium, and 8K high; medium/high modes include clouds, atmosphere, and night lights.
 - **Catalogue-based stars:** up to 41,411 stars, optional bright-star labels, an artistic Milky Way, and exposure styles.
 - **Toggleable orbit minimap:** current sub-satellite position with past and future ground tracks, synchronized with simulation time.
 - **Chinese / English UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
-- **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display, and 3D screenshot export.
+- **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display with adaptive fullscreen sizing, and 3D screenshot export.
 
 ### Getting started
 
