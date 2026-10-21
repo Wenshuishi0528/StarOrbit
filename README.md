@@ -10,7 +10,7 @@
 
 ### 主要功能
 
-- **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船，独立调整太阳翼，也支持实验舱联动。
+- **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
 - **轨道与时间**：采用公开 OEM 轨道记录，在有效期内插值；支持现实时间、自定义时间、暂停和最高 1000× 播放。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
 - **三档地球**：1K 简易、2K 中等、8K 高清；中高档提供云层、大气与夜间灯光。
@@ -37,7 +37,7 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 ### Features
 
-- **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of the same spacecraft, control arrays individually, or link laboratory-module rotations.
+- **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
 - **Orbit and time controls:** interpolate published OEM records within their validity interval; use real time, a custom date, pause, or playback up to 1000×.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
 - **Three Earth quality levels:** 1K simple, 2K medium, and 8K high; medium/high modes include clouds, atmosphere, and night lights.

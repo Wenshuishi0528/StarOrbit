@@ -3,27 +3,49 @@ import { Simulation } from './simulation.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import {describeAssembly,replaceAttachment,matingTransforms,placementMatrices} from './assembly.js';
 initLanguage();
-const $=id=>document.getElementById(id),meta=JSON.parse($('modelMeta').textContent),names={TH:'天和',WT:'问天',MT:'梦天',TZ:'天舟',SZ:'神舟',XT:'巡天'},slotNames={TH_WENTIAN:'节点左侧',TH_MENGTIAN:'节点右侧',TH_FORWARD:'节点前端',TH_LOWER:'节点下方',TH_AFT:'天和尾端'},defaults={TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'},homeSlot={WT:'TH_WENTIAN',MT:'TH_MENGTIAN',SZ:'TH_FORWARD',TZ:'TH_AFT'},state={slots:{...defaults},showXT:true,target:'TH_WENTIAN',linked:false,pair:true,angles:{}};
+const $=id=>document.getElementById(id),meta=JSON.parse($('modelMeta').textContent),names={TH:'天和',WT:'问天',MT:'梦天',TZ:'天舟',SZ:'神舟',XT:'巡天'},slotNames={TH_WENTIAN:'节点左侧',TH_MENGTIAN:'节点右侧',TH_FORWARD:'节点前端',TH_LOWER:'节点下方',TH_AFT:'天和尾端'},defaults={TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'},state={slots:{...defaults},showXT:true,target:'TH_WENTIAN',linked:false,pair:true,angles:{}};
+let assembly=describeAssembly(state.slots);
 const stage=$('stage'),scene=new THREE.Scene();scene.background=null;const camera=new THREE.PerspectiveCamera(38,1,.1,5000);camera.up.set(0,0,1);const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;stage.appendChild(renderer.domElement);
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=15;controls.maxDistance=1600;
 const fillLight=new THREE.AmbientLight(0xbccde5,.025),sunLight=new THREE.DirectionalLight(0xfff8ef,3.4);scene.add(fillLight,sunLight,sunLight.target);sunLight.castShadow=true;sunLight.shadow.mapSize.set(4096,4096);sunLight.shadow.bias=-.00015;sunLight.shadow.normalBias=.08;sunLight.shadow.camera.near=1;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 let sim=null;
-const modelRoot=new THREE.Group();scene.add(modelRoot);let model,ready=false,playing=false,last=0,saveTimer;const groups={},rig={},tags={},mating={},templates={},types={};const mats=m=>new THREE.Matrix4().set(...m.flat());const copyTo=(o,m)=>{m.decompose(o.position,o.quaternion,o.scale);o.updateMatrixWorld(true);};
+const modelRoot=new THREE.Group();scene.add(modelRoot);let model,ready=false,playing=false,last=0,saveTimer;const groups={},rig={},tags={},mating=matingTransforms(meta),templates={},types={};const mats=m=>new THREE.Matrix4().set(...m.flat());const copyTo=(o,m)=>{m.decompose(o.position,o.quaternion,o.scale);o.updateMatrixWorld(true);};
 function toast(key,params={}){setText('toast',key,params);$('toast').style.opacity=1;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').style.opacity=0,3000);}
 const zeroAngles=()=>({roll:0,left:0,right:0});
-const instanceName=id=>id==='TH'?t('天和核心舱'):id==='freeXT'?t('巡天 · 独立飞行'):`${t(names[types[id]])} · ${t(slotNames[id])}`;
+const coreName=id=>assembly.cores.length===1?t('天和核心舱'):t('天和核心舱 {number}',{number:assembly.byId.get(id).number});
+const instanceName=id=>{
+ if(id==='freeXT')return t('巡天 · 独立飞行');
+ const item=assembly.byId.get(id);if(!item)return '';
+ if(item.type==='TH')return coreName(id);
+ const name=t(names[item.type]),port=t(slotNames[item.hostPort]);
+ return assembly.cores.length===1?`${name} · ${port}`:t('{module} · {core} · {port}',{module:name,core:coreName(item.parentId),port});
+};
 const moduleName=k=>t({TH:'天和核心舱',WT:'问天实验舱',MT:'梦天实验舱',SZ:'神舟飞船',TZ:'天舟货运飞船',XT:'巡天望远镜'}[k]);
 const labs=()=>Object.keys(groups).filter(id=>['WT','MT'].includes(types[id]));
-function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem('tiangong-viewer-v2',JSON.stringify(state));}catch{}},200);}
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem('tiangong-viewer-v3',JSON.stringify(state));}catch{}},200);}
 function loadState(){try{
- const current=localStorage.getItem('tiangong-viewer-v2'),s=JSON.parse(current||localStorage.getItem('tiangong-viewer-v1'));if(!s)return;
- for(const k of Object.keys(defaults)){const v=s.slots?.[k];state.slots[k]=names[v]&&v!=='TH'?v:'';}
+ const current=localStorage.getItem('tiangong-viewer-v3')||localStorage.getItem('tiangong-viewer-v2'),s=JSON.parse(current||localStorage.getItem('tiangong-viewer-v1'));if(!s)return;
+ state.slots=describeAssembly(s.slots).slots;
  state.showXT=s.showXT!==false;state.target=current?s.target:(s.target==='TH'?'TH':Object.keys(state.slots).find(id=>state.slots[id]===s.target)||'freeXT');state.linked=!!s.linked;state.pair=s.pair!==false;
- for(const id of ['TH',...Object.keys(defaults),'freeXT']){state.angles[id]=zeroAngles();const oldKey=id==='TH'?'TH':id==='freeXT'?'XT':state.slots[id];for(const a of ['roll','left','right']){const v=Number(s.angles?.[current?id:oldKey]?.[a]);state.angles[id][a]=Number.isFinite(v)?THREE.MathUtils.clamp(v,-180,180):0;}}
+ for(const id of ['TH',...Object.keys(state.slots),'freeXT']){state.angles[id]=zeroAngles();const oldKey=id==='TH'?'TH':id==='freeXT'?'XT':state.slots[id];for(const a of ['roll','left','right']){const v=Number(s.angles?.[current?id:oldKey]?.[a]);state.angles[id][a]=Number.isFinite(v)?THREE.MathUtils.clamp(v,-180,180):0;}}
 }catch{}}
-for(const [slot,label] of Object.entries(slotNames)){const row=document.createElement('div');row.className='row';const lab=document.createElement('label');lab.htmlFor=slot;lab.textContent=t(label);const sel=document.createElement('select');sel.id=slot;sel.replaceChildren(new Option(t('空置'),''),...Object.keys(names).filter(k=>k!=='TH').map(k=>new Option(moduleName(k),k)));row.append(lab,sel);$('ports').appendChild(row);sel.onchange=()=>{const v=sel.value;state.slots[slot]=v;state.angles[slot]=zeroAngles();applyConfig();fit();save();};}
-function localPort(k){const ps=meta.modules[k].ports;return mats(ps[Object.keys(ps)[0]]);}
+function renderPorts(){
+ const cards=new Map();$('ports').replaceChildren();
+ for(const core of assembly.cores){
+  const card=document.createElement('fieldset');card.className='core-ports';card.dataset.core=core.id;
+  const title=document.createElement('legend');title.textContent=coreName(core.id);card.append(title);
+  if(core.parentId){const note=document.createElement('p');note.className='small core-connection';note.textContent=t('尾口已连接：{core} · {port}',{core:coreName(core.parentId),port:t(slotNames[core.hostPort])});card.append(note);}
+  cards.set(core.id,card);$('ports').append(card);
+ }
+ for(const {id,coreId,port} of assembly.ports){
+  const row=document.createElement('div');row.className='row';const lab=document.createElement('label');lab.htmlFor=id;lab.textContent=t(slotNames[port]);
+  const sel=document.createElement('select');sel.id=id;sel.setAttribute('aria-label',`${coreName(coreId)} · ${t(slotNames[port])}`);
+  sel.replaceChildren(new Option(t('空置'),''),...Object.keys(names).map(k=>new Option(moduleName(k),k)));sel.value=state.slots[id];row.append(lab,sel);cards.get(coreId).append(row);
+  sel.onchange=()=>{state.slots=replaceAttachment(state.slots,id,sel.value);state.angles[id]=zeroAngles();applyConfig();fit();save();};
+ }
+}
 function addInstance(id,type){
  const g=templates[type].clone(true);g.name='instance_'+id;model.add(g);groups[id]=g;types[id]=type;
  rig[id]={roll:g.getObjectByName('roll_'+type),left:g.getObjectByName('pitch_'+type+'_L'),right:g.getObjectByName('pitch_'+type+'_R')};
@@ -31,14 +53,17 @@ function addInstance(id,type){
  const el=document.createElement('div');el.textContent=instanceName(id);Object.assign(el.style,{position:'absolute',padding:'4px 8px',border:'1px solid #355066',borderRadius:'5px',color:'#c8e0f0',background:'#0a1724bb',fontSize:'11px',whiteSpace:'nowrap',pointerEvents:'none',transform:'translate(-50%,-130%)'});stage.appendChild(el);tags[id]={el,anchor:new THREE.Vector3(type==='TH'?45:40,0,13)};
 }
 function applyConfig(){if(!ready)return;playing=false;$('animate').textContent=t('▶ 演示自转');
- const wanted={TH:'TH',...Object.fromEntries(Object.entries(state.slots).filter(([,k])=>k))};if(state.showXT)wanted.freeXT='XT';
+ assembly=describeAssembly(state.slots);state.slots=assembly.slots;
+ const wanted=Object.fromEntries(assembly.instances.map(item=>[item.id,item.type]));if(state.showXT)wanted.freeXT='XT';
+ for(const id of Object.keys(state.angles))if(!wanted[id])delete state.angles[id];
  for(const id of Object.keys(groups))if(wanted[id]!==types[id]){groups[id].removeFromParent();tags[id].el.remove();delete groups[id];delete rig[id];delete tags[id];delete types[id];}
  for(const [id,k]of Object.entries(wanted)){state.angles[id]??=zeroAngles();if(!groups[id])addInstance(id,k);copyTo(groups[id],mats(meta.modules[k].matrix));}
- const th=mats(meta.modules.TH.matrix);for(const [slot,k]of Object.entries(state.slots)){ $(slot).value=k;if(!k)continue;const M=th.clone().multiply(mats(meta.modules.TH.ports[slot])).multiply(mating[k]).multiply(localPort(k).invert());copyTo(groups[slot],M);}
+ for(const [id,M] of placementMatrices(meta,assembly,mating))copyTo(groups[id],M);
+ renderPorts();for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
  $('showXT').checked=state.showXT;$('showXT').disabled=false;
  if(!groups[state.target])state.target=Object.keys(groups).find(id=>id!=='TH')||'TH';
  $('target').replaceChildren(...Object.keys(groups).map(id=>new Option(instanceName(id),id)));$('target').value=state.target;$('linkLabs').checked=state.linked;$('pairWings').checked=state.pair;
- setText('status','{count} 个舱体 · 模型就绪',{count:Object.keys(groups).length});$('configuration').textContent=Object.keys(groups).map(instanceName).join(' · ');applyAngles();syncControls();sim?.rebuild();}
+ setText('status','{count} 个舱体 · 模型就绪',{count:Object.keys(groups).length});$('configuration').textContent=Object.keys(groups).map(instanceName).join(' · ');applyAngles();controls.maxDistance=Math.max(1600,bounds().getSize(new THREE.Vector3()).length()*4);syncControls();sim?.rebuild();}
 function applyAngles(){for(const k of Object.keys(groups)){const a=state.angles[k];if(rig[k].roll)rig[k].roll.rotation.x=THREE.MathUtils.degToRad(a.roll);rig[k].left.rotation.y=THREE.MathUtils.degToRad(a.left);rig[k].right.rotation.y=THREE.MathUtils.degToRad(a.right);}model.updateMatrixWorld(true);}
 function syncControls(){const k=state.target,shown=!!groups[k],lab=['WT','MT'].includes(types[k]);$('rotationControls').classList.toggle('disabled',!shown);$('rollControl').classList.toggle('hidden',!lab);$('rightControl').classList.toggle('hidden',state.pair);$('linkLabs').disabled=!(labs().length>1&&lab);for(const a of ['roll','left','right']){$(a).value=state.angles[k][a];$(a+'N').value=Math.round(state.angles[k][a]);}$('selection').textContent=t('正在控制：{name}{linked}',{name:instanceName(k),linked:state.linked&&!sim?.auto&&lab&&!$('linkLabs').disabled?t(' · 实验舱联动'):''});$('motionHint').textContent=lab?t('整组转动带动尾部转架及双翼；翼板自转只改变翼面朝向。角度为可视化演示，不代表实物机械限位。')+(state.linked&&!sim?.auto?t(' 所有问天、梦天实例按对应转轴联动；反向轴使用相反角度，非平行轴不保证翼面平行。'):''):t('翼板绕根部横向转轴旋转。此实例的角度可独立控制。');}
 function linkSign(a,from,to){model.updateMatrixWorld(true);const u=new THREE.Vector3(a==='roll'?1:0,a==='roll'?0:1,0),v=u.clone();u.transformDirection((a==='roll'?groups[from]:rig[from].left.parent).matrixWorld);v.transformDirection((a==='roll'?groups[to]:rig[to].left.parent).matrixWorld);return u.dot(v)<-.5?-1:1;}
@@ -60,15 +85,10 @@ document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state.slots
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}new ResizeObserver(resize).observe(stage);
 function tick(t){requestAnimationFrame(tick);const dt=Math.min((t-last)/1000,.1);last=t;if(ready&&sim)sim.update(t);if(ready&&playing)changeAngle('left',((state.angles[state.target].left+dt*15+180)%360)-180);controls.update();updateModelClipping();if(ready){for(const [k,tag]of Object.entries(tags)){const p=tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);tag.el.style.display=groups[k].visible&&$('labels').checked&&p.z<1&&p.z>-1&&Math.abs(p.x)<1&&Math.abs(p.y)<1?'block':'none';tag.el.style.left=((p.x+1)*stage.clientWidth/2)+'px';tag.el.style.top=((-p.y+1)*stage.clientHeight/2)+'px';}}if(sim)sim.render();else renderer.render(scene,camera);}requestAnimationFrame(tick);
 async function boot(){try{const encoded=$('modelData').textContent.trim(),bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));setText('loadText','正在展开模型并建立太阳翼转轴…');const buffer=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();const gltf=await new GLTFLoader().parseAsync(buffer,'');model=gltf.scene;modelRoot.add(model);
-for(const k of Object.keys(names)){templates[k]=model.getObjectByName('module_'+k);if(!templates[k])throw Error(t('缺少模型 {module}',{module:k}));
-if(k!=='TH'){if(homeSlot[k]){const host=mats(meta.modules.TH.matrix).multiply(mats(meta.modules.TH.ports[homeSlot[k]]));mating[k]=host.invert().multiply(mats(meta.modules[k].matrix)).multiply(localPort(k));}else mating[k]=new THREE.Matrix4().makeTranslation(0,0,6).multiply(new THREE.Matrix4().makeRotationX(Math.PI));}}
+for(const k of Object.keys(names)){templates[k]=model.getObjectByName('module_'+k);if(!templates[k])throw Error(t('缺少模型 {module}',{module:k}));}
 model.traverse(o=>{if(o.isMesh){o.frustumCulled=true;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){m.roughness=Math.max(m.roughness,.4);m.metalness=Math.min(m.metalness,.6);}}});for(const t of Object.values(templates))t.removeFromParent();loadState();ready=true;resize();applyConfig();fit(null,[1,-1,1.25]);sim=new Simulation({groups,rig,state,types,model,modelRoot,scene,camera,renderer,stage,controls,sunLight,fillLight,tags,resize,syncControls,labs,toast,stopAnimation:()=>{playing=false;$('animate').textContent=t('▶ 演示自转');}});fit(null,[1,-1,.35]);$('loading').classList.add('hidden');document.body.dataset.ready='true';window.viewer={state,groups,rig,scene,camera,controls,fit,applyConfig,changeAngle,renderer,meta,types,sim};}catch(e){console.error(e);$('loading').querySelector('.spinner').style.display='none';setText('loadingTitle','模型未能载入');setText('loadText','请使用新版 Chrome、Edge 或 Safari 打开本文件。错误：{error}',{error:e.message});setText('status','载入失败');}}
 onLanguageChange(()=>{
- for(const [slot,label] of Object.entries(slotNames)){
-  document.querySelector(`label[for="${slot}"]`).textContent=t(label);
-  for(const option of $(slot).options)option.textContent=option.value?moduleName(option.value):t('空置');
- }
- if(ready){for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
+ if(ready){renderPorts();for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
   $('target').replaceChildren(...Object.keys(groups).map(id=>new Option(instanceName(id),id)));$('target').value=state.target;
   $('configuration').textContent=Object.keys(groups).map(instanceName).join(' · ');syncControls();
  }

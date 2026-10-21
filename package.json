@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node tests/physics.mjs && node tests/environment.mjs"
+    "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs"
   },
   "displayVersion": "0.7"
 }

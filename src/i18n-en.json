@@ -199,5 +199,9 @@
   "只支持地心 EME2000 / UTC 的 OEM 文件": "Only geocentric EME2000 / UTC OEM files are supported",
   "请导入单段 OEM 数据": "Import a single-segment OEM file",
   "无效轨道记录 {index}": "Invalid ephemeris record {index}",
-  "用户导入 OEM（未验证来源）": "User-imported OEM (source unverified)"
+  "用户导入 OEM（未验证来源）": "User-imported OEM (source unverified)",
+  "天和核心舱 {number}": "Tianhe core {number}",
+  "{module} · {core} · {port}": "{module} · {core} · {port}",
+  "尾口已连接：{core} · {port}": "Aft connected to: {core} · {port}",
+  "各接口可重复部署任意舱体。新增天和使用尾口接入，四个节点接口可继续扩展；左侧按核心舱编号列出。太阳翼独立控制，自选组合可能重叠。": "Deploy any module type at each port, including duplicates. New Tianhe cores connect aft-first and expose four node ports for further expansion. Cores are numbered in this list. Arrays remain independent; custom assemblies may overlap."
 }
