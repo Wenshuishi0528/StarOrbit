@@ -8,18 +8,25 @@ export class SunView{
   this.mesh=new THREE.Mesh(new THREE.PlaneGeometry(2,2),this.material);this.mesh.renderOrder=1.8;sim.sky.add(this.mesh);
  }
  update(q,camera,enabled){
-  const sim=this.sim,uniforms=sim.environment.hdr.material.uniforms;this.mesh.visible=enabled&&!!q;uniforms.sunGlow.value.set(0,0,0);
+  const sim=this.sim,uniforms=sim.environment.hdr.material.uniforms;this.mesh.visible=enabled&&!!q;uniforms.sunGlow.value.set(0,0,0);uniforms.sunTwilight.value=0;
   if(!this.mesh.visible)return;
   const direction=new THREE.Vector3(...q.sunDir),distance=Math.hypot(...q.sun),table=sim.environment.opticalTable;
   if(!table){this.mesh.visible=false;return;}
   const appearance=solarAppearance(camera.position.toArray(),q.sunDir,distance,table);
+  uniforms.sunTwilight.value=appearance.twilight;
   this.mesh.position.copy(camera.position).addScaledVector(direction,800000);this.mesh.quaternion.copy(camera.quaternion);this.mesh.scale.setScalar(800000*Math.tan(appearance.radius));
   const moon=sim.environment.moon?.mesh;
-  let moonVisible=1;
-  if(moon?.visible){const ray=moon.position.clone().sub(camera.position),distance=ray.length();moonVisible=diskVisibility(appearance.radius,Math.asin(Math.min(1,1737.4/distance)),Math.acos(THREE.MathUtils.clamp(ray.normalize().dot(direction),-1,1)));}
+  let moonVisible=1;uniforms.sunMoonDisc.value.set(0,0,0,-1);
+  if(moon?.visible){const ray=moon.position.clone().sub(camera.position),distance=ray.length();const ratio=Math.min(1,1737.4/distance);ray.normalize();
+   uniforms.sunMoonDisc.value.set(ray.x,ray.y,ray.z,2*(1-Math.sqrt(1-ratio*ratio)));
+   moonVisible=diskVisibility(appearance.radius,Math.asin(ratio),Math.acos(THREE.MathUtils.clamp(ray.dot(direction),-1,1)));}
   // Sparse cloud probes cannot resolve a thin Earth/Moon occultation crescent.
   uniforms.sunOcclusionProbe.value=THREE.MathUtils.smoothstep(Math.min(appearance.visible,moonVisible),.98,1.);
   camera.updateMatrixWorld();this.projected.copy(this.mesh.position).project(camera);
+  const e=camera.matrixWorld.elements,sy=Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),sx=sy*camera.aspect;
+  uniforms.sunViewRays.value.set(e[0]*sx,e[4]*sy,-e[8],e[1]*sx,e[5]*sy,-e[9],e[2]*sx,e[6]*sy,-e[10]);
+  const r=camera.position.length(),ratio=Math.min(1,6371/r);
+  uniforms.sunEarthDisc.value.set(-camera.position.x/r,-camera.position.y/r,-camera.position.z/r,2*(1-Math.sqrt(1-ratio*ratio)));
   const front=direction.dot(camera.getWorldDirection(new THREE.Vector3()));
   if(front>0){uniforms.sunPosition.value.set(this.projected.x*.5+.5,this.projected.y*.5+.5);uniforms.sunRadius.value=Math.tan(appearance.radius)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*front);uniforms.sunGlow.value.fromArray(appearance.rgb).multiplyScalar(SUN_RADIANCE*moonVisible);}
   // The station can also receive reddened light at orbital sunrise. Power/orbit

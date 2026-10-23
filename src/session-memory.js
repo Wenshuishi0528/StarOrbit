@@ -2,7 +2,7 @@ import {setText} from './i18n.js';
 const KEY='tiangong-session-v1';
 const $=id=>document.getElementById(id);
 const switches=['occlusion','orbitPath','sunVector','fillLight','labels'];
-const settingsKeys=[KEY,'tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-language-v1'];
+const settingsKeys=[KEY,'tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
 const vector=a=>Array.isArray(a)&&a.length===3&&a.every(v=>Number.isFinite(v)&&Math.abs(v)<1e7);
 function restoreCamera(camera,controls,s){
  if(!s||!vector(s.position)||!vector(s.target))return;

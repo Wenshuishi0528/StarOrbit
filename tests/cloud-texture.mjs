@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CLOUD_PNG,cloudChannel,cloudDecodeSize} from '../src/cloud-texture.js';
+import {CLOUD_PNG,cloudChannel,cloudDecodeSize,cloudTone,githubCloudOpacity} from '../src/cloud-texture.js';
 assert.equal(cloudChannel({source:CLOUD_PNG}),'alpha');
 assert.equal(cloudChannel({channel:'alpha',source:'导入快照'}),'alpha');
 assert.equal(cloudChannel({source:'https://clouds.matteason.co.uk/images/8192x4096/clouds.jpg'}),'red');
@@ -10,3 +10,15 @@ assert.deepEqual(cloudDecodeSize(8192,4096,'high',4096),{width:4096,height:2048}
 assert.deepEqual(cloudDecodeSize(1024,512,'high',16384),{width:1024,height:512});
 assert.throws(()=>cloudDecodeSize(8192,2048,'high',16384));
 console.log({cloudAlphaChannel:'pass',legacyJPEG:'pass',deviceLimit:'pass',noUpscaling:'pass'});
+
+assert.equal(cloudTone({provider:'github',channel:'alpha'}),1);
+assert.equal(cloudTone({provider:'github',channel:'red',source:'导入快照'}),1);
+assert.equal(cloudTone({source:CLOUD_PNG}),1);
+assert.equal(cloudTone({provider:'satcorps',channel:'red'}),0);
+assert.equal(cloudTone(null),0);
+assert.equal(cloudTone({source:'unknown import'}),0);
+assert.equal(githubCloudOpacity(0),0);assert.equal(githubCloudOpacity(1),1);
+assert.ok(githubCloudOpacity(.2)<.02);assert.ok(githubCloudOpacity(.9)>.8);
+let previous=0;
+for(let i=0;i<=1000;i++){let next=githubCloudOpacity(i/1000);assert.ok(next>=previous&&next-previous<.003);previous=next;}
+console.log({githubGreyFloor:'pass',continuousThinClouds:'pass',sourceIsolation:'pass'});

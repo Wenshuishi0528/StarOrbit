@@ -1,19 +1,28 @@
+import {cloudToneGLSL} from './cloud-texture.js';
 import {scatteringGLSL} from './atmosphere-scattering.js';
 import {solarOpticsGLSL} from './atmosphere-glsl.js';
 export const vertex=`varying vec3 localN;varying vec3 worldN;varying vec3 worldP;
 void main(){localN=normalize(position);worldN=normalize(mat3(modelMatrix)*localN);worldP=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(worldP,1.);}`;
-const mapping=`vec4 sampleMap(sampler2D tex,vec2 uv){vec2 dx=dFdx(uv),dy=dFdy(uv);dx.x-=floor(dx.x+.5);dy.x-=floor(dy.x+.5);return textureGrad(tex,uv,dx,dy);}
-vec2 mapUV(vec3 p){p=normalize(p);return vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);}`;
+const mapUVCode=`vec2 mapUV(vec3 p){p=normalize(p);return vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);}`;
+const mapping=`${mapUVCode}
+vec2 wrapGradient(vec2 v){v.x-=floor(v.x+.5);return v;}
+#ifdef CLOUD_RAYMARCH
+vec2 cloudDx,cloudDy;
+vec4 sampleMap(sampler2D tex,vec2 uv){return textureGrad(tex,uv,cloudDx,cloudDy);}
+#else
+vec4 sampleMap(sampler2D tex,vec2 uv){return textureGrad(tex,uv,wrapGradient(dFdx(uv)),wrapGradient(dFdy(uv)));}
+#endif
+`;
 const output=`\n#include <tonemapping_fragment>\n#include <colorspace_fragment>
 // Static, sub-code-value dithering avoids 8-bit colour bands without temporal flicker.
 if(enhanced>.5&&linearOutput<.5){float grain=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715))))-.5;gl_FragColor.rgb+=grain/255.;}`;
 const noise=`float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.2,.3));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise3(p);p=p*2.03+7.1;a*=.5;}return v;}`;
-const clouds=`${solarOpticsGLSL}uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason,cloudChannel;${noise}
+const clouds=`${solarOpticsGLSL}${cloudToneGLSL}uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason,cloudChannel;${noise}
 vec3 aroundAxis(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);}
 float cloudAt(vec3 p){p=normalize(p);
-if(cloudMode<.5){vec4 mask=sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.)))));return mix(mask.r,mask.a,cloudChannel);}
+if(cloudMode<.5){vec4 mask=sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.)))));return cloudOpacity(mix(mask.r,mask.a,cloudChannel));}
 // Geography remains Earth-fixed while synoptic texture evolves inside its envelope.
 vec2 uv=mapUV(p);float lat=(uv.y-.5)*180.,lon=(uv.x-.5)*6.2831853,ab=abs(lat);
 float ocean=smoothstep(.15,.85,sampleMap(oceanMap,uv).r);vec3 region=sampleMap(climateMap,uv).rgb;
@@ -142,15 +151,23 @@ float oval=exp(-pow((abs(lat)-1.16-wave)/.065,2.));float data=sampleMap(auroraMa
 float height=length(worldP)-6371.;float fold=lon*180.+sin(lon*13.+t*.3)*9.+fbm(p*23.+vec3(t*.04))*16.;float curtain=pow(.5+.5*sin(fold+height*.006),3.)*(.35+.65*noise3(p*40.+vec3(t*.03))); float vertical=exp(-pow((height-150.)/65.,2.));float night=1.-smoothstep(-.16,.08,dot(normalize(worldN),normalize(sun)));
 float a=mask*curtain*vertical*strength*night*.08;vec3 color=mix(vec3(.008,1.,.035),vec3(.65,.002,.09),smoothstep(180.,310.,height));gl_FragColor=vec4(color*1.8,clamp(a,0.,.2));\n#include <colorspace_fragment>}`;
 // True ray-marched cloud shell. Satellite coverage is measured; vertical profile/detail is illustrative.
-export const volumeCloudFragment=`uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}
+export const volumeCloudFragment=`#define CLOUD_RAYMARCH
+uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}
 vec2 cloudHit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
-float densityAt(vec3 p){float h=length(p)-6371.;if(h<1.5||h>15.)return 0.;float c=cloudAt(p);if(c<.025)return 0.;
+float densityAt(vec3 p){float h=length(p)-6371.;if(h<1.5||h>15.)return 0.;float c=cloudAt(p);if(c<=0.)return 0.;
 // The measured mask controls both thickness and optical density. A continuous
 // response preserves differences inside bright cloud fields instead of clipping
 // everything above 0.85 to the same opaque column.
 float top=mix(4.,13.,c*c),profile=smoothstep(1.5,3.,h)*(1.-smoothstep(top,top+2.,h));if(profile<.001)return 0.;
 float detail=noise3(p*.22+vec3(seed*.1,weatherTime*.07*cloudMotion,0.));return profile*pow(c,1.6)*(.9+.1*detail)*cloudAmount;}
-void main(){vec3 o=earthInverse*cameraPosition,d=normalize(earthInverse*worldP-o),s=normalize(localSun);vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,outer.x),end=outer.y;if(inner.x>begin)end=min(end,inner.x);vec2 ground=cloudHit(o,d,6371.);if(ground.x>0.)end=min(end,ground.x);if(end<=begin)discard;
+void main(){vec3 o=earthInverse*cameraPosition,d=normalize(earthInverse*worldP-o),s=normalize(localSun);
+// Derivatives must be evaluated before any per-pixel discard/early-exit loop.
+// Use the same cloud-shell ray footprint for density and light-path samples.
+float b=dot(o,d),disc=b*b-dot(o,o)+6379.*6379.;
+vec3 reference=normalize(o+d*max(0.,-b-sqrt(max(0.,disc))));
+vec2 uv=mapUV(aroundAxis(reference,cloudMotion*motionTime*.004*(.5+.5*sin(reference.z*4.))));
+cloudDx=wrapGradient(dFdx(uv));cloudDy=wrapGradient(dFdy(uv));
+vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,outer.x),end=outer.y;if(inner.x>begin)end=min(end,inner.x);vec2 ground=cloudHit(o,d,6371.);if(ground.x>0.)end=min(end,ground.x);if(end<=begin)discard;
 float ds=(end-begin)/float(cloudSteps),trans=1.,depthMoment=0.;vec3 sum=vec3(0.);float forward=pow(max(dot(d,s),0.),8.);
 for(int i=0;i<40;i++){if(i>=cloudSteps||trans<.025)break;vec3 p=o+d*(begin+(float(i)+.5)*ds);float den=densityAt(p);if(den<.001)continue;float mu=dot(normalize(p),s);float lightDepth=(densityAt(p+s*3.)*3.+densityAt(p+s*8.)*5.)*.22;vec3 direct=exp(-lightDepth)*sunlightAt(length(p)-6371.,mu);
 vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002);

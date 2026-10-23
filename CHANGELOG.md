@@ -1,5 +1,45 @@
 # Changelog / 更新记录
 
+## v0.24 — 2026-10-23
+
+- GitHub 云图增加全图自适应遮罩断层处理，减轻碎片和阶梯边缘；历史 PNG／JPEG 同步适用，原始下载缓存保留。大尺度上游误分类仍不能由该处理恢复。
+- 云图在独立 Worker 中一次性处理，复用单通道纹理并限制并发；普通云、体积云、云影使用同一遮罩。
+- 轨道数据框增加开关和关闭按钮，记忆显示状态；右上视角按钮改为点击展开，选择视角、点击外部或按 Esc 收起，支持中英文。
+
+**English:** Added source-wide adaptive mask reconstruction for GitHub cloud snapshots, reducing fragmentation without changing archived PNG/JPEG data. Large-scale source misclassification remains unresolved. One-shot worker processing uses a single-channel texture shared by clouds and shadows, with serialized loads. Added a persistent orbit-readout toggle and a click-to-open camera menu with outside-click/Escape dismissal and bilingual labels.
+
+[处理依据与验证 / Method and validation](docs/v0.24-details.md)
+
+## v0.23 — 2026-10-23
+
+- 修正体积云分支取样时的纹理梯度，减少不稳定的细节选择；移除低密度硬截断，保留连续的弱云过渡。
+- 对比原始 Alpha、普通云与体积云，确认 GitHub 图源自身包含灰色连块和阶梯缺口；本次未恢复上游云分类，也未以模糊或随机云掩盖缺失数据。
+- 原始缓存和其他图源保留，不新增纹理或渲染通道。自动测试及生产着色器 GPU 场景检查通过。
+
+**English:** Stabilized texture gradients in volume-cloud sampling and removed the low-density cutoff. Raw-alpha, shell and volume comparisons traced large grey blocks to the GitHub source itself. This update does not reconstruct upstream cloud classification or hide missing information with blur or synthetic clouds. Original caches and other sources are retained; no extra textures or render passes. Automated tests and production-shader GPU checks passed.
+
+[诊断、修正范围与参考 / Diagnosis, scope and references](docs/v0.23-details.md)
+
+## v0.22 — 2026-10-23
+
+- 8K 太阳十字星芒改为仅在视线掠过大气边缘时渐入，白昼关闭；光晕随光谱消光与遮挡连续减弱。
+- 改善晨昏太阳高亮的颜色保留，显现从亮白、金橙到暗红的变化；补充地球／月球遮挡范围，避免局部显示处理污染遮挡物。
+- 复用现有 HDR 缓冲；自动测试、GPU 太阳／遮挡检查及单个 subagent 审查完成。
+
+**English:** In 8K mode, solar starbursts now fade in only for atmosphere-grazing views. Local hue-preserving highlight mapping reveals spectral twilight colours while retaining daylight white. Earth/Moon masks protect occulting surfaces; glare fades with transmitted sunlight. Reuses the existing HDR buffer. Automated tests, GPU solar/occlusion checks and one subagent review completed.
+
+[实现、验证与参考 / Implementation, validation and references](docs/v0.22-details.md)
+
+## v0.21 — 2026-10-23
+
+- 修正 GitHub 云图灰底过度遮挡海洋：针对上游增强灰度加入连续透明度校正，普通云、体积云、云影与夜光遮蔽一致使用。
+- 已下载的 PNG/JPEG 历史快照自动应用；保留原始缓存，NASA 科学云图与内置云图沿用各自处理。未增加纹理或渲染通道。
+- 自动测试与生产着色器 GPU 检查通过；本项是显示校正，不能从合成灰度恢复严格的晴空／薄云分类。
+
+**English:** Reduced the GitHub source's grey veil with a continuous, provider-specific opacity transfer shared by cloud shells, volume clouds, shadows and night-light attenuation. Existing PNG/JPEG snapshots benefit without changing their cached pixels; NASA and bundled maps retain their own processing. No new textures or render passes. Automated and production-shader GPU checks passed. This display correction does not recover a scientific clear-sky classification.
+
+[图源含义、处理与验证 / Source interpretation, processing and validation](docs/v0.21-details.md)
+
 ## v0.20 — 2026-10-23
 
 - 8K 大气改用六波长光谱转换，修正白昼低层紫边，保留晨昏金橙过渡和夜侧弱气辉。

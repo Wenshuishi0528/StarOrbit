@@ -1,3 +1,5 @@
+import {Weather} from '../../src/weather.js';
+import {cloudToneGLSL,githubCloudOpacity} from '../../src/cloud-texture.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from '../../src/atmosphere-spectrum.js';
 // Small on-demand GPU fixture: production shaders, no embedded app/assets/animation.
 import * as THREE from 'three';
@@ -22,7 +24,7 @@ const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:tru
 renderer.debug.onShaderError=(gl,p,v,f)=>errors.push(gl.getShaderInfoLog(f));$('canvas').append(renderer.domElement);
 const hdr=new AtmosphereRenderer(renderer);const scene=new THREE.Scene();scene.background=new THREE.Color(0);
 const camera=new THREE.PerspectiveCamera(38,800/560,10,1000000);camera.position.set(0,0,6771);camera.up.set(0,0,1);
-const sun=new THREE.Vector3(),uniforms={linearOutput:{value:0},linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:multiTex},multipleDepthB:{value:multiTexB},sun:{value:sun},localSun:{value:sun},solarDepth:{value:lut},enhanced:{value:1},steps:{value:32},detailed:{value:1},dayMap:{value:water},nightMap:{value:black},oceanMap:{value:white},cloudMap:{value:mask},cloudTemplateMap:{value:mask},climateMap:{value:black},cloudAmount:{value:.85},cloudMode:{value:0},cloudChannel:{value:0},gloss:{value:90},cloudMotion:{value:0},motionTime:{value:0},weatherTime:{value:0},seed:{value:0},cloudSeason:{value:0},cloudSteps:{value:28},earthInverse:{value:new THREE.Matrix3()}};
+const sun=new THREE.Vector3(),uniforms={linearOutput:{value:0},linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:multiTex},multipleDepthB:{value:multiTexB},sun:{value:sun},localSun:{value:sun},solarDepth:{value:lut},enhanced:{value:1},steps:{value:32},detailed:{value:1},dayMap:{value:water},nightMap:{value:black},oceanMap:{value:white},cloudMap:{value:mask},cloudTemplateMap:{value:mask},climateMap:{value:black},cloudAmount:{value:.85},cloudMode:{value:0},cloudChannel:{value:0},cloudTone:{value:0},gloss:{value:90},cloudMotion:{value:0},motionTime:{value:0},weatherTime:{value:0},seed:{value:0},cloudSeason:{value:0},cloudSteps:{value:28},earthInverse:{value:new THREE.Matrix3()}};
 for(let i=0;i<4;i++)for(const prefix of ['detail','nightDetail']){uniforms[prefix+'Map'+i]={value:black};uniforms[prefix+'Fade'+i]={value:0};uniforms[prefix+'Rect'+i]={value:new THREE.Vector4(0,0,1,1)};}
 const make=(r,w,h,fragment,order,back=false)=>{const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,w,h),new THREE.ShaderMaterial({uniforms,vertexShader:vertex,fragmentShader:fragment,transparent:order>0,depthWrite:!order,depthTest:!back,side:back?THREE.BackSide:THREE.FrontSide}));mesh.renderOrder=order;scene.add(mesh);return mesh;};
 make(6371,384,192,earthFragment,0);const cloud=make(6379,384,192,cloudFragment,2),volume=make(6387,128,80,volumeCloudFragment,2.4,true);const airMesh=make(6671,128,64,atmosphereFragment,3,true),transMesh=make(6471,128,64,atmosphereTransmissionFragment,2.9,true);
@@ -136,4 +138,61 @@ window.checkSunFrames=()=>{
   select.value='-19';render();gl.finish();const start=performance.now();for(let i=0;i<12;i++){render();gl.finish();}results.push({fixtureMillisecondsPerFrame:(performance.now()-start)/12,width:800,height:560});
  }finally{select.value=saved;$('cloud').value=cloudMode;$('azimuth').value=az;render();}
  return results;
+};
+
+// Scalar cloud masks must not turn weak source backgrounds into broad cloud decks.
+window.checkCloudTone=()=>{
+ const rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false}),buf=new Float32Array(4),probe=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+ const u={cloudTone:{value:1},value:{value:0}},m=new THREE.ShaderMaterial({uniforms:u,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`${cloudToneGLSL}uniform float value;void main(){gl_FragColor=vec4(cloudOpacity(value),0.,0.,1.);}`,toneMapped:false});
+ quad.material=m;quad.frustumCulled=false;probe.add(quad);const results=[];
+ try{
+  for(const mode of [1,0])for(const v of [0,.05,.1,.2,.5,.9,1]){u.cloudTone.value=mode;u.value.value=v;renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);results.push({mode,input:v,output:buf[0],pass:Math.abs(buf[0]-(mode?githubCloudOpacity(v):v))<1e-6});}
+  uniforms.cloudTone.value=1;
+  for(const mode of ['shell','volume']){document.getElementById('cloud').value=mode;render();results.push({mode,pass:errors.length===0});}
+  return {results,shaderErrors:errors};
+ }finally{uniforms.cloudTone.value=0;document.getElementById('cloud').value='shell';renderer.setRenderTarget(null);rt.dispose();m.dispose();quad.geometry.dispose();render();}
+};
+
+window.checkSolarMapping=()=>{
+ const u=hdr.material.uniforms,saved=Object.fromEntries(Object.entries(u).map(([k,v])=>[k,v.value]));
+ const tex=new THREE.DataTexture(new Float32Array([.3,.04,.01,1]),1,1,THREE.RGBAFormat,THREE.FloatType);tex.needsUpdate=true;
+ const gl=renderer.getContext(),pixel=()=>{renderer.setRenderTarget(null);renderer.render(hdr.scene,hdr.camera);const a=new Uint8Array(4);gl.readPixels(400,280,1,1,gl.RGBA,gl.UNSIGNED_BYTE,a);return [...a].slice(0,3);};
+ const results=[];
+ try{
+  u.frame.value=tex;u.sunGlow.value=new THREE.Vector3(.001,.001,.001);u.sunPosition.value=new THREE.Vector2(.5,.5);u.sunRadius.value=.1;u.sunOcclusionProbe.value=0;u.sunViewRays.value=new THREE.Matrix3();
+  u.sunEarthDisc.value=new THREE.Vector4(0,0,1,-1);u.sunMoonDisc.value=new THREE.Vector4(0,0,1,-1);
+  u.sunTwilight.value=0;const original=pixel();u.sunTwilight.value=1;const clear=pixel();
+  for(const body of ['sunEarthDisc','sunMoonDisc']){u[body].value.w=.01;const covered=pixel();results.push({body,original,clear,covered,pass:covered.every((v,i)=>Math.abs(v-original[i])<=1)&&clear.some((v,i)=>Math.abs(v-covered[i])>10)});u[body].value.w=-1;}
+  u.sunPosition.value.set(-5,-5);const offscreen=pixel();results.push({name:'offscreen Sun leaves background mapping intact',pass:offscreen.every((v,i)=>Math.abs(v-original[i])<=1)});
+  return {results,shaderErrors:errors};
+ }finally{for(const [k,v] of Object.entries(saved))u[k].value=v;tex.dispose();render();}
+};
+
+// Actual downloaded texture inspection: 8K source pixels, one frame at 400 km.
+window.loadCloudInspection=async(url,mode='volume',repaired=false,latitude=-6.67,longitude=146.27,altitude=400)=>{
+ const blob=await (await fetch(url)).blob(),start=performance.now();
+ let tex;
+ if(repaired){tex=await Weather.prototype.texture.call({env:{quality:'high',api:{renderer}}},{kind:'cloud',blob,provider:'github',channel:'alpha'});}else{
+ const bitmap=await createImageBitmap(blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
+ tex=new THREE.Texture(bitmap);tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();tex.needsUpdate=true;}
+ window.reviewCloudTexture?.dispose();window.reviewCloudTexture?.image?.close?.();
+ window.reviewCloudTexture=tex;
+ uniforms.cloudMap.value=tex;uniforms.cloudChannel.value=tex.userData.cloudChannel??1;uniforms.cloudTone.value=tex.userData.cloudTone??1;$('sun').value='45';$('cloud').value=mode;render();
+ const lat=latitude*Math.PI/180,lon=longitude*Math.PI/180,n=new THREE.Vector3(Math.cos(lat)*Math.cos(lon),Math.cos(lat)*Math.sin(lon),Math.sin(lat)),q=new THREE.Quaternion().setFromUnitVectors(n,new THREE.Vector3(0,0,1));
+ for(const o of scene.children)if(o.isMesh&&o!==sunView.mesh)o.quaternion.copy(q);
+ uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(q).invert());uniforms.localSun.value=sun.clone().applyQuaternion(q.clone().invert());
+ camera.position.set(0,0,6371+altitude);camera.up.set(0,1,0);camera.lookAt(0,0,6371);
+ window.drawCloudInspection=()=>{hdr.begin();renderer.render(scene,camera);hdr.finish();};drawCloudInspection();
+ return {width:tex.image.width,height:tex.image.height,milliseconds:performance.now()-start,shaderErrors:errors};
+};
+
+window.checkCloudRequestCoalescing=async()=>{
+ const apply=Weather.prototype.apply,record={id:'test-cloud',kind:'cloud',provider:'github',downloaded:1,time:Date.now()};let calls=0,disposed=0,complete;
+ const fake={settings:{cloud:'latest'},items:[record],sim:{time:Date.now()},env:{quality:'high'},tokens:{cloud:0},active:{},status(){},render(){},bindCloud(){},release(){this.active.cloud=null;},texture(){calls++;return new Promise(resolve=>{complete=()=>resolve({dispose(){disposed++;},image:{}});});}};
+ const jobs=[apply.call(fake,'cloud'),apply.call(fake,'cloud'),apply.call(fake,'cloud')];complete();await Promise.all(jobs);
+ const shared=calls===1&&fake.active.cloud===record.id;
+ fake.active.cloud=null;const pending=apply.call(fake,'cloud');fake.settings.cloud='builtin';await apply.call(fake,'cloud');complete();await pending;
+ const cancelled=fake.active.cloud===null&&disposed===1;
+ fake.settings.cloud='latest';const old=apply.call(fake,'cloud'),finishOld=complete;++fake.tokens.cloud;const newer=apply.call(fake,'cloud'),finishNew=complete;finishOld();finishNew();await Promise.all([old,newer]);
+ return {shared,cancelled,invalidatedReload:calls===4&&fake.active.cloud===record.id,requestsCleared:!fake.pendingApply.cloud};
 };

@@ -400,5 +400,12 @@
   "部分候选暂不可访问，保留已下载云图": "Some candidates are unavailable; keeping the downloaded map",
   "本次未找到最近 30 天内可用的完整云图，保留已下载云图": "No usable complete composite found in the last 30 days; keeping the downloaded map",
   "已找到最近 30 天内覆盖合格的 NASA 全球云图": "Found a qualifying NASA global composite from the last 30 days",
-  "本次未找到最近 30 天内可用的完整 NASA 云图，原图源保持不变": "No usable complete NASA composite found in the last 30 days; existing source unchanged"
+  "本次未找到最近 30 天内可用的完整 NASA 云图，原图源保持不变": "No usable complete NASA composite found in the last 30 days; existing source unchanged",
+  "轨道数据框": "Orbit readout",
+  "视角 ▾": "Views ▾",
+  "视角选择": "Camera views",
+  "关闭轨道数据框": "Close orbit readout",
+  "关闭数据框": "Close readout",
+  "云图处理超时": "Cloud processing timed out",
+  "云图处理失败": "Cloud processing failed"
 }

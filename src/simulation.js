@@ -1,3 +1,4 @@
+import {installDisplayControls} from './display-controls.js';
 import {t,setText,onLanguageChange} from './i18n.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -31,6 +32,7 @@ export class Simulation{
  dataUI(){const s=clockText(this.start),e=clockText(this.end);$('dataRange').textContent=t('{source} · {count} 条\n{start} — {end}（UTC+8）\n生成：{created} · EME2000 / UTC',{source:t(this.data.source||'导入数据'),count:this.data.rows.length,start:s,end:e,created:t(this.data.created||'未提供')});$('customTime').min=inputText(this.start);$('customTime').max=inputText(this.end);}
  timeUI(){$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续时间'):t('Ⅱ 暂停时间');$('customTime').value=inputText(this.time);$('timeline').value=(this.time-this.start)/(this.end-this.start)*10000;$('speed').disabled=this.mode==='real';}
  bind(){
+  installDisplayControls();
   $('customTime').oninput=()=>{this.inputDirty=true;};
   $('toggleTelemetry').onclick=()=>{const on=$('telemetry').classList.toggle('expanded');$('toggleTelemetry').setAttribute('aria-expanded',String(on));};
   $('timeMode').onchange=()=>{if($('timeMode').value==='real')this.realTime();else{this.mode='custom';this.timeUI();}};

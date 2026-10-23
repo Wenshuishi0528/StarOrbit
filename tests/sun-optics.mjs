@@ -17,3 +17,12 @@ assert.equal(diskVisibility(.0046,.004,1),1);
 assert.ok(Math.abs(diskVisibility(.0046,.0023,0)-.75)<1e-12);
 assert.ok(diskVisibility(.0046,.0046,.0046)>0&&diskVisibility(.0046,.0046,.0046)<1);
 console.log({solarOccultation:'pass'});
+
+assert.equal(day.twilight,0);assert.equal(at(-15).twilight,0);assert.equal(night.twilight,0);
+assert.equal(half.twilight,1);
+const tangent=h=>at(-Math.acos((6371+h)/6771)*180/Math.PI);
+let last=0,maxTwilightStep=0;
+for(let h=100;h>=0;h-=.1){const v=tangent(h).twilight;assert.ok(v>=0&&v<=1&&v>=last-1e-12);maxTwilightStep=Math.max(maxTwilightStep,v-last);last=v;}
+assert.ok(maxTwilightStep<.003);assert.equal(tangent(80).twilight,0);
+assert.ok(Math.abs(rotated.twilight-half.twilight)<1e-12);
+console.log({twilight:'pass',maximumStep:maxTwilightStep});

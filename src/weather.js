@@ -1,5 +1,6 @@
+import {prepareGithubCloud} from './cloud-mask-repair.js';
 import {cloudProvider,selectCloud,validateNASA,completeNASA,retireNASA} from './cloud-source.js';
-import {CLOUD_PNG,CLOUD_JPEG,cloudChannel,cloudDecodeSize} from './cloud-texture.js';
+import {CLOUD_PNG,CLOUD_JPEG,cloudChannel,cloudDecodeSize,cloudTone} from './cloud-texture.js';
 import {parseOfficialOrbit} from './data-sources.js';
 import * as THREE from 'three';
 import {t,onLanguageChange} from './i18n.js';
@@ -81,23 +82,42 @@ export class Weather{
   return this.store('cloud',blob,{provider:'github',source,channel,resolution:'8192×4096'});
  }
  async validateCloud(blob,alpha=false){if(alpha){const header=new Uint8Array(await blob.slice(0,8).arrayBuffer());if(![137,80,78,71,13,10,26,10].every((v,i)=>header[i]===v))throw Error('云图格式无效');}const image=await createImageBitmap(blob);try{if(image.width!==8192||image.height!==4096)throw Error('云图尺寸无效');}finally{image.close();}}
- bindCloud(){this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;this.env.uniforms.cloudChannel.value=this.cloudTexture&&cloudChannel(this.cloudRecord)==='alpha'?1:0;}
- async texture(record){if(record.kind==='aurora'){const d=auroraPixels(JSON.parse(await record.blob.text()));const tex=new THREE.DataTexture(d,360,181,THREE.RedFormat);tex.minFilter=tex.magFilter=THREE.LinearFilter;tex.wrapS=THREE.RepeatWrapping;tex.needsUpdate=true;return tex;}
-  let bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
-  try{const size=cloudDecodeSize(bitmap.width,bitmap.height,this.env.quality,this.env.api.renderer.capabilities.maxTextureSize);
-   if(size.width!==bitmap.width){bitmap.close();bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none',resizeWidth:size.width,resizeHeight:size.height,resizeQuality:'high'});}
-   const tex=new THREE.Texture(bitmap);tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(this.env.quality==='high'?16:4,this.env.api.renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;return tex;
-  }catch(error){bitmap.close();throw error;}}
+ bindCloud(){this.env.uniforms.cloudTone.value=this.cloudTexture?(this.cloudTexture.userData.cloudTone??cloudTone(this.cloudRecord)):0;this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;this.env.uniforms.cloudChannel.value=this.cloudTexture?(this.cloudTexture.userData.cloudChannel??(cloudChannel(this.cloudRecord)==='alpha'?1:0)):0;}
+ async texture(record,isStale=()=>false){if(record.kind==='aurora'){const d=auroraPixels(JSON.parse(await record.blob.text()));const tex=new THREE.DataTexture(d,360,181,THREE.RedFormat);tex.minFilter=tex.magFilter=THREE.LinearFilter;tex.wrapS=THREE.RepeatWrapping;tex.needsUpdate=true;return tex;}
+  const decode=async()=>{
+   if(isStale())return null;
+   let bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
+   try{const size=cloudDecodeSize(bitmap.width,bitmap.height,this.env.quality,this.env.api.renderer.capabilities.maxTextureSize);let tex;
+    if(cloudTone(record)===1){
+     const {output,width,height}=await prepareGithubCloud(bitmap,cloudChannel(record),size);
+     tex=new THREE.DataTexture(output,width,height,THREE.RedFormat);tex.generateMipmaps=true;tex.minFilter=THREE.LinearMipmapLinearFilter;tex.magFilter=THREE.LinearFilter;
+     tex.userData.cloudChannel=0;tex.userData.cloudTone=0;
+    }else{
+     if(size.width!==bitmap.width){bitmap.close();bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none',resizeWidth:size.width,resizeHeight:size.height,resizeQuality:'high'});}
+     tex=new THREE.Texture(bitmap);
+    }
+    tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(this.env.quality==='high'?16:4,this.env.api.renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;return tex;
+   }catch(error){bitmap.close();throw error;}
+  };
+  const pending=(this.cloudDecodeTask||Promise.resolve()).catch(()=>{}).then(decode);this.cloudDecodeTask=pending;try{return await pending;}finally{if(this.cloudDecodeTask===pending)this.cloudDecodeTask=null;}
+ }
+
  release(k){const tex=this[k+'Texture'];if(tex){tex.dispose();tex.image?.close?.();this[k+'Texture']=null;}this.active[k]=null;}
- async apply(k){const token=++this.tokens[k],mode=this.settings[k];let record=null;
+ async apply(k){const mode=this.settings[k];let record=null;
   if(['latest','history','satcorps'].includes(mode)){record=k==='cloud'?selectCloud(this.items,mode,this.sim.time,this.settings[k+'History']):selectSnapshot(this.items,k,mode,this.sim.time,this.settings[k+'History']);if(record&&mode==='history'&&this.settings[k+'History']==='auto'&&Math.abs(record.time-this.sim.time)>6*3600e3)record=null;}
+  this.pendingApply??={};const key=record?record.id+'|'+(k==='cloud'?this.env.quality:''):mode+'|none';
+  if(this.pendingApply[k]?.key===key&&this.pendingApply[k].token===this.tokens[k])return this.pendingApply[k].promise;
+  const token=++this.tokens[k],run=async()=>{
   if(record&&this.active[k]===record.id&&!(k==='cloud'&&this.cloudTier!==this.env.quality)){if(k==='cloud')this.bindCloud();this.status(k);return;}
-  if(record){const tex=await this.texture(record);if(token!==this.tokens[k]){tex.dispose();tex.image?.close?.();return;}this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;if(k==='cloud')this.cloudRecord=record;}
+  if(record){const tex=await this.texture(record,()=>token!==this.tokens[k]);if(!tex)return;if(token!==this.tokens[k]){tex.dispose();tex.image?.close?.();return;}this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;if(k==='cloud')this.cloudRecord=record;}
   else {const had=!!this.active[k];this.release(k);if(!had&&this.appliedMode?.[k]===mode){this.status(k);return;}}
   this.appliedMode??={};this.appliedMode[k]=mode;
   if(k==='cloud')this.bindCloud();
   else this.env.auroraUniforms.auroraMap.value=this.auroraTexture||this.env.fallback;
   this.render();
+  };
+  const promise=run(),request={key,promise,token};this.pendingApply[k]=request;
+  try{return await promise;}finally{if(this.pendingApply[k]===request)delete this.pendingApply[k];}
  }
  async clear(){const selected=[...document.querySelectorAll('[data-clear-kind]:checked')].map(x=>x.dataset.clearKind),include=$('clearFavorites').checked;
   if(selected.includes('cloud')&&/^https?:$/.test(location.protocol)){try{const r=await fetch('/api/cloud/satcorps/clear',{method:'POST'});if(r.ok&&!(await r.json()).cleared)throw Error('云图正在下载，请完成后清理');}catch(e){if(e.message.includes('正在下载'))throw e;}}
