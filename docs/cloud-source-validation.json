@@ -1,0 +1,37 @@
+{
+  "provider": "satcorps",
+  "time": 1792497600000,
+  "observedStart": 1792482708000,
+  "observedEnd": 1792514802000,
+  "coverage": 0.9985940000571559,
+  "polarCoverage": {
+    "north": 0.9999994284407865,
+    "south": 0.9997806165218717
+  },
+  "footprint": {
+    "global": 0.9999622532769394,
+    "north": 0.9999994284407865,
+    "south": 0.999929983996342
+  },
+  "resolution": "8192×4096",
+  "nativeResolution": "12960×6480",
+  "channel": "red",
+  "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/10/20/satcorps-gcc.v02a.geoleo.glob-comp.2026293.1200.3km.nc",
+  "release": "GCC V2A",
+  "downloadBytes": 83296341,
+  "sha256": "e1016f93d144d2704fb734e1dc2142eb93064fe0706076bef0e5101a658069a8",
+  "checks": {
+    "rollingDailyWindow": "pass",
+    "rejectedNewerDates": [
+      "2026-10-22",
+      "2026-10-21"
+    ],
+    "fullRetrievalValidation": true,
+    "retired2024Migration": "browser passed, including favorite record",
+    "browserDownload": true,
+    "decodedTexture": "8192x4096",
+    "githubCachePreserved": true,
+    "repeatedRefreshKeepsQualified": true,
+    "englishSourceLabel": true
+  }
+}

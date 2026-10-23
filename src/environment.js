@@ -1,4 +1,8 @@
-import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment} from './earth-shaders.js';
+import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from './atmosphere-spectrum.js';
+import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment,atmosphereTransmissionFragment} from './earth-shaders.js';
+import {AtmosphereRenderer} from './atmosphere-renderer.js';
+import {buildMultipleScatteringTable} from './atmosphere-multiple.js';
+import {buildOpticalDepthTable} from './atmosphere-optics.js';
 import {galaxyVertex,galaxyFragment} from './sky-shaders.js';
 import {climatePixels} from './cloud-geography.js';
 import {Weather} from './weather.js';
@@ -14,7 +18,9 @@ const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a);
 export class Environment{
  constructor(sim){
   this.sim=sim;this.api=sim.api;this.ticket=0;this.queue=Promise.resolve();this.textures=[];this.lastTrack=0;
-  this.assets=JSON.parse($('environmentAssets').textContent);
+  const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
+  // Parsed assets own the data now; release the large inline JSON DOM copy.
+  assetNode.remove();
   this.settings={quality:'medium',stars:true,milky:true,moon:true,starLabels:false,clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'view',groundTrack:false};
   try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));for(const k of ['stars','milky','moon','starLabels','clouds','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
@@ -22,12 +28,16 @@ export class Environment{
   }catch{}
   this.fallback=new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1);this.fallback.needsUpdate=true;
   this.climateMap=new THREE.DataTexture(climatePixels(),512,256,THREE.RGBAFormat);this.climateMap.wrapS=THREE.RepeatWrapping;this.climateMap.minFilter=this.climateMap.magFilter=THREE.LinearFilter;this.climateMap.needsUpdate=true;
-  this.uniforms={climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
+  this.uniforms={linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
   this.detail=new EarthDetail(this);this.nightDetail=new EarthDetail(this,true);
   this.earth=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS,160,96),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:earthFragment}));
   sim.sky.add(this.earth);sim.earth=this.earth;
   this.clouds=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+8,160,96),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:cloudFragment,transparent:true,depthWrite:false}));this.clouds.renderOrder=2;sim.sky.add(this.clouds);
-  this.atmosphere=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+100,128,64),new THREE.ShaderMaterial({uniforms:{sun:this.uniforms.sun,steps:{value:8},enhanced:this.uniforms.enhanced},vertexShader:vertex,fragmentShader:atmosphereFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.atmosphere.renderOrder=3;sim.sky.add(this.atmosphere);
+  this.atmosphere=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+300,128,64),new THREE.ShaderMaterial({uniforms:{linearOutput:this.uniforms.linearOutput,linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:this.fallback},multipleDepthB:{value:this.fallback},sun:this.uniforms.sun,steps:{value:8},enhanced:this.uniforms.enhanced,solarDepth:this.uniforms.solarDepth},vertexShader:vertex,fragmentShader:atmosphereFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.atmosphere.renderOrder=3;sim.sky.add(this.atmosphere);
+  for(const key of ['linearComposite','airglowStrength','multipleStrength','multipleDepth','multipleDepthB','steps'])this.uniforms[key]=this.atmosphere.material.uniforms[key];
+  this.atmosphereTransmission=new THREE.Mesh(this.atmosphere.geometry,new THREE.ShaderMaterial({uniforms:{solarDepth:this.uniforms.solarDepth},vertexShader:vertex,fragmentShader:atmosphereTransmissionFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide,blending:THREE.CustomBlending,blendSrc:THREE.ZeroFactor,blendDst:THREE.SrcColorFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor,toneMapped:false}));this.atmosphereTransmission.renderOrder=2.9;this.atmosphereTransmission.visible=false;sim.sky.add(this.atmosphereTransmission);
+  this.hdr=new AtmosphereRenderer(this.api.renderer);
+
   this.volumeClouds=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+16,128,80),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:volumeCloudFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.volumeClouds.renderOrder=2.4;sim.sky.add(this.volumeClouds);
   this.auroraUniforms={auroraMap:{value:this.fallback},sun:this.uniforms.sun,useData:{value:0},strength:{value:1.4},weatherTime:this.uniforms.weatherTime,seed:this.uniforms.seed};
   this.aurora=new THREE.Group();for(let i=0;i<9;i++){const mesh=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+105+i*24,160,96),new THREE.ShaderMaterial({uniforms:this.auroraUniforms,vertexShader:vertex,fragmentShader:auroraFragment,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));mesh.renderOrder=3.1+i*.01;this.aurora.add(mesh);}sim.sky.add(this.aurora);
@@ -133,7 +143,29 @@ export class Environment{
     this.builtinCloud=textures.cloud||this.fallback;this.uniforms.cloudTemplateMap.value=this.builtinCloud;
     this.textures.forEach(t=>{t.dispose();t.image=null;});this.textures=loaded;this.quality=tier;this.settings.quality=tier;
     this.uniforms.detailed.value=tier==='simple'?0:1;this.uniforms.enhanced.value=tier==='high'?1:0;this.uniforms.gloss.value=tier==='high'?90:40;
+    if(tier==='high'&&!this.solarDepth){
+     const table=buildOpticalDepthTable();this.opticalTable=table;const pixels=new Uint16Array(table.data.length);
+     for(let i=0;i<pixels.length;i++)pixels[i]=THREE.DataUtils.toHalfFloat(table.data[i]);
+     this.solarDepth=new THREE.DataTexture(pixels,table.width,table.height,THREE.RGBAFormat,THREE.HalfFloatType);
+     this.solarDepth.minFilter=this.solarDepth.magFilter=THREE.LinearFilter;this.solarDepth.needsUpdate=true;
+     this.uniforms.solarDepth.value=this.solarDepth;
+     for(let band=0;band<2;band++){
+      const multi=buildMultipleScatteringTable(table,{rayleigh:SPECTRAL_RAYLEIGH.slice(band*3,band*3+3),ozone:SPECTRAL_OZONE.slice(band*3,band*3+3)});
+      const texture=new THREE.DataTexture(Uint16Array.from(multi.data,v=>THREE.DataUtils.toHalfFloat(v)),multi.width,multi.height,THREE.RGBAFormat,THREE.HalfFloatType);
+      texture.minFilter=texture.magFilter=THREE.LinearFilter;texture.needsUpdate=true;
+      const key=band?'multipleDepthB':'multipleDepth';this[key]=texture;this.atmosphere.material.uniforms[key].value=texture;
+     }
+    }
+    // Avoid faceted land/cloud silhouettes against the analytic atmosphere limb.
+    const dense=tier==='high';
+    if(this.denseEarth!==dense){
+     for(const [mesh,radius] of [[this.earth,EARTH_RADIUS],[this.clouds,EARTH_RADIUS+8]]){
+      mesh.geometry.dispose();mesh.geometry=new THREE.SphereGeometry(radius,dense?384:160,dense?192:96);
+     }
+     this.denseEarth=dense;
+    }
     this.atmosphere.material.uniforms.steps.value=QUALITY[tier].steps;
+    if(tier!=='high')this.hdr.release();
     const count=catalogue.filter(r=>r[3]<=QUALITY[tier].limit).length;this.stars.geometry.setDrawRange(0,this.settings.exposure==='cinematic'?catalogue.length:count);this.starCount=count;
     this.updatePixelRatio();this.starUniforms.high.value=tier==='high'?1:0;
     $('earthQuality').value=tier;for(const id of ['volumeClouds','cloudMotion'])$(id).disabled=tier!=='high';setText('qualityStatus','');
@@ -179,6 +211,21 @@ export class Environment{
    this.track.geometry.dispose();this.track.geometry=new THREE.BufferGeometry();this.track.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.lastTrack=q.t;this.trackData=this.sim.data;
   }
  }
+ beginFrame(){
+  const linear=this.quality==='high'&&this.hdr.begin();
+  this.clouds.renderOrder=linear?3.05:2;this.volumeClouds.renderOrder=linear?3.06:2.4;
+  this.uniforms.linearOutput.value=linear?1:0;this.atmosphere.material.uniforms.linearComposite.value=linear?1:0;
+  this.atmosphere.material.blending=linear?THREE.AdditiveBlending:THREE.NormalBlending;
+  // Additive RGB uses source alpha=1; transmittance is applied by the multiply pass.
+  this.atmosphere.material.premultipliedAlpha=false;
+  this.atmosphereTransmission.visible=!!linear;
+  // Catalogue/panorama values were authored for direct display. Apply the same
+  // modest radiance normalization to both before the new shared ACES pass.
+  const skyGain=this.settings.starBrightness*(this.settings.exposure==='photo'?.025:1)*(linear?2:1);
+  this.starUniforms.brightness.value=skyGain;this.milky.material.uniforms.brightness.value=skyGain;
+  return linear;
+ }
+ finishFrame(){this.hdr.finish();}
  renderBackground(renderer){renderer.autoClear=true;renderer.render(this.backdrop,this.starCamera);renderer.autoClear=false;renderer.clearDepth();}
  bindImmersive(){
   const body=document.body;let timer,keyboard=false;

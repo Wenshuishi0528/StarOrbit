@@ -4,6 +4,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import bundledOrbit from '../assets/orbit.json';
 import {EARTH_RADIUS,validateOrbit,snapshot,interpolate,sunlightFraction,parseOrbit,nextShadowEvent,earthAxes,sunPosition} from './orbit.js';
 import {SolarTracker} from './solar.js';
+import {SunView} from './sun-view.js';
 import {Environment} from './environment.js';
 import {OrbitMinimap} from './minimap.js';
 import {groundTrackAttitude} from './attitude.js';
@@ -17,7 +18,7 @@ export class Simulation{
   this.orbitControls=new OrbitControls(this.spaceCamera,api.renderer.domElement);this.orbitControls.enableDamping=true;this.orbitControls.enabled=false;this.orbitControls.minDistance=7500;this.orbitControls.maxDistance=60000;
   this.sky.background=null;this.environment=new Environment(this);this.minimap=new OrbitMinimap(this);
   this.marker=new THREE.Mesh(new THREE.SphereGeometry(65,16,10),new THREE.MeshBasicMaterial({color:0x7deaff}));this.sky.add(this.marker);
-  this.sunDisc=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshBasicMaterial({color:0xfff5ce}));this.sky.add(this.sunDisc);
+  this.sunDisc=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshBasicMaterial({color:0xfff5ce}));this.sky.add(this.sunDisc);this.sunView=new SunView(this);
   this.sunArrow=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),11500,0xffd27e,700,300);this.sky.add(this.sunArrow);
   this.orbitLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.8}));this.sky.add(this.orbitLine);
   this.localSunArrow=new THREE.ArrowHelper(new THREE.Vector3(0,0,1),new THREE.Vector3(),60,0xffd27e,6,3);api.scene.add(this.localSunArrow);
@@ -86,7 +87,7 @@ export class Simulation{
   if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position)));this.spaceCamera.near=10;this.spaceCamera.far=1000000;}else if(overview)this.orbitControls.update();
   this.spaceCamera.updateProjectionMatrix();this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
   if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),800000);this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));}
-  this.environment.update(q,this.spaceCamera);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);
+  this.environment.update(q,this.spaceCamera);const linear=this.environment.beginFrame();this.sunDisc.visible=!linear&&!!q;this.sunView.update(q,this.spaceCamera,linear);if(!linear){this.api.sunLight.color.set(0xfff8ef);this.api.sunLight.intensity=q?3.4*q.illumination:0;}this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);if(linear)this.environment.finishFrame();
   if(!overview){renderer.autoClear=false;renderer.clearDepth();renderer.render(scene,camera);renderer.autoClear=true;}
   renderer.autoClear=true;
   for(const {el}of Object.values(this.api.tags))if(overview)el.style.display='none';

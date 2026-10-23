@@ -2,10 +2,29 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess, tempfile, time
+from cloud_service import service as clouds
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
 class Handler(SimpleHTTPRequestHandler):
+ def cloud_origin_ok(self):
+  return self.headers.get('Origin') in (None,f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}')
+ def send_json(self,value,code=200):
+  self.send_response(code);self.send_header('Content-Type','application/json');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(json.dumps(value,ensure_ascii=False).encode())
+ def do_POST(self):
+  if not self.cloud_origin_ok():self.send_error(403);return
+  if self.path=='/api/cloud/satcorps/update':self.send_json(clouds.start());return
+  if self.path=='/api/cloud/satcorps/clear':self.send_json({'cleared':clouds.clear()});return
+  self.send_error(404)
  def do_GET(self):
+  if self.path.startswith('/api/cloud/'):
+   if not self.cloud_origin_ok():self.send_error(403);return
+   if self.path=='/api/cloud/satcorps/status':self.send_json(clouds.snapshot());return
+   if self.path=='/api/cloud/satcorps/image':
+    with clouds.lock:
+     if clouds.state['state']!='ready' or not clouds.image or not clouds.image.exists():self.send_error(404);return
+     data=clouds.image.read_bytes()
+    self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
+   self.send_error(404);return
   if self.path=='/api/status':
    self.send_response(200);self.send_header('Content-Type','application/json');self.end_headers();self.wfile.write(b'{"app":"tiangong-earth-viewer"}');return
   if self.path=='/api/orbit':

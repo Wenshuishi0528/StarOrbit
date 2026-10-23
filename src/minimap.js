@@ -16,7 +16,7 @@ export class OrbitMinimap{
   $('closeMinimap').onclick=()=>{this.setVisible(false);$('showMinimap').focus();};
   onLanguageChange(()=>{this.lastDraw=-Infinity;});
   this.image=new Image();this.image.onload=()=>{this.lastDraw=-Infinity;};
-  this.image.src=JSON.parse($('environmentAssets').textContent).simple.day;
+  this.image.src=sim.environment.assets.simple.day;
   this.resizeObserver=new ResizeObserver(()=>{this.lastDraw=-Infinity;});this.resizeObserver.observe(this.canvas);this.bindPicking();
  }
  bindPicking(){

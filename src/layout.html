@@ -38,7 +38,8 @@ body.immersive #stage{inset:0}body.immersive header{display:none}body.immersive 
 
 <details open><summary>云图与极光</summary>
 <label class="check"><input id="volumeClouds" type="checkbox">体积云 · 8K</label><label class="check"><input id="cloudMotion" type="checkbox" checked>动态云层 · 8K</label>
-<div class="row"><label for="cloudSource">云图来源</label><select id="cloudSource"><option value="builtin">内置静态云图</option><option value="latest">最新已下载</option><option value="history">历史快照</option><option value="local">本地生成</option><option value="off">关闭</option></select></div>
+<div class="row"><label for="cloudSource">云图来源</label><select id="cloudSource"><option value="builtin">内置静态云图</option><option value="latest">github最新已下载</option><option value="satcorps">NASA 全球云图 · 含极区</option><option value="history">历史快照</option><option value="local">本地生成</option><option value="off">关闭</option></select></div>
+<button id="updateCloudSource">下载当前云图源</button>
 
 <label for="cloudHistory" class="small">云图快照</label><select class="wide" id="cloudHistory"></select><p class="small data-status" id="cloudDataStatus"></p>
 <div class="row"><label for="auroraSource">极光来源</label><select id="auroraSource"><option value="off">关闭</option><option value="local">本地生成</option><option value="latest">最新已下载</option><option value="history">历史快照</option></select></div>

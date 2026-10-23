@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><link rel="icon" href="data:,"><title>大气方向检查</title>
+<style>body{background:#090f19;color:#def;font:14px system-ui;margin:12px}select,button{padding:7px;margin:4px}canvas{display:block;max-width:100%}pre{white-space:pre-wrap}</style>
+<p>相机高 400 km；太阳高度角以相机当地水平面为零，几何地平线约为 −19.8°。只改变视线方位，不移动相机。</p>
+<label>太阳高度 <select id="sun"><option value="45">白天 45°</option><option value="-19" selected>近地平线 −19°</option><option value="-45">深夜 −45°</option></select></label>
+<label>视线方位 <select id="azimuth"><option value="0">朝日方向</option><option value="90">侧向 90°</option><option value="180">背日方向</option></select></label>
+<label>云层 <select id="cloud"><option value="off">关闭</option><option value="shell" selected>普通云</option><option value="volume">体积云</option></select></label>
+<button id="check">运行方向检查</button><div id="canvas"></div><pre id="report"></pre><script src="atmosphere.js"></script>

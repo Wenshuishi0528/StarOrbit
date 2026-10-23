@@ -10,6 +10,7 @@ let html=fs.readFileSync('src/layout.html','utf8').replace('__APP_VERSION__',app
 html=html.replace('</head>','<!-- Three.js license\n'+fs.readFileSync('node_modules/three/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Astronomy Engine MIT / three-mesh-bvh MIT licenses\n'+fs.readFileSync('node_modules/astronomy-engine/astronomy.js','utf8').split('*/')[0].slice(3)+'\n'+fs.readFileSync('node_modules/three-mesh-bvh/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Earth and star credits\n'+fs.readFileSync('素材与迁移说明.md','utf8')+'\n'+fs.readFileSync('assets/D3-CELESTIAL-LICENSE.txt','utf8')+' -->\n</head>');
+html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.readFileSync('tests/reference/atmosphere-spectrum/LICENSE-Bruneton.txt','utf8')+' -->\n</head>');
 const bytes=Buffer.byteLength(html);
 if(bytes>400e6)throw new Error('Standalone app exceeds the 400 MB distribution budget');
 fs.writeFileSync('天宫空间站交互预览.html',html);console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');

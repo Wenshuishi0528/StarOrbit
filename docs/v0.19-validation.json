@@ -1,0 +1,156 @@
+{
+  "raw": [
+    {
+      "name": "Rayleigh 前后对称",
+      "pass": true
+    },
+    {
+      "name": "Mie 朝日增强",
+      "pass": true
+    },
+    {
+      "name": "高太阳云顶近白",
+      "pass": true
+    },
+    {
+      "name": "长光程自然偏暖",
+      "pass": true
+    },
+    {
+      "name": "地影内无直射暖光",
+      "pass": true
+    },
+    {
+      "name": "云顶仍受光时地面已入影",
+      "pass": true
+    },
+    {
+      "name": "白天侧向薄边偏蓝",
+      "pass": true
+    },
+    {
+      "name": "晨昏朝日与背日亮度不同",
+      "pass": true
+    },
+    {
+      "name": "共同旋转相机和太阳保持物理关系",
+      "pass": true
+    },
+    {
+      "name": "深夜侧不制造整圈发光",
+      "pass": true
+    },
+    {
+      "name": "生产着色器编译无错误",
+      "pass": true
+    },
+    {
+      "name": "日照全高度剖面无暖色条带",
+      "pass": true
+    },
+    {
+      "name": "地影有独立弱绿色气辉",
+      "pass": true
+    },
+    {
+      "name": "气辉低于白昼散射亮度",
+      "pass": true
+    },
+    {
+      "name": "高云前方透射不包含云后低层空气",
+      "pass": true
+    },
+    {
+      "cloudT": [
+        0.6979945302009583,
+        0.4058952033519745,
+        0.23841212689876556
+      ],
+      "groundT": [
+        0.22800034284591675,
+        0.03986555337905884,
+        0.0011317151365801692
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "name": "final daytime limb blue 0",
+      "pass": true,
+      "samples": 19,
+      "warm": 0
+    },
+    {
+      "name": "final daytime limb blue 90",
+      "pass": true,
+      "samples": 19,
+      "warm": 0
+    },
+    {
+      "name": "final daytime limb blue 180",
+      "pass": true,
+      "samples": 20,
+      "warm": 0
+    },
+    {
+      "name": "cloud final 45 shell",
+      "pass": true
+    },
+    {
+      "name": "cloud final 45 volume",
+      "pass": true
+    },
+    {
+      "name": "cloud final -19 shell",
+      "pass": true
+    },
+    {
+      "name": "cloud final -19 volume",
+      "pass": true
+    },
+    {
+      "name": "cloud final -45 shell",
+      "pass": true
+    },
+    {
+      "name": "cloud final -45 volume",
+      "pass": true
+    },
+    {
+      "name": "viewport target follows resize",
+      "pass": true
+    },
+    {
+      "name": "reuse target",
+      "pass": true
+    },
+    {
+      "name": "quality switch frees HDR",
+      "pass": true
+    },
+    {
+      "name": "quality switch recreates HDR",
+      "pass": true
+    },
+    {
+      "name": "unsupported HDR falls back",
+      "pass": true
+    }
+  ],
+  "sky": {
+    "results": [
+      {
+        "linear": false,
+        "visibleStarPixels": 24405,
+        "meanContrast": 50.899815611555006
+      },
+      {
+        "linear": true,
+        "visibleStarPixels": 21111,
+        "meanContrast": 54.28766993510492
+      }
+    ],
+    "pass": true,
+    "shaderErrors": []
+  }
+}
