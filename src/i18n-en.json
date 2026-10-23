@@ -371,5 +371,7 @@
   "NASA 地表 ↗": "NASA Earth ↗",
   "返回空间站": "Back to station",
   "地球：NASA Blue Marble / Black Marble 2016；Solar System Scope / INOVE，CC BY 4.0。星表：d3-celestial / XHIP，保留 BSD 3-Clause 声明。星空与示意银河改编自 Wenshuishi / StarSky Studio，CC BY 4.0。": "Earth: NASA Blue Marble / Black Marble 2016; Solar System Scope / INOVE, CC BY 4.0; resized and compressed. Stars: d3-celestial / XHIP; BSD 3-Clause notice retained. Starfield styling and artistic Milky Way adapted from Wenshuishi / StarSky Studio, CC BY 4.0.",
-  "NASA 夜光 ↗": "NASA night lights ↗"
+  "NASA 夜光 ↗": "NASA night lights ↗",
+  "文件超过 64 MB": "File exceeds 64 MB",
+  "云图格式无效": "Invalid cloud image format"
 }

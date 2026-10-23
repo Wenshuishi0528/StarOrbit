@@ -1,7 +1,7 @@
 """Local viewer plus a fixed-origin official orbit relay. No arbitrary URL proxy."""
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess
+import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess, tempfile, time
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
 class Handler(SimpleHTTPRequestHandler):
@@ -15,7 +15,7 @@ class Handler(SimpleHTTPRequestHandler):
     self.send_error(403);return
    try:
     try:
-     with urllib.request.urlopen(urllib.request.Request(URL,headers={'User-Agent':'Tiangong-Viewer/0.16'}),timeout=20) as r:body=r.read(6000001)
+     with urllib.request.urlopen(urllib.request.Request(URL,headers={'User-Agent':'Tiangong-Viewer/0.17'}),timeout=20) as r:body=r.read(6000001)
     except urllib.error.URLError as error:
      if not isinstance(error.reason,ssl.SSLError):raise
      # macOS Python can lack the system CA bundle; curl still verifies TLS normally.
@@ -28,7 +28,27 @@ class Handler(SimpleHTTPRequestHandler):
   super().do_GET()
  def list_directory(self,path):self.send_error(403);return None
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=8771);p.add_argument('--open',action='store_true');a=p.parse_args();os.chdir(ROOT)
+ p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=8771);p.add_argument('--open',action='store_true');p.add_argument('--background',action='store_true');a=p.parse_args();os.chdir(ROOT)
+ if a.background:
+  # A launcher may close its terminal after startup. Detach the server so the
+  # remembered localhost address keeps working for the current login session.
+  def running():
+   try:
+    with urllib.request.urlopen(f'http://127.0.0.1:{a.port}/api/status',timeout=.5) as r:return json.load(r).get('app')=='tiangong-earth-viewer'
+   except Exception:return False
+  if not running():
+   log=Path(tempfile.gettempdir())/f'tiangong-viewer-{a.port}.log'
+   with log.open('ab') as output:
+    child=subprocess.Popen([os.sys.executable,str(Path(__file__).resolve()),'--port',str(a.port)],cwd=ROOT,stdin=subprocess.DEVNULL,stdout=output,stderr=output,start_new_session=True)
+   ready=False
+   for _ in range(30):
+    if running():ready=True;break
+    if child.poll() is not None:break
+    time.sleep(.1)
+   if not ready:raise SystemExit(f'Viewer server could not start; see {log}')
+  if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/天宫空间站交互预览.html')
+  print(f'Tiangong is running: http://127.0.0.1:{a.port}')
+  raise SystemExit(0)
  try:server=ThreadingHTTPServer(('127.0.0.1',a.port),Handler)
  except OSError:
   # Reuse this app's existing local server and its remembered browser origin.

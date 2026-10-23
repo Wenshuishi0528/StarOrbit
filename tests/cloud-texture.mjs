@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {CLOUD_PNG,cloudChannel,cloudDecodeSize} from '../src/cloud-texture.js';
+assert.equal(cloudChannel({source:CLOUD_PNG}),'alpha');
+assert.equal(cloudChannel({channel:'alpha',source:'导入快照'}),'alpha');
+assert.equal(cloudChannel({source:'https://clouds.matteason.co.uk/images/8192x4096/clouds.jpg'}),'red');
+assert.deepEqual(cloudDecodeSize(8192,4096,'high',16384),{width:8192,height:4096});
+assert.deepEqual(cloudDecodeSize(8192,4096,'standard',16384),{width:4096,height:2048});
+assert.deepEqual(cloudDecodeSize(8192,4096,'medium',16384),{width:2048,height:1024});
+assert.deepEqual(cloudDecodeSize(8192,4096,'high',4096),{width:4096,height:2048});
+assert.deepEqual(cloudDecodeSize(1024,512,'high',16384),{width:1024,height:512});
+assert.throws(()=>cloudDecodeSize(8192,2048,'high',16384));
+console.log({cloudAlphaChannel:'pass',legacyJPEG:'pass',deviceLimit:'pass',noUpscaling:'pass'});

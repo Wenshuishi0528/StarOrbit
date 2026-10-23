@@ -8,10 +8,10 @@ if(enhanced>.5){float grain=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.067
 const noise=`float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.2,.3));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise3(p);p=p*2.03+7.1;a*=.5;}return v;}`;
-const clouds=`uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason;${noise}
+const clouds=`uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason,cloudChannel;${noise}
 vec3 aroundAxis(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);}
 float cloudAt(vec3 p){p=normalize(p);
-if(cloudMode<.5)return sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.))))).r;
+if(cloudMode<.5){vec4 mask=sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.)))));return mix(mask.r,mask.a,cloudChannel);}
 // Geography remains Earth-fixed while synoptic texture evolves inside its envelope.
 vec2 uv=mapUV(p);float lat=(uv.y-.5)*180.,lon=(uv.x-.5)*6.2831853,ab=abs(lat);
 float ocean=smoothstep(.15,.85,sampleMap(oceanMap,uv).r);vec3 region=sampleMap(climateMap,uv).rgb;
@@ -80,8 +80,8 @@ gl_FragColor=vec4(color,1.);${output}}`;
 export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}
 void main(){float c=cloudAt(localN);float mu=dot(normalize(worldN),normalize(sun)),light=max(mu,0.);vec3 eye=normalize(cameraPosition-worldP);
 float alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004+light*1.4);
-if(enhanced>.5){c=smoothstep(.06,.9,c);float warm=1.-smoothstep(-.03,.18,mu);vec3 tint=mix(vec3(1.),vec3(1.,.46,.2),warm*.62);float silver=pow(max(dot(eye,-normalize(sun)),0.),12.)*smoothstep(.02,.24,c)*(1.-smoothstep(.6,1.,c));
-color=tint*(.008+max(mu+.035,0.)*1.45)+vec3(1.,.8,.58)*silver*.32*smoothstep(-.06,.08,mu);color*=.78+.22*c;
+if(enhanced>.5){c=pow(clamp(c,0.,1.),1.3);float warm=1.-smoothstep(-.03,.18,mu);vec3 tint=mix(vec3(1.),vec3(1.,.46,.2),warm*.62);float silver=pow(max(dot(eye,-normalize(sun)),0.),12.)*smoothstep(.02,.24,c)*(1.-smoothstep(.6,1.,c));
+color=tint*(.008+max(mu+.035,0.)*1.45)+vec3(1.,.8,.58)*silver*.32*smoothstep(-.06,.08,mu);color*=.48+.52*c;
 alpha=clamp(c*cloudAmount,0.,.98);}
 gl_FragColor=vec4(color,clamp(alpha,0.,.96));${output}}`;
 // Single scattering with separate Rayleigh/Mie density scales; no weather dynamics assumed.
@@ -122,7 +122,12 @@ float a=mask*curtain*vertical*strength*night*.08;vec3 color=mix(vec3(.008,1.,.03
 // True ray-marched cloud shell. Satellite coverage is measured; vertical profile/detail is illustrative.
 export const volumeCloudFragment=`uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}
 vec2 cloudHit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
-float densityAt(vec3 p){float h=length(p)-6371.;float profile=smoothstep(1.5,4.,h)*(1.-smoothstep(9.,15.,h));if(profile<.001)return 0.;float c=cloudAt(p);if(c<.08)return 0.;float detail=noise3(p*.22+vec3(seed*.1,weatherTime*.07*cloudMotion,0.));return profile*smoothstep(.1,.85,c)*(.65+.35*detail)*cloudAmount;}
+float densityAt(vec3 p){float h=length(p)-6371.;if(h<1.5||h>15.)return 0.;float c=cloudAt(p);if(c<.025)return 0.;
+// The measured mask controls both thickness and optical density. A continuous
+// response preserves differences inside bright cloud fields instead of clipping
+// everything above 0.85 to the same opaque column.
+float top=mix(4.,13.,c*c),profile=smoothstep(1.5,3.,h)*(1.-smoothstep(top,top+2.,h));if(profile<.001)return 0.;
+float detail=noise3(p*.22+vec3(seed*.1,weatherTime*.07*cloudMotion,0.));return profile*pow(c,1.6)*(.9+.1*detail)*cloudAmount;}
 void main(){vec3 o=earthInverse*cameraPosition,d=normalize(earthInverse*worldP-o),s=normalize(localSun);vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,outer.x),end=outer.y;if(inner.x>begin)end=min(end,inner.x);vec2 ground=cloudHit(o,d,6371.);if(ground.x>0.)end=min(end,ground.x);if(end<=begin)discard;
 float ds=(end-begin)/float(cloudSteps),trans=1.;vec3 sum=vec3(0.);float forward=pow(max(dot(d,s),0.),8.);
 for(int i=0;i<40;i++){if(i>=cloudSteps||trans<.025)break;vec3 p=o+d*(begin+(float(i)+.5)*ds);float den=densityAt(p);if(den<.001)continue;float mu=dot(normalize(p),s);float lightDepth=(densityAt(p+s*3.)*3.+densityAt(p+s*8.)*5.)*.22;float direct=exp(-lightDepth)*smoothstep(-.04,.08,mu);vec3 warm=mix(vec3(1.,.37,.12),vec3(.98,.99,1.),smoothstep(-.01,.18,mu));vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+warm*direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002);

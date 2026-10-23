@@ -1,3 +1,4 @@
+import {CLOUD_PNG,CLOUD_JPEG,cloudChannel,cloudDecodeSize} from './cloud-texture.js';
 import {parseOfficialOrbit} from './data-sources.js';
 import * as THREE from 'three';
 import {t,onLanguageChange} from './i18n.js';
@@ -5,7 +6,7 @@ import {WeatherCache} from './weather-cache.js';
 import {validateAurora,auroraPixels,selectSnapshot,seedNumber,clamp} from './weather-math.js';
 import {validateOrbit} from './orbit.js';
 const $=id=>document.getElementById(id),fmt=x=>Number.isFinite(x)?new Date(x).toISOString().replace('T',' ').slice(0,19)+' UTC':t('观测时间未提供');
-const SOURCE={cloud:'https://clouds.matteason.co.uk/images/8192x4096/clouds.jpg',aurora:'https://services.swpc.noaa.gov/json/ovation_aurora_latest.json',orbit:'https://en.cmse.gov.cn/news/202107/t20210722_48418.html'};
+const SOURCE={cloud:CLOUD_PNG,aurora:'https://services.swpc.noaa.gov/json/ovation_aurora_latest.json',orbit:'https://en.cmse.gov.cn/news/202107/t20210722_48418.html'};
 const names={cloud:'云图',aurora:'极光',orbit:'轨道',assets:'内置素材'};
 const saveFile=(blob,name)=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);};
 export class Weather{
@@ -42,42 +43,56 @@ export class Weather{
   const record={id,kind,blob,size:blob.size,downloaded:Date.now(),time:null,favorite:false,source:SOURCE[kind],...extra};await this.cache.put(record);await this.reload();this.messages[kind]='更新成功';return record;}
  async updateAll(){if(this.busy)return;this.settings.checked=Date.now();this.save();this.busy=true;$('updateEnvironment').disabled=$('clearEnvironment').disabled=$('importSnapshot').disabled=true;this.messages={cloud:'检查中…',aurora:'检查中…',orbit:'检查中…',assets:'内置素材已就绪，无需重复下载'};this.render();
   try{await Promise.allSettled(['cloud','aurora','orbit'].map(async k=>{try{
-   if(k==='cloud'){const {blob}=await this.fetch(SOURCE.cloud);const image=await createImageBitmap(blob);if(image.width!==8192||image.height!==4096){image.close();throw Error('云图尺寸无效');}image.close();await this.store(k,blob,{resolution:'8192×4096'});}
+   if(k==='cloud')await this.updateCloud();
    if(k==='aurora'){const {blob}=await this.fetch(SOURCE.aurora,3e6),v=validateAurora(JSON.parse(await blob.text()));await this.store(k,blob,{time:v.time,observed:v.observed,resolution:'360×181'});}
    if(k==='orbit'){let text;try{const r=await this.fetch('/api/orbit',6e6);text=await r.blob.text();}catch{const r=await this.fetch(SOURCE.orbit,6e6);text=await r.blob.text();}const data=parseOfficialOrbit(text);data.source='中国载人航天工程办公室 / BACC';const row=await this.store(k,new Blob([JSON.stringify(data)],{type:'application/json'}),{time:Date.parse(data.created)||data.rows[0][0]});this.useOrbit(data);this.active.orbit=row.id;this.settings.orbitRecord=row.id;this.save();}
    if(k!=='orbit')await this.apply(k);this.render();
   }catch(e){this.fail(k,e);}}));await this.trim();}finally{this.busy=false;$('updateEnvironment').disabled=$('clearEnvironment').disabled=$('importSnapshot').disabled=false;this.render();}
  }
  useOrbit(data,notify=true){this.sim.data=data;this.sim.dataUI();this.sim.lastOrbit=0;this.sim.lastEvent=0;this.sim.event=null;this.sim.dirty=true;this.sim.snap=true;if(this.sim.time<this.sim.start||this.sim.time>this.sim.end){this.sim.seek((this.sim.start+this.sim.end)/2);if(notify)this.env.api.toast('模拟时间超出新数据范围，已暂停在数据中点');}}
+ async updateCloud(){
+  // Prefer lossless alpha. Validate before caching; fall back to the legacy JPEG
+  // if the PNG is unavailable, while retaining all existing snapshots.
+  let blob,source=SOURCE.cloud,channel='alpha';
+  try{({blob}=await this.fetch(source,40e6));await this.validateCloud(blob,true);}
+  catch{source=CLOUD_JPEG;channel='red';({blob}=await this.fetch(source));await this.validateCloud(blob);}
+  return this.store('cloud',blob,{source,channel,resolution:'8192×4096'});
+ }
+ async validateCloud(blob,alpha=false){if(alpha){const header=new Uint8Array(await blob.slice(0,8).arrayBuffer());if(![137,80,78,71,13,10,26,10].every((v,i)=>header[i]===v))throw Error('云图格式无效');}const image=await createImageBitmap(blob);try{if(image.width!==8192||image.height!==4096)throw Error('云图尺寸无效');}finally{image.close();}}
+ bindCloud(){this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;this.env.uniforms.cloudChannel.value=this.cloudTexture&&cloudChannel(this.cloudRecord)==='alpha'?1:0;}
  async texture(record){if(record.kind==='aurora'){const d=auroraPixels(JSON.parse(await record.blob.text()));const tex=new THREE.DataTexture(d,360,181,THREE.RedFormat);tex.minFilter=tex.magFilter=THREE.LinearFilter;tex.wrapS=THREE.RepeatWrapping;tex.needsUpdate=true;return tex;}
-  const bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',resizeWidth:this.env.quality==='high'?8192:this.env.quality==='standard'?4096:2048,resizeQuality:'high'});const tex=new THREE.Texture(bitmap);tex.flipY=false;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(this.env.quality==='high'?16:4,this.env.api.renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;return tex;}
+  let bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
+  try{const size=cloudDecodeSize(bitmap.width,bitmap.height,this.env.quality,this.env.api.renderer.capabilities.maxTextureSize);
+   if(size.width!==bitmap.width){bitmap.close();bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none',resizeWidth:size.width,resizeHeight:size.height,resizeQuality:'high'});}
+   const tex=new THREE.Texture(bitmap);tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(this.env.quality==='high'?16:4,this.env.api.renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;return tex;
+  }catch(error){bitmap.close();throw error;}}
  release(k){const tex=this[k+'Texture'];if(tex){tex.dispose();tex.image?.close?.();this[k+'Texture']=null;}this.active[k]=null;}
  async apply(k){const token=++this.tokens[k],mode=this.settings[k];let record=null;
   if(['latest','history'].includes(mode)){record=selectSnapshot(this.items,k,mode,this.sim.time,this.settings[k+'History']);if(record&&mode==='history'&&this.settings[k+'History']==='auto'&&Math.abs(record.time-this.sim.time)>6*3600e3)record=null;}
-  if(record&&this.active[k]===record.id&&!(k==='cloud'&&this.cloudTier!==this.env.quality)){this.status(k);return;}
-  if(record){const tex=await this.texture(record);if(token!==this.tokens[k]){tex.dispose();tex.image?.close?.();return;}this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;}
+  if(record&&this.active[k]===record.id&&!(k==='cloud'&&this.cloudTier!==this.env.quality)){if(k==='cloud')this.bindCloud();this.status(k);return;}
+  if(record){const tex=await this.texture(record);if(token!==this.tokens[k]){tex.dispose();tex.image?.close?.();return;}this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;if(k==='cloud')this.cloudRecord=record;}
   else {const had=!!this.active[k];this.release(k);if(!had&&this.appliedMode?.[k]===mode){this.status(k);return;}}
   this.appliedMode??={};this.appliedMode[k]=mode;
-  if(k==='cloud')this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;
+  if(k==='cloud')this.bindCloud();
   else this.env.auroraUniforms.auroraMap.value=this.auroraTexture||this.env.fallback;
   this.render();
  }
  async clear(){const selected=[...document.querySelectorAll('[data-clear-kind]:checked')].map(x=>x.dataset.clearKind),include=$('clearFavorites').checked;
-  for(const k of ['cloud','aurora'])if(selected.includes(k)){++this.tokens[k];this.release(k);if(k==='cloud')this.env.uniforms.cloudMap.value=this.env.builtinCloud||this.env.fallback;else this.env.auroraUniforms.auroraMap.value=this.env.fallback;}
+  for(const k of ['cloud','aurora'])if(selected.includes(k)){++this.tokens[k];this.release(k);if(k==='cloud')this.bindCloud();else this.env.auroraUniforms.auroraMap.value=this.env.fallback;}
   if(selected.includes('orbit')){this.useOrbit(this.sim.bundledOrbit);this.active.orbit=null;this.settings.orbitRecord=null;this.save();}
   for(const r of this.items)if(selected.includes(r.kind)&&(!r.favorite||include))await this.cache.remove(r.id);
   await this.reload();await Promise.allSettled(['cloud','aurora'].map(k=>this.apply(k)));$('cacheDialog').close();this.messages.cache='缓存已清理，组合和设置已保留';this.render();
  }
- async remove(id){const item=this.items.find(x=>x.id===id);if(!item||item.favorite)return;for(const k of ['cloud','aurora'])if(this.active[k]===id){++this.tokens[k];this.release(k);if(k==='cloud')this.env.uniforms.cloudMap.value=this.env.builtinCloud||this.env.fallback;else this.env.auroraUniforms.auroraMap.value=this.env.fallback;}if(item.kind==='orbit'&&this.active.orbit===id){this.useOrbit(this.sim.bundledOrbit);this.active.orbit=null;this.settings.orbitRecord=null;this.save();}await this.cache.remove(id);await this.reload();await Promise.allSettled(['cloud','aurora'].map(k=>this.apply(k)));}
+ async remove(id){const item=this.items.find(x=>x.id===id);if(!item||item.favorite)return;for(const k of ['cloud','aurora'])if(this.active[k]===id){++this.tokens[k];this.release(k);if(k==='cloud')this.bindCloud();else this.env.auroraUniforms.auroraMap.value=this.env.fallback;}if(item.kind==='orbit'&&this.active.orbit===id){this.useOrbit(this.sim.bundledOrbit);this.active.orbit=null;this.settings.orbitRecord=null;this.save();}await this.cache.remove(id);await this.reload();await Promise.allSettled(['cloud','aurora'].map(k=>this.apply(k)));}
  async exportRecord(record){const bytes=new Uint8Array(await record.blob.arrayBuffer());let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));const {blob,...meta}=record;saveFile(new Blob([JSON.stringify({format:'tiangong-weather-1',meta,base64:btoa(s)})],{type:'application/json'}),'Tiangong-'+record.kind+'-'+record.id.slice(-8)+'.json');}
- async importFile(file){if(file.size>25e6)throw Error('文件超过 25 MB');const x=JSON.parse(await file.text());if(x.format!=='tiangong-weather-1'||!['cloud','aurora','orbit'].includes(x.meta?.kind)||typeof x.base64!=='string')throw Error('无效快照文件');const k=x.meta.kind,bytes=Uint8Array.from(atob(x.base64),c=>c.charCodeAt(0)),blob=new Blob([bytes],{type:k==='cloud'?'image/jpeg':'application/json'});let time=null,observed=null;
+ async importFile(file){if(file.size>64e6)throw Error('文件超过 64 MB');const x=JSON.parse(await file.text());if(x.format!=='tiangong-weather-1'||!['cloud','aurora','orbit'].includes(x.meta?.kind)||typeof x.base64!=='string')throw Error('无效快照文件');const k=x.meta.kind,bytes=Uint8Array.from(atob(x.base64),c=>c.charCodeAt(0)),blob=new Blob([bytes],{type:k==='cloud'?(bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71?'image/png':'image/jpeg'):'application/json'});let time=null,observed=null;
   if(k==='aurora'){const v=validateAurora(JSON.parse(await blob.text()));time=v.time;observed=v.observed;}else if(k==='orbit'){const v=validateOrbit(JSON.parse(await blob.text()));time=Date.parse(v.created)||v.rows[0][0];}else{const im=await createImageBitmap(blob);const valid=im.width>=1024&&im.width<=8192&&im.width===im.height*2;im.close();if(!valid)throw Error('云图尺寸无效');}
-  const record=await this.store(k,blob,{time,observed,source:'导入快照',favorite:true});record.favorite=true;await this.cache.put(record);if(k!=='orbit'){this.settings[k]='history';this.settings[k+'History']=record.id;this.sync();this.save();await this.apply(k);}if(k==='orbit'){this.useOrbit(validateOrbit(JSON.parse(await blob.text())));this.active.orbit=record.id;this.settings.orbitRecord=record.id;this.save();}this.render();}
+  const record=await this.store(k,blob,{time,observed,source:'导入快照',favorite:true,...(k==='cloud'?{channel:cloudChannel(x.meta)}:{})});record.favorite=true;await this.cache.put(record);if(k!=='orbit'){this.settings[k]='history';this.settings[k+'History']=record.id;this.sync();this.save();await this.apply(k);}if(k==='orbit'){this.useOrbit(validateOrbit(JSON.parse(await blob.text())));this.active.orbit=record.id;this.settings.orbitRecord=record.id;this.save();}this.render();}
  async preview(image,record){
   this.previewQueue=(this.previewQueue||Promise.resolve()).catch(()=>{}).then(async()=>{
    if(!image.isConnected)return;
    this.thumbnails??=new Map();let blob=this.thumbnails.get(record.id);
-   if(!blob){const bitmap=await createImageBitmap(record.blob,{resizeWidth:512,resizeHeight:256,resizeQuality:'high'});try{const canvas=new OffscreenCanvas(512,256);canvas.getContext('2d').drawImage(bitmap,0,0);blob=await canvas.convertToBlob({type:'image/jpeg',quality:.85});}finally{bitmap.close();}this.thumbnails.set(record.id,blob);if(this.thumbnails.size>12)this.thumbnails.delete(this.thumbnails.keys().next().value);}
+   if(!blob){const bitmap=await createImageBitmap(record.blob,{resizeWidth:512,resizeHeight:256,resizeQuality:'high'});try{const canvas=new OffscreenCanvas(512,256),ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0);if(cloudChannel(record)==='alpha'){const im=ctx.getImageData(0,0,512,256);for(let i=0;i<im.data.length;i+=4){im.data[i]=im.data[i+1]=im.data[i+2]=im.data[i+3];im.data[i+3]=255;}ctx.putImageData(im,0,0);}blob=await canvas.convertToBlob({type:'image/jpeg',quality:.85});}finally{bitmap.close();}this.thumbnails.set(record.id,blob);if(this.thumbnails.size>12)this.thumbnails.delete(this.thumbnails.keys().next().value);}
    if(!image.isConnected)return;
    const url=URL.createObjectURL(blob);this.previewURLs.add(url);image.onload=image.onerror=()=>{URL.revokeObjectURL(url);this.previewURLs.delete(url);};image.src=url;
   }).catch(()=>{});

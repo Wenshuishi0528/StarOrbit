@@ -1,6 +1,6 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.16 · 作者 / Author: wenshuishi0528**
+**v0.17 · 作者 / Author: wenshuishi0528**
 
 ![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
 
@@ -22,7 +22,9 @@
 
 ### 使用
 
-从 **[v0.16 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.16)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 211 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+从 **[v0.17 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.17)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 211 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+
+macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -50,7 +52,9 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 ### Getting started
 
-Download the portable package from the **[v0.16 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.16)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 211 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+Download the portable package from the **[v0.17 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.17)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 211 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+
+On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
 The bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Positions are not extrapolated beyond that interval. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

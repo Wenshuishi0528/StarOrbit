@@ -1,5 +1,15 @@
 # Changelog / 更新记录
 
+## v0.17
+
+- 优先下载无损 PNG 云层遮罩，兼容 JPEG 历史快照；保留 8K 源尺寸及快照通道信息。
+- 保留厚云内部浓淡与体积密度差别；修正重复选择画质后云图绑定退回内置图的问题。
+- Prefer lossless PNG cloud masks while retaining legacy JPEG history; preserve native 8K size and mask-channel metadata.
+- Preserve bright-cloud shading and density variation; keep downloaded cloud textures bound when reselecting a quality tier.
+
+- 新增带封面图标的 macOS 启动应用，支持 Intel / Apple Silicon；本地服务后台运行并复用现有实例。
+- Added a macOS launcher with a custom Earth/station icon, Intel / Apple Silicon support, and a persistent background server.
+
 ## v0.16
 
 ### 中文
