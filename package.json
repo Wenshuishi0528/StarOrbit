@@ -1,6 +1,6 @@
 {
   "name": "tiangong-orbit-simulator",
-  "version": "0.10.0",
+  "version": "0.16.0",
   "private": true,
   "description": "Interactive Tiangong space station viewer with orbit simulation, Earth, stars and solar tracking.",
   "author": "wenshuishi0528",
@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs && node tests/attitude.mjs"
+    "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs && node tests/attitude.mjs && node tests/weather.mjs && node tests/cloud-geography.mjs && node tests/minimap-picking.mjs && node tests/moon.mjs && node tests/earth-detail.mjs"
   },
-  "displayVersion": "0.10"
+  "displayVersion": "0.16"
 }

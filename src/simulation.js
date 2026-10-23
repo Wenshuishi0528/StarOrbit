@@ -12,8 +12,8 @@ const clockText=t=>new Date(t+8*3600000).toISOString().slice(0,19).replace('T','
 const inputText=t=>new Date(t+8*3600000).toISOString().slice(0,19);
 export class Simulation{
  constructor(api){
-  this.api=api;this.data=validateOrbit(bundledOrbit);this.mode='real';this.time=Date.now();this.speed=1;this.paused=false;this.view='follow';this.auto=true;this.dirty=true;this.snap=true;this.lastSolve=0;this.lastRead=0;this.lastEvent=0;this.lastOrbit=0;this.lastWall=performance.now();this.current=null;this.event=null;
-  this.sky=new THREE.Scene();this.sky.background=new THREE.Color('#020713');this.spaceCamera=new THREE.PerspectiveCamera(api.camera.fov,1,.1,150000);this.spaceCamera.up.set(0,0,1);this.spaceCamera.position.set(13000,-16000,11000);
+  this.api=api;this.bundledOrbit=validateOrbit(bundledOrbit);this.data=this.bundledOrbit;this.mode='real';this.time=Date.now();this.speed=1;this.paused=false;this.view='follow';this.auto=true;this.dirty=true;this.snap=true;this.lastSolve=0;this.lastRead=0;this.lastEvent=0;this.lastOrbit=0;this.lastWall=performance.now();this.current=null;this.event=null;
+  this.sky=new THREE.Scene();this.sky.background=new THREE.Color('#020713');this.spaceCamera=new THREE.PerspectiveCamera(api.camera.fov,1,.1,1000000);this.spaceCamera.up.set(0,0,1);this.spaceCamera.position.set(13000,-16000,11000);
   this.orbitControls=new OrbitControls(this.spaceCamera,api.renderer.domElement);this.orbitControls.enableDamping=true;this.orbitControls.enabled=false;this.orbitControls.minDistance=7500;this.orbitControls.maxDistance=60000;
   this.sky.background=null;this.environment=new Environment(this);this.minimap=new OrbitMinimap(this);
   this.marker=new THREE.Mesh(new THREE.SphereGeometry(65,16,10),new THREE.MeshBasicMaterial({color:0x7deaff}));this.sky.add(this.marker);
@@ -43,14 +43,14 @@ export class Simulation{
   $('viewMode').onchange=()=>this.setView($('viewMode').value);
   $('autoTrack').onchange=()=>{this.auto=$('autoTrack').checked;this.api.stopAnimation();this.dirty=true;this.snap=true;this.controlUI();};
   $('occlusion').onchange=()=>{this.dirty=true;this.snap=true;};
-  $('importOrbit').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>30e6)throw Error('文件超过 30 MB');const data=parseOrbit(await f.text());this.data=data;this.dataUI();if(this.time<this.start||this.time>this.end)this.seek((this.start+this.end)/2);this.dirty=true;this.lastOrbit=0;this.lastEvent=0;setText('dataMessage','本次使用导入数据；刷新后恢复内置官方数据。');this.api.toast('轨道数据已载入');}catch(err){this.api.toast('导入失败：{error}',{error:err.message});}finally{e.target.value='';}};
+  $('importOrbit').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>30e6)throw Error('文件超过 30 MB');const data=parseOrbit(await f.text());this.data=data;this.dataUI();if(this.time<this.start||this.time>this.end)this.seek((this.start+this.end)/2);this.dirty=true;this.lastOrbit=0;this.lastEvent=0;const weather=this.environment.weather;await weather.ready;const record=await weather.store('orbit',new Blob([JSON.stringify(data)],{type:'application/json'}),{time:Date.parse(data.created)||data.rows[0][0],source:'导入轨道',favorite:true});weather.active.orbit=record.id;weather.settings.orbitRecord=record.id;weather.save();setText('dataMessage','轨道数据已保存，下次打开会恢复。');this.api.toast('轨道数据已载入');}catch(err){this.api.toast('导入失败：{error}',{error:err.message});}finally{e.target.value='';}};
  }
  realTime(){const now=Date.now();if(now<this.start||now>this.end){setText('dataMessage','当前时刻不在轨道数据有效期内，请更新或导入轨道数据。');this.api.toast('轨道数据已过期或尚未生效；没有外推为实时位置');return;}this.inputDirty=false;this.time=now;this.mode='real';this.paused=false;this.dirty=true;this.snap=true;this.timeUI();}
  seek(t){this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();}
  manual(){this.auto=false;$('autoTrack').checked=false;this.controlUI();}
  controlUI(){$('trackingStatus').textContent=this.auto?t('全舱自动追日 · 计算姿态'):t('手动控制 · 角度保持');$('linkLabs').disabled=this.auto||!(this.api.labs().length>1&&['WT','MT'].includes(this.api.types[this.api.state.target]));$('rotationControls').classList.toggle('auto-controls',this.auto);}
  rebuild(){this.tracker.rebuild();this.dirty=true;this.snap=true;const b=new THREE.Box3();Object.values(this.api.groups).forEach(g=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());const size=b.getSize(new THREE.Vector3()).length();const l=this.api.sunLight;l.shadow.camera.left=l.shadow.camera.bottom=-size*.65;l.shadow.camera.right=l.shadow.camera.top=size*.65;l.shadow.camera.near=Math.max(10,1000-size);l.shadow.camera.far=1000+size;l.shadow.camera.updateProjectionMatrix();l.target.position.copy(this.center);this.localSunArrow.position.copy(this.center);this.controlUI();}
- setView(view){if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.spaceCamera.near=10;this.spaceCamera.far=150000;this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
+ setView(view){if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.spaceCamera.near=10;this.spaceCamera.far=1000000;this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
  overviewPosition(){const q=this.current;if(q){const r=V(q.position).normalize(),side=r.clone().cross(V(q.sunDir)).normalize();this.spaceCamera.position.copy(r.addScaledVector(side,.6).normalize().multiplyScalar(28000));}else this.spaceCamera.position.set(14000,-17000,10000);}
  fit(){if(this.view!=='orbit')return false;this.overviewPosition();this.orbitControls.target.set(0,0,0);this.orbitControls.update();return true;}
  updateOrbit(q){const points=[],colors=[];for(let t=Math.max(this.start,q.t-2800000);t<=Math.min(this.end,q.t+2800000);t+=20000){const p=interpolate(this.data.rows,t).position;points.push(...p);const lit=sunlightFraction(p,q.sun);colors.push(...(lit>.5?[.18,.72,.9]:[.36,.24,.48]));}this.orbitLine.geometry.dispose();this.orbitLine.geometry=new THREE.BufferGeometry();this.orbitLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.orbitLine.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));}
@@ -61,13 +61,13 @@ export class Simulation{
   if(!q){this.api.sunLight.intensity=0;$('simClock').textContent=clockText(this.time);for(const id of ['altitude','velocity','arrayYield','groundPoint'])$(id).textContent='—';this.marker.visible=false;this.api.modelRoot.visible=false;$('simNotice').textContent=t('轨道数据已失效：请更新数据或选择有效时刻');$('illumination').textContent=t('数据无效');return;}
   this.api.modelRoot.visible=true;this.earth.quaternion.setFromRotationMatrix(basis(q.earthAxes));this.earth.material.uniforms.sun.value.copy(V(q.sun).normalize());this.marker.position.copy(V(q.position));
   const localSun=V(q.sunLocal);this.api.sunLight.position.copy(this.center).addScaledVector(localSun,1000);this.api.sunLight.intensity=3.4*q.illumination;this.api.fillLight.intensity=$('fillLight').checked?.65:.025;this.localSunArrow.setDirection(localSun);
-  const dirty=this.dirty,solve=dirty||wall-this.lastSolve>700;
+  const dirty=this.dirty,scrubbing=this.minimap.dragging,solve=!scrubbing&&(dirty||wall-this.lastSolve>700);
   // Continue pointing through eclipse; illumination only scales lighting and received flux.
   if(this.auto&&solve){this.tracker.solve(q.sunLocal,$('occlusion').checked);this.lastSolve=wall;}
-  if(this.auto)this.tracker.advance((this.time-old)/1000,this.snap,q.sunLocal);
+  if(this.auto&&!scrubbing)this.tracker.advance((this.time-old)/1000,this.snap,q.sunLocal);
   if(solve){this.tracker.measure(q.sunLocal,q.illumination,$('occlusion').checked);this.api.syncControls();this.controlUI();this.lastSolve=wall;}
-  if(dirty||Math.abs(q.t-this.lastOrbit)>60000){this.updateOrbit(q);this.lastOrbit=q.t;}
-  if(dirty||(this.event&&q.t>this.event.time)||q.t<this.lastEvent||(!this.event&&q.t-this.lastEvent>300000)){this.event=nextShadowEvent(this.data,q.t);this.lastEvent=q.t;}
+  if(!scrubbing&&(dirty||Math.abs(q.t-this.lastOrbit)>60000)){this.updateOrbit(q);this.lastOrbit=q.t;}
+  if(!scrubbing&&(dirty||(this.event&&q.t>this.event.time)||q.t<this.lastEvent||(!this.event&&q.t-this.lastEvent>300000))){this.event=nextShadowEvent(this.data,q.t);this.lastEvent=q.t;}
   if(dirty||wall-this.lastRead>250){this.readout(q);this.lastRead=wall;}
   this.dirty=false;this.snap=false;
  }
@@ -77,14 +77,15 @@ export class Simulation{
   $('illumination').textContent=q.illumination<.001?t('地影 · 无直射'):q.illumination>.999?t('日照'):t('半影 {percent}%',{percent:(q.illumination*100).toFixed(0)});$('illumination').className=q.illumination>.5?'sunlit':'eclipsed';
   $('arrayYield').textContent=(this.tracker.total*100||0).toFixed(1)+'%';const reading=this.tracker.readings[this.api.state.target];$('selectedYield').textContent=reading?t('所选实例有效受光：{percent}%',{percent:(reading.effective*100).toFixed(1)}):t('受光面积计算中');
   $('eventText').textContent=this.event?t(this.event.entering?'进入地影约 {minutes} 分钟':'离开地影约 {minutes} 分钟',{minutes:Math.max(0,(this.event.time-q.t)/60000).toFixed(1)}):t('未来两小时／剩余数据内无昼夜转换');
+  if(this.minimap.dragging){$('arrayYield').textContent='—';$('eventText').textContent=t('松开鼠标后更新太阳翼与昼夜事件');}
   $('timeline').value=(q.t-this.start)/(this.end-this.start)*10000;if(!this.inputDirty&&document.activeElement!==$('customTime'))$('customTime').value=inputText(q.t);
-  $('simNotice').textContent=(this.view==='orbit'?t('轨道总览 · 青点为放大的空间站标记'):t('空间站跟随 · 地球距离与角尺度按真实比例'))+t(' · 沿地面轨迹定向')+($('fillLight').checked?t(' · 辅助照明开启'):'');
+  $('simNotice').textContent='';
  }
  render(){
   const {renderer,camera,scene,stage}=this.api,q=this.current,overview=this.view==='orbit';this.spaceCamera.aspect=camera.aspect;this.spaceCamera.fov=camera.fov;
-  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position)));this.spaceCamera.near=10;this.spaceCamera.far=150000;}else if(overview)this.orbitControls.update();
+  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(5000).applyMatrix4(rot).add(V(q.position)));this.spaceCamera.near=10;this.spaceCamera.far=1000000;}else if(overview)this.orbitControls.update();
   this.spaceCamera.updateProjectionMatrix();this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
-  if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),60000);this.sunDisc.scale.setScalar(60000*695700/Math.hypot(...q.sun));}
+  if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),800000);this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));}
   this.environment.update(q,this.spaceCamera);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);
   if(!overview){renderer.autoClear=false;renderer.clearDepth();renderer.render(scene,camera);renderer.autoClear=true;}
   renderer.autoClear=true;
