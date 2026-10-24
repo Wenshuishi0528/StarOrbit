@@ -1,5 +1,14 @@
 # Changelog / 更新记录
 
+## v0.26 — 2026-10-24
+
+- 新增可折叠的“场景分享”，通过 JSON 导出／导入完整舱体组合、太阳翼角度与联动、模拟时间、镜头及环境显示设置。
+- 文件自带轨道数据，导入后暂停在分享时刻；云图与极光匹配本地同一快照，缺失时提示并使用内置云图／关闭极光。
+- 导入前校验格式、舱体层级、轨道、时间、镜头和数值范围；中英文界面同步支持。
+- 已验证多层组合与重复飞船往返恢复、文件导入／导出、刷新记忆、缺失天气快照和无效输入处理。
+
+**English:** Added collapsible Scene sharing with JSON export/import for assemblies, solar arrays, time, cameras, environment and display settings. Files embed orbit data and restore to a paused shared time. Downloaded clouds and aurora match exact local snapshots, with explicit fallback when missing. Validates scene structure, hierarchy, orbit, time, cameras and value ranges before applying. Bilingual interface included. Verified recursive/repeated assemblies, file round-trips, reload persistence, missing-weather fallback and invalid input rejection.
+
 ## v0.25 — 2026-10-24
 
 - 左侧六个设置模块支持独立展开／收起，点击标题或右侧箭头即可切换；收起仅保留标题，不改变功能开关与控件数值。

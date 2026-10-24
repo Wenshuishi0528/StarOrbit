@@ -1,6 +1,6 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.25 · 作者 / Author: wenshuishi0528**
+**v0.26 · 作者 / Author: wenshuishi0528**
 
 ![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
 
@@ -18,11 +18,12 @@
 - **真实星表星空**：41,411颗独立星点；可选原生16K NASA银河背景、主星名称和曝光风格。增强背景按需加载，切回普通模式释放。
 - **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
 - **中英文切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
+- **场景分享**：导出／导入 JSON，恢复舱体组合、太阳翼、时间、镜头和环境设置；文件包含所用轨道，下载云图与极光按快照匹配。
 - **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示、全屏尺寸自适应及三维画面截图。
 
 ### 使用
 
-从 **[v0.25 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.25)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 211 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+从 **[v0.26 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.26)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 211 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
@@ -48,11 +49,12 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 - **Catalogue-based stars:** 41,411 independent stars, optional native 16K NASA Milky Way, bright-star labels, and exposure styles. The enhanced background loads on demand and is released in standard mode.
 - **Toggleable orbit minimap:** current sub-satellite position with past and future ground tracks, synchronized with simulation time.
 - **Chinese / English UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
+- **Scene sharing:** export/import compact JSON files with assemblies, solar arrays, time, cameras, environment settings and embedded orbit data. Downloaded weather matches exact local snapshots.
 - **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display with adaptive fullscreen sizing, and 3D screenshot export.
 
 ### Getting started
 
-Download the portable package from the **[v0.25 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.25)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 211 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+Download the portable package from the **[v0.26 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.26)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 211 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 

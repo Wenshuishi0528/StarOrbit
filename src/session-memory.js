@@ -37,13 +37,13 @@ export async function installSessionMemory(sim,assembly){
   for(const cls of ['immersive','photo-mode'])document.body.classList.toggle(cls,!!saved[cls]);
   $('immersiveExit').hidden=!saved.immersive;$('photoExit').hidden=!saved['photo-mode'];
   if(Number.isFinite(saved.scroll))document.querySelector('aside').scrollTop=saved.scroll;
-  for(const id of ['environmentPresetName','environmentPresets'])if(typeof saved.fields?.[id]==='string')$(id).value=saved.fields[id];
+  for(const id of ['environmentPresetName','environmentPresets','sceneName'])if(typeof saved.fields?.[id]==='string')$(id).value=saved.fields[id];
  }
  sim.dirty=true;sim.snap=true;sim.lastWall=performance.now();sim.timeUI();sim.controlUI();api.resize();
  const persist=()=>{
   if(resetting)return;
   try{
-   const s={mode:sim.mode,time:sim.time,speed:sim.speed,paused:sim.paused,auto:sim.auto,view:sim.view,playing:assembly.getPlaying(),camera:cameraState(api.camera,api.controls),spaceCamera:sim.view==='orbit'?cameraState(sim.spaceCamera,sim.orbitControls):saved?.spaceCamera,switches:Object.fromEntries(switches.map(id=>[id,$(id).checked])),details:[...document.querySelectorAll('aside details')].map(el=>el.open),telemetry:$('telemetry').classList.contains('expanded'),scroll:document.querySelector('aside').scrollTop,fields:Object.fromEntries(['environmentPresetName','environmentPresets'].map(id=>[id,$(id).value])),immersive:document.body.classList.contains('immersive'),'photo-mode':document.body.classList.contains('photo-mode')};
+   const s={mode:sim.mode,time:sim.time,speed:sim.speed,paused:sim.paused,auto:sim.auto,view:sim.view,playing:assembly.getPlaying(),camera:cameraState(api.camera,api.controls),spaceCamera:sim.view==='orbit'?cameraState(sim.spaceCamera,sim.orbitControls):saved?.spaceCamera,switches:Object.fromEntries(switches.map(id=>[id,$(id).checked])),details:[...document.querySelectorAll('aside details')].map(el=>el.open),telemetry:$('telemetry').classList.contains('expanded'),scroll:document.querySelector('aside').scrollTop,fields:Object.fromEntries(['environmentPresetName','environmentPresets','sceneName'].map(id=>[id,$(id).value])),immersive:document.body.classList.contains('immersive'),'photo-mode':document.body.classList.contains('photo-mode')};
    localStorage.setItem(KEY,JSON.stringify(s));saved=s;assembly.saveAssembly();
   }catch{setText('memoryStatus','浏览器未允许保存设置，本次修改可能无法在下次打开时恢复。');}
  };
