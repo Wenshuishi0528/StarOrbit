@@ -1,10 +1,12 @@
 import {t,initLanguage,onLanguageChange,setText,getLanguage} from './i18n.js';
+import {installSidebar} from './sidebar.js';
 import {installSessionMemory} from './session-memory.js';
 import { Simulation } from './simulation.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {describeAssembly,replaceAttachment,matingTransforms,placementMatrices} from './assembly.js';
+installSidebar();
 initLanguage();
 const $=id=>document.getElementById(id),meta=JSON.parse($('modelMeta').textContent),names={TH:'天和',WT:'问天',MT:'梦天',TZ:'天舟',SZ:'神舟',XT:'巡天'},slotNames={TH_WENTIAN:'节点左侧',TH_MENGTIAN:'节点右侧',TH_FORWARD:'节点前端',TH_LOWER:'节点下方',TH_AFT:'天和尾端'},defaults={TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'},state={slots:{...defaults},showXT:true,target:'TH_WENTIAN',linked:false,pair:true,angles:{}};
 let assembly=describeAssembly(state.slots);

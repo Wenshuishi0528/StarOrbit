@@ -1,5 +1,13 @@
 # Changelog / 更新记录
 
+## v0.25 — 2026-10-24
+
+- 左侧六个设置模块支持独立展开／收起，点击标题或右侧箭头即可切换；收起仅保留标题，不改变功能开关与控件数值。
+- 自动记忆各模块状态，恢复出厂设置时重置；支持中英文、键盘和窄屏操作。
+- 已检查折叠独立性、刷新恢复、控件值保留及完整软件加载。
+
+**English:** Added independent collapsible sections to all six sidebar modules. Click a heading or its chevron to toggle; collapsing preserves controls and active features. Section states persist across visits and reset with factory settings. Supports both languages, keyboard navigation and narrow screens.
+
 ## v0.24 — 2026-10-23
 
 - GitHub 云图增加全图自适应遮罩断层处理，减轻碎片和阶梯边缘；历史 PNG／JPEG 同步适用，原始下载缓存保留。大尺度上游误分类仍不能由该处理恢复。
