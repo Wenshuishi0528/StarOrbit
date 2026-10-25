@@ -1,3 +1,4 @@
+import {lightningGLSL} from './phenomena.js';
 import {cloudToneGLSL} from './cloud-texture.js';
 import {scatteringGLSL} from './atmosphere-scattering.js';
 import {solarOpticsGLSL} from './atmosphere-glsl.js';
@@ -89,7 +90,7 @@ float highlight=pow(max(0.,dot(reflect(-s,n),eye)),gloss);float fresnel=.04+.96*
 color+=(enhanced>.5?directSun:vec3(1.,.91,.73))*ocean*highlight*day*mix(.6,.3+fresnel*2.,enhanced);
 }
 gl_FragColor=vec4(color,1.);${output}}`;
-export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}
+export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}
 void main(){float c=cloudAt(localN);float mu=dot(normalize(worldN),normalize(sun)),light=max(mu,0.);vec3 eye=normalize(cameraPosition-worldP);
 float alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004+light*1.4);
 if(enhanced>.5){c=pow(clamp(c,0.,1.),1.3);
@@ -101,12 +102,13 @@ vec3 ambient=vec3(.003,.005,.008)*smoothstep(-.16,.08,mu);
 color=ambient+directSun*((max(mu,0.)+.035)*1.45+silver*.32);color*=.48+.52*c;
 alpha=clamp(c*cloudAmount,0.,.98);}
 if(alpha<.001)discard;
+color+=cloudLightning(localN);
 if(linearComposite>.5)color=cloudAerial(worldP,color,normalize(sun));
 gl_FragColor=vec4(color,clamp(alpha,0.,.96));${output}}`;
 // Single scattering with separate Rayleigh/Mie density scales; no weather dynamics assumed.
-export const atmosphereFragment=`${solarOpticsGLSL}${scatteringGLSL}uniform vec3 sun;uniform float enhanced;varying vec3 worldP;
+export const atmosphereFragment=`${solarOpticsGLSL}${scatteringGLSL}uniform vec3 sun;uniform float enhanced,airglowOnly;varying vec3 worldP;
 
-void main(){vec3 o=cameraPosition,d=normalize(worldP-o),s=normalize(sun);vec2 a=hit(o,d,A);float begin=max(0.,a.x),end=a.y;vec2 ground=hit(o,d,R);if(ground.x>0.)end=min(end,ground.x);if(end<=begin&&enhanced<.5)discard;
+void main(){vec3 o=cameraPosition,d=normalize(worldP-o),s=normalize(sun);vec2 a=hit(o,d,A);float begin=max(0.,a.x),end=a.y;vec2 ground=hit(o,d,R);if(ground.x>0.)end=min(end,ground.x);if((end<=begin||airglowOnly>.5)&&enhanced<.5){vec3 glow=nightglow(o,d,s,ground.x>0.?ground.x:1e8);float alpha=clamp(max(glow.r,max(glow.g,glow.b))*4.,0.,.15);if(alpha<=0.)discard;gl_FragColor=vec4(glow/alpha,alpha);${output}return;}
 if(enhanced>.5){
  vec3 glow=nightglow(o,d,s,ground.x>0.?ground.x:1e8);
  if(end>begin)gl_FragColor=fineAtmosphere(o,d,s,begin,end);else gl_FragColor=vec4(vec3(0.),linearComposite>.5?1.:0.);
@@ -138,7 +140,9 @@ for(int j=0;j<3;j++){
   sum+=exp(-tau)*(betaR*r*pr+betaM*m*pm)*ds*visibility;odR+=r*ds;odM+=m*ds;
  }
 }
-vec3 trans=exp(-(betaR*odR+betaM*odM));float alpha=clamp(1.-dot(trans,vec3(.2126,.7152,.0722)),0.,.98);vec3 color=sum*8./max(alpha,.001);gl_FragColor=vec4(color,alpha);${output}}`;
+vec3 trans=exp(-(betaR*odR+betaM*odM));float alpha=clamp(1.-dot(trans,vec3(.2126,.7152,.0722)),0.,.98);vec3 color=sum*8./max(alpha,.001);vec3 glow=nightglow(o,d,s,ground.x>0.?ground.x:1e8);
+float combined=max(alpha,clamp(max(glow.r,max(glow.g,glow.b))*4.,0.,.15));
+gl_FragColor=vec4((color*alpha+glow)/max(combined,.00001),combined);${output}}`;
 export const atmosphereTransmissionFragment=`${solarOpticsGLSL}varying vec3 worldP;
 void main(){vec3 o=cameraPosition,d=normalize(worldP-o);float b=dot(o,d),r2=dot(o,o),h=b*b-r2+6471.*6471.;if(h<=0.)discard;
 float start=max(0.,-b-sqrt(h));vec3 p=o+d*start;float g=b*b-r2+6371.*6371.;vec3 depth;
@@ -152,7 +156,7 @@ float height=length(worldP)-6371.;float fold=lon*180.+sin(lon*13.+t*.3)*9.+fbm(p
 float a=mask*curtain*vertical*strength*night*.08;vec3 color=mix(vec3(.008,1.,.035),vec3(.65,.002,.09),smoothstep(180.,310.,height));gl_FragColor=vec4(color*1.8,clamp(a,0.,.2));\n#include <colorspace_fragment>}`;
 // True ray-marched cloud shell. Satellite coverage is measured; vertical profile/detail is illustrative.
 export const volumeCloudFragment=`#define CLOUD_RAYMARCH
-uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}
+uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}
 vec2 cloudHit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
 float densityAt(vec3 p){float h=length(p)-6371.;if(h<1.5||h>15.)return 0.;float c=cloudAt(p);if(c<=0.)return 0.;
 // The measured mask controls both thickness and optical density. A continuous
@@ -168,9 +172,10 @@ vec3 reference=normalize(o+d*max(0.,-b-sqrt(max(0.,disc))));
 vec2 uv=mapUV(aroundAxis(reference,cloudMotion*motionTime*.004*(.5+.5*sin(reference.z*4.))));
 cloudDx=wrapGradient(dFdx(uv));cloudDy=wrapGradient(dFdy(uv));
 vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,outer.x),end=outer.y;if(inner.x>begin)end=min(end,inner.x);vec2 ground=cloudHit(o,d,6371.);if(ground.x>0.)end=min(end,ground.x);if(end<=begin)discard;
+vec3 lightning=cloudLightning(reference);
 float ds=(end-begin)/float(cloudSteps),trans=1.,depthMoment=0.;vec3 sum=vec3(0.);float forward=pow(max(dot(d,s),0.),8.);
 for(int i=0;i<40;i++){if(i>=cloudSteps||trans<.025)break;vec3 p=o+d*(begin+(float(i)+.5)*ds);float den=densityAt(p);if(den<.001)continue;float mu=dot(normalize(p),s);float lightDepth=(densityAt(p+s*3.)*3.+densityAt(p+s*8.)*5.)*.22;vec3 direct=exp(-lightDepth)*sunlightAt(length(p)-6371.,mu);
-vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002);
+vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002)+lightning;
 float alpha=1.-exp(-den*.25*ds);sum+=trans*alpha*light;depthMoment+=trans*alpha*(begin+(float(i)+.5)*ds);trans*=1.-alpha;}
 float alpha=1.-trans;if(alpha<.001)discard;vec3 color=sum/max(alpha,.001);
 if(linearComposite>.5){vec3 p=transpose(earthInverse)*(o+d*clamp(depthMoment/alpha,begin,end));color=cloudAerial(p,color,normalize(sun));}

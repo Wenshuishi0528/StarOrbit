@@ -13,7 +13,7 @@ export function installSceneShare(sim,replaceAssembly){
  const recordRef=kind=>{const r=weather.items.find(x=>x.id===weather.active[kind]);return r?{id:r.id,source:r.source||'',provider:r.provider||'',time:r.time??null}:null;};
  const capture=()=>{
   const home=env.moon.savedView;
-  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'Tiangong',appVersion:document.querySelector('.app-version').textContent,assembly:structuredClone(api.state),simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}});
+  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'Tiangong',appVersion:document.querySelector('.app-version').textContent,assembly:structuredClone(api.state),simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},phenomena:{...env.phenomena.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}});
  };
  async function importScene(input){
   if(busy)throw Error('正在恢复场景…');
@@ -36,7 +36,7 @@ export function installSceneShare(sim,replaceAssembly){
     if(r){weather.settings[kind]='history';weather.settings[kind+'History']=r.id;}
     else{weather.settings[kind]=kind==='cloud'?'builtin':'off';missing.push(kind);}
    }
-   weather.sync();weather.save();Object.assign(env.settings,scene.environment);env.save();
+   env.phenomena.restore(scene.phenomena);weather.sync();weather.save();Object.assign(env.settings,scene.environment);env.save();
    for(const [key,id] of Object.entries({moon:'showMoon',stars:'showStars',milky:'showMilky',starLabels:'starNames',clouds:'showClouds',groundTrack:'groundTrack'}))$(id).checked=env.settings[key];
    $('skyExposure').value=env.settings.exposure;$('cloudOpacity').value=env.settings.cloudOpacity;$('starBrightness').value=env.settings.starBrightness;
    if(env.quality!==scene.environment.quality)await env.setQuality(scene.environment.quality);

@@ -6,6 +6,7 @@ import {buildOpticalDepthTable} from './atmosphere-optics.js';
 import {galaxyVertex,galaxyFragment} from './sky-shaders.js';
 import {climatePixels} from './cloud-geography.js';
 import {Weather} from './weather.js';
+import {Phenomena,flashUniforms} from './phenomena.js';
 import {Moon} from './moon.js';
 import {EarthDetail} from './earth-detail.js';
 import {t,setText,onLanguageChange} from './i18n.js';
@@ -28,12 +29,12 @@ export class Environment{
   }catch{}
   this.fallback=new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1);this.fallback.needsUpdate=true;
   this.climateMap=new THREE.DataTexture(climatePixels(),512,256,THREE.RGBAFormat);this.climateMap.wrapS=THREE.RepeatWrapping;this.climateMap.minFilter=this.climateMap.magFilter=THREE.LinearFilter;this.climateMap.needsUpdate=true;
-  this.uniforms={linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudTone:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
+  this.uniforms={...flashUniforms(),linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudTone:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
   this.detail=new EarthDetail(this);this.nightDetail=new EarthDetail(this,true);
   this.earth=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS,160,96),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:earthFragment}));
   sim.sky.add(this.earth);sim.earth=this.earth;
   this.clouds=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+8,160,96),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:cloudFragment,transparent:true,depthWrite:false}));this.clouds.renderOrder=2;sim.sky.add(this.clouds);
-  this.atmosphere=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+300,128,64),new THREE.ShaderMaterial({uniforms:{linearOutput:this.uniforms.linearOutput,linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:this.fallback},multipleDepthB:{value:this.fallback},sun:this.uniforms.sun,steps:{value:8},enhanced:this.uniforms.enhanced,solarDepth:this.uniforms.solarDepth},vertexShader:vertex,fragmentShader:atmosphereFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.atmosphere.renderOrder=3;sim.sky.add(this.atmosphere);
+  this.atmosphere=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+300,128,64),new THREE.ShaderMaterial({uniforms:{linearOutput:this.uniforms.linearOutput,airglowOnly:{value:0},linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:this.fallback},multipleDepthB:{value:this.fallback},sun:this.uniforms.sun,steps:{value:8},enhanced:this.uniforms.enhanced,solarDepth:this.uniforms.solarDepth},vertexShader:vertex,fragmentShader:atmosphereFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.atmosphere.renderOrder=3;sim.sky.add(this.atmosphere);
   for(const key of ['linearComposite','airglowStrength','multipleStrength','multipleDepth','multipleDepthB','steps'])this.uniforms[key]=this.atmosphere.material.uniforms[key];
   this.atmosphereTransmission=new THREE.Mesh(this.atmosphere.geometry,new THREE.ShaderMaterial({uniforms:{solarDepth:this.uniforms.solarDepth},vertexShader:vertex,fragmentShader:atmosphereTransmissionFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide,blending:THREE.CustomBlending,blendSrc:THREE.ZeroFactor,blendDst:THREE.SrcColorFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor,toneMapped:false}));this.atmosphereTransmission.renderOrder=2.9;this.atmosphereTransmission.visible=false;sim.sky.add(this.atmosphereTransmission);
   this.hdr=new AtmosphereRenderer(this.api.renderer);
@@ -47,7 +48,7 @@ export class Environment{
   this.buildStars();this.buildMilkyWay();this.moon=new Moon(this);
   this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
-  this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);onLanguageChange(()=>{this.translateStars();this.skyStatus();});
+  this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.translateStars();this.skyStatus();});
  }
  buildStars(){
   const positions=[],colors=[],mags=[];this.labelGroup=new THREE.Group();this.backdrop.add(this.labelGroup);
@@ -192,7 +193,7 @@ export class Environment{
   const volume=this.quality==='high'&&this.weather?.settings.volume;this.volumeClouds.visible=!!detailed&&s.clouds&&!!volume;this.volumeClouds.quaternion.copy(this.earth.quaternion);this.uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(this.earth.quaternion)).transpose();
   this.clouds.quaternion.copy(this.earth.quaternion);this.clouds.visible=!!detailed&&s.clouds&&!volume;
   this.detail.update(camera);this.nightDetail.update(camera);
-  this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);
+  this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.phenomena?.update(q,camera);
   this.stars.visible=s.stars;this.labelGroup.visible=s.stars&&s.starLabels;this.milky.visible=s.stars&&s.milky;
   // The photographic option is an explicit display/exposure approximation.
   const cinematic=s.exposure==='cinematic';this.milky.material.uniforms.textured.value=cinematic&&this.galaxyTexture?1:0;

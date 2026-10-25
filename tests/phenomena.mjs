@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {randomAt,direction,stormPrior,eventClock,earthOccluded,flashEnvelope,phenomenaSettings} from '../src/phenomena-math.js';
+assert.deepEqual(phenomenaSettings({mode:'wrong',meteors:'yes',airglow:false}),{mode:'natural',lightning:true,upper:true,airglow:false,meteors:true});
+for(let i=0;i<1000;i++){const r=randomAt(8,i);assert(r>=0&&r<1);assert.equal(r,randomAt(8,i));}
+assert(stormPrior(23,0)>stormPrior(15,24));assert.equal(stormPrior(0,75),0);
+assert(Math.abs(Math.hypot(...direction(125,40))-1)<1e-12);
+assert(earthOccluded([-6400,0,0],[6771,0,0]));assert(!earthOccluded([6400,0,0],[6771,0,0]));
+assert(!earthOccluded([0,6400,1000],[0,0,28000]));
+assert.equal(flashEnvelope(-1),0);assert.equal(flashEnvelope(2,true),0);assert(flashEnvelope(.06)>.9);
+let c=eventClock(null,1e9,1000);assert(c.reset);let paused=eventClock(c,1e9,1016);assert.equal(paused.phase,c.phase);
+let fast=eventClock(c,1e9+16000,1016,1000);assert(!fast.reset);assert(Math.abs(fast.phase-c.phase-.032)<1e-8);
+assert(eventClock(c,1e9-1,1016).reset);assert(eventClock(c,1e9+10000,1016,1).reset);
+assert(eventClock(c,1e9+5000,6000,1).reset);
+console.log('Phenomena: deterministic randomness, geography, Earth occlusion, pulse, pause, seek and bounded fast-time clock passed');
+import {cloudCoverage,maskSample} from '../src/phenomena-cloud.js';
+const base={cloudMode:0,cloudMotion:0,motionTime:0,cloudChannel:0,cloudTone:0,cloudSeason:0,weatherTime:20,seed:123};
+assert.equal(cloudCoverage([1,0,0],base,()=>.7),.7);
+assert.equal(cloudCoverage([1,0,0],{...base,cloudMode:1},()=>0),0);
+let requests=[];const local=cloudCoverage(direction(110,20),{...base,cloudMode:1,cloudMotion:1},(name,n)=>{requests.push({name,n});return name==='ocean'?.5:.7;});
+assert(local>=0&&local<=1);assert(requests.some(x=>x.name==='template'));assert(!requests.some(x=>x.name==='cloud'));assert(requests.some(x=>Math.abs(x.n[0]-direction(110,20)[0])>.0001));
+const mask={width:2,height:2,data:new Uint8Array([0,0,0,255,255,0,0,255,0,0,0,255,255,0,0,255])};
+assert(Math.abs(maskSample(mask,direction(179.999,0))-maskSample(mask,direction(-179.999,0)))<.001);
+console.log('Phenomena cloud selection: source channels, local template/motion and date-line bilinear continuity passed');

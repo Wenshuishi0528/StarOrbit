@@ -425,5 +425,14 @@
   "未找到云图快照，使用内置云图。": "Cloud snapshot not found; using bundled clouds.",
   "未找到极光快照，极光已关闭。": "Aurora snapshot not found; aurora is off.",
   "画质素材未能全部载入，已保留可用画质。": "Some quality assets could not load; kept the available quality.",
-  "部分环境数据未能载入，请在数据栏重试。": "Some environment data could not load; retry in the data panel."
+  "部分环境数据未能载入，请在数据栏重试。": "Some environment data could not load; retry in the data panel.",
+  "天气与奇观": "Weather & phenomena",
+  "效果模式": "Effect mode",
+  "自然": "Natural",
+  "观赏增强": "Enhanced",
+  "云内闪电": "In-cloud lightning",
+  "高空闪光": "Sprites & blue jets",
+  "夜侧气辉": "Night airglow",
+  "流星掠过": "Meteors",
+  "模拟事件 · 非实时观测": "Simulated events · not live observations"
 }

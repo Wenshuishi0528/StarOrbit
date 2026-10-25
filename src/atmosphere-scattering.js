@@ -12,7 +12,7 @@ vec3 viewTransmission(vec3 p,vec3 direction){
  return spectralTransmission(depth);
 }
 vec3 nightglow(vec3 o,vec3 d,vec3 s,float stop){
- vec3 result=vec3(0.);
+ vec3 result=vec3(0.);if(airglowStrength<=0.)return result;
  // Weak phenomenological emission layers, not aurora or direct solar scattering.
  for(int band=0;band<2;band++){
   float low=band==0?70.:180.,high=band==0?112.:300.;
@@ -22,11 +22,11 @@ vec3 nightglow(vec3 o,vec3 d,vec3 s,float stop){
   if(inner.y<inner.x){cuts[1]=b;cuts[2]=b;}
   for(int side=0;side<2;side++){
    float start=cuts[side*2],span=cuts[side*2+1]-start;if(span<=0.)continue;
-   for(int i=0;i<6;i++){
-    vec3 p=o+d*(start+span*(float(i)+.5)/6.);float rho=length(p),h=rho-R,mu=dot(p/rho,s);
+   int count=steps>=24?6:3;for(int i=0;i<6;i++){if(i>=count)break;
+    vec3 p=o+d*(start+span*(float(i)+.5)/float(count));float rho=length(p),h=rho-R,mu=dot(p/rho,s);
     float night=1.-smoothstep(-.15,.03,mu);if(night<=0.)continue;
     vec3 emission=band==0?vec3(.16,1.,.12)*exp(-pow((h-92.)/7.,2.))*1.8e-5+vec3(1.,.33,.035)*exp(-pow((h-87.)/4.,2.))*4.e-6:vec3(1.,.065,.025)*exp(-pow((h-240.)/25.,2.))*1.1e-6;
-    result+=emission*night*viewTransmission(p,-d)*(span/6.);
+    result+=emission*night*viewTransmission(p,-d)*(span/float(count));
    }
   }
  }

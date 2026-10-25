@@ -1,4 +1,5 @@
 import {describeAssembly,MODULE_TYPES} from './assembly.js';
+import {PHENOMENA_DEFAULTS} from './phenomena-math.js';
 import {validateOrbit} from './orbit.js';
 
 export const SCENE_FORMAT='tiangong-scene-1',MAX_SCENE_BYTES=16e6;
@@ -38,6 +39,7 @@ export function validateScene(x){
  const environment={quality:choice(e.quality,['simple','medium','standard','high']),exposure:choice(e.exposure,['view','photo','cinematic']),cloudOpacity:number(e.cloudOpacity,0,1),starBrightness:number(e.starBrightness,0,2)};
  for(const key of ['stars','milky','moon','starLabels','clouds','groundTrack'])environment[key]=bool(e[key]);
  const weather={cloud:choice(w.cloud,['builtin','off','local','latest','history','satcorps']),aurora:choice(w.aurora,['off','local','latest','history']),seed:text(w.seed,80),auroraStrength:number(w.auroraStrength,0,4),exposure:number(w.exposure,.3,2.5),volume:bool(w.volume),motion:bool(w.motion),adaptive:bool(w.adaptive),cloudRecord:reference(w.cloudRecord),auroraRecord:reference(w.auroraRecord)};
+ const phenomena=x.phenomena===undefined?{...PHENOMENA_DEFAULTS}:{mode:choice(x.phenomena?.mode,['natural','enhanced']),...Object.fromEntries(['lightning','upper','airglow','meteors'].map(k=>[k,bool(x.phenomena?.[k])]))};
  const display=Object.fromEntries(DISPLAY_KEYS.map(k=>[k,bool(x.display[k])]));
- return {format:SCENE_FORMAT,name:text(x.name,60),appVersion:text(x.appVersion,30),assembly:{slots:graph.slots,showXT,target:choice(a.target,ids),linked:bool(a.linked),pair:bool(a.pair),angles},simulation:{time,speed:choice(x.simulation.speed,[1,10,60,300,1000]),auto:bool(x.simulation.auto),view:choice(x.simulation.view,['follow','orbit'])},environment,weather,display,cameras:{follow:camera(x.cameras.follow),overview:camera(x.cameras.overview),home:x.cameras.home?camera(x.cameras.home):null},orbit};
+ return {format:SCENE_FORMAT,name:text(x.name,60),appVersion:text(x.appVersion,30),assembly:{slots:graph.slots,showXT,target:choice(a.target,ids),linked:bool(a.linked),pair:bool(a.pair),angles},simulation:{time,speed:choice(x.simulation.speed,[1,10,60,300,1000]),auto:bool(x.simulation.auto),view:choice(x.simulation.view,['follow','orbit'])},environment,weather,phenomena,display,cameras:{follow:camera(x.cameras.follow),overview:camera(x.cameras.overview),home:x.cameras.home?camera(x.cameras.home):null},orbit};
 }

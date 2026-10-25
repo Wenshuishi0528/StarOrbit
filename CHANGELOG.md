@@ -1,5 +1,21 @@
 # Changelog / 更新记录
 
+## v0.28 — 2026-10-25
+
+- 新增“天气与奇观”：云内闪电、红色精灵与蓝色喷流、夜侧气辉开关、流星；支持自然和观赏增强模式。
+- 云内闪电受实际显示云层约束，支持普通云与体积云；高空闪光与雷暴关联，流星和闪光遵循地球遮挡与大气透射。
+- 限制事件数量、倍速播放节奏和资源用量；支持暂停、时间跳转、设置记忆、环境预设、场景分享与恢复默认。
+- 说明与参考资料：[天气与奇观](docs/weather-phenomena.md)。事件为程序模拟，不代表实时雷电或流星观测。
+
+**English:** Added in-cloud lightning, sprites and blue jets, a night-airglow toggle, and meteors, with Natural and Enhanced modes. Cloud lighting follows the displayed coverage, including volumetric clouds; upper-atmosphere events respect Earth occlusion and atmospheric transmission. Bounded event pools and time scaling keep effects lightweight. Settings integrate with persistence, presets, scene sharing and factory reset. Events are illustrative simulations, not live observations.
+
+## v0.27 — 2026-10-24
+
+- 启动图标改用三舱构型手绘版，校准天和、问天、梦天及太阳翼位置；方形舱段采用直角箱体与侧面阴影。
+- 更新图标绘制源文件、1024 px 原图及本机 macOS 启动器，提供完整尺寸的图标资源。
+
+**English:** Replaced the launcher icon with the illustrated three-module configuration, correcting module and solar-array placement and using angular box sections with shaded side faces. Updated the drawing source, 1024 px artwork and local macOS launcher with a complete icon-size set.
+
 ## v0.26 — 2026-10-24
 
 - 新增可折叠的“场景分享”，通过 JSON 导出／导入完整舱体组合、太阳翼角度与联动、模拟时间、镜头及环境显示设置。
