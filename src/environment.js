@@ -26,7 +26,7 @@ export class Environment{
   const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
   // Parsed assets own the data now; release the large inline JSON DOM copy.
   assetNode.remove();
-  this.settings={quality:'standard',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'view',groundTrack:false};
+  this.settings={quality:'standard',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
   try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
    for(const k of ['cloudOpacity','starBrightness'])if(Number.isFinite(old?.[k]))this.settings[k]=THREE.MathUtils.clamp(old[k],0,k==='cloudOpacity'?1:2);

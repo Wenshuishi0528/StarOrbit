@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.45 — 2026-10-26
+
+**中文：** 星空显示默认改为“观赏增强 · 16K 银河”，同步更新四语引导和说明。整体画质继续默认标准 4K，保留已有保存设置。
+
+**English:** Changed the default sky display to Enhanced · 16K Milky Way and updated guidance in all four languages. Overall quality remains Standard · 4K, with saved preferences preserved.
+
 ## v0.44 — 2026-10-26
 
 **中文：** 软件正式更名为“星轨 · StarOrbit”，统一四语界面、帮助、桌面应用、导出文件及说明文档。GitHub 仓库更名为 StarOrbit，在线版启用新网址；保留现有存档与数据兼容。[详情](docs/v0.44-details.md)。

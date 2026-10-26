@@ -6,7 +6,7 @@ const topics=[
  {title:'切换航天器',text:'在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。',target:'#missionSelect'},
  {title:'控制时间',text:'选择 1s／1m／10m／1h，再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。',target:'.time-step-row'},
  {title:'选择整体画质',group:'选择画质',text:'推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。',target:'#earthQuality'},
- {title:'选择星空画质',group:'选择画质',text:'星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。',target:'#skyExposure'},
+ {title:'选择星空画质',group:'选择画质',text:'星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。',target:'#skyExposure'},
  {title:'探索地球与星空',text:'展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。',target:'#settings-annotations'},
  {title:'播放音乐',text:'点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。',target:'#musicExpanded',music:true},
  {title:'隐藏航天器名称',text:'取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。',target:'#craftLabelsControl'},
