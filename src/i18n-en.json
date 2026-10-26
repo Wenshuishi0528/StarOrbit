@@ -692,5 +692,11 @@
   "选择画质": "Choose graphics quality",
   "推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。": "We recommend the highest quality, Fine · 8K, for sharper Earth detail and lighting. If controls feel slow, switch to Standard · 4K. Choose from the dropdown indicated by the arrow.",
   "点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。": "Click Play to start music. Open the playlist to choose, import, remove and reorder tracks.",
-  "‹ 帮助目录": "‹ Help topics"
+  "‹ 帮助目录": "‹ Help topics",
+  "选择整体画质": "Choose overall quality",
+  "选择星空画质": "Choose sky quality",
+  "4K · 星表观赏": "4K · Star catalog view",
+  "下一个": "Next",
+  "完成介绍": "Finish",
+  "星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。": "The sky defaults to “4K · Star catalog view”. For a more detailed Milky Way, choose “Enhanced · 16K Milky Way”. Use the sky display selector indicated by the arrow."
 }

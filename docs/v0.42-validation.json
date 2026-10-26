@@ -1,0 +1,995 @@
+{
+  "version": "0.42",
+  "browserChecks": [
+    {
+      "name": "fresh overall quality is 4K",
+      "pass": true
+    },
+    {
+      "name": "fresh sky is catalog view",
+      "pass": true
+    },
+    {
+      "name": "sky option renamed",
+      "pass": true
+    },
+    {
+      "name": "nine help cards",
+      "pass": true
+    },
+    {
+      "name": "quality precedes exploration",
+      "pass": true
+    },
+    {
+      "name": "quality has two subtopics",
+      "pass": true
+    },
+    {
+      "name": "overall guide reveals actual selector",
+      "pass": true
+    },
+    {
+      "name": "highest-quality recommendation retained",
+      "pass": true
+    },
+    {
+      "name": "manual card has Next",
+      "pass": true
+    },
+    {
+      "name": "manual Next reaches sky guide",
+      "pass": true
+    },
+    {
+      "name": "sky guide expands nested menu",
+      "pass": true
+    },
+    {
+      "name": "sky selector is highlighted",
+      "pass": true
+    },
+    {
+      "name": "guide leaves selected quality intact",
+      "pass": true
+    },
+    {
+      "name": "scene click keeps guide open",
+      "pass": true
+    },
+    {
+      "name": "sky control usable during guidance",
+      "pass": true
+    },
+    {
+      "name": "sky followed by exploration",
+      "pass": true
+    },
+    {
+      "name": "leaving sky restores folded menu",
+      "pass": true
+    },
+    {
+      "name": "leaving quality restores section",
+      "pass": true
+    },
+    {
+      "name": "manual actions visible 5",
+      "pass": true
+    },
+    {
+      "name": "manual actions visible 6",
+      "pass": true
+    },
+    {
+      "name": "manual actions visible 7",
+      "pass": true
+    },
+    {
+      "name": "manual actions visible 8",
+      "pass": true
+    },
+    {
+      "name": "manual sequence finishes",
+      "pass": true
+    },
+    {
+      "name": "tour position 1440/Zh/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/0",
+      "pass": true,
+      "details": {
+        "left": 1037,
+        "right": 1377,
+        "top": 411.5,
+        "bottom": 660.5,
+        "nextBottom": 639.5,
+        "nextRight": 1356,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/1",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 80,
+        "bottom": 329,
+        "nextBottom": 308,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/2",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 401.890625,
+        "bottom": 673.640625,
+        "nextBottom": 652.640625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 402.0390625,
+        "bottom": 673.7890625,
+        "nextBottom": 652.7890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 1440/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 402.0390625,
+        "bottom": 673.7890625,
+        "nextBottom": 652.7890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 402.0390625,
+        "bottom": 673.7890625,
+        "nextBottom": 652.7890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 1440/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 402.0390625,
+        "bottom": 673.7890625,
+        "nextBottom": 652.7890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/5",
+      "pass": true,
+      "details": {
+        "left": 342,
+        "right": 682,
+        "top": 413.5390625,
+        "bottom": 662.5390625,
+        "nextBottom": 641.5390625,
+        "nextRight": 661,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Zh/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/6",
+      "pass": true,
+      "details": {
+        "left": 729,
+        "right": 1069,
+        "top": 739,
+        "bottom": 988,
+        "nextBottom": 967,
+        "nextRight": 1048,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 1440/Zh",
+      "pass": true
+    },
+    {
+      "name": "tour position 1440/Ru/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/0",
+      "pass": true,
+      "details": {
+        "left": 1037,
+        "right": 1377,
+        "top": 392,
+        "bottom": 679.5,
+        "nextBottom": 658.5,
+        "nextRight": 1356,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/1",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 80,
+        "bottom": 344.75,
+        "nextBottom": 323.75,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/2",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 393.890625,
+        "bottom": 681.390625,
+        "nextBottom": 660.390625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 383.0390625,
+        "bottom": 693.2890625,
+        "nextBottom": 672.2890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 1440/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 383.0390625,
+        "bottom": 693.2890625,
+        "nextBottom": 672.2890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 383.0390625,
+        "bottom": 693.2890625,
+        "nextBottom": 672.2890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 1440/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 383.0390625,
+        "bottom": 693.2890625,
+        "nextBottom": 672.2890625,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/5",
+      "pass": true,
+      "details": {
+        "left": 342,
+        "right": 682,
+        "top": 405.5390625,
+        "bottom": 670.2890625,
+        "nextBottom": 649.2890625,
+        "nextRight": 661,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 1440/Ru/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/6",
+      "pass": true,
+      "details": {
+        "left": 729,
+        "right": 1069,
+        "top": 723,
+        "bottom": 987.75,
+        "nextBottom": 966.75,
+        "nextRight": 1048,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 1440/Ru",
+      "pass": true
+    },
+    {
+      "name": "tour position 390/Zh/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/0",
+      "pass": true,
+      "details": {
+        "left": 45,
+        "right": 345,
+        "top": 379.7578125,
+        "bottom": 612.3515625,
+        "nextBottom": 595.3515625,
+        "nextRight": 328,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/1",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 306.171875,
+        "bottom": 538.765625,
+        "nextBottom": 521.765625,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/2",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 364.765625,
+        "bottom": 617.15625,
+        "nextBottom": 600.15625,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 362.4140625,
+        "bottom": 614.8046875,
+        "nextBottom": 597.8046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 390/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 362.4140625,
+        "bottom": 614.8046875,
+        "nextBottom": 597.8046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 362.4140625,
+        "bottom": 614.8046875,
+        "nextBottom": 597.8046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 390/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 362.4140625,
+        "bottom": 614.8046875,
+        "nextBottom": 597.8046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/5",
+      "pass": true,
+      "details": {
+        "left": 43,
+        "right": 343,
+        "top": 349.4140625,
+        "bottom": 582.0078125,
+        "nextBottom": 565.0078125,
+        "nextRight": 326,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Zh/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/6",
+      "pass": true,
+      "details": {
+        "left": 32,
+        "right": 332,
+        "top": 165.5234375,
+        "bottom": 398.1171875,
+        "nextBottom": 381.1171875,
+        "nextRight": 315,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 390/Zh",
+      "pass": true
+    },
+    {
+      "name": "tour position 390/Ru/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/0",
+      "pass": true,
+      "details": {
+        "left": 45,
+        "right": 345,
+        "top": 379.7578125,
+        "bottom": 664.7421875,
+        "nextBottom": 647.7421875,
+        "nextRight": 328,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/1",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 294.171875,
+        "bottom": 539.5625,
+        "nextBottom": 522.5625,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/2",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 331.9140625,
+        "bottom": 616.8984375,
+        "nextBottom": 599.8984375,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 390/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 390/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 78,
+        "right": 378,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 361,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/5",
+      "pass": true,
+      "details": {
+        "left": 43,
+        "right": 343,
+        "top": 339.5625,
+        "bottom": 584.953125,
+        "nextBottom": 567.953125,
+        "nextRight": 326,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 390/Ru/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/6",
+      "pass": true,
+      "details": {
+        "left": 32,
+        "right": 332,
+        "top": 133.5234375,
+        "bottom": 398.7109375,
+        "nextBottom": 381.7109375,
+        "nextRight": 315,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 390/Ru",
+      "pass": true
+    },
+    {
+      "name": "tour position 320/Zh/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/0",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 379.7578125,
+        "bottom": 612.3515625,
+        "nextBottom": 595.3515625,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/1",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 306.171875,
+        "bottom": 538.765625,
+        "nextBottom": 521.765625,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/2",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 364.9140625,
+        "bottom": 617.3046875,
+        "nextBottom": 600.3046875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 362.0625,
+        "bottom": 614.453125,
+        "nextBottom": 597.453125,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 320/Zh/3",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 362.0625,
+        "bottom": 614.453125,
+        "nextBottom": 597.453125,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 362.0625,
+        "bottom": 614.453125,
+        "nextBottom": 597.453125,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 320/Zh/4",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 362.0625,
+        "bottom": 614.453125,
+        "nextBottom": 597.453125,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/5",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 349.0625,
+        "bottom": 581.65625,
+        "nextBottom": 564.65625,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Zh/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/6",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 165.5234375,
+        "bottom": 398.1171875,
+        "nextBottom": 381.1171875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 320/Zh",
+      "pass": true
+    },
+    {
+      "name": "tour position 320/Ru/0",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/0",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 379.7578125,
+        "bottom": 664.7421875,
+        "nextBottom": 647.7421875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/1",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/1",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 294.171875,
+        "bottom": 539.5625,
+        "nextBottom": 522.5625,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/2",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/2",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 331.9140625,
+        "bottom": 616.8984375,
+        "nextBottom": 599.8984375,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/3",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 320/Ru/3",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/4",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "quality card avoids selector 320/Ru/4",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 329.0625,
+        "bottom": 614.046875,
+        "nextBottom": 597.046875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/5",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/5",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 339.5625,
+        "bottom": 584.953125,
+        "nextBottom": 567.953125,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour position 320/Ru/6",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/6",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 119.5234375,
+        "bottom": 398.7109375,
+        "nextBottom": 381.7109375,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "tour closes cleanly 320/Ru",
+      "pass": true
+    },
+    {
+      "name": "saved quality and sky preferences survive reload",
+      "pass": true
+    }
+  ]
+}

@@ -5,13 +5,14 @@ const topics=[
  {title:'观察模型',text:'左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。',target:'#stage'},
  {title:'切换航天器',text:'在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。',target:'#missionSelect'},
  {title:'控制时间',text:'选择 1s／1m／10m／1h，再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。',target:'.time-step-row'},
+ {title:'选择整体画质',group:'选择画质',text:'推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。',target:'#earthQuality'},
+ {title:'选择星空画质',group:'选择画质',text:'星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。',target:'#skyExposure'},
  {title:'探索地球与星空',text:'展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。',target:'#settings-annotations'},
- {title:'选择画质',text:'推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。',target:'#earthQuality'},
  {title:'播放音乐',text:'点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。',target:'#musicExpanded',music:true},
  {title:'数据与更新',text:WEB_BUILD?'网页版默认使用内置轨道和云图。可导入轨道文件与云图快照；数据区间外继续椭圆轨道演算。':'桌面版支持内置数据、在线更新和文件导入。轨道区间外继续椭圆轨道演算，数据栏显示当前计算模式。',target:'#importSnapshot'},
  {title:'保存与分享',text:'设置、导入模型和音乐保存在当前浏览器中。清除网站数据会删除这些内容；使用“场景分享”导出场景文件。桌面版与网页版的本地数据分别保存。',target:'#exportScene'},
 ];
-const TOUR_LENGTH=6;
+const TOUR_LENGTH=7;
 export function installHelp(music){
  const panel=$('helpPanel'),welcome=$('welcomeDialog'),spotlight=$('helpSpotlight');let step=null,touring=false,marked=null,restore=[],returnFocus=null,frame=0;
  const remember=()=>{try{localStorage.setItem(KEY,'seen');}catch{}};
@@ -56,11 +57,12 @@ export function installHelp(music){
  }
  function render(){
   const selected=step!==null;panel.classList.toggle('guiding',selected);panel.style.left=panel.style.top='';
-  $('helpProgress').textContent=touring?`${step+1} / ${TOUR_LENGTH}`:t('使用指南');$('helpTitle').textContent=t(selected?topics[step].title:'帮助与操作说明');$('tourActions').hidden=!touring;$('replayTour').hidden=selected;$('helpDirectory').hidden=!selected;
-  $('tourPrevious').disabled=step===0;$('tourNext').textContent=t(step===TOUR_LENGTH-1?'完成导览':'下一步');
+  $('helpProgress').textContent=touring?`${step+1} / ${TOUR_LENGTH}`:t('使用指南');$('helpTitle').textContent=t(selected?topics[step].title:'帮助与操作说明');$('tourActions').hidden=!selected;$('replayTour').hidden=selected;$('helpDirectory').hidden=!selected;
+  $('tourPrevious').disabled=step===0;$('tourNext').textContent=t(step===(touring?TOUR_LENGTH:topics.length)-1?(touring?'完成导览':'完成介绍'):'下一个');
   const contents=$('helpContents');contents.replaceChildren();
   if(selected){const p=document.createElement('p');p.textContent=t(topics[step].text);contents.append(p);return;}
-  topics.forEach((topic,i)=>{const button=document.createElement('button');button.type='button';button.className='help-topic';button.dataset.topic=String(i);const label=document.createElement('span'),arrow=document.createElement('span');label.textContent=t(topic.title);arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');button.append(label,arrow);button.onclick=()=>select(i,false);contents.append(button);});
+  const groups=new Map();
+  topics.forEach((topic,i)=>{let container=contents;if(topic.group){if(!groups.has(topic.group)){const group=document.createElement('details'),summary=document.createElement('summary');group.className='help-topic-group';summary.textContent=t(topic.group);group.append(summary);contents.append(group);groups.set(topic.group,group);}container=groups.get(topic.group);}const button=document.createElement('button');button.type='button';button.className='help-topic';button.dataset.topic=String(i);const label=document.createElement('span'),arrow=document.createElement('span');label.textContent=t(topic.title);arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');button.append(label,arrow);button.onclick=()=>select(i,false);container.append(button);});
  }
  function select(index,tour){step=index;touring=tour;render();target();panel.focus({preventScroll:true});}
  function close(){clearTarget();panel.hidden=true;document.body.classList.remove('help-active');$('helpToggle').setAttribute('aria-expanded','false');step=null;touring=false;if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});}
@@ -69,8 +71,8 @@ export function installHelp(music){
  $('helpToggle').onclick=()=>panel.hidden?open():close();$('closeHelp').onclick=close;
  $('helpDirectory').onclick=()=>{clearTarget();step=null;touring=false;render();panel.focus({preventScroll:true});};
  $('replayTour').onclick=()=>select(0,true);
- $('tourPrevious').onclick=()=>{if(touring&&step>0)select(step-1,true);};
- $('tourNext').onclick=()=>{if(!touring)return;if(step===TOUR_LENGTH-1){remember();close();}else select(step+1,true);};
+ $('tourPrevious').onclick=()=>{if(step!==null&&step>0)select(step-1,touring);};
+ $('tourNext').onclick=()=>{if(step===null)return;if(step===(touring?TOUR_LENGTH:topics.length)-1){remember();close();}else select(step+1,touring);};
  $('startTour').onclick=()=>{dismiss();open(true);returnFocus=$('helpToggle');};$('skipTour').onclick=()=>{dismiss();$('helpToggle').focus();};
  welcome.addEventListener('cancel',remember);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){e.preventDefault();e.stopImmediatePropagation();close();}},true);

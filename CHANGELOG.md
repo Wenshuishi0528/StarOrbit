@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.42 — 2026-10-26
+
+**中文：** 帮助介绍新增“下一个”，画质介绍前移并分为整体画质、星空画质两个入口，分别用箭头定位控件。首次使用默认标准 4K 与“4K · 星表观赏”，保留已保存设置。[详情](docs/v0.42-details.md)。
+
+**English:** Added Next navigation to help cards and moved quality guidance ahead of exploration, with separate overall and sky quality entries pointing to their controls. First-time defaults are Standard · 4K and 4K · Star catalog view; saved preferences are preserved. [Details](docs/v0.42-details.md).
+
 ## v0.41 — 2026-10-26
 
 **中文：** 帮助改为可边看边操作的箭头与高亮引导，选择条目时自动展开、定位对应控件，点击画面保持打开。新增独立画质介绍，推荐“精细 · 8K”并指向画质选择。桌面与窄屏布局、四语说明同步更新。[详情](docs/v0.41-details.md)。

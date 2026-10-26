@@ -1,6 +1,6 @@
 {
   "name": "tiangong-orbit-simulator",
-  "version": "0.41.0",
+  "version": "0.42.0",
   "private": true,
   "description": "Modular spacecraft orbit simulator with shared Earth resources, model packages, independent orbits and attitude controls.",
   "author": "wenshuishi0528",
@@ -18,5 +18,5 @@
     "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs && node tests/attitude.mjs && node tests/weather.mjs && node tests/cloud-geography.mjs && node tests/minimap-picking.mjs && node tests/moon.mjs && node tests/earth-detail.mjs && node tests/cloud-texture.mjs && node tests/cloud-mask-repair.mjs && node tests/atmosphere.mjs && node tests/minimap-assets.mjs && node tests/cloud-source.mjs && node tests/sun-optics.mjs && node tests/scene-share.mjs && node tests/phenomena.mjs && node tests/missions.mjs && node tests/mission-packages.mjs && python3 tests/cloud-service.py && node tests/music.mjs && node tests/rendering.mjs && node tests/spacecraft-shadow.mjs && node tests/star-chart-settings.mjs && node tests/star-chart-data.mjs && node tests/star-chart.mjs && node tests/geography.mjs && node tests/orbit-events.mjs && node tests/unbounded-time.mjs && node tests/i18n.mjs",
     "build:web": "node build.mjs --web"
   },
-  "displayVersion": "0.41"
+  "displayVersion": "0.42"
 }

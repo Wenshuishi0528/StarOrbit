@@ -1,9 +1,9 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.41 · 作者 / Author: wenshuishi0528**
+**v0.42 · 作者 / Author: wenshuishi0528**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/Tiangong-Orbit-Simulator-China-Space-Station/)**
 
-浏览器直接使用，默认内置轨道与云图。首次访问可选择简短导览，右上角“？帮助”通过箭头和高亮定位真实控件，可边看边操作。[v0.41 引导说明](docs/v0.41-details.md)。[网页版与部署说明](docs/v0.40-details.md)。
+浏览器直接使用，默认内置轨道与云图。首次访问可选择简短导览，右上角“？帮助”通过箭头和高亮定位真实控件，可边看边操作，每个介绍可直接点击“下一个”。画质介绍包含整体画质与星空画质两个入口；首次使用默认为标准 4K 和“4K · 星表观赏”。[v0.42 引导说明](docs/v0.42-details.md)。[网页版与部署说明](docs/v0.40-details.md)。
 
 
 ![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
@@ -41,7 +41,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.41**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.42**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -84,7 +84,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.41**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.42**; the GitHub portable download is **v0.38**.
 
 The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
