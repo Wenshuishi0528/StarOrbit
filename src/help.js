@@ -1,44 +1,81 @@
 import {t,onLanguageChange} from './i18n.js';
 import {WEB_BUILD} from './runtime-assets.js';
-const KEY='tiangong-help-v1',$=id=>document.getElementById(id);
+const KEY='tiangong-help-v1',$=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const topics=[
- {title:'观察模型',text:'左键拖动旋转，右键拖动平移，滚轮缩放。触屏使用单指旋转、双指缩放与平移；右上角“视角”可切换方向或显示全貌。',target:'#stage'},
- {title:'切换航天器',text:'在左侧任务列表选择中国空间站或东方红一号。每个任务有独立的模型、轨道和姿态控制，地球与星空设置共用。也可导入模型和配置文件。',target:'#missionSelect'},
- {title:'控制时间',text:'使用暂停、倍速和 1s／1m／10m／1h 步进探索轨道。拖动右下角小地图或底部时间轴可定位时刻；运行中拖动后继续播放。',target:'.time-step-row'},
- {title:'探索地球与星空',text:'在“地球与星空”调整画质和标注。地理标注显示国家、首都和地形，星图显示恒星与星座；左下角音符展开音乐播放器。',target:'#settings-environment'},
+ {title:'观察模型',text:'左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。',target:'#stage'},
+ {title:'切换航天器',text:'在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。',target:'#missionSelect'},
+ {title:'控制时间',text:'选择 1s／1m／10m／1h，再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。',target:'.time-step-row'},
+ {title:'探索地球与星空',text:'展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。',target:'#settings-annotations'},
+ {title:'选择画质',text:'推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。',target:'#earthQuality'},
+ {title:'播放音乐',text:'点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。',target:'#musicExpanded',music:true},
+ {title:'数据与更新',text:WEB_BUILD?'网页版默认使用内置轨道和云图。可导入轨道文件与云图快照；数据区间外继续椭圆轨道演算。':'桌面版支持内置数据、在线更新和文件导入。轨道区间外继续椭圆轨道演算，数据栏显示当前计算模式。',target:'#importSnapshot'},
+ {title:'保存与分享',text:'设置、导入模型和音乐保存在当前浏览器中。清除网站数据会删除这些内容；使用“场景分享”导出场景文件。桌面版与网页版的本地数据分别保存。',target:'#exportScene'},
 ];
+const TOUR_LENGTH=6;
 export function installHelp(music){
- const panel=$('helpPanel'),welcome=$('welcomeDialog');let step=null,marked=null,restore=[],returnFocus=null;
+ const panel=$('helpPanel'),welcome=$('welcomeDialog'),spotlight=$('helpSpotlight');let step=null,touring=false,marked=null,restore=[],returnFocus=null,frame=0;
  const remember=()=>{try{localStorage.setItem(KEY,'seen');}catch{}};
  const beginMusic=()=>{if(music.settings.autoplay&&music.audio.paused)music.play();};
- const clearTarget=()=>{marked?.classList.remove('tour-highlight');marked=null;for(const fn of restore.reverse())fn();restore=[];};
+ // Layout work is event-driven and coalesced: no animation-loop measurements.
+ const schedule=()=>{if(panel.hidden||step===null||frame)return;frame=requestAnimationFrame(()=>{frame=0;place();});};
+ const observer=new ResizeObserver(schedule);
+ const clearTarget=()=>{
+  observer.disconnect();cancelAnimationFrame(frame);frame=0;marked?.classList.remove('tour-highlight');marked=null;spotlight.toggleAttribute('hidden',true);
+  for(const fn of restore.reverse())fn();restore=[];
+ };
  function target(){
-  clearTarget();const el=document.querySelector(topics[step].target);if(!el)return;
+  clearTarget();const topic=topics[step];
+  if(topic.music){const expanded=music.dock.expanded;music.dock.guided=true;music.dock.expand();restore.push(()=>{music.dock.guided=false;if(!expanded)music.dock.collapse();});}
+  const el=document.querySelector(topic.target);if(!el)return;
   const content=el.closest('.settings-content');if(content?.hidden){content.hidden=false;const button=document.querySelector(`[aria-controls="${content.id}"]`);button?.setAttribute('aria-expanded','true');restore.push(()=>{content.hidden=true;button?.setAttribute('aria-expanded','false');});}
+  for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS'&&!parent.open){const detail=parent;detail.open=true;restore.push(()=>detail.open=false);}
   const aside=el.closest('aside');if(aside){const scroll=aside.scrollTop;restore.push(()=>aside.scrollTop=scroll);el.scrollIntoView({block:'center',behavior:'instant'});}
-  marked=el;el.classList.add('tour-highlight');
+  marked=el;el.classList.add('tour-highlight');observer.observe(el);observer.observe(panel);for(const section of document.querySelectorAll('aside > section'))observer.observe(section);place();
+ }
+ function place(){
+  if(!marked||panel.hidden)return;
+  const w=innerWidth,h=innerHeight,raw=marked.getBoundingClientRect(),aside=marked.closest('aside'),clip=aside?.getBoundingClientRect();
+  let left=Math.max(8,raw.left,clip?.left??0),right=Math.min(w-8,raw.right,clip?.right??w),top=Math.max(8,raw.top,clip?.top??0),bottom=Math.min(h-8,raw.bottom,clip?.bottom??h);
+  if(marked.id==='stage'){const cx=(left+right)/2,cy=(top+bottom)/2,rw=Math.min(240,(right-left)*.6),rh=Math.min(140,(bottom-top)*.5);left=cx-rw/2;right=cx+rw/2;top=cy-rh/2;bottom=cy+rh/2;}
+  if(right<=left||bottom<=top){spotlight.toggleAttribute('hidden',true);return;}
+  const r={left:left-4,right:right+4,top:top-4,bottom:bottom+4},pw=panel.offsetWidth,ph=panel.offsetHeight,gap=28,cx=(left+right)/2,cy=(top+bottom)/2;
+  const candidates=[{x:r.right+gap,y:cy-ph/2},{x:r.left-gap-pw,y:cy-ph/2},{x:cx-pw/2,y:r.top-gap-ph},{x:cx-pw/2,y:r.bottom+gap}];
+  const overlap=p=>Math.max(0,Math.min(p.x+pw,r.right)-Math.max(p.x,r.left))*Math.max(0,Math.min(p.y+ph,r.bottom)-Math.max(p.y,r.top));
+  const positions=candidates.map(p=>({x:clamp(p.x,12,w-pw-12),y:clamp(p.y,80,h-ph-12)}));
+  const position=positions.reduce((best,p)=>overlap(p)<overlap(best)?p:best);
+  panel.style.left=position.x+'px';panel.style.top=position.y+'px';
+  spotlight.toggleAttribute('hidden',false);spotlight.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  $('helpShade').setAttribute('d',`M0 0H${w}V${h}H0Z M${r.left} ${r.top}H${r.right}V${r.bottom}H${r.left}Z`);
+  const ring=$('helpRing');for(const [k,v] of Object.entries({x:r.left,y:r.top,width:r.right-r.left,height:r.bottom-r.top}))ring.setAttribute(k,v);
+  const p={left:position.x,right:position.x+pw,top:position.y,bottom:position.y+ph};let a,b;
+  if(p.left>=r.right){a=[p.left,clamp(cy,p.top+20,p.bottom-20)];b=[r.right+7,cy];}
+  else if(p.right<=r.left){a=[p.right,clamp(cy,p.top+20,p.bottom-20)];b=[r.left-7,cy];}
+  else if(p.bottom<=r.top){a=[clamp(cx,p.left+20,p.right-20),p.bottom];b=[cx,r.top-7];}
+  else{a=[clamp(cx,p.left+20,p.right-20),p.top];b=[cx,r.bottom+7];}
+  $('helpArrow').setAttribute('d',`M${a.join(' ')} L${b.join(' ')}`);
  }
  function render(){
-  const tour=step!==null;panel.classList.toggle('touring',tour);$('helpProgress').textContent=tour?`${step+1} / ${topics.length}`:t('使用指南');$('helpTitle').textContent=t(tour?topics[step].title:'帮助与操作说明');$('tourActions').hidden=!tour;$('replayTour').hidden=tour;
-  $('tourPrevious').disabled=step===0;$('tourNext').textContent=t(step===topics.length-1?'完成导览':'下一步');
+  const selected=step!==null;panel.classList.toggle('guiding',selected);panel.style.left=panel.style.top='';
+  $('helpProgress').textContent=touring?`${step+1} / ${TOUR_LENGTH}`:t('使用指南');$('helpTitle').textContent=t(selected?topics[step].title:'帮助与操作说明');$('tourActions').hidden=!touring;$('replayTour').hidden=selected;$('helpDirectory').hidden=!selected;
+  $('tourPrevious').disabled=step===0;$('tourNext').textContent=t(step===TOUR_LENGTH-1?'完成导览':'下一步');
   const contents=$('helpContents');contents.replaceChildren();
-  if(tour){const p=document.createElement('p');p.textContent=t(topics[step].text);contents.append(p);return;}
-  const extra=[{title:'数据与更新',text:WEB_BUILD?'网页版默认使用内置轨道和云图。可导入轨道文件与云图快照；数据区间外继续椭圆轨道演算。':'桌面版支持内置数据、在线更新和文件导入。轨道区间外继续椭圆轨道演算，数据栏显示当前计算模式。'},
-   {title:'保存与分享',text:'设置、导入模型和音乐保存在当前浏览器中。清除网站数据会删除这些内容；使用“场景分享”导出场景文件。桌面版与网页版的本地数据分别保存。'},
-   {title:'画质与音乐',text:'画面流畅度取决于电脑性能。可先使用流畅或标准画质，再提高细节。点击音符播放音乐，展开播放列表可导入、删除和排序曲目。'}];
-  [...topics,...extra].forEach((topic,i)=>{const details=document.createElement('details'),summary=document.createElement('summary'),p=document.createElement('p');summary.textContent=t(topic.title);p.textContent=t(topic.text);details.append(summary,p);details.open=i===0;contents.append(details);});
+  if(selected){const p=document.createElement('p');p.textContent=t(topics[step].text);contents.append(p);return;}
+  topics.forEach((topic,i)=>{const button=document.createElement('button');button.type='button';button.className='help-topic';button.dataset.topic=String(i);const label=document.createElement('span'),arrow=document.createElement('span');label.textContent=t(topic.title);arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');button.append(label,arrow);button.onclick=()=>select(i,false);contents.append(button);});
  }
- function close(){clearTarget();panel.hidden=true;$('helpToggle').setAttribute('aria-expanded','false');step=null;if(returnFocus?.isConnected)returnFocus.focus();}
- function open(tour=false){returnFocus=document.activeElement;step=tour?0:null;panel.hidden=false;$('helpToggle').setAttribute('aria-expanded','true');render();if(tour)target();panel.focus();}
+ function select(index,tour){step=index;touring=tour;render();target();panel.focus({preventScroll:true});}
+ function close(){clearTarget();panel.hidden=true;document.body.classList.remove('help-active');$('helpToggle').setAttribute('aria-expanded','false');step=null;touring=false;if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});}
+ function open(tour=false){returnFocus=document.activeElement;panel.hidden=false;document.body.classList.add('help-active');$('helpToggle').setAttribute('aria-expanded','true');if(tour)select(0,true);else{step=null;touring=false;render();panel.focus({preventScroll:true});}}
  function dismiss(){remember();welcome.close();beginMusic();}
  $('helpToggle').onclick=()=>panel.hidden?open():close();$('closeHelp').onclick=close;
- $('replayTour').onclick=()=>{step=0;render();target();panel.focus();};
- $('tourPrevious').onclick=()=>{if(step>0){step--;render();target();}};
- $('tourNext').onclick=()=>{if(step===topics.length-1){remember();close();}else{step++;render();target();}};
+ $('helpDirectory').onclick=()=>{clearTarget();step=null;touring=false;render();panel.focus({preventScroll:true});};
+ $('replayTour').onclick=()=>select(0,true);
+ $('tourPrevious').onclick=()=>{if(touring&&step>0)select(step-1,true);};
+ $('tourNext').onclick=()=>{if(!touring)return;if(step===TOUR_LENGTH-1){remember();close();}else select(step+1,true);};
  $('startTour').onclick=()=>{dismiss();open(true);returnFocus=$('helpToggle');};$('skipTour').onclick=()=>{dismiss();$('helpToggle').focus();};
- welcome.addEventListener('cancel',remember);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){e.preventDefault();close();}});
- document.addEventListener('pointerdown',e=>{if(!panel.hidden&&step===null&&!panel.contains(e.target)&&!$('helpToggle').contains(e.target))close();});
- onLanguageChange(()=>{if(!panel.hidden)render();});
+ welcome.addEventListener('cancel',remember);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){e.preventDefault();e.stopImmediatePropagation();close();}},true);
+ window.addEventListener('resize',schedule);document.addEventListener('scroll',schedule,true);document.addEventListener('click',schedule);document.addEventListener('toggle',schedule,true);
+ onLanguageChange(()=>{if(!panel.hidden){render();schedule();}});
  let seen=false;try{seen=localStorage.getItem(KEY)==='seen';}catch{}
  if(!seen)welcome.showModal();
 }

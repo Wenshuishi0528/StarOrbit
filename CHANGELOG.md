@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.41 — 2026-10-26
+
+**中文：** 帮助改为可边看边操作的箭头与高亮引导，选择条目时自动展开、定位对应控件，点击画面保持打开。新增独立画质介绍，推荐“精细 · 8K”并指向画质选择。桌面与窄屏布局、四语说明同步更新。[详情](docs/v0.41-details.md)。
+
+**English:** Help now reveals and highlights real controls with arrows while remaining open during interaction. Added a dedicated quality guide recommending Fine · 8K and pointing to the selector. Updated desktop/mobile placement and all four languages. [Details](docs/v0.41-details.md).
+
 ## v0.40 — 2026-10-26
 
 **中文：** 新增 GitHub Pages 在线版，与桌面版共用源码和版本号，模型、贴图与音乐按需加载。新增四步首次导览与右上角帮助，支持四种语言；网页版默认使用内置轨道和云图，保留文件导入。详见[网页版说明](docs/v0.40-details.md)。

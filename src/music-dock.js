@@ -20,6 +20,7 @@ export class MusicDock{
   this.timer=setTimeout(()=>{if(!this.touch&&!this.inside&&!this.held&&!this.dragging&&!this.locked()&&!(this.keyboard&&this.widget.contains(document.activeElement)))this.collapse();},280);
  }
  collapse(){
+  if(this.guided)return;
   clearTimeout(this.timer);this.expanded=false;this.widget.classList.remove('expanded','music-popup-open');document.getElementById('musicExpanded').hidden=true;document.getElementById('musicOrb').setAttribute('aria-expanded','false');
   for(const [panel,button] of [['musicPanel','musicListToggle'],['musicVolumePanel','musicVolumeToggle']]){document.getElementById(panel).hidden=true;document.getElementById(button).setAttribute('aria-expanded','false');}
  }

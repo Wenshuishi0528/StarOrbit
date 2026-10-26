@@ -1,0 +1,1791 @@
+{
+  "version": "0.41",
+  "npmTest": "passed",
+  "browserChecks": [
+    {
+      "name": "eight compact directory topics",
+      "pass": true
+    },
+    {
+      "name": "clicking scene keeps directory open",
+      "pass": true
+    },
+    {
+      "name": "quality topic opens collapsed sidebar section",
+      "pass": true
+    },
+    {
+      "name": "quality recommends highest setting",
+      "pass": true
+    },
+    {
+      "name": "spotlight visible",
+      "pass": true
+    },
+    {
+      "name": "arrow has target path",
+      "pass": true
+    },
+    {
+      "name": "guidance preserves quality/time/mission",
+      "pass": true
+    },
+    {
+      "name": "scene click keeps selected guide open",
+      "pass": true
+    },
+    {
+      "name": "quality change keeps help open",
+      "pass": true
+    },
+    {
+      "name": "directory restores original collapsed section",
+      "pass": true
+    },
+    {
+      "name": "directory restores sidebar scroll",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 100.6484375,
+          "right": 664,
+          "bottom": 297.1484375
+        },
+        "r": {
+          "left": 31,
+          "top": 177.6484375,
+          "right": 296,
+          "bottom": 220.6484375
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 100.6484375,
+          "right": 664,
+          "bottom": 297.1484375
+        },
+        "r": {
+          "left": 31,
+          "top": 177.6484375,
+          "right": 296,
+          "bottom": 220.6484375
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 428.390625,
+          "right": 664,
+          "bottom": 647.640625
+        },
+        "r": {
+          "left": 31,
+          "top": 515.890625,
+          "right": 296,
+          "bottom": 559.890625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 428.390625,
+          "right": 664,
+          "bottom": 647.640625
+        },
+        "r": {
+          "left": 31,
+          "top": 515.890625,
+          "right": 296,
+          "bottom": 559.890625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 342,
+          "top": 439.5390625,
+          "right": 682,
+          "bottom": 636.0390625
+        },
+        "r": {
+          "left": 13,
+          "top": 480.5390625,
+          "right": 314,
+          "bottom": 595.5390625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 342,
+          "top": 439.5390625,
+          "right": 682,
+          "bottom": 636.0390625
+        },
+        "r": {
+          "left": 13,
+          "top": 480.5390625,
+          "right": 314,
+          "bottom": 595.5390625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 428.5390625,
+          "right": 664,
+          "bottom": 647.7890625
+        },
+        "r": {
+          "left": 140,
+          "top": 513.5390625,
+          "right": 296,
+          "bottom": 562.5390625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 428.5390625,
+          "right": 664,
+          "bottom": 647.7890625
+        },
+        "r": {
+          "left": 140,
+          "top": 513.5390625,
+          "right": 296,
+          "bottom": 562.5390625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 729,
+          "top": 791,
+          "right": 1069,
+          "bottom": 987.5
+        },
+        "r": {
+          "left": 355,
+          "top": 929,
+          "right": 701,
+          "bottom": 981
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 729,
+          "top": 791,
+          "right": 1069,
+          "bottom": 987.5
+        },
+        "r": {
+          "left": 355,
+          "top": 929,
+          "right": 701,
+          "bottom": 981
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 1440/Zh",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 354,
+          "top": 434.1796875,
+          "right": 694,
+          "bottom": 630.6796875
+        },
+        "r": {
+          "left": 13,
+          "top": 514.4296875,
+          "right": 326,
+          "bottom": 550.9296875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 354,
+          "top": 434.1796875,
+          "right": 694,
+          "bottom": 630.6796875
+        },
+        "r": {
+          "left": 13,
+          "top": 514.4296875,
+          "right": 326,
+          "bottom": 550.9296875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 192,
+          "top": 769,
+          "right": 532,
+          "bottom": 988.25
+        },
+        "r": {
+          "left": 31,
+          "top": 920.671875,
+          "right": 164,
+          "bottom": 965.171875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 192,
+          "top": 769,
+          "right": 532,
+          "bottom": 988.25
+        },
+        "r": {
+          "left": 31,
+          "top": 920.671875,
+          "right": 164,
+          "bottom": 965.171875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 91.6484375,
+          "right": 664,
+          "bottom": 306.3984375
+        },
+        "r": {
+          "left": 31,
+          "top": 177.6484375,
+          "right": 296,
+          "bottom": 220.6484375
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 91.6484375,
+          "right": 664,
+          "bottom": 306.3984375
+        },
+        "r": {
+          "left": 31,
+          "top": 177.6484375,
+          "right": 296,
+          "bottom": 220.6484375
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 418.890625,
+          "right": 664,
+          "bottom": 656.390625
+        },
+        "r": {
+          "left": 31,
+          "top": 515.890625,
+          "right": 296,
+          "bottom": 559.890625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 418.890625,
+          "right": 664,
+          "bottom": 656.390625
+        },
+        "r": {
+          "left": 31,
+          "top": 515.890625,
+          "right": 296,
+          "bottom": 559.890625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 342,
+          "top": 430.6875,
+          "right": 682,
+          "bottom": 645.4375
+        },
+        "r": {
+          "left": 13,
+          "top": 483.1875,
+          "right": 314,
+          "bottom": 593.1875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 342,
+          "top": 430.6875,
+          "right": 682,
+          "bottom": 645.4375
+        },
+        "r": {
+          "left": 13,
+          "top": 483.1875,
+          "right": 314,
+          "bottom": 593.1875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 408.1875,
+          "right": 664,
+          "bottom": 668.4375
+        },
+        "r": {
+          "left": 134,
+          "top": 513.6875,
+          "right": 296,
+          "bottom": 562.6875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 324,
+          "top": 408.1875,
+          "right": 664,
+          "bottom": 668.4375
+        },
+        "r": {
+          "left": 134,
+          "top": 513.6875,
+          "right": 296,
+          "bottom": 562.6875
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 729,
+          "top": 773,
+          "right": 1069,
+          "bottom": 987.75
+        },
+        "r": {
+          "left": 355,
+          "top": 929,
+          "right": 701,
+          "bottom": 981
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 729,
+          "top": 773,
+          "right": 1069,
+          "bottom": 987.75
+        },
+        "r": {
+          "left": 355,
+          "top": 929,
+          "right": 701,
+          "bottom": 981
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 1440/Ru",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 354,
+          "top": 402.4765625,
+          "right": 694,
+          "bottom": 662.7265625
+        },
+        "r": {
+          "left": 13,
+          "top": 514.2265625,
+          "right": 326,
+          "bottom": 550.7265625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 354,
+          "top": 402.4765625,
+          "right": 694,
+          "bottom": 662.7265625
+        },
+        "r": {
+          "left": 13,
+          "top": 514.2265625,
+          "right": 326,
+          "bottom": 550.7265625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 1440/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 192,
+          "top": 705,
+          "right": 532,
+          "bottom": 988
+        },
+        "r": {
+          "left": 31,
+          "top": 923.0625,
+          "right": 164,
+          "bottom": 965.0625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 1440/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 192,
+          "top": 705,
+          "right": 532,
+          "bottom": 988
+        },
+        "r": {
+          "left": 31,
+          "top": 923.0625,
+          "right": 164,
+          "bottom": 965.0625
+        },
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 359.171875,
+          "right": 339.5,
+          "bottom": 539.265625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 366,
+          "bottom": 610.171875
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 359.171875,
+          "right": 339.5,
+          "bottom": 539.265625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 366,
+          "bottom": 610.171875
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 416.765625,
+          "right": 339.5,
+          "bottom": 616.65625
+        },
+        "r": {
+          "left": 13,
+          "top": 644.765625,
+          "right": 366,
+          "bottom": 688.765625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 416.765625,
+          "right": 339.5,
+          "bottom": 616.65625
+        },
+        "r": {
+          "left": 13,
+          "top": 644.765625,
+          "right": 366,
+          "bottom": 688.765625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 43,
+          "top": 402.4140625,
+          "right": 343,
+          "bottom": 582.5078125
+        },
+        "r": {
+          "left": 4,
+          "top": 610.4140625,
+          "right": 382,
+          "bottom": 723.4140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 43,
+          "top": 402.4140625,
+          "right": 343,
+          "bottom": 582.5078125
+        },
+        "r": {
+          "left": 4,
+          "top": 610.4140625,
+          "right": 382,
+          "bottom": 723.4140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 78,
+          "top": 414.4140625,
+          "right": 378,
+          "bottom": 614.3046875
+        },
+        "r": {
+          "left": 210,
+          "top": 642.4140625,
+          "right": 366,
+          "bottom": 691.4140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 78,
+          "top": 414.4140625,
+          "right": 378,
+          "bottom": 614.3046875
+        },
+        "r": {
+          "left": 210,
+          "top": 642.4140625,
+          "right": 366,
+          "bottom": 691.4140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 32,
+          "top": 218.5234375,
+          "right": 332,
+          "bottom": 398.6171875
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 355,
+          "bottom": 478.5234375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 32,
+          "top": 218.5234375,
+          "right": 332,
+          "bottom": 398.6171875
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 355,
+          "bottom": 478.5234375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 390/Zh",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 390/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 33.25,
+          "top": 440.65625,
+          "right": 333.25,
+          "bottom": 620.75
+        },
+        "r": {
+          "left": 13,
+          "top": 648.65625,
+          "right": 353.5,
+          "bottom": 685.15625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 33.25,
+          "top": 440.65625,
+          "right": 333.25,
+          "bottom": 620.75
+        },
+        "r": {
+          "left": 13,
+          "top": 648.65625,
+          "right": 353.5,
+          "bottom": 685.15625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 558.3984375,
+          "right": 312,
+          "bottom": 758.2890625
+        },
+        "r": {
+          "left": 13,
+          "top": 786.3984375,
+          "right": 190,
+          "bottom": 830.8984375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 558.3984375,
+          "right": 312,
+          "bottom": 758.2890625
+        },
+        "r": {
+          "left": 13,
+          "top": 786.3984375,
+          "right": 190,
+          "bottom": 830.8984375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 344.171875,
+          "right": 339.5,
+          "bottom": 539.5625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 366,
+          "bottom": 610.171875
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 344.171875,
+          "right": 339.5,
+          "bottom": 539.5625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 366,
+          "bottom": 610.171875
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 381.9140625,
+          "right": 339.5,
+          "bottom": 616.8984375
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 366,
+          "bottom": 688.9140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 39.5,
+          "top": 381.9140625,
+          "right": 339.5,
+          "bottom": 616.8984375
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 366,
+          "bottom": 688.9140625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 43,
+          "top": 389.5625,
+          "right": 343,
+          "bottom": 584.953125
+        },
+        "r": {
+          "left": 4,
+          "top": 612.5625,
+          "right": 382,
+          "bottom": 720.5625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 43,
+          "top": 389.5625,
+          "right": 343,
+          "bottom": 584.953125
+        },
+        "r": {
+          "left": 4,
+          "top": 612.5625,
+          "right": 382,
+          "bottom": 720.5625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 78,
+          "top": 379.0625,
+          "right": 378,
+          "bottom": 614.046875
+        },
+        "r": {
+          "left": 204,
+          "top": 642.0625,
+          "right": 366,
+          "bottom": 691.0625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 78,
+          "top": 379.0625,
+          "right": 378,
+          "bottom": 614.046875
+        },
+        "r": {
+          "left": 204,
+          "top": 642.0625,
+          "right": 366,
+          "bottom": 691.0625
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 32,
+          "top": 183.5234375,
+          "right": 332,
+          "bottom": 398.7109375
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 355,
+          "bottom": 478.5234375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 32,
+          "top": 183.5234375,
+          "right": 332,
+          "bottom": 398.7109375
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 355,
+          "bottom": 478.5234375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 390/Ru",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 390/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 33.25,
+          "top": 385.453125,
+          "right": 333.25,
+          "bottom": 620.4375
+        },
+        "r": {
+          "left": 13,
+          "top": 648.453125,
+          "right": 353.5,
+          "bottom": 684.953125
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 33.25,
+          "top": 385.453125,
+          "right": 333.25,
+          "bottom": 620.4375
+        },
+        "r": {
+          "left": 13,
+          "top": 648.453125,
+          "right": 353.5,
+          "bottom": 684.953125
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 390/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 505.84375,
+          "right": 312,
+          "bottom": 760.625
+        },
+        "r": {
+          "left": 13,
+          "top": 788.84375,
+          "right": 190,
+          "bottom": 830.84375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 390/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 505.84375,
+          "right": 312,
+          "bottom": 760.625
+        },
+        "r": {
+          "left": 13,
+          "top": 788.84375,
+          "right": 190,
+          "bottom": 830.84375
+        },
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 359.171875,
+          "right": 308,
+          "bottom": 539.265625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 296,
+          "bottom": 610.171875
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 359.171875,
+          "right": 308,
+          "bottom": 539.265625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 296,
+          "bottom": 610.171875
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 416.9140625,
+          "right": 308,
+          "bottom": 616.8046875
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 296,
+          "bottom": 688.9140625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 416.9140625,
+          "right": 308,
+          "bottom": 616.8046875
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 296,
+          "bottom": 688.9140625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 402.0625,
+          "right": 308,
+          "bottom": 582.15625
+        },
+        "r": {
+          "left": 4,
+          "top": 610.0625,
+          "right": 312,
+          "bottom": 723.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 402.0625,
+          "right": 308,
+          "bottom": 582.15625
+        },
+        "r": {
+          "left": 4,
+          "top": 610.0625,
+          "right": 312,
+          "bottom": 723.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 414.0625,
+          "right": 308,
+          "bottom": 613.953125
+        },
+        "r": {
+          "left": 140,
+          "top": 642.0625,
+          "right": 296,
+          "bottom": 691.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 414.0625,
+          "right": 308,
+          "bottom": 613.953125
+        },
+        "r": {
+          "left": 140,
+          "top": 642.0625,
+          "right": 296,
+          "bottom": 691.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 218.5234375,
+          "right": 308,
+          "bottom": 398.6171875
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 311,
+          "bottom": 478.5234375
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 218.5234375,
+          "right": 308,
+          "bottom": 398.6171875
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 311,
+          "bottom": 478.5234375
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 320/Zh",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 320/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 434.953125,
+          "right": 308,
+          "bottom": 615.046875
+        },
+        "r": {
+          "left": 4,
+          "top": 642.953125,
+          "right": 316,
+          "bottom": 679.453125
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 434.953125,
+          "right": 308,
+          "bottom": 615.046875
+        },
+        "r": {
+          "left": 4,
+          "top": 642.953125,
+          "right": 316,
+          "bottom": 679.453125
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 538.6953125,
+          "right": 308,
+          "bottom": 758.3828125
+        },
+        "r": {
+          "left": 13,
+          "top": 786.6953125,
+          "right": 155,
+          "bottom": 831.1953125
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Zh/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 538.6953125,
+          "right": 308,
+          "bottom": 758.3828125
+        },
+        "r": {
+          "left": 13,
+          "top": 786.6953125,
+          "right": 155,
+          "bottom": 831.1953125
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 344.171875,
+          "right": 308,
+          "bottom": 539.5625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 296,
+          "bottom": 610.171875
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/1",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 344.171875,
+          "right": 308,
+          "bottom": 539.5625
+        },
+        "r": {
+          "left": 13,
+          "top": 567.171875,
+          "right": 296,
+          "bottom": 610.171875
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 381.9140625,
+          "right": 308,
+          "bottom": 616.8984375
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 296,
+          "bottom": 688.9140625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/2",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 381.9140625,
+          "right": 308,
+          "bottom": 616.8984375
+        },
+        "r": {
+          "left": 13,
+          "top": 644.9140625,
+          "right": 296,
+          "bottom": 688.9140625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 389.5625,
+          "right": 308,
+          "bottom": 584.953125
+        },
+        "r": {
+          "left": 4,
+          "top": 612.5625,
+          "right": 312,
+          "bottom": 720.5625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/3",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 389.5625,
+          "right": 308,
+          "bottom": 584.953125
+        },
+        "r": {
+          "left": 4,
+          "top": 612.5625,
+          "right": 312,
+          "bottom": 720.5625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 379.0625,
+          "right": 308,
+          "bottom": 614.046875
+        },
+        "r": {
+          "left": 134,
+          "top": 642.0625,
+          "right": 296,
+          "bottom": 691.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/4",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 379.0625,
+          "right": 308,
+          "bottom": 614.046875
+        },
+        "r": {
+          "left": 134,
+          "top": 642.0625,
+          "right": 296,
+          "bottom": 691.0625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 183.5234375,
+          "right": 308,
+          "bottom": 398.7109375
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 311,
+          "bottom": 478.5234375
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/5",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 183.5234375,
+          "right": 308,
+          "bottom": 398.7109375
+        },
+        "r": {
+          "left": 9,
+          "top": 426.5234375,
+          "right": 311,
+          "bottom": 478.5234375
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "music stays expanded for guidance 320/Ru",
+      "pass": true
+    },
+    {
+      "name": "card stays onscreen 320/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 380.1015625,
+          "right": 308,
+          "bottom": 615.0859375
+        },
+        "r": {
+          "left": 4,
+          "top": 643.1015625,
+          "right": 316,
+          "bottom": 679.6015625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/6",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 380.1015625,
+          "right": 308,
+          "bottom": 615.0859375
+        },
+        "r": {
+          "left": 4,
+          "top": 643.1015625,
+          "right": 316,
+          "bottom": 679.6015625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card stays onscreen 320/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 505.7890625,
+          "right": 308,
+          "bottom": 760.5703125
+        },
+        "r": {
+          "left": 13,
+          "top": 788.7890625,
+          "right": 155,
+          "bottom": 830.7890625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "card does not cover highlighted target 320/Ru/7",
+      "pass": true,
+      "details": {
+        "p": {
+          "left": 12,
+          "top": 505.7890625,
+          "right": 308,
+          "bottom": 760.5703125
+        },
+        "r": {
+          "left": 13,
+          "top": 788.7890625,
+          "right": 155,
+          "bottom": 830.7890625
+        },
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "tour step 0",
+      "pass": true
+    },
+    {
+      "name": "tour step 1",
+      "pass": true
+    },
+    {
+      "name": "tour step 2",
+      "pass": true
+    },
+    {
+      "name": "tour step 3",
+      "pass": true
+    },
+    {
+      "name": "tour step 4",
+      "pass": true
+    },
+    {
+      "name": "tour step 5",
+      "pass": true
+    },
+    {
+      "name": "finishing clears panel and highlight",
+      "pass": true
+    },
+    {
+      "name": "finishing releases music lock",
+      "pass": true
+    },
+    {
+      "name": "escape explicitly closes and cleans up",
+      "pass": true
+    }
+  ],
+  "subagentReview": "passed; layout shifts, eight Russian mobile topics, music lock and Escape cleanup independently verified"
+}

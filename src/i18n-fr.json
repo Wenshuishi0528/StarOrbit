@@ -553,7 +553,7 @@
   "正在准备音乐…": "Préparation de la musique…",
   "上一首": "Piste précédente",
   "下一首": "Piste suivante",
-  "播放音乐": "Lire la musique",
+  "播放音乐": "Écouter de la musique",
   "暂停音乐": "Mettre la musique en pause",
   "音乐播放进度": "Progression musicale",
   "音乐列表为空": "La liste de lecture est vide",
@@ -683,5 +683,14 @@
   "画质与音乐": "Qualité et musique",
   "画面流畅度取决于电脑性能。可先使用流畅或标准画质，再提高细节。点击音符播放音乐，展开播放列表可导入、删除和排序曲目。": "La fluidité dépend de votre ordinateur. Commencez avec la qualité Fluide ou Standard, puis augmentez les détails. Cliquez sur la note pour écouter ; ouvrez la liste pour importer, supprimer et réordonner les morceaux.",
   "模型资源加载失败": "Impossible de charger le modèle",
-  "轨道资源加载失败": "Impossible de charger les données orbitales"
+  "轨道资源加载失败": "Impossible de charger les données orbitales",
+  "在浏览器中探索航天器、地球与星空。用简短导览熟悉操作，也可以直接开始。": "Explorez les véhicules spatiaux, la Terre et les étoiles dans votre navigateur. Suivez une courte visite ou commencez directement.",
+  "左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。": "Glissez avec le bouton gauche pour tourner, le droit pour déplacer, et utilisez la molette pour zoomer. Essayez : le guide reste ouvert.",
+  "在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。": "Choisissez ici la Station spatiale chinoise ou Dong Fang Hong 1. Le modèle et l’orbite changent ensemble.",
+  "选择 1s／1m／10m／1h，再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。": "Choisissez 1 s / 1 min / 10 min / 1 h, puis avancez ou reculez. La pause et la vitesse sont dans le même panneau. Glissez sur la mini-carte ou la chronologie pour choisir un instant.",
+  "展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。": "Ouvrez les repères géographiques ou les annotations célestes pour choisir pays, lieux, étoiles et constellations.",
+  "选择画质": "Choisir la qualité graphique",
+  "推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。": "Nous recommandons la qualité maximale « Fine · 8K » pour une Terre et un éclairage plus détaillés. Si les commandes ralentissent, passez à « Standard · 4K ». Choisissez dans la liste indiquée par la flèche.",
+  "点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。": "Cliquez sur Lecture pour écouter. Ouvrez la liste pour choisir, importer, supprimer et réordonner les morceaux.",
+  "‹ 帮助目录": "‹ Rubriques d’aide"
 }

@@ -683,5 +683,14 @@
   "画质与音乐": "Quality and music",
   "画面流畅度取决于电脑性能。可先使用流畅或标准画质，再提高细节。点击音符播放音乐，展开播放列表可导入、删除和排序曲目。": "Rendering performance depends on your computer. Start with Smooth or Standard quality, then increase detail. Click the note to play music; open the playlist to import, remove and reorder tracks.",
   "模型资源加载失败": "Could not load the model asset",
-  "轨道资源加载失败": "Could not load the orbit data"
+  "轨道资源加载失败": "Could not load the orbit data",
+  "在浏览器中探索航天器、地球与星空。用简短导览熟悉操作，也可以直接开始。": "Explore spacecraft, Earth and the stars in your browser. Take a short tour or start exploring right away.",
+  "左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。": "Left-drag to rotate, right-drag to pan, and scroll to zoom. Try it now; this guide stays open.",
+  "在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。": "Choose China Space Station or Dong Fang Hong 1 here. The model and orbit switch together.",
+  "选择 1s／1m／10m／1h，再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。": "Choose 1s / 1m / 10m / 1h, then step forward or backward. Pause and speed are in the same panel. Drag the minimap or timeline to choose a time.",
+  "展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。": "Open Geography labels or Sky annotations to choose countries, places, stars and constellations.",
+  "选择画质": "Choose graphics quality",
+  "推荐选择最高画质“精细 · 8K”，查看更清晰的地球与光影。如果操作不够流畅，可切回“标准 · 4K”。在箭头指向的下拉框中选择即可。": "We recommend the highest quality, Fine · 8K, for sharper Earth detail and lighting. If controls feel slow, switch to Standard · 4K. Choose from the dropdown indicated by the arrow.",
+  "点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。": "Click Play to start music. Open the playlist to choose, import, remove and reorder tracks.",
+  "‹ 帮助目录": "‹ Help topics"
 }
