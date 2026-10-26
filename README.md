@@ -1,6 +1,8 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
 **v0.42 · 作者 / Author: wenshuishi0528**
+
+**[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/Tiangong-Orbit-Simulator-China-Space-Station/)**
 
 浏览器直接使用，默认内置轨道与云图。首次访问可选择简短导览，右上角“？帮助”通过箭头和高亮定位真实控件，可边看边操作，每个介绍可直接点击“下一个”。画质介绍包含整体画质与星空画质两个入口；首次使用默认为标准 4K 和“4K · 星表观赏”。[v0.42 引导说明](docs/v0.42-details.md)。[网页版与部署说明](docs/v0.40-details.md)。
@@ -119,7 +121,7 @@ npm run build
 - Orbit source: [China Manned Space Engineering Office / BACC](https://en.cmse.gov.cn/news/202107/t20210722_48418.html).
 - Three.js, Astronomy Engine, satellite.js, and three-mesh-bvh: **MIT**; notices are embedded in the standalone HTML.
 
-Full asset notes: **[素材与迁移说明.md](素材与迁移说明.md)**. Third-party materials retain their respective licenses. Original project code and model are currently unlicensed for redistribution.
+Full asset notes: **[素材与迁移说明.md](素材与迁移说明.md)**. Third-party materials retain their respective licenses. Original project content is licensed under **CC BY-NC 4.0**; commercial use requires separate written permission from the author. See [licensing scope](LICENSING.md) and the [full license](LICENSE).
 
 
 ### Earth & weather update / 地球与天气增强

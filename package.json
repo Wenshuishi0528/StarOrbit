@@ -4,7 +4,7 @@
   "private": true,
   "description": "Modular spacecraft orbit simulator with shared Earth resources, model packages, independent orbits and attitude controls.",
   "author": "wenshuishi0528",
-  "license": "UNLICENSED",
+  "license": "CC-BY-NC-4.0",
   "dependencies": {
     "astronomy-engine": "2.1.19",
     "esbuild": "0.25.11",
