@@ -79,7 +79,7 @@ export class Simulation{
  seek(t){if(!validTime(t))return;this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();this.missions?.syncUI();}
  manual(){this.auto=false;this.lastSolveTime=null;$('autoTrack').checked=false;this.controlUI();}
  controlUI(){if(!this.capabilities.solarArrays)return;$('trackingStatus').textContent=this.auto?t('全舱自动追日 · 计算姿态'):t('手动控制 · 角度保持');$('linkLabs').disabled=this.auto||!(this.api.labs().length>1&&['WT','MT'].includes(this.api.types[this.api.state.target]));$('rotationControls').classList.toggle('auto-controls',this.auto);}
- rebuild(){if(this.capabilities.solarArrays)this.tracker.rebuild();this.dirty=true;this.snap=true;const b=new THREE.Box3(),active=Object.entries(this.missions?.activeGroups()||this.api.groups).filter(([,g])=>g?.visible);active.forEach(([,g])=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());this.shadowDistance=fitSpacecraftShadow(this.api.sunLight,b);this.shadowCache.reset(active.flatMap(([id,g])=>{const r=this.api.rig[id];return [g,...(this.capabilities.solarArrays&&r?[r.roll,r.left,r.right]:[])];}));this.localSunArrow.position.copy(this.center);this.controlUI();}
+ rebuild({poseOnly=false}={}){if(this.capabilities.solarArrays){if(poseOnly)this.tracker.refreshPose();else this.tracker.rebuild();}if(poseOnly)this.poseDirty=true;else this.dirty=true;this.snap=true;const b=new THREE.Box3(),active=Object.entries(this.missions?.activeGroups()||this.api.groups).filter(([,g])=>g?.visible);active.forEach(([,g])=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());this.shadowDistance=fitSpacecraftShadow(this.api.sunLight,b);this.shadowCache.reset(active.flatMap(([id,g])=>{const r=this.api.rig[id];return [g,...(this.capabilities.solarArrays&&r?[r.roll,r.left,r.right]:[])];}));this.localSunArrow.position.copy(this.center);this.controlUI();}
  setView(view){if(view==='orbit'&&this.orbitStatus!=='ready')view='follow';if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.spaceCamera.near=10;this.spaceCamera.far=1000000;this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
  overviewPosition(){const q=this.current;if(q){const r=V(q.position).normalize(),side=r.clone().cross(V(q.sunDir)).normalize();this.spaceCamera.position.copy(r.addScaledVector(side,.6).normalize().multiplyScalar(28000));}else this.spaceCamera.position.set(14000,-17000,10000);}
  fit(){if(this.view!=='orbit')return false;this.overviewPosition();this.orbitControls.target.set(0,0,0);this.orbitControls.update();return true;}
@@ -99,14 +99,14 @@ export class Simulation{
   }
   this.api.modelRoot.visible=true;this.earth.quaternion.setFromRotationMatrix(basis(q.earthAxes));this.earth.material.uniforms.sun.value.copy(V(q.sun).normalize());this.marker.position.copy(V(q.position));
   const localSun=V(q.sunLocal);this.api.sunLight.position.copy(this.center).addScaledVector(localSun,this.shadowDistance);this.localSunArrow.setDirection(localSun);
-  const dirty=this.dirty,scrubbing=this.minimap.dragging||this.timeline.dragging,solve=this.capabilities.solarArrays&&!scrubbing&&(dirty||wall-this.lastSolve>700&&q.t!==this.lastSolveTime);
+  const dirty=this.dirty,poseDirty=this.poseDirty,scrubbing=this.minimap.dragging||this.timeline.dragging,solve=this.capabilities.solarArrays&&!scrubbing&&(dirty||poseDirty||wall-this.lastSolve>700&&q.t!==this.lastSolveTime);
   // Continue pointing through eclipse; illumination only scales lighting and received flux.
   if(this.auto&&solve){this.tracker.solve(q.sunLocal,$('occlusion').checked);this.lastSolve=wall;}
   if(this.capabilities.solarArrays&&this.auto&&!scrubbing)this.tracker.advance((this.time-old)/1000,this.snap,q.sunLocal);
   if(solve){this.tracker.measure(q.sunLocal,q.illumination,$('occlusion').checked);this.api.syncControls();this.controlUI();this.lastSolve=wall;this.lastSolveTime=q.t;}
   if(!scrubbing&&(dirty||Math.abs(q.t-this.lastOrbit)>60000)){this.updateOrbit(q);this.lastOrbit=q.t;}
-  if(dirty||wall-this.lastRead>250){this.readout(q);this.lastRead=wall;}
-  this.dirty=false;this.snap=false;
+  if(dirty||poseDirty||wall-this.lastRead>250){this.readout(q);this.lastRead=wall;}
+  this.dirty=false;this.poseDirty=false;this.snap=false;
  }
  readout(q){this.gpUI();
   $('simClock').textContent=clockText(q.t);$('clockMode').textContent=`UTC+8 · ${this.mode==='real'?t('现实时间 1×'):this.paused?t('自定义 · 已暂停'):t('自定义 {speed}×',{speed:this.speed})}`;

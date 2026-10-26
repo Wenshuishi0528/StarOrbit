@@ -700,5 +700,9 @@
   "完成介绍": "Finish",
   "星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。": "The sky defaults to “4K · Star catalog view”. For a more detailed Milky Way, choose “Enhanced · 16K Milky Way”. Use the sky display selector indicated by the arrow.",
   "隐藏航天器名称": "Hide spacecraft labels",
-  "取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。": "Uncheck “Spacecraft labels” to hide names beside the model for a cleaner view. Check it again whenever you want to see the names."
+  "取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。": "Uncheck “Spacecraft labels” to hide names beside the model for a cleaner view. Check it again whenever you want to see the names.",
+  "三轴姿态偏移 · 相对当前姿态参考": "Three-axis offset · relative to the attitude reference",
+  "X · 滚转": "X · Roll",
+  "Y · 俯仰": "Y · Pitch",
+  "Z · 偏航": "Z · Yaw"
 }

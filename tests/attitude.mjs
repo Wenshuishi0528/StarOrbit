@@ -39,3 +39,23 @@ assert.ok(maxNewYaw<.001);
 assert.ok(northbound>0&&southbound>0);
 assert.equal(groundTrackAttitude(null),null);
 console.log({samples,northbound,southbound,maxOldYawDegrees:maxOldYaw,maxNewYawDegrees:maxNewYaw,orbitAndSun:'unchanged'});
+
+// Rigid attitude changes must refresh cached solar occluders without resampling geometry.
+const THREE=await import('three');
+const {SolarTracker}=await import('../src/solar.js');
+const {applyBodyPose}=await import('../src/spacecraft-model.js');
+const body=new THREE.Group(),fixed=new THREE.Mesh(new THREE.BoxGeometry(2,4,6)),wing=new THREE.Mesh(new THREE.BoxGeometry(3,1,.2));
+fixed.position.set(4,2,0);wing.position.set(-3,1,2);body.add(fixed,wing);
+const tracker=new SolarTracker({model:body}),records=[fixed,wing].map(mesh=>{mesh.geometry.computeBoundingBox();return {mesh,box:new THREE.Box3()};});
+tracker.occluders.test={fixed:new THREE.Box3(),box:new THREE.Box3(),records,moving:[records[1]]};
+const originalGeometry=fixed.geometry;
+for(const pose of [{roll:90,pitch:0,yaw:0},{roll:0,pitch:90,yaw:0},{roll:0,pitch:0,yaw:90},{roll:27.5,pitch:-41,yaw:130}]){
+ applyBodyPose(body,pose);tracker.refreshPose();
+ for(const record of records)assert.ok(record.box.equals(new THREE.Box3().setFromObject(record.mesh)),'cached bounds follow the rigid attitude');
+ assert.ok(tracker.occluders.test.fixed.equals(new THREE.Box3().setFromObject(fixed)));
+ assert.ok(tracker.occluders.test.box.equals(new THREE.Box3().setFromObject(body)));
+ assert.equal(fixed.geometry,originalGeometry,'rotation reuses geometry');
+ wing.rotation.y+=.2;body.updateMatrixWorld(true);tracker.updateBounds('test');
+ assert.ok(tracker.occluders.test.box.equals(new THREE.Box3().setFromObject(body)),'solar articulation remains correct after body rotation');
+}
+console.log('Manual three-axis attitude: cached solar bounds follow body rotation and wing articulation');

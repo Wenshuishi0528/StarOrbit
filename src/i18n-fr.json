@@ -700,5 +700,9 @@
   "完成介绍": "Terminer",
   "星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。": "Le ciel utilise par défaut «4K · Vue du catalogue stellaire». Pour une Voie lactée plus détaillée, choisissez «Renforcé · Voie lactée 16K». La flèche indique le sélecteur d’affichage du ciel.",
   "隐藏航天器名称": "Masquer les noms des vaisseaux",
-  "取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。": "Décochez «Noms des vaisseaux» pour masquer les noms à côté du modèle et dégager la vue. Cochez à nouveau cette option pour les réafficher."
+  "取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。": "Décochez «Noms des vaisseaux» pour masquer les noms à côté du modèle et dégager la vue. Cochez à nouveau cette option pour les réafficher.",
+  "三轴姿态偏移 · 相对当前姿态参考": "Décalage sur trois axes · relatif à la référence",
+  "X · 滚转": "X · Roulis",
+  "Y · 俯仰": "Y · Tangage",
+  "Z · 偏航": "Z · Lacet"
 }

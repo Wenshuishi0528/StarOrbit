@@ -1,0 +1,591 @@
+{
+  "version": "0.43",
+  "browserChecks": [
+    {
+      "name": "station exposes three-axis controls",
+      "pass": true
+    },
+    {
+      "name": "station keeps its ground-track reference",
+      "pass": true
+    },
+    {
+      "name": "number synchronizes slider roll",
+      "pass": true
+    },
+    {
+      "name": "number synchronizes slider pitch",
+      "pass": true
+    },
+    {
+      "name": "number synchronizes slider yaw",
+      "pass": true
+    },
+    {
+      "name": "slider keyboard edit synchronizes number",
+      "pass": true
+    },
+    {
+      "name": "empty edit restores prior angle",
+      "pass": true
+    },
+    {
+      "name": "angle clamps to 180",
+      "pass": true
+    },
+    {
+      "name": "decimal input normalizes to slider precision",
+      "pass": true
+    },
+    {
+      "name": "attitude preserves orbital position, time and solar tracking",
+      "pass": true
+    },
+    {
+      "name": "editing reuses solar geometry and orbit line",
+      "pass": true,
+      "details": {
+        "time": 1793025304067,
+        "position": [
+          -666.2583460179042,
+          6184.100133393746,
+          -2670.0080912777553
+        ],
+        "auto": true,
+        "rebuild": 0,
+        "orbit": 0
+      }
+    },
+    {
+      "name": "solar occlusion caches follow rotated station",
+      "pass": true
+    },
+    {
+      "name": "satellite keeps attitude reference selector",
+      "pass": true
+    },
+    {
+      "name": "satellite number and slider synchronize",
+      "pass": true
+    },
+    {
+      "name": "switching missions restores station pose",
+      "pass": true
+    },
+    {
+      "name": "pose survives reload",
+      "pass": true
+    },
+    {
+      "name": "restored slider matches saved pose",
+      "pass": true
+    },
+    {
+      "name": "scene captures body attitude",
+      "pass": true
+    },
+    {
+      "name": "control fits 390/Zh/craftroll",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 814.7890625,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Zh/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 878.7890625,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Zh/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 942.7890625,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Zh/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 850.7890625,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Zh/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 914.7890625,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Zh/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 978.7890625,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/En/craftroll",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 806.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/En/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 870.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/En/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 934.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/En/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 842.0859375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/En/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 906.0859375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/En/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 970.0859375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftroll",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 815.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 879.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 943.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 851.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 915.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Ru/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 979.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftroll",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 815.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 879.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 271.765625,
+        "y": 943.234375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 851.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 915.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 390/Fr/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 979.234375,
+        "width": 345,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftroll",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 805.5859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 869.5859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 933.5859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 841.5859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 905.5859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Zh/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 969.5859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/En/craftroll",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 797.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/En/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 861.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/En/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 925.0859375,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/En/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 833.0859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/En/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 897.0859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/En/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 961.0859375,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftroll",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 652.6796875,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 716.6796875,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 780.6796875,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 688.6796875,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 752.6796875,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Ru/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 816.6796875,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftroll",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 653.03125,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftpitch",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 717.03125,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftyaw",
+      "pass": true,
+      "details": {
+        "x": 201.765625,
+        "y": 781.03125,
+        "width": 78,
+        "height": 28
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftrollRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 689.03125,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftpitchRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 753.03125,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "control fits 320/Fr/craftyawRange",
+      "pass": true,
+      "details": {
+        "x": 17,
+        "y": 817.03125,
+        "width": 275,
+        "height": 16
+      }
+    },
+    {
+      "name": "reset restores original attitude",
+      "pass": true
+    }
+  ],
+  "sceneRoundTrip": {
+    "pose": {
+      "roll": 12.3,
+      "pitch": -34.5,
+      "yaw": 67.8
+    },
+    "inputs": [
+      "12.3",
+      "-34.5",
+      "67.8"
+    ],
+    "quaternion": [
+      0.24936375480174167,
+      -0.18765205862581416,
+      0.5559608449523855,
+      0.7703972751538651
+    ],
+    "paused": true
+  }
+}

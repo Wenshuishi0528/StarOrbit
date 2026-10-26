@@ -23,7 +23,16 @@ export class MissionController{
   this.sim=sim;this.api=sim.api;this.models=new Map();this.states={};this.busy=false;
   try{const saved=JSON.parse(localStorage.getItem(MISSION_MEMORY_KEY));if(saved){this.savedId=Object.hasOwn(MISSIONS,saved.active)?saved.active:DEFAULT_MISSION;for(const id of Object.keys(MISSIONS))if(saved.states?.[id]){const v=saved.states[id];this.states[id]={...v,pose:validatePose(v.pose),rotation:validateRotation(v.rotation,sim.time,{enabled:!!mission(id).spinRpm})};}}}catch{this.states={};}
   $('missionSelect').onchange=()=>this.switchTo($('missionSelect').value).catch(e=>{this.syncUI();this.api.toast('切换失败：{error}',{error:t(e.message)});});
-  for(const key of ['roll','pitch','yaw'])$('craft'+key).oninput=()=>{const state=this.state;state.pose[key]=Math.max(-180,Math.min(180,Number($('craft'+key).value)||0));this.applyPose();this.save();};
+  for(const key of ['roll','pitch','yaw']){
+   const number=$('craft'+key),range=$('craft'+key+'Range');
+   const input=source=>{if(source.value.trim()==='')return;const value=Number(source.value);if(!Number.isFinite(value))return;
+    this.state.pose[key]=Math.round(Math.max(-180,Math.min(180,value))*10)/10;range.value=this.state.pose[key];if(source===range)number.value=this.state.pose[key];
+    // Coalesce pointer events; persist only when the edit is committed.
+    if(!this.poseFrame)this.poseFrame=requestAnimationFrame(()=>{this.poseFrame=0;this.applyPose();});
+   };
+   number.oninput=()=>input(number);range.oninput=()=>input(range);
+   for(const control of [number,range])control.onchange=()=>{input(control);number.value=range.value=this.state.pose[key];this.applyPose();this.save();};
+  }
   $('craftAttitudeMode').onchange=()=>{this.state.rotation.mode=$('craftAttitudeMode').value;sim.dirty=true;sim.update(performance.now());this.syncUI();this.save();};
   $('craftSpin').onchange=()=>{this.state.rotation=toggleSpin(this.state.rotation,$('craftSpin').checked,sim.time,mission(sim.missionId).spinRpm||0);this.applyPose();this.save();};
   $('resetCraftPose').onclick=()=>{this.state.pose=validatePose();this.applyPose();this.syncUI();this.save();};
@@ -55,8 +64,13 @@ export class MissionController{
   root.traverse(o=>{if(o.isMesh)o.castShadow=o.receiveShadow=true;});
   this.api.modelRoot.add(root);this.models.set(id,root);
  }
- applyPose(){const root=this.models.get(this.sim.missionId);if(root){this.updateRotation();this.sim.rebuild();}}
- updateRotation(){const root=this.models.get(this.sim.missionId);if(root)applyBodyPose(root,this.state.pose,spinAngle(this.state.rotation,this.sim.time,mission(this.sim.missionId).spinRpm||0));}
+ bodyRoot(){return spacecraft(this.sim.missionId).capabilities.assembly?this.api.model:this.models.get(this.sim.missionId);}
+ applyPose(){cancelAnimationFrame(this.poseFrame);this.poseFrame=0;if(this.bodyRoot()){this.updateRotation();this.sim.rebuild({poseOnly:true});}}
+ updateRotation(){
+  const root=this.bodyRoot();if(!root)return;const p=this.state.pose,spin=spinAngle(this.state.rotation,this.sim.time,mission(this.sim.missionId).spinRpm||0),last=this.lastBodyPose;
+  if(last&&last.root===root&&last.roll===p.roll&&last.pitch===p.pitch&&last.yaw===p.yaw&&last.spin===spin)return;
+  applyBodyPose(root,p,spin);this.lastBodyPose={root,...p,spin};
+ }
  syncUI(){
   const sim=this.sim,id=sim.missionId,craft=spacecraft(id),cap=craft.capabilities;
   $('missionSelect').replaceChildren(...Object.keys(MISSIONS).map(key=>new Option(missionLabel(key,t),key)));$('missionSelect').value=id;$('missionSelect').disabled=this.busy||sim.sceneBusy||this.importing||false;$('importMission').disabled=this.busy||sim.sceneBusy||this.importing||false;for(const key of ['exportScene','importScene'])$(key).disabled=this.busy||sim.sceneBusy||false;
@@ -67,9 +81,9 @@ export class MissionController{
   $('craftSpinLabel').textContent=t('自动自旋 · {rpm} 转/分',{rpm:mission(id).spinRpm||0});$('craftSpinNote').textContent=mission(id).spinRpm?t('自旋速度：{rpm} 转/分。随模拟时间和倍速运行，暂停时间即停止；按星体 +Z 右手方向旋转。',{rpm:mission(id).spinRpm}):'';
   $('attitudeSourceLink').hidden=!mission(id).spinSource;if(mission(id).spinSource)$('attitudeSourceLink').href=mission(id).spinSource;
   $('craftAttitudeMode').value=this.state.rotation.mode;$('craftSpin').checked=this.state.rotation.enabled;$('craftSpinControl').hidden=!mission(id).spinRpm;
-  $('craftAttitude').hidden=!cap.manualAttitude;$('reset').hidden=!cap.assembly;
+  $('craftAttitude').hidden=!cap.manualAttitude;$('craftAttitudeModeControl').hidden=cap.assembly;$('reset').hidden=!cap.assembly;
   $('arrayYield').parentElement.hidden=!cap.solarArrays;
-  for(const key of ['roll','pitch','yaw'])$('craft'+key).value=this.state.pose[key];
+  for(const key of ['roll','pitch','yaw']){$('craft'+key).value=this.state.pose[key];$('craft'+key+'Range').value=this.state.pose[key];}
   if(!cap.assembly){$('status').textContent=t(craft.name);$('selection').textContent=t(craft.name)+' · '+t('航向与自旋');}
   else{this.api.syncControls();setText('status','{count} 个舱体',{count:Object.keys(this.api.groups).length});}
   const status=sim.orbitStatus;$('missionOrbitStatus').textContent=t(status==='missing'?'轨道待配置 · 当前仅查看模型':status==='out-of-range'?'轨道演算不可用':'已载入此任务的独立轨道');
@@ -87,6 +101,7 @@ export class MissionController{
  }
  async switchTo(id,{restoring=false,fromScene=false}={}){
   mission(id);if(this.busy||this.sim.sceneBusy&&!fromScene)throw Error('正在恢复场景…');
+  if(this.poseFrame)this.applyPose();
   const sim=this.sim,weather=sim.environment.weather;this.busy=true;this.syncUI();
   try{
    // Load and validate before committing: a failed asset leaves the old task intact.

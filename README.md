@@ -1,6 +1,6 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.42 · 作者 / Author: wenshuishi0528**
+**v0.43 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/Tiangong-Orbit-Simulator-China-Space-Station/)**
@@ -15,6 +15,8 @@
 一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
 
 ### 主要功能
+
+- **三轴姿态**：在“航天器姿态”中调节 X 滚转、Y 俯仰、Z 偏航；输入框与滑条实时同步，支持 ±180°、0.1° 精度及归零。空间站与卫星通用，按任务保存。[v0.43 说明](docs/v0.43-details.md)。
 
 - **背景音乐**：内置六首太空音乐，启动随机首曲并按列表循环；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，切换任务保持连续播放。
 - **公共资源**：NASA 已下载云图保存在软件公共目录，启动自动恢复；更新期间继续提供已有云图，切换模型保留云图选择与纹理。
@@ -43,7 +45,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.42**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.43**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -86,7 +88,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.42**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.43**; the GitHub portable download is **v0.38**.
 
 The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

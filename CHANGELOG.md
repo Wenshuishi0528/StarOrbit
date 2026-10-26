@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.43 — 2026-10-26
+
+**中文：** 航天器姿态新增通用三轴调节，空间站和卫星均可用输入框或滑条控制 X 滚转、Y 俯仰、Z 偏航，角度同步显示，支持姿态归零并按任务保存。拖动复用模型与太阳翼遮挡缓存。[详情](docs/v0.43-details.md)。
+
+**English:** Added shared three-axis attitude controls for stations and satellites, with synchronized numeric inputs and sliders for X roll, Y pitch and Z yaw, reset and per-mission persistence. Editing reuses model geometry and solar occlusion caches. [Details](docs/v0.43-details.md).
+
 ## v0.42 — 2026-10-26
 
 **中文：** 帮助介绍新增“下一个”，画质介绍前移并分为整体画质、星空画质两个入口，分别用箭头定位控件，教程末尾新增隐藏航天器名称说明。首次使用默认标准 4K 与“4K · 星表观赏”，保留已保存设置。原创内容采用 CC BY-NC 4.0，商用须经作者书面许可。[详情](docs/v0.42-details.md)。
