@@ -2,9 +2,9 @@
 
 ## v0.42 — 2026-10-26
 
-**中文：** 帮助介绍新增“下一个”，画质介绍前移并分为整体画质、星空画质两个入口，分别用箭头定位控件。首次使用默认标准 4K 与“4K · 星表观赏”，保留已保存设置。原创内容采用 CC BY-NC 4.0，商用须经作者书面许可。[详情](docs/v0.42-details.md)。
+**中文：** 帮助介绍新增“下一个”，画质介绍前移并分为整体画质、星空画质两个入口，分别用箭头定位控件，教程末尾新增隐藏航天器名称说明。首次使用默认标准 4K 与“4K · 星表观赏”，保留已保存设置。原创内容采用 CC BY-NC 4.0，商用须经作者书面许可。[详情](docs/v0.42-details.md)。
 
-**English:** Added Next navigation to help cards and moved quality guidance ahead of exploration, with separate overall and sky quality entries pointing to their controls. First-time defaults are Standard · 4K and 4K · Star catalog view; saved preferences are preserved. Original content uses CC BY-NC 4.0; commercial use requires the author’s written permission. [Details](docs/v0.42-details.md).
+**English:** Added Next navigation to help cards and moved quality guidance ahead of exploration, with separate overall and sky quality entries pointing to their controls, plus a final tour step for hiding spacecraft labels. First-time defaults are Standard · 4K and 4K · Star catalog view; saved preferences are preserved. Original content uses CC BY-NC 4.0; commercial use requires the author’s written permission. [Details](docs/v0.42-details.md).
 
 ## v0.41 — 2026-10-26
 

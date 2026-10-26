@@ -9,10 +9,11 @@ const topics=[
  {title:'选择星空画质',group:'选择画质',text:'星空显示默认选择“4K · 星表观赏”。想看更细致的银河，可以选择“观赏增强 · 16K 银河”。在箭头指向的星空显示下拉框中切换。',target:'#skyExposure'},
  {title:'探索地球与星空',text:'展开“地球地点标识”或“星图标注”，选择想看的国家、地名、恒星和星座。',target:'#settings-annotations'},
  {title:'播放音乐',text:'点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。',target:'#musicExpanded',music:true},
+ {title:'隐藏航天器名称',text:'取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。',target:'#craftLabelsControl'},
  {title:'数据与更新',text:WEB_BUILD?'网页版默认使用内置轨道和云图。可导入轨道文件与云图快照；数据区间外继续椭圆轨道演算。':'桌面版支持内置数据、在线更新和文件导入。轨道区间外继续椭圆轨道演算，数据栏显示当前计算模式。',target:'#importSnapshot'},
  {title:'保存与分享',text:'设置、导入模型和音乐保存在当前浏览器中。清除网站数据会删除这些内容；使用“场景分享”导出场景文件。桌面版与网页版的本地数据分别保存。',target:'#exportScene'},
 ];
-const TOUR_LENGTH=7;
+const TOUR_LENGTH=8;
 export function installHelp(music){
  const panel=$('helpPanel'),welcome=$('welcomeDialog'),spotlight=$('helpSpotlight');let step=null,touring=false,marked=null,restore=[],returnFocus=null,frame=0;
  const remember=()=>{try{localStorage.setItem(KEY,'seen');}catch{}};

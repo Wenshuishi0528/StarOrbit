@@ -14,7 +14,7 @@
       "pass": true
     },
     {
-      "name": "nine help cards",
+      "name": "ten help cards",
       "pass": true
     },
     {
@@ -87,6 +87,10 @@
     },
     {
       "name": "manual actions visible 8",
+      "pass": true
+    },
+    {
+      "name": "manual actions visible 9",
       "pass": true
     },
     {
@@ -239,6 +243,35 @@
       }
     },
     {
+      "name": "tour position 1440/Zh/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Zh/7",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 402.078125,
+        "bottom": 673.828125,
+        "nextBottom": 652.828125,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 1440/Zh",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 1440/Zh",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 1440/Zh",
+      "pass": true
+    },
+    {
       "name": "tour closes cleanly 1440/Zh",
       "pass": true
     },
@@ -386,6 +419,35 @@
         "nextRight": 1048,
         "overlap": 0
       }
+    },
+    {
+      "name": "tour position 1440/Ru/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 1440/Ru/7",
+      "pass": true,
+      "details": {
+        "left": 324,
+        "right": 664,
+        "top": 394.0234375,
+        "bottom": 681.5234375,
+        "nextBottom": 660.5234375,
+        "nextRight": 643,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 1440/Ru",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 1440/Ru",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 1440/Ru",
+      "pass": true
     },
     {
       "name": "tour closes cleanly 1440/Ru",
@@ -537,6 +599,35 @@
       }
     },
     {
+      "name": "tour position 390/Zh/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Zh/7",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 373.8046875,
+        "bottom": 626.1953125,
+        "nextBottom": 609.1953125,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 390/Zh",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 390/Zh",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 390/Zh",
+      "pass": true
+    },
+    {
       "name": "tour closes cleanly 390/Zh",
       "pass": true
     },
@@ -684,6 +775,35 @@
         "nextRight": 315,
         "overlap": 0
       }
+    },
+    {
+      "name": "tour position 390/Ru/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 390/Ru/7",
+      "pass": true,
+      "details": {
+        "left": 39.5,
+        "right": 339.5,
+        "top": 360.6015625,
+        "bottom": 625.7890625,
+        "nextBottom": 608.7890625,
+        "nextRight": 322.5,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 390/Ru",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 390/Ru",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 390/Ru",
+      "pass": true
     },
     {
       "name": "tour closes cleanly 390/Ru",
@@ -835,6 +955,35 @@
       }
     },
     {
+      "name": "tour position 320/Zh/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Zh/7",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 373.6015625,
+        "bottom": 625.9921875,
+        "nextBottom": 608.9921875,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 320/Zh",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 320/Zh",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 320/Zh",
+      "pass": true
+    },
+    {
       "name": "tour closes cleanly 320/Zh",
       "pass": true
     },
@@ -976,12 +1125,41 @@
       "details": {
         "left": 12,
         "right": 308,
-        "top": 119.5234375,
+        "top": 133.5234375,
         "bottom": 398.7109375,
         "nextBottom": 381.7109375,
         "nextRight": 291,
         "overlap": 0
       }
+    },
+    {
+      "name": "tour position 320/Ru/7",
+      "pass": true
+    },
+    {
+      "name": "card and Next fit 320/Ru/7",
+      "pass": true,
+      "details": {
+        "left": 12,
+        "right": 308,
+        "top": 327.8984375,
+        "bottom": 626.0859375,
+        "nextBottom": 609.0859375,
+        "nextRight": 291,
+        "overlap": 0
+      }
+    },
+    {
+      "name": "last step reveals label control 320/Ru",
+      "pass": true
+    },
+    {
+      "name": "last step highlights labels 320/Ru",
+      "pass": true
+    },
+    {
+      "name": "label toggle keeps help open 320/Ru",
+      "pass": true
     },
     {
       "name": "tour closes cleanly 320/Ru",
