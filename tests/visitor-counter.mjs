@@ -20,5 +20,7 @@ calls=[];await run({site:''});assert.equal(calls.length,0);
 calls=[];await run({automated:true,now:now+3600000});assert.equal(calls.length,1);assert(calls[0].url.endsWith('.json'));
 updates=[];await run({fetch:async()=>{throw Error('offline');},now:now+7200000});assert.equal(updates.at(-1).count,1234,'failed refresh preserves count');
 records.clear();updates=[];await run({fetch:async()=>({ok:true,json:async()=>({count:'<script>alert(1)</script>'})})});assert.equal(updates.length,0,'invalid payload never reaches UI');
+await run({fetch:async()=>({ok:false,status:404,json:async()=>({count:'0',count_unique:'0'})})});assert.equal(updates.at(-1).count,0,'new site displays the service zero count');
+records.clear();updates=[];await run({fetch:async()=>({ok:false,status:403,json:async()=>({count:'0',count_unique:'0'})})});assert.equal(updates.length,0,'access errors never become a zero count');
 await run({storage:{getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}}});assert.equal(updates.at(-1).count,1234,'storage restrictions do not break counts');
 console.log('Visitor counter: fixed payload, official-site gate, credential/referrer exclusion, local read-only, cache, offline, validation and failure isolation passed');

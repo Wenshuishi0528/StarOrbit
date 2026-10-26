@@ -14,7 +14,10 @@ async function request(fetch,url,readJSON=false){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
  try{const response=await fetch(url,{method:'GET',mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',redirect:'error',cache:'no-store',signal:controller.signal});
   if(!readJSON)return;
-  if(!response.ok)throw Error('Counter unavailable');return await response.json();
+  const value=await response.json();
+  // GoatCounter returns this documented counter shape with HTTP 404 before
+  // the first visit to a path. It is a real zero, unlike a network failure.
+  if(!response.ok&&!(response.status===404&&value?.count==='0'&&value?.count_unique==='0'))throw Error('Counter unavailable');return value;
  }
  finally{clearTimeout(timer);}
 }
