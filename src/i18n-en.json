@@ -712,5 +712,6 @@
   "列表循环": "Repeat playlist",
   "时间制式": "Time format",
   "日期": "Date",
-  "时间": "Time"
+  "时间": "Time",
+  "左右键切换时、分、秒，上下键调整数值": "Left/right: select hours, minutes or seconds; up/down: adjust"
 }

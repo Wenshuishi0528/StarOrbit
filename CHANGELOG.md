@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.50 — 2026-10-26
+
+**中文：** 恢复时间框的分段键盘操作：左右键选择时、分、秒及 AM／PM，上下键调整当前项，保留直接输入和 24h／12h 切换。
+
+**English:** Restored segmented keyboard editing for time: left/right selects hours, minutes, seconds or AM/PM; up/down adjusts the selected part. Direct typing and the 24h/12h switch remain available.
+
 ## v0.49 — 2026-10-26
 
 **中文：** 左侧日期时间默认使用 24 小时制，新增紧凑的 24h／12h 切换并记住选择，保留日期选择器与 UTC+8 时区。

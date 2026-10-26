@@ -712,5 +712,6 @@
   "列表循环": "Lecture en boucle",
   "时间制式": "Format de l’heure",
   "日期": "Date",
-  "时间": "Heure"
+  "时间": "Heure",
+  "左右键切换时、分、秒，上下键调整数值": "Gauche/droite : heures, minutes ou secondes ; haut/bas : ajuster"
 }
