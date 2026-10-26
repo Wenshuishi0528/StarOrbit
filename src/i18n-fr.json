@@ -704,5 +704,10 @@
   "星轨 · StarOrbit": "StarOrbit",
   "正在准备星轨": "Préparation de StarOrbit",
   "欢迎来到星轨": "Bienvenue dans StarOrbit",
-  "星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。": "Le ciel utilise par défaut «Renforcé · Voie lactée 16K» pour un fond plus détaillé. Le sélecteur indiqué par la flèche permet aussi de choisir «4K · Vue du catalogue stellaire» ou le style photographique."
+  "星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。": "Le ciel utilise par défaut «Renforcé · Voie lactée 16K» pour un fond plus détaillé. Le sélecteur indiqué par la flèche permet aussi de choisir «4K · Vue du catalogue stellaire» ou le style photographique.",
+  "东方红一号 · 乐曲与遥测信号": "Dong Fang Hong 1 · Mélodie et télémétrie",
+  "东方红一号 · 历史广播": "Dong Fang Hong 1 · Émission historique",
+  "从头播放": "Recommencer",
+  "5 秒后重复播放": "Reprise après 5 secondes",
+  "列表循环": "Lecture en boucle"
 }

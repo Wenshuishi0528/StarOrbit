@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.46 · 作者 / Author: wenshuishi0528**
+**v0.48 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -20,7 +20,7 @@
 
 - **三轴姿态**：在“航天器姿态”中调节 X 滚转、Y 俯仰、Z 偏航；输入框与滑条实时同步，支持 ±180°、0.1° 精度及归零。空间站与卫星通用，按任务保存。[v0.43 说明](docs/v0.43-details.md)。
 
-- **背景音乐**：内置六首太空音乐，启动随机首曲并按列表循环；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，切换任务保持连续播放。
+- **背景音乐**：内置六首太空音乐，启动随机首曲并默认持续列表循环，最后一首结束后回到第一首，单首歌单重复播放；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，普通任务之间保持连续播放。东方红一号专属彩蛋播放《东方红》乐曲与遥测信号，完整播放后间隔 5 秒循环；切走后恢复原歌单进度和播放状态。
 - **公共资源**：NASA 已下载云图保存在软件公共目录，启动自动恢复；更新期间继续提供已有云图，切换模型保留云图选择与纹理。
 - **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失时可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
 - **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
@@ -47,7 +47,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.46**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.48**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -67,7 +67,7 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 
 - **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
 
-- **Background music:** Six built-in tracks, a random opening track and an ordered playlist loop. A spinning note expands on hover and collapses on exit, with import, removal, drag sorting, volume and seeking. Playback continues across mission changes.
+- **Background music:** Six built-in tracks, a random opening track and continuous playlist repeat. The last track returns to the first; a one-track playlist repeats that track. A spinning note expands on hover and collapses on exit, with import, removal, drag sorting, volume and seeking. Playback continues across ordinary missions. Dong Fang Hong 1 plays its exclusive melody and telemetry recording with a five-second gap between repeats; switching away restores the previous playlist position and playback state.
 - **Shared resources:** NASA cloud images persist in a shared application library, restore on startup and remain available during updates. Switching spacecraft retains the selected environment and texture.
 - **Mission switching:** China Space Station and Dong Fang Hong 1 have independent models, orbits, attitude controls, and cameras. Missions without an orbit retain a model preview. New Earth-orbit missions can be imported through the UI using configuration JSON, a GLB model and an orbit file.
 
@@ -90,7 +90,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.46**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.48**; the GitHub portable download is **v0.38**.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

@@ -704,5 +704,10 @@
   "星轨 · StarOrbit": "StarOrbit",
   "正在准备星轨": "Preparing StarOrbit",
   "欢迎来到星轨": "Welcome to StarOrbit",
-  "星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。": "The sky defaults to “Enhanced · 16K Milky Way” for a more detailed Milky Way background. Use the selector indicated by the arrow to switch to “4K · Star catalog view” or Photo style."
+  "星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。": "The sky defaults to “Enhanced · 16K Milky Way” for a more detailed Milky Way background. Use the selector indicated by the arrow to switch to “4K · Star catalog view” or Photo style.",
+  "东方红一号 · 乐曲与遥测信号": "Dong Fang Hong 1 · Melody and telemetry",
+  "东方红一号 · 历史广播": "Dong Fang Hong 1 · Historical broadcast",
+  "从头播放": "Restart",
+  "5 秒后重复播放": "Repeating after 5 seconds",
+  "列表循环": "Repeat playlist"
 }

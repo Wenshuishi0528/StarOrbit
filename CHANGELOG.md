@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v0.48 — 2026-10-26
+
+**中文：** 普通音乐播放器明确显示“列表循环”，列表末尾回到首曲持续播放；单首歌单使用原生音频循环。东方红一号保留专属广播循环。
+
+**English:** The regular music player now shows Repeat playlist and continuously wraps from the last track to the first. Single-track playlists use native audio looping; Dong Fang Hong 1 retains its exclusive broadcast loop.
+
+## v0.47 — 2026-10-26
+
+**中文：** 新增东方红一号专属广播彩蛋，使用提供的乐曲与遥测音频，完整播放后间隔 5 秒循环；切换其他航天器时恢复原音乐。复用左下角播放器，支持暂停、音量和从头播放。
+
+**English:** Added an exclusive Dong Fang Hong 1 broadcast Easter egg using the supplied melody and telemetry recording, with a five-second gap between repeats. Switching away restores the previous music; the existing player provides pause, volume and restart controls.
+
 ## v0.46 — 2026-10-26
 
 **中文：** 时间轴收起后仅在右下角显示“展开时间轴”按钮，释放原时间轴占用的画面空间。

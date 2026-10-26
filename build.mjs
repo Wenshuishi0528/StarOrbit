@@ -12,6 +12,7 @@ import {SPACECRAFT,MISSIONS} from './src/missions.js';
 const spacecraftModels=Object.fromEntries(Object.entries(SPACECRAFT).filter(([,x])=>x.asset).map(([id,x])=>[id,packed(x.asset)]));
 const missionOrbits=Object.fromEntries(Object.entries(MISSIONS).map(([id,x])=>[id,x.orbitAsset?JSON.parse(fs.readFileSync(x.orbitAsset,'utf8')):null]));
 const music=JSON.parse(fs.readFileSync('assets/music/catalog.json','utf8')).map(({file,...track})=>({...track,...(web?{url:publish(file)}:{base64:fs.readFileSync(file).toString('base64')})}));
+music.push({id:'mission-dfh1-broadcast',title:'东方红一号 · 乐曲与遥测信号',mission:'dfh1',sha256:crypto.createHash('sha256').update(fs.readFileSync('assets/music/dfh1-broadcast.m4a')).digest('hex'),type:'audio/mp4',duration:56.067755,...(web?{url:publish('assets/music/dfh1-broadcast.m4a')}:{base64:fs.readFileSync('assets/music/dfh1-broadcast.m4a').toString('base64')})});
 const app=JSON.parse(fs.readFileSync('package.json','utf8'));
 await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web)}});
 const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image('assets/earth/'+tier+'/'+f)]))]));

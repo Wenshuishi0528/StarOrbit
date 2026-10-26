@@ -116,7 +116,7 @@ export class MissionController{
    if(!restoreCamera(this.api.camera,this.api.controls,this.state.camera))this.api.fit(null,[1,-1,.6]);
    restoreCamera(sim.spaceCamera,sim.orbitControls,this.state.overview);
    if(this.state.view==='orbit'&&sim.orbitStatus==='ready'){sim.setView('orbit');restoreCamera(sim.spaceCamera,sim.orbitControls,this.state.overview);}
-   if(!restoring)sim.update(performance.now());weather.save();weather.render();this.syncUI();
+   if(!restoring)sim.update(performance.now());weather.save();weather.render();this.syncUI();this.api.music?.setMission(id);
   }finally{this.busy=false;this.syncUI();}
   this.save();sim.sessionMemory?.save();
  }
