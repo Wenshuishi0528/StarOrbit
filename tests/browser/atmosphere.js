@@ -96,11 +96,27 @@ window.checkAtmosphereFrames=()=>{
  return results;
 };
 
+window.checkHDRAntialias=()=>{
+ const gl=renderer.getContext(),size=renderer.getSize(new THREE.Vector2()),samples=hdr.samples;
+ const probe=new THREE.Scene();probe.background=new THREE.Color(0);
+ const geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute([-.91,-.87,0,.86,-.73,0,-.77,.93,0],3));
+ const material=new THREE.MeshBasicMaterial({color:0xffffff});probe.add(new THREE.Mesh(geometry,material));
+ const camera=new THREE.Camera(),glow=hdr.material.uniforms.sunGlow.value.clone();
+ const read=count=>{
+  hdr.release();hdr.samples=count;hdr.material.uniforms.sunGlow.value.set(0,0,0);hdr.begin();renderer.autoClear=true;renderer.render(probe,camera);hdr.finish();
+  const p=new Uint8Array(128*128*4);gl.readPixels(0,0,128,128,gl.RGBA,gl.UNSIGNED_BYTE,p);
+  let max=0,edges=0;for(let i=0;i<p.length;i+=4)max=Math.max(max,p[i]);for(let i=0;i<p.length;i+=4)if(p[i]>5&&p[i]<max-5)edges++;
+  return {edges,max};
+ };
+ try{renderer.setSize(128,128);const before=read(0),after=read(samples);return {pass:samples>0&&after.edges>before.edges+100,samples,before,after};}
+ finally{geometry.dispose();material.dispose();hdr.release();hdr.samples=samples;hdr.material.uniforms.sunGlow.value.copy(glow);renderer.setSize(size.x,size.y);render();}
+};
+
 // Reuse the actual catalogue builder and Milky Way shader, with the bundled
 // lower-resolution copy of the same panorama to keep this QA context small.
 import {Environment} from '../../src/environment.js';
 window.checkAtmosphereSky=async()=>{
- const sky=Object.create(Environment.prototype);sky.backdrop=new THREE.Scene();sky.buildStars();sky.buildMilkyWay();sky.labelGroup.visible=false;sky.starUniforms.high.value=1;
+ const sky=Object.create(Environment.prototype);sky.backdrop=new THREE.Scene();sky.buildStars();sky.buildMilkyWay();sky.starUniforms.high.value=1;
  const view=new THREE.PerspectiveCamera(55,800/560,.1,2000);view.up.set(0,0,1);view.lookAt(-.05487556,-.87343709,-.48383502);
  let cube;
  try{

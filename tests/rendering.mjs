@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {hdrSamples} from '../src/atmosphere-renderer.js';
+const gl={RENDERBUFFER:1,RGBA16F:2,DEPTH_COMPONENT24:3,SAMPLES:4};
+const samples=(color,depth)=>hdrSamples({...gl,getInternalformatParameter:(_,format)=>format===gl.RGBA16F?color:depth});
+assert.equal(samples([8,4,2],[8,4,2]),4);
+assert.equal(samples([2],[4,2]),2);
+assert.equal(samples([4],[2]),0);
+assert.equal(samples(null,null),0);
+assert.equal(samples([8],[8]),0);
+console.log('HDR color/depth sample compatibility: passed');

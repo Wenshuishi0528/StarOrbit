@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import * as THREE from 'three';
+import {MISSION_TEMPLATE,validateMissionPackage,registerMissionPackage,unregisterMissionPackage,validateGLB} from '../src/mission-package.js';
+import {mission,spacecraft,missionLabel} from '../src/missions.js';
+import {normalizeSpacecraft} from '../src/spacecraft-model.js';
+import {OrbitRepository,orbitSource} from '../src/orbit-repository.js';
+const template=structuredClone(MISSION_TEMPLATE);
+registerMissionPackage(template);assert.equal(missionLabel(template.id),'地球：卫星：我的卫星');
+assert.throws(()=>registerMissionPackage(template));
+const component=name=>{const v=new THREE.Vector3();v[name.at(-1).toLowerCase()]=name[0]==='-'?-1:1;return v;};
+for(const forward of ['+X','-X','+Y','-Y','+Z','-Z'])for(const normal of ['+X','-X','+Y','-Y','+Z','-Z']){
+ if(forward.at(-1)===normal.at(-1))continue;
+ const asset=new THREE.Group(),nose=new THREE.Object3D(),up=new THREE.Object3D();nose.position.copy(component(forward));up.position.copy(component(normal));asset.add(nose,up);
+ const root=normalizeSpacecraft(asset,{metresPerUnit:.01,forwardAxis:forward,normalAxis:normal});root.updateMatrixWorld(true);
+ assert.ok(nose.getWorldPosition(new THREE.Vector3()).distanceTo(new THREE.Vector3(0,0,.05))<1e-9);
+ assert.ok(up.getWorldPosition(new THREE.Vector3()).distanceTo(new THREE.Vector3(0,.05,0))<1e-9);
+}
+for(const change of [{id:'constructor'},{id:'tiangong',model:{...template.model,forwardAxis:'+Y',normalAxis:'-Y'}},{center:'MARS'},{model:{...template.model,metresPerUnit:0}},{orbit:{updateSource:'celestrak',noradId:1234}},{spinRpm:Infinity}])assert.throws(()=>validateMissionPackage({...template,...change}));
+const bytes=fs.readFileSync('assets/spacecraft/dongfanghong1_v03_meters.glb');validateGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length));assert.throws(()=>validateGLB(new ArrayBuffer(12)));
+unregisterMissionPackage(template.id);assert.throws(()=>mission(template.id));
+registerMissionPackage({...template,orbit:{noradId:12345,objectId:'2020-001A',updateSource:'celestrak'}});assert.ok(orbitSource(template.id).includes('CATNR=12345'));
+const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
+const data=JSON.parse(fs.readFileSync('assets/spacecraft/dfh1-orbit.json'));delete data.missionId;delete data.noradId;delete data.objectId;
+let release;const delayed=new Promise(r=>release=r);
+const resources={items:[{id:'A',missionId:template.id,kind:'orbit',blob:{text:()=>delayed}},{id:'B',missionId:template.id,kind:'orbit',blob:new Blob([JSON.stringify({...data,source:'B'})])}],active:{},render(){}};
+const repo=new OrbitRepository({missionId:template.id,bundledOrbits:{},api:{toast(){}}},resources,{orbitRecords:{[template.id]:'A'}});
+const pending=repo.resolve(template.id);repo.records[template.id]='B';release(JSON.stringify(data));assert.equal((await pending).data.source,'B');
+repo.save();assert.equal(new OrbitRepository(repo.sim,resources,{}).selected,'B');unregisterMissionPackage(template.id);
+console.log('Mission manifest, all 24 axis mappings, GLB, generic orbit provider and independent repository race/persistence passed');

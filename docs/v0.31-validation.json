@@ -1,0 +1,265 @@
+{
+  "version": "0.31",
+  "date": "2026-10-26",
+  "testSuite": "20 JavaScript suites + NASA Python suite passed",
+  "browser": {
+    "music": [
+      {
+        "name": "six bundled tracks and a random opening selection",
+        "pass": true
+      },
+      {
+        "name": "actual audio playback advances after play",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-computer-beeping",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-endless-space",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-kerban-race",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-track-4",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-bathed-in-the-light",
+        "pass": true
+      },
+      {
+        "name": "built-in audio decodes: builtin-dreamy-flashback",
+        "pass": true
+      },
+      {
+        "name": "music continues across model switches, scene restore and simulation time changes",
+        "pass": true
+      },
+      {
+        "name": "seek changes the audio position",
+        "pass": true
+      },
+      {
+        "name": "move-up changes playlist order",
+        "pass": true
+      },
+      {
+        "name": "drag reorders the playlist",
+        "pass": true
+      },
+      {
+        "name": "reordering the playing track does not restart audio",
+        "pass": true
+      },
+      {
+        "name": "batch import saves valid audio and reports the invalid file",
+        "pass": true
+      },
+      {
+        "name": "duplicate imports do not duplicate music",
+        "pass": true
+      },
+      {
+        "name": "storage failure preserves the playlist and current playback",
+        "pass": true
+      },
+      {
+        "name": "end of the last track wraps to the first playlist entry",
+        "pass": true
+      },
+      {
+        "name": "removing the current track continues with its successor",
+        "pass": true
+      },
+      {
+        "name": "imported audio, removals, order, volume, mute and autoplay persist",
+        "pass": true
+      },
+      {
+        "name": "opening selection uses random draw at the first endpoint",
+        "pass": true
+      },
+      {
+        "name": "new launch selects a fresh opening track",
+        "pass": true
+      },
+      {
+        "name": "blocked autoplay offers a compact play action",
+        "pass": true
+      },
+      {
+        "name": "one play click resumes blocked playback",
+        "pass": true
+      },
+      {
+        "name": "a second app tab takes playback without overlapping music",
+        "pass": true
+      },
+      {
+        "name": "restoring built-ins retains imported music",
+        "pass": true
+      },
+      {
+        "name": "an empty playlist stops audio and disables playback",
+        "pass": true
+      },
+      {
+        "name": "restore from an empty library recreates all six built-ins",
+        "pass": true
+      },
+      {
+        "name": "compact English player and playlist fit a narrow viewport",
+        "pass": true
+      },
+      {
+        "name": "Escape closes the playlist",
+        "pass": true
+      },
+      {
+        "name": "standalone offline HTML includes playable music",
+        "pass": true
+      }
+    ],
+    "dock": [
+      {
+        "name": "idle player is one 44px circular note",
+        "pass": true
+      },
+      {
+        "name": "collapsed controls leave the surrounding orbit canvas interactive",
+        "pass": true
+      },
+      {
+        "name": "mouse entry expands the playback controls",
+        "pass": true
+      },
+      {
+        "name": "the note rotates while music is playing",
+        "pass": true
+      },
+      {
+        "name": "pause freezes the rotating note",
+        "pass": true
+      },
+      {
+        "name": "the gap between bar and playlist stays within the interaction area",
+        "pass": true
+      },
+      {
+        "name": "hovering the open playlist keeps the player expanded",
+        "pass": true
+      },
+      {
+        "name": "leaving the entire range collapses even after a mouse click focused a track",
+        "pass": true
+      },
+      {
+        "name": "reordering releases drag state and allows collapse",
+        "pass": true
+      },
+      {
+        "name": "dragging a volume slider outside the dock keeps its controls open",
+        "pass": true
+      },
+      {
+        "name": "releasing the pointer outside collapses the volume controls",
+        "pass": true
+      },
+      {
+        "name": "keyboard focus keeps the dock usable without hovering",
+        "pass": true
+      },
+      {
+        "name": "Escape collapses the dock and returns keyboard focus",
+        "pass": true
+      },
+      {
+        "name": "touch opens and retains the expanded controls",
+        "pass": true
+      },
+      {
+        "name": "touch opens the playlist",
+        "pass": true
+      },
+      {
+        "name": "expanded playlist fits a narrow English touch layout",
+        "pass": true
+      },
+      {
+        "name": "an outside tap collapses the touch player",
+        "pass": true
+      }
+    ],
+    "checks": 47
+  },
+  "tracks": [
+    {
+      "id": "builtin-computer-beeping",
+      "title": "Space Music (Computer Beeping)",
+      "duration": 165.163,
+      "sha256": "9cfc120eb173ae7b21bfd8312990c5d80d9d07b032ca59d9cb8288f9dd0d0ffa"
+    },
+    {
+      "id": "builtin-endless-space",
+      "title": "Space Music (Endless Space)",
+      "duration": 101.163,
+      "sha256": "494c6a860a89640c6aa50afccf50da04c28c391661143e12e2152628af354500"
+    },
+    {
+      "id": "builtin-kerban-race",
+      "title": "Space Music (For the Kerban Race)",
+      "duration": 158.144,
+      "sha256": "bd91235d04b3adea500f1793dc253222d3ccd45ec9547837b871bf20f4b5e87d"
+    },
+    {
+      "id": "builtin-track-4",
+      "title": "Space Music (Track 4)",
+      "duration": 110.166,
+      "sha256": "899cf4db75863f0ab2ea819f1e6c959484b2c4c7dc54a42116ea32792817afa7"
+    },
+    {
+      "id": "builtin-bathed-in-the-light",
+      "title": "Bathed In The Light",
+      "duration": 168.342667,
+      "sha256": "947342fe01b8f49f84818e3aeb9293dc5bb8c380520b35d575c9f0600382da4f"
+    },
+    {
+      "id": "builtin-dreamy-flashback",
+      "title": "Dreamy Flashback",
+      "duration": 126.976,
+      "sha256": "5c6ee3a6396116def3df2038d8bcb3f5f2775242fc5cebb2b517264425a62047"
+    }
+  ],
+  "build": {
+    "bytes": 230446751,
+    "sha256": "640c6125c4bcb01ba2d4466da7064d77474d2ada537be7c73f3052d817f4b613"
+  },
+  "review": {
+    "agent": "review_music",
+    "result": "passed",
+    "fixed": [
+      "drag state after playlist rerender",
+      "waiting/playing audio animation state"
+    ],
+    "independentBrowserRecheck": "native keyboard, clicked-focus exit and reorder-to-collapse passed"
+  },
+  "installedRuntime": {
+    "version": "v0.31",
+    "tracks": 6,
+    "autoplayStarted": true,
+    "needsGesture": false,
+    "circleWidth": 44,
+    "buildMatchesSource": true,
+    "launcherVersion": "0.31",
+    "signatureVerified": true,
+    "screenshots": [
+      "v0.31-music-collapsed.png",
+      "v0.31-music-expanded.png"
+    ]
+  }
+}

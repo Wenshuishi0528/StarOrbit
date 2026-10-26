@@ -1,0 +1,359 @@
+{
+  "version": "0.30",
+  "date": "2026-10-26",
+  "fullTestSuite": "passed: 19 JavaScript suites + shared NASA Python regression",
+  "browser": {
+    "existing": {
+      "mission-regression": [
+        {
+          "name": "switch preserves global simulation time",
+          "pass": true
+        },
+        {
+          "name": "independent satellite orbit selected",
+          "pass": true
+        },
+        {
+          "name": "capability-specific controls",
+          "pass": true
+        },
+        {
+          "name": "station labels hidden",
+          "pass": true
+        },
+        {
+          "name": "head axis follows orbital velocity",
+          "pass": true
+        },
+        {
+          "name": "station assembly and manual angles preserved",
+          "pass": true
+        },
+        {
+          "name": "station camera restored",
+          "pass": true
+        },
+        {
+          "name": "satellite pose and camera restored",
+          "pass": true
+        },
+        {
+          "name": "missing orbit keeps spacecraft visible",
+          "pass": true
+        },
+        {
+          "name": "missing orbit clears old track and markers",
+          "pass": true
+        },
+        {
+          "name": "missing orbit clears telemetry",
+          "pass": true
+        },
+        {
+          "name": "model-only scene exports",
+          "pass": true
+        },
+        {
+          "name": "model-only scene imports",
+          "pass": true
+        },
+        {
+          "name": "explicit model-only orbit survives task switching",
+          "pass": true
+        },
+        {
+          "name": "out-of-range scene keeps time and offers jump",
+          "pass": true
+        },
+        {
+          "name": "explicit jump activates orbit",
+          "pass": true
+        },
+        {
+          "name": "independent orbit overview draws",
+          "pass": true
+        },
+        {
+          "name": "scene retains identity and orbital provenance",
+          "pass": true
+        },
+        {
+          "name": "scene round-trip restores satellite pose and view",
+          "pass": true
+        },
+        {
+          "name": "foreign scene rejected before mutation",
+          "pass": true
+        },
+        {
+          "name": "delayed station update cannot overwrite satellite orbit",
+          "pass": true
+        },
+        {
+          "name": "delayed update restored on correct task",
+          "pass": true
+        },
+        {
+          "name": "legacy scene defaults to station",
+          "pass": true
+        },
+        {
+          "name": "Moon view captured",
+          "pass": true
+        },
+        {
+          "name": "Moon return state does not cross tasks",
+          "pass": true
+        },
+        {
+          "name": "concurrent switches serialized",
+          "pass": true
+        },
+        {
+          "name": "selected mission persisted",
+          "pass": true
+        },
+        {
+          "name": "orbit cache references isolated",
+          "pass": true
+        },
+        {
+          "name": "GPU shaders compile",
+          "pass": true
+        }
+      ],
+      "mission-reload": [
+        {
+          "name": "model-only mission survives reload",
+          "pass": true
+        },
+        {
+          "name": "time and spacecraft attitude survive reload",
+          "pass": true
+        },
+        {
+          "name": "station manual wing angles survive other-mission boot",
+          "pass": true
+        },
+        {
+          "name": "station manual wing angles survive own boot",
+          "pass": true
+        },
+        {
+          "name": "scene file upload restores mission",
+          "pass": true
+        },
+        {
+          "name": "scene export downloads JSON file",
+          "pass": true
+        },
+        {
+          "name": "cache read remains consistent with concurrent update",
+          "pass": true
+        },
+        {
+          "name": "automatic trimming protects every selected mission orbit",
+          "pass": true
+        },
+        {
+          "name": "preset restore blocks task switch until complete",
+          "pass": true
+        }
+      ],
+      "mission-spin-controls": [
+        {
+          "name": "120 rpm gives quarter turn in 0.125 s and full turn in 0.5 s",
+          "pass": true
+        },
+        {
+          "name": "spin toggle freezes and resumes without a phase jump",
+          "pass": true
+        },
+        {
+          "name": "camera does not rotate with satellite spin",
+          "pass": true
+        },
+        {
+          "name": "paused simulation freezes spin",
+          "pass": true
+        },
+        {
+          "name": "inertial axis stays fixed; prograde axis follows changing orbital velocity",
+          "pass": true
+        },
+        {
+          "name": "spin settings and phase survive reload",
+          "pass": true
+        },
+        {
+          "name": "scene restores spin and axis mode",
+          "pass": true
+        },
+        {
+          "name": "satellite left drag rotates around model with stable height, distance and target",
+          "pass": true
+        },
+        {
+          "name": "horizon left drag respects updated camera up",
+          "pass": true
+        },
+        {
+          "name": "preset restores camera up, field of view and zoom",
+          "pass": true
+        },
+        {
+          "name": "left drag uses restored preset camera frame",
+          "pass": true
+        },
+        {
+          "name": "station left drag retains original behavior",
+          "pass": true
+        },
+        {
+          "name": "satellite left drag remains correct after mission return",
+          "pass": true
+        }
+      ],
+      "mission-offline": [
+        {
+          "name": "offline station loads",
+          "pass": true
+        },
+        {
+          "name": "offline satellite and independent orbit load",
+          "pass": true
+        },
+        {
+          "name": "horizon up follows satellite radial direction",
+          "pass": true
+        },
+        {
+          "name": "English narrow layout fits viewport",
+          "pass": true
+        },
+        {
+          "name": "offline return restores station model",
+          "pass": true
+        },
+        {
+          "name": "no uncaught browser errors",
+          "pass": true,
+          "errors": []
+        }
+      ],
+      "common-panel": [
+        {
+          "name": "attitude module sits below display and above sharing",
+          "pass": true
+        },
+        {
+          "name": "station has its own common attitude reference",
+          "pass": true
+        },
+        {
+          "name": "satellite has registry-driven controls and source",
+          "pass": true
+        }
+      ]
+    },
+    "sharedResourcesAndImports": [
+      {
+        "name": "reload resumes a running NASA job without starting another download",
+        "pass": true
+      },
+      {
+        "name": "empty browser cache restores the shared disk NASA image",
+        "pass": true
+      },
+      {
+        "name": "imported manifest supplies selector and category: test-large",
+        "pass": true
+      },
+      {
+        "name": "import keeps the exact shared environment and NASA texture: test-large",
+        "pass": true
+      },
+      {
+        "name": "imported GLB antenna points along orbital velocity: test-large",
+        "pass": true
+      },
+      {
+        "name": "camera fit adapts to imported model size: test-large",
+        "pass": true
+      },
+      {
+        "name": "large model camera exceeds the previous fixed distance cap",
+        "pass": true
+      },
+      {
+        "name": "imported manifest supplies selector and category: test-tiny",
+        "pass": true
+      },
+      {
+        "name": "import keeps the exact shared environment and NASA texture: test-tiny",
+        "pass": true
+      },
+      {
+        "name": "imported GLB antenna points along orbital velocity: test-tiny",
+        "pass": true
+      },
+      {
+        "name": "camera fit adapts to imported model size: test-tiny",
+        "pass": true
+      },
+      {
+        "name": "tiny model receives a close camera fit",
+        "pass": true
+      },
+      {
+        "name": "imported model, orbit and active task persist across reload",
+        "pass": true
+      },
+      {
+        "name": "tiny imported model supports scene export/import",
+        "pass": true
+      },
+      {
+        "name": "duplicate IDs report an error and preserve the existing task",
+        "pass": true
+      },
+      {
+        "name": "invalid orbit import rolls back its registration",
+        "pass": true
+      },
+      {
+        "name": "in-progress package import blocks task switches, scene export and presets",
+        "pass": true
+      }
+    ],
+    "checks": 77
+  },
+  "reviews": [
+    "review_mission_framework: passed after fixes",
+    "review_package_import: passed after fixes"
+  ],
+  "NASA": {
+    "observed": "2026-10-20T12:00:00Z",
+    "sha256": "e1016f93d144d2704fb734e1dc2142eb93064fe0706076bef0e5101a658069a8",
+    "storage": "~/Library/Application Support/Tiangong Orbit Simulator/clouds",
+    "emptyBrowserRestore": "passed",
+    "resumeExistingJobWithoutPOST": "passed"
+  },
+  "artifact": {
+    "file": "天宫空间站交互预览.html",
+    "bytes": 212486745,
+    "sha256": "5deece03176a9af38c4e5c528d2a16a6522101086a82376c6d9388f57e59ee1a"
+  },
+  "installedRuntime": {
+    "version": "v0.30",
+    "NASA": "e1016f93d144d2704fb734e1dc2142eb93064fe0706076bef0e5101a658069a8",
+    "stationSharesTexture": true,
+    "satelliteSharesTexture": true,
+    "timePreserved": true,
+    "shaderErrors": 0,
+    "serverRestartRestoredNASA": true,
+    "desktopLauncherVersion": "0.30",
+    "runtimeBuildMatchesSource": true,
+    "screenshot": "v0.30-shared-resources.png"
+  }
+}

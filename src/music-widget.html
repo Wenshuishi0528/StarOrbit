@@ -1,0 +1,23 @@
+<div id="musicWidget" role="region" aria-label="背景音乐">
+ <button id="musicOrb" aria-label="展开音乐播放器" title="展开音乐播放器" aria-expanded="false" aria-controls="musicExpanded"><span aria-hidden="true">♫</span></button>
+ <div id="musicExpanded" hidden>
+ <div id="musicPanel" role="region" aria-label="音乐播放列表" hidden>
+  <div class="music-panel-heading"><strong>播放列表</strong><span id="musicCount"></span><button id="musicClose" aria-label="关闭播放列表" title="关闭播放列表">×</button></div>
+  <ul id="musicList"></ul>
+  <div class="music-library-actions"><button id="musicAdd">添加音乐</button><button id="musicRestore">恢复内置音乐</button></div>
+  <label class="music-auto"><input id="musicAutoplay" type="checkbox" checked>启动时播放 · 随机首曲</label>
+  <p id="musicStatus" role="status" aria-live="polite"></p>
+  <input id="musicFiles" type="file" accept=".m4a,.mp3,.wav,.ogg,.oga,.opus,.aac,.flac,.webm,audio/*" multiple hidden>
+ </div>
+ <div id="musicVolumePanel" hidden><label for="musicVolume">音量</label><input id="musicVolume" type="range" min="0" max="100" value="25"><span id="musicVolumeValue">25%</span><button id="musicMute" aria-pressed="false">静音</button></div>
+ <div class="music-bar">
+  <button id="musicTitleButton" title="打开播放列表"><span class="music-caption"><span id="musicTrackTitle">背景音乐</span><span id="musicMeta">正在准备音乐…</span></span></button>
+  <button id="musicPrevious" class="music-icon" aria-label="上一首" title="上一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M19 5L8 12l11 7Z"/></svg></button>
+  <button id="musicPlay" class="music-icon" aria-label="播放音乐" title="播放音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="music-play-icon" d="M7 4l14 8-14 8Z"/><path class="music-pause-icon" d="M7 5v14M17 5v14"/></svg></button>
+  <button id="musicNext" class="music-icon" aria-label="下一首" title="下一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5v14M5 5l11 7-11 7Z"/></svg></button>
+  <button id="musicVolumeToggle" class="music-icon" aria-label="音量" title="音量" aria-expanded="false" aria-controls="musicVolumePanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-5v16l-5-5H3Z"/><path class="music-sound-waves" d="M16 8q4 4 0 8m3-11q7 7 0 14"/></svg></button>
+  <button id="musicListToggle" class="music-icon" aria-label="打开播放列表" title="播放列表" aria-expanded="false" aria-controls="musicPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.5M3 12h.5M3 18h.5"/></svg></button>
+ </div>
+ <input id="musicSeek" type="range" min="0" max="1000" step="1" value="0" aria-label="音乐播放进度">
+</div>
+</div>

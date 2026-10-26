@@ -1,0 +1,155 @@
+{
+  "version": "0.33",
+  "date": "2026-10-26",
+  "automated": "npm test: all configured suites passed",
+  "browser": [
+    {
+      "name": "pointer holds the selected time: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968325,
+      "actual": 1792813968325
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968325,
+      "actual": 1792813968325
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "real-time case starts in real mode",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792986087110,
+      "actual": 1792986087110
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointercancel releases scrubbing and continues playback",
+      "pass": true
+    },
+    {
+      "name": "lostpointercapture releases scrubbing and continues playback",
+      "pass": true
+    }
+  ],
+  "installed": {
+    "version": "0.33",
+    "browserReady": true,
+    "sourceRuntimeSHA256Match": true,
+    "launcherSignatureVerified": true
+  }
+}

@@ -19,28 +19,32 @@ class Handler(SimpleHTTPRequestHandler):
   if self.path.startswith('/api/cloud/'):
    if not self.cloud_origin_ok():self.send_error(403);return
    if self.path=='/api/cloud/satcorps/status':self.send_json(clouds.snapshot());return
-   if self.path=='/api/cloud/satcorps/image':
-    with clouds.lock:
-     if clouds.state['state']!='ready' or not clouds.image or not clouds.image.exists():self.send_error(404);return
-     data=clouds.image.read_bytes()
+   parsed=urllib.parse.urlparse(self.path)
+   if parsed.path=='/api/cloud/satcorps/image':
+    data=clouds.image_bytes(urllib.parse.parse_qs(parsed.query).get('sha256',[None])[0])
+    if data is None:self.send_error(404);return
     self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
    self.send_error(404);return
   if self.path=='/api/status':
    self.send_response(200);self.send_header('Content-Type','application/json');self.end_headers();self.wfile.write(b'{"app":"tiangong-earth-viewer"}');return
-  if self.path=='/api/orbit':
+  route=urllib.parse.urlparse(self.path)
+  if route.path in ('/api/orbit','/api/orbit/dfh1','/api/orbit/gp'):
+   gp=route.path!='/api/orbit';catalog=urllib.parse.parse_qs(route.query).get('norad',['4382' if route.path.endswith('/dfh1') else ''])[0]
+   if gp and (not catalog.isascii() or not catalog.isdigit() or not 1<=int(catalog)<=999999999):self.send_error(400);return
+   source=f'https://celestrak.org/NORAD/elements/gp.php?CATNR={int(catalog)}&FORMAT=JSON' if gp else URL
    # Only local, same-origin requests; never relay credentials or arbitrary paths.
    origin=self.headers.get('Origin')
    if origin and origin not in (f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}'):
     self.send_error(403);return
    try:
     try:
-     with urllib.request.urlopen(urllib.request.Request(URL,headers={'User-Agent':'Tiangong-Viewer/0.17'}),timeout=20) as r:body=r.read(6000001)
+     with urllib.request.urlopen(urllib.request.Request(source,headers={'User-Agent':'Tiangong-Viewer/0.30'}),timeout=20) as r:body=r.read(6000001)
     except urllib.error.URLError as error:
      if not isinstance(error.reason,ssl.SSLError):raise
      # macOS Python can lack the system CA bundle; curl still verifies TLS normally.
-     body=subprocess.run(['curl','--fail','--silent','--show-error','--location','--max-time','20','--max-filesize','6000000',URL],capture_output=True,check=True,timeout=22).stdout
+     body=subprocess.run(['curl','--fail','--silent','--show-error','--location','--max-time','20','--max-filesize','6000000',source],capture_output=True,check=True,timeout=22).stdout
     if len(body)>6000000:raise ValueError('Response too large')
-    self.send_response(200);self.send_header('Content-Type','text/html; charset=utf-8');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(body)
+    self.send_response(200);self.send_header('Content-Type','application/json' if gp else 'text/html; charset=utf-8');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(body)
    except Exception:self.send_error(502,'Official orbit source unavailable; existing data retained')
    return
   if self.path.startswith('/api/') or any(p.startswith('.') for p in urllib.parse.unquote(self.path).split('/') if p):self.send_error(404);return

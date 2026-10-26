@@ -1,5 +1,95 @@
 # Changelog / 更新记录
 
+## v0.38 — 2026-10-26
+
+- 时间步进新增 1s／1m／10m／1h 四档，默认 1m；采用两行紧凑布局，选中时长以青色突出，前后按钮同步显示 ± 时长，中间暂停／继续保持单行。
+- 步进保留播放状态与倍速，实时模式转为 1× 自定义播放；到达轨道起点或终点时暂停。时长选择跨任务、跨重启保存，支持完整中英文悬停提示和键盘选择。
+- 复用已有时间定位和会话记忆；运行 HTML 增加约 3.3 KB。全套测试及 32 项浏览器检查通过，桌面运行版与启动器同步至 v0.38。详见 [时间步进说明](docs/v0.38-details.md)及[验证记录](docs/v0.38-validation.json)。
+
+**English:** Added a compact two-row 1s/1m/10m/1h selector, defaulting to 1m, with a highlighted selection, matching backward/forward labels and a single-line pause control. Steps preserve playback and speed, convert real-time playback to custom 1×, and pause at either ephemeris boundary. Preferences persist across missions and restarts; tooltips and keyboard controls support both languages. Reused existing navigation and session storage, adding about 3.3 KB to the runtime HTML. The full test suite, 32 browser checks and installed-app verification passed.
+
+## v0.37 — 2026-10-26
+
+- 新增公共轨道事件时间轴，显示日照／半影／全影色带、近远地点及高度、赤道升降交点；提供 3／12／24 小时范围、类别筛选、前后事件导航与紧凑折叠，收起后保留下一事件倒计时。
+- 地影事件区分开始进入地影、进入全影、开始离开全影、恢复完全日照四个时刻；邻近标记合并显示，可在详情中选择。拖动与事件定位保留播放状态，支持提前 30 秒以 1× 观看；到事件暂停默认关闭，开启后在首个跨越的已选类别事件停时。
+- 复用轨道和天体计算，按需分批扫描、局部细化并复用单个内存缓存；处理短暂掠影、窗口边缘、近圆轨道与任务切换取消。24 小时时段实测约 125 个事件、结果约 7 KB，运行 HTML 增加约 19 KB。
+- 全套测试、74 项浏览器检查及独立 subagent 审查完成，覆盖播放状态、自动暂停、小地图回归、持久化和界面避让。见 [时间轴说明](docs/v0.37-details.md)及[验证记录](docs/v0.37-validation.json)。
+
+**English:** Added a shared, collapsible timeline with sunlight/penumbra/umbra bands, four eclipse contacts, apsis altitudes, equator crossings, 3/12/24-hour windows, filters and event navigation. Collapsing retains the next-event countdown. Scrubbing preserves playback; watch mode starts 30 seconds earlier at 1×, and optional automatic pause stops at the first selected event crossed. Batched calculations and one transient cache handle grazing events, window edges, near-circular orbits and cancellation on mission changes. A measured 24-hour result contained about 125 events and 7 KB; runtime HTML grew by about 19 KB. The full test suite, 74 browser checks and independent subagent review passed.
+
+## v0.36 — 2026-10-26
+
+- 新增“地理与星图”一级组，地球地点标识与原有星图标注并列为二级菜单。
+- 新增国家、首都、国境线、海域、山脉地貌、河流和湖泊标注；北京使用红色五角星，中国轮廓与海上线段采用天地图官方矢量数据。
+- 小地图显示航天器当前上空的国家／地貌／海域；地理设置随任务共用，并支持本地记忆、环境收藏与场景分享。
+- 通过字图缓存、批量绘制、两档线数据、空间索引及低频排版控制计算量，避让名称和信息面板。完成数据、浏览器与原有星图／小地图回归验证，见 [地理与星图](docs/v0.36-details.md)。
+
+**English:** Added a Geography & star chart group with two second-level panels. Earth labels cover countries, capitals, boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star, and China’s geometry comes directly from official Tianditu vectors. The minimap identifies the region below the spacecraft. Shared settings support persistence, presets and scenes; cached glyphs, batched lines, two geometry levels and indexed/throttled updates bound the work. Validated data, browser flows, existing star charts and minimap dragging.
+
+## v0.35 — 2026-10-26
+
+- 新增公共星图标注三级菜单：361 颗主要恒星、965 条已收录星名，以及仅显示牛郎星／织女星／北极星的精选三项预设；支持 88 星座名称、连线和边界分别开关。
+- 标注自动避让、亮星优先，提供密度控制与中英文名称；地球、月球和航天器遮挡标注，切换任务共用资源和偏好。
+- 单张字图缓存、批量绘制、静止排版复用和低频可见性更新；兼容旧开关、环境收藏和场景文件，修正三级菜单插入后的折叠状态记忆。
+- 完成数据、浏览器与独立 subagent 审查，说明及验证见 [星图标注](docs/v0.35-details.md)。
+
+**English:** Added shared sky annotations with 361 major stars, 965 catalogued names, a preset containing only Altair/Vega/Polaris, and independently controlled names, lines and boundaries for 88 constellations. Labels avoid overlap, prioritize bright stars, support Chinese/English and respect celestial-body and spacecraft occlusion. A shared glyph atlas, batched drawing and cached/throttled layout keep resource use bounded. Preserved legacy preference migration, scene/preset round trips and stable sidebar expansion. Validated data and browser behavior with independent subagent review.
+
+## v0.34 — 2026-10-26
+
+- 修复中国空间站舱体、端面和箱体上的条纹状自阴影；阴影偏移与覆盖范围按可见模型尺寸适配，所有航天器共用。
+- 统一使用优化阴影：静止与仅移动镜头时复用阴影图，太阳方向、太阳翼和自旋变化时刷新，全影时跳过；暂停期间复用太阳翼遮挡计算，手动调整后更新读数。
+- 在最高画质、阳光区、辅助照明关闭的条件下检查空间站与东方红一号；完成 GPU 条纹回归、阴影刷新与既有光照／清晰度验证。详见 [修复与验证](docs/v0.34-details.md)。
+
+**English:** Fixed striped self-shadow artifacts on spacecraft surfaces with scale-aware shadow bias and coverage. One shared optimized implementation reuses shadow maps for static scenes and camera-only movement, refreshes for solar direction, array motion and spin, and skips unlit maps during eclipse. Paused solar-array occlusion results are reused and manual changes refresh readings. Verified at the highest quality in direct sunlight with auxiliary lighting off, plus GPU artifact, cache and existing rendering regressions.
+
+## v0.33 — 2026-10-26
+
+- 小地图拖动／点击定位保留播放状态：运行时松手按原倍速继续，暂停时保持暂停；现实时间拖动后从所选时刻以 1 倍速运行。
+- 拖动期间由鼠标控制时刻，松手后从选中位置继续计时；指针取消或失去捕获时也正常结束拖动。
+- 验证东方红一号、中国空间站的运行／暂停、倍速、实时模式和状态保存。验证记录：[小地图播放状态](docs/v0.33-validation.json)。
+
+**English:** Minimap scrubbing and track clicks now preserve playback state and speed. Running simulations continue after release; paused simulations remain paused. Scrubbing from real time continues at 1× from the selected time. Pointer cancellation and capture loss also finish scrubbing cleanly. Verified both spacecraft, playback speeds, real-time transition and saved state.
+
+## v0.32 — 2026-10-26
+
+- 修复东方红一号在全影中仍被固定室内反射照亮的问题；移除模型私有展示环境，所有航天器共用辅助照明开关，关闭时同时关闭补光和展示反射。
+- 精细档 HDR 合成启用最高 4× MSAA，按浮点颜色与深度格式共同支持的采样数分配；保持完整画布分辨率，并在浏览器缩放、窗口跨屏及模型查看时同步设备像素比。
+- 验证四档地影表面、辅助照明、空间站切换、纯模型预览、像素比变化、GPU 边缘抗锯齿及原有大气效果。详见 [光照与清晰度修复](docs/v0.32-details.md)。
+
+**English:** Fixed persistent studio reflections on Dongfanghong-1 during eclipse. All spacecraft now share one auxiliary-light switch that controls both ambient fill and display reflections. Enabled up to 4× MSAA for full-resolution HDR compositing using compatible color/depth sample counts, and refresh pixel density after display or browser-zoom changes, including model-only previews. Verified eclipse lighting across all four quality tiers, auxiliary lighting, mission switches, preview transitions, pixel-density changes, GPU edge coverage and atmospheric rendering.
+
+## v0.31 — 2026-10-26
+
+- 增加软件通用音乐系统，内置用户选定的六首 AAC 曲目，启动随机首曲、按列表顺序循环；切换模型、恢复场景与调整模拟时间时连续播放。
+- 左下角默认圆形音符，播放时旋转、暂停时静止；悬停展开，移出整个操作范围后延迟收起，支持键盘与触屏。
+- 支持批量导入、去重、移除、恢复内置曲目、拖动及按钮排序、音量、静音与进度控制；音乐库和偏好独立保存。
+- 校验真实音频播放、离线使用、列表恢复、删除续播、失败回滚、多个标签页及收起交互。详见 [全局音乐与验证](docs/v0.31-details.md)。
+
+**English:** Added shared background music with six bundled AAC tracks, a random opening track and an ordered playlist loop. Playback remains independent of spacecraft, scenes and simulation time. A rotating circular note expands on hover and collapses after leaving the complete control area, with keyboard and touch support. Added batch imports, content deduplication, removal, built-in restoration, drag/button ordering, volume, mute and seeking, with an independent persistent library. Validated actual playback, offline use, reloads, deletion handoff, failure rollback, multiple tabs and dock interactions.
+
+## v0.30 — 2026-10-26
+
+- 修复 NASA 云图在软件重启后未恢复的问题；公共资源持久保存，更新或失败期间继续提供上次完整云图，网页可接续后台更新。
+- 新增界面导入航天器：配置 JSON、GLB 模型与轨道文件组合接入，保存后重开自动恢复；名称、比例、轴向、自旋和轨道更新源均由配置提供。
+- 分离公共环境资源与任务轨道管理，在线 GP 更新按配置读取 NORAD 编号；内置任务转为数据清单。
+- 相机适配模型大小，导入与场景恢复统一协调；验证模型朝向、导入回滚、刷新、场景往返及跨任务 NASA 纹理复用，并完成两位 subagent 审查。
+- 使用方法与验证：[模块化任务与公共资源](docs/v0.30-details.md)。
+
+**English:** Fixed NASA cloud restoration after restart with a persistent shared library and continued access to the last complete image during updates. Added UI import of spacecraft configuration, self-contained GLB and orbit files, with persistent missions, configurable scale/axes/spin and catalog-driven GP updates. Separated mission orbit selections from shared environmental resources. Adapted camera controls to model size and coordinated package import with scene restoration. Verified recovery, import rollback, axis mappings, reloads, scene round-trips and shared NASA textures, with two independent subagent reviews.
+
+## v0.29 — 2026-10-26
+
+- 任务命名统一为“星球：类别：名称”，东方红一号归类为卫星。
+- 建立航天器与任务注册表，支持独立模型、轨道、姿态策略、功能开关及镜头记忆；加入东方红一号米制 GLB。
+- 接入东方红一号 CelesTrak GP / SGP4 轨道，保留来源、历元与展示窗口；支持在线更新及 GP JSON 导入，缺失或越界时只显示模型。
+- 校正模型 Y-up → Z-up、真实比例和姿态旋转顺序；东方红一号默认顶部天线朝轨道前进方向，可切换惯性定轴；按历史资料加入可开关的 120 转/分自旋。天宫保留地面轨迹定向与追日。
+- 场景格式升级并兼容旧文件；任务轨道缓存隔离，修复切换／收藏恢复竞态和刷新时手动翼角被覆盖的问题。
+- 姿态参考与控制移至下方通用模块，轴向、转速和来源由配置提供；统一相机控制修复变更参考轴后左键拖动异常。
+- 全量测试、浏览器切换／刷新／文件往返、独立 Skyfield 对照与 subagent 审查完成。详见 [任务框架与验证](docs/v0.29-details.md)。
+
+**English:** Added a spacecraft/mission registry with separate models, orbits, attitude policies, capabilities, and camera memory, plus Dong Fang Hong 1. Its CelesTrak GP elements are propagated using SGP4 with explicit epoch and display-window metadata. Corrected asset axes, real scale, and rotation order; default prograde pointing, an inertial-axis illustration, and toggleable historical 120 rpm spin remain separate from Tiangong ground-track alignment. Moved attitude controls into a shared lower-sidebar module and fixed mouse rotation after camera-up changes. Upgraded scene files with legacy compatibility and isolated orbit caches; fixed restoration races and manual-array reload persistence. Validated with the full test suite, browser switching/reloads/file round-trips, independent Skyfield references, and subagent review.
+
 ## v0.28 — 2026-10-25
 
 - 新增“天气与奇观”：云内闪电、红色精灵与蓝色喷流、夜侧气辉开关、流星；支持自然和观赏增强模式。

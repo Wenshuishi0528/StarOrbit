@@ -1,0 +1,456 @@
+{
+  "version": "0.35",
+  "date": "2026-10-26",
+  "npmTest": "passed",
+  "build": "passed",
+  "data": {
+    "names": 965,
+    "major": 361,
+    "properNames": 541,
+    "constellations": 88,
+    "boundaryPaths": 782,
+    "boundaryPoints": 9918,
+    "sources": {
+      "project": "d3-celestial",
+      "commit": "7e720a3de062059d4c5400a379146a601d9010e0",
+      "frame": "J2000 equatorial",
+      "units": "degrees",
+      "license": "d3-celestial: BSD-3-Clause; assets/D3-CELESTIAL-LICENSE.txt. CDS VI/49: attributed scientific boundary data, Davenhall & Leggett (1989).",
+      "urls": {
+        "starnames.json": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/data/starnames.json",
+        "constellations.json": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/data/constellations.json",
+        "constellations.lines.json": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/data/constellations.lines.json",
+        "constellations.bounds.json": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/data/constellations.bounds.json",
+        "readme.md": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/readme.md",
+        "VI49.bound_20.dat.gz": "https://cdsarc.cds.unistra.fr/ftp/VI/49/bound_20.dat.gz",
+        "VI49.ReadMe": "https://cdsarc.cds.unistra.fr/ftp/VI/49/ReadMe",
+        "VI49.constell.txt": "https://cdsarc.cds.unistra.fr/ftp/VI/49/constell.txt"
+      },
+      "sha256": {
+        "starnames.json": "19c84bc885f8a97c3b8e1f6a380084c575a9758dedfe35256e911a823ec3a695",
+        "constellations.json": "ab4ae692027cbc042c0d6791a84456a65eb7c55656107fd00c58ff6e55d4d8b2",
+        "constellations.lines.json": "294f66bef5d5cf50b1e17f16d2efa1d97a15131612c68dd935adef6e7373e13c",
+        "constellations.bounds.json": "f2e2687af6b20b24567879f838c21874d412efcc93ecc1966be07e78431cc196",
+        "readme.md": "c3d77ea7e64565a31876cd2be3c2bc71919712e0379ecd1d98b490afc68703e2",
+        "VI49.bound_20.dat.gz": "879cd6e7a1c908f1e19a5f5fe8cc75fb1d1077564e3890f9152a3680affe9aac",
+        "VI49.ReadMe": "af906e494b7390de1257a06934b69ce1a87e1c4a55776d2e8c16de8e3b468705",
+        "VI49.constell.txt": "4d906000d1647aab4b65fc1319116f16a65f35ed6017d4101817c9806976486b"
+      },
+      "frameEvidence": "https://raw.githubusercontent.com/ofrohn/d3-celestial/7e720a3de062059d4c5400a379146a601d9010e0/readme.md",
+      "catalogue": "assets/stars.json; XHIP / d3-celestial Hipparcos identifiers",
+      "boundarySource": "Davenhall & Leggett (1989), VizieR VI/49 bound_20.dat; J2000 one-degree samples including 2024-07-23 CEP/UMI correction",
+      "boundaryFrameEvidence": "https://cdsarc.cds.unistra.fr/ftp/VI/49/constell.txt",
+      "boundaryOrdering": "Astronomy Engine 2.1.19 B1875 conversion is used only to classify/sort published J2000 samples; renderer uses CDS coordinates",
+      "processing": "HIP join; simplified Chinese and common-name aliases; <=3 mag or named outline stars marked major; duplicate boundary edges removed; Serpens components retained; 3 obsolete d3 polar vertices replaced by CDS corrected parallel"
+    }
+  },
+  "browser": [
+    {
+      "name": "shared sky chart enables names and constellation lines",
+      "pass": true
+    },
+    {
+      "name": "Orion and Betelgeuse align with the existing J2000 star field",
+      "pass": true
+    },
+    {
+      "name": "visible labels avoid one another",
+      "pass": true
+    },
+    {
+      "name": "label atlas and display count stay bounded",
+      "pass": true,
+      "atlas": 1024,
+      "visible": 25
+    },
+    {
+      "name": "stationary view reuses layout and GPU buffers",
+      "pass": true,
+      "frames": 30,
+      "layouts": 0,
+      "uploads": 0
+    },
+    {
+      "name": "constellation boundaries use finite spherical geometry",
+      "pass": true
+    },
+    {
+      "name": "all chart graphics use at most three draw calls",
+      "pass": true,
+      "extraDrawCalls": 3
+    },
+    {
+      "name": "expanded name range includes additional named or designated stars",
+      "pass": true,
+      "all": 69,
+      "major": 28
+    },
+    {
+      "name": "classic preset contains exactly the three requested labels",
+      "pass": true
+    },
+    {
+      "name": "classic preset suppresses full constellation overlays",
+      "pass": true
+    },
+    {
+      "name": "classic controls match the effective display",
+      "pass": true
+    },
+    {
+      "name": "classic label appears at Vega",
+      "pass": true
+    },
+    {
+      "name": "classic label appears at Polaris rather than an asterism center",
+      "pass": true
+    },
+    {
+      "name": "disabled chart performs no layout or uploads",
+      "pass": true
+    },
+    {
+      "name": "English sky labels use the shared language setting",
+      "pass": true
+    },
+    {
+      "name": "language changes replace one shared glyph atlas",
+      "pass": true,
+      "builds": 3
+    },
+    {
+      "name": "Earth hides star-label anchors",
+      "pass": true
+    },
+    {
+      "name": "spacecraft switch reuses the chart and preferences",
+      "pass": true
+    },
+    {
+      "name": "spacecraft geometry hides the complete anchored label",
+      "pass": true
+    },
+    {
+      "name": "large imported geometry reuses an acceleration tree for label occlusion",
+      "pass": true
+    },
+    {
+      "name": "scene round trip restores chart settings and controls",
+      "pass": true
+    },
+    {
+      "name": "sky chart shaders compile without WebGL errors",
+      "pass": true
+    },
+    {
+      "name": "shared chart preferences are persisted",
+      "pass": true
+    }
+  ],
+  "persistence": [
+    {
+      "pass": true,
+      "name": "first startup leaves chart off with no glyph or overlay GPU resources",
+      "enabled": false,
+      "atlas": false,
+      "geometry": false,
+      "layouts": 0
+    },
+    {
+      "pass": true,
+      "name": "legacy bright-star switch migrates to the three-label preset",
+      "enabled": true,
+      "scope": "classic",
+      "checked": true,
+      "sky": true,
+      "weather": false,
+      "photo": true,
+      "chart": false
+    },
+    {
+      "pass": true,
+      "name": "old sidebar expansion positions remain aligned"
+    },
+    {
+      "pass": true,
+      "name": "reload restores all annotation preferences and its nested panel",
+      "scope": "all",
+      "density": 0.8,
+      "boundaries": true,
+      "scopeControl": "all",
+      "open": true
+    }
+  ],
+  "renderingRegression": [
+    {
+      "name": "full eclipse found in DFH-1 orbit",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: simple",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: simple",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: medium",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: medium",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: standard",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: standard",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: high",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: high",
+      "pass": true
+    },
+    {
+      "name": "sunlight illuminates satellite",
+      "pass": true,
+      "luminance": 0.79840087890625
+    },
+    {
+      "name": "auxiliary lighting reveals metallic satellite in eclipse",
+      "pass": true,
+      "luminance": 2.0711669921875
+    },
+    {
+      "name": "imported materials have no independent studio light",
+      "pass": true
+    },
+    {
+      "name": "station uses the same auxiliary reflection",
+      "pass": true
+    },
+    {
+      "name": "station auxiliary light fully switches off",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1.5",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1.5",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "HDR uses supported multisampling",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "spacecraft output retains MSAA",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "no WebGL error",
+      "pass": true
+    },
+    {
+      "name": "GPU shaders compile",
+      "pass": true
+    },
+    {
+      "name": "model-only preview retains display lighting",
+      "pass": true
+    },
+    {
+      "name": "model-only preview follows screen density changes",
+      "pass": true
+    },
+    {
+      "name": "return from preview removes display lighting",
+      "pass": true
+    }
+  ],
+  "visualChecks": [
+    {
+      "pass": true,
+      "scope": "major",
+      "names": [
+        "参宿七",
+        "参宿四",
+        "毕宿五",
+        "参宿五",
+        "参宿二",
+        "小犬座",
+        "猎户座",
+        "参宿一",
+        "井宿三",
+        "参宿六",
+        "参宿三",
+        "伐三",
+        "玉井三",
+        "井宿一",
+        "南河二",
+        "天关",
+        "参旗六",
+        "参宿增三",
+        "井宿四",
+        "觜宿一",
+        "毕宿一",
+        "γ Tau",
+        "井宿七",
+        "九洲殊口二",
+        "参旗五"
+      ],
+      "stats": {
+        "layouts": 23,
+        "uploads": 20,
+        "atlasBuilds": 3,
+        "candidates": 28,
+        "visible": 25
+      }
+    },
+    {
+      "pass": true,
+      "scope": "classic",
+      "names": [
+        "织女星",
+        "牛郎星"
+      ],
+      "stats": {
+        "layouts": 24,
+        "uploads": 21,
+        "atlasBuilds": 3,
+        "candidates": 2,
+        "visible": 2
+      }
+    }
+  ],
+  "independentReview": {
+    "agent": "star_review",
+    "status": "passed after fixes",
+    "resolved": [
+      "B1875 small-circle boundaries: published dense J2000 samples and polar regressions",
+      "Imported high-triangle meshes: lazy shared BVH for label occlusion"
+    ],
+    "tests": [
+      "star-chart-data.mjs",
+      "star-chart-settings.mjs",
+      "star-chart.mjs"
+    ],
+    "polarisCorrection": "HIP 11767 / Polaris, preset and bilingual text verified"
+  },
+  "htmlSha256": "81ecd4eb98b07bc617d056d8a056caab30594435b38147ae2772816d2d62a4ac",
+  "polarisCorrection": [
+    {
+      "pass": true,
+      "language": "zh",
+      "classic": [
+        {
+          "id": 91262,
+          "zh": "织女星",
+          "en": "Vega"
+        },
+        {
+          "id": 97649,
+          "zh": "牛郎星",
+          "en": "Altair"
+        },
+        {
+          "id": 11767,
+          "zh": "北极星",
+          "en": "Polaris"
+        }
+      ],
+      "visible": [
+        "北极星"
+      ],
+      "description": "仅标注牛郎星、织女星和北极星。",
+      "gl": 0
+    },
+    {
+      "pass": true,
+      "language": "en",
+      "classic": [
+        {
+          "id": 91262,
+          "zh": "织女星",
+          "en": "Vega"
+        },
+        {
+          "id": 97649,
+          "zh": "牛郎星",
+          "en": "Altair"
+        },
+        {
+          "id": 11767,
+          "zh": "北极星",
+          "en": "Polaris"
+        }
+      ],
+      "visible": [
+        "Polaris"
+      ],
+      "description": "Label only Altair, Vega and Polaris.",
+      "gl": 0
+    }
+  ],
+  "installedRuntime": {
+    "pass": true,
+    "version": "v0.35",
+    "classic": [
+      {
+        "id": 91262,
+        "zh": "织女星",
+        "en": "Vega"
+      },
+      {
+        "id": 97649,
+        "zh": "牛郎星",
+        "en": "Altair"
+      },
+      {
+        "id": 11767,
+        "zh": "北极星",
+        "en": "Polaris"
+      }
+    ],
+    "note": "仅标注牛郎星、织女星和北极星。"
+  }
+}

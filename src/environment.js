@@ -12,6 +12,10 @@ import {EarthDetail} from './earth-detail.js';
 import {t,setText,onLanguageChange} from './i18n.js';
 import * as THREE from 'three';
 import catalogue from '../assets/stars.json';
+import {Geography} from './geography.js';
+import {normalizeGeographySettings,bindGeographyControls} from './geography-settings.js';
+import {StarChart} from './star-chart.js';
+import {normalizeStarChartSettings,bindStarChartControls} from './star-chart-settings.js';
 import {QUALITY,equatorial,qualityFor} from './environment-math.js';
 import {EARTH_RADIUS,interpolate,earthAxes} from './orbit.js';
 
@@ -22,8 +26,8 @@ export class Environment{
   const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
   // Parsed assets own the data now; release the large inline JSON DOM copy.
   assetNode.remove();
-  this.settings={quality:'medium',stars:true,milky:true,moon:true,starLabels:false,clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'view',groundTrack:false};
-  try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));for(const k of ['stars','milky','moon','starLabels','clouds','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
+  this.settings={quality:'medium',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'view',groundTrack:false};
+  try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
    for(const k of ['cloudOpacity','starBrightness'])if(Number.isFinite(old?.[k]))this.settings[k]=THREE.MathUtils.clamp(old[k],0,k==='cloudOpacity'?1:2);
   }catch{}
@@ -45,19 +49,16 @@ export class Environment{
 
   this.backdrop=new THREE.Scene();this.backdrop.background=new THREE.Color('#000104');
   this.starCamera=new THREE.PerspectiveCamera(38,1,.1,2000);
-  this.buildStars();this.buildMilkyWay();this.moon=new Moon(this);
+  this.buildStars();this.buildMilkyWay();this.moon=new Moon(this);this.starChart=new StarChart(this);this.geography=new Geography(this);
   this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
-  this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.translateStars();this.skyStatus();});
+  this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.skyStatus();});
  }
  buildStars(){
-  const positions=[],colors=[],mags=[];this.labelGroup=new THREE.Group();this.backdrop.add(this.labelGroup);
-  const names={91262:'织女星',97649:'牛郎星',102098:'天津四',11767:'北极星',32349:'天狼星'};
+  const positions=[],colors=[],mags=[];
   for(const [id,ra,dec,mag,bv] of catalogue){const dir=V(equatorial(ra,dec));positions.push(...dir.clone().multiplyScalar(1000).toArray());mags.push(mag);
    const color=new THREE.Color(Number(bv)>.9?'#ffce9e':Number(bv)>.4?'#fff0dc':Number(bv)<.1?'#c0d7ff':'#e5ecff');colors.push(color.r,color.g,color.b);
-   if(names[id]){const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;const ctx=canvas.getContext('2d');ctx.fillStyle='#bdd6e6';ctx.font='28px sans-serif';ctx.fillText(t(names[id]),6,44);
-    const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(canvas),transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));sprite.position.copy(dir.multiplyScalar(990));sprite.scale.set(42,10.5,1);sprite.center.set(-.12,.5);sprite.userData.nameKey=names[id];this.labelGroup.add(sprite);
-   }
+
   }
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setAttribute('mag',new THREE.Float32BufferAttribute(mags,1));
   this.starUniforms={brightness:{value:1},pixelRatio:{value:1},high:{value:0}};
@@ -67,9 +68,6 @@ export class Environment{
    vertexShader:`attribute float mag;uniform float brightness,pixelRatio,high;varying vec3 tint;varying float flux;void main(){tint=color;flux=pow(10.,-.14*max(-1.,mag-1.))*brightness;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_PointSize=(2.1+max(0.,5.-mag)*.55+high)*pixelRatio;}`,
    fragmentShader:`varying vec3 tint;varying float flux;uniform float high;void main(){float r=length(gl_PointCoord-.5)*2.;if(r>1.)discard;float a=exp(-r*r*5.)+high*.08*exp(-r*r);gl_FragColor=vec4(tint*flux*a,1.);#include <colorspace_fragment>}`.replace(';#include',';\n#include')
   });this.stars=new THREE.Points(geometry,material);this.stars.frustumCulled=false;this.stars.renderOrder=1;this.backdrop.add(this.stars);
- }
- translateStars(){
-  for(const sprite of this.labelGroup.children){const map=sprite.material.map,canvas=map.image,ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#bdd6e6';ctx.font='28px sans-serif';ctx.fillText(t(sprite.userData.nameKey),6,44);map.needsUpdate=true;}
  }
  buildMilkyWay(){
   this.milky=new THREE.Mesh(new THREE.SphereGeometry(1200,64,32),new THREE.ShaderMaterial({side:THREE.BackSide,depthTest:false,depthWrite:false,toneMapped:false,uniforms:{brightness:{value:1},textured:{value:0},skyMap:{value:null}},vertexShader:galaxyVertex,fragmentShader:galaxyFragment}));this.backdrop.add(this.milky);
@@ -111,6 +109,7 @@ export class Environment{
   setText('skyStatus',this.skySize===16?'':'当前设备：六面 {size}K 天空',{size:this.skySize/4});
  }
  updatePixelRatio(){
+  this.devicePixelRatio=devicePixelRatio;
   const tier=this.quality||this.settings.quality;
   const ratio=Math.min(devicePixelRatio,QUALITY[tier].pixelRatio);
   if(this.api.renderer.getPixelRatio()!==ratio){this.api.renderer.setPixelRatio(ratio);this.api.resize();}
@@ -118,7 +117,8 @@ export class Environment{
  }
  save(){try{localStorage.setItem('tiangong-environment-v1',JSON.stringify(this.settings));}catch{}}
  bind(){
-  const ids={moon:'showMoon',stars:'showStars',milky:'showMilky',starLabels:'starNames',clouds:'showClouds',groundTrack:'groundTrack'};
+  bindStarChartControls(this.settings,()=>this.save());bindGeographyControls(this.settings,()=>this.save());
+  const ids={moon:'showMoon',stars:'showStars',milky:'showMilky',clouds:'showClouds',groundTrack:'groundTrack'};
   for(const [key,id] of Object.entries(ids)){$(id).checked=this.settings[key];$(id).onchange=()=>{this.settings[key]=$(id).checked;this.save();if(key==='stars'||key==='milky')this.setSkyStyle();};}
   for(const [key,id] of [['cloudOpacity','cloudOpacity'],['starBrightness','starBrightness']]){$(id).value=this.settings[key];$(id).oninput=()=>{this.settings[key]=Number($(id).value);this.save();};}
   $('skyExposure').value=this.settings.exposure;$('skyExposure').onchange=()=>{this.settings.exposure=$('skyExposure').value;this.save();this.setSkyStyle();};
@@ -194,13 +194,12 @@ export class Environment{
   this.clouds.quaternion.copy(this.earth.quaternion);this.clouds.visible=!!detailed&&s.clouds&&!volume;
   this.detail.update(camera);this.nightDetail.update(camera);
   this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.phenomena?.update(q,camera);
-  this.stars.visible=s.stars;this.labelGroup.visible=s.stars&&s.starLabels;this.milky.visible=s.stars&&s.milky;
+  this.stars.visible=s.stars;this.milky.visible=s.stars&&s.milky;
   // The photographic option is an explicit display/exposure approximation.
   const cinematic=s.exposure==='cinematic';this.milky.material.uniforms.textured.value=cinematic&&this.galaxyTexture?1:0;
   if(this.lastSkyStyle!==s.exposure||this.lastStarTier!==this.quality){this.stars.geometry.setDrawRange(0,cinematic?catalogue.length:this.starCount||0);this.lastSkyStyle=s.exposure;this.lastStarTier=this.quality;if(this.quality&&!this.loading)setText('qualityStatus','');}
   const boost=s.exposure==='photo'?.025:1;this.starUniforms.brightness.value=s.starBrightness*boost;this.milky.material.uniforms.brightness.value=s.starBrightness*boost;
-  this.labelGroup.children.forEach(label=>label.material.opacity=Math.min(1,s.starBrightness));
-  this.starCamera.quaternion.copy(camera.quaternion);this.starCamera.fov=camera.fov;this.starCamera.aspect=camera.aspect;this.starCamera.updateProjectionMatrix();
+  this.starCamera.quaternion.copy(camera.quaternion);this.starCamera.fov=camera.fov;this.starCamera.aspect=camera.aspect;this.starCamera.zoom=camera.zoom;this.starCamera.updateProjectionMatrix();this.starChart.update(camera);this.geography.update(q,camera);
   this.track.visible=this.groundMarker.visible=s.groundTrack&&this.sim.view==='orbit'&&!!q;
   if(!q)return;
   const p=V(q.position).normalize().multiplyScalar(EARTH_RADIUS+28).applyQuaternion(this.earth.quaternion.clone().invert());this.groundMarker.position.copy(p);
@@ -227,7 +226,7 @@ export class Environment{
   return linear;
  }
  finishFrame(){this.hdr.finish();}
- renderBackground(renderer){renderer.autoClear=true;renderer.render(this.backdrop,this.starCamera);renderer.autoClear=false;renderer.clearDepth();}
+ renderBackground(renderer){renderer.autoClear=true;renderer.render(this.backdrop,this.starCamera);renderer.autoClear=false;renderer.state.buffers.depth.setMask(true);renderer.clearDepth();}
  bindImmersive(){
   const body=document.body;let timer,keyboard=false;
   const reveal=()=>{body.classList.add('hud-visible');clearTimeout(timer);timer=setTimeout(()=>{if(!keyboard)body.classList.remove('hud-visible');},1800);};

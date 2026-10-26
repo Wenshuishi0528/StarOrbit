@@ -7,6 +7,8 @@ export const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1
 export const sub=(a,b)=>a.map((v,i)=>v-b[i]);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function validateOrbit(data){
+ if(!data||typeof data!=='object')throw Error('无效轨道数据');
+ if(data.center!==undefined&&data.center!=='EARTH')throw Error('当前仅支持绕地轨道');
  if(data.frame!=='EME2000'||data.timeSystem!=='UTC'||data.units!=='km, km/s')throw Error('需要 EME2000 / UTC，单位 km、km/s 的轨道数据');
  if(!Array.isArray(data.rows)||data.rows.length<8||data.rows.length>100000)throw Error('轨道记录数应为 8—100000');
  data.rows.forEach((r,i)=>{if(r.length!==7||!r.every(Number.isFinite)||!Number.isFinite(new Date(r[0]).getTime())||(i&&r[0]<=data.rows[i-1][0])||norm(r.slice(1,4))<EARTH_RADIUS+100||norm(r.slice(1,4))>50000||norm(r.slice(4))>15)throw Error('无效轨道记录 '+i);if(i&&r[0]-data.rows[i-1][0]>600000)throw Error('轨道数据间隔不能超过 10 分钟');});return data;
@@ -34,6 +36,7 @@ export function earthAxes(t){
  return [[Math.cos(a),Math.sin(a),0],[-Math.sin(a),Math.cos(a),0],[0,0,1]].map(v=>{const q=Astronomy.RotateVector(rot,new Astronomy.Vector(...v,date));return [q.x,q.y,q.z];});
 }
 export function snapshot(data,t){
+ if(!data)return null;
  const pv=interpolate(data.rows,t);if(!pv)return null;
  const r=pv.position,z=unit(r),x=unit(sub(pv.velocity,z.map(v=>v*dot(pv.velocity,z)))),y=unit(cross(z,x)),basis=[x,y,z];
  const sun=sunPosition(t),sunDir=unit(sub(sun,r)),fixed=earthAxes(t),ecef=fixed.map(a=>dot(r,a)),rho=norm(r);
@@ -49,16 +52,11 @@ export function bestAngles(s,dual,previous={roll:0,left:0}){
  return cost(roll,pitch)<=cost(other.roll,other.pitch)?{roll,pitch}:other;
 }
 export function panelNormal(roll,pitch){const r=roll*Math.PI/180,p=pitch*Math.PI/180;return [Math.sin(p),-Math.sin(r)*Math.cos(p),Math.cos(r)*Math.cos(p)];}
-export function nextShadowEvent(data,t){
- const start=snapshot(data,t);if(!start)return null;const lit=start.illumination>.5;
- for(let next=t+30000;next<=Math.min(t+7200000,data.rows.at(-1)[0]);next+=30000){const q=snapshot(data,next);if((q.illumination>.5)!==lit){let a=next-30000,b=next;for(let j=0;j<15;j++){const m=(a+b)/2;if((snapshot(data,m).illumination>.5)===lit)a=m;else b=m;}return {time:(a+b)/2,entering:lit};}}
- return null;
-}
 export function parseOrbit(text){
  if(text.trim().startsWith('{'))return validateOrbit(JSON.parse(text));
  const field=k=>text.match(new RegExp('\\b'+k+'\\s*=\\s*(\\S+)'))?.[1];
  if(field('REF_FRAME')!=='EME2000'||field('TIME_SYSTEM')!=='UTC'||field('CENTER_NAME')!=='EARTH')throw Error('只支持地心 EME2000 / UTC 的 OEM 文件');
  if((text.match(/META_START/g)||[]).length!==1)throw Error('请导入单段 OEM 数据');
  const rows=[];for(const line of text.split(/\r?\n/)){const a=line.trim().split(/\s+/);if(/^\d{4}-\d{2}-\d{2}T/.test(a[0])&&a.length===7)rows.push([Date.parse(a[0].endsWith('Z')?a[0]:a[0]+'Z'),...a.slice(1).map(Number)]);}
- return validateOrbit({source:'用户导入 OEM（未验证来源）',created:field('CREATION_DATE'),frame:'EME2000',timeSystem:'UTC',units:'km, km/s',rows});
+ return validateOrbit({center:'EARTH',objectId:field('OBJECT_ID'),source:'用户导入 OEM（未验证来源）',created:field('CREATION_DATE'),frame:'EME2000',timeSystem:'UTC',units:'km, km/s',rows});
 }

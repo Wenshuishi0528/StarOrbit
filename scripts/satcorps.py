@@ -198,7 +198,7 @@ def build(output,progress=lambda s:None,now=None):
             info['sha256']=hashlib.sha256(target.read_bytes()).hexdigest()
             target.with_suffix('.json').write_text(json.dumps(info))
             for p in output.iterdir():
-                if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile):p.unlink()
+                if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile) and (not previous or p.stem!=Path(previous['file']).stem):p.unlink()
             return {**info,'file':str(target),'updateMessage':'已找到最近 30 天内覆盖合格的 NASA 全球云图'}
         except (RuntimeError,ValueError,OSError,subprocess.TimeoutExpired) as e:
             errors+=1;progress('该候选未通过检查，继续查找 · '+date)

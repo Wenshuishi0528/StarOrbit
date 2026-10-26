@@ -1,0 +1,384 @@
+{
+  "version": "0.37",
+  "date": "2026-10-26",
+  "unitSuite": {
+    "command": "npm test",
+    "exitCode": 0
+  },
+  "numerics": {
+    "3h": {
+      "milliseconds": 2.820292000000002,
+      "events": 16,
+      "bytes": 961
+    },
+    "12h": {
+      "milliseconds": 3.012208000000001,
+      "events": 64,
+      "bytes": 3617
+    },
+    "24h": {
+      "milliseconds": 4.646041999999994,
+      "events": 125,
+      "bytes": 7009
+    },
+    "synthetic": "Kepler epochs, circular/equatorial, grazing and sunlight passed",
+    "cache": "reuse and cancellation passed"
+  },
+  "browser": [
+    {
+      "name": "markers rendered for station",
+      "pass": true
+    },
+    {
+      "name": "paused frames reuse event cache",
+      "pass": true
+    },
+    {
+      "name": "held pointer freezes time/window tiangong/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state tiangong/false",
+      "pass": true
+    },
+    {
+      "name": "playback resumes correctly tiangong/false",
+      "pass": true
+    },
+    {
+      "name": "held pointer freezes time/window tiangong/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state tiangong/true",
+      "pass": true
+    },
+    {
+      "name": "playback resumes correctly tiangong/true",
+      "pass": true
+    },
+    {
+      "name": "held pointer freezes time/window dfh1/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state dfh1/false",
+      "pass": true
+    },
+    {
+      "name": "playback resumes correctly dfh1/false",
+      "pass": true
+    },
+    {
+      "name": "held pointer freezes time/window dfh1/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state dfh1/true",
+      "pass": true
+    },
+    {
+      "name": "playback resumes correctly dfh1/true",
+      "pass": true
+    },
+    {
+      "name": "real-time scrub continues at 1x",
+      "pass": true
+    },
+    {
+      "name": "pointercancel ends drag and preserves playback",
+      "pass": true
+    },
+    {
+      "name": "lostpointercapture ends drag and preserves playback",
+      "pass": true
+    },
+    {
+      "name": "event click locates time while preserving pause/speed",
+      "pass": true
+    },
+    {
+      "name": "event details open",
+      "pass": true
+    },
+    {
+      "name": "watch starts 30 seconds before at 1x",
+      "pass": true
+    },
+    {
+      "name": "auto-pause catches first crossed event at 1x",
+      "pass": true,
+      "time": 1792814599788.7822,
+      "target": 1792814599788.7822,
+      "paused": true
+    },
+    {
+      "name": "auto-pause catches first crossed event at 1000x",
+      "pass": true,
+      "time": 1792816715976.5625,
+      "target": 1792816715976.5625,
+      "paused": true
+    },
+    {
+      "name": "real-time automatic pause normalizes speed",
+      "pass": true
+    },
+    {
+      "name": "filters select navigation and pause events",
+      "pass": true
+    },
+    {
+      "name": "next event follows filters",
+      "pass": true
+    },
+    {
+      "name": "collapse leaves compact summary",
+      "pass": true
+    },
+    {
+      "name": "24h window computes",
+      "pass": true
+    },
+    {
+      "name": "shared visibility switch",
+      "pass": true
+    },
+    {
+      "name": "preferences saved without event arrays",
+      "pass": true
+    },
+    {
+      "name": "orbit removal cancels pending results and clears UI",
+      "pass": true
+    },
+    {
+      "name": "mission switch uses the current orbit",
+      "pass": true
+    },
+    {
+      "name": "English labels",
+      "pass": true
+    },
+    {
+      "name": "photo mode hides timeline",
+      "pass": true
+    },
+    {
+      "name": "auto-pause holds at uncomputed coverage boundary",
+      "pass": true
+    }
+  ],
+  "minimap": [
+    {
+      "name": "pointer holds the selected time: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968523,
+      "actual": 1792813968522.6958
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968325,
+      "actual": 1792813968325
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "real-time case starts in real mode",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1793004375905,
+      "actual": 1793004375904.404
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointercancel releases scrubbing and continues playback",
+      "pass": true
+    },
+    {
+      "name": "lostpointercapture releases scrubbing and continues playback",
+      "pass": true
+    }
+  ],
+  "layout": [
+    {
+      "pass": true,
+      "name": "preferences restore after reload"
+    },
+    {
+      "pass": true,
+      "name": "desktop caption/music clearance and compact height"
+    },
+    {
+      "pass": true,
+      "name": "details visible from navigation"
+    },
+    {
+      "pass": true,
+      "name": "collapsed height"
+    },
+    {
+      "pass": true,
+      "name": "mobile timeline remains inside viewport/stage"
+    },
+    {
+      "pass": true,
+      "name": "immersive hidden HUD hides timeline"
+    },
+    {
+      "pass": true,
+      "name": "immersive visible HUD reveals timeline"
+    }
+  ],
+  "review": {
+    "agent": "/root/review_timeline",
+    "status": "completed",
+    "fixes": [
+      "1x automatic-pause dead zone",
+      "grazing eclipses at window edges",
+      "real-time pause speed normalization",
+      "caption CSS specificity",
+      "lastOrbit reset value"
+    ],
+    "remaining": []
+  },
+  "html": {
+    "bytes": 234811410,
+    "sha256": "b97598c2620f1131b9288c24561e2a3c29b9ae5e6514bd7e953115a8f2b68d31",
+    "previousBytes": 234792365,
+    "addedBytes": 19045
+  },
+  "visual": {
+    "image": "v0.37-timeline.png",
+    "conditions": "8K, direct sunlight, auxiliary lighting off",
+    "mobileChecked": true
+  },
+  "installed": {
+    "version": true,
+    "initialized": true,
+    "events": 24,
+    "defaultRange": 3,
+    "automaticPauseDefault": false,
+    "menu": true,
+    "markers": 9,
+    "bodyVisible": true
+  },
+  "runtime": {
+    "path": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "sha256": "b97598c2620f1131b9288c24561e2a3c29b9ae5e6514bd7e953115a8f2b68d31",
+    "launcherVersion": "0.37",
+    "signatureVerified": true
+  }
+}

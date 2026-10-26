@@ -1,0 +1,152 @@
+{
+  "version": "0.38",
+  "date": "2026-10-26",
+  "unitSuite": "npm test passed",
+  "browser": [
+    {
+      "name": "default step is one minute",
+      "pass": true
+    },
+    {
+      "name": "selection updates labels 1s",
+      "pass": true
+    },
+    {
+      "name": "paused backward 1s",
+      "pass": true
+    },
+    {
+      "name": "paused forward 1s",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved -1/1s",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved 1/1s",
+      "pass": true
+    },
+    {
+      "name": "selection updates labels 1m",
+      "pass": true
+    },
+    {
+      "name": "paused backward 1m",
+      "pass": true
+    },
+    {
+      "name": "paused forward 1m",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved -1/1m",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved 1/1m",
+      "pass": true
+    },
+    {
+      "name": "selection updates labels 10m",
+      "pass": true
+    },
+    {
+      "name": "paused backward 10m",
+      "pass": true
+    },
+    {
+      "name": "paused forward 10m",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved -1/10m",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved 1/10m",
+      "pass": true
+    },
+    {
+      "name": "selection updates labels 1h",
+      "pass": true
+    },
+    {
+      "name": "paused backward 1h",
+      "pass": true
+    },
+    {
+      "name": "paused forward 1h",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved -1/1h",
+      "pass": true
+    },
+    {
+      "name": "running state/speed preserved 1/1h",
+      "pass": true
+    },
+    {
+      "name": "step size shared across missions",
+      "pass": true
+    },
+    {
+      "name": "real-time step becomes custom 1x",
+      "pass": true
+    },
+    {
+      "name": "step clamps and pauses at start",
+      "pass": true
+    },
+    {
+      "name": "step clamps and pauses at end",
+      "pass": true
+    },
+    {
+      "name": "native radio keyboard navigation",
+      "pass": true
+    },
+    {
+      "name": "selection restored after reload",
+      "pass": true
+    },
+    {
+      "name": "step buttons disabled without orbit",
+      "pass": true
+    },
+    {
+      "name": "English duration tooltip",
+      "pass": true
+    },
+    {
+      "name": "desktop English buttons fit one row",
+      "pass": true
+    },
+    {
+      "name": "Chinese duration tooltip",
+      "pass": true
+    },
+    {
+      "name": "mobile controls fit without wrapping",
+      "pass": true
+    }
+  ],
+  "visual": "v0.38-controls.png; desktop, English and mobile checked",
+  "html": {
+    "bytes": 234814750,
+    "addedBytes": 3340,
+    "sha256": "f19c4d1e30bf68cfb3d8a328f0215de825fbdae077ebc729d44155dd996f35f6"
+  },
+  "installed": {
+    "version": true,
+    "defaultStep": 60000,
+    "options": 4,
+    "delta": 1000,
+    "paused": true,
+    "forward": "+1s",
+    "launcherVersion": "0.38",
+    "signatureVerified": true,
+    "runtimeHash": "f19c4d1e30bf68cfb3d8a328f0215de825fbdae077ebc729d44155dd996f35f6"
+  }
+}

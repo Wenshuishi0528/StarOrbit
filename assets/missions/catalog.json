@@ -1,0 +1,56 @@
+{
+  "spacecraft": {
+    "tiangong": {
+      "name": "中国空间站",
+      "axes": "天和节点／前端为星体 +X，+Z 朝舱体上方，+Y 完成右手系。",
+      "asset": null,
+      "up": "Z",
+      "metresPerUnit": 0.2,
+      "capabilities": {
+        "assembly": true,
+        "solarArrays": true,
+        "manualAttitude": false
+      }
+    },
+    "dfh1": {
+      "name": "东方红一号",
+      "axes": "顶部短天线为星体 +Z，四根长天线位于 XY 平面；采用右手系。",
+      "asset": "assets/spacecraft/dongfanghong1_v03_meters.glb",
+      "up": "Y",
+      "metresPerUnit": 1,
+      "capabilities": {
+        "assembly": false,
+        "solarArrays": false,
+        "manualAttitude": true
+      }
+    }
+  },
+  "missions": {
+    "tiangong": {
+      "name": "中国空间站",
+      "planet": "地球",
+      "category": "空间站",
+      "spacecraft": "tiangong",
+      "center": "EARTH",
+      "attitude": "ground-track",
+      "attitudeNote": "地面轨迹定向：+X 沿地面轨迹前进，−Z 朝地；已计入地球自转。",
+      "orbitAsset": "assets/orbit.json",
+      "updateSource": "cmse"
+    },
+    "dfh1": {
+      "name": "东方红一号",
+      "planet": "地球",
+      "category": "卫星",
+      "spacecraft": "dfh1",
+      "center": "EARTH",
+      "attitude": "velocity-axis",
+      "attitudeNote": "航向跟随时，零偏移的 +Z 沿轨道速度方向；惯性定轴时保持轨道参考历元的轴向。自旋绕星体 +Z，手动角度是姿态偏移。",
+      "spinRpm": 120,
+      "spinSource": "https://www.aas.net.cn/cn/article/doi/10.16383/j.aas.c220792",
+      "orbitAsset": "assets/spacecraft/dfh1-orbit.json",
+      "updateSource": "celestrak",
+      "noradId": 4382,
+      "objectId": "1970-034A"
+    }
+  }
+}

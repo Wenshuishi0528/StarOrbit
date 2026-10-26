@@ -1,0 +1,737 @@
+{
+  "version": "0.32",
+  "date": "2026-10-26",
+  "automated": "npm test passed (all configured suites)",
+  "browser": [
+    {
+      "name": "full eclipse found in DFH-1 orbit",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: simple",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: simple",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: medium",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: medium",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: standard",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: standard",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: high",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: high",
+      "pass": true
+    },
+    {
+      "name": "sunlight illuminates satellite",
+      "pass": true,
+      "luminance": 0.67340087890625
+    },
+    {
+      "name": "auxiliary lighting reveals metallic satellite in eclipse",
+      "pass": true,
+      "luminance": 1.7293904622395833
+    },
+    {
+      "name": "imported materials have no independent studio light",
+      "pass": true
+    },
+    {
+      "name": "station uses the same auxiliary reflection",
+      "pass": true
+    },
+    {
+      "name": "station auxiliary light fully switches off",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1.5",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1.5",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "HDR uses supported multisampling",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "spacecraft output retains MSAA",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "no WebGL error",
+      "pass": true
+    },
+    {
+      "name": "GPU shaders compile",
+      "pass": true
+    },
+    {
+      "name": "model-only preview retains display lighting",
+      "pass": true
+    },
+    {
+      "name": "model-only preview follows screen density changes",
+      "pass": true
+    },
+    {
+      "name": "return from preview removes display lighting",
+      "pass": true
+    }
+  ],
+  "gpu": {
+    "edges": {
+      "pass": true,
+      "samples": 4,
+      "before": {
+        "edges": 0,
+        "max": 231
+      },
+      "after": {
+        "edges": 273,
+        "max": 231
+      }
+    },
+    "frames": [
+      {
+        "name": "final daytime limb blue 0",
+        "pass": true,
+        "samples": 19,
+        "warm": 0
+      },
+      {
+        "name": "final daytime limb blue 90",
+        "pass": true,
+        "samples": 19,
+        "warm": 0
+      },
+      {
+        "name": "final daytime limb blue 180",
+        "pass": true,
+        "samples": 20,
+        "warm": 0
+      },
+      {
+        "name": "cloud final 45 shell",
+        "pass": true
+      },
+      {
+        "name": "cloud final 45 volume",
+        "pass": true
+      },
+      {
+        "name": "cloud final -19 shell",
+        "pass": true
+      },
+      {
+        "name": "cloud final -19 volume",
+        "pass": true
+      },
+      {
+        "name": "cloud final -45 shell",
+        "pass": true
+      },
+      {
+        "name": "cloud final -45 volume",
+        "pass": true
+      },
+      {
+        "name": "viewport target follows resize",
+        "pass": true
+      },
+      {
+        "name": "reuse target",
+        "pass": true
+      },
+      {
+        "name": "quality switch frees HDR",
+        "pass": true
+      },
+      {
+        "name": "quality switch recreates HDR",
+        "pass": true
+      },
+      {
+        "name": "unsupported HDR falls back",
+        "pass": true
+      }
+    ],
+    "physics": {
+      "results": [
+        {
+          "phaseSamples": {
+            "forward": [
+              0.11936620622873306,
+              2.8299946784973145,
+              0,
+              1
+            ],
+            "side": [
+              0.05968310311436653,
+              0.009871757589280605,
+              0,
+              1
+            ],
+            "back": [
+              0.11936620622873306,
+              0.007175988983362913,
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "name": "Rayleigh 前后对称",
+          "pass": true
+        },
+        {
+          "name": "Mie 朝日增强",
+          "pass": true
+        },
+        {
+          "solarSamples": {
+            "noon": [
+              0.9458789825439453,
+              0.9340613484382629,
+              0.9084223508834839,
+              1
+            ],
+            "sunset": [
+              0.04445857182145119,
+              0.004650128073990345,
+              0,
+              1
+            ],
+            "night": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "ground": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "high": [
+              0.17596791684627533,
+              0.054254043847322464,
+              0.00019188389705959707,
+              1
+            ]
+          }
+        },
+        {
+          "name": "高太阳云顶近白",
+          "pass": true
+        },
+        {
+          "name": "长光程自然偏暖",
+          "pass": true
+        },
+        {
+          "name": "地影内无直射暖光",
+          "pass": true
+        },
+        {
+          "name": "云顶仍受光时地面已入影",
+          "pass": true
+        },
+        {
+          "name": "白天侧向薄边偏蓝",
+          "pass": true
+        },
+        {
+          "name": "晨昏朝日与背日亮度不同",
+          "pass": true
+        },
+        {
+          "name": "共同旋转相机和太阳保持物理关系",
+          "pass": true
+        },
+        {
+          "name": "深夜侧不制造整圈发光",
+          "pass": true
+        },
+        {
+          "name": "生产着色器编译无错误",
+          "pass": true
+        },
+        {
+          "dayProfiles": [
+            {
+              "height": 0.1,
+              "az": 0,
+              "rgb": [
+                0.055306141790028684,
+                0.06842217253699623,
+                0.10339344212678236
+              ]
+            },
+            {
+              "height": 0.1,
+              "az": 90,
+              "rgb": [
+                0.046856623425328925,
+                0.0594608630240383,
+                0.09176263805564533
+              ]
+            },
+            {
+              "height": 0.1,
+              "az": 180,
+              "rgb": [
+                0.0668521579871717,
+                0.08353945398676732,
+                0.12503393590107859
+              ]
+            },
+            {
+              "height": 0.5,
+              "az": 0,
+              "rgb": [
+                0.05604258604073431,
+                0.06889344300056566,
+                0.10346030384300908
+              ]
+            },
+            {
+              "height": 0.5,
+              "az": 90,
+              "rgb": [
+                0.04763522497729755,
+                0.05990720776767677,
+                0.0918285915875674
+              ]
+            },
+            {
+              "height": 0.5,
+              "az": 180,
+              "rgb": [
+                0.06813156687495248,
+                0.08422431418732534,
+                0.12517713388595197
+              ]
+            },
+            {
+              "height": 1,
+              "az": 0,
+              "rgb": [
+                0.05646529770939601,
+                0.06914544285104185,
+                0.10351327300604396
+              ]
+            },
+            {
+              "height": 1,
+              "az": 90,
+              "rgb": [
+                0.04817464112753633,
+                0.06016588107143228,
+                0.0918715453704877
+              ]
+            },
+            {
+              "height": 1,
+              "az": 180,
+              "rgb": [
+                0.06909581641730611,
+                0.08465908851606585,
+                0.12531430220562356
+              ]
+            },
+            {
+              "height": 2,
+              "az": 0,
+              "rgb": [
+                0.05633668513328827,
+                0.06920378947188333,
+                0.10363827538305159
+              ]
+            },
+            {
+              "height": 2,
+              "az": 90,
+              "rgb": [
+                0.0483370764543154,
+                0.06029034792122179,
+                0.09197674250649879
+              ]
+            },
+            {
+              "height": 2,
+              "az": 180,
+              "rgb": [
+                0.06969321658419592,
+                0.0849969474954202,
+                0.12562597567974265
+              ]
+            },
+            {
+              "height": 5,
+              "az": 0,
+              "rgb": [
+                0.05164777152412148,
+                0.06760764064803748,
+                0.10397790008331853
+              ]
+            },
+            {
+              "height": 5,
+              "az": 90,
+              "rgb": [
+                0.04463257402331777,
+                0.05903685111614543,
+                0.09230471844381416
+              ]
+            },
+            {
+              "height": 5,
+              "az": 180,
+              "rgb": [
+                0.06502015446425702,
+                0.08378205329480082,
+                0.12666678381272334
+              ]
+            },
+            {
+              "height": 10,
+              "az": 0,
+              "rgb": [
+                0.03450972071382474,
+                0.05739472337094664,
+                0.10317985967197263
+              ]
+            },
+            {
+              "height": 10,
+              "az": 90,
+              "rgb": [
+                0.029834401277675893,
+                0.0502025893755611,
+                0.09164201934554228
+              ]
+            },
+            {
+              "height": 10,
+              "az": 180,
+              "rgb": [
+                0.04419462294311938,
+                0.0723565342719592,
+                0.1272356127138945
+              ]
+            },
+            {
+              "height": 20,
+              "az": 0,
+              "rgb": [
+                0.010871009609435878,
+                0.027481310746316323,
+                0.07746168427593192
+              ]
+            },
+            {
+              "height": 20,
+              "az": 90,
+              "rgb": [
+                0.009394197978712937,
+                0.024061485376582037,
+                0.06880741660274703
+              ]
+            },
+            {
+              "height": 20,
+              "az": 180,
+              "rgb": [
+                0.01438544809659592,
+                0.0359634400289619,
+                0.09849444551555209
+              ]
+            },
+            {
+              "height": 40,
+              "az": 0,
+              "rgb": [
+                0.002297756053665667,
+                0.004651731034303275,
+                0.011499672525060234
+              ]
+            },
+            {
+              "height": 40,
+              "az": 90,
+              "rgb": [
+                0.001993121368367712,
+                0.004061554277216217,
+                0.010156051774438346
+              ]
+            },
+            {
+              "height": 40,
+              "az": 180,
+              "rgb": [
+                0.0031187181371075123,
+                0.006245426954619049,
+                0.014992946003081542
+              ]
+            },
+            {
+              "height": 70,
+              "az": 0,
+              "rgb": [
+                5.370153112260745e-05,
+                0.00010999434696667976,
+                0.0002824069760176684
+              ]
+            },
+            {
+              "height": 70,
+              "az": 90,
+              "rgb": [
+                4.608794094562718e-05,
+                9.498629250481727e-05,
+                0.0002470184360685579
+              ]
+            },
+            {
+              "height": 70,
+              "az": 180,
+              "rgb": [
+                7.260833966937774e-05,
+                0.0001473813587491435,
+                0.0003681848984520286
+              ]
+            },
+            {
+              "height": 95,
+              "az": 0,
+              "rgb": [
+                5.565058703305148e-07,
+                3.065123802770131e-06,
+                9.159404299907692e-06
+              ]
+            },
+            {
+              "height": 95,
+              "az": 90,
+              "rgb": [
+                4.7109526518651634e-07,
+                2.6229350127415785e-06,
+                7.925265554931116e-06
+              ]
+            },
+            {
+              "height": 95,
+              "az": 180,
+              "rgb": [
+                7.509695058027788e-07,
+                4.076392474683388e-06,
+                1.1932102328415795e-05
+              ]
+            }
+          ],
+          "multipleFeedback": 0.3738086262290109
+        },
+        {
+          "name": "日照全高度剖面无暖色条带",
+          "pass": true
+        },
+        {
+          "name": "地影有独立弱绿色气辉",
+          "pass": true
+        },
+        {
+          "name": "气辉低于白昼散射亮度",
+          "pass": true
+        },
+        {
+          "glow": [
+            0.0005603734072523216,
+            0.00248642242513597,
+            0.0003001291975646761
+          ],
+          "dark": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "高云前方透射不包含云后低层空气",
+          "pass": true
+        },
+        {
+          "cloudT": [
+            0.5070999264717102,
+            0.3987819254398346,
+            0.25368183851242065
+          ],
+          "groundT": [
+            0.12669281661510468,
+            0.033930957317352295,
+            0
+          ]
+        }
+      ],
+      "directional": [
+        {
+          "sunElevation": 45,
+          "azimuth": 0,
+          "rgb": [
+            0.03450972071382474,
+            0.05739472337094664,
+            0.10317985967197263
+          ]
+        },
+        {
+          "sunElevation": 45,
+          "azimuth": 90,
+          "rgb": [
+            0.029834401277675893,
+            0.0502025893755611,
+            0.09164201934554228
+          ]
+        },
+        {
+          "sunElevation": 45,
+          "azimuth": 180,
+          "rgb": [
+            0.04419462294311938,
+            0.0723565342719592,
+            0.1272356127138945
+          ]
+        },
+        {
+          "sunElevation": -19,
+          "azimuth": 0,
+          "rgb": [
+            0.01890462962434769,
+            0.016519272210374303,
+            0.011273271744192126
+          ]
+        },
+        {
+          "sunElevation": -19,
+          "azimuth": 90,
+          "rgb": [
+            3.4129739857034906e-10,
+            6.405110257750986e-10,
+            1.9306941224131297e-09
+          ]
+        },
+        {
+          "sunElevation": -19,
+          "azimuth": 180,
+          "rgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "sunElevation": -45,
+          "azimuth": 0,
+          "rgb": [
+            5.729794505988213e-11,
+            3.4660065886728044e-11,
+            2.988718756556701e-11
+          ]
+        },
+        {
+          "sunElevation": -45,
+          "azimuth": 90,
+          "rgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "sunElevation": -45,
+          "azimuth": 180,
+          "rgb": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shaderErrors": []
+    }
+  },
+  "installed": {
+    "version": true,
+    "mission": "dfh1",
+    "illumination": 0,
+    "auxiliary": 0,
+    "environment": false,
+    "solarRGB": [
+      0,
+      0,
+      0
+    ],
+    "pixelRatio": 2,
+    "hdrSamples": 4,
+    "canvas": [
+      1724,
+      1688
+    ],
+    "hdr": [
+      1724,
+      1688
+    ],
+    "shaderErrors": 0
+  },
+  "runtimeHTML": "SHA-256 verified equal to built source",
+  "launcher": "0.32, ad-hoc signature verified"
+}

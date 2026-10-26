@@ -1,0 +1,56 @@
+[
+  {
+    "id": "builtin-computer-beeping",
+    "title": "Space Music (Computer Beeping)",
+    "file": "assets/music/computer-beeping.m4a",
+    "type": "audio/mp4",
+    "duration": 165.163,
+    "artist": "Kevin MacLeod",
+    "sha256": "9cfc120eb173ae7b21bfd8312990c5d80d9d07b032ca59d9cb8288f9dd0d0ffa"
+  },
+  {
+    "id": "builtin-endless-space",
+    "title": "Space Music (Endless Space)",
+    "file": "assets/music/endless-space.m4a",
+    "type": "audio/mp4",
+    "duration": 101.163,
+    "artist": "Kevin MacLeod",
+    "sha256": "494c6a860a89640c6aa50afccf50da04c28c391661143e12e2152628af354500"
+  },
+  {
+    "id": "builtin-kerban-race",
+    "title": "Space Music (For the Kerban Race)",
+    "file": "assets/music/kerban-race.m4a",
+    "type": "audio/mp4",
+    "duration": 158.144,
+    "artist": "Kevin MacLeod",
+    "sha256": "bd91235d04b3adea500f1793dc253222d3ccd45ec9547837b871bf20f4b5e87d"
+  },
+  {
+    "id": "builtin-track-4",
+    "title": "Space Music (Track 4)",
+    "file": "assets/music/track-4.m4a",
+    "type": "audio/mp4",
+    "duration": 110.166,
+    "artist": "Kevin MacLeod",
+    "sha256": "899cf4db75863f0ab2ea819f1e6c959484b2c4c7dc54a42116ea32792817afa7"
+  },
+  {
+    "id": "builtin-bathed-in-the-light",
+    "title": "Bathed In The Light",
+    "file": "assets/music/bathed-in-the-light.m4a",
+    "type": "audio/mp4",
+    "duration": 168.342667,
+    "artist": "Kevin MacLeod",
+    "sha256": "947342fe01b8f49f84818e3aeb9293dc5bb8c380520b35d575c9f0600382da4f"
+  },
+  {
+    "id": "builtin-dreamy-flashback",
+    "title": "Dreamy Flashback",
+    "file": "assets/music/dreamy-flashback.m4a",
+    "type": "audio/mp4",
+    "duration": 126.976,
+    "artist": "Kevin MacLeod",
+    "sha256": "5c6ee3a6396116def3df2038d8bcb3f5f2775242fc5cebb2b517264425a62047"
+  }
+]

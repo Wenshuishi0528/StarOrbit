@@ -1,0 +1,423 @@
+{
+  "version": "0.36",
+  "date": "2026-10-26",
+  "unitSuite": "npm test passed; final geography, sky-placement and scene tests passed",
+  "geography": [
+    {
+      "name": "first launch allocates no geography GPU resources",
+      "pass": true
+    },
+    {
+      "name": "geography and star chart are siblings at the second menu level",
+      "pass": true
+    },
+    {
+      "name": "shared globe overlay enables labels and official China outline",
+      "pass": true
+    },
+    {
+      "name": "Beijing anchor is visible in China view",
+      "pass": true
+    },
+    {
+      "name": "Beijing uses the red five-pointed-star glyph",
+      "pass": true
+    },
+    {
+      "name": "labels avoid text collisions",
+      "pass": true
+    },
+    {
+      "name": "backside and below-horizon anchors are hidden",
+      "pass": true
+    },
+    {
+      "name": "default density includes major landforms and seas alongside countries and capitals",
+      "pass": true
+    },
+    {
+      "name": "labels leave telemetry and minimap areas clear",
+      "pass": true
+    },
+    {
+      "name": "visible count and glyph atlas have bounded size",
+      "pass": true,
+      "atlas": 1024,
+      "visible": 57
+    },
+    {
+      "name": "every complete glyph cell stays inside the atlas texture",
+      "pass": true
+    },
+    {
+      "name": "paused static view reuses layouts, buffers and location lookup",
+      "pass": true,
+      "delta": {
+        "layouts": 0,
+        "uploads": 0,
+        "atlasBuilds": 0,
+        "lookups": 0,
+        "visible": 0,
+        "candidates": 0
+      }
+    },
+    {
+      "name": "all geography layers use at most six draw calls",
+      "pass": true,
+      "drawCalls": 6
+    },
+    {
+      "name": "boundary switch controls global, China and offshore lines",
+      "pass": true
+    },
+    {
+      "name": "river and lake switches control names and geometry",
+      "pass": true
+    },
+    {
+      "name": "current-location readout identifies Beijing",
+      "pass": true
+    },
+    {
+      "name": "location readout can be hidden independently",
+      "pass": true
+    },
+    {
+      "name": "master off stops rendering, layouts and readout",
+      "pass": true
+    },
+    {
+      "name": "English labels and Beijing anchor use shared language",
+      "pass": true
+    },
+    {
+      "name": "model switch retains the shared atlas and settings",
+      "pass": true
+    },
+    {
+      "name": "scene import restores geography settings and controls",
+      "pass": true
+    },
+    {
+      "name": "paused spacecraft geometry movement refreshes complete-label occlusion",
+      "pass": true
+    },
+    {
+      "name": "overview and follow shaders compile without WebGL errors",
+      "pass": true
+    },
+    {
+      "name": "geography preferences persist in the shared environment",
+      "pass": true
+    }
+  ],
+  "persistence": [
+    {
+      "pass": true,
+      "name": "environment preset restores geography values and controls"
+    },
+    {
+      "pass": true,
+      "name": "reopening restores the shared geography preferences"
+    },
+    {
+      "pass": true,
+      "name": "both second-level panels retain independent expansion state"
+    }
+  ],
+  "starChartRegression": [
+    {
+      "name": "shared sky chart enables names and constellation lines",
+      "pass": true
+    },
+    {
+      "name": "Orion and Betelgeuse align with the existing J2000 star field",
+      "pass": true
+    },
+    {
+      "name": "visible labels avoid one another",
+      "pass": true
+    },
+    {
+      "name": "label atlas and display count stay bounded",
+      "pass": true,
+      "atlas": 1024,
+      "visible": 25
+    },
+    {
+      "name": "stationary view reuses layout and GPU buffers",
+      "pass": true,
+      "frames": 30,
+      "layouts": 0,
+      "uploads": 0
+    },
+    {
+      "name": "constellation boundaries use finite spherical geometry",
+      "pass": true
+    },
+    {
+      "name": "all chart graphics use at most three draw calls",
+      "pass": true,
+      "extraDrawCalls": 3
+    },
+    {
+      "name": "expanded name range includes additional named or designated stars",
+      "pass": true,
+      "all": 68,
+      "major": 27
+    },
+    {
+      "name": "classic preset contains exactly the three requested labels",
+      "pass": true
+    },
+    {
+      "name": "classic preset suppresses full constellation overlays",
+      "pass": true
+    },
+    {
+      "name": "classic controls match the effective display",
+      "pass": true
+    },
+    {
+      "name": "classic label appears at Vega",
+      "pass": true
+    },
+    {
+      "name": "classic label appears at Polaris rather than an asterism center",
+      "pass": true
+    },
+    {
+      "name": "disabled chart performs no layout or uploads",
+      "pass": true
+    },
+    {
+      "name": "English sky labels use the shared language setting",
+      "pass": true
+    },
+    {
+      "name": "language changes replace one shared glyph atlas",
+      "pass": true,
+      "builds": 3
+    },
+    {
+      "name": "Earth hides star-label anchors",
+      "pass": true
+    },
+    {
+      "name": "spacecraft switch reuses the chart and preferences",
+      "pass": true
+    },
+    {
+      "name": "spacecraft geometry hides the complete anchored label",
+      "pass": true
+    },
+    {
+      "name": "large imported geometry reuses an acceleration tree for label occlusion",
+      "pass": true
+    },
+    {
+      "name": "scene round trip restores chart settings and controls",
+      "pass": true
+    },
+    {
+      "name": "sky chart shaders compile without WebGL errors",
+      "pass": true
+    },
+    {
+      "name": "shared chart preferences are persisted",
+      "pass": true
+    }
+  ],
+  "minimapRegression": [
+    {
+      "name": "pointer holds the selected time: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968793,
+      "actual": 1792813968792.33
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792813968325,
+      "actual": 1792813968325
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/60/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: tiangong/300/true",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1792670720000,
+      "actual": 1792670719999.4963
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "real-time case starts in real mode",
+      "pass": true
+    },
+    {
+      "name": "pointer holds the selected time: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "scrubbing preserves playback state: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release preserves state and speed: dfh1/real/false",
+      "pass": true
+    },
+    {
+      "name": "clock continues only when previously running: dfh1/1000/false",
+      "pass": true
+    },
+    {
+      "name": "release stays near selected track position",
+      "pass": true,
+      "target": 1793002111899,
+      "actual": 1793002111899.4644
+    },
+    {
+      "name": "saved state matches resumed playback",
+      "pass": true
+    },
+    {
+      "name": "pointercancel releases scrubbing and continues playback",
+      "pass": true
+    },
+    {
+      "name": "lostpointercapture releases scrubbing and continues playback",
+      "pass": true
+    }
+  ],
+  "highestQualityDaylight": {
+    "quality": "high",
+    "daylight": true,
+    "visible": 57,
+    "categories": [
+      "capital",
+      "country",
+      "marine",
+      "landform"
+    ],
+    "atlas": 1024,
+    "glyphs": 617,
+    "lineVertices": {
+      "borders": 79410,
+      "china": 10776,
+      "offshore": 66,
+      "rivers": 8758,
+      "lakes": 11218
+    },
+    "cpuLayoutMs": {
+      "mean": 1.4499999980131786,
+      "max": 2.0999999940395355,
+      "samples": 30
+    },
+    "gpuErrors": 0,
+    "beijingVisible": true,
+    "belowHorizon": 0
+  },
+  "sourceData": {
+    "atlasSha256": "7e350d8ec5289c162f2f5caa62bad6dca1a41852fcb5f9b53c2e2ab4d22fa19d",
+    "officialChinaSha256": "b21fafa0e17a610eaf237aa26ea8e64f937e266e744f1288db5d1bf430282024"
+  },
+  "inactiveResourceCleanup": {
+    "released": true,
+    "inactiveOrbitHidden": true,
+    "version": "v0.36",
+    "gpuErrors": 0
+  },
+  "htmlSha256": "0f8722cb8f7a020e1126b5066225d6cc30a6454ac5bc70294b8246eaa1f04761",
+  "runtimeMirrorMatches": true,
+  "installedSmoke": {
+    "version": "v0.36",
+    "geographyMenu": true,
+    "secondLevel": "settings-annotations",
+    "initiallyOff": true,
+    "beijing": "star",
+    "gpuErrors": 0
+  }
+}

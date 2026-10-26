@@ -26,12 +26,12 @@ export class OrbitMinimap{
    const hit=nearestTrackTime(this.dragPoints,x,y,rect.width,rect.height,this.sim.time);
    if(hit)this.pendingTime=hit.time;
   };
-  const apply=()=>{this.dragFrame=0;if(!Number.isFinite(this.pendingTime))return;const s=this.sim;s.time=Math.max(s.start,Math.min(s.end,this.pendingTime));s.mode='custom';s.paused=true;s.inputDirty=false;s.timeUI();this.lastDraw=-Infinity;};
+  const apply=()=>{this.dragFrame=0;if(!Number.isFinite(this.pendingTime))return;const s=this.sim;s.time=Math.max(s.start,Math.min(s.end,this.pendingTime));if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.inputDirty=false;s.timeUI();this.lastDraw=-Infinity;};
   const finish=e=>{
    if(!this.dragging||e.pointerId!==this.pointerId)return;
    if(e.type==='pointerup')pick(e);cancelAnimationFrame(this.dragFrame);apply();
    this.dragging=false;canvas.classList.remove('dragging');this.dragPoints=null;this.lastTrack=-Infinity;
-   this.sim.dirty=true;this.sim.snap=true;this.sim.sessionMemory?.save();
+   this.sim.lastWall=performance.now();this.sim.dirty=true;this.sim.snap=true;this.sim.sessionMemory?.save();
    if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
   };
   canvas.addEventListener('pointerdown',e=>{
@@ -72,6 +72,7 @@ export class OrbitMinimap{
   c.stroke();
  }
  update(q,wall){
+  this.panel.hidden=!this.visible||!q;
   if(!this.visible||wall-this.lastDraw<(this.dragging?33:250))return;this.lastDraw=wall;
   const c=this.ctx,box=this.canvas.getBoundingClientRect(),w=box.width,h=box.height;if(!w||!h)return;
   const ratio=Math.min(devicePixelRatio||1,2),pw=Math.round(w*ratio),ph=Math.round(h*ratio);
@@ -93,7 +94,7 @@ export class OrbitMinimap{
   for(const lat of [-60,-30,0,30,60]){const y=project(0,lat,w,h)[1];c.moveTo(0,y);c.lineTo(w,y);}
   c.stroke();c.font='9px -apple-system,sans-serif';c.fillStyle='#d2e5edb3';c.textAlign='center';
   for(const lon of [-120,0,120])c.fillText(`${lon}°`,project(lon,0,w,h)[0],h-5);
-  if(!q){$('minimapTime').textContent=t('轨道数据无效');$('minimapPosition').textContent=t('请选择有效时刻或更新轨道数据');return;}
+  if(!q){$('minimapTime').textContent=t(this.sim.data?'轨道数据无效':'轨道待配置');$('minimapPosition').textContent=t('请选择有效时刻或更新轨道数据');return;}
   if(!this.dragging&&(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000))this.rebuild(q);
   const current=[q.t,q.longitude,q.latitude];
   this.trace([...this.points.filter(p=>p[0]<q.t),current],'#76e2fa',w,h);

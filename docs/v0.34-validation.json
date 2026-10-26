@@ -1,0 +1,375 @@
+{
+  "version": "0.34",
+  "date": "2026-10-26",
+  "npmTest": "passed",
+  "build": "passed",
+  "gpuSurfaceRegression": [
+    {
+      "scale": 1,
+      "sun": [
+        0.83102094,
+        0.44858862,
+        0.32889579
+      ],
+      "pixels": 101262,
+      "beforeError": 0.015928976318856036,
+      "afterError": 0,
+      "shadowPixels": 1065,
+      "retainedShadowPixels": 1065,
+      "pass": true
+    },
+    {
+      "scale": 1,
+      "sun": [
+        -0.41859224,
+        0.44150678,
+        0.79363235
+      ],
+      "pixels": 102007,
+      "beforeError": 0.005283951101395002,
+      "afterError": 0,
+      "shadowPixels": 350,
+      "retainedShadowPixels": 350,
+      "pass": true
+    },
+    {
+      "scale": 1,
+      "sun": [
+        -0.88694394,
+        0.45988995,
+        0.04279822
+      ],
+      "pixels": 95453,
+      "beforeError": 0.032141472766701935,
+      "afterError": 0,
+      "shadowPixels": 6514,
+      "retainedShadowPixels": 6514,
+      "pass": true
+    },
+    {
+      "scale": 100,
+      "sun": [
+        0.83102094,
+        0.44858862,
+        0.32889579
+      ],
+      "pixels": 101262,
+      "beforeError": 41.02721652742391,
+      "afterError": 0,
+      "shadowPixels": 1065,
+      "retainedShadowPixels": 1065,
+      "pass": true
+    },
+    {
+      "scale": 100,
+      "sun": [
+        -0.41859224,
+        0.44150678,
+        0.79363235
+      ],
+      "pixels": 102007,
+      "beforeError": 18.333261442842158,
+      "afterError": 0,
+      "shadowPixels": 350,
+      "retainedShadowPixels": 350,
+      "pass": true
+    },
+    {
+      "scale": 100,
+      "sun": [
+        -0.88694394,
+        0.45988995,
+        0.04279822
+      ],
+      "pixels": 95453,
+      "beforeError": 18.095502498611882,
+      "afterError": 0,
+      "shadowPixels": 6514,
+      "retainedShadowPixels": 6514,
+      "pass": true
+    }
+  ],
+  "actualSunlitViewer": [
+    {
+      "id": "tiangong",
+      "time": 1792673220000,
+      "quality": "high",
+      "illumination": 1,
+      "fill": 0,
+      "environment": false,
+      "solarDirectionError": 2.5438405243138006e-16,
+      "normalBias": 0.2896115997992713,
+      "bias": -0.00015869140625000003,
+      "shadowMap": [
+        4096,
+        4096
+      ],
+      "gl": 0,
+      "shaderErrors": 0,
+      "pass": true
+    },
+    {
+      "id": "tiangong",
+      "time": 1792674120000,
+      "quality": "high",
+      "illumination": 1,
+      "fill": 0,
+      "environment": false,
+      "solarDirectionError": 2.4835037038225095e-16,
+      "normalBias": 0.2896115997992713,
+      "bias": -0.00015869140625000003,
+      "shadowMap": [
+        4096,
+        4096
+      ],
+      "gl": 0,
+      "shaderErrors": 0,
+      "pass": true
+    },
+    {
+      "id": "dfh1",
+      "time": 1792813648325,
+      "quality": "high",
+      "illumination": 1,
+      "fill": 0,
+      "environment": false,
+      "solarDirectionError": 1.1102230246251565e-16,
+      "normalBias": 0.039967721756320455,
+      "bias": -0.00015869140625,
+      "shadowMap": [
+        4096,
+        4096
+      ],
+      "gl": 0,
+      "shaderErrors": 0,
+      "pass": true
+    }
+  ],
+  "shadowCache": [
+    {
+      "name": "review uses full sunlight, highest quality and no auxiliary lighting",
+      "pass": true
+    },
+    {
+      "name": "paused scene reuses its shadow map",
+      "pass": true,
+      "frames": 20,
+      "before": 20,
+      "after": 0,
+      "elapsedMs": 341.5
+    },
+    {
+      "name": "cached shadow frames retain identical rendered detail",
+      "pass": true
+    },
+    {
+      "name": "cached spacecraft matches a fully redrawn shadow frame",
+      "pass": true
+    },
+    {
+      "name": "paused solar tracking skips repeated ray tests",
+      "pass": true,
+      "measurements": 0
+    },
+    {
+      "name": "moving only the camera reuses the shadow map",
+      "pass": true,
+      "passes": 0
+    },
+    {
+      "name": "slow solar motion refreshes only after a subpixel change",
+      "pass": true,
+      "frames": 30,
+      "passes": 2
+    },
+    {
+      "name": "solar-array movement invalidates cached shadows",
+      "pass": true,
+      "passes": 1
+    },
+    {
+      "name": "manual array movement refreshes paused illumination readings",
+      "pass": true,
+      "measurements": 1
+    },
+    {
+      "name": "assembly visibility change rebuilds shadow coverage",
+      "pass": true
+    },
+    {
+      "name": "satellite spin updates shadows each changing frame",
+      "pass": true,
+      "frames": 12,
+      "passes": 12
+    },
+    {
+      "name": "full eclipse skips unlit shadow rendering",
+      "pass": true,
+      "passes": 0
+    },
+    {
+      "name": "return to sunlight refreshes the shadow map",
+      "pass": true
+    },
+    {
+      "name": "cached and dynamic GPU rendering stays valid",
+      "pass": true
+    }
+  ],
+  "renderingRegression": [
+    {
+      "name": "full eclipse found in DFH-1 orbit",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: simple",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: simple",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: medium",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: medium",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: standard",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: standard",
+      "pass": true
+    },
+    {
+      "name": "eclipse surface is dark with auxiliary light off: high",
+      "pass": true,
+      "luminance": 0
+    },
+    {
+      "name": "all auxiliary sources disabled: high",
+      "pass": true
+    },
+    {
+      "name": "sunlight illuminates satellite",
+      "pass": true,
+      "luminance": 0.79840087890625
+    },
+    {
+      "name": "auxiliary lighting reveals metallic satellite in eclipse",
+      "pass": true,
+      "luminance": 2.0711669921875
+    },
+    {
+      "name": "imported materials have no independent studio light",
+      "pass": true
+    },
+    {
+      "name": "station uses the same auxiliary reflection",
+      "pass": true
+    },
+    {
+      "name": "station auxiliary light fully switches off",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 1.5",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 1.5",
+      "pass": true
+    },
+    {
+      "name": "screen density change refreshes drawing buffer 2",
+      "pass": true
+    },
+    {
+      "name": "HDR retains full drawing resolution 2",
+      "pass": true
+    },
+    {
+      "name": "HDR uses supported multisampling",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "spacecraft output retains MSAA",
+      "pass": true,
+      "samples": 4
+    },
+    {
+      "name": "no WebGL error",
+      "pass": true
+    },
+    {
+      "name": "GPU shaders compile",
+      "pass": true
+    },
+    {
+      "name": "model-only preview retains display lighting",
+      "pass": true
+    },
+    {
+      "name": "model-only preview follows screen density changes",
+      "pass": true
+    },
+    {
+      "name": "return from preview removes display lighting",
+      "pass": true
+    }
+  ],
+  "visualReview": {
+    "quality": "high",
+    "auxiliaryLighting": false,
+    "stationTimesUtc8": [
+      "2026-10-22 20:47",
+      "2026-10-22 21:02"
+    ],
+    "spacecraft": [
+      "tiangong",
+      "dfh1"
+    ],
+    "screenshots": [
+      "v0.34-shadow-before.png",
+      "v0.34-shadow-after.png",
+      "v0.34-station-day.png",
+      "v0.34-dfh1-day.png"
+    ]
+  },
+  "htmlSha256": "2360db1830fba4271fec53abca94b615f8422a09a1b69c383521b7efb566bdd8",
+  "installedRuntime": {
+    "pass": true,
+    "version": "0.34",
+    "url": "http://127.0.0.1:8771/%E5%A4%A9%E5%AE%AB%E7%A9%BA%E9%97%B4%E7%AB%99%E4%BA%A4%E4%BA%92%E9%A2%84%E8%A7%88.html",
+    "quality": "high",
+    "illumination": 1,
+    "auxiliaryLighting": false,
+    "shadowAutoUpdate": false,
+    "normalBias": 0.3716039432216657,
+    "gl": 0
+  }
+}

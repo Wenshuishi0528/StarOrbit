@@ -1,0 +1,335 @@
+{
+  "version": "0.29",
+  "checkedAt": "2026-10-25T16:43:33.950798+00:00",
+  "automatedSuite": {
+    "command": "npm test",
+    "exitCode": 0,
+    "includes": "all 18 scripts, including mission/orbit/GLB/spin/camera regression"
+  },
+  "browser": {
+    "mission-regression": [
+      {
+        "name": "switch preserves global simulation time",
+        "pass": true
+      },
+      {
+        "name": "independent satellite orbit selected",
+        "pass": true
+      },
+      {
+        "name": "capability-specific controls",
+        "pass": true
+      },
+      {
+        "name": "station labels hidden",
+        "pass": true
+      },
+      {
+        "name": "head axis follows orbital velocity",
+        "pass": true
+      },
+      {
+        "name": "station assembly and manual angles preserved",
+        "pass": true
+      },
+      {
+        "name": "station camera restored",
+        "pass": true
+      },
+      {
+        "name": "satellite pose and camera restored",
+        "pass": true
+      },
+      {
+        "name": "missing orbit keeps spacecraft visible",
+        "pass": true
+      },
+      {
+        "name": "missing orbit clears old track and markers",
+        "pass": true
+      },
+      {
+        "name": "missing orbit clears telemetry",
+        "pass": true
+      },
+      {
+        "name": "model-only scene exports",
+        "pass": true
+      },
+      {
+        "name": "model-only scene imports",
+        "pass": true
+      },
+      {
+        "name": "explicit model-only orbit survives task switching",
+        "pass": true
+      },
+      {
+        "name": "out-of-range scene keeps time and offers jump",
+        "pass": true
+      },
+      {
+        "name": "explicit jump activates orbit",
+        "pass": true
+      },
+      {
+        "name": "independent orbit overview draws",
+        "pass": true
+      },
+      {
+        "name": "scene retains identity and orbital provenance",
+        "pass": true
+      },
+      {
+        "name": "scene round-trip restores satellite pose and view",
+        "pass": true
+      },
+      {
+        "name": "foreign scene rejected before mutation",
+        "pass": true
+      },
+      {
+        "name": "delayed station update cannot overwrite satellite orbit",
+        "pass": true
+      },
+      {
+        "name": "delayed update restored on correct task",
+        "pass": true
+      },
+      {
+        "name": "legacy scene defaults to station",
+        "pass": true
+      },
+      {
+        "name": "Moon view captured",
+        "pass": true
+      },
+      {
+        "name": "Moon return state does not cross tasks",
+        "pass": true
+      },
+      {
+        "name": "concurrent switches serialized",
+        "pass": true
+      },
+      {
+        "name": "selected mission persisted",
+        "pass": true
+      },
+      {
+        "name": "orbit cache references isolated",
+        "pass": true
+      },
+      {
+        "name": "GPU shaders compile",
+        "pass": true
+      }
+    ],
+    "mission-reload": [
+      {
+        "name": "model-only mission survives reload",
+        "pass": true
+      },
+      {
+        "name": "time and spacecraft attitude survive reload",
+        "pass": true
+      },
+      {
+        "name": "station manual wing angles survive other-mission boot",
+        "pass": true
+      },
+      {
+        "name": "station manual wing angles survive own boot",
+        "pass": true
+      },
+      {
+        "name": "scene file upload restores mission",
+        "pass": true
+      },
+      {
+        "name": "scene export downloads JSON file",
+        "pass": true
+      },
+      {
+        "name": "cache read remains consistent with concurrent update",
+        "pass": true
+      },
+      {
+        "name": "automatic trimming protects every selected mission orbit",
+        "pass": true
+      },
+      {
+        "name": "preset restore blocks task switch until complete",
+        "pass": true
+      }
+    ],
+    "mission-spin-controls": [
+      {
+        "name": "120 rpm gives quarter turn in 0.125 s and full turn in 0.5 s",
+        "pass": true
+      },
+      {
+        "name": "spin toggle freezes and resumes without a phase jump",
+        "pass": true
+      },
+      {
+        "name": "camera does not rotate with satellite spin",
+        "pass": true
+      },
+      {
+        "name": "paused simulation freezes spin",
+        "pass": true
+      },
+      {
+        "name": "inertial axis stays fixed; prograde axis follows changing orbital velocity",
+        "pass": true
+      },
+      {
+        "name": "spin settings and phase survive reload",
+        "pass": true
+      },
+      {
+        "name": "scene restores spin and axis mode",
+        "pass": true
+      },
+      {
+        "name": "satellite left drag rotates around model with stable height, distance and target",
+        "pass": true
+      },
+      {
+        "name": "horizon left drag respects updated camera up",
+        "pass": true
+      },
+      {
+        "name": "preset restores camera up, field of view and zoom",
+        "pass": true
+      },
+      {
+        "name": "left drag uses restored preset camera frame",
+        "pass": true
+      },
+      {
+        "name": "station left drag retains original behavior",
+        "pass": true
+      },
+      {
+        "name": "satellite left drag remains correct after mission return",
+        "pass": true
+      }
+    ],
+    "mission-offline": [
+      {
+        "name": "offline station loads",
+        "pass": true
+      },
+      {
+        "name": "offline satellite and independent orbit load",
+        "pass": true
+      },
+      {
+        "name": "horizon up follows satellite radial direction",
+        "pass": true
+      },
+      {
+        "name": "English narrow layout fits viewport",
+        "pass": true
+      },
+      {
+        "name": "offline return restores station model",
+        "pass": true
+      },
+      {
+        "name": "no uncaught browser errors",
+        "pass": true,
+        "errors": []
+      }
+    ],
+    "common-panel": [
+      {
+        "name": "attitude module sits below display and above sharing",
+        "pass": true
+      },
+      {
+        "name": "station has its own common attitude reference",
+        "pass": true
+      },
+      {
+        "name": "satellite has registry-driven controls and source",
+        "pass": true
+      }
+    ]
+  },
+  "browserPassed": 60,
+  "independentOrbitReference": {
+    "tool": "Skyfield 1.55 + Python sgp4",
+    "samples": 9,
+    "maxPositionM": 5.0999454350519695,
+    "maxVelocityMps": 0.009711125060220642,
+    "interpolationChecks": 28,
+    "maxInterpolationM": 0.21930267229059583
+  },
+  "review": {
+    "agent": "review_mission_framework",
+    "status": "completed",
+    "remainingFindings": 0,
+    "fixes": [
+      "preset asynchronous task-switch race",
+      "startup manual-array overwrite",
+      "registry-driven orbit bundle",
+      "persistent explicit empty orbit",
+      "consistent asynchronous cache identity",
+      "all-task orbit cache protection",
+      "preset camera up/fov/zoom restoration"
+    ]
+  },
+  "sources": {
+    "orbit": "https://celestrak.org/NORAD/elements/gp.php?CATNR=4382&FORMAT=JSON",
+    "orbitEpochUTC": "2026-10-24T03:47:28.325472",
+    "spin": "https://www.aas.net.cn/cn/article/pdf/preview/10.16383/j.aas.c220792.pdf",
+    "historicalSpinRPM": 120
+  },
+  "onlineRelay": {
+    "path": "/api/orbit/dfh1",
+    "status": 200,
+    "NORAD_CAT_ID": 4382
+  },
+  "artifacts": {
+    "assets/spacecraft/dongfanghong1_v03_meters.glb": {
+      "bytes": 2833072,
+      "sha256": "3f898d5dc2beadf776c277be59a6f9ad3fbca5c8f90819d384d1848156ac0f68"
+    },
+    "assets/spacecraft/dfh1-gp.json": {
+      "bytes": 416,
+      "sha256": "2a9c91dc4ddb6ad91e7edf72605aed04cbf7d7fcf79712f72c9a8859ceecce37"
+    },
+    "assets/spacecraft/dfh1-orbit.json": {
+      "bytes": 1115996,
+      "sha256": "4b43d867f4c888b1a7756696fbb522837948350c19e1d34921f3791c017cb80f"
+    },
+    "天宫空间站交互预览.html": {
+      "bytes": 212470784,
+      "sha256": "1555d2600998b5e46417d1f041621c1f091b2e6be25f19daef67b54c766915b9"
+    },
+    "docs/v0.29-dfh1.png": {
+      "bytes": 515280,
+      "sha256": "54eabd5acb840f5d76b7d34c54d45566835ae81874c9cc303a0f6fb718d08012"
+    }
+  },
+  "installedRuntime": {
+    "root": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "launcher": "/Applications/天宫轨道模拟.app",
+    "launcherSignatureVerified": true,
+    "version": "v0.29",
+    "labels": [
+      "地球：空间站：中国空间站",
+      "地球：卫星：东方红一号"
+    ],
+    "active": "地球：卫星：东方红一号",
+    "removedWording": true,
+    "spin": "自动自旋 · 120 转/分",
+    "relay": {
+      "status": 200,
+      "id": 4382
+    }
+  }
+}

@@ -1,4 +1,11 @@
 import * as THREE from 'three';
+// Color and depth must support the same sample count. MAX_SAMPLES alone does
+// not guarantee that floating-point HDR attachments support that count.
+export function hdrSamples(gl){
+ const color=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.RGBA16F,gl.SAMPLES)||[]);
+ const depth=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.DEPTH_COMPONENT24,gl.SAMPLES)||[]);
+ return Math.max(0,...color.filter(n=>n<=4&&depth.includes(n)));
+}
 // One viewport-sized HDR buffer, allocated only in the highest quality tier.
 export class AtmosphereRenderer{
  constructor(renderer){
@@ -56,12 +63,12 @@ void main(){
   this.material.uniforms.aspect.value=w/h;
   const changed=!this.target||this.target.width!==w||this.target.height!==h;
   try{
-   if(!this.target){this.target=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false,samples:0});this.target.texture.colorSpace=THREE.LinearSRGBColorSpace;this.material.uniforms.frame.value=this.target.texture;}
+   if(!this.target){this.samples??=hdrSamples(r.getContext());this.target=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false,samples:this.samples});this.target.texture.colorSpace=THREE.LinearSRGBColorSpace;this.material.uniforms.frame.value=this.target.texture;}
    else if(changed)this.target.setSize(w,h);
    r.setRenderTarget(this.target);
    if(changed){const gl=r.getContext();if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('HDR framebuffer unavailable');}
    return true;
-  }catch(error){r.setRenderTarget(null);this.release();this.failed=true;console.warn('Atmosphere HDR fallback:',error.message);return false;}
+  }catch(error){r.setRenderTarget(null);this.release();if(this.samples>0){this.samples=0;return this.begin();}this.failed=true;console.warn('Atmosphere HDR fallback:',error.message);return false;}
  }
  finish(){const r=this.renderer;r.setRenderTarget(null);r.autoClear=true;r.render(this.scene,this.camera);}
  release(){this.target?.dispose();this.target=null;this.material.uniforms.frame.value=null;}
