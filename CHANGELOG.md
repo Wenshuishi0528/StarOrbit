@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.52 — 2026-10-27
+
+**中文：** 修复较高轨道下地表与城市夜景细节变糊的问题：高清分块按视角和屏幕像素需求加载，取消 2,000 公里固定高度限制；保持原有缓存和单路解码上限。
+
+**English:** Fixed blurry ground and city-light detail at higher orbital altitudes. Detail tiles now follow camera projection and screen resolution instead of a fixed 2,000 km cutoff, retaining the existing cache and single-decoder limits.
+
 ## v0.51 — 2026-10-27
 
 **中文：** 东方红一号在 2000 年以前使用 1970 年公报的历史轨道参数（439 × 2384 km、68.5°、114 分钟），2000 年起自动切换现有轨道；位置、地面轨迹和轨道事件同步切换。分界采用 UTC+8。[说明](docs/v0.51-details.md)。

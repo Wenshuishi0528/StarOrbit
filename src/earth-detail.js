@@ -6,6 +6,12 @@ export function detailCell(lon,lat,columns=12,rows=6){
  return {key:`${x}-${y}`,x,y};
 }
 export function detailRect({x,y},columns=12,rows=6){return [x/columns,1-(y+1)/rows,1/columns,1/rows];}
+// Compare a base-map texel with a screen pixel at the nearest surface point.
+// Zoom and display density matter; orbital altitude alone is not a detail limit.
+export function detailNeeded(radius,projectionScale,pixelHeight,mapWidth){
+ const pixelKm=2*Math.max(1,radius-6371)/(projectionScale*Math.max(1,pixelHeight));
+ return pixelKm<2*Math.PI*6371/mapWidth;
+}
 
 // Four resident tiles, one decode in flight. No full-resolution global GPU texture.
 export class EarthDetail{
@@ -22,7 +28,7 @@ export class EarthDetail{
  clear(){this.epoch++;this.wanted=[];for(let i=0;i<4;i++)this.release(i);}
  update(camera){
   const now=performance.now(),e=this.env;
-  if(e.quality!=='high'||camera.position.length()>8371||!e.assets[this.prefix]){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
+  if(e.quality!=='high'||!e.assets[this.prefix]||!detailNeeded(camera.position.length(),camera.projectionMatrix.elements[5],e.api.renderer.domElement.height,e.uniforms[this.night?'nightMap':'dayMap'].value.image.width)){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
   for(let i=0;i<4;i++)e.uniforms[`${this.prefix}Fade${i}`].value=this.slots[i].texture?Math.min(1,(now-this.slots[i].born)/400):0;
   if(now-this.lastCheck<250)return;this.lastCheck=now;
   camera.updateMatrixWorld();this.inverse.copy(e.earth.quaternion).invert();this.origin.copy(camera.position).applyQuaternion(this.inverse);this.sunDirection.copy(e.uniforms.sun.value).applyQuaternion(this.inverse);
