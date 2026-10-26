@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.50 · 作者 / Author: wenshuishi0528**
+**v0.51 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -25,6 +25,7 @@
 - **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失时可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
 - **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
 - **轨道事件时间轴**：底部紧凑显示日照／半影／全影、近远地点和赤道交点，支持 3／12／24 小时窗口、事件筛选与前后导航。拖动保留播放状态，可提前 30 秒观看事件或开启到事件暂停。所有航天器共用，按需计算并缓存。详见 [v0.37 时间轴](docs/v0.37-details.md)。
+- **东方红一号历史轨道**：2000 年以前使用近地点 439 km、远地点 2384 km、倾角 68.5°、周期 114 分钟的历史椭圆；从 2000-01-01 00:00（UTC+8）起自动使用现有轨道。详见 [v0.51 说明](docs/v0.51-details.md)。
 - **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期时间默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
 - **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
@@ -47,7 +48,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.50**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.51**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -72,6 +73,7 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 - **Mission switching:** China Space Station and Dong Fang Hong 1 have independent models, orbits, attitude controls, and cameras. Missions without an orbit retain a model preview. New Earth-orbit missions can be imported through the UI using configuration JSON, a GLB model and an orbit file.
 
 - **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
+- **Dong Fang Hong 1 historical orbit:** Before 2000, uses a 439 × 2384 km ellipse with 68.5° inclination and a 114-minute period. Automatically switches to the current orbit at 2000-01-01 00:00 (UTC+8). See [v0.51 details](docs/v0.51-details.md).
 - **Orbit and time controls:** interpolate published OEM records within their sampled interval and propagate a Kepler ellipse outside it; use real time, a custom date, pause, or playback up to 1000×. The 1s/1m/10m/1h steps can continue across days and years while preserving playback state.
 - **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
@@ -90,7 +92,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.50**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.51**; the GitHub portable download is **v0.38**.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

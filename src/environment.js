@@ -1,3 +1,4 @@
+import {orbitSegment} from './dfh1-history.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from './atmosphere-spectrum.js';
 import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment,atmosphereTransmissionFragment} from './earth-shaders.js';
 import {AtmosphereRenderer} from './atmosphere-renderer.js';
@@ -50,7 +51,7 @@ export class Environment{
   this.backdrop=new THREE.Scene();this.backdrop.background=new THREE.Color('#000104');
   this.starCamera=new THREE.PerspectiveCamera(38,1,.1,2000);
   this.buildStars();this.buildMilkyWay();this.moon=new Moon(this);this.starChart=new StarChart(this);this.geography=new Geography(this);
-  this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
+  this.track=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
   this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.skyStatus();});
  }
@@ -204,9 +205,10 @@ export class Environment{
   if(!q)return;
   const p=V(q.position).normalize().multiplyScalar(EARTH_RADIUS+28).applyQuaternion(this.earth.quaternion.clone().invert());this.groundMarker.position.copy(p);
   if(this.track.visible&&(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000)){
-   const points=[];
+   const points=[];let previous;
    for(let t=q.t-2800000;t<=q.t+2800000;t+=30000){
-    const pv=stateAt(this.sim.data,t);if(!pv)continue;const pos=V(pv.position),axes=earthAxes(t);const local=axes.map(a=>pos.dot(V(a)));points.push(...V(local).normalize().multiplyScalar(EARTH_RADIUS+12).toArray());
+    const pv=stateAt(this.sim.data,t);if(!pv){previous=null;continue;}const pos=V(pv.position),axes=earthAxes(t),segment=orbitSegment(this.sim.data,t);const local=axes.map(a=>pos.dot(V(a))),point=V(local).normalize().multiplyScalar(EARTH_RADIUS+12).toArray();
+    if(previous&&previous.segment===segment)points.push(...previous.point,...point);previous={point,segment};
    }
    this.track.geometry.dispose();this.track.geometry=new THREE.BufferGeometry();this.track.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.lastTrack=q.t;this.trackData=this.sim.data;
   }

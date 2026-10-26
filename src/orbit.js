@@ -1,3 +1,4 @@
+import {DFH1_HISTORY,orbitSegment,historicalEllipse} from './dfh1-history.js';
 import * as Astronomy from 'astronomy-engine';
 export const EARTH_RADIUS=6371, SUN_RADIUS=695700, AU=149597870.7;
 export const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
@@ -40,16 +41,31 @@ function ellipse(row){
 function endpoint(data,last){
  let pair=ellipses.get(data);if(!pair){pair=[ellipse(data.rows[0]),ellipse(data.rows.at(-1))];ellipses.set(data,pair);}return pair[last?1:0];
 }
-export function orbitComputationMode(data,t){
+function sampledOrbitMode(data,t){
  if(!data||!validTime(t))return 'unavailable';
  if(t>=data.rows[0][0]&&t<=data.rows.at(-1)[0])return 'interpolation';
  return endpoint(data,t>data.rows.at(-1)[0])?'propagation':'unavailable';
 }
-export function stateAt(data,t){
- const mode=orbitComputationMode(data,t);if(mode==='unavailable')return null;
+export function orbitComputationMode(data,t){
+ if(!data||!validTime(t))return 'unavailable';
+ return orbitSegment(data,t)==='historical'?'historical':sampledOrbitMode(data,t);
+}
+let historyEllipse;
+// segmentTime fixes the branch for event-solver padding at the era boundary.
+export function stateAt(data,t,segmentTime=t){
+ if(!data||!validTime(t))return null;
+ if(orbitSegment(data,segmentTime)==='historical'){
+  historyEllipse??=historicalEllipse(EARTH_RADIUS,earthAxes(DFH1_HISTORY.epoch));
+  return ellipseState(historyEllipse,t);
+ }
+ const mode=sampledOrbitMode(data,t);if(mode==='unavailable')return null;
  if(mode==='interpolation')return interpolate(data.rows,t);
- const q=endpoint(data,t>data.rows.at(-1)[0]),{a,b,e,x,y,n}=q;
- const M=((q.M+n*((t-q.epoch)/1000%q.period))%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+ return ellipseState(endpoint(data,t>data.rows.at(-1)[0]),t);
+}
+function ellipseState(q,t){
+ const {a,b,e,x,y,n}=q;
+ const elapsed=q.periodMs?((t-q.epoch)%q.periodMs)/1000:(t-q.epoch)/1000%q.period;
+ const M=((q.M+n*elapsed)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
  // Bracketed Newton iteration also converges for highly eccentric imports.
  let lo=0,hi=2*Math.PI,E=e<.8?M:Math.PI;
  for(let i=0;i<48;i++){const f=E-e*Math.sin(E)-M;if(Math.abs(f)<1e-13)break;if(f>0)hi=E;else lo=E;const next=E-f/(1-e*Math.cos(E));E=next>lo&&next<hi?next:(lo+hi)/2;}

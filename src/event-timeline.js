@@ -94,8 +94,9 @@ export class EventTimeline{
     let phase=result.initialPhase,at=start;
     const after=type=>type==='umbra-enter'?'umbra':type==='penumbra-exit'?'sun':type==='penumbra-enter'?'enter':'exit';
     const band=(left,right,kind)=>{if(right<=left)return;const el=document.createElement('i');el.className='event-band '+kind;el.style.left=percent(left)+'%';el.style.width=(percent(right)-percent(left))+'%';bands.append(el);};
-    for(const event of result.events.filter(e=>EVENT_TYPES[e.type].group==='shadow')){
-     if(event.time<=start){phase=after(event.type);continue;}if(event.time>end)break;band(at,event.time,phase);at=event.time;phase=after(event.type);
+    const phaseChanges=[...result.events.filter(e=>EVENT_TYPES[e.type].group==='shadow').map(e=>({time:e.time,phase:after(e.type)})),...(result.transitions||[])].sort((a,b)=>a.time-b.time);
+    for(const event of phaseChanges){
+     if(event.time<=start){phase=event.phase;continue;}if(event.time>end)break;band(at,event.time,phase);at=event.time;phase=event.phase;
     }band(at,end,phase);
     const clusters=[];for(const event of this.events.filter(e=>e.time>=start&&e.time<=end)){const last=clusters.at(-1);if(last&&percent(event.time)-percent(last[0].time)<1.6)last.push(event);else clusters.push([event]);}
     for(const cluster of clusters){const event=cluster[0],type=EVENT_TYPES[event.type],button=document.createElement('button');button.type='button';button.className='event-marker '+type.group;button.style.left=percent(event.time)+'%';button.textContent=type.symbol;button.title=cluster.map(e=>t(EVENT_TYPES[e.type].name)+' · '+clock(e.time)).join('\n');button.setAttribute('aria-label',button.title);button.onclick=()=>{this.choices=cluster;this.choose(event);};markers.append(button);}

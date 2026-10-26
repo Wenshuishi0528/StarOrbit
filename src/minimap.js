@@ -1,3 +1,4 @@
+import {orbitSegment} from './dfh1-history.js';
 import {nearestTrackTime} from './minimap-picking.js';
 import {t,onLanguageChange} from './i18n.js';
 import {shortClock} from './time-format.js';
@@ -53,22 +54,22 @@ export class OrbitMinimap{
   const s=this.sim;this.points=[];
   for(let t=q.t-2800000;t<=q.t+2800000;t+=20000){
    const pv=stateAt(s.data,t);if(!pv)continue;const p=pv.position,fixed=earthAxes(t),v=fixed.map(a=>dot(p,a));
-   this.points.push([t,Math.atan2(v[1],v[0])/DEG,Math.asin(v[2]/norm(v))/DEG]);
+   this.points.push([t,Math.atan2(v[1],v[0])/DEG,Math.asin(v[2]/norm(v))/DEG,orbitSegment(s.data,t)]);
   }
   this.lastTrack=q.t;this.trackData=s.data;
  }
  trace(points,color,w,h){
-  const c=this.ctx;c.beginPath();c.strokeStyle=color;c.lineWidth=1.7;let last;
-  for(const [,lon,lat] of points){
+  const c=this.ctx;c.beginPath();c.strokeStyle=color;c.lineWidth=1.7;let last,lastSegment;
+  for(const [,lon,lat,segment] of points){
    const p=project(lon,lat,w,h);
-   if(!last)c.moveTo(...p);
+   if(!last||segment!==lastSegment)c.moveTo(...p);
    else if(Math.abs(p[0]-last[0])>w/2){
     // Split at the date line instead of drawing a false line across the map.
     const right=last[0]>w/2,x=p[0]+(right?w:-w),edge=right?w:0;
     const y=last[1]+(p[1]-last[1])*(edge-last[0])/(x-last[0]);
     c.lineTo(edge,y);c.moveTo(right?0:w,y);c.lineTo(...p);
    }else c.lineTo(...p);
-   last=p;
+   last=p;lastSegment=segment;
   }
   c.stroke();
  }
@@ -97,7 +98,7 @@ export class OrbitMinimap{
   for(const lon of [-120,0,120])c.fillText(`${lon}°`,project(lon,0,w,h)[0],h-5);
   if(!q){$('minimapTime').textContent=t(this.sim.data?'轨道数据无效':'轨道待配置');$('minimapPosition').textContent=t('请选择有效时刻或更新轨道数据');return;}
   if(!this.dragging&&(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000))this.rebuild(q);
-  const current=[q.t,q.longitude,q.latitude];
+  const current=[q.t,q.longitude,q.latitude,orbitSegment(this.sim.data,q.t)];
   this.trace([...this.points.filter(p=>p[0]<q.t),current],'#76e2fa',w,h);
   this.trace([current,...this.points.filter(p=>p[0]>q.t)],'#ffcc76',w,h);
   const [x,y]=project(q.longitude,q.latitude,w,h);

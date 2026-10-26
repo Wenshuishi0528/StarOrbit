@@ -3,7 +3,7 @@ export function nearestTrackTime(points,x,y,width,height,preferredTime){
  if(points.length<2||width<=0||height<=0)return null;
  let best=null;
  for(let i=1;i<points.length;i++){
-  const a=points[i-1],b=points[i];let ax=(a[1]+180)/360*width,bx=(b[1]+180)/360*width;
+  const a=points[i-1],b=points[i];if(a[3]!==b[3])continue;let ax=(a[1]+180)/360*width,bx=(b[1]+180)/360*width;
   const ay=(90-a[2])/180*height,by=(90-b[2])/180*height;
   if(bx-ax>width/2)bx-=width;else if(bx-ax<-width/2)bx+=width;
   for(const shift of [-width,0,width]){

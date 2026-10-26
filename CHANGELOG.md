@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.51 — 2026-10-27
+
+**中文：** 东方红一号在 2000 年以前使用 1970 年公报的历史轨道参数（439 × 2384 km、68.5°、114 分钟），2000 年起自动切换现有轨道；位置、地面轨迹和轨道事件同步切换。分界采用 UTC+8。[说明](docs/v0.51-details.md)。
+
+**English:** Dong Fang Hong 1 uses the 1970 communiqué’s historical orbit (439 × 2384 km, 68.5°, 114 minutes) before 2000, then automatically switches to the current orbit. Position, ground tracks and events follow the same UTC+8 boundary. [Details](docs/v0.51-details.md).
+
 ## v0.50 — 2026-10-26
 
 **中文：** 恢复时间框的分段键盘操作：左右键选择时、分、秒及 AM／PM，上下键调整当前项，保留直接输入和 24h／12h 切换。

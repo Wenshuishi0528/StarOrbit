@@ -1,3 +1,4 @@
+import {DFH1_HISTORY} from './dfh1-history.js';
 import {EARTH_RADIUS,SUN_RADIUS,dot,norm,stateAt,sunPosition,earthAxes} from './orbit.js';
 
 export const EVENT_TYPES={
@@ -18,10 +19,10 @@ export function shadowAngles(position,sun){
 }
 // The Sun and date-equator pole vary slowly. Five-minute knots are shared by all
 // detectors; spacecraft positions still use the existing ephemeris interpolator.
-function sampler(data){
+function sampler(data,segmentTime){
  const frames=new Map(),frame=t=>{if(!frames.has(t))frames.set(t,{sun:sunPosition(t),pole:earthAxes(t)[2]});return frames.get(t);};
  return time=>{
-  const {position,velocity}=stateAt(data,time),radius=norm(position),k=Math.floor(time/300000)*300000,f=(time-k)/300000,a=frame(k),b=frame(k+300000);
+  const {position,velocity}=stateAt(data,time,segmentTime),radius=norm(position),k=Math.floor(time/300000)*300000,f=(time-k)/300000,a=frame(k),b=frame(k+300000);
   const sun=a.sun.map((v,i)=>v+(b.sun[i]-v)*f),pole=a.pole.map((v,i)=>v+(b.pole[i]-v)*f);
   return {time,radius,radial:dot(position,velocity)/radius,node:dot(position,pole),...shadowAngles(position,sun)};
  };
@@ -37,8 +38,14 @@ function minimum(sample,lo,hi,key='outer',minimize=true){
  return sample((lo+hi)/2);
 }
 export function* scanOrbitEvents(data,start,end){
- if(!stateAt(data,start-60000)||!stateAt(data,end+60000))return {start,end,initialPhase:'sun',events:[]};
- const sample=sampler(data),events=[],scanStart=start-60000,scanEnd=end+60000,initial=sample(start);
+ const cut=DFH1_HISTORY.cutoff;
+ if(data?.missionId!=='dfh1'||start>=cut||end<cut)return yield* scanContinuous(data,start,end,start);
+ const left=yield* scanContinuous(data,start,cut,start),right=yield* scanContinuous(data,cut,end,cut);
+ return {start,end,initialPhase:left.initialPhase,events:[...left.events.filter(e=>e.time<cut),...right.events],transitions:[{time:cut,phase:right.initialPhase}]};
+}
+function* scanContinuous(data,start,end,segmentTime){
+ if(!stateAt(data,start-60000,segmentTime)||!stateAt(data,end+60000,segmentTime))return {start,end,initialPhase:'sun',events:[]};
+ const sample=sampler(data,segmentTime),events=[],scanStart=start-60000,scanEnd=end+60000,initial=sample(start);
  let a=sample(scanStart),previous=null,minRadius=a.radius,maxRadius=a.radius;
  const initialPhase=initial.outer>=0?'sun':initial.inner<=0?'umbra':'penumbra';
  const add=(type,q)=>events.push({type,time:q.time,...(EVENT_TYPES[type].group==='apsis'?{altitude:q.radius-EARTH_RADIUS}:{})});

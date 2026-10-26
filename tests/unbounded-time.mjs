@@ -5,7 +5,8 @@ import {clockText,inputText,parseLocalTime,shortClock} from '../src/time-format.
 import {OrbitEventCache} from '../src/orbit-events.js';
 const mu=398600.4418;
 for(const file of ['assets/orbit.json','assets/spacecraft/dfh1-orbit.json']){
- const data=JSON.parse(fs.readFileSync(file)),energy=q=>dot(q.velocity,q.velocity)/2-mu/norm(q.position);
+ // Exercise the generic endpoint propagator independently of mission-specific eras.
+ const {missionId:ignored,...data}=JSON.parse(fs.readFileSync(file)),energy=q=>dot(q.velocity,q.velocity)/2-mu/norm(q.position);
  for(const row of [data.rows[0],data.rows.at(-1)]){
   const direction=row===data.rows[0]?-1:1,base=stateAt(data,row[0]),epsilon=stateAt(data,row[0]+direction);
   assert(norm(epsilon.position.map((x,i)=>x-base.position[i]-base.velocity[i]*direction/1000))<1e-7,'boundary position and velocity continuity');

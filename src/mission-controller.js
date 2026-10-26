@@ -1,3 +1,4 @@
+import {DFH1_HISTORY,orbitSegment} from './dfh1-history.js';
 import {readPackedModel} from './runtime-assets.js';
 import {missionLibrary} from './mission-library.js';
 import {MISSION_TEMPLATE,unregisterMissionPackage} from './mission-package.js';
@@ -74,7 +75,7 @@ export class MissionController{
  syncUI(){
   const sim=this.sim,id=sim.missionId,craft=spacecraft(id),cap=craft.capabilities;
   $('missionSelect').replaceChildren(...Object.keys(MISSIONS).map(key=>new Option(missionLabel(key,t),key)));$('missionSelect').value=id;$('missionSelect').disabled=this.busy||sim.sceneBusy||this.importing||false;$('importMission').disabled=this.busy||sim.sceneBusy||this.importing||false;for(const key of ['exportScene','importScene'])$(key).disabled=this.busy||sim.sceneBusy||false;
-  $('officialOrbitLink').hidden=!orbitSource(id);$('officialOrbitLink').href=orbitSource(id)||'#';$('dataMessage').textContent='';
+  const source=orbitSegment(sim.data,sim.time)==='historical'?DFH1_HISTORY.source:orbitSource(id);$('officialOrbitLink').hidden=!source;$('officialOrbitLink').href=source||'#';$('dataMessage').textContent='';
   $('activeMission').textContent=missionLabel(id,t);$('activeMission').title=missionLabel(id,t);$('missionSummary').textContent=t(cap.assembly?'模块化空间站 · 地面轨迹定向':'独立卫星 · 航向与自旋');
   for(const name of ['assembly','solar'])document.querySelector(`[data-settings-module="${name}"]`).hidden=!cap[name==='solar'?'solarArrays':'assembly'];
   $('attitudeCraftName').textContent=t(craft.name);$('attitudeAxes').textContent=t(craft.axes||'星体采用右手坐标系；具体轴向由模型配置定义。');$('attitudeFrame').textContent=t(mission(id).attitudeNote||'姿态按当前任务的参考系与控制参数计算。');
