@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {counterEndpoints,isOfficialVisitorPage,parseVisitorCount,loadVisitorCount} from '../src/visitor-counter.js';
+const site='https://starorbit-test.goatcounter.com',official=new URL('https://wenshuishi0528.github.io/StarOrbit/?secret=private-scene#model=private-model');
+assert.equal(counterEndpoints(site).count,site+'/count?p=%2FStarOrbit%2F');
+for(const bad of ['',site+'/data',site+'?key=x',site+'#x','http://starorbit-test.goatcounter.com','https://goatcounter.com','https://evil.goatcounter.com.example.org','https://user:password@starorbit-test.goatcounter.com','https://starorbit-test.goatcounter.com:123'])assert.equal(counterEndpoints(bad),null);
+for(const url of ['http://127.0.0.1:8771/StarOrbit.html','file:///private/name/StarOrbit.html','https://other.github.io/StarOrbit/','https://wenshuishi0528.github.io/Other/','https://wenshuishi0528.github.io/StarOrbit/assets/model.glb','http://wenshuishi0528.github.io/StarOrbit/'])assert(!isOfficialVisitorPage(new URL(url)));
+assert(isOfficialVisitorPage(official));assert(isOfficialVisitorPage(new URL('https://wenshuishi0528.github.io/StarOrbit/index.html')));
+for(const [input,expected] of [['1,234',1234],['0',0],[42,42],[-1,null],['<img>',null],['1,2',null],[Infinity,null],[1.5,null],['99999999999999999',null]])assert.equal(parseVisitorCount(input),expected);
+const now=2000000000000,records=new Map(),storage={getItem:k=>records.get(k),setItem:(k,v)=>records.set(k,v)};
+let calls=[],updates=[];
+const fetch=async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({count:'1,234',ignored:'not displayed'})};};
+const run=(extra={})=>loadVisitorCount({site,location:official,fetch,storage,onChange:x=>updates.push(x),now,...extra});
+await run();assert.equal(calls.length,2);assert.equal(updates.at(-1).count,1234);
+for(const {url,options} of calls){assert(!url.includes('private'));assert.equal(options.credentials,'omit');assert.equal(options.referrerPolicy,'no-referrer');assert.equal(options.redirect,'error');assert.equal(options.method,'GET');assert(!options.body&&!options.headers);}
+assert.equal(calls[0].options.mode,'cors');assert.equal(calls[1].options.mode,'cors');
+calls=[];updates=[];await run({location:new URL('http://localhost:8771/'),now:now+1000});assert.equal(calls.length,0);assert.equal(updates.at(-1).count,1234);
+calls=[];await run({location:new URL('file:///private/StarOrbit.html'),now:now+16*60000});assert.equal(calls.length,1);assert(calls[0].url.endsWith('.json'));
+calls=[];await run({online:false,now:now+3600000});assert.equal(calls.length,0);
+calls=[];await run({site:''});assert.equal(calls.length,0);
+calls=[];await run({automated:true,now:now+3600000});assert.equal(calls.length,1);assert(calls[0].url.endsWith('.json'));
+updates=[];await run({fetch:async()=>{throw Error('offline');},now:now+7200000});assert.equal(updates.at(-1).count,1234,'failed refresh preserves count');
+records.clear();updates=[];await run({fetch:async()=>({ok:true,json:async()=>({count:'<script>alert(1)</script>'})})});assert.equal(updates.length,0,'invalid payload never reaches UI');
+await run({storage:{getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}}});assert.equal(updates.at(-1).count,1234,'storage restrictions do not break counts');
+console.log('Visitor counter: fixed payload, official-site gate, credential/referrer exclusion, local read-only, cache, offline, validation and failure isolation passed');

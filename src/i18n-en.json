@@ -716,5 +716,7 @@
   "左右键切换时、分、秒，上下键调整数值": "Left/right: select hours, minutes or seconds; up/down: adjust",
   "历史轨道 · 1970 年新华社公报": "Historical orbit · 1970 Xinhua communiqué",
   "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 周期 114 分钟": "Perigee 439 km · Apogee 2384 km\nInclination 68.5° · Period 114 min",
-  "2000-01-01 00:00（UTC+8）起自动使用现有轨道": "Automatically uses the current orbit from 2000-01-01 00:00 (UTC+8)"
+  "2000-01-01 00:00（UTC+8）起自动使用现有轨道": "Automatically uses the current orbit from 2000-01-01 00:00 (UTC+8)",
+  "网页累计访问 · {count}": "Web visits · {count}",
+  "统计更新：{time}；同一会话重复访问去重，数字定期更新。": "Statistics fetched: {time}; repeat visits in one session are deduplicated. Counts update periodically."
 }

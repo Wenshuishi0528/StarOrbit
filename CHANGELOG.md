@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.53 — 2026-10-27
+
+**中文：** 新增公开网页累计访问数，本地和网页共用计数模块，支持缓存和四语显示；仅正式网站记录访问，通过固定接口传输计数标识。[说明](docs/v0.53-details.md)。
+
+**English:** Added a public web visit counter shared by local and web builds, with caching and four-language display. Only the official website records visits, using a fixed counter identifier. [Details](docs/v0.53-details.md).
+
 ## v0.52 — 2026-10-27
 
 **中文：** 修复较高轨道下地表与城市夜景细节变糊的问题：高清分块按视角和屏幕像素需求加载，取消 2,000 公里固定高度限制；保持原有缓存和单路解码上限。
