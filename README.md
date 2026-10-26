@@ -33,11 +33,11 @@
 
 新增航天器：点击左栏 **下载配置模板**，填写模型文件名、单位比例、前向轴、轨道法向轴和轨道文件名，再点击 **导入航天器** 一次选择这些文件。配置与例子见 [模块化任务说明](docs/v0.30-details.md)。
 
-从 **[v0.28 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.28)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 235 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+从 **[v0.38 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.38)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 235 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-本地源码与运行版已更新至 **v0.38**；上面的下载链接仍是已发布的 v0.28。
+源码、运行版与下载包均已更新至 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -76,11 +76,11 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 ### Getting started
 
-Download the portable package from the **[v0.28 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.28)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 230 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+Download the portable package from the **[v0.38 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.38)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 235 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The local source/runtime is now **v0.38**; the download above remains the published v0.28 release.
+The source, runtime and downloadable package are all updated to **v0.38**.
 
 The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Positions are not extrapolated beyond that interval. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
