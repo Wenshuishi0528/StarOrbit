@@ -16,7 +16,8 @@ import {DEFAULT_MISSION,mission,spacecraft,orbitState,bindOrbit,VIEW_UNITS_PER_M
 import {spacecraftAttitude} from './spacecraft-attitude.js';
 import {groundTrackAttitude} from './attitude.js';
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a),basis=axes=>new THREE.Matrix4().makeBasis(...axes.map(V));
-import {clockText,inputText,parseLocalTime} from './time-format.js';
+import {clockText} from './time-format.js';
+import {DateTimeInput} from './date-time-input.js';
 export class Simulation{
  constructor(api){
   this.api=api;this.missionId=DEFAULT_MISSION;this.bundledOrbits=Object.fromEntries(Object.entries(JSON.parse($('missionOrbits').textContent)).map(([id,data])=>[id,data===null?null:bindOrbit(validateOrbit(data),id)]));Object.assign(this.bundledOrbits,missionLibrary.orbits);this.bundledOrbit=this.bundledOrbits[DEFAULT_MISSION];this.data=this.bundledOrbit;this.mode='real';this.time=Date.now();this.speed=1;this.timeStep=60000;this.paused=false;this.view='follow';this.auto=true;this.dirty=true;this.snap=true;this.lastSolve=0;this.lastRead=0;this.lastOrbit=0;this.lastWall=performance.now();this.current=null;
@@ -46,7 +47,7 @@ export class Simulation{
 
  dataUI(){if(!this.data){$('dataRange').textContent=t('此任务尚未配置轨道。可导入地心 EME2000 / UTC 的 OEM 或 JSON。');$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');return;}const s=clockText(this.start),e=clockText(this.end);$('dataRange').textContent=t('{source} · {count} 条\n{start} — {end}（UTC+8）\n生成：{created} · EME2000 / UTC',{source:t(this.data.source||'导入数据'),count:this.data.rows.length,start:s,end:e,created:t(this.data.created||'未提供')});$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');}
  gpUI(){const mode=orbitComputationMode(this.data,this.time);$('gpStatus').textContent=t(mode==='interpolation'?'星历插值':mode==='propagation'?'轨道演算 · 开普勒椭圆':'轨道演算不可用');}
- timeUI(){this.gpUI();this.stepUI();for(const id of ['stepBack','stepForward','pauseTime','speed'])$(id).disabled=false;$('viewMode').querySelector('[value=orbit]').disabled=this.orbitStatus!=='ready';$('lookMoon').disabled=this.orbitStatus!=='ready';$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续'):t('Ⅱ 暂停');$('customTime').value=inputText(this.time);$('speed').disabled=this.mode==='real';}
+ timeUI(){this.gpUI();this.stepUI();for(const id of ['stepBack','stepForward','pauseTime','speed'])$(id).disabled=false;$('viewMode').querySelector('[value=orbit]').disabled=this.orbitStatus!=='ready';$('lookMoon').disabled=this.orbitStatus!=='ready';$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续'):t('Ⅱ 暂停');this.timeInput.set(this.time);$('speed').disabled=this.mode==='real';}
  stepUI(){
   const options=[...document.querySelectorAll('[name=timeStep]')],selected=options.find(input=>Number(input.value)===this.timeStep);
   for(const input of options)input.checked=input===selected;
@@ -61,13 +62,13 @@ export class Simulation{
  }
  bind(){
   installDisplayControls();
-  $('customTime').oninput=()=>{this.inputDirty=true;};
+  this.timeInput=new DateTimeInput(this);
   $('toggleTelemetry').onclick=()=>{const on=$('telemetry').classList.toggle('expanded');$('toggleTelemetry').setAttribute('aria-expanded',String(on));};
   $('timeMode').onchange=()=>{if($('timeMode').value==='real')this.realTime();else{this.mode='custom';this.timeUI();}};
   $('goNow').onclick=()=>this.realTime();
   $('pauseTime').onclick=()=>{if(this.mode==='real'){this.time=Date.now();this.mode='custom';this.paused=true;}else this.paused=!this.paused;this.timeUI();};
   $('speed').onchange=()=>{this.speed=Number($('speed').value);this.mode='custom';this.paused=false;this.timeUI();};
-  $('setTime').onclick=()=>{const t=parseLocalTime($('customTime').value);if(!validTime(t)){this.api.toast('请输入有效日期和时间');return;}this.seek(t);};
+  $('setTime').onclick=()=>{const t=this.timeInput.read();if(!validTime(t)){this.api.toast('请输入有效日期和时间');return;}this.seek(t);};
   for(const input of document.querySelectorAll('[name=timeStep]'))input.onchange=()=>{this.timeStep=Number(input.value);this.stepUI();this.sessionMemory?.save();};
   $('stepBack').onclick=()=>this.stepTime(-1);$('stepForward').onclick=()=>this.stepTime(1);
   $('viewMode').onchange=()=>this.setView($('viewMode').value);
@@ -114,7 +115,7 @@ export class Simulation{
   $('illumination').textContent=q.illumination<.001?t('地影 · 无直射'):q.illumination>.999?t('日照'):t('半影 {percent}%',{percent:(q.illumination*100).toFixed(0)});$('illumination').className=q.illumination>.5?'sunlit':'eclipsed';
   $('arrayYield').textContent=this.capabilities.solarArrays?(this.tracker.total*100||0).toFixed(1)+'%':'—';const reading=this.tracker.readings[this.api.state.target];$('selectedYield').textContent=reading?t('所选实例有效受光：{percent}%',{percent:(reading.effective*100).toFixed(1)}):t('受光面积计算中');
   if(this.minimap.dragging||this.timeline.dragging)$('arrayYield').textContent='—';
-  if(!this.inputDirty&&document.activeElement!==$('customTime'))$('customTime').value=inputText(q.t);
+  if(!this.inputDirty&&!this.timeInput.focused)this.timeInput.set(q.t);
   $('simNotice').textContent='';
  }
  render(){

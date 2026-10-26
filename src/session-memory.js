@@ -6,7 +6,7 @@ const KEY='tiangong-session-v1';
 const $=id=>document.getElementById(id);
 const legacyDetailKeys=['orbit-data','sky-style','weather','photography','credits','downloads','attitude'];
 const switches=['occlusion','orbitPath','sunVector','fillLight','labels'];
-const settingsKeys=['tiangong-help-v1','tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
+const settingsKeys=['starorbit-hour-cycle-v1','tiangong-help-v1','tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
 const vector=a=>Array.isArray(a)&&a.length===3&&a.every(v=>Number.isFinite(v)&&Math.abs(v)<1e7);
 function restoreCamera(camera,controls,s){
  if(!s||!vector(s.position)||!vector(s.target))return;

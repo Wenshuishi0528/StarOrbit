@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.49 — 2026-10-26
+
+**中文：** 左侧日期时间默认使用 24 小时制，新增紧凑的 24h／12h 切换并记住选择，保留日期选择器与 UTC+8 时区。
+
+**English:** The orbit date/time input now defaults to 24-hour time, with a compact, remembered 24h/12h selector. The date picker and UTC+8 time zone are preserved.
+
 ## v0.48 — 2026-10-26
 
 **中文：** 普通音乐播放器明确显示“列表循环”，列表末尾回到首曲持续播放；单首歌单使用原生音频循环。东方红一号保留专属广播循环。

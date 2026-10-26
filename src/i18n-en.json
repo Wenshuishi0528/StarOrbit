@@ -709,5 +709,8 @@
   "东方红一号 · 历史广播": "Dong Fang Hong 1 · Historical broadcast",
   "从头播放": "Restart",
   "5 秒后重复播放": "Repeating after 5 seconds",
-  "列表循环": "Repeat playlist"
+  "列表循环": "Repeat playlist",
+  "时间制式": "Time format",
+  "日期": "Date",
+  "时间": "Time"
 }
