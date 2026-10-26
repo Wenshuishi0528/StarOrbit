@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.46 — 2026-10-26
+
+**中文：** 时间轴收起后仅在右下角显示“展开时间轴”按钮，释放原时间轴占用的画面空间。
+
+**English:** Collapsing the timeline now leaves only an Expand timeline button in the bottom-right corner, freeing the timeline’s screen space.
+
 ## v0.45 — 2026-10-26
 
 **中文：** 星空显示默认改为“观赏增强 · 16K 银河”，同步更新四语引导和说明。整体画质继续默认标准 4K，保留已有保存设置。

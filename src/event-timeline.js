@@ -82,7 +82,7 @@ export class EventTimeline{
   $('orbitEventTime').textContent=date(e.time)+' UTC+8'+(Number.isFinite(e.altitude)?' · '+e.altitude.toFixed(1)+' km':'');
  }
  render(){
-  const {visible,expanded}=this.settings;this.panel.hidden=!visible;this.panel.classList.toggle('collapsed',!expanded);document.body.classList.toggle('has-event-timeline',visible);
+  const {visible,expanded}=this.settings;this.panel.hidden=!visible;this.panel.classList.toggle('collapsed',!expanded);document.body.classList.toggle('has-event-timeline',visible&&expanded);
   $('toggleEventTimeline').setAttribute('aria-expanded',String(expanded));$('toggleEventTimeline').textContent=t(expanded?'收起时间轴':'展开时间轴');
   $('eventScale').hidden=!expanded;$('eventRail').hidden=!expanded;$('eventRail').setAttribute('aria-disabled',String(!this.range));
   const bands=$('eventBands'),markers=$('eventMarkers');bands.replaceChildren();markers.replaceChildren();
