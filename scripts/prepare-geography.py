@@ -48,7 +48,7 @@ def label(p, g, kind, key, rank=None):
         biggest=max(polygons(g),key=lambda a:a.area)
         anchor=biggest.centroid
         if not biggest.covers(anchor): anchor=biggest.representative_point()
-    return {'id':key,'kind':kind,'en':en,'zh':zh,'lon':round(anchor.x,4),'lat':round(anchor.y,4),'rank':rank if rank is not None else min(6,max(0,p.get('scalerank') or 0))}
+    return {'id':key,'kind':kind,'en':en,'zh':zh,**{lang:p['name_'+lang] for lang in ['ru','fr'] if p.get('name_'+lang)},'lon':round(anchor.x,4),'lat':round(anchor.y,4),'rank':rank if rank is not None else min(6,max(0,p.get('scalerank') or 0))}
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--cache',type=Path,default=Path('/tmp/tiangong-geodata'));args=ap.parse_args();args.cache.mkdir(parents=True,exist_ok=True)
@@ -91,7 +91,7 @@ def main():
     for p,g in load('ne_50m_populated_places'):
         if p.get('adm0cap')!=1 or p.get('adm0_a3') in ['TWN','HKG','MAC']:continue
         item=label(p,g,'capital','capital-'+str(p['ne_id']),max(1,min(5,p.get('scalerank') or 1)))
-        if p.get('adm0_a3')=='CHN':item.update(id='beijing',zh='北京',en='Beijing',lon=116.4074,lat=39.9042,rank=0,marker='star')
+        if p.get('adm0_a3')=='CHN':item.update(id='beijing',zh='北京',en='Beijing',ru='Пекин',fr='Pékin',lon=116.4074,lat=39.9042,rank=0,marker='star')
         labels.append(item)
     for name,kind in [('geography_marine_polys','marine'),('geography_regions_polys','landform'),('lakes','lake')]:
         for i,(p,g) in enumerate(load('ne_50m_'+name)):

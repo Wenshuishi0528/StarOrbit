@@ -52,7 +52,7 @@ export function validateScene(x){
   bindOrbit(orbit,missionId);
  }
  if(legacy&&!orbit)bad();
- const time=number(x.simulation.time,legacy?orbit.rows[0][0]:-8.64e15,legacy?orbit.rows.at(-1)[0]:8.64e15);
+ const time=number(x.simulation.time,-8.64e15+86400000,8.64e15-86400000);
  if(!spacecraft(missionId).capabilities.solarArrays&&x.simulation.auto!==false)bad();
  const e=x.environment,w=x.weather;
  const environment={quality:choice(e.quality,['simple','medium','standard','high']),exposure:choice(e.exposure,['view','photo','cinematic']),cloudOpacity:number(e.cloudOpacity,0,1),starBrightness:number(e.starBrightness,0,2)};

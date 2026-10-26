@@ -1,0 +1,13 @@
+<dialog id="welcomeDialog" aria-labelledby="welcomeTitle">
+ <div class="help-kicker">✦ <span>开始探索</span></div>
+ <h2 id="welcomeTitle">欢迎来到轨道模拟</h2>
+ <p>在浏览器中探索航天器、地球与星空。用四步导览熟悉操作，也可以直接开始。</p>
+ <div class="help-welcome-actions"><button id="startTour" type="button" class="primary">快速导览</button><button id="skipTour" type="button">直接开始</button></div>
+ <p class="small">右上角“帮助”随时提供说明和导览。</p>
+</dialog>
+<section id="helpPanel" role="dialog" aria-labelledby="helpTitle" tabindex="-1" hidden>
+ <div class="help-heading"><div><span id="helpProgress" class="help-kicker"></span><h2 id="helpTitle"></h2></div><button id="closeHelp" type="button" aria-label="关闭帮助">×</button></div>
+ <div id="helpContents"></div>
+ <div id="tourActions"><button id="tourPrevious" type="button">上一步</button><button id="tourNext" type="button" class="primary">下一步</button></div>
+ <button id="replayTour" type="button">重新播放导览</button>
+</section>

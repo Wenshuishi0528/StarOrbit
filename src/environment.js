@@ -17,7 +17,7 @@ import {normalizeGeographySettings,bindGeographyControls} from './geography-sett
 import {StarChart} from './star-chart.js';
 import {normalizeStarChartSettings,bindStarChartControls} from './star-chart-settings.js';
 import {QUALITY,equatorial,qualityFor} from './environment-math.js';
-import {EARTH_RADIUS,interpolate,earthAxes} from './orbit.js';
+import {EARTH_RADIUS,stateAt,earthAxes} from './orbit.js';
 
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a);
 export class Environment{
@@ -205,8 +205,8 @@ export class Environment{
   const p=V(q.position).normalize().multiplyScalar(EARTH_RADIUS+28).applyQuaternion(this.earth.quaternion.clone().invert());this.groundMarker.position.copy(p);
   if(this.track.visible&&(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000)){
    const points=[];
-   for(let t=Math.max(this.sim.start,q.t-2800000);t<=Math.min(this.sim.end,q.t+2800000);t+=30000){
-    const pos=V(interpolate(this.sim.data.rows,t).position),axes=earthAxes(t);const local=axes.map(a=>pos.dot(V(a)));points.push(...V(local).normalize().multiplyScalar(EARTH_RADIUS+12).toArray());
+   for(let t=q.t-2800000;t<=q.t+2800000;t+=30000){
+    const pv=stateAt(this.sim.data,t);if(!pv)continue;const pos=V(pv.position),axes=earthAxes(t);const local=axes.map(a=>pos.dot(V(a)));points.push(...V(local).normalize().multiplyScalar(EARTH_RADIUS+12).toArray());
    }
    this.track.geometry.dispose();this.track.geometry=new THREE.BufferGeometry();this.track.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.lastTrack=q.t;this.trackData=this.sim.data;
   }

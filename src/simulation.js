@@ -4,7 +4,7 @@ import {t,setText,onLanguageChange} from './i18n.js';
 import * as THREE from 'three';
 import {createOrbitControls} from './camera-controls.js';
 import {parseMissionOrbit} from './gp-orbit.js';
-import {EARTH_RADIUS,validateOrbit,snapshot,interpolate,sunlightFraction,earthAxes,sunPosition} from './orbit.js';
+import {EARTH_RADIUS,validateOrbit,snapshot,interpolate,stateAt,validTime,clampTime,orbitComputationMode,sunlightFraction,earthAxes,sunPosition} from './orbit.js';
 import {SolarTracker} from './solar.js';
 import {SunView} from './sun-view.js';
 import {SpacecraftLighting} from './spacecraft-lighting.js';
@@ -16,8 +16,7 @@ import {DEFAULT_MISSION,mission,spacecraft,orbitState,bindOrbit,VIEW_UNITS_PER_M
 import {spacecraftAttitude} from './spacecraft-attitude.js';
 import {groundTrackAttitude} from './attitude.js';
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a),basis=axes=>new THREE.Matrix4().makeBasis(...axes.map(V));
-const clockText=t=>new Date(t+8*3600000).toISOString().slice(0,19).replace('T',' ');
-const inputText=t=>new Date(t+8*3600000).toISOString().slice(0,19);
+import {clockText,inputText,parseLocalTime} from './time-format.js';
 export class Simulation{
  constructor(api){
   this.api=api;this.missionId=DEFAULT_MISSION;this.bundledOrbits=Object.fromEntries(Object.entries(JSON.parse($('missionOrbits').textContent)).map(([id,data])=>[id,data===null?null:bindOrbit(validateOrbit(data),id)]));Object.assign(this.bundledOrbits,missionLibrary.orbits);this.bundledOrbit=this.bundledOrbits[DEFAULT_MISSION];this.data=this.bundledOrbit;this.mode='real';this.time=Date.now();this.speed=1;this.timeStep=60000;this.paused=false;this.view='follow';this.auto=true;this.dirty=true;this.snap=true;this.lastSolve=0;this.lastRead=0;this.lastOrbit=0;this.lastWall=performance.now();this.current=null;
@@ -31,7 +30,6 @@ export class Simulation{
   this.localSunArrow=new THREE.ArrowHelper(new THREE.Vector3(0,0,1),new THREE.Vector3(),60,0xffd27e,6,3);api.scene.add(this.localSunArrow);
   this.tracker=new SolarTracker(api);this.lighting=new SpacecraftLighting(api);this.shadowCache=new SpacecraftShadowCache(api.sunLight);
   this.bind();this.rebuild();this.dataUI();
-  if(this.time<this.start||this.time>this.end){this.mode='custom';this.time=(this.start+this.end)/2;this.paused=true;setText('dataMessage','当前时间超出内置数据范围，已显示数据中点。可导入新数据后返回实时。');}
   this.timeUI();onLanguageChange(()=>{this.dataUI();this.timeUI();this.controlUI();if(this.current)this.readout(this.current);});
  }
  get start(){return this.data?.rows[0][0]??NaN;}get end(){return this.data?.rows.at(-1)[0]??NaN;}
@@ -46,9 +44,9 @@ export class Simulation{
   this.timeline.reset();this.dataUI();this.timeUI();this.missions?.syncUI();
  }
 
- dataUI(){if(!this.data){$('dataRange').textContent=t('此任务尚未配置轨道。可导入地心 EME2000 / UTC 的 OEM 或 JSON。');$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');return;}const s=clockText(this.start),e=clockText(this.end);$('dataRange').textContent=t('{source} · {count} 条\n{start} — {end}（UTC+8）\n生成：{created} · EME2000 / UTC',{source:t(this.data.source||'导入数据'),count:this.data.rows.length,start:s,end:e,created:t(this.data.created||'未提供')});$('customTime').min=inputText(this.start);$('customTime').max=inputText(this.end);}
- gpUI(){$('gpStatus').textContent=this.data?.propagator==='SGP4'?t('SGP4 计算位置 · 根数历元 {epoch} · 相差 {hours} 小时 · 展示窗口 ±3 天',{epoch:this.data.gpEpoch,hours:((this.time-Date.parse(this.data.gpEpoch))/3600e3).toFixed(1)}):'';}
- timeUI(){this.gpUI();this.stepUI();for(const id of ['stepBack','stepForward','pauseTime','speed'])$(id).disabled=this.orbitStatus!=='ready';$('viewMode').querySelector('[value=orbit]').disabled=this.orbitStatus!=='ready';$('lookMoon').disabled=this.orbitStatus!=='ready';$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续'):t('Ⅱ 暂停');$('customTime').value=inputText(this.time);$('speed').disabled=this.mode==='real'||this.orbitStatus!=='ready';}
+ dataUI(){if(!this.data){$('dataRange').textContent=t('此任务尚未配置轨道。可导入地心 EME2000 / UTC 的 OEM 或 JSON。');$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');return;}const s=clockText(this.start),e=clockText(this.end);$('dataRange').textContent=t('{source} · {count} 条\n{start} — {end}（UTC+8）\n生成：{created} · EME2000 / UTC',{source:t(this.data.source||'导入数据'),count:this.data.rows.length,start:s,end:e,created:t(this.data.created||'未提供')});$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');}
+ gpUI(){const mode=orbitComputationMode(this.data,this.time);$('gpStatus').textContent=t(mode==='interpolation'?'星历插值':mode==='propagation'?'轨道演算 · 开普勒椭圆':'轨道演算不可用');}
+ timeUI(){this.gpUI();this.stepUI();for(const id of ['stepBack','stepForward','pauseTime','speed'])$(id).disabled=false;$('viewMode').querySelector('[value=orbit]').disabled=this.orbitStatus!=='ready';$('lookMoon').disabled=this.orbitStatus!=='ready';$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续'):t('Ⅱ 暂停');$('customTime').value=inputText(this.time);$('speed').disabled=this.mode==='real';}
  stepUI(){
   const options=[...document.querySelectorAll('[name=timeStep]')],selected=options.find(input=>Number(input.value)===this.timeStep);
   for(const input of options)input.checked=input===selected;
@@ -57,10 +55,8 @@ export class Simulation{
   }
  }
  stepTime(direction){
-  if(this.orbitStatus!=='ready')return;
   const target=this.time+direction*this.timeStep;
   this.timeline.jump(target);
-  if(target<=this.start||target>=this.end){this.paused=true;this.timeUI();}
   this.timeline.selected=null;this.timeline.renderSelection();this.timeline.update(performance.now(),true);this.missions?.syncUI();this.sessionMemory?.save();
  }
  bind(){
@@ -71,7 +67,7 @@ export class Simulation{
   $('goNow').onclick=()=>this.realTime();
   $('pauseTime').onclick=()=>{if(this.mode==='real'){this.time=Date.now();this.mode='custom';this.paused=true;}else this.paused=!this.paused;this.timeUI();};
   $('speed').onchange=()=>{this.speed=Number($('speed').value);this.mode='custom';this.paused=false;this.timeUI();};
-  $('setTime').onclick=()=>{const t=Date.parse($('customTime').value+'+08:00');if(!this.data||!Number.isFinite(t)||t<this.start||t>this.end){this.api.toast('请选择轨道数据有效期内的时间');return;}this.seek(t);};
+  $('setTime').onclick=()=>{const t=parseLocalTime($('customTime').value);if(!validTime(t)){this.api.toast('请输入有效日期和时间');return;}this.seek(t);};
   for(const input of document.querySelectorAll('[name=timeStep]'))input.onchange=()=>{this.timeStep=Number(input.value);this.stepUI();this.sessionMemory?.save();};
   $('stepBack').onclick=()=>this.stepTime(-1);$('stepForward').onclick=()=>this.stepTime(1);
   $('viewMode').onchange=()=>this.setView($('viewMode').value);
@@ -79,19 +75,19 @@ export class Simulation{
   $('occlusion').onchange=()=>{this.dirty=true;this.snap=true;};
   $('importOrbit').onchange=async e=>{const id=this.missionId;try{if(this.sceneBusy||this.missions?.busy)throw Error('正在恢复场景…');const f=e.target.files[0];if(!f)return;if(f.size>30e6)throw Error('文件超过 30 MB');const data=parseMissionOrbit(await f.text(),id),weather=this.environment.weather;await weather.ready;const record=await weather.store('orbit',new Blob([JSON.stringify(data)],{type:'application/json'}),{missionId:id,time:Date.parse(data.created)||data.rows[0][0],source:'导入轨道',favorite:true});weather.acceptOrbit(data,record.id,id);setText('dataMessage','轨道数据已保存，下次打开会恢复。');this.api.toast('轨道数据已载入');}catch(err){this.api.toast('导入失败：{error}',{error:t(err.message)});}finally{e.target.value='';}};
  }
- realTime(){const now=Date.now();if(!this.data||now<this.start||now>this.end){setText('dataMessage','当前时刻不在轨道数据有效期内，请更新或导入轨道数据。');this.api.toast('轨道数据已过期或尚未生效；没有外推为实时位置');return;}this.inputDirty=false;this.time=now;this.mode='real';this.paused=false;this.dirty=true;this.snap=true;this.timeUI();}
- seek(t){if(!Number.isFinite(t))return;this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();this.missions?.syncUI();}
+ realTime(){const now=Date.now();this.inputDirty=false;this.time=now;this.mode='real';this.paused=false;this.dirty=true;this.snap=true;this.timeUI();}
+ seek(t){if(!validTime(t))return;this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();this.missions?.syncUI();}
  manual(){this.auto=false;this.lastSolveTime=null;$('autoTrack').checked=false;this.controlUI();}
  controlUI(){if(!this.capabilities.solarArrays)return;$('trackingStatus').textContent=this.auto?t('全舱自动追日 · 计算姿态'):t('手动控制 · 角度保持');$('linkLabs').disabled=this.auto||!(this.api.labs().length>1&&['WT','MT'].includes(this.api.types[this.api.state.target]));$('rotationControls').classList.toggle('auto-controls',this.auto);}
  rebuild(){if(this.capabilities.solarArrays)this.tracker.rebuild();this.dirty=true;this.snap=true;const b=new THREE.Box3(),active=Object.entries(this.missions?.activeGroups()||this.api.groups).filter(([,g])=>g?.visible);active.forEach(([,g])=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());this.shadowDistance=fitSpacecraftShadow(this.api.sunLight,b);this.shadowCache.reset(active.flatMap(([id,g])=>{const r=this.api.rig[id];return [g,...(this.capabilities.solarArrays&&r?[r.roll,r.left,r.right]:[])];}));this.localSunArrow.position.copy(this.center);this.controlUI();}
  setView(view){if(view==='orbit'&&this.orbitStatus!=='ready')view='follow';if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.spaceCamera.near=10;this.spaceCamera.far=1000000;this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
  overviewPosition(){const q=this.current;if(q){const r=V(q.position).normalize(),side=r.clone().cross(V(q.sunDir)).normalize();this.spaceCamera.position.copy(r.addScaledVector(side,.6).normalize().multiplyScalar(28000));}else this.spaceCamera.position.set(14000,-17000,10000);}
  fit(){if(this.view!=='orbit')return false;this.overviewPosition();this.orbitControls.target.set(0,0,0);this.orbitControls.update();return true;}
- updateOrbit(q){const points=[],colors=[];for(let t=Math.max(this.start,q.t-2800000);t<=Math.min(this.end,q.t+2800000);t+=20000){const p=interpolate(this.data.rows,t).position;points.push(...p);const lit=sunlightFraction(p,q.sun);colors.push(...(lit>.5?[.18,.72,.9]:[.36,.24,.48]));}this.orbitLine.geometry.dispose();this.orbitLine.geometry=new THREE.BufferGeometry();this.orbitLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.orbitLine.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));}
+ updateOrbit(q){const points=[],colors=[];for(let t=q.t-2800000;t<=q.t+2800000;t+=20000){const pv=stateAt(this.data,t);if(!pv)continue;const p=pv.position;points.push(...p);const lit=sunlightFraction(p,q.sun);colors.push(...(lit>.5?[.18,.72,.9]:[.36,.24,.48]));}this.orbitLine.geometry.dispose();this.orbitLine.geometry=new THREE.BufferGeometry();this.orbitLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.orbitLine.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));}
  update(wall){
   const elapsed=Math.max(0,(wall-this.lastWall)/1000);this.lastWall=wall;const old=this.time;
   // Scrubbing owns the selected time while held; playback state stays intact.
-  if(!this.minimap.dragging&&!this.timeline.dragging){if(this.mode==='real'){this.time=this.timeline.limitAdvance(old,Date.now());if(this.paused)this.timeUI();}else if(!this.paused){this.time=this.timeline.limitAdvance(old,this.time+elapsed*this.speed*1000);if(this.paused)this.timeUI();if(this.time>=this.end){this.time=this.end;this.paused=true;setText('dataMessage','已到达数据终点，时间已暂停。');this.timeUI();}}}
+  if(!this.minimap.dragging&&!this.timeline.dragging){if(this.mode==='real'){this.time=this.timeline.limitAdvance(old,Date.now());if(this.paused)this.timeUI();}else if(!this.paused){this.time=this.timeline.limitAdvance(old,clampTime(this.time+elapsed*this.speed*1000));if(this.paused)this.timeUI();}}
   const status=this.orbitStatus;if(status!==this.lastOrbitStatus){this.lastOrbitStatus=status;if(status!=='ready')this.setView('follow');this.timeUI();this.missions?.syncUI();}
   const raw=snapshot(this.data,this.time),q=raw&&(mission(this.missionId).attitude==='ground-track'?groundTrackAttitude(raw):spacecraftAttitude(raw,this.missions?.state.rotation.mode==='inertial'?(this.inertialReference||raw):raw));this.current=q;this.missions?.updateRotation();this.minimap.update(q,wall);this.timeline.update(wall);
   if(!q){
@@ -99,7 +95,7 @@ export class Simulation{
    $('simClock').textContent=clockText(this.time);$('clockMode').textContent=t('模型查看 · 无轨道位置');
    for(const id of ['altitude','velocity','arrayYield','groundPoint','selectedYield'])$(id).textContent='—';
    this.marker.visible=this.orbitLine.visible=this.localSunArrow.visible=this.sunArrow.visible=false;$('illumination').textContent=t('展示照明');$('illumination').className='';
-   $('simNotice').textContent=t(this.data?'当前时刻不在此任务轨道有效期内':'轨道待配置 · 当前仅查看模型');return;
+   $('simNotice').textContent=t(this.data?'轨道演算不可用':'轨道待配置 · 当前仅查看模型');return;
   }
   this.api.modelRoot.visible=true;this.earth.quaternion.setFromRotationMatrix(basis(q.earthAxes));this.earth.material.uniforms.sun.value.copy(V(q.sun).normalize());this.marker.position.copy(V(q.position));
   const localSun=V(q.sunLocal);this.api.sunLight.position.copy(this.center).addScaledVector(localSun,this.shadowDistance);this.localSunArrow.setDirection(localSun);

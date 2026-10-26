@@ -1,4 +1,4 @@
-import {EARTH_RADIUS,SUN_RADIUS,dot,norm,interpolate,sunPosition,earthAxes} from './orbit.js';
+import {EARTH_RADIUS,SUN_RADIUS,dot,norm,stateAt,sunPosition,earthAxes} from './orbit.js';
 
 export const EVENT_TYPES={
  'penumbra-enter':{group:'shadow',name:'开始进入地影',symbol:'◐'},
@@ -21,7 +21,7 @@ export function shadowAngles(position,sun){
 function sampler(data){
  const frames=new Map(),frame=t=>{if(!frames.has(t))frames.set(t,{sun:sunPosition(t),pole:earthAxes(t)[2]});return frames.get(t);};
  return time=>{
-  const {position,velocity}=interpolate(data.rows,time),radius=norm(position),k=Math.floor(time/300000)*300000,f=(time-k)/300000,a=frame(k),b=frame(k+300000);
+  const {position,velocity}=stateAt(data,time),radius=norm(position),k=Math.floor(time/300000)*300000,f=(time-k)/300000,a=frame(k),b=frame(k+300000);
   const sun=a.sun.map((v,i)=>v+(b.sun[i]-v)*f),pole=a.pole.map((v,i)=>v+(b.pole[i]-v)*f);
   return {time,radius,radial:dot(position,velocity)/radius,node:dot(position,pole),...shadowAngles(position,sun)};
  };
@@ -37,7 +37,8 @@ function minimum(sample,lo,hi,key='outer',minimize=true){
  return sample((lo+hi)/2);
 }
 export function* scanOrbitEvents(data,start,end){
- const sample=sampler(data),events=[],scanStart=Math.max(data.rows[0][0],start-60000),scanEnd=Math.min(data.rows.at(-1)[0],end+60000),initial=sample(start);
+ if(!stateAt(data,start-60000)||!stateAt(data,end+60000))return {start,end,initialPhase:'sun',events:[]};
+ const sample=sampler(data),events=[],scanStart=start-60000,scanEnd=end+60000,initial=sample(start);
  let a=sample(scanStart),previous=null,minRadius=a.radius,maxRadius=a.radius;
  const initialPhase=initial.outer>=0?'sun':initial.inner<=0?'umbra':'penumbra';
  const add=(type,q)=>events.push({type,time:q.time,...(EVENT_TYPES[type].group==='apsis'?{altitude:q.radius-EARTH_RADIUS}:{})});
@@ -60,7 +61,7 @@ export function* scanOrbitEvents(data,start,end){
    const candidate=root(sample,'radial',a,b),perigee=b.radial>a.radial;
    // Imported velocity samples need not be the exact derivative of interpolated
    // positions. Refine the displayed altitude's extremum near the radial root.
-   const q=minimum(sample,Math.max(data.rows[0][0],candidate.time-30000),Math.min(data.rows.at(-1)[0],candidate.time+30000),'radius',perigee),left=sample(Math.max(data.rows[0][0],q.time-30000)),right=sample(Math.min(data.rows.at(-1)[0],q.time+30000));
+   const q=minimum(sample,candidate.time-30000,candidate.time+30000,'radius',perigee),left=sample(q.time-30000),right=sample(q.time+30000);
    if((perigee?Math.min(left.radius,right.radius)-q.radius:q.radius-Math.max(left.radius,right.radius))>1e-5)add(perigee?'perigee':'apogee',q);
   }
   previous=a;a=b;yield;
@@ -85,7 +86,7 @@ export class OrbitEventCache{
   this.promise=new Promise(resolve=>{
    this.resolve=resolve;const run=()=>{
     if(token!==this.generation)return;const begin=performance.now();let step;
-    do{step=scan.next();}while(!step.done&&performance.now()-begin<4);
+    try{do{step=scan.next();}while(!step.done&&performance.now()-begin<4);}catch{this.pending=null;this.resolve=null;resolve(null);return;}
     if(step.done){this.result=step.value;this.pending=null;this.resolve=null;resolve(this.result);}else this.timer=setTimeout(run,0);
    };this.timer=setTimeout(run,0);
   });return this.promise;

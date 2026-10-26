@@ -1,6 +1,7 @@
 import {nearestTrackTime} from './minimap-picking.js';
 import {t,onLanguageChange} from './i18n.js';
-import {interpolate,earthAxes,dot,norm,unit} from './orbit.js';
+import {shortClock} from './time-format.js';
+import {stateAt,earthAxes,dot,norm,unit} from './orbit.js';
 
 const $=id=>document.getElementById(id),DEG=Math.PI/180;
 const project=(lon,lat,w,h)=>[(lon+180)/360*w,(90-lat)/180*h];
@@ -26,7 +27,7 @@ export class OrbitMinimap{
    const hit=nearestTrackTime(this.dragPoints,x,y,rect.width,rect.height,this.sim.time);
    if(hit)this.pendingTime=hit.time;
   };
-  const apply=()=>{this.dragFrame=0;if(!Number.isFinite(this.pendingTime))return;const s=this.sim;s.time=Math.max(s.start,Math.min(s.end,this.pendingTime));if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.inputDirty=false;s.timeUI();this.lastDraw=-Infinity;};
+  const apply=()=>{this.dragFrame=0;if(!Number.isFinite(this.pendingTime))return;const s=this.sim;s.time=this.pendingTime;if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.inputDirty=false;s.timeUI();this.lastDraw=-Infinity;};
   const finish=e=>{
    if(!this.dragging||e.pointerId!==this.pointerId)return;
    if(e.type==='pointerup')pick(e);cancelAnimationFrame(this.dragFrame);apply();
@@ -42,7 +43,7 @@ export class OrbitMinimap{
   });
   canvas.addEventListener('pointermove',e=>{if(!this.dragging||e.pointerId!==this.pointerId)return;e.preventDefault();pick(e);if(!this.dragFrame)this.dragFrame=requestAnimationFrame(apply);});
   for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,finish);
-  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key)||!this.sim.current)return;e.preventDefault();this.sim.seek(Math.max(this.sim.start,Math.min(this.sim.end,this.sim.time+(e.key==='ArrowLeft'?-60000:60000))));this.lastDraw=-Infinity;this.sim.sessionMemory?.save();});
+  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key)||!this.sim.current)return;e.preventDefault();this.sim.seek(this.sim.time+(e.key==='ArrowLeft'?-60000:60000));this.lastDraw=-Infinity;this.sim.sessionMemory?.save();});
  }
  setVisible(on){
   this.visible=on;this.panel.hidden=!on;$('showMinimap').checked=on;this.lastDraw=-Infinity;
@@ -50,8 +51,8 @@ export class OrbitMinimap{
  }
  rebuild(q){
   const s=this.sim;this.points=[];
-  for(let t=Math.max(s.start,q.t-2800000);t<=Math.min(s.end,q.t+2800000);t+=20000){
-   const p=interpolate(s.data.rows,t).position,fixed=earthAxes(t),v=fixed.map(a=>dot(p,a));
+  for(let t=q.t-2800000;t<=q.t+2800000;t+=20000){
+   const pv=stateAt(s.data,t);if(!pv)continue;const p=pv.position,fixed=earthAxes(t),v=fixed.map(a=>dot(p,a));
    this.points.push([t,Math.atan2(v[1],v[0])/DEG,Math.asin(v[2]/norm(v))/DEG]);
   }
   this.lastTrack=q.t;this.trackData=s.data;
@@ -102,7 +103,7 @@ export class OrbitMinimap{
   const [x,y]=project(q.longitude,q.latitude,w,h);
   c.fillStyle='#75e5ff33';c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();
   c.fillStyle='#fff';c.strokeStyle='#072b3c';c.lineWidth=1.7;c.beginPath();c.arc(x,y,3.7,0,Math.PI*2);c.fill();c.stroke();
-  $('minimapTime').textContent=`${this.dragging?t('拖动定位'):this.sim.mode==='real'?t('实时'):t('模拟')} · ${new Date(q.t+8*3600000).toISOString().slice(11,19)}`;
+  $('minimapTime').textContent=`${this.dragging?t('拖动定位'):this.sim.mode==='real'?t('实时'):t('模拟')} · ${shortClock(q.t)}`;
   $('minimapPosition').textContent=`${coordinate(q.latitude,'N','S')} / ${coordinate(q.longitude,'E','W')}`;
  }
 }

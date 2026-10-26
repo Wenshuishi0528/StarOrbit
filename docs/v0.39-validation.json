@@ -1,0 +1,357 @@
+{
+  "version": "0.39",
+  "automatedSuite": "npm test passed",
+  "browserChecks": [
+    {
+      "name": "72 hourly steps tiangong/-1/true",
+      "pass": true,
+      "details": {
+        "delta": -259200000,
+        "paused": true,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -2245.8317513597153,
+          -5370.769041648038,
+          -3446.989462612718
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps tiangong/-1/false",
+      "pass": true,
+      "details": {
+        "delta": -259199934,
+        "paused": false,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -2245.4723350148124,
+          -5371.055577323577,
+          -3446.7767917647557
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps tiangong/1/true",
+      "pass": true,
+      "details": {
+        "delta": 259200000,
+        "paused": true,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -4384.755928096203,
+          -4794.068775102993,
+          -1896.4782139876775
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps tiangong/1/false",
+      "pass": true,
+      "details": {
+        "delta": 259200018,
+        "paused": false,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -4384.692400483891,
+          -4794.159380239105,
+          -1896.3955847718976
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "future year events tiangong",
+      "pass": true
+    },
+    {
+      "name": "72 hourly steps dfh1/-1/true",
+      "pass": true,
+      "details": {
+        "delta": -259200000,
+        "paused": true,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -5395.674165363147,
+          -1063.277771197642,
+          6300.3197492226045
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps dfh1/-1/false",
+      "pass": true,
+      "details": {
+        "delta": -259199940,
+        "paused": false,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -5395.387193635131,
+          -1063.4444130281286,
+          6300.529482298498
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps dfh1/1/true",
+      "pass": true,
+      "details": {
+        "delta": 259200000,
+        "paused": true,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -4641.322724861633,
+          4365.099689027475,
+          -4261.013373189629
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "72 hourly steps dfh1/1/false",
+      "pass": true,
+      "details": {
+        "delta": 259200018,
+        "paused": false,
+        "speed": 60,
+        "ready": "ready",
+        "position": [
+          -4641.4161327199345,
+          4365.10980054573,
+          -4260.924855940242
+        ],
+        "points": 281
+      }
+    },
+    {
+      "name": "future year events dfh1",
+      "pass": true
+    },
+    {
+      "name": "switch keeps date",
+      "pass": true
+    },
+    {
+      "name": "scene restores future date",
+      "pass": true
+    },
+    {
+      "name": "real-time step continues at 1x",
+      "pass": true
+    },
+    {
+      "name": "restart restores date outside samples",
+      "pass": true
+    },
+    {
+      "name": "language preserves simulation ru",
+      "pass": true,
+      "details": {
+        "lang": "ru",
+        "time": 1795564800000,
+        "mission": "tiangong",
+        "speed": 1,
+        "mode": "Расчёт орбиты · эллипс Кеплера"
+      }
+    },
+    {
+      "name": "language preserves simulation fr",
+      "pass": true,
+      "details": {
+        "lang": "fr",
+        "time": 1795564800000,
+        "mission": "tiangong",
+        "speed": 1,
+        "mode": "Propagation orbitale · ellipse de Kepler"
+      }
+    },
+    {
+      "name": "language preserves simulation en",
+      "pass": true,
+      "details": {
+        "lang": "en",
+        "time": 1795564800000,
+        "mission": "tiangong",
+        "speed": 1,
+        "mode": "Orbit propagation · Kepler ellipse"
+      }
+    },
+    {
+      "name": "language preserves simulation zh-CN",
+      "pass": true,
+      "details": {
+        "lang": "zh-CN",
+        "time": 1795564800000,
+        "mission": "tiangong",
+        "speed": 1,
+        "mode": "轨道演算 · 开普勒椭圆"
+      }
+    },
+    {
+      "name": "language controls fit Ru/1440",
+      "pass": true,
+      "details": [
+        {
+          "id": "languageZh",
+          "x": 1250.546875,
+          "right": 1294.546875,
+          "width": 44
+        },
+        {
+          "id": "languageEn",
+          "x": 1296.546875,
+          "right": 1332.6015625,
+          "width": 36.0546875
+        },
+        {
+          "id": "languageRu",
+          "x": 1334.6015625,
+          "right": 1371.2890625,
+          "width": 36.6875
+        },
+        {
+          "id": "languageFr",
+          "x": 1373.2890625,
+          "right": 1408,
+          "width": 34.7109375
+        }
+      ]
+    },
+    {
+      "name": "header fits Ru/1440",
+      "pass": true
+    },
+    {
+      "name": "language controls fit Fr/1440",
+      "pass": true,
+      "details": [
+        {
+          "id": "languageZh",
+          "x": 1250.546875,
+          "right": 1294.546875,
+          "width": 44
+        },
+        {
+          "id": "languageEn",
+          "x": 1296.546875,
+          "right": 1332.6015625,
+          "width": 36.0546875
+        },
+        {
+          "id": "languageRu",
+          "x": 1334.6015625,
+          "right": 1371.2890625,
+          "width": 36.6875
+        },
+        {
+          "id": "languageFr",
+          "x": 1373.2890625,
+          "right": 1408,
+          "width": 34.7109375
+        }
+      ]
+    },
+    {
+      "name": "header fits Fr/1440",
+      "pass": true
+    },
+    {
+      "name": "language controls fit Ru/390",
+      "pass": true,
+      "details": [
+        {
+          "id": "languageZh",
+          "x": 253.75,
+          "right": 287.75,
+          "width": 34
+        },
+        {
+          "id": "languageEn",
+          "x": 289.75,
+          "right": 317.3671875,
+          "width": 27.6171875
+        },
+        {
+          "id": "languageRu",
+          "x": 319.3671875,
+          "right": 347.5078125,
+          "width": 28.140625
+        },
+        {
+          "id": "languageFr",
+          "x": 349.5078125,
+          "right": 376,
+          "width": 26.4921875
+        }
+      ]
+    },
+    {
+      "name": "header fits Ru/390",
+      "pass": true
+    },
+    {
+      "name": "language controls fit Fr/390",
+      "pass": true,
+      "details": [
+        {
+          "id": "languageZh",
+          "x": 253.75,
+          "right": 287.75,
+          "width": 34
+        },
+        {
+          "id": "languageEn",
+          "x": 289.75,
+          "right": 317.3671875,
+          "width": 27.6171875
+        },
+        {
+          "id": "languageRu",
+          "x": 319.3671875,
+          "right": 347.5078125,
+          "width": 28.140625
+        },
+        {
+          "id": "languageFr",
+          "x": 349.5078125,
+          "right": 376,
+          "width": 26.4921875
+        }
+      ]
+    },
+    {
+      "name": "header fits Fr/390",
+      "pass": true
+    },
+    {
+      "name": "French persists",
+      "pass": true
+    }
+  ],
+  "subagentReview": {
+    "time": "passed; extended-year formatting and Date limits fixed and rechecked",
+    "languagesAndData": "passed; docs corrected; geometry/source hashes unchanged"
+  },
+  "implementation": {
+    "endpointCache": "two ellipses per orbit, WeakMap",
+    "eventCache": "one bounded window, 4 ms batches"
+  },
+  "localRuntime": {
+    "version": "0.39",
+    "signature": "codesign verification passed",
+    "htmlSHA256": "a6ded6e29dbcd858011a271cf790f59c427f5cd7c0cc8b8381e82c10adcdb544",
+    "sourceRuntimeMatch": true,
+    "smoke": "port 8771: source end + 60 days + 1 hour, finite position and both added language controls"
+  }
+}

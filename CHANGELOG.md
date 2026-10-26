@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v0.40 — 2026-10-26
+
+**中文：** 新增 GitHub Pages 在线版，与桌面版共用源码和版本号，模型、贴图与音乐按需加载。新增四步首次导览与右上角帮助，支持四种语言；网页版默认使用内置轨道和云图，保留文件导入。详见[网页版说明](docs/v0.40-details.md)。
+
+**English:** Added a GitHub Pages web edition sharing the desktop source and version, with on-demand model, texture and music loading. Added a four-step welcome tour and upper-right help in four languages. The web edition uses bundled orbits and clouds with file import support. See [details](docs/v0.40-details.md).
+
+## v0.39 — 2026-10-26
+
+**中文：** 新增俄语和法语界面，语言选择自动保存。时间步进可连续跨天、跨年，轨迹、小地图和事件时间轴同步延续；跳转保留播放状态。轨道区间外复用缓存的开普勒椭圆参数，计算和缓存大小不随时间跨度增长。全套自动测试、27 项浏览器检查及 subagent 审查通过。详见[更新说明](docs/v0.39-details.md)。
+
+**English:** Added Russian and French with a persistent language selector. Time steps continue across days and years, with synchronized tracks, minimap and event timeline while preserving playback state. Outside sampled ephemerides, cached Kepler ellipses provide constant-cost propagation without growing stored history. See [details](docs/v0.39-details.md).
+
 ## v0.38 — 2026-10-26
 
 - 时间步进新增 1s／1m／10m／1h 四档，默认 1m；采用两行紧凑布局，选中时长以青色突出，前后按钮同步显示 ± 时长，中间暂停／继续保持单行。

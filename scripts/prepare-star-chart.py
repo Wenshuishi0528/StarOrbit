@@ -142,7 +142,7 @@ def generate(raw):
         ra, dec = point(feature['geometry']['coordinates'])
         if ident not in constellations:
             constellations[ident] = {'id': ident, 'zh': CONSTELLATION_ALIASES.get(ident, clean(p['zh'])),
-                                    'en': clean(p['name']), 'ra': ra, 'dec': dec,
+                                    'en': clean(p['name']), **{lang:clean(p[lang]) for lang in ['ru','fr'] if p.get(lang)}, 'ra': ra, 'dec': dec,
                                     'labelPositions': [], 'lines': []}
         constellations[ident]['labelPositions'].append([ra, dec])
     for feature in const_lines['features']:
@@ -169,7 +169,7 @@ def generate(raw):
         designation = designation or f'HIP {ident}'
         zh = STAR_ALIASES.get(ident, zh) or designation
         en = en or designation
-        stars.append({'id': ident, 'zh': zh, 'en': en, 'ra': ra, 'dec': dec, 'mag': mag,
+        stars.append({'id': ident, 'zh': zh, 'en': en, **{lang:clean(name[lang]) for lang in ['ru','fr'] if name.get(lang)}, 'ra': ra, 'dec': dec, 'mag': mag,
                       'major': major, 'hasProperName': proper, 'nameType': 'proper' if proper else 'designation'})
 
     boundaries = dense_boundaries(const_bounds['features'], raw)

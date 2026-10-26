@@ -21,6 +21,41 @@ export function interpolate(rows,t){
  for(let i=0;i<8;i++){let w=1;for(let j=0;j<8;j++)if(i!==j)w*=(t-p[j][0])/(p[i][0]-p[j][0]);for(let k=0;k<6;k++)out[k]+=w*p[i][k+1];}
  return {position:out.slice(0,3),velocity:out.slice(3)};
 }
+// Source samples remain unchanged. Outside their span, reuse the nearest endpoint's
+// osculating ellipse. Evaluation is constant cost even after years of time steps.
+const MU=398600.4418,ellipses=new WeakMap();
+// Reserve one day at the Date representation edge for astronomical sampling.
+export const MIN_TIME=-8.64e15+86400000,MAX_TIME=8.64e15-86400000;
+export const validTime=t=>Number.isFinite(t)&&t>=MIN_TIME&&t<=MAX_TIME;
+export const clampTime=t=>Math.max(MIN_TIME,Math.min(MAX_TIME,t));
+function ellipse(row){
+ const r=row.slice(1,4),v=row.slice(4),radius=norm(r),h=cross(r,v),hmag=norm(h),energy=dot(v,v)/2-MU/radius;
+ if(!(energy<0)||hmag<1e-8)return null;
+ const a=-MU/(2*energy),ev=cross(v,h).map((x,i)=>x/MU-r[i]/radius),e=norm(ev);
+ if(!(e<1)||a*(1-e)<=EARTH_RADIUS)return null;
+ const x=e>1e-10?unit(ev):unit(r),y=unit(cross(unit(h),x)),b=a*Math.sqrt(1-e*e);
+ const E=Math.atan2(dot(r,y)/b,dot(r,x)/a+e),n=Math.sqrt(MU/a**3);
+ return {epoch:row[0],a,b,e,x,y,n,M:E-e*Math.sin(E),period:2*Math.PI/n};
+}
+function endpoint(data,last){
+ let pair=ellipses.get(data);if(!pair){pair=[ellipse(data.rows[0]),ellipse(data.rows.at(-1))];ellipses.set(data,pair);}return pair[last?1:0];
+}
+export function orbitComputationMode(data,t){
+ if(!data||!validTime(t))return 'unavailable';
+ if(t>=data.rows[0][0]&&t<=data.rows.at(-1)[0])return 'interpolation';
+ return endpoint(data,t>data.rows.at(-1)[0])?'propagation':'unavailable';
+}
+export function stateAt(data,t){
+ const mode=orbitComputationMode(data,t);if(mode==='unavailable')return null;
+ if(mode==='interpolation')return interpolate(data.rows,t);
+ const q=endpoint(data,t>data.rows.at(-1)[0]),{a,b,e,x,y,n}=q;
+ const M=((q.M+n*((t-q.epoch)/1000%q.period))%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+ // Bracketed Newton iteration also converges for highly eccentric imports.
+ let lo=0,hi=2*Math.PI,E=e<.8?M:Math.PI;
+ for(let i=0;i<48;i++){const f=E-e*Math.sin(E)-M;if(Math.abs(f)<1e-13)break;if(f>0)hi=E;else lo=E;const next=E-f/(1-e*Math.cos(E));E=next>lo&&next<hi?next:(lo+hi)/2;}
+ const c=Math.cos(E),s=Math.sin(E),rate=n/(1-e*c);
+ return {position:x.map((v,i)=>a*(c-e)*v+b*s*y[i]),velocity:x.map((v,i)=>rate*(-a*s*v+b*c*y[i]))};
+}
 export function sunPosition(t){const v=Astronomy.GeoVector(Astronomy.Body.Sun,new Date(t),false);return [v.x*AU,v.y*AU,v.z*AU];}
 // Fraction of the apparent solar disc outside the spherical Earth's disc.
 export function sunlightFraction(r,sun){
@@ -37,7 +72,7 @@ export function earthAxes(t){
 }
 export function snapshot(data,t){
  if(!data)return null;
- const pv=interpolate(data.rows,t);if(!pv)return null;
+ const pv=stateAt(data,t);if(!pv)return null;
  const r=pv.position,z=unit(r),x=unit(sub(pv.velocity,z.map(v=>v*dot(pv.velocity,z)))),y=unit(cross(z,x)),basis=[x,y,z];
  const sun=sunPosition(t),sunDir=unit(sub(sun,r)),fixed=earthAxes(t),ecef=fixed.map(a=>dot(r,a)),rho=norm(r);
  return {...pv,t,basis,earthAxes:fixed,sun,sunDir,sunLocal:basis.map(a=>dot(a,sunDir)),illumination:sunlightFraction(r,sun),altitude:rho-EARTH_RADIUS,speed:norm(pv.velocity),latitude:Math.asin(ecef[2]/rho)*180/Math.PI,longitude:Math.atan2(ecef[1],ecef[0])*180/Math.PI};

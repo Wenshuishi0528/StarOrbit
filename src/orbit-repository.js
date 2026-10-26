@@ -29,7 +29,7 @@ export class OrbitRepository{
   }
  }
  activate(data,recordId,notify=true){this.selected=recordId;this.resources.active.orbit=recordId==='none'?null:recordId;this.use(data,notify);this.save();}
- use(data,notify=true){this.sim.setOrbit(data);if(notify&&this.sim.orbitStatus==='out-of-range')this.sim.api.toast('当前时刻不在此任务轨道有效期内');}
+ use(data,notify=true){this.sim.setOrbit(data);if(notify&&this.sim.orbitStatus==='out-of-range')this.sim.api.toast('轨道演算不可用');}
  accept(data,recordId,id){data=bindOrbit(validateOrbit(data),id);this.records[id]=recordId;if(id===this.sim.missionId)this.activate(data,recordId);this.save();this.resources.render();this.sim.sessionMemory?.save();}
  async update(id){
   const r=this.resources,task=mission(id),source=orbitSource(id);if(!source){r.messages.orbit='此任务没有在线轨道源，请导入轨道文件';return;}

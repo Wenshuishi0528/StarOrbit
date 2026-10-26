@@ -1,3 +1,4 @@
+import {validTime} from './orbit.js';
 import {DEFAULT_MISSION} from './missions.js';
 import {MISSION_MEMORY_KEY} from './mission-controller.js';
 import {setText} from './i18n.js';
@@ -5,7 +6,7 @@ const KEY='tiangong-session-v1';
 const $=id=>document.getElementById(id);
 const legacyDetailKeys=['orbit-data','sky-style','weather','photography','credits','downloads','attitude'];
 const switches=['occlusion','orbitPath','sunVector','fillLight','labels'];
-const settingsKeys=['tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
+const settingsKeys=['tiangong-help-v1','tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
 const vector=a=>Array.isArray(a)&&a.length===3&&a.every(v=>Number.isFinite(v)&&Math.abs(v)<1e7);
 function restoreCamera(camera,controls,s){
  if(!s||!vector(s.position)||!vector(s.target))return;
@@ -26,11 +27,11 @@ export async function installSessionMemory(sim,assembly){
  if(saved){
   if([1000,60000,600000,3600000].includes(saved.timeStep))sim.timeStep=saved.timeStep;
   if([1,10,60,300,1000].includes(saved.speed))sim.speed=saved.speed;
-  const now=Date.now(),valid=x=>Number.isFinite(x)&&x>=sim.start&&x<=sim.end;
+  const now=Date.now(),valid=validTime;
   sim.mode=saved.mode==='real'?'real':'custom';sim.paused=!!saved.paused;
   const desired=sim.mode==='real'?now:saved.time;
   if(valid(desired))sim.time=desired;
-  else{if(Number.isFinite(saved.time))sim.time=saved.time;sim.mode='custom';sim.paused=true;}
+  else{if(validTime(saved.time))sim.time=saved.time;sim.mode='custom';sim.paused=true;}
   sim.setView(saved.view==='orbit'?'orbit':'follow');
   if((saved.missionId||DEFAULT_MISSION)===sim.missionId)restoreCamera(api.camera,api.controls,saved.camera);
   if(sim.view==='orbit')restoreCamera(sim.spaceCamera,sim.orbitControls,saved.spaceCamera);

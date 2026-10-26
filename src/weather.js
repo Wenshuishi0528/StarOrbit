@@ -1,3 +1,4 @@
+import {WEB_BUILD} from './runtime-assets.js';
 import {normalizeGeographySettings,syncGeographyControls} from './geography-settings.js';
 import {normalizeStarChartSettings,syncStarChartControls} from './star-chart-settings.js';
 import {validateRotation} from './spacecraft-attitude.js';
@@ -28,6 +29,7 @@ export class Weather{
   this.settings.limit=clamp(Number(this.settings.limit)||200,20,2000);this.settings.auroraStrength=clamp(Number.isFinite(Number(this.settings.auroraStrength))?Number(this.settings.auroraStrength):1.4,0,4);this.settings.seed=String(this.settings.seed).slice(0,80);this.settings.exposure=clamp(Number(this.settings.exposure)||1.15,.3,2.5);
   // Background suspension is not a low-performance sample. Keep the simulation clock intact.
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){this.fpsStart=performance.now();this.frames=0;this.fastWindows=0;}});
+  if(WEB_BUILD){for(const id of ['updateCloudSource','updateEnvironment'])$(id).hidden=true;for(const option of $('cloudSource').querySelectorAll('[value=latest],[value=satcorps]'))option.remove();if(['satcorps','latest'].includes(this.settings.cloud))this.settings.cloud='builtin';}
   this.bind();this.sync();this.ready=this.restore();onLanguageChange(()=>{this.render();this.renderPresets();});
  }
  async restore(){try{
@@ -58,7 +60,7 @@ export class Weather{
  async fetch(url,max=16e6){const r=await fetch(url,{cache:'no-cache',signal:AbortSignal.timeout(25000)});if(!r.ok)throw Error('HTTP '+r.status);if(Number(r.headers.get('content-length'))>max)throw Error('数据超过大小限制');const blob=await r.blob();if(blob.size>max)throw Error('数据超过大小限制');return {blob,r};}
  async store(kind,blob,extra={}){const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');const id=kind+'-'+(kind==='orbit'?(extra.missionId||this.sim.missionId)+'-':'')+(extra.provider==='satcorps'?'satcorps-'+extra.time+'-':'')+hash;const existing=this.items.find(x=>x.id===id);if(existing){this.messages[kind]='已是最新可用数据';return existing;}
   const record={id,kind,...(kind==='orbit'?{missionId:extra.missionId||this.sim.missionId}:{}),blob,size:blob.size,downloaded:Date.now(),time:null,favorite:false,source:SOURCE[kind],...extra};await this.cache.put(record);await this.reload();this.messages[kind]='更新成功';return record;}
- async updateAll(){if(this.busy||this.sim.sceneBusy)return;const missionId=this.sim.missionId;this.settings.checked=Date.now();this.save();this.busy=true;$('updateCloudSource').disabled=$('updateEnvironment').disabled=$('clearEnvironment').disabled=$('importSnapshot').disabled=true;this.messages={cloud:'检查中…',aurora:'检查中…',orbit:'检查中…',assets:'内置素材已就绪，无需重复下载'};this.render();
+ async updateAll(){if(WEB_BUILD)return;if(this.busy||this.sim.sceneBusy)return;const missionId=this.sim.missionId;this.settings.checked=Date.now();this.save();this.busy=true;$('updateCloudSource').disabled=$('updateEnvironment').disabled=$('clearEnvironment').disabled=$('importSnapshot').disabled=true;this.messages={cloud:'检查中…',aurora:'检查中…',orbit:'检查中…',assets:'内置素材已就绪，无需重复下载'};this.render();
   try{await Promise.allSettled(['cloud','aurora','orbit'].map(async k=>{try{
    if(k==='cloud')await this.updateCloud();
    if(k==='aurora'){const {blob}=await this.fetch(SOURCE.aurora,3e6),v=validateAurora(JSON.parse(await blob.text()));await this.store(k,blob,{time:v.time,observed:v.observed,resolution:'360×181'});}
@@ -75,6 +77,7 @@ export class Weather{
   if(!response.ok)throw Error('NASA 本地资源服务暂不可用');return response.json();
  }
  async restoreNASA(){
+  if(WEB_BUILD)return;
   if(!/^https?:$/.test(location.protocol))return;
   const job=await this.nasaCall('status');
   if(job.result){try{await this.acceptNASA(job);await this.apply('cloud');}catch(e){if(job.state!=='running')throw e;this.messages.cloud=e.message;}}
@@ -109,6 +112,7 @@ export class Weather{
   const row=await this.store('cloud',blob,meta);if(meta.updateMessage)this.messages.cloud=meta.updateMessage;return row;
  }
  async updateCloud(){
+  if(WEB_BUILD)return;
   const current=this.items.find(r=>r.id===this.settings.cloudHistory);
   if(this.settings.cloud==='satcorps'||(this.settings.cloud==='history'&&cloudProvider(current)==='satcorps'))return this.updateNASA();
   // Prefer lossless alpha. Validate before caching; fall back to the legacy JPEG
@@ -157,7 +161,7 @@ export class Weather{
   try{return await promise;}finally{if(this.pendingApply[k]===request)delete this.pendingApply[k];}
  }
  async clear(){const selected=[...document.querySelectorAll('[data-clear-kind]:checked')].map(x=>x.dataset.clearKind),include=$('clearFavorites').checked;
-  if(selected.includes('cloud')&&/^https?:$/.test(location.protocol)){try{const r=await fetch('/api/cloud/satcorps/clear',{method:'POST'});if(r.ok&&!(await r.json()).cleared)throw Error('云图正在下载，请完成后清理');}catch(e){if(e.message.includes('正在下载'))throw e;}}
+  if(!WEB_BUILD&&selected.includes('cloud')&&/^https?:$/.test(location.protocol)){try{const r=await fetch('/api/cloud/satcorps/clear',{method:'POST'});if(r.ok&&!(await r.json()).cleared)throw Error('云图正在下载，请完成后清理');}catch(e){if(e.message.includes('正在下载'))throw e;}}
   for(const k of ['cloud','aurora'])if(selected.includes(k)){++this.tokens[k];this.release(k);if(k==='cloud')this.bindCloud();else this.env.auroraUniforms.auroraMap.value=this.env.fallback;}
   if(selected.includes('orbit')){this.useOrbit(this.sim.bundledOrbit);this.active.orbit=null;this.settings.orbitRecord=null;this.save();}
   for(const r of this.items)if(selected.includes(r.kind)&&(!r.favorite||include))await this.cache.remove(r.id);
@@ -209,6 +213,6 @@ export class Weather{
   else if(!p.settings.orbitRecord||p.settings.orbitRecord==='none'){this.useOrbit(p.settings.orbitRecord==='none'?null:this.sim.bundledOrbit,false);this.active.orbit=null;}
   else this.env.api.toast('收藏的轨道缓存已删除，已保留当前轨道。');
   const {orbitRecords,orbitRecord,...sharedSettings}=p.settings;Object.assign(this.settings,sharedSettings);this.settings.orbitRecord=record?record.id:p.settings.orbitRecord==='none'?'none':p.settings.orbitRecord?previous:null;this.sync();this.save();for(const key of ['quality','exposure','cloudOpacity','starBrightness','stars','milky','moon','clouds','groundTrack'])if(Object.hasOwn(p.environment,key))this.env.settings[key]=p.environment[key];Object.assign(this.env.settings,normalizeStarChartSettings(p.environment),normalizeGeographySettings(p.environment));this.env.save();await this.env.setQuality(p.environment.quality);await this.env.setSkyStyle();for(const [id,k] of [['showMoon','moon'],['showStars','stars'],['showClouds','clouds'],['showMilky','milky'],['groundTrack','groundTrack']])$(id).checked=this.env.settings[k];syncStarChartControls(this.env.settings);syncGeographyControls(this.env.settings);$('skyExposure').value=this.env.settings.exposure;$('cloudOpacity').value=this.env.settings.cloudOpacity;$('starBrightness').value=this.env.settings.starBrightness;
- if(p.time>=this.sim.start&&p.time<=this.sim.end)this.sim.seek(p.time);else this.env.api.toast('收藏时间超出轨道有效期，已保留当前时间');this.sim.setView(p.view);this.env.api.controls.stopMotion();this.env.api.camera.up.fromArray(p.cameraUp||[0,0,1]).normalize();this.env.api.camera.fov=p.cameraFov||38;this.env.api.camera.zoom=p.cameraZoom||1;this.env.api.camera.updateProjectionMatrix();this.env.api.camera.position.fromArray(p.camera);this.env.api.controls.target.fromArray(p.target);this.env.api.controls.update();this.sim.orbitControls.stopMotion();this.sim.spaceCamera.up.fromArray(p.spaceUp||[0,0,1]).normalize();this.sim.spaceCamera.fov=p.spaceFov||38;this.sim.spaceCamera.zoom=p.spaceZoom||1;this.sim.spaceCamera.updateProjectionMatrix();this.sim.spaceCamera.position.fromArray(p.spaceCamera);this.sim.orbitControls.target.fromArray(p.spaceTarget);this.sim.orbitControls.update();await Promise.allSettled(['cloud','aurora'].map(k=>this.apply(k)));}
+ this.sim.seek(p.time);this.sim.setView(p.view);this.env.api.controls.stopMotion();this.env.api.camera.up.fromArray(p.cameraUp||[0,0,1]).normalize();this.env.api.camera.fov=p.cameraFov||38;this.env.api.camera.zoom=p.cameraZoom||1;this.env.api.camera.updateProjectionMatrix();this.env.api.camera.position.fromArray(p.camera);this.env.api.controls.target.fromArray(p.target);this.env.api.controls.update();this.sim.orbitControls.stopMotion();this.sim.spaceCamera.up.fromArray(p.spaceUp||[0,0,1]).normalize();this.sim.spaceCamera.fov=p.spaceFov||38;this.sim.spaceCamera.zoom=p.spaceZoom||1;this.sim.spaceCamera.updateProjectionMatrix();this.sim.spaceCamera.position.fromArray(p.spaceCamera);this.sim.orbitControls.target.fromArray(p.spaceTarget);this.sim.orbitControls.update();await Promise.allSettled(['cloud','aurora'].map(k=>this.apply(k)));}
  capture(){const {renderer,camera}=this.env.api,size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect;try{const max=renderer.capabilities.maxTextureSize,w=Math.min(3840,max,Math.floor(max*aspect)),h=Math.round(w/aspect);renderer.setPixelRatio(1);renderer.setSize(w,h,false);this.sim.render();const url=renderer.domElement.toDataURL('image/png'),a=document.createElement('a');a.href=url;a.download='Tiangong-Earth-'+new Date(this.sim.time).toISOString().replaceAll(':','-')+'.png';a.click();}finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);}}
 }

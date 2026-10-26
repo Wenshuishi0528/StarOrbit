@@ -1,3 +1,4 @@
+import {readPackedModel} from './runtime-assets.js';
 import {missionLibrary} from './mission-library.js';
 import {MISSION_TEMPLATE,unregisterMissionPackage} from './mission-package.js';
 import {orbitSource} from './orbit-repository.js';
@@ -47,7 +48,7 @@ export class MissionController{
   const definition=spacecraft(id),record=missionLibrary.packages.get(id);let buffer;
   if(record)buffer=await record.blob.arrayBuffer();
   else{const encoded=JSON.parse($('spacecraftModels').textContent)[mission(id).spacecraft];if(!encoded)throw Error('缺少航天器模型');
-   const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));buffer=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();}
+   buffer=await readPackedModel(encoded);}
   const gltf=await new GLTFLoader().parseAsync(buffer,''),root=normalizeSpacecraft(gltf.scene,definition);root.name='mission_'+id;root.visible=false;
   const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3()).length();if(box.isEmpty()||!Number.isFinite(size)||size<.0001||size>5e6)throw Error('模型尺寸无效，请检查比例与网格');
   // Preserve the GLB's PBR materials; the shared scene owns display lighting.
@@ -71,7 +72,7 @@ export class MissionController{
   for(const key of ['roll','pitch','yaw'])$('craft'+key).value=this.state.pose[key];
   if(!cap.assembly){$('status').textContent=t(craft.name);$('selection').textContent=t(craft.name)+' · '+t('航向与自旋');}
   else{this.api.syncControls();setText('status','{count} 个舱体',{count:Object.keys(this.api.groups).length});}
-  const status=sim.orbitStatus;$('missionOrbitStatus').textContent=t(status==='missing'?'轨道待配置 · 当前仅查看模型':status==='out-of-range'?'当前时刻不在此任务轨道有效期内':'已载入此任务的独立轨道');
+  const status=sim.orbitStatus;$('missionOrbitStatus').textContent=t(status==='missing'?'轨道待配置 · 当前仅查看模型':status==='out-of-range'?'轨道演算不可用':'已载入此任务的独立轨道');
   $('validOrbitTime').hidden=status!=='out-of-range';
  }
  async importPackage(files){

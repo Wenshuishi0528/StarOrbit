@@ -1,10 +1,10 @@
+import {validTime,clampTime} from './orbit.js';
 import {EVENT_TYPES,OrbitEventCache,selectedEvents,eventBetween} from './orbit-events.js';
 import {t,onLanguageChange} from './i18n.js';
 
 const $=id=>document.getElementById(id),KEY='tiangong-timeline-v1';
 const defaults={visible:true,expanded:true,hours:3,shadow:true,apsis:true,node:true,autoPause:false};
-const clock=time=>new Date(time+8*3600000).toISOString().slice(11,19);
-const date=time=>new Date(time+8*3600000).toISOString().slice(5,19).replace('T',' ');
+import {shortClock as clock,shortDate as date} from './time-format.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export class EventTimeline{
  constructor(sim){
@@ -16,7 +16,7 @@ export class EventTimeline{
   $('eventRange').value=this.settings.hours;$('eventRange').onchange=()=>{this.settings.hours=Number($('eventRange').value);this.range=null;this.selected=null;this.save();this.update(performance.now(),true);};
   $('toggleEventTimeline').onclick=()=>{this.settings.expanded=!this.settings.expanded;this.save();this.render();};
   $('previousOrbitEvent').onclick=()=>this.navigate(-1);$('nextOrbitEvent').onclick=()=>this.navigate(1);
-  $('watchOrbitEvent').onclick=()=>{if(!this.selected)return;this.jump(Math.max(sim.start,this.selected.time-30000));sim.speed=1;sim.paused=false;sim.timeUI();sim.sessionMemory?.save();};
+  $('watchOrbitEvent').onclick=()=>{if(!this.selected)return;this.jump(this.selected.time-30000);sim.speed=1;sim.paused=false;sim.timeUI();sim.sessionMemory?.save();};
   $('closeOrbitEvent').onclick=()=>{this.selected=null;this.renderSelection();};
   $('orbitEventChoice').onchange=()=>this.choose(this.choices[Number($('orbitEventChoice').value)]);
   this.bindScrub();onLanguageChange(()=>{this.render();this.lastUpdate=-Infinity;});this.render();
@@ -26,8 +26,8 @@ export class EventTimeline{
  get events(){return selectedEvents(this.cache.result,this.settings);}
  next(time=this.sim.time){return this.events.find(e=>e.time>time)||null;}
  jump(time){
-  const s=this.sim;if(!s.data)return;
-  if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.time=clamp(time,s.start,s.end);s.inputDirty=false;s.dirty=s.snap=true;s.lastWall=performance.now();s.timeUI();
+  const s=this.sim;if(!validTime(time))return;
+  if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.time=time;s.inputDirty=false;s.dirty=s.snap=true;s.lastWall=performance.now();s.timeUI();
  }
  choose(event){if(!event)return;this.selected=event;this.jump(event.time);this.renderSelection();this.sim.sessionMemory?.save();this.lastUpdate=-Infinity;}
  navigate(direction){const events=this.events,event=direction>0?this.next():events.findLast(e=>e.time<this.sim.time-1);if(event){this.choices=[event];this.choose(event);}}
@@ -48,10 +48,10 @@ export class EventTimeline{
   const s=this.sim;if(!s.data||s.orbitStatus!=='ready'){if(this.cache.data||this.range)this.reset();return;}
   if(this.dragging||s.minimap.dragging)return;
   const span=this.settings.hours*3600000,step=span/8,anchor=Math.floor(s.time/step)*step;
-  const start=Math.max(s.start,Math.min(anchor-step,s.end-span)),end=Math.min(s.end,start+span);
+  const start=clampTime(anchor-step),end=clampTime(start+span);
   if(this.range?.start!==start||this.range?.end!==end){this.range={start,end};this.render();}
   const result=this.cache.result;if(this.cache.data===s.data&&result?.start<=start&&result.end>=end)return;
-  const a=Math.max(s.start,start-span/4),b=Math.min(s.end,end+span/4);
+  const a=clampTime(start-span/4),b=clampTime(end+span/4);
   if(this.cache.data===s.data&&this.cache.pending?.start===a&&this.cache.pending.end===b)return;
   this.cache.request(s.data,a,b).then(result=>{if(result&&this.cache.result===result){this.render();this.lastUpdate=-Infinity;}});this.render();
  }

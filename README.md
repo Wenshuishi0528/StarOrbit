@@ -1,6 +1,10 @@
 # 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
 
-**v0.38 · 作者 / Author: wenshuishi0528**
+**v0.40 · 作者 / Author: wenshuishi0528**
+**[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/Tiangong-Orbit-Simulator-China-Space-Station/)**
+
+浏览器直接使用，默认内置轨道与云图。首次访问可选择四步导览，右上角“？帮助”随时查看说明。[网页版与部署说明](docs/v0.40-details.md)。
+
 
 ![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
 
@@ -12,10 +16,10 @@
 
 - **背景音乐**：内置六首太空音乐，启动随机首曲并按列表循环；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，切换任务保持连续播放。
 - **公共资源**：NASA 已下载云图保存在软件公共目录，启动自动恢复；更新期间继续提供已有云图，切换模型保留云图选择与纹理。
-- **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失或过期时仍可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
+- **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失时可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
 - **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
 - **轨道事件时间轴**：底部紧凑显示日照／半影／全影、近远地点和赤道交点，支持 3／12／24 小时窗口、事件筛选与前后导航。拖动保留播放状态，可提前 30 秒观看事件或开启到事件暂停。所有航天器共用，按需计算并缓存。详见 [v0.37 时间轴](docs/v0.37-details.md)。
-- **轨道与时间**：采用公开 OEM 轨道记录，在有效期内插值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，跳转保留播放状态。
+- **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
 - **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
 - **四档地球**：1K 简易、2K 流畅、4K 标准、8K 精细；8K可开启体积云和动态演变，另有云图与极光数据模式。
@@ -25,7 +29,7 @@
 - **星图标注**：地理与星图中的二级折叠菜单提供主要恒星、全部已收录星名和精选三项；支持 88 星座名称、连线、边界与标注密度，名称自动避让，所有航天器共用。详见 [v0.35 星图标注](docs/v0.35-details.md)。
 - **真实星表星空**：41,411颗独立星点；可选原生16K NASA银河背景、主星名称和曝光风格。增强背景按需加载，切回普通模式释放。
 - **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
-- **中英文切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
+- **中英俄法四语切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
 - **场景分享**：导出／导入 JSON，恢复舱体组合、太阳翼、时间、镜头和环境设置；文件包含所用轨道，下载云图与极光按快照匹配。
 - **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示、全屏尺寸自适应及三维画面截图。
 
@@ -37,13 +41,13 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、运行版与下载包均已更新至 **v0.38**。
+源码、网页版与本机运行版共用 **v0.40**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
-天宫内置轨道快照覆盖 **2026-10-19 00:00 至 2026-10-26 00:00 UTC**；超出有效期不会外推“实时位置”。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
+天宫内置轨道快照覆盖 **2026-10-19 00:00 至 2026-10-26 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
 
-东方红一号使用 CelesTrak 的 **DFH 1 / NORAD 4382 / 1970-034A** 根数，通过 SGP4 计算。内置根数历元为 **2026-10-24 03:47:28 UTC**，展示窗口为历元前后各三天；顶部任务栏可切换，轨道数据栏显示历元和时间差。模型顶部短天线校正为星体 +Z；默认顶部朝轨道前进方向，支持开关 120 转/分自旋；下方通用姿态模块可切换惯性定轴示意与手动偏移。详见 [v0.29 任务框架与验证](docs/v0.29-details.md)。
+东方红一号使用 CelesTrak 的 **DFH 1 / NORAD 4382 / 1970-034A** 根数，通过 SGP4 计算。内置根数历元为 **2026-10-24 03:47:28 UTC**，采样区间为历元前后各三天，区间外接续开普勒椭圆演算；顶部任务栏可切换，轨道数据栏显示当前计算模式。模型顶部短天线校正为星体 +Z；默认顶部朝轨道前进方向，支持开关 120 转/分自旋；下方通用姿态模块可切换惯性定轴示意与手动偏移。详见 [v0.29 任务框架与验证](docs/v0.29-details.md)。
 
 本软件使用模拟姿态与计算太阳翼角度。云图可选内置、下载快照或地理约束生成；体积与运动为示意。普通银河为艺术算法，增强银河来自NASA星表可视化。
 
@@ -59,10 +63,10 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 - **Background music:** Six built-in tracks, a random opening track and an ordered playlist loop. A spinning note expands on hover and collapses on exit, with import, removal, drag sorting, volume and seeking. Playback continues across mission changes.
 - **Shared resources:** NASA cloud images persist in a shared application library, restore on startup and remain available during updates. Switching spacecraft retains the selected environment and texture.
-- **Mission switching:** China Space Station and Dong Fang Hong 1 have independent models, orbits, attitude controls, and cameras. Missing or expired orbits retain a model preview. New Earth-orbit missions can be imported through the UI using configuration JSON, a GLB model and an orbit file.
+- **Mission switching:** China Space Station and Dong Fang Hong 1 have independent models, orbits, attitude controls, and cameras. Missions without an orbit retain a model preview. New Earth-orbit missions can be imported through the UI using configuration JSON, a GLB model and an orbit file.
 
 - **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
-- **Orbit and time controls:** interpolate published OEM records within their validity interval; use real time, a custom date, pause, or playback up to 1000×.
+- **Orbit and time controls:** interpolate published OEM records within their sampled interval and propagate a Kepler ellipse outside it; use real time, a custom date, pause, or playback up to 1000×. The 1s/1m/10m/1h steps can continue across days and years while preserving playback state.
 - **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
 - **Four Earth quality levels:** 1K simple, 2K smooth, 4K standard, and 8K fine. Optional 8K ray-marched volumetric clouds, illustrative cloud evolution, improved atmosphere, twilight, cloud shadows, and aurora.
@@ -70,7 +74,7 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 - **Sky annotations:** a compact nested panel provides major stars, all catalogued names and a three-label preset, plus names, lines and boundaries for 88 constellations. Labels avoid overlap and settings are shared across spacecraft. See [v0.35](docs/v0.35-details.md).
 - **Catalogue-based stars:** 41,411 independent stars, optional native 16K NASA Milky Way, bright-star labels, and exposure styles. The enhanced background loads on demand and is released in standard mode.
 - **Toggleable orbit minimap:** current sub-satellite position with past and future ground tracks, synchronized with simulation time.
-- **Chinese / English UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
+- **Chinese / English / Russian / French UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
 - **Scene sharing:** export/import compact JSON files with assemblies, solar arrays, time, cameras, environment settings and embedded orbit data. Downloaded weather matches exact local snapshots.
 - **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display with adaptive fullscreen sizing, and 3D screenshot export.
 
@@ -80,11 +84,11 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, runtime and downloadable package are all updated to **v0.38**.
+The source, web edition and local runtime share **v0.40**; the GitHub portable download is **v0.38**.
 
-The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Positions are not extrapolated beyond that interval. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
+The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
-Dong Fang Hong 1 uses CelesTrak GP elements for **NORAD 4382 / 1970-034A**, propagated with SGP4. The bundled epoch is **2026-10-24 03:47:28 UTC**, with a ±3-day display window. The polar short antenna maps to body +Z; its default prograde orientation and optional inertial-axis mode are illustrative, with toggleable 120 rpm historical spin. The shared attitude panel sits below the display settings. See [mission architecture and validation](docs/v0.29-details.md).
+Dong Fang Hong 1 uses CelesTrak GP elements for **NORAD 4382 / 1970-034A**, propagated with SGP4. The bundled epoch is **2026-10-24 03:47:28 UTC**, with a ±3-day sampled interval and continued Kepler propagation beyond it. The polar short antenna maps to body +Z; its default prograde orientation and optional inertial-axis mode are illustrative, with toggleable 120 rpm historical spin. The shared attitude panel sits below the display settings. See [mission architecture and validation](docs/v0.29-details.md).
 
 Station attitude follows the ground track; array pointing is computed from the Sun direction. Clouds offer bundled, downloaded and geographically constrained modes; cloud volume and motion are illustrative. The enhanced Milky Way uses NASA catalogue visualization; the standard background is artistic.
 

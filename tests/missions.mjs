@@ -15,7 +15,7 @@ assert.equal(missionLabel('dfh1'),'地球：卫星：东方红一号');
 assert.equal(missionLabel('tiangong'),'地球：空间站：中国空间站');
 assert.equal(spacecraft('dfh1').capabilities.solarArrays,false);
 assert.equal(mission('dfh1').center,'EARTH');assert.throws(()=>mission('__proto__'));
-assert.equal(orbitState(null,Date.now()),'missing');assert.equal(orbitState(dfh,dfh.rows[0][0]-1),'out-of-range');assert.equal(snapshot(null,Date.now()),null);
+assert.equal(orbitState(null,Date.now()),'missing');assert.equal(orbitState(dfh,dfh.rows[0][0]-1),'ready');assert.equal(snapshot(null,Date.now()),null);
 assert.throws(()=>bindOrbit({...station,missionId:'tiangong'},'dfh1'));
 assert.throws(()=>bindOrbit({...dfh,center:'MOON'},'dfh1'));
 assert.throws(()=>bindOrbit({...dfh,objectId:'2021-035A'},'dfh1'));

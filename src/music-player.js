@@ -48,6 +48,7 @@ export class MusicPlayer{
  message(key,params={}){this.notice={key,params};$('musicStatus').textContent=t(key,params);}
  source(track){
   if(track.blob)return URL.createObjectURL(track.blob);
+  if(track.url)return track.url;
   const bytes=Uint8Array.from(atob(track.base64),c=>c.charCodeAt(0));return URL.createObjectURL(new Blob([bytes],{type:track.type}));
  }
  select(id,play=true){
