@@ -16,7 +16,7 @@ export function installSceneShare(sim,replaceAssembly){
  const capture=()=>{
   if(sim.missions.busy||sim.sceneBusy)throw Error('正在恢复场景…');
   const home=env.moon.savedView;
-  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'Tiangong',appVersion:document.querySelector('.app-version').textContent,mission:{id:sim.missionId,pose:{...sim.missions.state.pose},rotation:{...sim.missions.state.rotation}},assembly:sim.capabilities.assembly?structuredClone(api.state):null,simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},phenomena:{...env.phenomena.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:sim.data?{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}:null});
+  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'StarOrbit',appVersion:document.querySelector('.app-version').textContent,mission:{id:sim.missionId,pose:{...sim.missions.state.pose},rotation:{...sim.missions.state.rotation}},assembly:sim.capabilities.assembly?structuredClone(api.state):null,simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},phenomena:{...env.phenomena.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:sim.data?{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}:null});
  };
  async function importScene(input){
   if(busy||sim.missions.busy)throw Error('正在恢复场景…');
@@ -67,7 +67,7 @@ export function installSceneShare(sim,replaceAssembly){
    await Promise.allSettled([env.ready,weather.ready,env.skyLoad,...Object.values(weather.pendingApply||{}).map(x=>x.promise)]);
    const text=JSON.stringify(capture()),blob=new Blob([text],{type:'application/json'});
    if(blob.size>MAX_SCENE_BYTES)throw Error('场景文件超过 16 MB');
-   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=($('sceneName').value.trim().slice(0,60)||'Tiangong').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')+'.tiangong.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
+   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=($('sceneName').value.trim().slice(0,60)||'StarOrbit').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')+'.starorbit.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
    setText('sceneStatus','场景已导出 · {size} KB',{size:(blob.size/1024).toFixed(0)});
   }catch(error){setText('sceneStatus','无法导出场景：{error}',{error:t(error.message)});}
   finally{busy=false;$('exportScene').disabled=$('importScene').disabled=false;}

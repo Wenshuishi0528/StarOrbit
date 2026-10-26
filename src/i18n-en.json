@@ -4,8 +4,6 @@
   "月面纹理未能加载": "Moon texture could not load",
   "请先选择有效的轨道时间": "Select a time covered by the orbit data",
   "月球当前被地球遮挡": "The Moon is currently behind Earth",
-  "天宫 · 实时轨道模拟": "Tiangong · Orbit Simulator",
-  "天宫 · 轨道模拟": "Tiangong · Orbit",
   "作者：": "Author:",
   "正在载入模型": "Loading model",
   "界面语言": "Interface language",
@@ -122,7 +120,6 @@
   "正在准备空间站": "Preparing station",
   "拖动查看所有角度": "Drag to explore all angles",
   "V20 模型 · 官方轨道驱动": "V20 model · Official ephemerides",
-  "正在装配天宫": "Assembling Tiangong",
   "读取本地模型与材质，首次打开请稍候。": "Loading embedded model and materials. Please wait on first launch.",
   "正在定位…": "Locating…",
   "关闭轨道小地图": "Close orbit minimap",
@@ -655,7 +652,6 @@
   "轨道演算不可用": "Orbit propagation unavailable",
   "？帮助": "? Help",
   "开始探索": "Start exploring",
-  "欢迎来到轨道模拟": "Welcome to Orbit Simulator",
   "在浏览器中探索航天器、地球与星空。用四步导览熟悉操作，也可以直接开始。": "Explore spacecraft, Earth and the stars in your browser. Take a four-step tour or start exploring right away.",
   "快速导览": "Quick tour",
   "直接开始": "Start exploring",
@@ -704,5 +700,9 @@
   "三轴姿态偏移 · 相对当前姿态参考": "Three-axis offset · relative to the attitude reference",
   "X · 滚转": "X · Roll",
   "Y · 俯仰": "Y · Pitch",
-  "Z · 偏航": "Z · Yaw"
+  "Z · 偏航": "Z · Yaw",
+  "星轨 · StarOrbit — 航天与轨道模拟": "StarOrbit — Space & Orbit Simulator",
+  "星轨 · StarOrbit": "StarOrbit",
+  "正在准备星轨": "Preparing StarOrbit",
+  "欢迎来到星轨": "Welcome to StarOrbit"
 }

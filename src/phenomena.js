@@ -76,7 +76,7 @@ export class Phenomena{
   this.group.quaternion.copy(this.env.earth.quaternion);
   const clock=eventClock(this.clock,q.t,wall,this.sim.mode==='real'?1:this.sim.speed);this.clock=clock;
   if(clock.reset){this.events.length=0;this.lastSlot=null;}
-  this.readMask();const seed=seedNumber(this.env.weather?.settings.seed||'Tiangong');
+  this.readMask();const seed=seedNumber(this.env.weather?.settings.seed||'StarOrbit');
   if(seed!==this.seed){this.seed=seed;this.events.length=0;this.lastSlot=null;}
   this.schedule(clock.phase,seed,camera,enhanced);
   this.inv.copy(this.env.earth.quaternion).invert();this.eye.copy(camera.position).applyQuaternion(this.inv);

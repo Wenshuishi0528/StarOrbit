@@ -1,14 +1,16 @@
-# 天宫 · 实时轨道模拟 / Tiangong Orbit Simulator · 中国空间站
+# 星轨 · StarOrbit
 
-**v0.43 · 作者 / Author: wenshuishi0528**
+**航天与轨道模拟 / Space & Orbit Simulator**
+
+**v0.44 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
-**[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/Tiangong-Orbit-Simulator-China-Space-Station/)**
+**[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
 
 浏览器直接使用，默认内置轨道与云图。首次访问可选择简短导览，右上角“？帮助”通过箭头和高亮定位真实控件，可边看边操作，每个介绍可直接点击“下一个”。画质介绍包含整体画质与星空画质两个入口；首次使用默认为标准 4K 和“4K · 星表观赏”。[v0.42 引导说明](docs/v0.42-details.md)。[网页版与部署说明](docs/v0.40-details.md)。
 
 
-![中国空间站 · Tiangong Orbit Simulator v0.7](docs/hero.jpg)
+![中国空间站 · StarOrbit](docs/hero.jpg)
 
 ## 中文简介
 
@@ -41,15 +43,15 @@
 
 新增航天器：点击左栏 **下载配置模板**，填写模型文件名、单位比例、前向轴、轨道法向轴和轨道文件名，再点击 **导入航天器** 一次选择这些文件。配置与例子见 [模块化任务说明](docs/v0.30-details.md)。
 
-从 **[v0.38 发布页](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.38)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 235 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+从 **[v0.38 发布页](https://github.com/Wenshuishi0528/StarOrbit/releases/tag/v0.38)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 235 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.43**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.44**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
-天宫内置轨道快照覆盖 **2026-10-19 00:00 至 2026-10-26 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
+中国空间站内置轨道快照覆盖 **2026-10-19 00:00 至 2026-10-26 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
 
 东方红一号使用 CelesTrak 的 **DFH 1 / NORAD 4382 / 1970-034A** 根数，通过 SGP4 计算。内置根数历元为 **2026-10-24 03:47:28 UTC**，采样区间为历元前后各三天，区间外接续开普勒椭圆演算；顶部任务栏可切换，轨道数据栏显示当前计算模式。模型顶部短天线校正为星体 +Z；默认顶部朝轨道前进方向，支持开关 120 转/分自旋；下方通用姿态模块可切换惯性定轴示意与手动偏移。详见 [v0.29 任务框架与验证](docs/v0.29-details.md)。
 
@@ -59,7 +61,7 @@ macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel �
 
 ![English interface](docs/preview-en.png)
 
-An offline-capable interactive 3D viewer and orbital simulation of China's Tiangong space station. Built around the author's modular 1:200 models, it combines configurable spacecraft assemblies, published orbital ephemerides, solar geometry, Earth's day/night cycle, and automatic solar-array tracking in one browser interface.
+StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Station, Dong Fang Hong 1 and imported spacecraft share Earth, clouds, stars, music and navigation, with independent orbit and attitude configurations.
 
 ### Features
 
@@ -84,13 +86,13 @@ An offline-capable interactive 3D viewer and orbital simulation of China's Tiang
 
 ### Getting started
 
-Download the portable package from the **[v0.38 release](https://github.com/Wenshuishi0528/Tiangong-Orbit-Simulator-China-Space-Station/releases/tag/v0.38)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 235 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+Download the portable package from the **[v0.38 release](https://github.com/Wenshuishi0528/StarOrbit/releases/tag/v0.38)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 235 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.43**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.44**; the GitHub portable download is **v0.38**.
 
-The Tiangong bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
+The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
 Dong Fang Hong 1 uses CelesTrak GP elements for **NORAD 4382 / 1970-034A**, propagated with SGP4. The bundled epoch is **2026-10-24 03:47:28 UTC**, with a ±3-day sampled interval and continued Kepler propagation beyond it. The polar short antenna maps to body +Z; its default prograde orientation and optional inertial-axis mode are illustrative, with toggleable 120 rpm historical spin. The shared attitude panel sits below the display settings. See [mission architecture and validation](docs/v0.29-details.md).
 
@@ -106,7 +108,7 @@ npm test
 npm run build
 ```
 
-构建后在项目根目录生成独立 HTML。Generated standalone HTML is written to the project root; it is distributed as a release asset because it exceeds GitHub’s 100 MB per-file limit.
+构建后在项目根目录生成 **StarOrbit.html**，可用 **启动星轨.command** 或 **星轨.app** 启动。Generated standalone **StarOrbit.html** is written to the project root; it is distributed as a release asset because it exceeds GitHub’s 100 MB per-file limit.
 
 - `src/`: application, orbit/solar calculations, Earth/stars, and minimap.
 - `assets/`: required model, prepared textures, catalogue, and orbital records.
@@ -132,7 +134,7 @@ Full asset notes: **[素材与迁移说明.md](素材与迁移说明.md)**. Thir
 - 云图与极光独立选择最新数据、已保存历史、本地生成或关闭。极光使用 NOAA OVATION 预测网格；程序生成的光幕与云层立体形态是示意。
 - 一键检查云图、极光和轨道；失败保留旧数据。历史缓存支持收藏、容量限制、删除与导入导出。云图未提供观测时刻时明确显示未知。
 - 摄影模式、固定曝光、4K宽PNG截图和环境视角收藏；保留原有自由组合、全屏适配、轨道与太阳能板计算。
-- 双击 `启动实时地球.command` 可开启本地服务及固定来源的官方轨道中继。直接打开HTML仍能离线运行；云图/极光可按需联网更新，持久缓存能力取决于浏览器。
+- 双击 `启动星轨.command` 可开启本地服务及固定来源的官方轨道中继。直接打开HTML仍能离线运行；云图/极光可按需联网更新，持久缓存能力取决于浏览器。
 
 Four quality tiers with optional 8K ray-marched clouds and illustrative continuous weather evolution. Improved atmospheric limb, twilight, ocean glint and cloud shadows. Clouds and aurora offer downloaded, saved-history, procedural and off modes. NOAA OVATION supplies forecast coverage, not observed auroral curtains. One update button checks each source independently; failures retain existing data. Favorite/export/import snapshots, manage the cache budget, use photo mode and 4K-wide captures, and save reproducible environment presets. Existing orbital physics, solar tracking, fullscreen sizing and recursive assembly remain intact. Run `python3 scripts/serve.py --open` for the local viewer and official-orbit relay, or open the offline HTML directly. Historical coverage is limited to snapshots actually available in the local library.
 

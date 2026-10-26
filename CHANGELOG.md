@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.44 — 2026-10-26
+
+**中文：** 软件正式更名为“星轨 · StarOrbit”，统一四语界面、帮助、桌面应用、导出文件及说明文档。GitHub 仓库更名为 StarOrbit，在线版启用新网址；保留现有存档与数据兼容。[详情](docs/v0.44-details.md)。
+
+**English:** Renamed the app to StarOrbit across all four interface languages, help, desktop launcher, exports and documentation. Renamed the GitHub repository to StarOrbit with a new Pages URL, preserving existing storage and data compatibility. [Details](docs/v0.44-details.md).
+
 ## v0.43 — 2026-10-26
 
 **中文：** 航天器姿态新增通用三轴调节，空间站和卫星均可用输入框或滑条控制 X 滚转、Y 俯仰、Z 偏航，角度同步显示，支持姿态归零并按任务保存。拖动复用模型与太阳翼遮挡缓存。[详情](docs/v0.43-details.md)。

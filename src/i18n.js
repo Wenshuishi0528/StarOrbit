@@ -24,7 +24,7 @@ export function setText(id,key,params={}){
  messages.set(id,{key,params});document.getElementById(id).textContent=t(key,params);
 }
 function render(){
- document.documentElement.lang=language==='zh'?'zh-CN':language;document.title=t('天宫 · 实时轨道模拟');
+ document.documentElement.lang=language==='zh'?'zh-CN':language;document.title=t('星轨 · StarOrbit — 航天与轨道模拟');
  for(const {node,key,before,after} of staticText)if(node.isConnected)node.nodeValue=before+t(key)+after;
  for(const {el,name,key} of attributes)el.setAttribute(name,t(key));
  for(const [id,{key,params}] of messages)document.getElementById(id).textContent=t(key,params);

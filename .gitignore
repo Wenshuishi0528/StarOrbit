@@ -12,3 +12,5 @@ __pycache__/
 
 # Generated standalone runtime is distributed through GitHub Releases (>100 MB).
 /天宫空间站交互预览.html
+
+/StarOrbit.html

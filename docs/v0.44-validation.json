@@ -1,0 +1,92 @@
+{
+  "version": "0.44",
+  "browserChecks": [
+    {
+      "name": "welcome uses StarOrbit",
+      "pass": true
+    },
+    {
+      "name": "browser title Zh",
+      "pass": true
+    },
+    {
+      "name": "header brand Zh",
+      "pass": true
+    },
+    {
+      "name": "browser title En",
+      "pass": true
+    },
+    {
+      "name": "header brand En",
+      "pass": true
+    },
+    {
+      "name": "browser title Ru",
+      "pass": true
+    },
+    {
+      "name": "header brand Ru",
+      "pass": true
+    },
+    {
+      "name": "browser title Fr",
+      "pass": true
+    },
+    {
+      "name": "header brand Fr",
+      "pass": true
+    },
+    {
+      "name": "new scene default",
+      "pass": true
+    },
+    {
+      "name": "new weather seed default",
+      "pass": true
+    },
+    {
+      "name": "spacecraft name remains accurate",
+      "pass": true
+    },
+    {
+      "name": "new scene download name",
+      "pass": true,
+      "details": "StarOrbit.starorbit.json"
+    },
+    {
+      "name": "scene schema retains backwards compatibility",
+      "pass": true
+    },
+    {
+      "name": "existing mission storage survives reload",
+      "pass": true
+    },
+    {
+      "name": "music order persists with existing library",
+      "pass": true
+    },
+    {
+      "name": "no horizontal overflow 1440",
+      "pass": true
+    },
+    {
+      "name": "no horizontal overflow 390",
+      "pass": true
+    },
+    {
+      "name": "no horizontal overflow 320",
+      "pass": true
+    },
+    {
+      "name": "legacy entry opens renamed standalone app",
+      "pass": true
+    },
+    {
+      "name": "installed standalone version",
+      "pass": true
+    }
+  ],
+  "launcher": "arm64/x86_64; codesign and --check passed",
+  "portable": "StarOrbit.html, launcher command and license files verified"
+}

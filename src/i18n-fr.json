@@ -4,8 +4,6 @@
   "月面纹理未能加载": "Impossible de charger la texture lunaire",
   "请先选择有效的轨道时间": "Choisissez une heure couverte par les données orbitales",
   "月球当前被地球遮挡": "La Lune est actuellement derrière la Terre",
-  "天宫 · 实时轨道模拟": "Tiangong · Simulateur orbital",
-  "天宫 · 轨道模拟": "Tiangong · Orbite",
   "作者：": "Auteur :",
   "正在载入模型": "Chargement du modèle",
   "界面语言": "Langue de l’interface",
@@ -122,7 +120,6 @@
   "正在准备空间站": "Préparation de la station",
   "拖动查看所有角度": "Glissez pour explorer les angles",
   "V20 模型 · 官方轨道驱动": "Modèle V20 · Éphémérides officielles",
-  "正在装配天宫": "Assemblage de Tiangong",
   "读取本地模型与材质，首次打开请稍候。": "Chargement du modèle et des matériaux intégrés. Le premier lancement peut prendre un instant.",
   "正在定位…": "Localisation…",
   "关闭轨道小地图": "Fermer la mini-carte orbitale",
@@ -655,7 +652,6 @@
   "轨道演算不可用": "Propagation orbitale indisponible",
   "？帮助": "? Aide",
   "开始探索": "Commencer l’exploration",
-  "欢迎来到轨道模拟": "Bienvenue dans le simulateur orbital",
   "在浏览器中探索航天器、地球与星空。用四步导览熟悉操作，也可以直接开始。": "Explorez les véhicules spatiaux, la Terre et les étoiles dans votre navigateur. Suivez une visite en quatre étapes ou commencez directement.",
   "快速导览": "Visite rapide",
   "直接开始": "Commencer",
@@ -704,5 +700,9 @@
   "三轴姿态偏移 · 相对当前姿态参考": "Décalage sur trois axes · relatif à la référence",
   "X · 滚转": "X · Roulis",
   "Y · 俯仰": "Y · Tangage",
-  "Z · 偏航": "Z · Lacet"
+  "Z · 偏航": "Z · Lacet",
+  "星轨 · StarOrbit — 航天与轨道模拟": "StarOrbit — Simulateur spatial et orbital",
+  "星轨 · StarOrbit": "StarOrbit",
+  "正在准备星轨": "Préparation de StarOrbit",
+  "欢迎来到星轨": "Bienvenue dans StarOrbit"
 }

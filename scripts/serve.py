@@ -38,7 +38,7 @@ class Handler(SimpleHTTPRequestHandler):
     self.send_error(403);return
    try:
     try:
-     with urllib.request.urlopen(urllib.request.Request(source,headers={'User-Agent':'Tiangong-Viewer/0.30'}),timeout=20) as r:body=r.read(6000001)
+     with urllib.request.urlopen(urllib.request.Request(source,headers={'User-Agent':'StarOrbit/0.44'}),timeout=20) as r:body=r.read(6000001)
     except urllib.error.URLError as error:
      if not isinstance(error.reason,ssl.SSLError):raise
      # macOS Python can lack the system CA bundle; curl still verifies TLS normally.
@@ -69,8 +69,8 @@ if __name__=='__main__':
     if child.poll() is not None:break
     time.sleep(.1)
    if not ready:raise SystemExit(f'Viewer server could not start; see {log}')
-  if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/天宫空间站交互预览.html')
-  print(f'Tiangong is running: http://127.0.0.1:{a.port}')
+  if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/StarOrbit.html')
+  print(f'StarOrbit is running: http://127.0.0.1:{a.port}')
   raise SystemExit(0)
  try:server=ThreadingHTTPServer(('127.0.0.1',a.port),Handler)
  except OSError:
@@ -79,7 +79,7 @@ if __name__=='__main__':
    with urllib.request.urlopen(f'http://127.0.0.1:{a.port}/api/status',timeout=2) as r:existing=json.load(r)
   except Exception:raise SystemExit(f'Port {a.port} is occupied; close its existing server and retry.')
   if existing.get('app')!='tiangong-earth-viewer':raise SystemExit(f'Port {a.port} belongs to another application.')
-  if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/天宫空间站交互预览.html')
+  if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/StarOrbit.html')
   raise SystemExit(0)
- if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/天宫空间站交互预览.html')
- print(f'Tiangong: http://127.0.0.1:{a.port}',flush=True);server.serve_forever()
+ if a.open:webbrowser.open(f'http://127.0.0.1:{a.port}/StarOrbit.html')
+ print(f'StarOrbit: http://127.0.0.1:{a.port}',flush=True);server.serve_forever()

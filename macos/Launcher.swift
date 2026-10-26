@@ -10,7 +10,7 @@ func fail(_ message: String) -> Never {
         app.setActivationPolicy(.accessory)
         app.activate(ignoringOtherApps: true)
         let alert = NSAlert()
-        alert.messageText = "天宫暂时无法启动"
+        alert.messageText = "星轨暂时无法启动"
         alert.informativeText = message
         alert.addButton(withTitle: "好")
         alert.runModal()
@@ -25,7 +25,7 @@ guard let data = try? Data(contentsOf: configURL),
     fail("启动配置缺失，请重新创建桌面启动器。")
 }
 let root = URL(fileURLWithPath: config.root, isDirectory: true, relativeTo: bundle.bundleURL.deletingLastPathComponent()).standardizedFileURL
-let html = root.appendingPathComponent("天宫空间站交互预览.html")
+let html = root.appendingPathComponent("StarOrbit.html")
 let server = root.appendingPathComponent("scripts/serve.py")
 guard manager.fileExists(atPath: html.path), manager.fileExists(atPath: server.path) else {
     fail("找不到软件文件。请保留原来的软件目录：\n" + root.path)
@@ -54,5 +54,5 @@ if checkOnly {
     print("READY http://127.0.0.1:8771/ — " + html.path)
     exit(0)
 }
-let page = URL(string: "http://127.0.0.1:8771/" + "天宫空间站交互预览.html".addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
+let page = URL(string: "http://127.0.0.1:8771/" + "StarOrbit.html".addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
 guard NSWorkspace.shared.open(page) else { fail("浏览器未能打开。请访问：\n" + page.absoluteString) }
