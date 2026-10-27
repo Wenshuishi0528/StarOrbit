@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {geographicVector,ringContains,regionContains,angularDistance,GeographyIndex} from '../src/geography-math.js';
-import {GEOGRAPHY_DEFAULTS,normalizeGeographySettings} from '../src/geography-settings.js';
+import {GEOGRAPHY_DEFAULTS,normalizeGeographySettings,cityLabelEnabled} from '../src/geography-settings.js';
 const data=JSON.parse(fs.readFileSync(new URL('../assets/geography/atlas.json',import.meta.url)));
 assert.equal(data.format,'tiangong-geography-1');
 assert.deepEqual(geographicVector(0,0,1),[1,0,0]);
@@ -40,3 +40,30 @@ assert.equal(index.locate(NaN,0),null);
 const start=performance.now();for(let i=0;i<1000;i++)index.locate(i%360-180,Math.sin(i)*70);const ms=performance.now()-start;
 assert.ok(ms<2000,`lookup budget: ${ms} ms per 1000 positions`);
 console.log('Geography: settings, official source hash, Beijing, coordinates, boundaries, location lookup passed; 1000 lookups:',ms.toFixed(1),'ms');
+
+// Old preferences and scenes gain tier 1; corrupt tier values cannot flood labels.
+assert.equal(normalizeGeographySettings({geoCapitals:false}).geoCityTier,1);
+assert.equal(normalizeGeographySettings().geoCities,true);
+for(const invalid of [0,4,1.5,'2',null,NaN]){
+ assert.equal(normalizeGeographySettings({geoCityTier:invalid}).geoCityTier,1);
+ assert.throws(()=>normalizeGeographySettings({geoCityTier:invalid},{strict:true}));
+}
+const cities=data.labels.filter(p=>p.cityTier);
+assert.equal(cities.length,1210);
+for(const tier of [1,2,3]){
+ const settings={...GEOGRAPHY_DEFAULTS,geoCapitals:false,geoCityTier:tier};
+ assert.equal(normalizeGeographySettings(settings,{strict:true}).geoCityTier,tier);
+ assert(cities.some(p=>p.cityTier===tier&&p.kind==='city'));
+ for(const p of cities)assert.equal(!!cityLabelEnabled(p,settings),p.cityTier<=tier);
+}
+for(const name of ['北京','上海','广州','深圳','香港','台北','纽约','巴黎']){
+ const p=cities.find(p=>p.zh===name);assert(p,name);assert.equal(p.cityTier,1,name);
+}
+assert.equal(cities.find(p=>p.zh==='台北').kind,'city');
+assert.equal(cities.filter(p=>p.id==='beijing').length,1);
+for(const p of cities){
+ assert([1,2,3].includes(p.cityTier));
+ assert.equal(!!cityLabelEnabled(p,{...GEOGRAPHY_DEFAULTS,geoCities:false}),p.kind==='capital');
+ assert.equal(!!cityLabelEnabled(p,{...GEOGRAPHY_DEFAULTS,geoCities:false,geoCapitals:false}),false);
+}
+console.log('City tiers: 1210 shared anchors, defaults, cumulative tiers, capital deduplication and validation passed');

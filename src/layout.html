@@ -70,7 +70,7 @@ __HELP_CSS__
 <label for="cloudHistory" class="small">云图快照</label><select class="wide" id="cloudHistory"></select><p class="small data-status" id="cloudDataStatus"></p>
 <div class="row"><label for="auroraSource">极光来源</label><select id="auroraSource"><option value="off">关闭</option><option value="local">本地生成</option><option value="latest">最新已下载</option><option value="history">历史快照</option></select></div>
 <label for="auroraHistory" class="small">极光快照</label><select class="wide" id="auroraHistory"></select><p class="small data-status" id="auroraDataStatus"></p>
-<label for="auroraStrength" class="small">极光亮度</label><input id="auroraStrength" type="range" min="0" max="4" step=".1" value="1.4">
+<label for="auroraStrength" class="small">极光亮度</label><input id="auroraStrength" type="range" min="0" max="4" step=".1" value="1.4"><p class="small">4K 使用经典极光，8K 使用柔和分层极光。</p>
 <div class="row"><label for="weatherSeed">随机种子</label><input id="weatherSeed" maxlength="80" value="StarOrbit"></div><button id="newWeatherSeed">换一个种子</button>
 
 <p class="small data-status" id="weatherSimTime"></p></details>
@@ -87,13 +87,14 @@ __HELP_CSS__
 <div class="geography-options">
 <label class="check"><input id="geoCountries" type="checkbox" checked>国家名称</label>
 <label class="check"><input id="geoCapitals" type="checkbox" checked>首都</label>
+<label class="check"><input id="geoCities" type="checkbox" checked>主要城市</label>
 <label class="check"><input id="geoBorders" type="checkbox" checked>国境线</label>
 <label class="check"><input id="geoMarine" type="checkbox" checked>海洋与海域</label>
 <label class="check"><input id="geoLandforms" type="checkbox" checked>山脉与地貌</label>
 <label class="check"><input id="geoRivers" type="checkbox" checked>河流</label>
 <label class="check"><input id="geoLakes" type="checkbox" checked>湖泊</label>
 <label class="check"><input id="geoLocation" type="checkbox" checked>显示当前上空</label>
-</div><label class="small" for="geoDensity">标注密度</label><input id="geoDensity" type="range" min="0" max="1" step=".05" value=".5"><div class="star-chart-density"><span>少</span><span>多</span></div>
+</div><div class="row"><label for="geoCityTier">城市层级</label><select id="geoCityTier"><option value="1">一级城市</option><option value="2">一级 + 二级城市</option><option value="3">一级 + 二级 + 三级城市</option></select></div><label class="small" for="geoDensity">标注密度</label><input id="geoDensity" type="range" min="0" max="1" step=".05" value=".5"><div class="star-chart-density"><span>少</span><span>多</span></div>
 <p class="small geography-note">北京以红色五角星标识。中国轮廓与海上线段采用天地图官方矢量数据。</p></details>
 <details class="annotation-settings" data-memory-key="star-chart"><summary>星图标注</summary>
 <label class="check"><input id="starChartEnabled" type="checkbox">启用星图标注</label>

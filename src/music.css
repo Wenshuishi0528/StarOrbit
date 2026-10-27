@@ -19,3 +19,8 @@ body:has(#musicWidget) .caption{bottom:76px}body.photo-mode #musicWidget{visibil
 @keyframes music-note-spin{to{transform:rotate(360deg)}}
 @keyframes music-controls-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){#musicWidget{transition:none}#musicOrb span,#musicExpanded{animation:none}}
+
+#dfh1Panel{position:absolute;bottom:calc(100% + 8px);left:0;right:0;padding:12px;border:1px solid #345065;background:#0c1929fa;border-radius:10px;box-shadow:0 8px 24px #0006;max-height:calc(100vh - 160px);overflow:auto;font-size:11px;scrollbar-width:thin}
+.dfh1-select{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 0}.dfh1-select select{max-width:210px;padding:5px;font-size:11px}#dfh1TelemetryStatus{color:var(--cyan);margin:10px 0;font-size:11px;min-height:14px}#musicWidget #dfh1Run{padding:6px 10px;background:#254458;color:#a6eeee;margin-bottom:8px}
+.dfh1-readings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.dfh1-readings span{display:flex;justify-content:space-between;gap:5px}.dfh1-readings b{font-weight:500;font-variant-numeric:tabular-nums}.dfh1-sun{color:#ffd776}.dfh1-earth{color:#64dfdd}#dfh1Wave{display:block;width:100%;height:90px;border-radius:5px}.dfh1-wave-caption{font-size:10px;color:var(--muted);text-align:right;margin:4px 0 8px}.dfh1-model{font-size:10px;color:var(--muted);line-height:1.6}.dfh1-model summary{cursor:pointer}.dfh1-model p{margin:5px 0}
+@media(max-width:760px){#dfh1Panel{max-height:calc(58vh - 105px)}body.immersive #dfh1Panel{max-height:calc(100vh - 110px)}}

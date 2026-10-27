@@ -1,5 +1,29 @@
 # Changelog / 更新记录
 
+## v0.58 — 2026-10-27
+
+**中文：** 8K 极光改为体积光幕，加入卷曲亮弧、向上散开的绿光、淡红上缘和局部粉紫底缘；采用限分辨率、低频更新与静止画面缓存。4K 保留原效果。[说明与验证](docs/v0.58-details.md)。
+
+**English:** Rebuilt 8K auroras as emissive volumes with curled arcs, spreading green veils, faint red tops and sparse pink-violet lower edges. Bounded resolution, throttled updates and static-frame caching control rendering cost. The original 4K effect is preserved. [Details and validation](docs/v0.58-details.md).
+
+## v0.57 — 2026-10-27
+
+**中文：** 8K 极光改为柔和的宽幅发光区，加入蜿蜒亮弧、缓慢起伏和高度分层；4K 保留原效果。共享小纹理、单批绘制并按需简化，降低计算开销。[说明与验证](docs/v0.57-details.md)。
+
+**English:** Added soft, broad auroral emission, winding bright arcs and gently animated height layers in 8K, while preserving the original 4K effect. Shared small textures, one draw batch and adaptive detail reduce rendering work. [Details and validation](docs/v0.57-details.md).
+
+## v0.56 — 2026-10-27
+
+**中文：** 地球地点标识新增三级主要城市，默认显示一级，可逐级增加；与首都共用标注位置，支持四语、设置记忆与场景恢复，沿用按需刷新和避让。[说明](docs/v0.56-details.md)。
+
+**English:** Added three tiers of major-city labels, with tier 1 selected by default and cumulative expansion. Cities share anchors with capitals, support four languages and saved scenes, and reuse cached layout and collision avoidance. [Details](docs/v0.56-details.md).
+
+## v0.55 — 2026-10-27
+
+**中文：** 新增东方红一号实时遥测：太阳与红外参考探头生成连续调频声音，支持单路收听、10 秒实验路序和电压波形；跟随模拟轨道、姿态与自旋，暂停、跳时和倍速变化同步处理。保留历史录音与四语界面。通过探头几何、PCM 鉴频、音频状态及回归检查。[说明](docs/v0.55-details.md)。
+
+**English:** Added live DFH-1 telemetry from reference Sun and infrared horizon probes, with continuous FM audio, individual channels, a 10-second experimental sequence and voltage traces. Playback follows simulation orbit, attitude and spin, handling pauses, seeks and speed changes. Historical audio and four-language UI remain available. Validated geometry, PCM demodulation, audio lifecycle and regressions. [Details](docs/v0.55-details.md).
+
 ## v0.54 — 2026-10-27
 
 **中文：** 日期与时间合并为一个输入栏，保留原有键盘调整、日期选择和 24h／12h 切换。

@@ -14,7 +14,8 @@ const missionOrbits=Object.fromEntries(Object.entries(MISSIONS).map(([id,x])=>[i
 const music=JSON.parse(fs.readFileSync('assets/music/catalog.json','utf8')).map(({file,...track})=>({...track,...(web?{url:publish(file)}:{base64:fs.readFileSync(file).toString('base64')})}));
 music.push({id:'mission-dfh1-broadcast',title:'东方红一号 · 乐曲与遥测信号',mission:'dfh1',sha256:crypto.createHash('sha256').update(fs.readFileSync('assets/music/dfh1-broadcast.m4a')).digest('hex'),type:'audio/mp4',duration:56.067755,...(web?{url:publish('assets/music/dfh1-broadcast.m4a')}:{base64:fs.readFileSync('assets/music/dfh1-broadcast.m4a').toString('base64')})});
 const app=JSON.parse(fs.readFileSync('package.json','utf8'));
-await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web)}});
+const worklet=await build({entryPoints:['src/dfh1-telemetry-worklet.js'],bundle:true,format:'iife',minify:true,write:false,legalComments:'none'});
+await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text)}});
 const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image('assets/earth/'+tier+'/'+f)]))]));
 environmentAssets.detail=Object.fromEntries(fs.readdirSync('assets/earth/detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/detail/'+f)]));
 environmentAssets.nightDetail=Object.fromEntries(fs.readdirSync('assets/earth/night-detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/night-detail/'+f)]));

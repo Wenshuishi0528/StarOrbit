@@ -9,6 +9,19 @@
   <p id="musicStatus" role="status" aria-live="polite"></p>
   <input id="musicFiles" type="file" accept=".m4a,.mp3,.wav,.ogg,.oga,.opus,.aac,.flac,.webm,audio/*" multiple hidden>
  </div>
+ <div id="dfh1Panel" role="region" aria-label="东方红一号信号" hidden>
+  <div class="music-panel-heading"><strong>东方红一号信号</strong></div>
+  <label class="dfh1-select">信号来源<select id="dfh1AudioMode"><option value="recording">历史录音</option><option value="telemetry">实时遥测</option></select></label>
+  <div id="dfh1TelemetryDetails" hidden>
+   <label class="dfh1-select">收听通道<select id="dfh1Channel"><option value="sequence">实验路序 · 10 秒循环</option><option value="sun">太阳角计 · 连续</option><option value="earth">红外地平仪 · 连续</option></select></label>
+   <p id="dfh1TelemetryStatus" role="status"></p>
+   <button id="dfh1Run" hidden>以 1× 运行并收听</button>
+   <div class="dfh1-readings"><span class="dfh1-sun">太阳角计 <b id="dfh1SunValue">—</b></span><span class="dfh1-earth">红外地平仪 <b id="dfh1EarthValue">—</b></span><span>选通电压 <b id="dfh1Selected">—</b></span><span>副载波 <b id="dfh1Frequency">—</b></span></div>
+   <canvas id="dfh1Wave" width="600" height="180" role="img" aria-label="最近 10 秒探头电压：黄色太阳，青色红外"></canvas>
+   <p class="dfh1-wave-caption">探头电压 · 最近 10 秒</p>
+   <details class="dfh1-model"><summary>参考探头 · 实验路序</summary><p>太阳 +X / 80°，红外 −X / 4°；0–3 V → 880–1320 Hz。</p><p>位置 1–5 为参考电平，6–18 接太阳，19–32 接红外。探头参数与通道分配采用模拟配置。</p><p>信号随模拟轨道、姿态和自旋计算。暂停或加速时停止收听，恢复 1× 后同步继续。</p></details>
+  </div>
+ </div>
  <div id="musicVolumePanel" hidden><label for="musicVolume">音量</label><input id="musicVolume" type="range" min="0" max="100" value="25"><span id="musicVolumeValue">25%</span><button id="musicMute" aria-pressed="false">静音</button></div>
  <div class="music-bar">
   <button id="musicTitleButton" title="打开播放列表"><span class="music-caption"><span id="musicTrackTitle">背景音乐</span><span id="musicMeta">正在准备音乐…</span></span></button>
@@ -16,6 +29,7 @@
   <button id="musicPlay" class="music-icon" aria-label="播放音乐" title="播放音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="music-play-icon" d="M7 4l14 8-14 8Z"/><path class="music-pause-icon" d="M7 5v14M17 5v14"/></svg></button>
   <button id="musicNext" class="music-icon" aria-label="下一首" title="下一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5v14M5 5l11 7-11 7Z"/></svg></button>
   <button id="musicVolumeToggle" class="music-icon" aria-label="音量" title="音量" aria-expanded="false" aria-controls="musicVolumePanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-5v16l-5-5H3Z"/><path class="music-sound-waves" d="M16 8q4 4 0 8m3-11q7 7 0 14"/></svg></button>
+  <button id="dfh1Toggle" class="music-icon" aria-label="东方红一号信号" title="东方红一号信号" aria-expanded="false" aria-controls="dfh1Panel" hidden>⌁</button>
   <button id="musicListToggle" class="music-icon" aria-label="打开播放列表" title="播放列表" aria-expanded="false" aria-controls="musicPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.5M3 12h.5M3 18h.5"/></svg></button>
  </div>
  <input id="musicSeek" type="range" min="0" max="1000" step="1" value="0" aria-label="音乐播放进度">

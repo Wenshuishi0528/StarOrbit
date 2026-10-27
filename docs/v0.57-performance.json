@@ -1,0 +1,128 @@
+{
+  "viewport": [
+    1280,
+    900
+  ],
+  "results": [
+    {
+      "pose": "overhead",
+      "mode": "legacy",
+      "n": 24,
+      "disjoint": 0,
+      "medianMs": 22.771041,
+      "p90Ms": 26.816249,
+      "counts": {
+        "frame": 5527,
+        "calls": 9,
+        "triangles": 273600,
+        "points": 0,
+        "lines": 0
+      }
+    },
+    {
+      "pose": "overhead",
+      "mode": "layers",
+      "n": 24,
+      "disjoint": 0,
+      "medianMs": 11.86725,
+      "p90Ms": 17.885041,
+      "counts": {
+        "frame": 5524,
+        "calls": 1,
+        "triangles": 24576,
+        "points": 0,
+        "lines": 0
+      }
+    },
+    {
+      "pose": "horizon",
+      "mode": "legacy",
+      "n": 24,
+      "disjoint": 0,
+      "medianMs": 14.907,
+      "p90Ms": 21.755249,
+      "counts": {
+        "frame": 5719,
+        "calls": 9,
+        "triangles": 273600,
+        "points": 0,
+        "lines": 0
+      }
+    },
+    {
+      "pose": "horizon",
+      "mode": "layers",
+      "n": 24,
+      "disjoint": 0,
+      "medianMs": 11.301374,
+      "p90Ms": 18.573041,
+      "counts": {
+        "frame": 5716,
+        "calls": 1,
+        "triangles": 24576,
+        "points": 0,
+        "lines": 0
+      }
+    }
+  ],
+  "version": "0.57",
+  "method": "EXT_disjoint_timer_query_webgl2; isolated aurora passes in an 8K HDR target with Earth depth; interleaved order; 8 warmup rounds and 24 measured rounds per mode; adaptive detail disabled",
+  "wholeFrameExploratory": {
+    "viewport": [
+      1280,
+      900
+    ],
+    "tier": "high",
+    "results": [
+      {
+        "pose": "overhead",
+        "mode": "off",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 48.229916,
+        "p90Ms": 58.110708
+      },
+      {
+        "pose": "overhead",
+        "mode": "legacy",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 50.272499,
+        "p90Ms": 65.201208
+      },
+      {
+        "pose": "overhead",
+        "mode": "layers",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 36.819791,
+        "p90Ms": 57.732874
+      },
+      {
+        "pose": "horizon",
+        "mode": "off",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 20.322166,
+        "p90Ms": 30.003666
+      },
+      {
+        "pose": "horizon",
+        "mode": "legacy",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 26.545375,
+        "p90Ms": 49.769499
+      },
+      {
+        "pose": "horizon",
+        "mode": "layers",
+        "n": 30,
+        "disjoint": 0,
+        "medianMs": 20.021583,
+        "p90Ms": 36.117624
+      }
+    ]
+  },
+  "wholeFrameNote": "Sequential exploratory samples have scheduling and thermal variability; no total-frame speedup inferred."
+}

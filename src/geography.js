@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import data from '../assets/geography/atlas.json';
 import {geographicVector,GeographyIndex} from './geography-math.js';
+import {cityLabelEnabled} from './geography-settings.js';
 import {placeSkyLabels} from './star-chart-math.js';
 import {getLanguage,t} from './i18n.js';
 
 const R=6374,CELL=40,FONT=26;
-const kinds={country:'geoCountries',capital:'geoCapitals',marine:'geoMarine',landform:'geoLandforms',river:'geoRivers',lake:'geoLakes'};
-const colors={country:'#f5e9c9',capital:'#ffffff',marine:'#b2e8ff',landform:'#efdcba',river:'#92d9ff',lake:'#92d9ff'};
-const priority={country:.4,capital:.95,marine:.65,landform:.7,river:.9,lake:1.05};
+const kinds={country:'geoCountries',capital:'geoCapitals',city:'geoCities',marine:'geoMarine',landform:'geoLandforms',river:'geoRivers',lake:'geoLakes'};
+const colors={country:'#f5e9c9',capital:'#ffffff',city:'#e5edf5',marine:'#b2e8ff',landform:'#efdcba',river:'#92d9ff',lake:'#92d9ff'};
+const priority={country:.4,capital:.95,city:1.1,marine:.65,landform:.7,river:.9,lake:1.05};
 const vertex=`attribute vec2 offset;attribute vec2 lifetime;attribute vec3 tint;
 uniform vec2 viewport;uniform vec3 localCamera;uniform float clock;
 varying vec2 texUV;varying vec3 color;varying float alpha;
@@ -106,7 +107,7 @@ export class Geography{
   this.ensureLines(tier);
   for(const [key,line]of Object.entries(this.lines))line.visible=['borders','china','offshore'].includes(key)?s.geoBorders:key==='rivers'?s.geoRivers:s.geoLakes;
   const hudKey=['telemetry','orbitMinimap','eventTimeline','orbitEventDetail'].map(id=>{const el=document.getElementById(id);return [el.hidden,el.className,el.style.display].join(',');}).join('|');
-  const key=[language,width,height,camera.fov,camera.zoom,...Object.keys(kinds).map(k=>s[kinds[k]]),s.geoDensity,this.env.sim.view,hudKey,document.body.className].join('|');
+  const key=[language,width,height,camera.fov,camera.zoom,...Object.keys(kinds).map(k=>s[kinds[k]]),s.geoCityTier,s.geoDensity,this.env.sim.view,hudKey,document.body.className].join('|');
   const moved=camera.position.distanceToSquared(this.lastPosition)>1e-6||1-Math.abs(camera.quaternion.dot(this.lastQuaternion))>1e-12||1-Math.abs(earthQ.dot(this.lastEarth))>1e-12;
   const modelMoved=follow&&(this.modelSource!==records||this.modelRecords.some(r=>!r.matrix.equals(r.object.matrixWorld)));
   const fading=[...this.shown.values()].some(p=>p.out!==undefined);
@@ -115,12 +116,13 @@ export class Geography{
   const candidates=[],maxRank=Math.max(1,Math.min(6,Math.log2(Math.max(1,projectedRadius/90))+s.geoDensity*3));
   const chart=this.env.starChart;if(follow){chart.prepareOccluders();this.modelSource=records;this.modelRecords=records.map(r=>({object:r.object,matrix:r.object.matrixWorld.clone()}));}
   for(const p of this.items){
-   if(!s[kinds[p.kind]]||p.rank>maxRank||p.position.dot(localCamera)/R<=6371)continue;
+   const city=p.kind==='capital'||p.kind==='city';
+   if(!(city?cityLabelEnabled(p,s):s[kinds[p.kind]])||p.rank>maxRank||p.position.dot(localCamera)/R<=6371)continue;
    const world=p.position.clone().applyQuaternion(earthQ),screen=world.clone().project(camera);
    if(screen.z<-1||screen.z>1||Math.abs(screen.x)>1||Math.abs(screen.y)>1)continue;
    const text=p[language]||p.en,font=p.kind==='country'?15:p.kind==='marine'?14:13,scale=font/FONT;
    const w=[...text].reduce((n,c)=>n+this.glyphs.get(c).advance*scale,0);
-   candidates.push({...p,text,font,w:w+4,h:font+8,x:(screen.x+1)*width/2,y:(1-screen.y)*height/2,centered:p.kind!=='capital',priority:p.id==='beijing'?-2:priority[p.kind]+p.rank*.2,dir:world.sub(camera.position).normalize()});
+   candidates.push({...p,text,font,w:w+4,h:font+8,x:(screen.x+1)*width/2,y:(1-screen.y)*height/2,centered:!city,priority:p.id==='beijing'?-2:priority[p.kind]+p.rank*.2,dir:world.sub(camera.position).normalize()});
   }
   candidates.sort((a,b)=>a.priority-b.priority||a.id.localeCompare(b.id));this.stats.candidates=candidates.length;
   const stageBox=this.env.api.stage.getBoundingClientRect(),reserved=[];
@@ -140,7 +142,7 @@ export class Geography{
   for(const label of this.shown.values()){
    let pen=label.dx;const scale=label.font/FONT,color=new THREE.Color(colors[label.kind]);
    for(const char of label.text){const g=this.glyphs.get(char);quad(label,g,pen-5*scale,-label.dy-30*scale,CELL*scale,color);pen+=g.advance*scale;}
-   if(label.kind==='capital'){const star=label.id==='beijing',size=star?18:10;quad(label,this.glyphs.get(star?'★':'●'),-size/2,-size/2,size,new THREE.Color(star?'#ff3434':'#ffffff'));}
+   if(label.kind==='capital'||label.kind==='city'){const star=label.id==='beijing',size=star?18:label.kind==='capital'?10:7;quad(label,this.glyphs.get(star?'★':'●'),-size/2,-size/2,size,new THREE.Color(star?'#ff3434':'#ffffff'));}
   }
   const geometry=new THREE.BufferGeometry();for(const [key,size]of Object.entries({position:3,offset:2,uv:2,tint:3,lifetime:2}))geometry.setAttribute(key,new THREE.Float32BufferAttribute(arrays[key],size));
   this.labels.geometry.dispose();this.labels.geometry=geometry;this.stats.uploads++;

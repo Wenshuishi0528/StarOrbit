@@ -1,3 +1,4 @@
+import {TelemetryPanel} from './dfh1-telemetry-panel.js';
 import {MusicDock} from './music-dock.js';
 import {t,onLanguageChange} from './i18n.js';
 import {MusicStore,MUSIC_SETTINGS_KEY,musicSettings,reconcileMusic,adjacentTrack,randomTrack,moveTrack,musicTime,probeMusic} from './music-library.js';
@@ -9,6 +10,7 @@ export class MusicPlayer{
   this.audio=new Audio();this.audio.preload='metadata';this.store=new MusicStore();this.tracks=new Map();this.current=null;this.state={id:'library',order:[],removed:[]};this.busy=false;this.loaded=false;this.failed=new Set();this.wantPlayback=false;this.playToken=0;
   try{this.settings=musicSettings(JSON.parse(localStorage.getItem(MUSIC_SETTINGS_KEY)));}catch{this.settings=musicSettings();}
   this.audio.volume=this.settings.volume;this.audio.muted=this.settings.muted;
+  this.broadcastMode='recording';this.telemetry=new TelemetryPanel(this);
   this.dock=new MusicDock($('musicWidget'),()=>this.busy||this.picking);this.bind();this.render();this.ready=this.restore().catch(error=>this.message(error.message));onLanguageChange(()=>this.render());
  }
  async restore(){
@@ -22,33 +24,40 @@ export class MusicPlayer{
  bind(){
   $('musicOrb').addEventListener('click',()=>{if(this.needsGesture)this.play();});
   $('musicPlay').onclick=()=>this.toggle();$('musicPrevious').onclick=()=>this.step(-1);$('musicNext').onclick=()=>this.step(1);
-  $('musicListToggle').onclick=()=>this.panel('list',$('musicPanel').hidden);$('musicTitleButton').onclick=()=>this.panel('list',$('musicPanel').hidden);$('musicClose').onclick=()=>{this.panel('list',false);$('musicListToggle').focus();};
+  $('musicListToggle').onclick=()=>this.panel('list',$('musicPanel').hidden);$('musicTitleButton').onclick=()=>this.panel(this.broadcast?'telemetry':'list',$(this.broadcast?'dfh1Panel':'musicPanel').hidden);$('dfh1Toggle').onclick=()=>this.panel('telemetry',$('dfh1Panel').hidden);$('musicClose').onclick=()=>{this.panel('list',false);$('musicListToggle').focus();};
   $('musicVolumeToggle').onclick=()=>this.panel('volume',$('musicVolumePanel').hidden);
   $('musicVolume').oninput=()=>{this.settings.volume=Number($('musicVolume').value)/100;this.settings.muted=false;this.applySettings();};
   $('musicMute').onclick=()=>{this.settings.muted=!this.settings.muted;this.applySettings();};
   $('musicAutoplay').onchange=()=>{this.settings.autoplay=$('musicAutoplay').checked;this.applySettings();};
-  $('musicSeek').oninput=()=>{if(Number.isFinite(this.audio.duration)&&this.audio.duration>0){const resume=!!this.loopTimer&&this.wantPlayback;this.clearLoop();this.audio.currentTime=Number($('musicSeek').value)*this.audio.duration/1000;if(resume)this.play();this.progress();}};
+  $('musicSeek').oninput=()=>{if(this.live)return;if(Number.isFinite(this.audio.duration)&&this.audio.duration>0){const resume=!!this.loopTimer&&this.wantPlayback;this.clearLoop();this.audio.currentTime=Number($('musicSeek').value)*this.audio.duration/1000;if(resume)this.play();this.progress();}};
   $('musicAdd').onclick=()=>{this.picking=true;$('musicFiles').click();};$('musicFiles').oncancel=()=>{this.picking=false;this.dock.schedule();};$('musicFiles').onchange=async e=>{try{await this.importFiles([...e.target.files]);}catch(error){this.message(error.message);}finally{e.target.value='';this.picking=false;this.dock.schedule();}};
   $('musicRestore').onclick=()=>this.restoreBuiltins();
-  document.addEventListener('pointerdown',e=>{if(!$('musicWidget').contains(e.target)){this.panel('list',false);this.panel('volume',false);}});
-  for(const event of ['playing','waiting'])this.audio.addEventListener(event,()=>{this.buffering=event!=='playing';this.renderPlayback();});
+  document.addEventListener('pointerdown',e=>{if(!$('musicWidget').contains(e.target)){this.panel('list',false);this.panel('volume',false);this.panel('telemetry',false);}});
+  for(const event of ['playing','waiting'])this.audio.addEventListener(event,()=>{if(this.live)return;this.buffering=event!=='playing';this.renderPlayback();});
   for(const event of ['play','pause','loadedmetadata','durationchange','ended'])this.audio.addEventListener(event,()=>this.renderPlayback());
   this.audio.addEventListener('timeupdate',()=>this.progress());
-  this.audio.addEventListener('ended',()=>{if(this.wantPlayback){if(this.broadcast)this.queueLoop();else this.step(1,{automatic:true});}});
-  this.audio.addEventListener('error',()=>{if(this.audio.error&&this.current)this.trackError(this.current);});
+  this.audio.addEventListener('ended',()=>{if(this.live)return;if(this.wantPlayback){if(this.broadcast)this.queueLoop();else this.step(1,{automatic:true});}});
+  this.audio.addEventListener('error',()=>{if(!this.live&&this.audio.error&&this.current)this.trackError(this.current);});
   // Transfer playback when another app tab starts music; one audible tab at a time.
   try{this.channel=new BroadcastChannel('tiangong-music-playback-v1');this.channel.onmessage=()=>this.pause();}catch{}
   window.addEventListener('pagehide',()=>this.pause());
  }
+ get live(){return !!this.broadcast&&this.broadcastMode==='telemetry';}
+ updateSimulation(sim,wall){this.telemetry.update(sim,wall);}
+ setBroadcastMode(mode){
+  if(!['recording','telemetry'].includes(mode)||mode===this.broadcastMode)return;
+  const play=this.wantPlayback;this.pause();this.broadcastMode=mode;this.telemetry.reset();this.telemetry.render();
+  if(play)this.play();this.render();
+ }
  clearLoop(){clearTimeout(this.loopTimer);this.loopTimer=null;}
- pause(){this.clearLoop();this.wantPlayback=false;this.needsGesture=false;this.playToken++;this.audio.pause();this.renderPlayback();}
+ pause(){this.clearLoop();this.wantPlayback=false;this.needsGesture=false;this.playToken++;this.audio.pause();this.telemetry.engine.stop();this.renderPlayback();}
  queueLoop(){
-  this.clearLoop();this.loopTimer=setTimeout(()=>{this.loopTimer=null;if(this.broadcast&&this.wantPlayback){this.audio.currentTime=0;this.play();}},5000);this.renderPlayback();
+  this.clearLoop();this.loopTimer=setTimeout(()=>{this.loopTimer=null;if(this.broadcast&&!this.live&&this.wantPlayback){this.audio.currentTime=0;this.play();}},5000);this.renderPlayback();
  }
  setMission(id){
   this.pendingMission=id;if(!this.loaded)return;
   const broadcast=id==='dfh1';if(broadcast===!!this.broadcast)return;
-  this.panel('list',false);
+  this.panel('list',false);this.panel('telemetry',false);this.telemetry.engine.stop();
   if(broadcast){
    this.libraryPlayback={id:this.current,time:this.audio.currentTime,play:this.wantPlayback};this.broadcast=true;
    this.select(BROADCAST_ID,this.broadcastPlayback??this.settings.autoplay);
@@ -60,12 +69,13 @@ export class MusicPlayer{
   this.render();
  }
  panel(kind,open){
-  if(kind==='list'&&open&&this.broadcast)return;
-  const id=kind==='list'?'musicPanel':'musicVolumePanel',button=kind==='list'?'musicListToggle':'musicVolumeToggle';$(id).hidden=!open;$(button).setAttribute('aria-expanded',String(open));
-  if(open){this.dock.expand();const other=kind==='list'?'volume':'list';this.panel(other,false);}
-  $('musicWidget').classList.toggle('music-popup-open',!$('musicPanel').hidden||!$('musicVolumePanel').hidden);
+  if(kind==='list'&&open&&this.broadcast||kind==='telemetry'&&open&&!this.broadcast)return;
+  const panels={list:['musicPanel','musicListToggle'],volume:['musicVolumePanel','musicVolumeToggle'],telemetry:['dfh1Panel','dfh1Toggle']};
+  const [id,button]=panels[kind];$(id).hidden=!open;$(button).setAttribute('aria-expanded',String(open));
+  if(open){this.dock.expand();for(const other of Object.keys(panels))if(other!==kind)this.panel(other,false);if(kind==='telemetry')this.telemetry.render();}
+  $('musicWidget').classList.toggle('music-popup-open',Object.values(panels).some(([id])=>!$(id).hidden));
  }
- applySettings(){this.audio.volume=this.settings.volume;this.audio.muted=this.settings.muted;try{localStorage.setItem(MUSIC_SETTINGS_KEY,JSON.stringify(this.settings));}catch{this.message('音乐设置未能保存');}this.renderPlayback();}
+ applySettings(){this.telemetry.engine.setVolume(this.settings.volume,this.settings.muted);this.audio.volume=this.settings.volume;this.audio.muted=this.settings.muted;try{localStorage.setItem(MUSIC_SETTINGS_KEY,JSON.stringify(this.settings));}catch{this.message('音乐设置未能保存');}this.renderPlayback();}
  message(key,params={}){this.notice={key,params};$('musicStatus').textContent=t(key,params);}
  source(track){
   if(track.blob)return URL.createObjectURL(track.blob);
@@ -73,18 +83,18 @@ export class MusicPlayer{
   const bytes=Uint8Array.from(atob(track.base64),c=>c.charCodeAt(0));return URL.createObjectURL(new Blob([bytes],{type:track.type}));
  }
  select(id,play=true){
-  if(this.broadcast&&id!==BROADCAST_ID)return;this.clearLoop();this.playToken++;this.audio.pause();this.wantPlayback=play;this.needsGesture=false;this.buffering=false;this.current=id;this.audio.removeAttribute('src');this.audio.load();if(this.url){URL.revokeObjectURL(this.url);this.url=null;}
+  if(this.broadcast&&id!==BROADCAST_ID)return;this.clearLoop();this.playToken++;this.audio.pause();this.telemetry.engine.stop();this.wantPlayback=play;this.needsGesture=false;this.buffering=false;this.current=id;this.audio.removeAttribute('src');this.audio.load();if(this.url){URL.revokeObjectURL(this.url);this.url=null;}
   if(id&&this.tracks.has(id)){try{this.url=this.source(this.tracks.get(id));this.audio.src=this.url;if(play)this.play();}catch{this.trackError(id);}}
   else{this.current=null;this.wantPlayback=false;}
   this.render();
  }
  async play(){
   if(!this.current)return;this.clearLoop();this.wantPlayback=true;this.needsGesture=false;const token=++this.playToken,id=this.current;this.renderPlayback();
-  try{await this.audio.play();if(token!==this.playToken)return;this.failed.clear();this.channel?.postMessage('playing');this.renderPlayback();}
+  try{if(this.live){this.telemetry.engine.setVolume(this.settings.volume,this.settings.muted);this.telemetry.reset();const started=await this.telemetry.engine.start();if(!started)return;}else await this.audio.play();if(token!==this.playToken)return;this.failed.clear();this.channel?.postMessage('playing');this.renderPlayback();}
   catch(error){if(token!==this.playToken||error.name==='AbortError')return;if(error.name==='NotAllowedError'){this.needsGesture=true;this.renderPlayback();}else this.trackError(id);}
  }
- toggle(){if(!this.loaded)return;if(!this.current){this.select(randomTrack(this.state.order),true);return;}if(this.loopTimer||!this.audio.paused||this.wantPlayback&&!this.needsGesture&&this.audio.readyState<2){this.pause();}else{this.failed.clear();this.play();}}
- step(direction,{automatic=false}={}){if(this.broadcast){this.select(BROADCAST_ID,true);return;}const order=automatic?this.state.order.filter(id=>!this.failed.has(id)):this.state.order;if(!automatic)this.failed.clear();this.select(adjacentTrack(order,this.current,direction),true);}
+ toggle(){if(!this.loaded)return;if(this.live){if(this.wantPlayback&&!this.needsGesture)this.pause();else this.play();return;}if(!this.current){this.select(randomTrack(this.state.order),true);return;}if(this.loopTimer||!this.audio.paused||this.wantPlayback&&!this.needsGesture&&this.audio.readyState<2){this.pause();}else{this.failed.clear();this.play();}}
+ step(direction,{automatic=false}={}){if(this.broadcast){if(this.live){this.telemetry.reset();this.play();}else this.select(BROADCAST_ID,true);return;}const order=automatic?this.state.order.filter(id=>!this.failed.has(id)):this.state.order;if(!automatic)this.failed.clear();this.select(adjacentTrack(order,this.current,direction),true);}
  trackError(id){
   if(id!==this.current||this.failed.has(id))return;if(this.broadcast){this.pause();this.message('无法播放：{name}',{name:t(this.tracks.get(id)?.title||id)});$('musicMeta').textContent=t('无法播放：{name}',{name:t(this.tracks.get(id)?.title||id)});return;}this.failed.add(id);this.message('无法播放：{name}',{name:this.tracks.get(id)?.title||id});const next=adjacentTrack(this.state.order,id,1),remaining=this.state.order.filter(x=>!this.failed.has(x));
   if(this.wantPlayback&&remaining.length){const start=this.state.order.indexOf(next);const ordered=[...this.state.order.slice(start),...this.state.order.slice(0,start)];this.select(ordered.find(x=>!this.failed.has(x)),true);}
@@ -120,17 +130,18 @@ export class MusicPlayer{
  renderPlayback(){
   // A one-track library can repeat natively without reloading its audio source.
   this.audio.loop=!this.broadcast&&this.state.order.length===1;
-  const track=this.tracks.get(this.current),title=track?.mission?t(track.title):track?.title;$('musicTrackTitle').textContent=title||t('音乐列表为空');
-  const playing=!this.audio.paused||!!this.loopTimer;const active=!this.audio.paused&&!this.audio.ended&&!this.buffering;$('musicOrb').classList.toggle('is-playing',active);$('musicOrb').title=t(this.needsGesture?'点击播放':this.broadcast?'东方红一号 · 历史广播':'背景音乐')+(title?' · '+title:'');$('musicOrb').setAttribute('aria-label',t('展开音乐播放器')+(title?' · '+title:''));$('musicPlay').classList.toggle('is-playing',playing);$('musicPlay').setAttribute('aria-label',t(playing?'暂停音乐':'播放音乐'));$('musicPlay').title=t(playing?'暂停音乐':'播放音乐');
+  const track=this.tracks.get(this.current),title=this.live?t('东方红一号 · 实时遥测'):track?.mission?t(track.title):track?.title;$('musicTrackTitle').textContent=title||t('音乐列表为空');
+  const playing=this.live?this.wantPlayback:!this.audio.paused||!!this.loopTimer;const active=this.live?this.telemetry.engine.audible:!this.audio.paused&&!this.audio.ended&&!this.buffering;$('musicOrb').classList.toggle('is-playing',active);$('musicOrb').title=t(this.needsGesture?'点击播放':this.broadcast?'东方红一号信号':'背景音乐')+(title?' · '+title:'');$('musicOrb').setAttribute('aria-label',t('展开音乐播放器')+(title?' · '+title:''));$('musicPlay').classList.toggle('is-playing',playing);$('musicPlay').setAttribute('aria-label',t(playing?'暂停音乐':'播放音乐'));$('musicPlay').title=t(playing?'暂停音乐':'播放音乐');
   for(const id of ['musicPlay','musicPrevious','musicNext'])$(id).disabled=!this.loaded||(!this.broadcast&&!this.state.order.length);
   for(const id of ['musicNext','musicListToggle'])$(id).hidden=!!this.broadcast;
+  $('dfh1Toggle').hidden=!this.broadcast;
   $('musicPrevious').title=t(this.broadcast?'从头播放':'上一首');$('musicPrevious').setAttribute('aria-label',$('musicPrevious').title);
-  $('musicTitleButton').title=t(this.broadcast?'东方红一号 · 历史广播':'打开播放列表');
+  $('musicTitleButton').title=t(this.broadcast?'东方红一号信号':'打开播放列表');
   $('musicVolume').value=String(Math.round(this.settings.volume*100));$('musicVolumeValue').textContent=Math.round(this.settings.volume*100)+'%';$('musicMute').setAttribute('aria-pressed',String(this.settings.muted));$('musicMute').textContent=t(this.settings.muted?'取消静音':'静音');$('musicVolumeToggle').classList.toggle('muted',this.settings.muted||this.settings.volume===0);$('musicVolumeToggle').title=t(this.settings.muted?'已静音':'音量');$('musicAutoplay').checked=this.settings.autoplay;
   for(const row of $('musicList').children){const selected=row.dataset.id===this.current;row.classList.toggle('current',selected);row.querySelector('.music-track')?.setAttribute('aria-current',String(selected));}
   this.progress();
  }
- progress(){const duration=this.audio.duration,valid=Number.isFinite(duration)&&duration>0;$('musicSeek').disabled=!valid;$('musicSeek').value=valid?String(1000*this.audio.currentTime/duration):'0';$('musicSeek').setAttribute('aria-valuetext',musicTime(this.audio.currentTime)+' / '+musicTime(valid?duration:this.tracks.get(this.current)?.duration));$('musicMeta').textContent=this.loopTimer?t('5 秒后重复播放'):this.needsGesture?t('点击播放'):!this.loaded?t('正在准备音乐…'):(this.broadcast?'':t('列表循环')+' · ')+musicTime(this.audio.currentTime)+' / '+musicTime(valid?duration:this.tracks.get(this.current)?.duration);}
+ progress(){if(this.live){this.telemetry.progress();return;}const duration=this.audio.duration,valid=Number.isFinite(duration)&&duration>0;$('musicSeek').disabled=!valid;$('musicSeek').value=valid?String(1000*this.audio.currentTime/duration):'0';$('musicSeek').setAttribute('aria-valuetext',musicTime(this.audio.currentTime)+' / '+musicTime(valid?duration:this.tracks.get(this.current)?.duration));$('musicMeta').textContent=this.loopTimer?t('5 秒后重复播放'):this.needsGesture?t('点击播放'):!this.loaded?t('正在准备音乐…'):(this.broadcast?'':t('列表循环')+' · ')+musicTime(this.audio.currentTime)+' / '+musicTime(valid?duration:this.tracks.get(this.current)?.duration);}
  renderList(){
   const list=$('musicList'),focused=document.activeElement?.closest('[data-music-action]'),focus=focused&&{id:focused.closest('[data-id]')?.dataset.id,action:focused.dataset.musicAction};list.replaceChildren();
   $('musicCount').textContent=t('{count} 首',{count:this.state.order.length});$('musicAdd').disabled=$('musicRestore').disabled=this.busy||!this.loaded;

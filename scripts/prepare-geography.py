@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Build the offline globe atlas. Requires Python 3, Shapely and OpenCC.
 
 Natural Earth is pinned to v5.1.2. China's geometry comes directly from the
@@ -50,8 +51,22 @@ def label(p, g, kind, key, rank=None):
         if not biggest.covers(anchor): anchor=biggest.representative_point()
     return {'id':key,'kind':kind,'en':en,'zh':zh,**{lang:p['name_'+lang] for lang in ['ru','fr'] if p.get('name_'+lang)},'lon':round(anchor.x,4),'lat':round(anchor.y,4),'rank':rank if rank is not None else min(6,max(0,p.get('scalerank') or 0))}
 
+def city_labels(rows):
+    labels=[]
+    for p,g in rows:
+        if p.get('featurecla') in ['Scientific station','Historic place']:continue
+        capital=p.get('adm0cap')==1 and p.get('adm0_a3') not in ['TWN','HKG','MAC']
+        scale=p.get('scalerank') or 0
+        city_tier=1 if scale<=2 else 2 if scale==3 else 3
+        kind='capital' if capital else 'city'
+        item=label(p,g,kind,kind+'-'+str(p['ne_id']),max(1,min(5,scale)) if capital else [1,3,4][city_tier-1])
+        item['cityTier']=city_tier
+        if capital and p.get('adm0_a3')=='CHN':item.update(id='beijing',zh='北京',en='Beijing',ru='Пекин',fr='Pékin',lon=116.4074,lat=39.9042,rank=0,marker='star')
+        labels.append(item)
+    return labels
+
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--cache',type=Path,default=Path('/tmp/tiangong-geodata'));args=ap.parse_args();args.cache.mkdir(parents=True,exist_ok=True)
+    ap=argparse.ArgumentParser();ap.add_argument('--cache',type=Path,default=Path('/tmp/tiangong-geodata'));ap.add_argument('--cities-only',action='store_true');args=ap.parse_args();args.cache.mkdir(parents=True,exist_ok=True)
     out=ROOT/'assets/geography';out.mkdir(exist_ok=True)
     sources=[]
     def load(name):
@@ -59,6 +74,16 @@ def main():
         if not path.exists(): path.write_bytes(urllib.request.urlopen(url,timeout=60).read())
         blob=path.read_bytes();sources.append({'url':url,'sha256':hashlib.sha256(blob).hexdigest()})
         return [(dict((k.lower(),v) for k,v in f['properties'].items()),shape(f['geometry'])) for f in json.loads(blob)['features'] if f['geometry']]
+    if args.cities_only:
+        atlas=json.loads((out/'atlas.json').read_text(encoding='utf-8'))
+        cities=city_labels(load('ne_50m_populated_places'))
+        first=next(i for i,p in enumerate(atlas['labels']) if p['kind'] in ['capital','city'])
+        labels=[p for p in atlas['labels'] if p['kind'] not in ['capital','city']]
+        atlas['labels']=labels[:first]+cities+labels[first:]
+        atlas['sources']=[sources[0] if p['url']==sources[0]['url'] else p for p in atlas['sources']]
+        dump(out/'atlas.json',atlas)
+        print('city anchors',len(cities))
+        return
     blob=CHINA_FILE.read_bytes()
     decoded=bytes((v[0]>>2)&255 for v in struct.iter_unpack('>i',gzip.decompress(blob)))
     china_features=json.loads(decoded)['features']
@@ -88,11 +113,7 @@ def main():
         if g.is_empty:continue
         item=label(p,g,'country','country-'+code, max(0,min(5,(p.get('labelrank') or 3)-1)))
         labels.append(item);countries.append({**item,'parts':parts(g.simplify(.018,preserve_topology=True))})
-    for p,g in load('ne_50m_populated_places'):
-        if p.get('adm0cap')!=1 or p.get('adm0_a3') in ['TWN','HKG','MAC']:continue
-        item=label(p,g,'capital','capital-'+str(p['ne_id']),max(1,min(5,p.get('scalerank') or 1)))
-        if p.get('adm0_a3')=='CHN':item.update(id='beijing',zh='北京',en='Beijing',ru='Пекин',fr='Pékin',lon=116.4074,lat=39.9042,rank=0,marker='star')
-        labels.append(item)
+    labels.extend(city_labels(load('ne_50m_populated_places')))
     for name,kind in [('geography_marine_polys','marine'),('geography_regions_polys','landform'),('lakes','lake')]:
         for i,(p,g) in enumerate(load('ne_50m_'+name)):
             if kind=='landform' and p.get('featurecla') not in ['Range/mtn','Plateau','Desert','Basin','Plain','Valley','Lowland','Geoarea']:continue

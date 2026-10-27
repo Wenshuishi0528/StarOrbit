@@ -108,7 +108,7 @@ export class Simulation{
   // Scrubbing owns the selected time while held; playback state stays intact.
   if(!this.minimap.dragging&&!this.timeline.dragging){if(this.mode==='real'){this.time=this.timeline.limitAdvance(old,Date.now());if(this.paused)this.timeUI();}else if(!this.paused){this.time=this.timeline.limitAdvance(old,clampTime(this.time+elapsed*this.speed*1000));if(this.paused)this.timeUI();}}
   this.syncOrbitEra();const status=this.orbitStatus;if(status!==this.lastOrbitStatus){this.lastOrbitStatus=status;if(status!=='ready')this.setView('follow');this.timeUI();this.missions?.syncUI();}
-  const raw=snapshot(this.data,this.time),q=raw&&(mission(this.missionId).attitude==='ground-track'?groundTrackAttitude(raw):spacecraftAttitude(raw,this.missions?.state.rotation.mode==='inertial'?(this.inertialReference||raw):raw));this.current=q;this.missions?.updateRotation();this.minimap.update(q,wall);this.timeline.update(wall);
+  const raw=snapshot(this.data,this.time),q=raw&&(mission(this.missionId).attitude==='ground-track'?groundTrackAttitude(raw):spacecraftAttitude(raw,this.missions?.state.rotation.mode==='inertial'?(this.inertialReference||raw):raw));this.current=q;this.missions?.updateRotation();this.api.music?.updateSimulation(this,wall);this.minimap.update(q,wall);this.timeline.update(wall);
   if(!q){
    this.api.modelRoot.visible=true;this.api.sunLight.position.copy(this.center).addScaledVector(new THREE.Vector3(120,-180,240).normalize(),this.shadowDistance);
    $('simClock').textContent=clockText(this.time);$('clockMode').textContent=t('模型查看 · 无轨道位置');
@@ -144,7 +144,7 @@ export class Simulation{
   if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position)));this.spaceCamera.near=10;this.spaceCamera.far=1000000;}else if(overview)this.orbitControls.update();
   this.spaceCamera.updateProjectionMatrix();this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
   if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),800000);this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));}
-  this.environment.update(q,this.spaceCamera);const linear=this.environment.beginFrame();this.sunDisc.visible=!linear&&!!q;this.sunView.update(q,this.spaceCamera,linear);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);if(linear)this.environment.finishFrame();
+  this.environment.update(q,this.spaceCamera);const linear=this.environment.beginFrame();this.sunDisc.visible=!linear&&!!q;this.sunView.update(q,this.spaceCamera,linear);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);this.environment.auroraCurtains.render(this.spaceCamera);if(linear)this.environment.finishFrame();
   if(!overview){this.shadowCache.update();renderer.autoClear=false;renderer.state.buffers.depth.setMask(true);renderer.clearDepth();renderer.render(scene,camera);renderer.autoClear=true;}
   renderer.autoClear=true;
   for(const {el}of Object.values(this.api.tags))if(overview)el.style.display='none';

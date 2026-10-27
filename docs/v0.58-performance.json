@@ -1,0 +1,66 @@
+{
+  "viewport": [
+    1280,
+    900
+  ],
+  "stats": {
+    "fluxUpdates": 1,
+    "volumeRenders": 1030,
+    "steps": 24,
+    "width": 640,
+    "height": 450
+  },
+  "results": [
+    {
+      "pose": "overhead",
+      "mode": "legacy",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 17.506749,
+      "p90Ms": 19.8855
+    },
+    {
+      "pose": "overhead",
+      "mode": "volume",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 5.152583,
+      "p90Ms": 5.520124
+    },
+    {
+      "pose": "overhead",
+      "mode": "cached",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 4.281125,
+      "p90Ms": 4.525375
+    },
+    {
+      "pose": "horizon",
+      "mode": "legacy",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 10.03925,
+      "p90Ms": 15.436708
+    },
+    {
+      "pose": "horizon",
+      "mode": "volume",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 4.071041,
+      "p90Ms": 6.566124
+    },
+    {
+      "pose": "horizon",
+      "mode": "cached",
+      "n": 15,
+      "disjoint": 0,
+      "medianMs": 3.107333,
+      "p90Ms": 4.846666
+    }
+  ],
+  "version": "0.58",
+  "method": "EXT_disjoint_timer_query_webgl2; interleaved modes; 5 warmup + 15 measured frames per mode; isolated aurora GPU work with Earth depth prepared; footprint cached; same 1280x900 drawing buffer",
+  "note": "Local Chromium sample, not full application frame time; source flux refresh excluded. Renderer timings depend on camera and hardware."
+}

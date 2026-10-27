@@ -1,3 +1,4 @@
+import {AuroraVolume} from './aurora-volume.js';
 import {orbitSegment} from './dfh1-history.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from './atmosphere-spectrum.js';
 import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment,atmosphereTransmissionFragment} from './earth-shaders.js';
@@ -46,7 +47,7 @@ export class Environment{
 
   this.volumeClouds=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+16,128,80),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:volumeCloudFragment,transparent:true,depthWrite:false,depthTest:false,side:THREE.BackSide}));this.volumeClouds.renderOrder=2.4;sim.sky.add(this.volumeClouds);
   this.auroraUniforms={auroraMap:{value:this.fallback},sun:this.uniforms.sun,useData:{value:0},strength:{value:1.4},weatherTime:this.uniforms.weatherTime,seed:this.uniforms.seed};
-  this.aurora=new THREE.Group();for(let i=0;i<9;i++){const mesh=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+105+i*24,160,96),new THREE.ShaderMaterial({uniforms:this.auroraUniforms,vertexShader:vertex,fragmentShader:auroraFragment,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));mesh.renderOrder=3.1+i*.01;this.aurora.add(mesh);}sim.sky.add(this.aurora);
+  this.aurora=new THREE.Group();for(let i=0;i<9;i++){const mesh=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS+105+i*24,160,96),new THREE.ShaderMaterial({uniforms:this.auroraUniforms,vertexShader:vertex,fragmentShader:auroraFragment,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));mesh.renderOrder=3.1+i*.01;this.aurora.add(mesh);}sim.sky.add(this.aurora);this.auroraCurtains=new AuroraVolume(this);
 
   this.backdrop=new THREE.Scene();this.backdrop.background=new THREE.Color('#000104');
   this.starCamera=new THREE.PerspectiveCamera(38,1,.1,2000);
@@ -194,7 +195,7 @@ export class Environment{
   const volume=this.quality==='high'&&this.weather?.settings.volume;this.volumeClouds.visible=!!detailed&&s.clouds&&!!volume;this.volumeClouds.quaternion.copy(this.earth.quaternion);this.uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(this.earth.quaternion)).transpose();
   this.clouds.quaternion.copy(this.earth.quaternion);this.clouds.visible=!!detailed&&s.clouds&&!volume;
   this.detail.update(camera);this.nightDetail.update(camera);
-  this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.phenomena?.update(q,camera);
+  this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.auroraCurtains.update(q?.t??this.sim.time,this.weather?.lowEffects);this.phenomena?.update(q,camera);
   this.stars.visible=s.stars;this.milky.visible=s.stars&&s.milky;
   // The photographic option is an explicit display/exposure approximation.
   const cinematic=s.exposure==='cinematic';this.milky.material.uniforms.textured.value=cinematic&&this.galaxyTexture?1:0;

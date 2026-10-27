@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.54 · 作者 / Author: wenshuishi0528**
+**v0.58 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -20,6 +20,8 @@
 
 - **三轴姿态**：在“航天器姿态”中调节 X 滚转、Y 俯仰、Z 偏航；输入框与滑条实时同步，支持 ±180°、0.1° 精度及归零。空间站与卫星通用，按任务保存。[v0.43 说明](docs/v0.43-details.md)。
 
+- **东方红一号实时遥测**：在音乐播放器的“东方红一号信号”中切换历史录音与实时遥测，选择太阳角计、红外地平仪连续收听或 10 秒实验路序。电压、波形与调频声音随模拟轨道和星体姿态变化；暂停、跳时及倍速切换同步处理。[v0.55 模型与验证](docs/v0.55-details.md)。
+
 - **背景音乐**：内置六首太空音乐，启动随机首曲并默认持续列表循环，最后一首结束后回到第一首，单首歌单重复播放；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，普通任务之间保持连续播放。东方红一号专属彩蛋播放《东方红》乐曲与遥测信号，完整播放后间隔 5 秒循环；切走后恢复原歌单进度和播放状态。
 - **公共资源**：NASA 已下载云图保存在软件公共目录，启动自动恢复；更新期间继续提供已有云图，切换模型保留云图选择与纹理。
 - **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失时可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
@@ -30,10 +32,11 @@
 - **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期与时间合为一条输入栏，默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
 - **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
+- **8K 体积极光**：卷曲亮弧与透明光幕具有高度和厚度，绿色主体向上散开，配有淡红光与局部粉紫底缘。4K 保留原效果；8K 使用分辨率上限、低频形态更新和静止画面缓存。[说明与实拍参考](docs/v0.58-details.md)。
 - **四档地球**：1K 简易、2K 流畅、4K 标准、8K 精细；8K可开启体积云和动态演变，另有云图与极光数据模式。
 - **平滑阴影**：按模型尺寸适配阴影偏移，消除舱体表面的条纹；静止或仅移动镜头时复用阴影，太阳翼、自旋和太阳方向变化时按需刷新。详见 [v0.34 阴影修复与优化](docs/v0.34-details.md)。
 - **光照与清晰度**：辅助开关统一控制补光和金属展示反射；精细档大气合成启用多重采样抗锯齿，窗口缩放和跨屏时同步画布像素比。详见 [v0.32 修复与验证](docs/v0.32-details.md)。
-- **地球地点标识**：国家、首都、国境线、海域、山脉地貌与河湖；北京使用红色五角星，中国轮廓与海上线段来自天地图官方矢量数据。小地图显示当前上空的国家或海域，所有航天器共用。详见 [v0.36 地理与星图](docs/v0.36-details.md)。
+- **地球地点标识**：国家、首都、三级主要城市、国境线、海域、山脉地貌与河湖；北京使用红色五角星，中国轮廓与海上线段来自天地图官方矢量数据。小地图显示当前上空的国家或海域，所有航天器共用。详见 [v0.36 地理与星图](docs/v0.36-details.md)。
 - **星图标注**：地理与星图中的二级折叠菜单提供主要恒星、全部已收录星名和精选三项；支持 88 星座名称、连线、边界与标注密度，名称自动避让，所有航天器共用。详见 [v0.35 星图标注](docs/v0.35-details.md)。
 - **真实星表星空**：41,411颗独立星点；可选原生16K NASA银河背景、主星名称和曝光风格。增强背景按需加载，切回普通模式释放。
 - **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
@@ -49,7 +52,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.54**；GitHub 便携下载包为 **v0.38**。
+源码、网页构建与本机运行版共用 **v0.58**；已发布在线版为 **v0.58**，GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -61,13 +64,15 @@ macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel �
 
 ## English overview
 
+DFH-1 now includes live telemetry from reference Sun and infrared horizon probes, with continuous channel listening, a 10-second experimental sequence and voltage traces. Select the source in the music player’s DFH-1 signal panel. [Model and validation](docs/v0.55-details.md).
+
 ![English interface](docs/preview-en.png)
 
 StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Station, Dong Fang Hong 1 and imported spacecraft share Earth, clouds, stars, music and navigation, with independent orbit and attitude configurations.
 
 ### Features
 
-- **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
+- **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, three city tiers (tier 1 by default), boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
 
 - **Background music:** Six built-in tracks, a random opening track and continuous playlist repeat. The last track returns to the first; a one-track playlist repeats that track. A spinning note expands on hover and collapses on exit, with import, removal, drag sorting, volume and seeking. Playback continues across ordinary missions. Dong Fang Hong 1 plays its exclusive melody and telemetry recording with a five-second gap between repeats; switching away restores the previous playlist position and playback state.
 - **Shared resources:** NASA cloud images persist in a shared application library, restore on startup and remain available during updates. Switching spacecraft retains the selected environment and texture.
@@ -79,6 +84,7 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 - **Orbit and time controls:** interpolate published OEM records within their sampled interval and propagate a Kepler ellipse outside it; use real time, a custom date, pause, or playback up to 1000×. The 1s/1m/10m/1h steps can continue across days and years while preserving playback state.
 - **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
+- **Layered aurora in 8K:** Broad diffuse emission, winding bright arcs, diffuse upper red glow and sparse pink-violet lower rims follow simulation time and existing NOAA/procedural modes. 4K keeps the original effect; 8K uses a shared small texture, one draw batch and adaptive detail. [Details](docs/v0.57-details.md).
 - **Four Earth quality levels:** 1K simple, 2K smooth, 4K standard, and 8K fine. Optional 8K ray-marched volumetric clouds, illustrative cloud evolution, improved atmosphere, twilight, cloud shadows, and aurora.
 - **Smooth spacecraft shadows:** scale-aware bias removes surface stripes; cached shadow maps refresh for solar direction, array motion and spacecraft spin. See [v0.34 validation](docs/v0.34-details.md).
 - **Sky annotations:** a compact nested panel provides major stars, all catalogued names and a three-label preset, plus names, lines and boundaries for 88 constellations. Labels avoid overlap and settings are shared across spacecraft. See [v0.35](docs/v0.35-details.md).
@@ -94,7 +100,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.54**; the GitHub portable download is **v0.38**.
+The source, web build and local runtime share **v0.58**; the published online edition is **v0.58**; the GitHub portable download is **v0.38**.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

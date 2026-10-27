@@ -1,0 +1,59 @@
+{
+  "version": "0.58",
+  "browser": {
+    "checks": [
+      "4K retains the original nine shells",
+      "8K creates volume renderer",
+      "paused camera reuses footprint and integrated light",
+      "render target and autoClear restored",
+      "adaptive mode reduces segment samples",
+      "normal mode restores segment samples",
+      "paused seek refreshes footprint",
+      "returning to time restores phase",
+      "footprint and plume remain continuous across midnight",
+      "fast time does not refresh footprint each frame",
+      "NOAA snapshot bound false",
+      "NOAA 50 degree footprint is retained",
+      "NOAA snapshot bound true",
+      "zero NOAA produces zero emission",
+      "off releases volume resources",
+      "scene import restores volume source",
+      "direct screen fallback works",
+      "quality switch releases targets 0",
+      "quality switch releases targets 1",
+      "quality switch releases targets 2",
+      "4K identity preserved across switches",
+      "quality round trips do not accumulate textures",
+      "high DPI volume resolution capped",
+      "shader compilation and GL checks pass",
+      "unsupported float buffer restores classic aurora",
+      "quality change recovers volume rendering"
+    ],
+    "stats": {
+      "fluxUpdates": 15,
+      "volumeRenders": 20,
+      "steps": 24,
+      "width": 640,
+      "height": 450
+    },
+    "memory": {
+      "geometries": 731,
+      "textures": 18
+    }
+  },
+  "checks": [
+    "npm test",
+    "offline build",
+    "web build",
+    "web asset validation",
+    "git diff --check"
+  ],
+  "review": "code/performance and visual subagent reviews completed",
+  "localRuntime": {
+    "syncedFiles": 49,
+    "sha256Verified": true,
+    "launcherCheck": "READY on port 8771",
+    "appVersion": "0.58",
+    "codesignVerified": true
+  }
+}
