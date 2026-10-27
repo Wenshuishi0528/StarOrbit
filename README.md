@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.53 · 作者 / Author: wenshuishi0528**
+**v0.54 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -27,7 +27,7 @@
 - **轨道事件时间轴**：底部紧凑显示日照／半影／全影、近远地点和赤道交点，支持 3／12／24 小时窗口、事件筛选与前后导航。拖动保留播放状态，可提前 30 秒观看事件或开启到事件暂停。所有航天器共用，按需计算并缓存。详见 [v0.37 时间轴](docs/v0.37-details.md)。
 - **公开访问统计**：顶部显示网页累计访问；本地版读取同一份数字，离线保留缓存。使用固定计数请求，详见 [访问统计说明](docs/v0.53-details.md)。
 - **东方红一号历史轨道**：2000 年以前使用近地点 439 km、远地点 2384 km、倾角 68.5°、周期 114 分钟的历史椭圆；从 2000-01-01 00:00（UTC+8）起自动使用现有轨道。详见 [v0.51 说明](docs/v0.51-details.md)。
-- **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期时间默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
+- **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期与时间合为一条输入栏，默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
 - **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
 - **四档地球**：1K 简易、2K 流畅、4K 标准、8K 精细；8K可开启体积云和动态演变，另有云图与极光数据模式。
@@ -49,7 +49,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页版与本机运行版共用 **v0.53**；GitHub 便携下载包为 **v0.38**。
+源码、网页版与本机运行版共用 **v0.54**；GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -94,7 +94,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web edition and local runtime share **v0.53**; the GitHub portable download is **v0.38**.
+The source, web edition and local runtime share **v0.54**; the GitHub portable download is **v0.38**.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.54 — 2026-10-27
+
+**中文：** 日期与时间合并为一个输入栏，保留原有键盘调整、日期选择和 24h／12h 切换。
+
+**English:** Combined date and time into one input bar, preserving keyboard editing, the date picker and 24h/12h switching.
+
 ## v0.53 — 2026-10-27
 
 **中文：** 新增公开网页累计访问数，本地和网页共用计数模块，支持缓存和四语显示；仅正式网站记录访问，通过固定接口传输计数标识。[说明](docs/v0.53-details.md)。
