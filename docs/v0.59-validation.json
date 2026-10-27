@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "startup restores DFH-1 before any other music starts",
+    "repeat gap remains silent 0",
+    "exclusive repeat keeps the recording 0",
+    "repeat gap remains silent 1",
+    "exclusive repeat keeps the recording 1",
+    "pause cancels scheduled repeat",
+    "normal playlist advances using the same authorized media element",
+    "DFH-1 blocks playlist selection and ignores an obsolete end event"
+  ],
+  "requests": [
+    "assets/dfh1-broadcast-088ce86924d15261.m4a",
+    "assets/dfh1-broadcast-088ce86924d15261.m4a",
+    "assets/dfh1-broadcast-088ce86924d15261.m4a",
+    "assets/dfh1-broadcast-088ce86924d15261.m4a",
+    "assets/computer-beeping-9cfc120eb173ae7b.m4a",
+    "assets/computer-beeping-9cfc120eb173ae7b.m4a",
+    "assets/endless-space-494c6a860a89640c.m4a",
+    "assets/dfh1-broadcast-088ce86924d15261.m4a"
+  ]
+}

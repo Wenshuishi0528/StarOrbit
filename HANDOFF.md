@@ -41,3 +41,9 @@
 ## 2026-10-28 — GitHub and Pages publication
 
 - User authorized publishing the complete v0.58 source, including the v0.55 telemetry and v0.56 city-label work. Main-branch publication uses the existing Pages workflow. The portable release remains v0.38.
+
+## 2026-10-28 — v0.59 music isolation
+
+- Music initialization waits for the restored mission before autoplay. DFH-1 never starts the randomly selected library track during boot.
+- Media end events require the current resource to have ended; repeat callbacks validate their playback generation. The original audio element is retained for Safari autoplay authorization.
+- Added actual-player lifecycle tests and a browser playback trace covering DFH-1 repeats, the five-second gap, pause, library resume and stale end events.

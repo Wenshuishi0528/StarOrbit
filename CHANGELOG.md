@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.59 — 2026-10-28
+
+**中文：** 修复东方红一号启动时混入随机背景音乐的问题；自动播放等待任务恢复，旧曲目的结束事件与过期重播回调不再影响当前音频。[说明与验证](docs/v0.59-details.md)。
+
+**English:** Fixed random background music starting before the DFH-1 mission was restored. Autoplay now waits for mission selection; stale media-end events and repeat callbacks no longer affect the active audio. [Details and validation](docs/v0.59-details.md).
+
 ## v0.58 — 2026-10-27
 
 **中文：** 8K 极光改为体积光幕，加入卷曲亮弧、向上散开的绿光、淡红上缘和局部粉紫底缘；采用限分辨率、低频更新与静止画面缓存。4K 保留原效果。[说明与验证](docs/v0.58-details.md)。

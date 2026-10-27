@@ -19,7 +19,7 @@ export class MusicPlayer{
   let records=[];try{records=await this.store.read();}catch(error){this.message(error.message);}
   for(const record of records)if(record.id.startsWith('user-')&&record.blob instanceof Blob&&typeof record.title==='string')this.tracks.set(record.id,record);
   this.state=reconcileMusic(records.find(x=>x.id==='library'),[...this.tracks.values()].filter(track=>!track.mission));this.loaded=true;
-  this.select(randomTrack(this.state.order),this.settings.autoplay);if(this.pendingMission)this.setMission(this.pendingMission);this.render();
+  this.select(randomTrack(this.state.order),false);if(this.pendingMission)this.setMission(this.pendingMission);this.render();
  }
  bind(){
   $('musicOrb').addEventListener('click',()=>{if(this.needsGesture)this.play();});
@@ -33,14 +33,18 @@ export class MusicPlayer{
   $('musicAdd').onclick=()=>{this.picking=true;$('musicFiles').click();};$('musicFiles').oncancel=()=>{this.picking=false;this.dock.schedule();};$('musicFiles').onchange=async e=>{try{await this.importFiles([...e.target.files]);}catch(error){this.message(error.message);}finally{e.target.value='';this.picking=false;this.dock.schedule();}};
   $('musicRestore').onclick=()=>this.restoreBuiltins();
   document.addEventListener('pointerdown',e=>{if(!$('musicWidget').contains(e.target)){this.panel('list',false);this.panel('volume',false);this.panel('telemetry',false);}});
-  for(const event of ['playing','waiting'])this.audio.addEventListener(event,()=>{if(this.live)return;this.buffering=event!=='playing';this.renderPlayback();});
-  for(const event of ['play','pause','loadedmetadata','durationchange','ended'])this.audio.addEventListener(event,()=>this.renderPlayback());
-  this.audio.addEventListener('timeupdate',()=>this.progress());
-  this.audio.addEventListener('ended',()=>{if(this.live)return;if(this.wantPlayback){if(this.broadcast)this.queueLoop();else this.step(1,{automatic:true});}});
-  this.audio.addEventListener('error',()=>{if(!this.live&&this.audio.error&&this.current)this.trackError(this.current);});
+  this.bindAudio(this.audio);
   // Transfer playback when another app tab starts music; one audible tab at a time.
   try{this.channel=new BroadcastChannel('tiangong-music-playback-v1');this.channel.onmessage=()=>this.pause();}catch{}
   window.addEventListener('pagehide',()=>this.pause());
+ }
+ bindAudio(audio){
+  for(const event of ['playing','waiting'])audio.addEventListener(event,()=>{if(this.live)return;this.buffering=event!=='playing';this.renderPlayback();});
+  for(const event of ['play','pause','loadedmetadata','durationchange','ended'])audio.addEventListener(event,()=>this.renderPlayback());
+  audio.addEventListener('timeupdate',()=>this.progress());
+  // A queued event from the previous source cannot advance the new source.
+  audio.addEventListener('ended',()=>{if(this.live||!audio.ended||audio.currentSrc!==audio.src)return;if(this.wantPlayback){if(this.broadcast)this.queueLoop();else this.step(1,{automatic:true});}});
+  audio.addEventListener('error',()=>{if(!this.live&&audio.error&&this.current)this.trackError(this.current);});
  }
  get live(){return !!this.broadcast&&this.broadcastMode==='telemetry';}
  updateSimulation(sim,wall){this.telemetry.update(sim,wall);}
@@ -52,14 +56,15 @@ export class MusicPlayer{
  clearLoop(){clearTimeout(this.loopTimer);this.loopTimer=null;}
  pause(){this.clearLoop();this.wantPlayback=false;this.needsGesture=false;this.playToken++;this.audio.pause();this.telemetry.engine.stop();this.renderPlayback();}
  queueLoop(){
-  this.clearLoop();this.loopTimer=setTimeout(()=>{this.loopTimer=null;if(this.broadcast&&!this.live&&this.wantPlayback){this.audio.currentTime=0;this.play();}},5000);this.renderPlayback();
+  this.clearLoop();const token=this.playToken;this.loopTimer=setTimeout(()=>{if(token!==this.playToken)return;this.loopTimer=null;if(this.broadcast&&!this.live&&this.wantPlayback&&this.current===BROADCAST_ID){this.audio.currentTime=0;this.play();}},5000);this.renderPlayback();
  }
  setMission(id){
   this.pendingMission=id;if(!this.loaded)return;
-  const broadcast=id==='dfh1';if(broadcast===!!this.broadcast)return;
+  const first=!this.missionReady;this.missionReady=true;
+  const broadcast=id==='dfh1';if(broadcast===!!this.broadcast){if(first&&this.settings.autoplay)this.play();return;}
   this.panel('list',false);this.panel('telemetry',false);this.telemetry.engine.stop();
   if(broadcast){
-   this.libraryPlayback={id:this.current,time:this.audio.currentTime,play:this.wantPlayback};this.broadcast=true;
+   this.libraryPlayback={id:this.current,time:this.audio.currentTime,play:first?this.settings.autoplay:this.wantPlayback};this.broadcast=true;
    this.select(BROADCAST_ID,this.broadcastPlayback??this.settings.autoplay);
   }else{
    this.broadcastPlayback=this.wantPlayback;this.broadcast=false;
@@ -83,13 +88,18 @@ export class MusicPlayer{
   const bytes=Uint8Array.from(atob(track.base64),c=>c.charCodeAt(0));return URL.createObjectURL(new Blob([bytes],{type:track.type}));
  }
  select(id,play=true){
-  if(this.broadcast&&id!==BROADCAST_ID)return;this.clearLoop();this.playToken++;this.audio.pause();this.telemetry.engine.stop();this.wantPlayback=play;this.needsGesture=false;this.buffering=false;this.current=id;this.audio.removeAttribute('src');this.audio.load();if(this.url){URL.revokeObjectURL(this.url);this.url=null;}
+  if(this.broadcast&&id!==BROADCAST_ID)return;
+  this.clearLoop();this.playToken++;this.telemetry.engine.stop();
+  // Keep the user-authorized media element for Safari's per-element autoplay policy.
+  this.audio.pause();this.audio.removeAttribute('src');this.audio.load();
+  if(this.url){URL.revokeObjectURL(this.url);this.url=null;}
+  this.wantPlayback=play;this.needsGesture=false;this.buffering=false;this.current=id;
   if(id&&this.tracks.has(id)){try{this.url=this.source(this.tracks.get(id));this.audio.src=this.url;if(play)this.play();}catch{this.trackError(id);}}
   else{this.current=null;this.wantPlayback=false;}
   this.render();
  }
  async play(){
-  if(!this.current)return;this.clearLoop();this.wantPlayback=true;this.needsGesture=false;const token=++this.playToken,id=this.current;this.renderPlayback();
+  if(!this.current||!this.missionReady)return;this.clearLoop();this.wantPlayback=true;this.needsGesture=false;const token=++this.playToken,id=this.current;this.renderPlayback();
   try{if(this.live){this.telemetry.engine.setVolume(this.settings.volume,this.settings.muted);this.telemetry.reset();const started=await this.telemetry.engine.start();if(!started)return;}else await this.audio.play();if(token!==this.playToken)return;this.failed.clear();this.channel?.postMessage('playing');this.renderPlayback();}
   catch(error){if(token!==this.playToken||error.name==='AbortError')return;if(error.name==='NotAllowedError'){this.needsGesture=true;this.renderPlayback();}else this.trackError(id);}
  }
