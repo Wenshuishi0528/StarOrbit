@@ -1,0 +1,79 @@
+{
+  "version": "0.67",
+  "date": "2026-10-28",
+  "orbit": {
+    "source": "https://en.cmse.gov.cn/news/202107/t20210722_48418.html",
+    "rows": 2521,
+    "user_export_vs_official": "all timestamps and six state components exactly equal",
+    "valid_utc": [
+      "2026-10-28T00:00:00Z",
+      "2026-11-04T00:00:00Z"
+    ],
+    "independent_sgp4_position_difference_km": [
+      0.234,
+      1.143
+    ]
+  },
+  "depth_browser": {
+    "before": {
+      "near": 10,
+      "mean": 182.39203125,
+      "min": 0,
+      "max": 231,
+      "holes": 983,
+      "pixels": 6400
+    },
+    "after": {
+      "near": 26614.499999992444,
+      "mean": 229.9890625,
+      "min": 229,
+      "max": 231,
+      "holes": 0,
+      "pixels": 6400
+    },
+    "error": 0
+  },
+  "cloud_occlusion": {
+    "checks": 55,
+    "all_pass": true
+  },
+  "browser_ui": {
+    "previous_event_times_utc8": [
+      "19:41:44",
+      "19:31:10",
+      "19:07:46"
+    ],
+    "next_event_time_utc8": "19:31:10",
+    "paused_on_selection": true,
+    "pass_stage_cards": 3,
+    "slider_endpoints": [
+      "West-northwest 283.1 deg / 10.0 deg",
+      "East 94.9 deg / 10.0 deg"
+    ],
+    "near_zenith_pass": "89.7 deg; direction-change explanation present",
+    "translations": [
+      "zh-CN",
+      "en",
+      "fr",
+      "ru"
+    ],
+    "mobile": {
+      "viewport": 390,
+      "dialog_scroll_width": 390,
+      "chart_width": 349
+    },
+    "invalid_and_zero_pass_results_clear": true,
+    "console_errors": 0
+  },
+  "checks": {
+    "npm_test": "passed",
+    "offline_build": "passed",
+    "web_build": "passed",
+    "web_resource_byte_equality": "passed"
+  },
+  "publication": "Requested for GitHub main and GitHub Pages. See Actions for this commit and the public version.json for deployment status.",
+  "assets": {
+    "assets/orbit.json": "4ea25baa39b76bc76970414fb0d924b36a1847f19a1270fc222916348e8435c5",
+    "assets/spacecraft/dongfanghong1_v10_meters.glb": "d6774e04903e2f27922d166a5b8d609779f44075e40026b592bd14869be5712a"
+  }
+}

@@ -1,0 +1,4 @@
+<!doctype html><meta charset="utf-8"><title>StarOrbit depth regression</title>
+<style>body{margin:0;background:#091321;color:#dce9fa;font:14px system-ui}header{padding:8px;display:flex;gap:8px;align-items:center}button{padding:7px}iframe{display:block;width:100%;height:calc(100vh - 100px);border:0}output{display:block;padding:8px;max-height:34px;overflow:auto}</style>
+<header><strong>远景深度验证</strong><button id="old">原始近裁面</button><button id="fixed">自适应近裁面</button><button id="regression">均匀云层回归</button><button id="occlusion">夜云与航天器遮挡回归</button><span id="status">载入中</span></header>
+<iframe src="index.html" id="app"></iframe><output id="result"></output><script src="check067.js"></script>

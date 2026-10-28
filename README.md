@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.65 · 作者 / Author: wenshuishi0528**
+**v0.67 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -17,6 +17,8 @@
 一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
 
 ### 主要功能
+
+- **任务实验室**：右上角进入过境预报与交会对接。按北京或自定义地点计算 24／48／72 小时几何过境，以三阶段方向指引、时间—仰角曲线与滑动读数说明何时往哪里看，支持候选观测窗口和日历导出；近距离对接训练提供 50／200／500 m 起点、机体系推力、姿态控制、外部与舰载相机和捕获判定，使用简化相对运动模型。[任务实验室](docs/v0.66-flight-lab.md) · [v0.67 更新](docs/v0.67-details.md)。
 
 - **夜面云层**：云层设置新增“夜面也显示云层”，开启后夜面暗云按云图遮挡城市灯光，厚云遮蔽、薄云部分透光；关闭后显示无遮挡夜景，日面亮度不变；普通云层和 8K 体积云均支持，默认关闭，可保存到预设与分享场景。[v0.64 说明](docs/v0.64-details.md)。
 
@@ -54,11 +56,11 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.65**；在线版随 main 分支自动部署，当前部署版本以页面顶部为准。GitHub 便携下载包为 **v0.38**。
+源码、网页构建与本机运行版共用 **v0.67**；在线版随 main 分支自动部署，当前部署版本以页面顶部为准。GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
-中国空间站内置轨道快照覆盖 **2026-10-19 00:00 至 2026-10-26 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
+中国空间站内置轨道快照覆盖 **2026-10-28 00:00 至 2026-11-04 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
 
 东方红一号使用 CelesTrak 的 **DFH 1 / NORAD 4382 / 1970-034A** 根数，通过 SGP4 计算。内置根数历元为 **2026-10-24 03:47:28 UTC**，采样区间为历元前后各三天，区间外接续开普勒椭圆演算；顶部任务栏可切换，轨道数据栏显示当前计算模式。模型顶部短天线校正为星体 +Z；默认顶部朝轨道前进方向，支持开关 120 转/分自旋；下方通用姿态模块可切换惯性定轴示意与手动偏移。详见 [v0.29 任务框架与验证](docs/v0.29-details.md)。
 
@@ -73,6 +75,8 @@ DFH-1 now includes live telemetry from reference Sun and infrared horizon probes
 StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Station, Dong Fang Hong 1 and imported spacecraft share Earth, clouds, stars, music and navigation, with independent orbit and attitude configurations.
 
 ### Features
+
+- **Mission lab:** Site-based 24/48/72-hour pass planning with three viewing stages, elevation curves, interactive direction readouts, candidate optical windows and calendar export. A separate docking exercise offers 50/200/500 m starts, body-frame thrust, attitude controls, external/onboard cameras and capture checks using simplified relative dynamics. [Mission Lab](docs/v0.66-flight-lab.md) · [v0.67 update](docs/v0.67-details.md).
 
 - **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, three city tiers (tier 1 by default), boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
 
@@ -102,9 +106,9 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web build and local runtime share **v0.65**. The online edition deploys automatically from main; its current version appears at the top of the page. The GitHub portable download remains **v0.38**.
+The source, web build and local runtime share **v0.67**. The online edition deploys automatically from main; its current version appears at the top of the page. The GitHub portable download remains **v0.38**.
 
-The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
+The China Space Station bundled orbit snapshot is valid from **2026-10-28 00:00 to 2026-11-04 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
 Dong Fang Hong 1 uses CelesTrak GP elements for **NORAD 4382 / 1970-034A**, propagated with SGP4. The bundled epoch is **2026-10-24 03:47:28 UTC**, with a ±3-day sampled interval and continued Kepler propagation beyond it. The polar short antenna maps to body +Z; its default prograde orientation and optional inertial-axis mode are illustrative, with toggleable 120 rpm historical spin. The shared attitude panel sits below the display settings. See [mission architecture and validation](docs/v0.29-details.md).
 

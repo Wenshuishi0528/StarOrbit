@@ -14,7 +14,13 @@ assert.deepEqual(evictionIds(items,20,['c']),['a','d']);assert.deepEqual(evictio
 assert.equal(seedNumber('abc'),seedNumber('abc'));assert.notEqual(seedNumber('abc'),seedNumber('abcd'));
 console.log({auroraGridRegistration:'pass',validation:'pass',historySelection:'pass',protectedCache:'pass',seed:'pass'});
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import {parseOfficialOrbit} from '../src/data-sources.js';
-const official=parseOfficialOrbit(fs.readFileSync('assets/official-orbit-source.html','utf8')),bundled=JSON.parse(fs.readFileSync('assets/orbit.json'));
-assert.deepEqual(official.rows,bundled.rows);assert.throws(()=>parseOfficialOrbit('<html>Service unavailable</html>'));
+// This archived 19 October HTML is a fixed parser fixture; assets/orbit.json
+// is refreshed independently and is validated against held-out samples in physics.mjs.
+// Preserve the entire known-good row sequence from the original archived OEM.
+const official=parseOfficialOrbit(fs.readFileSync('assets/official-orbit-source.html','utf8'));
+assert.equal(official.created,'2026-10-19T00:24:27Z');assert.equal(official.rows.length,2521);
+assert.equal(createHash('sha256').update(JSON.stringify(official.rows)).digest('hex'),'b71e322769d3ba5fe715f50e696d66a3de931d679b454edfeddbb6f4b3c84140');
+assert.throws(()=>parseOfficialOrbit('<html>Service unavailable</html>'));
 console.log({officialHTMLParser:official.rows.length});

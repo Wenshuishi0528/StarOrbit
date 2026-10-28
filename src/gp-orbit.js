@@ -32,7 +32,7 @@ export function gpState(satrec,time){
 export function orbitFromGP(input,id,{source='导入 GP / OMM · SGP4',url=''}={}){
  const gp=validateGP(input,id),epoch=Date.parse(gp.EPOCH.endsWith('Z')?gp.EPOCH:gp.EPOCH+'Z'),satrec=json2satrec(gp),rows=[];
  for(let time=epoch-GP_WINDOW_MS;time<=epoch+GP_WINDOW_MS;time+=60000){const {position,velocity}=gpState(satrec,time);rows.push([time,...position,...velocity]);}
- return bindOrbit(validateOrbit({source,created:new Date(epoch).toISOString(),url,objectId:gp.OBJECT_ID,noradId:gp.NORAD_CAT_ID,gpEpoch:new Date(epoch).toISOString(),propagator:'SGP4',frame:'EME2000',timeSystem:'UTC',units:'km, km/s',center:'EARTH',rows}),id);
+ return bindOrbit(validateOrbit({source,created:new Date(epoch).toISOString(),url,objectId:gp.OBJECT_ID,noradId:gp.NORAD_CAT_ID,gpEpoch:new Date(epoch).toISOString(),propagator:'SGP4',gp,frame:'EME2000',timeSystem:'UTC',units:'km, km/s',center:'EARTH',rows}),id);
 }
 export function parseMissionOrbit(text,id){
  const start=text.trim()[0];

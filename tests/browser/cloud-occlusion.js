@@ -5,7 +5,7 @@ async page=>{
   const s=viewer.sim,e=s.environment,r=viewer.renderer;await e.setQuality('high');s.render();
   const u=e.uniforms,old=Object.fromEntries(Object.entries(u).map(([k,v])=>[k,v.value?.clone?v.value.clone():v.value]));
   const exposure=r.toneMappingExposure,glow=e.hdr.material.uniforms.sunGlow.value.clone(),checks=[];
-  const scene=new s.sky.constructor(),camera=s.spaceCamera.clone();camera.position.set(0,0,18000);camera.up.set(0,1,0);camera.lookAt(0,0,0);camera.aspect=1;camera.updateProjectionMatrix();
+  const scene=new s.sky.constructor(),camera=s.spaceCamera.clone();camera.position.set(0,0,18000);camera.near=1000;camera.up.set(0,1,0);camera.lookAt(0,0,0);camera.aspect=1;camera.updateProjectionMatrix();
   const textures=[],tex=value=>{const t=e.fallback.clone();t.source=new e.fallback.source.constructor();t.image={data:new Uint8Array([value,value,value,255]),width:1,height:1};t.needsUpdate=true;textures.push(t);return t;};
   const black=tex(0),city=tex(128),brightCity=tex(255),masks=[tex(0),tex(77),tex(255)],earth=e.earth.clone();earth.quaternion.identity();scene.add(earth);
   const check=(pass,name,data)=>{checks.push({name,pass,...data});if(!pass)throw Error(name+' '+JSON.stringify(data));};

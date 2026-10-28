@@ -100,3 +100,26 @@
 - Full npm test, fresh web build, exact bundled-resource checks and git diff --check passed. Independent subagent review verified the new GLB against the confirmed metre-scale source and found no blocking issues.
 - Publishing the existing v0.65 batch through main and the existing Pages workflow. Portable Release remains v0.38. The initial local validation record now labels its publication state as historical.
 - Next requested development direction: pass predictions and rendezvous/docking with an onboard camera view; implementation has not started in this publication task.
+
+## 2026-10-28 — v0.66 plaque enamel perimeter
+
+- Replaced the v0.10 GLB with its enamel r1 material repair: a separate red-base material removes painted highlights and border duplication all around the oval; original relief artwork and all geometry remain unchanged.
+- Scene triangle count remains65,472. Full-perimeter sampling and model preview inspection completed; source GLB SHA is recorded in docs/v0.66-details.md.
+- Local update only; no public deployment requested.
+
+- Plaque frame r2 supersedes enamel-only r1: connected gold frame, outer low / inner high, same outer footprint and inner opening, same triangle counts. Only model resources in the existing v0.66 builds were repackaged, preserving the concurrently completed Mission Lab build.
+
+## 2026-10-28 — v0.66 mission lab
+
+- Implemented site-based pass prediction (WGS84, bounded OEM or age-limited SGP4), sky tracks, optical-condition candidates, update/import controls and UTC calendar export. New GP imports retain validated source elements.
+- Added isolated 400 km HCW docking training with cloned station/Shenzhou models, 50/200/500 m scenarios, body-frame thrust, ideal attitude controls, fixed centreline onboard camera, capture and approach-corridor rules. Main clock freezes while the modal is open; hide/close/blur clears held controls.
+- Independent subagent review and real browser tests corrected contact-plane geometry, close-range camera parallax, stale SVG handling, multi-peak pass maxima and terminal-state wording. Full npm test, offline/web builds and resource checks passed; independent Skyfield maximum event difference 0.137 s (implementation agreement, not real-world accuracy).
+- Preserved the concurrent DFH-1 plaque repair in this existing v0.66 batch. Synced the local runtime and signed application. Source, tests and documentation are uncommitted; no new publication was requested. See docs/v0.66-flight-lab.md and docs/v0.66-flight-lab-validation.json.
+
+## 2026-10-28 — v0.67 orbit, rendering and forecast release
+
+- User authorized GitHub and online deployment, including previously local v0.66 work. NASA cloud-source UI investigation was explicitly dropped.
+- Audited the active user CSS ephemeris against all 2521 official OEM rows and independent SGP4/frame checks; bundled the verified Oct28–Nov4 snapshot.
+- Fixed far-overview cloud depth quantization, repeated Previous-event navigation, and replaced the polar pass chart with direction/time stages, elevation curve and an interactive time readout.
+- Full tests, offline/web builds and resource checks passed; real-browser depth A/B, 55 cloud occlusion checks, timeline, translations and 390 px layout passed. See docs/v0.67-details.md and docs/v0.67-validation.json.
+- Preserve the concurrent v0.66 DFH-1 plaque frame repair (asset hash in v0.66 details). Portable Release remains v0.38.

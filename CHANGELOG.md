@@ -1,5 +1,21 @@
 # Changelog / 更新记录
 
+## v0.67 — 2026-10-28
+
+**中文：** 修复轨道总览远景云层的雪花缺口与时间轴“上一个事件”反复跳回同一事件的问题。过境预报改为方向/时刻三阶段指引、时间—仰角曲线和拖动读数。核对当前空间站轨道与官方逐项一致，并更新内置快照至 10 月 28 日—11 月 4 日。[说明与验证](docs/v0.67-details.md)。
+
+**English:** Fixed cloud depth artifacts when zooming out and repeated Previous-event selections. Pass forecasts now show three viewing stages, an elevation-over-time plot and an interactive direction readout. Verified the active CSS ephemeris against the official source and refreshed the bundled October 28–November 4 snapshot. [Details and validation](docs/v0.67-details.md).
+
+## v0.66 — 2026-10-28
+
+**中文：** 新增“任务实验室”：按地点预报过境、绘制天空轨迹与导出日历；独立交会对接训练包含相对运动、推力与姿态控制、固定舰载相机和捕获判定。加入轨道时效限制、暂停隔离与四语界面，通过独立轨道对照、模型几何及浏览器流程检查。[使用与验证](docs/v0.66-flight-lab.md)。
+
+**English:** Added the Mission Lab with site-based pass forecasts, sky tracks and calendar export, plus independent docking training with relative motion, thrust/attitude controls, a body-fixed camera and capture checks. Includes orbit-age limits, pause isolation and four languages, validated against an independent orbit implementation, model geometry and browser workflows. [Usage and validation](docs/v0.66-flight-lab.md).
+
+**中文：** 修复东方红一号铭牌整圈红底的反光色斑与贴图金边残留，将底板材质和浮雕图案分开；金边连为外低内高的阶梯框，保留字形和面数。[说明与验证](docs/v0.66-details.md)。
+
+**English:** Removed painted highlights and redundant border colour around the DFH-1 plaque by separating its enamel base from the relief artwork. Joined the gold rings into one continuous frame rising toward the inside; retained lettering and triangle counts. [Details and validation](docs/v0.66-details.md).
+
 ## v0.65 — 2026-10-28
 
 **中文：** 东方红一号替换为新版整星模型，包含修订腰带、单台地平仪、靠下的长天线底座、两个太阳角计和平顶铭牌；保留米制尺寸、朝向及轨道姿态控制。[说明与验证](docs/v0.65-details.md)。

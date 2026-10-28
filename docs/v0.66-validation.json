@@ -1,0 +1,35 @@
+{
+  "version": "0.66",
+  "asset_sha256": "d6774e04903e2f27922d166a5b8d609779f44075e40026b592bd14869be5712a",
+  "asset_bytes": 3929476,
+  "scene_triangles": 65472,
+  "plaque_triangles": 8204,
+  "frame_profile": "outer low, inner high",
+  "other_meshes_unchanged": true,
+  "relief_artwork_unchanged": true,
+  "frame_manifold": true,
+  "full_perimeter_visual_review": true,
+  "checks": {
+    "bundled_resources": [
+      {
+        "file": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/StarOrbit.html",
+        "model_bytes_match": true,
+        "other_content_unchanged": true
+      },
+      {
+        "file": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/dist/index.html",
+        "model_bytes_match": true,
+        "other_content_unchanged": true
+      },
+      {
+        "file": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件/StarOrbit.html",
+        "model_bytes_match": true,
+        "other_content_unchanged": true
+      }
+    ],
+    "missions": "passed",
+    "mission_packages": "passed",
+    "web_build": "passed"
+  },
+  "published": false
+}

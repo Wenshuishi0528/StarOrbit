@@ -1,0 +1,71 @@
+{
+  "version": "0.66",
+  "date": "2026-10-28",
+  "published": false,
+  "checks": {
+    "npm_test": "passed",
+    "offline_build": "passed",
+    "web_build": "passed",
+    "web_resource_bytes": "passed",
+    "four_language_keys": "passed",
+    "subagent_review": "passed; geometry, near camera, lifecycle and mobile screenshots reviewed",
+    "browser_flow": "passed",
+    "native_file_import": "passed; GP retained, 8641 rows",
+    "installed_runtime": "passed"
+  },
+  "independent_reference": {
+    "implementation": "Skyfield 1.55",
+    "events": 21,
+    "max_event_difference_seconds": 0.13686474609375,
+    "meaning": "Implementation agreement only, not real-world accuracy"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:8784/",
+    "oem_passes": 4,
+    "dfh1_reference_day_passes": 7,
+    "desktop": [
+      1440,
+      1100
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "camera_yaw_10_deg_target_x_percent": 59.0355,
+    "webgl_error": 0,
+    "checks": [
+      "stale OEM and GP rejection",
+      "invalid observer clears stale results",
+      "calendar download",
+      "covered ephemeris preview",
+      "GP deadline clipping",
+      "update failure retains original orbit",
+      "body-frame keyboard thrust",
+      "tab and Escape pause",
+      "body-fixed camera moves target under yaw",
+      "slow capture and high-speed contact",
+      "unchanged main mission and assembly",
+      "English, French, Russian and Chinese",
+      "no mobile horizontal overflow"
+    ]
+  },
+  "runtime": {
+    "directory": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "app": "/Applications/星轨.app",
+    "html_sha256": "fc8b20e69b82a670866b809bf00a1c16147a094159618f8521787a9c6c417e46",
+    "signature": "codesign --verify --deep --strict passed",
+    "launcher": "--check passed"
+  },
+  "scope": "Educational close-range HCW docking; no full flight guidance or rigid-body contact simulation.",
+  "lifecycle": {
+    "version": "v0.66",
+    "capture": {
+      "status": "docked",
+      "caption": "对接捕获成功 · 重新开始",
+      "targetVisible": true
+    },
+    "blurPauses": true,
+    "mainClockFrozen": true,
+    "resumedMilliseconds": 5040
+  }
+}

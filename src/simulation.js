@@ -17,6 +17,8 @@ import {EventTimeline} from './event-timeline.js';
 import {DEFAULT_MISSION,mission,spacecraft,orbitState,bindOrbit,VIEW_UNITS_PER_METRE} from './missions.js';
 import {spacecraftAttitude} from './spacecraft-attitude.js';
 import {groundTrackAttitude} from './attitude.js';
+import {MOON_RADIUS} from './moon-math.js';
+import {EARTH_EFFECTS_RADIUS,spaceCameraClipping} from './space-camera-depth.js';
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a),basis=axes=>new THREE.Matrix4().makeBasis(...axes.map(V));
 import {clockText} from './time-format.js';
 import {DateTimeInput} from './date-time-input.js';
@@ -91,7 +93,7 @@ export class Simulation{
  manual(){this.auto=false;this.lastSolveTime=null;$('autoTrack').checked=false;this.controlUI();}
  controlUI(){if(!this.capabilities.solarArrays)return;$('trackingStatus').textContent=this.auto?t('全舱自动追日 · 计算姿态'):t('手动控制 · 角度保持');$('linkLabs').disabled=this.auto||!(this.api.labs().length>1&&['WT','MT'].includes(this.api.types[this.api.state.target]));$('rotationControls').classList.toggle('auto-controls',this.auto);}
  rebuild({poseOnly=false}={}){if(this.capabilities.solarArrays){if(poseOnly)this.tracker.refreshPose();else this.tracker.rebuild();}if(poseOnly)this.poseDirty=true;else this.dirty=true;this.snap=true;const b=new THREE.Box3(),active=Object.entries(this.missions?.activeGroups()||this.api.groups).filter(([,g])=>g?.visible);active.forEach(([,g])=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());this.shadowDistance=fitSpacecraftShadow(this.api.sunLight,b);this.shadowCache.reset(active.flatMap(([id,g])=>{const r=this.api.rig[id];return [g,...(this.capabilities.solarArrays&&r?[r.roll,r.left,r.right]:[])];}));this.localSunArrow.position.copy(this.center);this.controlUI();}
- setView(view){if(view==='orbit'&&this.orbitStatus!=='ready')view='follow';if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.spaceCamera.near=10;this.spaceCamera.far=1000000;this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
+ setView(view){if(view==='orbit'&&this.orbitStatus!=='ready')view='follow';if(view===this.view)return;this.view=view;const overview=view==='orbit';this.api.controls.enabled=!overview;this.orbitControls.enabled=overview;if(overview){this.overviewPosition();this.spaceCamera.up.set(0,0,1);this.orbitControls.target.set(0,0,0);this.orbitControls.update();}this.dirty=true;this.api.scene.visible=true;$('viewMode').value=view;this.api.resize();}
  overviewPosition(){const q=this.current;if(q){const r=V(q.position).normalize(),side=r.clone().cross(V(q.sunDir)).normalize();this.spaceCamera.position.copy(r.addScaledVector(side,.6).normalize().multiplyScalar(28000));}else this.spaceCamera.position.set(14000,-17000,10000);}
  fit(){if(this.view!=='orbit')return false;this.overviewPosition();this.orbitControls.target.set(0,0,0);this.orbitControls.update();return true;}
  updateOrbit(q){
@@ -140,8 +142,15 @@ export class Simulation{
   if(this.environment.devicePixelRatio!==devicePixelRatio)this.environment.updatePixelRatio();
   this.lighting.update(q,$('fillLight').checked);
   if(!q){this.environment.geography.update(null,this.spaceCamera);this.shadowCache.update();scene.background=new THREE.Color('#101b2b');renderer.autoClear=true;renderer.render(scene,camera);scene.background=null;return;}this.spaceCamera.aspect=camera.aspect;this.spaceCamera.fov=camera.fov;
-  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position)));this.spaceCamera.near=10;this.spaceCamera.far=1000000;}else if(overview)this.orbitControls.update();
-  this.spaceCamera.updateProjectionMatrix();this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
+  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position)));}else if(overview)this.orbitControls.update();
+  this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
+  const bounds=overview?[{center:[0,0,0],radius:EARTH_EFFECTS_RADIUS},{center:q.position,radius:65}]:[];
+  if(overview)bounds.push({center:this.spaceCamera.position.toArray().map((v,i)=>v+q.sunDir[i]*800000),radius:6000});
+  if(overview&&this.environment.settings.moon)bounds.push({center:this.environment.moon.ephemeris.at(q.t).position,radius:MOON_RADIUS});
+  if(this.sunArrow.visible)bounds.push({center:q.sunDir.map(v=>v*5750),radius:6050});
+  this.spaceCamera.updateMatrixWorld(true);
+  const clipping=spaceCameraClipping({overview,viewMatrix:this.spaceCamera.matrixWorldInverse.elements,fov:this.spaceCamera.fov,aspect:this.spaceCamera.aspect,zoom:this.spaceCamera.zoom,spheres:bounds,orbitPositions:this.orbitLine.visible?this.orbitLine.geometry.getAttribute('position')?.array:null});
+  this.spaceCamera.near=clipping.near;this.spaceCamera.far=clipping.far;this.spaceCamera.updateProjectionMatrix();
   if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),800000);this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));}
   this.environment.update(q,this.spaceCamera);const linear=this.environment.beginFrame();this.sunDisc.visible=!linear&&!!q;this.sunView.update(q,this.spaceCamera,linear);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);this.environment.auroraCurtains.render(this.spaceCamera);if(linear)this.environment.finishFrame();
   if(!overview){this.shadowCache.update();renderer.autoClear=false;renderer.state.buffers.depth.setMask(true);renderer.clearDepth();renderer.render(scene,camera);renderer.autoClear=true;}

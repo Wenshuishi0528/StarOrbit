@@ -1,5 +1,5 @@
 import {validTime,clampTime} from './orbit.js';
-import {EVENT_TYPES,OrbitEventCache,selectedEvents,eventBetween} from './orbit-events.js';
+import {EVENT_TYPES,OrbitEventCache,selectedEvents,eventBetween,TIME_TOLERANCE} from './orbit-events.js';
 import {t,onLanguageChange} from './i18n.js';
 
 const $=id=>document.getElementById(id),KEY='tiangong-timeline-v1';
@@ -24,13 +24,21 @@ export class EventTimeline{
  save(){try{localStorage.setItem(KEY,JSON.stringify(this.settings));}catch{}}
  reset(){this.finish();this.cache.reset();this.range=null;this.selected=null;this.render();this.lastUpdate=-Infinity;}
  get events(){return selectedEvents(this.cache.result,this.settings);}
- next(time=this.sim.time){return this.events.find(e=>e.time>time)||null;}
- jump(time){
-  const s=this.sim;if(!validTime(time))return;
-  if(s.mode==='real'){s.speed=1;s.paused=false;}s.mode='custom';s.time=time;s.inputDirty=false;s.dirty=s.snap=true;s.lastWall=performance.now();s.timeUI();
+ next(time=this.sim.time){return this.adjacent(1,time);}
+ adjacent(direction,time=this.sim.time){
+  // A recentered scan can refine the selected root to a slightly different time.
+  const selected=this.selected,atSelection=selected&&Math.abs(time-selected.time)<=TIME_TOLERANCE;
+  const candidates=this.events.filter(e=>!(atSelection&&e.type===selected.type&&Math.abs(e.time-selected.time)<=TIME_TOLERANCE));
+  return (direction>0?candidates.find(e=>e.time>time):candidates.findLast(e=>e.time<time-1))||null;
  }
- choose(event){if(!event)return;this.selected=event;this.jump(event.time);this.renderSelection();this.sim.sessionMemory?.save();this.lastUpdate=-Infinity;}
- navigate(direction){const events=this.events,event=direction>0?this.next():events.findLast(e=>e.time<this.sim.time-1);if(event){this.choices=[event];this.choose(event);}}
+ jump(time,{pause=false}={}){
+  const s=this.sim;if(!validTime(time))return;
+  if(s.mode==='real'){s.speed=1;s.paused=false;}if(pause)s.paused=true;s.mode='custom';s.time=time;s.inputDirty=false;s.dirty=s.snap=true;s.lastWall=performance.now();s.timeUI();
+ }
+ // Stop exactly at the selected event. Continuing playback would make Previous
+ // immediately select the same event again; Watch explicitly starts playback.
+ choose(event){if(!event)return;this.selected=event;this.jump(event.time,{pause:true});this.renderSelection();this.sim.sessionMemory?.save();this.lastUpdate=-Infinity;}
+ navigate(direction){const event=this.adjacent(direction);if(event){this.choices=[event];this.choose(event);}}
  finish(){
   if(!this.dragging)return;this.dragging=false;this.sim.lastWall=performance.now();this.sim.dirty=this.sim.snap=true;
   const rail=$('eventRail');if(rail.hasPointerCapture(this.pointerId))rail.releasePointerCapture(this.pointerId);
@@ -69,7 +77,7 @@ export class EventTimeline{
   const countdown=[Math.floor(remaining/3600),Math.floor(remaining%3600/60),remaining%60].map(n=>String(n).padStart(2,'0')).join(':');
   const message=!this.range?t('请先配置有效轨道'):this.cache.pending?t('正在计算轨道事件…'):next?t('{event} · 还有 {time}',{event:t(EVENT_TYPES[next.type].name),time:countdown}):t('该时段没有后续所选事件');
   $('nextEventSummary').textContent=message;$('eventText').textContent=message;
-  $('previousOrbitEvent').disabled=!this.events.some(e=>e.time<this.sim.time-1);$('nextOrbitEvent').disabled=!next;
+  $('previousOrbitEvent').disabled=!this.adjacent(-1);$('nextOrbitEvent').disabled=!next;
  }
  updateCursor(){
   if(!this.range)return;const {start,end}=this.range,f=clamp((this.sim.time-start)/(end-start),0,1);
