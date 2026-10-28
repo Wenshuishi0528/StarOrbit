@@ -1,5 +1,23 @@
 # Changelog / 更新记录
 
+## v0.71 — 2026-10-29
+
+**中文：** 交会对接升级为完整训练台：三种场景、停靠点检查与 GO 放行、人工／辅助接近／保持／撤离、四元数姿态与有限角速率响应。新增方向仪表、无推力预测、事件记录、回放和 JSON／CSV 导出；捕获报告保留接触前真实读数。[模型、使用与验证](docs/v0.71-details.md)。
+
+**English:** Expanded docking into a staged training workbench with three scenarios, hold-point checks and GO clearance, manual/assisted/hold/retreat modes, quaternion attitude and bounded angular-rate response. Added directional instruments, coast prediction, event logs, replay and JSON/CSV export. Capture reports preserve actual pre-contact readings. [Model, usage and validation](docs/v0.71-details.md).
+
+## v0.70 — 2026-10-29
+
+**中文：** 整理任务实验室：过境预报固定显示航天器、地点和轨道时段覆盖，计算成功后收起参数并展示结果；对接画面与读数、控制并排，窄窗口控制区独立滚动。保留原计算和训练逻辑，统一云图来源名称。[说明与验证](docs/v0.70-details.md)。
+
+**English:** Reorganized the Mission Lab with spacecraft, observer and orbit-coverage summaries, results shown after successful pass calculation, and docking controls alongside the viewport. Narrow layouts keep the viewport visible while controls scroll independently. Calculation and training models are preserved; cloud-source names are aligned. [Details and validation](docs/v0.70-details.md).
+
+## v0.69 — 2026-10-28
+
+**中文：** 修复环境收藏覆盖缓存与更新偏好的问题，兼容旧收藏。首次使用仅展开任务与时间，增加全部展开／收起；截图、摄影与收藏集中归类。窄窗口使用工具菜单和可收起小地图，避免遮挡读数与入口，并修正弹窗返回焦点。[说明与验证](docs/v0.69-details.md)。
+
+**English:** Saved environments now preserve global cache and update preferences, including when loading legacy presets. New sessions expand only mission and time controls, with expand/collapse-all actions and grouped photography tools. Narrow windows use a tools menu and collapsible orbit map, with corrected dialog focus restoration. [Details and validation](docs/v0.69-details.md).
+
 ## v0.68 — 2026-10-28
 
 **中文：** 新增统一“数据与资源”面板，清楚区分已下载、正在使用、无更新与检查失败；优化 NASA 云图检查和数据复用。缓存自动清理默认开启，保护当前数据、收藏与设置引用；避免重复下载、解码及轨道重建。[使用与验证](docs/v0.68-details.md)。

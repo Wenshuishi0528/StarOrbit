@@ -2,12 +2,16 @@ import {t,onLanguageChange} from './i18n.js';
 import {clockText,inputText,parseLocalTime} from './time-format.js';
 import {mission} from './missions.js';
 import {orbitSource} from './orbit-repository.js';
-import {validateObserver,predictionSource,predictPasses,passesToICS,createPassSampler} from './pass-prediction.js';
+import {validateObserver,predictionSource,predictionWindow,predictPasses,passesToICS,createPassSampler} from './pass-prediction.js';
 import {compassDirection,passClockParts,isCandidateTime,passStages,passTimeAtFraction,passTimeTicks,passProfile} from './pass-display.js';
 
 const STORE='starorbit-pass-observer-v1',BEIJING={name:'北京',latitude:39.9042,longitude:116.4074,height:50};
 const css=`
-.pass-panel [hidden]{display:none!important}.pass-panel{color:#dce8f4;font-size:13px}.pass-panel .pass-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pass-panel label{display:flex;flex-direction:column;gap:5px;color:#a7bbce}.pass-panel input,.pass-panel select{box-sizing:border-box;width:100%;min-width:0;max-width:none;background:#101e2d;border:1px solid #345068;color:#edf5fa;padding:8px;border-radius:6px}.pass-panel .pass-wide{grid-column:1/-1}.pass-panel .pass-actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pass-panel button{cursor:pointer;font:inherit;padding:8px 12px;border:1px solid #36556e;border-radius:7px;background:#183247;color:#e5f5ff}.pass-panel button:disabled{opacity:.45;cursor:default}.pass-panel .pass-status{white-space:pre-line;line-height:1.6;color:#c0d3e2}.pass-panel .pass-note{font-size:12px;color:#a1b2c3;line-height:1.6}.pass-panel .pass-results{display:grid;grid-template-columns:minmax(210px,.85fr) minmax(0,2.15fr);gap:18px;align-items:start}.pass-panel .pass-list{display:grid;gap:7px;max-height:660px;overflow:auto}.pass-panel .pass-item{text-align:left;white-space:pre-line;line-height:1.6}.pass-panel .pass-item[aria-pressed=true]{border-color:#77daf0;background:#18475b}.pass-panel .pass-preview{min-width:0}.pass-panel .pass-heading{font-size:15px;margin:0 0 10px}.pass-panel .pass-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pass-panel .pass-stage{min-width:0;padding:11px;background:#102235;border:1px solid #304c63;border-radius:9px;line-height:1.6}.pass-panel .pass-stage[data-stage="1"]{border-color:#5ca5b6;background:#123342}.pass-panel .pass-stage-title{display:block;color:#adc2d3;min-height:2.8em;font-size:12px}.pass-panel .pass-stage-time{display:block;color:#f0f7fe;font-size:18px;font-variant-numeric:tabular-nums}.pass-panel .pass-stage-date{display:block;color:#91a9bc;font-size:11px}.pass-panel .pass-stage-direction{display:block;margin-top:7px;color:#a8edf1}.pass-panel .pass-stage-elevation{display:block;color:#d7e5f1}.pass-panel .pass-threshold-note{margin:10px 0 14px}.pass-panel .pass-chart{display:block;width:100%;height:300px;background:#07121f;border:1px solid #294156;border-radius:12px}.pass-panel .pass-legend{display:flex;flex-wrap:wrap;gap:7px 15px;margin:8px 0;color:#adc2d3;font-size:12px;line-height:1.6}.pass-panel .pass-legend span{display:inline-flex;align-items:center;gap:6px}.pass-panel .pass-swatch{display:inline-block;width:19px;border-top:3px solid #72869a}.pass-panel .pass-swatch.candidate{border-color:#80e9ef}.pass-panel .pass-swatch.threshold{border-top:2px dashed #e7bb79}.pass-panel .pass-scrubber{margin-top:14px;padding:12px;background:#102235;border:1px solid #304c63;border-radius:9px}.pass-panel .pass-scrubber label{font-weight:600;color:#dbeaf5}.pass-panel .pass-scrubber input[type=range]{accent-color:#80e9ef;padding:0;margin:9px 0;height:28px;border:0}.pass-panel .pass-readout-time{display:block;color:#b6cbdd;font-variant-numeric:tabular-nums}.pass-panel .pass-readout-direction{display:block;color:#e3f8fb;font-size:16px;line-height:1.7;margin:5px 0}.pass-panel .pass-readout-status{display:block;color:#a1b2c3;line-height:1.6}.pass-panel .pass-readout-status[data-candidate=true]{color:#80e9ef}.pass-panel .pass-details{line-height:1.7;white-space:pre-line}.pass-panel .pass-error{color:#ffb7a7}
+.pass-context{position:sticky;top:-1px;z-index:2;display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:12px;padding:12px;background:#102235;border:1px solid #304c63;border-radius:9px;margin-bottom:12px;box-shadow:0 6px 12px #091321}
+.pass-context>div{min-width:0}.pass-context small{display:block;color:#9eb3c9;font-size:11px;margin-bottom:4px}.pass-context strong{display:block;font-size:13px;overflow-wrap:anywhere}.pass-context [data-state=partial]{color:#f1cb84}.pass-context [data-state=error]{color:#ffb7a7}
+.pass-panel .pass-setup,.pass-panel .pass-source-info{border:1px solid #2b4359;border-radius:9px;background:#0b1928;margin-bottom:12px;padding:10px 12px}
+.pass-panel summary{cursor:pointer;color:#c9e2ee;font-size:13px;line-height:1.5}.pass-panel summary:focus-visible{outline:2px solid #74d9ef;outline-offset:3px}.pass-setup-summary{margin-left:12px;color:#91adbf;font-size:12px}.pass-panel .pass-setup[open] .pass-form{margin-top:12px}.pass-panel .pass-source-info{margin-top:14px}.pass-source-details{white-space:pre-line;font-size:12px;line-height:1.7;color:#a7bbce}.pass-panel .pass-actions .primary{background:#184d60;border-color:#73c9de;font-weight:600}.pass-panel .pass-status:empty{display:none}
+.pass-panel [hidden]{display:none!important}.pass-panel{color:#dce8f4;font-size:13px}.pass-panel .pass-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pass-panel label{display:flex;flex-direction:column;gap:5px;color:#a7bbce}.pass-panel input,.pass-panel select{box-sizing:border-box;width:100%;min-width:0;max-width:none;background:#101e2d;border:1px solid #345068;color:#edf5fa;padding:8px;border-radius:6px}.pass-panel .pass-wide{grid-column:span 2}.pass-panel .pass-actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pass-panel button{cursor:pointer;font:inherit;padding:8px 12px;border:1px solid #36556e;border-radius:7px;background:#183247;color:#e5f5ff}.pass-panel button:disabled{opacity:.45;cursor:default}.pass-panel .pass-status{white-space:pre-line;line-height:1.6;color:#c0d3e2}.pass-panel .pass-note{font-size:12px;color:#a1b2c3;line-height:1.6}.pass-panel .pass-results{display:grid;grid-template-columns:minmax(210px,.85fr) minmax(0,2.15fr);gap:18px;align-items:start}.pass-panel .pass-list{display:grid;gap:7px;max-height:clamp(180px,calc(92dvh - 300px),660px);overflow:auto}.pass-panel .pass-item{text-align:left;white-space:pre-line;line-height:1.6}.pass-panel .pass-item[aria-pressed=true]{border-color:#77daf0;background:#18475b}.pass-panel .pass-preview{min-width:0}.pass-panel .pass-heading{font-size:15px;margin:0 0 10px}.pass-panel .pass-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pass-panel .pass-stage{min-width:0;padding:11px;background:#102235;border:1px solid #304c63;border-radius:9px;line-height:1.6}.pass-panel .pass-stage[data-stage="1"]{border-color:#5ca5b6;background:#123342}.pass-panel .pass-stage-title{display:block;color:#adc2d3;min-height:2.8em;font-size:12px}.pass-panel .pass-stage-time{display:block;color:#f0f7fe;font-size:18px;font-variant-numeric:tabular-nums}.pass-panel .pass-stage-date{display:block;color:#91a9bc;font-size:11px}.pass-panel .pass-stage-direction{display:block;margin-top:7px;color:#a8edf1}.pass-panel .pass-stage-elevation{display:block;color:#d7e5f1}.pass-panel .pass-threshold-note{margin:10px 0 14px}.pass-panel .pass-chart{display:block;width:100%;height:300px;background:#07121f;border:1px solid #294156;border-radius:12px}.pass-panel .pass-legend{display:flex;flex-wrap:wrap;gap:7px 15px;margin:8px 0;color:#adc2d3;font-size:12px;line-height:1.6}.pass-panel .pass-legend span{display:inline-flex;align-items:center;gap:6px}.pass-panel .pass-swatch{display:inline-block;width:19px;border-top:3px solid #72869a}.pass-panel .pass-swatch.candidate{border-color:#80e9ef}.pass-panel .pass-swatch.threshold{border-top:2px dashed #e7bb79}.pass-panel .pass-scrubber{margin-top:14px;padding:12px;background:#102235;border:1px solid #304c63;border-radius:9px}.pass-panel .pass-scrubber label{font-weight:600;color:#dbeaf5}.pass-panel .pass-scrubber input[type=range]{accent-color:#80e9ef;padding:0;margin:9px 0;height:28px;border:0}.pass-panel .pass-readout-time{display:block;color:#b6cbdd;font-variant-numeric:tabular-nums}.pass-panel .pass-readout-direction{display:block;color:#e3f8fb;font-size:16px;line-height:1.7;margin:5px 0}.pass-panel .pass-readout-status{display:block;color:#a1b2c3;line-height:1.6}.pass-panel .pass-readout-status[data-candidate=true]{color:#80e9ef}.pass-panel .pass-details{line-height:1.7;white-space:pre-line}.pass-panel .pass-error{color:#ffb7a7}
 @media(max-width:900px){.pass-panel .pass-results{grid-template-columns:1fr}.pass-panel .pass-list{max-height:210px;grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.pass-panel .pass-form{grid-template-columns:repeat(2,minmax(0,1fr))}.pass-panel .pass-list{grid-template-columns:1fr}.pass-panel .pass-stage{padding:8px 6px}.pass-panel .pass-stage-time{font-size:16px}.pass-panel .pass-stage-direction{font-size:12px}.pass-panel .pass-stage-date{font-size:10px}.pass-panel .pass-stage-title{font-size:11px}.pass-panel .pass-readout-direction{font-size:15px}}
 `;
 const node=(tag,className,parent)=>{const el=document.createElement(tag);if(className)el.className=className;parent?.append(el);return el;};
@@ -15,8 +19,14 @@ const svg=(tag,attrs,parent)=>{const el=document.createElementNS('http://www.w3.
 export function mountPassPanel(container,sim){
  const root=node('div','pass-panel',container);root.dataset.testid='pass-panel';const style=node('style','',root);style.textContent=css;
  const labels=[],label=(element,key)=>{labels.push(()=>element.textContent=t(key));element.textContent=t(key);return element;};
- const intro=label(node('p','pass-note',root),'按观测地点计算几何过境；候选可观测时段还要求航天器受照、当地太阳低于 −6°。');
- const form=node('div','pass-form',root),fields={};
+ const context=node('div','pass-context',root),contextValues={};
+ for(const [key,title] of [['craft','航天器'],['site','观测地点'],['coverage','轨道时段覆盖']]){
+  const item=node('div','',context);label(node('small','',item),title);contextValues[key]=node('strong','',item);
+ }
+ const setup=node('details','pass-setup',root);setup.open=true;
+ const setupHeading=node('summary','',setup);label(node('span','',setupHeading),'观测地点与预报参数');
+ const setupSummary=node('span','pass-setup-summary',setupHeading);
+ const form=node('div','pass-form',setup),fields={};
  const input=(key,title,type,value,attrs={})=>{const wrap=node('label','',form);label(node('span','',wrap),title);const el=node('input','',wrap);el.type=type;el.value=value;el.dataset.passField=key;for(const [name,x]of Object.entries(attrs))el.setAttribute(name,x);fields[key]=el;return el;};
  let saved=BEIJING;try{saved=validateObserver(JSON.parse(localStorage.getItem(STORE)));}catch{}
  input('name','地点名称','text',saved.name,{maxlength:60});input('latitude','纬度（北纬为正）','number',saved.latitude,{min:-90,max:90,step:.0001});input('longitude','经度（东经为正）','number',saved.longitude,{min:-180,max:180,step:.0001});
@@ -24,12 +34,12 @@ export function mountPassPanel(container,sim){
  const begin=input('start','开始时间 · UTC+8','datetime-local',inputText(sim.time),{step:1});begin.parentElement.classList.add('pass-wide');
  const select=(key,title,values)=>{const wrap=node('label','',form);label(node('span','',wrap),title);const el=node('select','',wrap);el.dataset.passField=key;for(const [value,key]of values){const option=node('option','',el);option.value=value;label(option,key);}fields[key]=el;return el;};
  select('hours','预报时长',[[24,'24 小时'],[48,'48 小时'],[72,'72 小时']]);input('minimum','最低仰角（度）','number',10,{min:0,max:80,step:1});
- const actions=node('div','pass-actions',root),button=(key,parent=actions)=>label(node('button','',parent),key);
- const beijing=button('使用北京'),current=button('使用模拟时刻'),interval=button('使用有效数据时段'),update=button('更新当前轨道'),importButton=button('导入轨道'),calculate=button('计算过境');calculate.dataset.action='predict';
+ const actions=node('div','pass-actions',setup),button=(key,parent=actions)=>label(node('button','',parent),key);
+ const calculate=button('计算过境'),beijing=button('使用北京'),current=button('使用模拟时刻'),interval=button('使用有效数据时段'),update=button('更新当前轨道'),importButton=button('导入轨道');calculate.dataset.action='predict';calculate.classList.add('primary');
  const status=node('p','pass-status',root);status.setAttribute('role','status');status.setAttribute('aria-live','polite');
- const note=label(node('p','pass-note',root),'受照与暮光条件不代表肉眼一定可见；未计入天气、地形遮挡和航天器亮度。');
+ status.tabIndex=-1;
  const results=node('div','pass-results',root),list=node('div','pass-list',results),preview=node('div','pass-preview',results);
- label(node('h3','pass-heading',preview),'这次过境怎么看');
+ const previewHeading=label(node('h3','pass-heading',preview),'这次过境怎么看');previewHeading.tabIndex=-1;
  const stages=node('div','pass-stages',preview),thresholdNote=node('p','pass-note pass-threshold-note',preview);
  const chart=svg('svg',{viewBox:'0 0 640 300',class:'pass-chart',role:'img'},preview),legend=node('div','pass-legend',preview);
  for(const [key,className] of [['候选可观测时段','candidate'],['仅几何通视',''],['设定的最低仰角','threshold']]){const item=node('span','',legend);node('i','pass-swatch '+className,item);label(node('span','',item),key);}
@@ -38,10 +48,28 @@ export function mountPassPanel(container,sim){
  const scrub=node('input','',scrubLabel);scrub.type='range';scrub.min=0;scrub.max=1000;scrub.step=1;scrub.dataset.testid='pass-time-slider';
  const readoutTime=node('time','pass-readout-time',scrubber),readoutDirection=node('strong','pass-readout-direction',scrubber),readoutStatus=node('span','pass-readout-status',scrubber);
  const details=node('p','pass-details',preview),tools=node('div','pass-actions',preview),jump=button('在轨道总览查看最高点',tools),download=button('导出日历 ICS',tools);
+ const sourceInfo=node('details','pass-source-info',root);label(node('summary','',sourceInfo),'轨道数据与观测说明');
+ const sourceDetails=node('p','pass-source-details',sourceInfo);
+ label(node('p','pass-note',sourceInfo),'按观测地点计算几何过境；候选可观测时段还要求航天器受照、当地太阳低于 −6°。');
+ label(node('p','pass-note',sourceInfo),'受照与暮光条件不代表肉眼一定可见；未计入天气、地形遮挡和航天器亮度。');
  results.hidden=true;let result=null,selected=0,job=null,generation=0,disposed=false,identity=null,errorKey=null,updating=false,poll=null,seenData=sim.data,seenMission=sim.missionId;
  let sampler=null,previewTime=null,chartLayout=null,cursorLine=null,cursorDot=null;
  const frameInfo=()=>{try{const source=predictionSource(sim.data);return `${t(source.kind==='sgp4'?'按需 SGP4 · 7 天时效上限':'有效星历区间内插值')}\n${t('数据历元')}：${clockText(source.epoch)} UTC+8\n${t('有效区间')}：${clockText(source.start)} — ${clockText(source.end)} UTC+8`;}catch(error){return t(error.message);}};
- function invalidate(){generation++;job?.abort();job=null;calculate.disabled=updating;result=null;identity=null;sampler=null;previewTime=null;results.hidden=true;list.replaceChildren();stages.replaceChildren();chart.replaceChildren();details.textContent=readoutTime.textContent=readoutDirection.textContent=readoutStatus.textContent='';scrub.value=0;scrub.removeAttribute('aria-valuetext');chartLayout=cursorLine=cursorDot=null;errorKey=null;status.classList.remove('pass-error');status.textContent=frameInfo();}
+ function refreshContext(){
+  contextValues.craft.textContent=t(mission(sim.missionId).name);
+  contextValues.site.textContent=fields.name.value.trim()||`${fields.latitude.value}°, ${fields.longitude.value}°`;
+  contextValues.site.title=`${fields.latitude.value}°, ${fields.longitude.value}°`;
+  setupSummary.textContent=t('{hours} 小时 · 最低仰角 {elevation}°',{hours:fields.hours.value,elevation:fields.minimum.value});
+  sourceDetails.textContent=frameInfo();
+  let state='error',message;
+  try{
+   const start=parseLocalTime(fields.start.value);
+   if(!Number.isFinite(start))message='请设置开始时间';
+   else {const window=predictionWindow(sim.data,start,Number(fields.hours.value));state=window.clipped?'partial':'ready';message=window.clipped?'所选时段部分覆盖':'所选时段完整覆盖';}
+  }catch(error){message=['预报时间超出有效轨道区间','轨道根数已超出预报时效'].includes(error.message)?'所选时段超出轨道范围':error.message;}
+  contextValues.coverage.textContent=t(message);contextValues.coverage.dataset.state=state;
+ }
+ function invalidate(){generation++;job?.abort();job=null;calculate.disabled=updating;result=null;identity=null;sampler=null;previewTime=null;results.hidden=true;list.replaceChildren();stages.replaceChildren();chart.replaceChildren();details.textContent=readoutTime.textContent=readoutDirection.textContent=readoutStatus.textContent='';scrub.value=0;scrub.removeAttribute('aria-valuetext');chartLayout=cursorLine=cursorDot=null;errorKey=null;status.classList.remove('pass-error');status.textContent='';setup.open=true;refreshContext();}
  function isCurrent(){return identity?.data===sim.data&&identity?.missionId===sim.missionId;}
  const directionText=point=>`${t(compassDirection(point.azimuth))} · ${point.azimuth.toFixed(1)}°`;
  function renderStages(pass){
@@ -100,22 +128,27 @@ export function mountPassPanel(container,sim){
  }
  scrub.oninput=()=>{if(!isCurrent()){invalidate();return;}const pass=result?.passes[selected];if(pass){previewTime=passTimeAtFraction(pass,Number(scrub.value)/1000);renderCursor();}};
  function renderResults(){
-  if(!result)return;results.hidden=!result.passes.length;list.replaceChildren();
+  if(!result)return;results.hidden=!result.passes.length;const listScroll=list.scrollTop;list.replaceChildren();
   result.passes.forEach((pass,index)=>{
    const item=node('button','pass-item',list);item.dataset.passIndex=index;item.setAttribute('aria-pressed',String(index===selected));
    item.textContent=`${clockText(pass.maximum.time)} UTC+8\n${t('最高仰角')} ${pass.maximum.elevation.toFixed(1)}° · ${t('持续')} ${Math.round((pass.end-pass.start)/1000)} s\n${t(pass.visible.length?'含候选可观测时段':'几何过境')}`;
-   item.onclick=()=>{if(!isCurrent()){invalidate();return;}selected=index;previewTime=pass.maximum.time;renderResults();};
+   item.onclick=()=>{
+    if(!isCurrent()){invalidate();return;}selected=index;previewTime=pass.maximum.time;renderResults();
+    if(matchMedia('(max-width:900px)').matches){container.scrollTop+=preview.getBoundingClientRect().top-container.getBoundingClientRect().top-context.offsetHeight-16;previewHeading.focus({preventScroll:true});}
+    else list.children[index]?.focus({preventScroll:true});
+   };
   });
+  list.scrollTop=listScroll;
   const selectedTime=result.passes[selected]?.maximum.time,covered=Number.isFinite(selectedTime)&&selectedTime>=sim.data.rows[0][0]&&selectedTime<=sim.data.rows.at(-1)[0];
   jump.disabled=!covered;download.disabled=!result.passes.length;jump.title=covered?'':t('当前三维星历未覆盖此时刻，可查看天空轨迹图。');if(!result.passes.length){chart.replaceChildren();stages.replaceChildren();details.textContent='';}
   if(result.passes.length){
    const pass=result.passes[selected];previewTime=Math.max(pass.start,Math.min(pass.end,previewTime??pass.maximum.time));scrub.value=(previewTime-pass.start)/(pass.end-pass.start)*1000;
    renderStages(pass);draw();details.textContent=`${t('最高点距离')}：${pass.maximum.range.toFixed(0)} km\n${t('候选可观测时段')} · UTC+8：${pass.visible.length?pass.visible.map(x=>clockText(x.start)+' — '+clockText(x.end)).join('\n'):t('无')}${covered?'':'\n'+t('当前三维星历未覆盖此时刻，可查看天空轨迹图。')}`;
   }
-  status.textContent=`${t('找到 {count} 次过境',{count:result.passes.length})}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped?'\n'+t('已按轨道有效区间截短，未使用长期外推。'):''}\n${frameInfo()}`;
+  status.textContent=`${t('找到 {count} 次过境',{count:result.passes.length})}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped?'\n'+t('已按轨道有效区间截短，未使用长期外推。'):''}${result.passes.length?'':'\n'+t('未找到符合条件的过境，可延长时段或降低最低仰角。')}`;
  }
  async function run(){
-  if(updating)return;const token=generation,controller=new AbortController();job=controller;
+  if(updating||job)return;invalidate();const token=generation,controller=new AbortController();job=controller;
   try{
    const numeric=key=>{if(fields[key].value.trim()==='')throw Error('观测点坐标无效');return Number(fields[key].value);};
    const observer=validateObserver({name:fields.name.value,latitude:numeric('latitude'),longitude:numeric('longitude'),height:numeric('height')});
@@ -124,7 +157,9 @@ export function mountPassPanel(container,sim){
    const next=await predictPasses(data,observer,time,hours,{minimumElevation,signal:controller.signal});
    if(disposed||token!==generation||data!==sim.data||missionId!==sim.missionId){if(token===generation)invalidate();return;}
    sampler=createPassSampler(predictionSource(data),observer);result=next;identity={data,missionId};selected=0;previewTime=next.passes[0]?.maximum.time??null;try{localStorage.setItem(STORE,JSON.stringify(observer));}catch{}renderResults();
-  }catch(error){if(error.name!=='AbortError'&&token===generation&&!disposed){errorKey=error.message;status.textContent=t(errorKey)+'\n'+t('可更新轨道数据，或使用有效数据时段查看历史过境。')+'\n'+frameInfo();status.classList.add('pass-error');}}
+   setup.open=!next.passes.length;container.scrollTop=0;status.focus({preventScroll:true});
+   if(!next.passes.length)status.scrollIntoView({block:'nearest'});
+  }catch(error){if(error.name!=='AbortError'&&token===generation&&!disposed){errorKey=error.message;status.textContent=t(errorKey)+'\n'+t('可更新轨道数据，或使用有效数据时段查看历史过境。');status.classList.add('pass-error');status.focus({preventScroll:true});status.scrollIntoView({block:'nearest'});}}
   finally{if(token===generation){calculate.disabled=updating;job=null;}}
  }
  for(const input of Object.values(fields))input.addEventListener('input',invalidate);
@@ -135,7 +170,7 @@ export function mountPassPanel(container,sim){
   if(updating)return;invalidate();
   if(!orbitSource(sim.missionId)){status.textContent=t('此任务没有在线轨道源，请导入轨道文件');return;}
   const id=sim.missionId,beforeData=sim.data;updating=true;update.disabled=calculate.disabled=importButton.disabled=true;status.textContent=t('正在更新轨道…');
-  try{const outcome=await sim.environment.weather.updateResource('orbit',{provider:id});if(!disposed){if(outcome.status!=='unchanged'||sim.data!==beforeData||sim.missionId!==id){seenData=sim.data;seenMission=sim.missionId;invalidate();}status.textContent=t(outcome.status==='unchanged'?'已是最新可用数据':'轨道已更新，请重新计算。')+'\n'+frameInfo();}}
+  try{const outcome=await sim.environment.weather.updateResource('orbit',{provider:id});if(!disposed){if(outcome.status!=='unchanged'||sim.data!==beforeData||sim.missionId!==id){seenData=sim.data;seenMission=sim.missionId;invalidate();}refreshContext();status.textContent=t(outcome.status==='unchanged'?'已是最新可用数据':'轨道已更新，请重新计算。');}}
   catch(error){if(!disposed){status.classList.add('pass-error');status.textContent=t('轨道更新失败，已保留原数据。')+'\n'+t(error.message||'网络请求失败');}}
   finally{updating=false;if(!disposed)update.disabled=calculate.disabled=importButton.disabled=false;}
  };
@@ -143,10 +178,10 @@ export function mountPassPanel(container,sim){
  calculate.onclick=run;
  jump.onclick=()=>{if(!isCurrent()){invalidate();return;}const time=result?.passes[selected]?.maximum.time;if(Number.isFinite(time)&&time>=sim.data.rows[0][0]&&time<=sim.data.rows.at(-1)[0]){if(sim.flightLab?.previewPass)sim.flightLab.previewPass(time);else sim.seek(time);}};
  download.onclick=()=>{if(!isCurrent()){invalidate();return;}if(!result?.passes.length)return;const blob=new Blob([passesToICS(result,t(mission(sim.missionId).name))],{type:'text/calendar;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='StarOrbit-passes.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);};
- const unsubscribe=onLanguageChange(()=>{for(const render of labels)render();if(result)renderResults();else status.textContent=errorKey?t(errorKey):frameInfo();});
+ const unsubscribe=onLanguageChange(()=>{for(const render of labels)render();refreshContext();if(result)renderResults();else if(errorKey)status.textContent=t(errorKey)+'\n'+t('可更新轨道数据，或使用有效数据时段查看历史过境。');});
  const resizeObserver=new ResizeObserver(()=>{if(!disposed&&result?.passes.length&&chart.clientWidth&&Math.abs(chart.clientWidth-(chartLayout?.width??0))>.5)draw();});resizeObserver.observe(chart);
  invalidate();
- const resume=()=>{if(seenData!==sim.data||seenMission!==sim.missionId){seenData=sim.data;seenMission=sim.missionId;invalidate();}else if(!result&&!updating)status.textContent=frameInfo();clearInterval(poll);poll=setInterval(()=>{if(seenData!==sim.data||seenMission!==sim.missionId){seenData=sim.data;seenMission=sim.missionId;invalidate();}},250);};
+ const resume=()=>{if(seenData!==sim.data||seenMission!==sim.missionId){seenData=sim.data;seenMission=sim.missionId;invalidate();}else refreshContext();clearInterval(poll);poll=setInterval(()=>{if(seenData!==sim.data||seenMission!==sim.missionId){seenData=sim.data;seenMission=sim.missionId;invalidate();}},250);};
  resume();
  return {calculate:run,resume,pause(){clearInterval(poll);poll=null;if(job)invalidate();},get result(){return result;},dispose(){disposed=true;generation++;clearInterval(poll);job?.abort();resizeObserver.disconnect();unsubscribe();root.remove();}};
 }

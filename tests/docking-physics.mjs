@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {createDockingModels,createDockingCamera} from '../src/docking-models.js';
-import {DOCKING_RATE,DOCKING_THRUST,DockingSimulation,dockingInitial,dockingContact,dockingMetrics,hcwStep,stepDocking,rotateDockingVector,dockingQuaternion,hcwToScene,sceneToHCW} from '../src/docking-physics.js';
+import {DOCKING_RATE,DOCKING_THRUST,DockingSimulation,dockingInitial,dockingContact,dockingMetrics,hcwStep,stepDocking,rotateDockingVector,dockingQuaternion,setDockingAttitude,hcwToScene,sceneToHCW} from '../src/docking-physics.js';
 const close=(a,b,tolerance=1e-7)=>assert(Math.hypot(...a.map((v,i)=>v-b[i]))<tolerance,JSON.stringify({a,b}));
 // Independent closed-form CW propagation with radial x, along-track y, normal z.
 function analytic(p,v,t){const n=DOCKING_RATE,c=Math.cos(n*t),s=Math.sin(n*t),[x,y,z]=p,[u,w,q]=v;return {
@@ -17,8 +17,8 @@ const a=new DockingSimulation(200),b=new DockingSimulation(200);
 for(let i=0;i<100;i++)a.advance(.01,{translation:[1,0,0]});for(let i=0;i<10;i++)b.advance(.1,{translation:[1,0,0]});
 close(a.state.position,b.state.position,1e-12);close(a.state.velocity,b.state.velocity,1e-12);assert(Math.abs(a.state.deltaV-DOCKING_THRUST)<1e-12);
 close(sceneToHCW(hcwToScene([1,2,3])),[1,2,3]);close(rotateDockingVector([-1,0,0],dockingQuaternion([0,0,90])),[0,-1,0]);
-const sideways=stepDocking({...dockingInitial(),attitude:[0,0,90]},{translation:[1,0,0]});assert(sideways.velocity[2]<0&&Math.abs(sideways.velocity[1])<1e-10);
-const start=(position,velocity=[0,-.1,0],attitude=[0,0,0])=>({...dockingInitial(),position,velocity,attitude});
+const sideways=stepDocking(setDockingAttitude(dockingInitial(),[0,0,90]),{translation:[1,0,0]});assert(sideways.velocity[2]<0&&Math.abs(sideways.velocity[1])<1e-10);
+const start=(position,velocity=[0,-.1,0],attitude=[0,0,0])=>setDockingAttitude({...dockingInitial(),position,velocity},attitude);
 assert.equal(dockingContact(start([0,.4,0]),start([0,.3,0])).status,'docked');
 assert.equal(dockingContact(start([0,10,0],[0,-500,0]),start([0,-10,0],[0,-500,0])).status,'collision');
 assert.equal(dockingContact(start([0,.4,0],[0,-.1,0],[0,0,5]),start([0,.3,0],[0,-.1,0],[0,0,5])).status,'collision');

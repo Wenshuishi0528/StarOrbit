@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.68 · 作者 / Author: wenshuishi0528**
+**v0.71 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -20,7 +20,7 @@
 
 - **数据与资源**：右上角集中检查 NASA／GitHub 云图、NOAA 极光和当前任务轨道，分别显示下载版本、实际使用版本与检查结果；相同数据复用、失败保留原数据。默认开启缓存自动清理，保护正在使用、收藏和设置引用的快照。[v0.68 使用与验证](docs/v0.68-details.md)。
 
-- **任务实验室**：右上角进入过境预报与交会对接。按北京或自定义地点计算 24／48／72 小时几何过境，以三阶段方向指引、时间—仰角曲线与滑动读数说明何时往哪里看，支持候选观测窗口和日历导出；近距离对接训练提供 50／200／500 m 起点、机体系推力、姿态控制、外部与舰载相机和捕获判定，使用简化相对运动模型。[任务实验室](docs/v0.66-flight-lab.md) · [v0.67 更新](docs/v0.67-details.md)。
+- **任务实验室**：右上角进入过境预报与交会对接。过境提供三阶段方向指引、时间—仰角曲线、候选观测窗口和日历导出。对接训练台提供末段对准、标准接近与偏差恢复场景，支持人工、位置保持、分段辅助接近及撤离；30 m／5 m 停靠点检查、舰载相机、无推力轨迹预测、接触判定和飞行记录回放形成完整训练流程，可导出 JSON／CSV。[对接训练台与模型范围](docs/v0.71-details.md) · [过境与任务实验室](docs/v0.66-flight-lab.md)。
 
 - **夜面云层**：云层设置新增“夜面也显示云层”，开启后夜面暗云按云图遮挡城市灯光，厚云遮蔽、薄云部分透光；关闭后显示无遮挡夜景，日面亮度不变；普通云层和 8K 体积云均支持，默认关闭，可保存到预设与分享场景。[v0.64 说明](docs/v0.64-details.md)。
 
@@ -58,7 +58,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.68**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
+源码、网页构建与本机运行版共用 **v0.71**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -80,7 +80,7 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 
 - **Data & resources:** A central panel checks NASA/GitHub clouds, NOAA aurora and the active mission's orbit, distinguishing available downloads from data actually in use. Identical data is reused and failures retain existing data. Automatic cache cleanup is on by default and protects active, starred and referenced snapshots. [v0.68 usage and validation](docs/v0.68-details.md).
 
-- **Mission lab:** Site-based 24/48/72-hour pass planning with three viewing stages, elevation curves, interactive direction readouts, candidate optical windows and calendar export. A separate docking exercise offers 50/200/500 m starts, body-frame thrust, attitude controls, external/onboard cameras and capture checks using simplified relative dynamics. [Mission Lab](docs/v0.66-flight-lab.md) · [v0.67 update](docs/v0.67-details.md).
+- **Mission lab:** Pass planning includes viewing directions, elevation curves, candidate optical windows and calendar export. The docking workbench offers terminal alignment, standard approach and offset recovery, with manual control, position hold, gated assisted approach and retreat. It combines 30 m / 5 m hold-point checks, a body-fixed camera, coast prediction, contact checks, recorded replay and JSON/CSV export. [Docking workbench and model scope](docs/v0.71-details.md) · [Pass planning](docs/v0.66-flight-lab.md).
 
 - **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, three city tiers (tier 1 by default), boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
 
@@ -110,7 +110,7 @@ Download the portable package from the **[latest release](https://github.com/Wen
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web build and local runtime share **v0.68**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
+The source, web build and local runtime share **v0.71**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-28 00:00 to 2026-11-04 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

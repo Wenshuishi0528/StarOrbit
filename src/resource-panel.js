@@ -1,3 +1,4 @@
+import {restoreControlFocus} from './display-controls.js';
 import {t,onLanguageChange} from './i18n.js';
 import {WEB_BUILD} from './runtime-assets.js';
 import {clockText} from './time-format.js';
@@ -55,7 +56,7 @@ export function mountResourcePanel(weather){
  const cacheNote=node('p','resource-cache-note'),cacheResult=node('p','resource-cache-result'),serverCache=node('p','resource-cache-result resource-server-cache');
  const history=legacy.querySelector('[data-memory-key="downloads"]');legacy.insertBefore(cacheNote,history);legacy.insertBefore(cacheResult,history);legacy.insertBefore(serverCache,history);
  side.replaceChildren();const entry=node('button','resource-sidebar-open primary',side);entry.type='button';entry.id='openResources';const summary=node('p','small resource-sidebar-summary',side);summary.id='resourceSummary';
- const toolbar=node('button','');toolbar.type='button';toolbar.id='openDataResources';document.querySelector('.toolbar').prepend(toolbar);
+ const toolbar=node('button','');toolbar.type='button';toolbar.id='openDataResources';document.getElementById('toolbarActions').prepend(toolbar);
  let disposed=false,returnFocus=null;
  const describeRecord=(record,kind)=>{
   if(!record)return t('尚未下载');
@@ -126,7 +127,7 @@ export function mountResourcePanel(weather){
  }
  const close=()=>dialog.close();entry.onclick=toolbar.onclick=()=>open();closeButton.onclick=close;
  dialog.addEventListener('keydown',event=>event.stopPropagation());
- dialog.addEventListener('close',()=>{sim.lastWall=performance.now();if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});});
+ dialog.addEventListener('close',()=>{sim.lastWall=performance.now();restoreControlFocus(returnFocus);});
  const unsubscribe=onLanguageChange(render);render();
  return {open,close,render,get active(){return dialog.open;},dispose(){disposed=true;if(dialog.open)dialog.close();unsubscribe();side.replaceChildren(...previous);dialog.remove();toolbar.remove();sheet.remove();}};
 }

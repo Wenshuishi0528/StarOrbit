@@ -1,3 +1,4 @@
+import {restoreControlFocus} from './display-controls.js';
 import {t,onLanguageChange} from './i18n.js';
 import {WEB_BUILD} from './runtime-assets.js';
 const KEY='tiangong-help-v1',$=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -28,7 +29,7 @@ export function installHelp(music){
  function target(){
   clearTarget();const topic=topics[step];
   if(topic.music){const expanded=music.dock.expanded;music.dock.guided=true;music.dock.expand();restore.push(()=>{music.dock.guided=false;if(!expanded)music.dock.collapse();});}
-  const el=document.querySelector(topic.target);if(!el)return;
+  let el=document.querySelector(topic.target);if(!el)return;if(el.closest('#toolbarActions')?.hidden)el=$('toolsToggle');
   const content=el.closest('.settings-content');if(content?.hidden){content.hidden=false;const button=document.querySelector(`[aria-controls="${content.id}"]`);button?.setAttribute('aria-expanded','true');restore.push(()=>{content.hidden=true;button?.setAttribute('aria-expanded','false');});}
   for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS'&&!parent.open){const detail=parent;detail.open=true;restore.push(()=>detail.open=false);}
   const aside=el.closest('aside');if(aside){const scroll=aside.scrollTop;restore.push(()=>aside.scrollTop=scroll);el.scrollIntoView({block:'center',behavior:'instant'});}
@@ -66,7 +67,7 @@ export function installHelp(music){
   topics.forEach((topic,i)=>{let container=contents;if(topic.group){if(!groups.has(topic.group)){const group=document.createElement('details'),summary=document.createElement('summary');group.className='help-topic-group';summary.textContent=t(topic.group);group.append(summary);contents.append(group);groups.set(topic.group,group);}container=groups.get(topic.group);}const button=document.createElement('button');button.type='button';button.className='help-topic';button.dataset.topic=String(i);const label=document.createElement('span'),arrow=document.createElement('span');label.textContent=t(topic.title);arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');button.append(label,arrow);button.onclick=()=>select(i,false);container.append(button);});
  }
  function select(index,tour){step=index;touring=tour;render();target();panel.focus({preventScroll:true});}
- function close(){clearTarget();panel.hidden=true;document.body.classList.remove('help-active');$('helpToggle').setAttribute('aria-expanded','false');step=null;touring=false;if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});}
+ function close(){clearTarget();panel.hidden=true;document.body.classList.remove('help-active');$('helpToggle').setAttribute('aria-expanded','false');step=null;touring=false;restoreControlFocus(returnFocus);}
  function open(tour=false){returnFocus=document.activeElement;panel.hidden=false;document.body.classList.add('help-active');$('helpToggle').setAttribute('aria-expanded','true');if(tour)select(0,true);else{step=null;touring=false;render();panel.focus({preventScroll:true});}}
  function dismiss(){remember();welcome.close();beginMusic();}
  $('helpToggle').onclick=()=>panel.hidden?open():close();$('closeHelp').onclick=close;

@@ -1,98 +1,226 @@
 import * as THREE from 'three';
 import {createOrbitControls} from './camera-controls.js';
 import {t,onLanguageChange} from './i18n.js';
-import {DOCKING_THRUST,DockingSimulation,dockingMetrics,dockingQuaternion,hcwToScene} from './docking-physics.js';
+import {DOCKING_THRUST,DOCKING_LIMITS,dockingQuaternion,dockingCorridorRadius,hcwToScene} from './docking-physics.js';
+import {DockingTraining,DOCKING_SCENARIOS,DOCKING_GATE_RULES} from './docking-training.js';
+import {DockingRecorder,deriveDockingInstruments,predictDockingCoast} from './docking-instruments.js';
 import {createDockingModels,createDockingCamera} from './docking-models.js';
+import {dockingCSS,dockingMarkup,alignmentSVG,trendSVG,reportHTML,escapeHTML,signed} from './docking-workbench.js';
 
 const labels={f:'前进 W',b:'后退 S',l:'左移 A',r:'右移 D',u:'上移 R',d:'下移 F',rollL:'左滚转 Q',rollR:'右滚转 E',pitchU:'抬头 ↑',pitchD:'低头 ↓',yawL:'左偏航 ←',yawR:'右偏航 →',brake:'按住相对制动 Space'};
 const keys={KeyW:'f',KeyS:'b',KeyA:'l',KeyD:'r',KeyR:'u',KeyF:'d',KeyQ:'rollL',KeyE:'rollR',ArrowUp:'pitchU',ArrowDown:'pitchD',ArrowLeft:'yawL',ArrowRight:'yawR',Space:'brake'};
-const statusNames={flying:'正在接近',docked:'对接捕获成功',collision:'接触条件不满足 · 训练停止',corridor:'偏离安全接近走廊 · 训练停止',lost:'超出 2 km 训练范围'};
-const css=`.dock-panel{color:#dce8f6;display:grid;gap:12px}.dock-panel button,.dock-panel select{font-size:12px}.dock-controls-top{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.dock-controls-top label{display:flex;gap:6px;align-items:center}.dock-viewport{height:clamp(290px,45vh,560px);position:relative;background:radial-gradient(ellipse at 50% 105%,#0c2038,#02060c 65%);border:1px solid #2b4259;border-radius:12px;overflow:hidden}.dock-viewport canvas{width:100%;height:100%;display:block;outline:none;touch-action:none}.dock-viewport canvas:focus-visible{outline:2px solid #69d9ec;outline-offset:-3px}.dock-hud{position:absolute;inset:0;pointer-events:none;font:12px ui-monospace,monospace;color:#8fe6ee}.dock-crosshair{position:absolute;left:50%;top:50%;width:70px;height:70px;transform:translate(-50%,-50%);border:1px solid #8fe6ee60;border-radius:50%}.dock-crosshair:before,.dock-crosshair:after{content:'';position:absolute;background:#8fe6ee80}.dock-crosshair:before{height:1px;width:100px;left:-15px;top:34px}.dock-crosshair:after{width:1px;height:100px;left:34px;top:-15px}.dock-target{position:absolute;width:18px;height:18px;border:2px solid #ffd17b;border-radius:3px;transform:translate(-50%,-50%)}.dock-view-caption{position:absolute;top:12px;left:14px;max-width:75%;background:#020a13a0;padding:5px 8px;border-radius:4px}.dock-pause-caption{position:absolute;bottom:12px;left:14px;color:#b6cadb}.dock-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}.dock-metrics>div{padding:9px 10px;background:#102032;border:1px solid #263e53;border-radius:7px}.dock-metrics small{font-size:11px;display:block;color:#91a8be;margin-bottom:5px}.dock-metrics b{font:15px ui-monospace,monospace;font-weight:500;white-space:nowrap}.dock-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px}.dock-control-box{padding:12px;border:1px solid #263e53;border-radius:8px;background:#0b1724}.dock-control-box h3{font-size:13px;margin:0 0 10px;color:#b8cfdf}.dock-thrusters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.dock-thrusters button{touch-action:none;user-select:none;min-height:36px}.dock-thrusters button.held{background:#286774;border-color:#a1ecf5}.dock-brake{grid-column:1/-1}.dock-info{font-size:12px;line-height:1.65;color:#96aec3;margin:0}.dock-terminal{padding:10px 12px;border-radius:8px;border:1px solid #3a5b73;background:#112a3b;font-size:13px}.dock-terminal[data-status=docked]{border-color:#66caa2;color:#a8f4ce}.dock-terminal[data-status=collision],.dock-terminal[data-status=corridor]{border-color:#c88d67;color:#ffd5b4}.dock-attitude{font:12px ui-monospace,monospace;color:#91a8be;margin-top:8px}.dock-panel input[type=range]{width:90px;margin:0}.dock-panel [hidden]{display:none!important}@media(max-width:700px){.dock-metrics{grid-template-columns:repeat(3,1fr)}.dock-bottom{grid-template-columns:1fr}.dock-viewport{height:330px}.dock-controls-top{gap:6px}.dock-controls-top label{font-size:12px}}`;
+const statusNames={docked:'对接捕获成功',collision:'接触条件不满足 · 训练停止',corridor:'偏离安全接近走廊 · 训练停止',lost:'超出 2 km 训练范围'};
+const modeHelp={manual:'人工控制：推力与姿态由你操作；停靠点只给出提醒。',hold:'位置保持：用有限推力制动并保持当前参考位置，仍在计时与消耗 Δv。',approach:'辅助接近：自动修正姿态与横向偏差，在停靠点等待你的 GO。',retreat:'主动撤离：先抑制横向漂移，再沿接口外侧退到保持点。'};
+const modeNames={manual:'人工控制',hold:'保持位置',approach:'辅助接近',retreat:'主动撤离'};
 
+/** UI owns pause/cameras/replay; training owns every physical command and fixed step. */
 export function mountDockingPanel(container,sim,{templates,meta}){
- const style=document.createElement('style');style.textContent=css;container.append(style);
- const panel=document.createElement('div');panel.className='dock-panel';panel.innerHTML=`
- <p class="dock-info" data-dock-text="近距离交会对接训练 · 400 km 圆轨道的简化相对运动模型，非真实任务飞控。主任务轨道与空间站组合不受影响。"></p>
- <div class="dock-controls-top">
-  <label><span data-dock-text="起始距离"></span><select data-role="distance"><option value="50">50 m</option><option value="200" selected>200 m</option><option value="500">500 m</option></select></label>
-  <button type="button" data-role="start"></button><button type="button" data-role="reset" data-dock-text="重新开始"></button>
-  <label><span data-dock-text="训练速度"></span><select data-role="speed"><option value="1">1×</option><option value="5">5×</option></select></label>
-  <label><input type="checkbox" data-role="fine"><span data-dock-text="精细推力"></span></label>
- </div>
- <div class="dock-controls-top">
-  <button type="button" data-view="external" data-dock-text="外部视角"></button><button type="button" data-view="onboard" data-dock-text="对接相机"></button>
-  <label><span data-dock-text="相机视场"></span><input data-role="fov" type="range" min="12" max="75" value="40"><output data-role="fovValue">40°</output></label>
-  <button type="button" data-role="fit" data-dock-text="查看全貌"></button>
- </div>
- <div class="dock-viewport"><div class="dock-hud"><div class="dock-view-caption"></div><div class="dock-crosshair" hidden></div><div class="dock-target" hidden></div><div class="dock-pause-caption"></div></div></div>
- <div class="dock-metrics">
-  <div><small data-dock-text="接口距离"></small><b data-read="distance"></b></div><div><small data-dock-text="闭合速度"></small><b data-read="closing"></b></div><div><small data-dock-text="横向偏差"></small><b data-read="lateral"></b></div>
-  <div><small data-dock-text="姿态误差"></small><b data-read="angle"></b></div><div><small data-dock-text="累计速度增量"></small><b data-read="deltaV"></b></div><div><small data-dock-text="训练时间"></small><b data-read="time"></b></div>
- </div>
- <div class="dock-terminal" role="status" aria-live="polite"></div>
- <div class="dock-bottom"><div class="dock-control-box"><h3 data-dock-text="平移推力 · 按住控制"></h3><div class="dock-thrusters" data-controls="translation"></div><div class="dock-attitude" data-role="thrust"></div></div>
- <div class="dock-control-box"><h3 data-dock-text="姿态控制 · 松开保持"></h3><div class="dock-thrusters" data-controls="rotation"></div><div class="dock-attitude" data-role="attitude"></div></div></div>
- <p class="dock-info" data-dock-text="先点击画面再用键盘。松开平移推力后仍会漂移；接近时先制动，再用精细推力。相机固定在飞船上，金色框是目标接口，青色十字是镜头中心。"></p>
- <p class="dock-info" data-dock-text="捕获条件：接口距离小于 0.5 m、横向偏差小于 0.3 m、相对速度小于 0.15 m/s、姿态误差小于 3°。越出近端接近走廊或高速接触会结束训练。"></p>`;
- container.append(panel);
+ const style=document.createElement('style');style.textContent=dockingCSS;container.append(style);
+ const panel=document.createElement('div');panel.className='dock-panel';panel.innerHTML=dockingMarkup;container.append(panel);
  const $=selector=>panel.querySelector(selector),get=role=>$(`[data-role="${role}"]`),viewport=$('.dock-viewport');
+ for(const scenario of DOCKING_SCENARIOS){const option=document.createElement('option');option.value=scenario.id;option.dataset.dockText=scenario.nameKey;get('scenario').append(option);}
+ get('scenario').value='alignment';
  for(const [group,names] of [['translation',['f','b','l','r','u','d','brake']],['rotation',['pitchU','pitchD','yawL','yawR','rollL','rollR']]])for(const name of names){
   const button=document.createElement('button');button.type='button';button.dataset.control=name;button.dataset.dockText=labels[name];if(name==='brake')button.className='dock-brake';$(`[data-controls="${group}"]`).append(button);
+ }
+ for(const name of ['trend','events','review']){
+  const tab=$(`[data-analysis="${name}"]`),body=$(`[data-analysis-panel="${name}"]`);
+  tab.id='docking-analysis-'+name;body.id=tab.id+'-panel';tab.setAttribute('aria-controls',body.id);body.setAttribute('aria-labelledby',tab.id);
  }
  let renderer;
  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});}
  catch(error){const failure=document.createElement('p');failure.textContent=t('对接训练需要可用的 WebGL，请关闭其他三维页面后重试。');viewport.append(failure);return {pause(){},dispose(){panel.remove();style.remove();},error};}
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
- renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label',t('交会对接训练画面'));viewport.prepend(renderer.domElement);
- const scene=new THREE.Scene(),external=new THREE.PerspectiveCamera(40,1,.02,6000),onboard=createDockingCamera();
- external.up.set(0,0,1);onboard.up.set(0,0,1);
+ renderer.domElement.tabIndex=0;viewport.prepend(renderer.domElement);
+ const scene=new THREE.Scene(),external=new THREE.PerspectiveCamera(40,1,.02,6000),onboard=createDockingCamera();external.up.set(0,0,1);
  const controls=createOrbitControls(external,renderer.domElement);controls.enableDamping=true;controls.minDistance=2;controls.maxDistance=2200;
- const ambient=new THREE.HemisphereLight(0xd7ecff,0x344859,2.2),sun=new THREE.DirectionalLight(0xfff2d9,3);sun.position.set(100,-60,80);scene.add(ambient,sun);
- const ownedGeometry=[],ownedMaterials=[],lineMaterial=new THREE.LineBasicMaterial({color:0x49788c,transparent:true,opacity:.3});ownedMaterials.push(lineMaterial);
- const {station,chaser}=createDockingModels(templates,meta);scene.add(station,chaser);
- chaser.add(onboard);
- const ringGeometry=new THREE.TorusGeometry(.55,.025,8,48),ringMaterial=new THREE.MeshBasicMaterial({color:0xffd17b});ownedGeometry.push(ringGeometry);ownedMaterials.push(ringMaterial);
- const targetRing=new THREE.Mesh(ringGeometry,ringMaterial);targetRing.rotation.y=Math.PI/2;targetRing.position.x=.08;scene.add(targetRing);
- // World-space approach gates provide depth cues without a fake target-tracking camera.
- const gates=new THREE.Group();scene.add(gates);
- for(const x of [5,10,20,50,100,200,500]){const radius=Math.max(.5,x*.12),points=[];for(let i=0;i<=48;i++){const a=i/48*Math.PI*2;points.push(new THREE.Vector3(x,Math.cos(a)*radius,Math.sin(a)*radius));}const g=new THREE.BufferGeometry().setFromPoints(points);ownedGeometry.push(g);gates.add(new THREE.Line(g,lineMaterial));}
- const modelSimulation=new DockingSimulation(200),held=new Set(),keyboard=new Set(),pointerControls=new Map();
- let paused=true,view='external',disposed=false,frameId=0,previousWall=null,lastRead=0,lastStatus='',lastWidth=0,lastHeight=0;
+ const sun=new THREE.DirectionalLight(0xfff2d9,3);sun.position.set(100,-60,80);scene.add(new THREE.HemisphereLight(0xd7ecff,0x344859,2.2),sun);
+ const {station,chaser}=createDockingModels(templates,meta);scene.add(station,chaser);chaser.add(onboard);
+ const ownedGeometry=[],ownedMaterials=[];
+ const keepGeometry=g=>(ownedGeometry.push(g),g),keepMaterial=m=>(ownedMaterials.push(m),m);
+ const targetRing=new THREE.Mesh(keepGeometry(new THREE.TorusGeometry(.55,.025,8,48)),keepMaterial(new THREE.MeshBasicMaterial({color:0xffd17b})));
+ targetRing.rotation.y=Math.PI/2;targetRing.position.x=.08;scene.add(targetRing);
+ const corridorMaterial=keepMaterial(new THREE.LineBasicMaterial({color:0x5597aa,transparent:true,opacity:.25}));
+ const gateMaterial=keepMaterial(new THREE.LineDashedMaterial({color:0xb5d5bc,transparent:true,opacity:.45,dashSize:.3,gapSize:.2}));
+ // The drawn envelope and the contact model share the same radius and 30 m extent.
+ for(const axial of [0,5,10,20,DOCKING_LIMITS.corridorStart]){
+  const radius=dockingCorridorRadius(axial),points=[];
+  for(let i=0;i<=64;i++){const angle=i/64*Math.PI*2;points.push(new THREE.Vector3(axial,Math.cos(angle)*radius,Math.sin(angle)*radius));}
+  const line=new THREE.Line(keepGeometry(new THREE.BufferGeometry().setFromPoints(points)),axial===5||axial===30?gateMaterial:corridorMaterial);line.computeLineDistances();scene.add(line);
+ }
+ for(const angle of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
+  const points=[0,5,10,20,30].map(axial=>new THREE.Vector3(axial,Math.cos(angle)*dockingCorridorRadius(axial),Math.sin(angle)*dockingCorridorRadius(axial)));
+  scene.add(new THREE.Line(keepGeometry(new THREE.BufferGeometry().setFromPoints(points)),corridorMaterial));
+ }
+ function trajectoryLine(maxPoints,material){
+  const geometry=keepGeometry(new THREE.BufferGeometry());geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(maxPoints*3),3).setUsage(THREE.DynamicDrawUsage));geometry.setDrawRange(0,0);
+  const line=new THREE.Line(geometry,keepMaterial(material));line.frustumCulled=false;scene.add(line);return line;
+ }
+ const flown=trajectoryLine(7200,new THREE.LineBasicMaterial({color:0x5fbed1,transparent:true,opacity:.55}));
+ const predicted=trajectoryLine(121,new THREE.LineDashedMaterial({color:0xffc472,transparent:true,opacity:.8,dashSize:.35,gapSize:.25}));
+ function writeLine(line,positions){const buffer=line.geometry.attributes.position;positions.forEach((position,i)=>buffer.setXYZ(i,...hcwToScene(position)));buffer.needsUpdate=true;line.geometry.setDrawRange(0,positions.length);if(line===predicted)line.computeLineDistances();}
+
+ const recorder=new DockingRecorder({id:'alignment',...DOCKING_SCENARIOS.find(s=>s.id==='alignment'),limits:DOCKING_LIMITS});
+ const training=new DockingTraining('alignment',{
+  onStep(state,context){recorder.sample(state,context);if(state.status!=='flying')recorder.finish(state,context);},
+  onEvent(event){recorder.event(event);},
+ });
+ const held=new Set(),keyboard=new Set(),pointerControls=new Map();
+ let paused=true,view='external',analysis='trend',disposed=false,frameId=0,previousWall=null,lastRead=0,lastChart=0,lastTrajectory=0,lastTrajectoryTime=-1,lastStatus='',lastWidth=0,lastHeight=0;
+ let replay=false,replayPlaying=false,replayTime=0,replayIndex=0,replaySamples=[],cachedSamples=recorder.samples,manualPreferences=null,lastReadKey='',lastAnalysisKey='';
+ const displayState=()=>replay?replaySamples[replayIndex]||training.state:training.state;
  const clearInput=()=>{held.clear();keyboard.clear();pointerControls.clear();panel.querySelectorAll('.held').forEach(x=>x.classList.remove('held'));};
  const isVisible=()=>!document.hidden&&container.isConnected&&!!container.getClientRects().length&&getComputedStyle(container).visibility!=='hidden';
- const pause=()=>{paused=true;previousWall=null;clearInput();updateReadouts();};
- function fit(){const p=new THREE.Vector3(...hcwToScene(modelSimulation.state.position)),distance=Math.max(35,p.length());controls.stopMotion();controls.target.copy(p).multiplyScalar(.42);external.position.copy(controls.target).add(new THREE.Vector3(distance*.55,-distance*.85,distance*.45));controls.update();}
- function syncPose(){chaser.position.fromArray(hcwToScene(modelSimulation.state.position));chaser.quaternion.fromArray(dockingQuaternion(modelSimulation.state.attitude));chaser.updateMatrixWorld(true);}
- function setCamera(mode){view=mode==='onboard'?'onboard':'external';controls.stopMotion();controls.enabled=view==='external';$('[data-view="external"]').classList.toggle('active',view==='external');$('[data-view="onboard"]').classList.toggle('active',view==='onboard');$('.dock-crosshair').hidden=view!=='onboard';updateReadouts();}
- function updateReadouts(){
-  const state=modelSimulation.state,m=dockingMetrics(state);
-  for(const [key,value] of Object.entries({distance:m.distance.toFixed(2)+' m',closing:m.closing.toFixed(3)+' m/s',lateral:m.lateral.toFixed(2)+' m',angle:m.angle.toFixed(2)+'°',deltaV:state.deltaV.toFixed(3)+' m/s',time:state.time.toFixed(1)+' s'}))$(`[data-read="${key}"]`).textContent=value;
-  get('start').textContent=t(paused?'开始 / 继续':'暂停训练');get('start').disabled=state.status!=='flying';
-  const status=state.status==='flying'?(paused?'训练已暂停':statusNames.flying):statusNames[state.status];
+ function pause(){
+  if(!paused&&!training.finished)recorder.event({type:'pause',time:training.state.time,messageKey:'训练已暂停'});
+  paused=true;replayPlaying=false;previousWall=null;clearInput();updateReadouts();
+ }
+ function finishRecord(){if(training.finished)recorder.finish(training.state,{mode:training.mode,phase:'finished',finishReason:training.finishReason});}
+ function syncPose(){const state=displayState();chaser.position.fromArray(hcwToScene(state.position));chaser.quaternion.fromArray(state.quaternion||dockingQuaternion(state.attitude));chaser.updateMatrixWorld(true);}
+ function fit(){
+  syncPose();const sphere=new THREE.Box3().setFromObject(station).expandByObject(chaser).getBoundingSphere(new THREE.Sphere());
+  const aspect=viewport.clientWidth/Math.max(1,viewport.clientHeight),vertical=THREE.MathUtils.degToRad(external.fov/2),halfFov=Math.min(vertical,Math.atan(Math.tan(vertical)*Math.max(.1,aspect)));
+  const distance=Math.max(35,sphere.radius/Math.sin(halfFov)*1.08);controls.stopMotion();controls.target.copy(sphere.center);external.position.copy(sphere.center).add(new THREE.Vector3(.55,-.85,.45).normalize().multiplyScalar(distance));controls.update();
+ }
+ function setCamera(mode){view=mode==='onboard'?'onboard':'external';controls.stopMotion();controls.enabled=view==='external';for(const button of panel.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));$('.dock-crosshair').hidden=view!=='onboard';updateReadouts();}
+ function selectAnalysis(name){
+  analysis=name;for(const button of panel.querySelectorAll('[data-analysis]')){const selected=button.dataset.analysis===name;button.setAttribute('aria-selected',String(selected));button.setAttribute('aria-pressed',String(selected));button.tabIndex=selected?0:-1;}
+  for(const body of panel.querySelectorAll('[data-analysis-panel]'))body.hidden=body.dataset.analysisPanel!==name;
+  $('.dock-analysis-body').scrollTop=0;updateAnalysis();
+  if(name==='review'&&$('.dock-analysis').parentElement===$('.dock-console'))$('.dock-analysis').scrollIntoView({block:'nearest'});
+ }
+ function updateAnalysis(force=true){
+  const signature=[training.state.time,recorder.summary().eventCount,analysis,replay,replayIndex,replayPlaying,training.finished].join('|');
+  if(!force&&signature===lastAnalysisKey)return;lastAnalysisKey=signature;
+  cachedSamples=recorder.samples;
+  if(analysis==='trend')get('trend').innerHTML=trendSVG(cachedSamples,displayState().time);
+  if(analysis==='events'){
+   const events=recorder.events.slice(-120).reverse();
+   get('events').innerHTML=events.map(event=>`<li><time>${event.time.toFixed(1)} s</time><span>${escapeHTML(t(event.messageKey,event.detail||{}))}</span></li>`).join('')||`<li>${escapeHTML(t('开始训练后将在这里记录操作与阶段变化。'))}</li>`;
+  }
+  if(analysis==='review')get('report').innerHTML=reportHTML(recorder.summary(),training.guidance().violations);
+  get('replay').textContent=t(replay?'退出回放':'进入回放');get('replay').disabled=!cachedSamples.length;
+  get('replay-play').hidden=!replay;get('replay-play').textContent=t(replayPlaying?'暂停回放':'播放回放');get('scrubber').hidden=!replay;
+  if(replay){get('replay-time').max=Math.max(0,replaySamples.length-1);get('replay-time').value=replayIndex;get('replay-value').textContent=displayState().time.toFixed(1)+' s';}
+ }
+ function updateReadouts(force=true){
+  const state=displayState(),signature=[state.time,state.status,training.mode,training.finished,paused,replay,replayPlaying].join('|');
+  if(!force&&signature===lastReadKey)return;lastReadKey=signature;
+  if(replay){get('fine').checked=!!state.context?.command?.fine;get('damping').checked=state.context?.command?.angularDamping!==false;}
+  const effectiveFine=replay?!!state.context?.command?.fine:training.mode==='manual'&&get('fine').checked;
+  const m=deriveDockingInstruments(state,{fine:effectiveFine}),g=training.guidance(),shownMode=replay?state.context?.mode||'manual':training.mode;
+  for(const [key,value] of Object.entries({distance:m.axialDistance.toFixed(2),closing:signed(m.axialClosing,3),right:signed(m.right)+' m',up:signed(m.up)+' m','right-velocity':signed(m.rightVelocity,3)+' m/s','up-velocity':signed(m.upVelocity,3)+' m/s',angle:m.attitudeErrorDeg.toFixed(2)+'° / '+m.angularSpeedDegPerSec.toFixed(2)+'°/s',lateral:m.lateralOffset.toFixed(2)+' m / '+m.lateralSpeed.toFixed(3)+' m/s',deltaV:m.deltaV.toFixed(3)+' m/s',time:m.time.toFixed(1)+' s'}))$(`[data-read="${key}"]`).textContent=value;
+  const advisoryLimit=replay?state.context?.speedLimit??m.recommendedClosing:g.speedLimit;
+  get('closing-box').dataset.alert=String(m.axialClosing>advisoryLimit+DOCKING_LIMITS.speedTolerance);get('alignment').innerHTML=alignmentSVG(m);
+  get('start').textContent=t(paused?'开始 / 继续':'暂停训练');get('start').disabled=training.finished||replay;get('finish').disabled=training.finished||replay;
+  for(const button of panel.querySelectorAll('[data-mode]')){button.setAttribute('aria-pressed',String(button.dataset.mode===shownMode));button.disabled=training.finished||replay;}
+  for(const button of panel.querySelectorAll('[data-control]'))button.disabled=paused||training.finished||replay;
+  get('fine').disabled=replay||training.mode!=='manual'||training.finished;get('damping').disabled=get('fine').disabled;
+  const status=replay?'正在回放 · 实时训练已暂停':training.finished?(statusNames[training.state.status]||'训练已结束'):paused?'训练已暂停':'训练进行中';
   if(status!==lastStatus){$('.dock-terminal').textContent=t(status);lastStatus=status;}
   $('.dock-terminal').dataset.status=state.status;
+  get('mode-help').textContent=replay?t('回放只读取记录；退出后回到暂停的实时训练。'):t(modeHelp[training.mode]);
+  get('phase').textContent=replay?t('记录回放')+' · '+t(modeNames[state.context?.mode]||'人工控制'):t(g.phaseKey)+' · '+t(modeNames[training.mode]);
+  get('guidance').textContent=replay?t('当前显示记录时刻 {time} s',{time:state.time.toFixed(1)}):g.finished?t('打开回放与报告，查看接触条件、操作事件和速度变化。'):g.gate&&!['hold','retreat'].includes(g.mode)?
+   t('下一停靠点 {distance} m · 稳定 {stable}/{required} s · 建议 ≤ {speed} m/s',{distance:g.gate.distance,stable:g.gate.stableSeconds.toFixed(1),required:g.gate.requiredSeconds,speed:g.speedLimit.toFixed(2)}):
+   t('目标距离 {distance} m · 建议闭合速度 ≤ {speed} m/s',{distance:g.targetDistance.toFixed(1),speed:g.speedLimit.toFixed(2)});
+  get('go').disabled=!g.canRelease||replay;get('go').textContent=t(g.canRelease?'检查就绪 · GO 放行':'确认放行 GO');
+  const rule=DOCKING_GATE_RULES.find(rule=>rule.distance===g.gate?.distance);
+  get('gatechecks').hidden=replay||!rule||training.finished||['hold','retreat'].includes(g.mode)&&g.gate?.status==='approaching';
+  if(rule)get('gatechecks').innerHTML=[
+   ['停靠位置偏差',Math.abs(m.axialDistance-rule.distance),rule.positionTolerance,'m'],
+   ['相对速度',m.speed,rule.speed,'m/s'],['横向偏差',m.lateralOffset,rule.lateral,'m'],
+   ['姿态误差',m.attitudeErrorDeg,rule.angle,'°'],['合成角速率',m.angularSpeedDegPerSec,rule.angularSpeed*180/Math.PI,'°/s'],
+  ].map(([key,value,limit,unit])=>`<span data-pass="${value<=limit}">${value<=limit?'✓':'○'} ${escapeHTML(t(key))} ≤ ${limit.toFixed(unit==='m/s'?3:unit==='m'?2:1)} ${unit}</span>`).join('');
+  get('warnings').hidden=replay||!g.warnings.length;get('warnings').textContent=g.warnings.map(w=>t(w.key,w.params)).join(' · ');
   $('.dock-view-caption').textContent=t(view==='onboard'?'舰载相机 · 固连机体':'外部视角 · 拖动旋转，滚轮缩放');
-  $('.dock-pause-caption').textContent=state.status!=='flying'?t(statusNames[state.status])+' · '+t('重新开始'):paused?t('已暂停 · 按开始继续'):t('推力松开后仍有惯性');
-  get('attitude').textContent=t('滚转 {roll}° · 俯仰 {pitch}° · 偏航 {yaw}°',{roll:state.attitude[0].toFixed(1),pitch:state.attitude[1].toFixed(1),yaw:state.attitude[2].toFixed(1)});
-  get('thrust').textContent=t('平移加速度 {value} m/s²',{value:(DOCKING_THRUST*(get('fine').checked?.2:1)).toFixed(3)});
+  $('.dock-hud-numbers').textContent=`${m.axialDistance.toFixed(2)} m\n${signed(m.axialClosing,3)} m/s`;
+  $('.dock-pause-caption').textContent=(replay?t('记录回放'):training.finished?t(statusNames[state.status]||'训练已结束'):paused?t('已暂停 · 按开始继续'):t('点击画面使用键盘 · 手动输入立即接管'))+'\n'+(get('prediction').checked&&state.status==='flying'?t('金色虚线：无推力预测 · HCW · 60 秒'):t('蓝色细线：已飞轨迹'));
+  get('attitude').textContent=t('滚转 {roll}° · 俯仰 {pitch}° · 偏航 {yaw}°',{roll:m.attitudeDeg[0].toFixed(1),pitch:m.attitudeDeg[1].toFixed(1),yaw:m.attitudeDeg[2].toFixed(1)});
+  get('thrust').textContent=t('单轴加速度上限 {value} m/s²',{value:(DOCKING_THRUST*(effectiveFine?.2:1)).toFixed(3)})+' · '+t('推力松开后仍有惯性');
  }
- function reset(distance=Number(get('distance').value)){pause();modelSimulation.reset(distance);get('distance').value=String(distance);syncPose();fit();lastStatus='';updateReadouts();}
- const input=()=>{const active=new Set([...held,...keyboard]);return {translation:[Number(active.has('f'))-Number(active.has('b')),Number(active.has('r'))-Number(active.has('l')),Number(active.has('u'))-Number(active.has('d'))],rotation:[Number(active.has('rollL'))-Number(active.has('rollR')),Number(active.has('pitchU'))-Number(active.has('pitchD')),Number(active.has('yawL'))-Number(active.has('yawR'))],fine:get('fine').checked,brake:active.has('brake')};};
- function pointerDown(event){const button=event.target.closest('[data-control]');if(!button||paused||modelSimulation.state.status!=='flying')return;event.preventDefault();renderer.domElement.focus({preventScroll:true});pointerControls.set(event.pointerId,button.dataset.control);held.add(button.dataset.control);button.classList.add('held');try{button.setPointerCapture(event.pointerId);}catch{}}
- function pointerUp(event){const name=pointerControls.get(event.pointerId);pointerControls.delete(event.pointerId);if(name&&![...pointerControls.values()].includes(name)){held.delete(name);$(`[data-control="${name}"]`).classList.remove('held');}}
- function keyDown(event){if(!isVisible()||paused||event.target.matches('input,select,textarea')||document.activeElement!==renderer.domElement)return;const control=keys[event.code];if(!control)return;event.preventDefault();keyboard.add(control);$(`[data-control="${control}"]`).classList.add('held');}
+ function reset(scenario=get('scenario').value){
+  pause();restoreManualPreferences();replay=false;replayPlaying=false;replaySamples=[];
+  const selected=DOCKING_SCENARIOS.find(s=>s.id===scenario);recorder.reset({...(selected||{id:'custom',initialDistance:Number(scenario)}),limits:DOCKING_LIMITS});training.reset(scenario);
+  if(selected)get('scenario').value=selected.id;
+  get('brief').textContent=t(selected?.descriptionKey||'从指定距离开始进行近距离对接训练。');
+  lastTrajectoryTime=-1;cachedSamples=recorder.samples;syncPose();fit();lastStatus='';selectAnalysis('trend');updateReadouts();
+ }
+ const input=()=>{const active=new Set([...held,...keyboard]);return {translation:[Number(active.has('f'))-Number(active.has('b')),Number(active.has('r'))-Number(active.has('l')),Number(active.has('u'))-Number(active.has('d'))],rotation:[Number(active.has('rollL'))-Number(active.has('rollR')),Number(active.has('pitchU'))-Number(active.has('pitchD')),Number(active.has('yawL'))-Number(active.has('yawR'))],fine:get('fine').checked,angularDamping:get('damping').checked,brake:active.has('brake')};};
+ function pointerDown(event){
+  const button=event.target.closest('[data-control]');if(!button||paused||training.finished||replay)return;
+  event.preventDefault();renderer.domElement.focus({preventScroll:true});pointerControls.set(event.pointerId,button.dataset.control);held.add(button.dataset.control);button.classList.add('held');button.setPointerCapture(event.pointerId);
+ }
+ function pointerUp(event){const name=pointerControls.get(event.pointerId);pointerControls.delete(event.pointerId);if(name&&![...pointerControls.values()].includes(name)){held.delete(name);if(!keyboard.has(name))$(`[data-control="${name}"]`).classList.remove('held');}}
+ function keyDown(event){if(!isVisible()||paused||training.finished||replay||document.activeElement!==renderer.domElement)return;const control=keys[event.code];if(!control)return;event.preventDefault();keyboard.add(control);$(`[data-control="${control}"]`).classList.add('held');}
  function keyUp(event){const control=keys[event.code];if(!control)return;keyboard.delete(control);if(!held.has(control))$(`[data-control="${control}"]`).classList.remove('held');}
- panel.addEventListener('pointerdown',pointerDown);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerUp);panel.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);
+ panel.addEventListener('pointerdown',pointerDown);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerUp);panel.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);renderer.domElement.addEventListener('blur',clearInput);
  const blur=()=>pause(),visibility=()=>{if(document.hidden)pause();};window.addEventListener('blur',blur);document.addEventListener('visibilitychange',visibility);
- renderer.domElement.addEventListener('blur',clearInput);
- get('start').onclick=()=>{if(modelSimulation.state.status!=='flying')return;paused=!paused;previousWall=null;clearInput();renderer.domElement.focus({preventScroll:true});updateReadouts();};get('reset').onclick=()=>reset();get('distance').onchange=()=>reset();get('fine').onchange=updateReadouts;
+ get('start').onclick=()=>{
+  if(training.finished||replay)return;if(!paused){pause();return;}
+  paused=false;previousWall=null;clearInput();recorder.event({type:'resume',time:training.state.time,messageKey:'训练开始或继续'});renderer.domElement.focus({preventScroll:true});updateReadouts();
+ };
+ get('reset').onclick=()=>reset();get('scenario').onchange=()=>reset();
+ get('finish').onclick=()=>{pause();training.finish('ended');finishRecord();selectAnalysis('review');updateReadouts();};
+ for(const button of panel.querySelectorAll('[data-mode]'))button.onclick=()=>{clearInput();training.setMode(button.dataset.mode);updateReadouts();updateAnalysis();};
+ get('go').onclick=()=>{if(training.releaseGate()){updateReadouts();updateAnalysis();}};
+ get('fine').onchange=updateReadouts;get('damping').onchange=()=>{recorder.event({type:'damping',time:training.state.time,messageKey:get('damping').checked?'已开启角速率阻尼':'已关闭角速率阻尼'});updateReadouts();};
  get('fit').onclick=()=>{setCamera('external');fit();};for(const button of panel.querySelectorAll('[data-view]'))button.onclick=()=>setCamera(button.dataset.view);
  get('fov').oninput=()=>{onboard.fov=Number(get('fov').value);onboard.updateProjectionMatrix();get('fovValue').textContent=onboard.fov+'°';};
- function resize(){const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h)return;if(w===lastWidth&&h===lastHeight)return;lastWidth=w;lastHeight=h;renderer.setSize(w,h,false);for(const camera of [external,onboard]){camera.aspect=w/h;camera.updateProjectionMatrix();}}
+ get('prediction').onchange=()=>{lastTrajectoryTime=-1;updateReadouts();};get('marker').onchange=updateReadouts;
+ for(const button of panel.querySelectorAll('[data-analysis]')){
+  button.onclick=()=>selectAnalysis(button.dataset.analysis);
+  button.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const names=['trend','events','review'],i=names.indexOf(analysis),next=event.key==='Home'?0:event.key==='End'?2:(i+(event.key==='ArrowRight'?1:2))%3;selectAnalysis(names[next]);$(`[data-analysis="${names[next]}"]`).focus();};
+ }
+ function restoreManualPreferences(){if(manualPreferences){get('fine').checked=manualPreferences.fine;get('damping').checked=manualPreferences.damping;manualPreferences=null;}}
+ function enterReplay(){pause();manualPreferences={fine:get('fine').checked,damping:get('damping').checked};replaySamples=recorder.samples;replay=!!replaySamples.length;replayIndex=Math.max(0,replaySamples.length-1);replayTime=displayState().time;lastTrajectoryTime=-1;updateReadouts();updateAnalysis();}
+ get('replay').onclick=()=>{if(replay){restoreManualPreferences();replay=false;replayPlaying=false;lastTrajectoryTime=-1;updateReadouts();updateAnalysis();}else enterReplay();};
+ get('replay-time').oninput=()=>{replayPlaying=false;replayIndex=Number(get('replay-time').value);replayTime=displayState().time;lastTrajectoryTime=-1;updateReadouts();updateAnalysis();};
+ get('replay-play').onclick=()=>{if(!replay)return;if(replayIndex>=replaySamples.length-1){replayIndex=0;replayTime=displayState().time;}replayPlaying=!replayPlaying;previousWall=null;updateAnalysis();};
+ function downloadRecord(format){
+  const blob=new Blob([format==='json'?recorder.exportJSON():recorder.exportCSV()],{type:format==='json'?'application/json':'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`StarOrbit-docking-${get('scenario').value}-${new Date().toISOString().replace(/[:.]/g,'-')}.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }
+ get('export-json').onclick=()=>downloadRecord('json');get('export-csv').onclick=()=>downloadRecord('csv');
+ function resize(){
+  // On narrow screens the viewport stays above the scrollable instruments;
+  // plots/reports join that scroll area instead of overflowing onto controls.
+  const narrow=matchMedia('(max-width:900px)').matches,analysisNode=$('.dock-analysis'),destination=narrow?$('.dock-console'):$('.dock-stage');
+  if(analysisNode.parentElement!==destination)destination.append(analysisNode);
+  const checks=get('gatechecks'),checksDestination=narrow?$('.dock-console'):$('.dock-guidance');
+  if(checks.parentElement!==checksDestination){if(narrow)checksDestination.append(checks);else checksDestination.insertBefore(checks,get('warnings'));}
+  const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h||w===lastWidth&&h===lastHeight)return;lastWidth=w;lastHeight=h;renderer.setSize(w,h,false);for(const camera of [external,onboard]){camera.aspect=w/h;camera.updateProjectionMatrix();}
+ }
  const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(viewport);
- function render(){resize();syncPose();if(view==='external')controls.update();const camera=view==='onboard'?onboard:external;scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);renderer.render(scene,camera);const p=new THREE.Vector3(0,0,0).project(camera),cue=$('.dock-target');cue.hidden=view!=='onboard'||p.z< -1||p.z>1||Math.abs(p.x)>1||Math.abs(p.y)>1;if(!cue.hidden){cue.style.left=(p.x+1)*50+'%';cue.style.top=(1-p.y)*50+'%';}}
- function frame(wall){if(disposed)return;frameId=requestAnimationFrame(frame);if(!isVisible()){if(!paused)pause();previousWall=null;return;}const dt=previousWall===null?0:Math.min(.1,Math.max(0,(wall-previousWall)/1000));previousWall=wall;if(!paused){modelSimulation.advance(dt*Number(get('speed').value),input());if(modelSimulation.state.status!=='flying')pause();}if(wall-lastRead>80){updateReadouts();lastRead=wall;}render();}
- const translate=()=>{for(const el of panel.querySelectorAll('[data-dock-text]'))el.textContent=t(el.dataset.dockText);renderer.domElement.setAttribute('aria-label',t('交会对接训练画面'));lastStatus='';updateReadouts();};
- const unsubscribe=onLanguageChange(translate);translate();reset();setCamera('external');frameId=requestAnimationFrame(frame);
- return {pause,reset,setCamera,render,get state(){return modelSimulation.state;},get cameraMode(){return view;},get camera(){return view==='onboard'?onboard:external;},get renderer(){return renderer;},get simulation(){return modelSimulation;},get paused(){return paused;},get modelRoots(){return {station,chaser};},step(seconds,command={}){modelSimulation.advance(seconds,command);syncPose();updateReadouts();return modelSimulation.state;},dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerUp);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();}};
+ function updateTrajectories(wall){
+  const state=displayState();predicted.visible=get('prediction').checked&&state.status==='flying';
+  if(state.time===lastTrajectoryTime||wall-lastTrajectory<500&&lastTrajectoryTime>=0)return;
+  lastTrajectory=wall;lastTrajectoryTime=state.time;
+  const rows=replay?replaySamples.slice(0,replayIndex+1):recorder.samples;writeLine(flown,rows.map(sample=>sample.position));
+  if(predicted.visible)writeLine(predicted,predictDockingCoast(state).map(point=>point.position));
+ }
+ const projected=new THREE.Vector3();
+ function render(){resize();syncPose();if(view==='external')controls.update();const camera=view==='onboard'?onboard:external;scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);renderer.render(scene,camera);
+  projected.set(0,0,0).project(camera);const cue=$('.dock-target');cue.hidden=!get('marker').checked||view!=='onboard'||projected.z< -1||projected.z>1||Math.abs(projected.x)>1||Math.abs(projected.y)>1;
+  if(!cue.hidden){cue.style.left=(projected.x+1)*50+'%';cue.style.top=(1-projected.y)*50+'%';}
+ }
+ function frame(wall){
+  if(disposed)return;frameId=requestAnimationFrame(frame);if(!isVisible()){if(!paused||replayPlaying)pause();previousWall=null;return;}
+  const dt=previousWall===null?0:Math.min(.1,Math.max(0,(wall-previousWall)/1000));previousWall=wall;
+  if(replay&&replayPlaying){replayTime+=dt*Number(get('speed').value);while(replayIndex<replaySamples.length-1&&replaySamples[replayIndex+1].time<=replayTime)replayIndex++;if(replayIndex===replaySamples.length-1)replayPlaying=false;}
+  else if(!paused&&!training.finished){training.advance(dt*Number(get('speed').value),input());if(training.finished){finishRecord();pause();selectAnalysis('review');}}
+  if(wall-lastRead>100){updateReadouts(false);lastRead=wall;}if(wall-lastChart>200){updateAnalysis(false);lastChart=wall;}
+  updateTrajectories(wall);render();
+ }
+ function translate(){
+  for(const el of panel.querySelectorAll('[data-dock-text]'))el.textContent=t(el.dataset.dockText);
+  renderer.domElement.setAttribute('aria-label',t('交会对接训练画面'));
+  get('replay-time').setAttribute('aria-label',t('记录时间'));get('export-json').setAttribute('aria-label',t('导出 JSON 飞行记录'));get('export-csv').setAttribute('aria-label',t('导出 CSV 飞行记录'));
+  const selected=DOCKING_SCENARIOS.find(s=>s.id===get('scenario').value);get('brief').textContent=t(selected?.descriptionKey||'从指定距离开始进行近距离对接训练。');lastStatus='';updateReadouts();updateAnalysis();
+ }
+ const unsubscribe=onLanguageChange(translate);translate();reset('alignment');setCamera('onboard');frameId=requestAnimationFrame(frame);
+ return {pause,reset,setCamera,render,get state(){return training.state;},get cameraMode(){return view;},get camera(){return view==='onboard'?onboard:external;},get renderer(){return renderer;},get simulation(){return training;},get recorder(){return recorder;},get paused(){return paused;},get modelRoots(){return {station,chaser};},
+  step(seconds,command={}){training.advance(seconds,command);finishRecord();syncPose();updateReadouts();return training.state;},
+  dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerUp);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();},
+ };
 }

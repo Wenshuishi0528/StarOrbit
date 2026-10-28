@@ -1,3 +1,4 @@
+import {restoreControlFocus} from './display-controls.js';
 import {orbitSegment} from './dfh1-history.js';
 import {nearestTrackTime} from './minimap-picking.js';
 import {t,onLanguageChange} from './i18n.js';
@@ -15,7 +16,7 @@ export class OrbitMinimap{
   try{this.visible=localStorage.getItem('tiangong-minimap-v1')!=='off';}catch{}
   $('showMinimap').checked=this.visible;this.panel.hidden=!this.visible;
   $('showMinimap').onchange=()=>this.setVisible($('showMinimap').checked);
-  $('closeMinimap').onclick=()=>{this.setVisible(false);$('showMinimap').focus();};
+  $('closeMinimap').onclick=()=>{this.setVisible(false);restoreControlFocus($('showMinimap'));};
   onLanguageChange(()=>{this.lastDraw=-Infinity;});
   this.image=new Image();this.image.onload=()=>{this.lastDraw=-Infinity;};
   this.image.src=sim.environment.assets.simple.day;

@@ -1,0 +1,39 @@
+.photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.photo-actions button { min-width: 0; min-height: 38px; padding: 8px; font-size: 12px; }
+.photo-actions #photoMode { grid-column: 1 / -1; }
+.sidebar-actions { display: flex; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.sidebar-actions button { flex: 1; padding: 6px 8px; font-size: 11px; }
+.settings-content > details > .angle-actions { margin-top: 10px; }
+#toolbarActions { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+#toolbarActions[hidden] { display: none; }
+#toolsToggle, #toggleMinimap { display: none; }
+
+@media (max-width: 760px) {
+  .toolbar { left: auto; right: 10px; top: 78px; z-index: 4; }
+  #toolsToggle { display: block; min-height: 36px; padding: 7px 12px; font-size: 12px; }
+  #toolbarActions {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    width: min(280px, calc(100vw - 20px)); max-height: calc(58dvh - 130px);
+    overflow: auto; align-items: stretch; padding: 9px;
+    border: 1px solid #355268; border-radius: 10px; background: #0c1929;
+    box-shadow: 0 8px 28px #0007;
+  }
+  #toolbarActions > button { min-height: 36px; font-size: 12px; text-align: left; }
+  .toolbar #viewActions { width: 100%; max-height: none; overflow: visible; }
+  #telemetry { top: 124px; }
+  #orbitMinimap,
+  body.has-event-timeline #orbitMinimap { bottom: calc(42% + 100px); max-height: max(36px, calc(58dvh - 234px)); overflow: auto; }
+  #orbitMinimap:not(.compact-expanded) { width: auto; max-width: calc(100vw - 24px); }
+  #orbitMinimap:not(.compact-expanded) > :not(.minimap-heading),
+  #orbitMinimap:not(.compact-expanded) #minimapTime { display: none; }
+  #toggleMinimap { display: block; padding: 5px 8px; font-size: 11px; white-space: nowrap; }
+  #toggleMinimap::after { content: ' ▾'; }
+  #toggleMinimap[aria-expanded=true]::after { content: ' ▴'; }
+  .minimap-heading { gap: 6px; }
+  .minimap-heading > strong { display: none; }
+  #closeMinimap { padding: 4px; min-width: 28px; }
+  body:has(#orbitMinimap.compact-expanded:not([hidden])) #telemetry { display: none; }
+  body #eventTimeline.collapsed { bottom: calc(42% + 8px); }
+  body.immersive #orbitMinimap,
+  body.has-event-timeline.immersive #orbitMinimap { bottom: 116px; max-height: calc(100dvh - 200px); }
+}
