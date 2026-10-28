@@ -77,3 +77,12 @@
 - Corrected standard-quality browser test configuration and added final display pixel checks at maximum exposure, including the real HDR finish pass. All 54 browser checks, full unit suite and builds passed. See docs/v0.63-details.md.
 - Latest-version publication remains authorized; NASA features remain outside this batch.
 - Independent subagent code and screenshot review passed. Local runtime files were SHA-256 verified, app metadata/signature updated to 0.63, and launcher check passed on port 8771.
+
+## 2026-10-28 — v0.64 cloud occlusion
+
+- User clarified that dark night clouds must visibly obscure city lights. The option previously changed only moonlight, with identical occlusion in both states.
+- Option now controls night extinction. Thick clouds suppress city emission, thin clouds transmit partially, off/zero-density restores clear night lights. Removed duplicate ground-level attenuation; retained daytime shading.
+- Volume clouds use actual cloud sample depth to avoid covering foreground spacecraft. Tests cover both foreground and far-side markers.
+- Full unit suite, offline/web builds, web asset checks and 109 browser checks passed; six output paths include brightest-city extinction at maximum exposure. Actual cloud-map on/off screenshots saved in output/playwright/cloud064-*.png. See docs/v0.64-details.md and validation JSON.
+- User's latest-version publication authorization remains in effect; NASA features remain unchanged.
+- Local runtime synced with SHA-256 checks; app version/signature and launcher verified at 0.64 on port 8771.

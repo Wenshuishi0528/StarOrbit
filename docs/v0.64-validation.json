@@ -1,0 +1,694 @@
+{
+  "night": [
+    {
+      "name": "new profile defaults off",
+      "pass": true
+    },
+    {
+      "name": "checkbox saves preference",
+      "pass": true
+    },
+    {
+      "name": "scene capture includes option",
+      "pass": true
+    },
+    {
+      "name": "scene import restores checkbox",
+      "pass": true
+    },
+    {
+      "name": "old scene resets option off",
+      "pass": true
+    },
+    {
+      "name": "preset restores option",
+      "pass": true
+    },
+    {
+      "name": "old preset resets option off",
+      "pass": true
+    },
+    {
+      "name": "simple quality disables unavailable cloud setting",
+      "pass": true
+    },
+    {
+      "name": "detailed quality enables setting",
+      "pass": true
+    },
+    {
+      "name": "shared cloud option in follow",
+      "pass": true
+    },
+    {
+      "name": "shared cloud option in orbit",
+      "pass": true
+    },
+    {
+      "name": "master cloud visibility remains authoritative",
+      "pass": true
+    },
+    {
+      "name": "cloud source off remains authoritative",
+      "pass": true
+    },
+    {
+      "name": "8K assets loaded",
+      "pass": true
+    },
+    {
+      "name": "medium final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "medium day pixels unchanged by option",
+      "pass": true,
+      "day": 194.4409621565137,
+      "maxDelta": 0
+    },
+    {
+      "name": "medium night remains dark",
+      "pass": true,
+      "day": 194.4409621565137,
+      "night": 0.0007178363257702436,
+      "off": 0
+    },
+    {
+      "name": "medium moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 0.0007178363257702436,
+      "unlit": 0
+    },
+    {
+      "name": "medium no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "medium Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        1.5602264132515606e-07,
+        6.651895982183002e-08,
+        1.637576200567518e-08,
+        1.3963611655842811e-09,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "standard final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "standard day pixels unchanged by option",
+      "pass": true,
+      "day": 194.4409621565137,
+      "maxDelta": 0
+    },
+    {
+      "name": "standard night remains dark",
+      "pass": true,
+      "day": 194.4409621565137,
+      "night": 0.0007178363257702436,
+      "off": 0
+    },
+    {
+      "name": "standard moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 0.0007178363257702436,
+      "unlit": 0
+    },
+    {
+      "name": "standard no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "standard Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        1.5602264132515606e-07,
+        6.651895982183002e-08,
+        1.637576200567518e-08,
+        1.3963611655842811e-09,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "layer8K-HDR final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "layer8K-HDR day pixels unchanged by option",
+      "pass": true,
+      "day": 170.2735325392132,
+      "maxDelta": 0
+    },
+    {
+      "name": "layer8K-HDR night remains dark",
+      "pass": true,
+      "day": 170.2735325392132,
+      "night": 0.0475222002980491,
+      "off": 0
+    },
+    {
+      "name": "layer8K-HDR moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 0.0475222002980491,
+      "unlit": 0.04692552042038223
+    },
+    {
+      "name": "layer8K-HDR no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "layer8K-HDR Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        0.0001268494282461082,
+        0.0001267717161681503,
+        0.00012672804283890096,
+        0.00012671489033285374,
+        0.00012671365827069772,
+        0.00012671365827069772
+      ]
+    },
+    {
+      "name": "volume8K-HDR final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "volume8K-HDR day pixels unchanged by option",
+      "pass": true,
+      "day": 215.1575260759273,
+      "maxDelta": 0
+    },
+    {
+      "name": "volume8K-HDR night remains dark",
+      "pass": true,
+      "day": 215.1575260759273,
+      "night": 0.04757429845140049,
+      "off": 0
+    },
+    {
+      "name": "volume8K-HDR moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 0.04757429845140049,
+      "unlit": 0.046924209427050556
+    },
+    {
+      "name": "volume8K-HDR no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "volume8K-HDR Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        0.00012678533494181465,
+        0.00012673799938056618,
+        0.00012671262751003573,
+        0.00012670520360795004,
+        0.0001267034306996114,
+        0.0001267034306996114
+      ]
+    },
+    {
+      "name": "layer8K-fallback final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "layer8K-fallback day pixels unchanged by option",
+      "pass": true,
+      "day": 182.59169999284495,
+      "maxDelta": 0
+    },
+    {
+      "name": "layer8K-fallback night remains dark",
+      "pass": true,
+      "day": 182.59169999284495,
+      "night": 3.702249230241872e-05,
+      "off": 0
+    },
+    {
+      "name": "layer8K-fallback moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 3.702249230241872e-05,
+      "unlit": -0.0006339557960282488
+    },
+    {
+      "name": "layer8K-fallback no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "layer8K-fallback Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        0.0005724857134434084,
+        0.0005724020690346757,
+        0.0005723551536599795,
+        0.0005723411644188067,
+        0.0005723398644477129,
+        0.0005723398644477129
+      ]
+    },
+    {
+      "name": "volume8K-fallback final night pixels near black at maximum exposure",
+      "pass": true,
+      "peak": 0,
+      "scale": 255
+    },
+    {
+      "name": "volume8K-fallback day pixels unchanged by option",
+      "pass": true,
+      "day": 230.9799126098369,
+      "maxDelta": 0
+    },
+    {
+      "name": "volume8K-fallback night remains dark",
+      "pass": true,
+      "day": 230.9799126098369,
+      "night": 7.496791713031137e-05,
+      "off": 0
+    },
+    {
+      "name": "volume8K-fallback moonlight adds weak illumination",
+      "pass": true,
+      "moonlit": 7.496791713031137e-05,
+      "unlit": -0.0006340332588182333
+    },
+    {
+      "name": "volume8K-fallback no new light without a visible illuminated Moon",
+      "pass": true
+    },
+    {
+      "name": "volume8K-fallback Moon sets continuously behind Earth",
+      "pass": true,
+      "horizon": [
+        0.0005723911065918704,
+        0.0005723409897958239,
+        0.0005723141172590355,
+        0.0005723063174324731,
+        0.0005723044741898775,
+        0.0005723044741898775
+      ]
+    },
+    {
+      "name": "no WebGL errors",
+      "pass": true
+    },
+    {
+      "name": "hidden Moon does not change cloud lighting",
+      "pass": true
+    },
+    {
+      "name": "camera does not change lunar illumination",
+      "pass": true
+    },
+    {
+      "name": "reload persistence",
+      "pass": true
+    }
+  ],
+  "occlusion": [
+    {
+      "name": "2K night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 234,
+      "thin": 108,
+      "thick": 0,
+      "off": 234,
+      "zero": 234
+    },
+    {
+      "name": "2K off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 234,
+      "off": 234,
+      "zero": 234
+    },
+    {
+      "name": "2K day unchanged 1.15",
+      "pass": true,
+      "on": 201,
+      "off": 201
+    },
+    {
+      "name": "2K night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 247,
+      "thin": 114,
+      "thick": 0,
+      "off": 247,
+      "zero": 247
+    },
+    {
+      "name": "2K off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 247,
+      "off": 247,
+      "zero": 247
+    },
+    {
+      "name": "2K day unchanged 2.5",
+      "pass": true,
+      "on": 210,
+      "off": 210
+    },
+    {
+      "name": "2K brightest city under thick cloud",
+      "pass": true,
+      "red": 0,
+      "scale": 255
+    },
+    {
+      "name": "2K foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223,
+      "frontOff": 223
+    },
+    {
+      "name": "2K Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0
+    },
+    {
+      "name": "4K night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 234,
+      "thin": 108,
+      "thick": 0,
+      "off": 234,
+      "zero": 234
+    },
+    {
+      "name": "4K off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 234,
+      "off": 234,
+      "zero": 234
+    },
+    {
+      "name": "4K day unchanged 1.15",
+      "pass": true,
+      "on": 201,
+      "off": 201
+    },
+    {
+      "name": "4K night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 247,
+      "thin": 114,
+      "thick": 0,
+      "off": 247,
+      "zero": 247
+    },
+    {
+      "name": "4K off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 247,
+      "off": 247,
+      "zero": 247
+    },
+    {
+      "name": "4K day unchanged 2.5",
+      "pass": true,
+      "on": 210,
+      "off": 210
+    },
+    {
+      "name": "4K brightest city under thick cloud",
+      "pass": true,
+      "red": 0,
+      "scale": 255
+    },
+    {
+      "name": "4K foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223,
+      "frontOff": 223
+    },
+    {
+      "name": "4K Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0
+    },
+    {
+      "name": "8K layer HDR night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 213.412109375,
+      "thin": 167.93359375,
+      "thick": 0,
+      "off": 213.412109375,
+      "zero": 213.412109375
+    },
+    {
+      "name": "8K layer HDR off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 213.412109375,
+      "off": 213.412109375,
+      "zero": 213.412109375
+    },
+    {
+      "name": "8K layer HDR day unchanged 1.15",
+      "pass": true,
+      "on": 233.96484375,
+      "off": 233.96484375
+    },
+    {
+      "name": "8K layer HDR night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 237.5712890625,
+      "thin": 213.458984375,
+      "thick": 0,
+      "off": 237.5712890625,
+      "zero": 237.5712890625
+    },
+    {
+      "name": "8K layer HDR off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 237.5712890625,
+      "off": 237.5712890625,
+      "zero": 237.5712890625
+    },
+    {
+      "name": "8K layer HDR day unchanged 2.5",
+      "pass": true,
+      "on": 246.609375,
+      "off": 246.609375
+    },
+    {
+      "name": "8K layer HDR brightest city under thick cloud",
+      "pass": true,
+      "red": 0,
+      "scale": 255
+    },
+    {
+      "name": "8K layer HDR foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223.3779296875,
+      "frontOff": 223.3779296875
+    },
+    {
+      "name": "8K layer HDR Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0
+    },
+    {
+      "name": "8K volume HDR night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 213.412109375,
+      "thin": 191.1552734375,
+      "thick": 0,
+      "off": 213.412109375,
+      "zero": 213.412109375
+    },
+    {
+      "name": "8K volume HDR off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 213.412109375,
+      "off": 213.412109375,
+      "zero": 213.412109375
+    },
+    {
+      "name": "8K volume HDR day unchanged 1.15",
+      "pass": true,
+      "on": 230.333984375,
+      "off": 230.333984375
+    },
+    {
+      "name": "8K volume HDR night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 237.5712890625,
+      "thin": 226.6640625,
+      "thick": 0,
+      "off": 237.5712890625,
+      "zero": 237.5712890625
+    },
+    {
+      "name": "8K volume HDR off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 237.5712890625,
+      "off": 237.5712890625,
+      "zero": 237.5712890625
+    },
+    {
+      "name": "8K volume HDR day unchanged 2.5",
+      "pass": true,
+      "on": 244.9853515625,
+      "off": 244.9853515625
+    },
+    {
+      "name": "8K volume HDR brightest city under thick cloud",
+      "pass": true,
+      "red": 0,
+      "scale": 255
+    },
+    {
+      "name": "8K volume HDR foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223.3779296875,
+      "frontOff": 223.3779296875
+    },
+    {
+      "name": "8K volume HDR Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0
+    },
+    {
+      "name": "8K layer fallback night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 213.435546875,
+      "thin": 98.435546875,
+      "thick": 0.0439453125,
+      "off": 213.435546875,
+      "zero": 213.435546875
+    },
+    {
+      "name": "8K layer fallback off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 213.435546875,
+      "off": 213.435546875,
+      "zero": 213.435546875
+    },
+    {
+      "name": "8K layer fallback day unchanged 1.15",
+      "pass": true,
+      "on": 202.7255859375,
+      "off": 202.7255859375
+    },
+    {
+      "name": "8K layer fallback night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 237.58203125,
+      "thin": 109.58203125,
+      "thick": 0.0498046875,
+      "off": 237.58203125,
+      "zero": 237.58203125
+    },
+    {
+      "name": "8K layer fallback off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 237.58203125,
+      "off": 237.58203125,
+      "zero": 237.58203125
+    },
+    {
+      "name": "8K layer fallback day unchanged 2.5",
+      "pass": true,
+      "on": 211.2939453125,
+      "off": 211.2939453125
+    },
+    {
+      "name": "8K layer fallback brightest city under thick cloud",
+      "pass": true,
+      "red": 0.0498046875,
+      "scale": 255
+    },
+    {
+      "name": "8K layer fallback foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223,
+      "frontOff": 223
+    },
+    {
+      "name": "8K layer fallback Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0.0498046875
+    },
+    {
+      "name": "8K volume fallback night city extinction at exposure 1.15",
+      "pass": true,
+      "clear": 213.435546875,
+      "thin": 139.5888671875,
+      "thick": 0.0166015625,
+      "off": 213.435546875,
+      "zero": 213.435546875
+    },
+    {
+      "name": "8K volume fallback off and zero density restore clear city lights 1.15",
+      "pass": true,
+      "clear": 213.435546875,
+      "off": 213.435546875,
+      "zero": 213.435546875
+    },
+    {
+      "name": "8K volume fallback day unchanged 1.15",
+      "pass": true,
+      "on": 212.1171875,
+      "off": 212.1171875
+    },
+    {
+      "name": "8K volume fallback night city extinction at exposure 2.5",
+      "pass": true,
+      "clear": 237.58203125,
+      "thin": 155.359375,
+      "thick": 0.017578125,
+      "off": 237.58203125,
+      "zero": 237.58203125
+    },
+    {
+      "name": "8K volume fallback off and zero density restore clear city lights 2.5",
+      "pass": true,
+      "clear": 237.58203125,
+      "off": 237.58203125,
+      "zero": 237.58203125
+    },
+    {
+      "name": "8K volume fallback day unchanged 2.5",
+      "pass": true,
+      "on": 223.619140625,
+      "off": 223.619140625
+    },
+    {
+      "name": "8K volume fallback brightest city under thick cloud",
+      "pass": true,
+      "red": 0.0205078125,
+      "scale": 255
+    },
+    {
+      "name": "8K volume fallback foreground spacecraft survives cloud extinction",
+      "pass": true,
+      "frontOn": 223,
+      "frontOff": 223
+    },
+    {
+      "name": "8K volume fallback Earth hides far-side spacecraft",
+      "pass": true,
+      "behind": 0.017578125
+    },
+    {
+      "name": "no WebGL errors",
+      "pass": true
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.64 — 2026-10-28
+
+**中文：** “夜面也显示云层”现在实际控制夜面暗云对城市灯光的遮挡，厚云遮蔽、薄云透光；关闭后恢复无遮挡夜景。移除地表重复遮挡并保留日面光照。[说明与验证](docs/v0.64-details.md)。
+
+**English:** The night-cloud option now controls city-light occlusion: thick clouds obscure lights and thin clouds transmit partially; disabling it restores the clear night view. Removed duplicate surface attenuation while retaining daylight illumination. [Details and validation](docs/v0.64-details.md).
+
 ## v0.63 — 2026-10-28
 
 **中文：** 取消夜云的 800 倍月光增亮，去除深夜固定环境补光，使普通云和体积云在夜侧接近黑色；保留日面亮度、晨昏照明与云层遮挡。[说明与验证](docs/v0.63-details.md)。
