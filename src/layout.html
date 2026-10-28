@@ -66,7 +66,7 @@ __HELP_CSS__
 <label class="check" title="开启后，夜面暗云按云图遮挡城市灯光；关闭后显示无遮挡夜景。云层不会被额外提亮。"><input id="cloudNightVisible" type="checkbox">夜面也显示云层</label>
 <label class="check"><input id="volumeClouds" type="checkbox">体积云 · 8K</label><label class="check"><input id="cloudMotion" type="checkbox" checked>动态云层 · 8K</label>
 <div class="row"><label for="cloudSource">云图来源</label><select id="cloudSource"><option value="builtin">内置静态云图</option><option value="latest">github最新已下载</option><option value="satcorps">NASA 全球云图 · 含极区</option><option value="history">历史快照</option><option value="local">本地生成</option><option value="off">关闭</option></select></div>
-<button id="updateCloudSource">下载当前云图源</button>
+<button id="updateCloudSource">云图下载与更新…</button>
 
 <label for="cloudHistory" class="small">云图快照</label><select class="wide" id="cloudHistory"></select><p class="small data-status" id="cloudDataStatus"></p>
 <div class="row"><label for="auroraSource">极光来源</label><select id="auroraSource"><option value="off">关闭</option><option value="local">本地生成</option><option value="latest">最新已下载</option><option value="history">历史快照</option></select></div>
@@ -115,8 +115,9 @@ __HELP_CSS__
 <label class="check"><input id="showMeteors" type="checkbox" checked>流星掠过</label>
 <p class="small">模拟事件 · 非实时观测</p>
 </div></section><section data-settings-module="data"><h2 class="settings-heading"><button type="button" class="settings-toggle" aria-expanded="true" aria-controls="settings-data"><span>公共资源与轨道</span><span class="settings-chevron" aria-hidden="true"></span></button></h2><div class="settings-content" id="settings-data">
-<p class="small">地球、云图、极光和星空由全部航天器共用；轨道按当前任务管理。</p><div class="angle-actions"><button id="updateEnvironment" class="primary">更新全部数据</button><button id="clearEnvironment">清理下载缓存</button></div>
+<p class="small">地球、云图、极光和星空由全部航天器共用；轨道按当前任务管理。</p><div class="angle-actions"><button id="updateEnvironment" class="primary">检查全部更新</button><button id="clearEnvironment">清理下载缓存</button></div>
 <p class="small" id="lastDataCheck"></p><div id="dataUpdates" role="status" aria-live="polite"></div><p class="small" id="cacheUsage"></p>
+<label class="check"><input type="checkbox" id="autoCleanCache" checked>自动限制下载缓存</label>
 <div class="row"><label for="cacheLimit">缓存上限 MB</label><input type="number" id="cacheLimit" min="20" max="2000" value="200"></div>
 
 <details data-memory-key="downloads"><summary>下载历史</summary><label for="importSnapshot" class="small">导入云图／极光／轨道快照</label><input id="importSnapshot" type="file" accept=".json"><div id="weatherHistory"></div></details>

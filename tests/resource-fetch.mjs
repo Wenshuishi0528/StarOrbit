@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {fetchResource} from '../src/resource-fetch.js';
+let requested=0,cancelled=0;
+const cached={source:'https://example.test/cloud.png',blob:new Blob(['valid cached payload']),http:{etag:'"frame-1"'}};
+const hit=await fetchResource(cached.source,{cached,fetcher:async()=>{requested++;return new Response(new ReadableStream({cancel(){cancelled++;}}),{headers:{etag:'"frame-1"'}});}});
+assert.equal(hit.unchanged,true);assert.equal(hit.blob,cached.blob);assert.equal(cancelled,1);assert.equal(requested,1);
+let reads=0;const chunks=[new Uint8Array(4),new Uint8Array(4),new Uint8Array(4)];
+await assert.rejects(()=>fetchResource('https://example.test/large',{max:6,fetcher:async()=>new Response(new ReadableStream({pull(c){reads++;const next=chunks.shift();if(next)c.enqueue(next);else c.close();}}))}),/大小限制/);
+assert(reads<=3,'reject unbounded payload before complete buffering');
+const seen=[];const fresh=await fetchResource(cached.source,{cached,max:10,onProgress:p=>seen.push(p),fetcher:async()=>new Response('new data',{headers:{etag:'"frame-2"','content-length':'8'}})});
+assert.equal(await fresh.blob.text(),'new data');assert.equal(fresh.unchanged,false);assert.equal(fresh.http.etag,'"frame-2"');assert.equal(seen.at(-1).received,8);
+await assert.rejects(()=>fetchResource('x',{fetcher:async()=>new Response('unavailable',{status:503})}),/HTTP 503/);
+await assert.rejects(()=>fetchResource('x',{timeout:5,fetcher:async(_url,{signal})=>new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted'))))}),/aborted/);
+console.log('Resource HTTP validators, unchanged payload reuse, streaming limits, progress, failures and timeout passed');

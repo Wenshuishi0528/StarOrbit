@@ -1,5 +1,21 @@
 # StarOrbit implementation handoff
 
+## 2026-10-28 — v0.68 publication
+
+- User explicitly authorized GitHub synchronization, web deployment and the latest Release after local v0.68 validation. Publish the existing batch without another version increment.
+- Use the existing main/Pages workflow and package-portable script, including the macOS launcher, and update the Latest release from v0.38 to v0.68.
+- Existing full tests, six SATCORPS tests, builds, browser validation and independent reviews passed; retain the previous local-validation record below.
+
+## 2026-10-28 — v0.68 unified data resources (local)
+
+- Reworked NASA/GitHub cloud, NOAA aurora and mission-specific orbit updates into a single Data & resources dialog, with explicit download/use actions and persistent per-source outcomes. NASA remains visible on web with the local-service requirement explained.
+- Added default-on, optional FIFO cache eviction across browser resource types; protect active, pending, favorite, all-mission selected and preset-referenced records. NASA shared disk derivatives remain separately measured and retain their existing two-image policy.
+- Reuse duplicate requests, HTTP validators, content hashes, unchanged GP/OEM data and NASA preflight data blocks. Throttle progress/history work and suspend hidden 3D rendering while the modal is open.
+- Independent subagent reviews found and resolved NASA recovery/cleanup races, misleading partial-check states, pending texture eviction, manual-delete resurrection and history invalidation on language/mission changes. Regression tests cover these cases.
+- Full npm tests, six SATCORPS tests, offline/web builds, web asset validation and diff checks passed. Browser tests used an isolated synthetic NASA helper; a real NOAA web download succeeded, while a blocked direct CSS source retained the bundled orbit and provided a fallback path. No claim that live NASA's newest product was downloaded in this batch.
+- Synced sources and HTML to the installed runtime; metadata is 0.68, codesign and launcher checks passed. Reloaded the local service on port 8771 while preserving the existing NASA image. Backup: output/runtime-backup-v0.67-to-v0.68. See docs/v0.68-details.md and docs/v0.68-resources.png.
+- No commit, GitHub push or deployment in this batch. Published main/Pages remains v0.67 at 301642152be6212393a791a65cbe96f657cdb7cf; portable Release remains v0.38.
+
 ## 2026-10-27 — v0.55 DFH-1 live telemetry
 
 - Added deterministic reference Sun/IR probes, 10-second experimental commutator and 880–1320 Hz FM audio.

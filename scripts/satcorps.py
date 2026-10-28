@@ -22,6 +22,33 @@ def request(url, byte_range=None, limit=2000000):
 # 30-day window. A product name or a new timestamp does not establish coverage.
 MAX_AGE=30*DAY
 RETIRED_TIME=1719748800
+CHECK_TTL=15*60
+CHECK_FIELDS=('updateStatus','checkedAt','checkComplete','cachedCheck','updateMessage')
+
+class NoQualifiedFrameError(ValueError):
+    def __init__(self,message,check):
+        super().__init__(message);self.check=check
+
+def load_check(output,previous):
+    try:
+        value=json.loads((Path(output)/'last-check.json').read_text())
+        if value.get('sha256')!=(previous or {}).get('sha256'):return None
+        if value.get('updateStatus') not in ('updated','unchanged','partial','unavailable'):return None
+        if not isinstance(value.get('checkedAt'),(int,float)) or not 0<value['checkedAt']<1e16:return None
+        if not isinstance(value.get('checkComplete'),bool):return None
+        return {k:value[k] for k in CHECK_FIELDS if k in value}
+    except (OSError,ValueError,TypeError,AttributeError):return None
+
+def recent_check(output,previous,now=None):
+    check=load_check(output,previous);now=time.time() if now is None else now
+    if previous and check and check['checkComplete'] and check['updateStatus'] in ('updated','unchanged') and 0<=now-check['checkedAt']/1000<CHECK_TTL:
+        return {**check,'updateStatus':'unchanged','cachedCheck':True,'updateMessage':'最近 15 分钟已完成检查，沿用该次结果，未重复下载'}
+    return None
+
+def save_check(output,result):
+    value={k:result[k] for k in (*CHECK_FIELDS,'sha256') if k in result}
+    path=Path(output)/'last-check.json';temp=path.with_suffix('.tmp')
+    temp.write_text(json.dumps(value));temp.replace(path)
 
 def candidates(now):
     day=datetime.datetime.fromtimestamp(now,datetime.timezone.utc).replace(hour=12,minute=0,second=0,microsecond=0)
@@ -36,8 +63,10 @@ def acceptable(info):
     return min(info['footprint'].values())>=.995 and info['coverage']>=.995 and min(info['polarCoverage'].values())>=.99
 
 class RangeFile(io.RawIOBase):
-    def __init__(self,url,path):
-        self.url=url;self.pos=0;self.blocks=set();self.bytes=0
+    def __init__(self,url,path,reuse=None):
+        self.url=url;self.pos=0;self.blocks=set();self.chunks=set();self.bytes=0;self.reuse=reuse
+        if reuse and reuse.get('url')==url and Path(path).exists():
+            self.file=open(path,'r+b');self.size=reuse['size'];self.blocks=reuse['blocks'];self.chunks=reuse['chunks'];return
         self.file=open(path,'w+b')
         # HDF5 v0 superblock provides the EOF address; no 1.3 GB download.
         header=request(url,(0,65535),65536)
@@ -61,7 +90,10 @@ class RangeFile(io.RawIOBase):
                 self.file.seek(start);self.file.write(data);self.blocks.add(block);self.bytes+=len(data)
         self.file.seek(self.pos);data=self.file.read(end-self.pos);b[:len(data)]=data;self.pos+=len(data);return len(data)
     def close(self):
-        if not self.closed:self.file.close()
+        if not self.closed:
+            if self.reuse is not None and hasattr(self,'size'):
+                self.reuse.update(url=self.url,size=self.size,blocks=self.blocks,chunks=self.chunks)
+            self.file.close()
         super().close()
 
 def scalar(attrs,name,default):
@@ -108,9 +140,9 @@ def convert(path,reference,now=None):
         valid_image=Image.fromarray(valid_map).resize((8192,4096),Image.Resampling.NEAREST)
     return im,valid_image,{'provider':'satcorps','time':int(reference*1000),'observedStart':int(oldest*1000),'observedEnd':int(newest*1000),'coverage':coverage,'polarCoverage':polar,'footprint':footprint,'resolution':'8192×4096','nativeResolution':'12960×6480','channel':'red'}
 
-def fetch_frame(url,path,progress,fields=FIELDS):
+def fetch_frame(url,path,progress,fields=FIELDS,reuse=None):
     import h5py
-    remote=RangeFile(url,path)
+    remote=RangeFile(url,path,reuse)
     try:
         with h5py.File(remote,'r') as f:
             chunks=[]
@@ -121,6 +153,7 @@ def fetch_frame(url,path,progress,fields=FIELDS):
             dict(f.attrs)
         total=sum(size for _,size in chunks)
         if total>220_000_000:raise ValueError('NASA 必需字段超过下载预算')
+        chunks=[chunk for chunk in chunks if chunk not in remote.chunks]
         def load(chunk):
             offset,size=chunk
             return offset,request(url,(offset,offset+size-1),size)
@@ -130,6 +163,7 @@ def fetch_frame(url,path,progress,fields=FIELDS):
                 for i,(offset,data) in enumerate(pool.map(load,chunks[start:start+2])):
                     progress(f'下载 NASA 云层字段 {start+i+1}/{len(chunks)}')
                     remote.file.seek(offset);remote.file.write(data);remote.bytes+=len(data)
+                    remote.chunks.add((offset,len(data)))
         remote.file.flush();return remote.bytes
     finally:remote.close()
 
@@ -163,7 +197,7 @@ def cached_frames(output):
     return sorted(frames,key=lambda x:x['time'],reverse=True)
 
 def build(output,progress=lambda s:None,now=None):
-    now=time.time() if now is None else now
+    live=now is None;now=time.time() if live else now
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     # Explicit retirement applies only to our old NASA derivative, never GitHub.
     for ext in ('.png','.json'):(output/('20240630T1200-v1a'+ext)).unlink(missing_ok=True)
@@ -172,21 +206,28 @@ def build(output,progress=lambda s:None,now=None):
     except (OSError,ValueError):checks={}
     checks={k:v for k,v in checks.items() if now-v.get('checked',0)<6*3600}
     cached=cached_frames(output);previous=cached[0] if cached else None
+    recent=recent_check(output,previous,now)
+    if recent:return {**previous,**recent}
     errors=0;deadline=time.monotonic()+16*60
+    def finish(result,status,message):
+        check={'updateStatus':'partial' if errors and result else status,'checkedAt':int((time.time() if live else now)*1000),'checkComplete':not errors,'cachedCheck':False,'updateMessage':message}
+        value={**(result or {}),**check};save_check(output,value)
+        if not result:raise NoQualifiedFrameError(message,check)
+        return value
     for reference,url in candidates(now):
         if previous and previous['time']>=reference*1000:
-            return {**previous,'updateMessage':'近期候选未发现更新的合格云图，保留已下载云图' if not errors else '部分候选暂不可访问，保留已下载云图'}
+            return finish(previous,'unchanged','近期候选未发现更新的合格云图，保留已下载云图' if not errors else '部分候选暂不可访问，未能完整确认是否有更新，保留已下载云图')
         if time.monotonic()>deadline:errors+=1;break
         if url in checks:continue
         date=datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y-%m-%d')
         progress('检查 NASA 全球与极区覆盖 · '+date+' 12:00 UTC')
         try:
             with tempfile.TemporaryDirectory(prefix='tiangong-gcc-') as tmp:
-                path=Path(tmp)/'fields.nc'
-                fetch_frame(url,path,progress,('cloud_phase','lat'))
+                path=Path(tmp)/'fields.nc';reuse={}
+                downloaded=fetch_frame(url,path,progress,('cloud_phase','lat'),reuse=reuse)
                 if not acceptable(phase_coverage(path)):
                     checks[url]={'checked':now,'reason':'phase coverage'};checkfile.write_text(json.dumps(checks));continue
-                downloaded=fetch_frame(url,path,progress)
+                downloaded+=fetch_frame(url,path,progress,reuse=reuse)
                 im,mask,info=convert(path,reference,now)
             if not acceptable(info):
                 checks[url]={'checked':now,'reason':'retrieval coverage'};checkfile.write_text(json.dumps(checks));continue
@@ -198,16 +239,16 @@ def build(output,progress=lambda s:None,now=None):
             info['sha256']=hashlib.sha256(target.read_bytes()).hexdigest()
             target.with_suffix('.json').write_text(json.dumps(info))
             for p in output.iterdir():
-                if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile) and (not previous or p.stem!=Path(previous['file']).stem):p.unlink()
-            return {**info,'file':str(target),'updateMessage':'已找到最近 30 天内覆盖合格的 NASA 全球云图'}
+                if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile,output/'last-check.json') and (not previous or p.stem!=Path(previous['file']).stem):p.unlink()
+            return finish({**info,'file':str(target)},'updated','已找到最近 30 天内覆盖合格的 NASA 全球云图' if not errors else '已下载覆盖合格的 NASA 云图；部分较新候选暂不可访问，未能完整确认最新状态')
         except (RuntimeError,ValueError,OSError,subprocess.TimeoutExpired) as e:
             errors+=1;progress('该候选未通过检查，继续查找 · '+date)
     if previous:
-        return {**previous,'updateMessage':'本次未找到最近 30 天内可用的完整云图，保留已下载云图'}
-    raise ValueError('本次未找到最近 30 天内可用的完整 NASA 云图，原图源保持不变')
+        return finish(previous,'unchanged','本次未找到最近 30 天内可用的完整云图，保留已下载云图' if not errors else '部分候选暂不可访问，未能完整确认是否有更新，保留已下载云图')
+    return finish(None,'unavailable','本次未找到最近 30 天内可用的完整 NASA 云图，原图源保持不变')
 
 if __name__=='__main__':
     import sys
     def progress(s):print(json.dumps({'status':s},ensure_ascii=False),flush=True)
     try:print(json.dumps({'result':build(sys.argv[1],progress)},ensure_ascii=False),flush=True)
-    except Exception as e:print(json.dumps({'error':str(e)},ensure_ascii=False),flush=True);sys.exit(1)
+    except Exception as e:print(json.dumps({'error':str(e),**getattr(e,'check',{'updateStatus':'unavailable','checkedAt':int(time.time()*1000),'checkComplete':False,'cachedCheck':False})},ensure_ascii=False),flush=True);sys.exit(1)

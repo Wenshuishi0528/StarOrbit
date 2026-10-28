@@ -115,7 +115,7 @@ export function mountPassPanel(container,sim){
   status.textContent=`${t('找到 {count} 次过境',{count:result.passes.length})}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped?'\n'+t('已按轨道有效区间截短，未使用长期外推。'):''}\n${frameInfo()}`;
  }
  async function run(){
-  if(updating)return;invalidate();const token=generation,controller=new AbortController();job=controller;
+  if(updating)return;const token=generation,controller=new AbortController();job=controller;
   try{
    const numeric=key=>{if(fields[key].value.trim()==='')throw Error('观测点坐标无效');return Number(fields[key].value);};
    const observer=validateObserver({name:fields.name.value,latitude:numeric('latitude'),longitude:numeric('longitude'),height:numeric('height')});
@@ -134,8 +134,8 @@ export function mountPassPanel(container,sim){
  update.onclick=async()=>{
   if(updating)return;invalidate();
   if(!orbitSource(sim.missionId)){status.textContent=t('此任务没有在线轨道源，请导入轨道文件');return;}
-  const id=sim.missionId;updating=true;update.disabled=calculate.disabled=importButton.disabled=true;status.textContent=t('正在更新轨道…');
-  try{await sim.orbits.update(id);if(!disposed){seenData=sim.data;seenMission=sim.missionId;invalidate();status.textContent=t('轨道已更新，请重新计算。')+'\n'+frameInfo();}}
+  const id=sim.missionId,beforeData=sim.data;updating=true;update.disabled=calculate.disabled=importButton.disabled=true;status.textContent=t('正在更新轨道…');
+  try{const outcome=await sim.environment.weather.updateResource('orbit',{provider:id});if(!disposed){if(outcome.status!=='unchanged'||sim.data!==beforeData||sim.missionId!==id){seenData=sim.data;seenMission=sim.missionId;invalidate();}status.textContent=t(outcome.status==='unchanged'?'已是最新可用数据':'轨道已更新，请重新计算。')+'\n'+frameInfo();}}
   catch(error){if(!disposed){status.classList.add('pass-error');status.textContent=t('轨道更新失败，已保留原数据。')+'\n'+t(error.message||'网络请求失败');}}
   finally{updating=false;if(!disposed)update.disabled=calculate.disabled=importButton.disabled=false;}
  };

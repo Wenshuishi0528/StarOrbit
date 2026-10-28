@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.68 — 2026-10-28
+
+**中文：** 新增统一“数据与资源”面板，清楚区分已下载、正在使用、无更新与检查失败；优化 NASA 云图检查和数据复用。缓存自动清理默认开启，保护当前数据、收藏与设置引用；避免重复下载、解码及轨道重建。[使用与验证](docs/v0.68-details.md)。
+
+**English:** Added a unified Data & resources panel distinguishing downloaded, active, unchanged and failed states. Improved NASA checks and data reuse. Automatic cache cleanup is enabled by default and protects active, starred and referenced data; redundant downloads, decoding and orbit regeneration are avoided. [Usage and validation](docs/v0.68-details.md).
+
 ## v0.67 — 2026-10-28
 
 **中文：** 修复轨道总览远景云层的雪花缺口与时间轴“上一个事件”反复跳回同一事件的问题。过境预报改为方向/时刻三阶段指引、时间—仰角曲线和拖动读数。核对当前空间站轨道与官方逐项一致，并更新内置快照至 10 月 28 日—11 月 4 日。[说明与验证](docs/v0.67-details.md)。

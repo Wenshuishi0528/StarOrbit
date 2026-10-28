@@ -19,8 +19,15 @@ export function selectSnapshot(items,kind,mode,time,id){
  return candidates.filter(x=>Number.isFinite(x.time)).sort((a,b)=>Math.abs(a.time-time)-Math.abs(b.time-time))[0]||null;
 }
 export function evictionIds(items,limit,protectedIds=[]){
- let size=items.reduce((n,x)=>n+x.size,0);const ids=[];
- for(const x of [...items].filter(x=>!x.favorite&&!protectedIds.includes(x.id)).sort((a,b)=>a.downloaded-b.downloaded)){if(size<=limit)break;ids.push(x.id);size-=x.size;}
- return ids;
+ return cacheTrimPlan(items,limit,protectedIds).removedIds;
+}
+export function cacheTrimPlan(items,limit,protectedIds=[],automatic=true){
+ if(!Number.isFinite(limit)||limit<0)throw Error('无效缓存上限');
+ const bytes=x=>Number.isFinite(x.size)&&x.size>=0?x.size:x.blob?.size||0,protectedSet=new Set(protectedIds);
+ let totalBytes=items.reduce((n,x)=>n+bytes(x),0),removedBytes=0;const removedIds=[];
+ if(automatic)for(const x of [...items].filter(x=>!x.favorite&&!protectedSet.has(x.id)).sort((a,b)=>(a.downloaded||0)-(b.downloaded||0))){
+  if(totalBytes<=limit)break;removedIds.push(x.id);removedBytes+=bytes(x);totalBytes-=bytes(x);
+ }
+ return {removedIds,removedBytes,totalBytes,overBudget:totalBytes>limit};
 }
 export function seedNumber(value){let n=2166136261;for(const c of String(value))n=Math.imul(n^c.charCodeAt(0),16777619);return (n>>>0)%10000;}

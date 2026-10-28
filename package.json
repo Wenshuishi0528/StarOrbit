@@ -1,6 +1,6 @@
 {
   "name": "starorbit",
-  "version": "0.67.0",
+  "version": "0.68.0",
   "private": true,
   "description": "StarOrbit — Space & Orbit Simulator. Shared Earth resources, modular spacecraft, independent orbits and attitude controls.",
   "author": "wenshuishi0528",
@@ -15,8 +15,8 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs && node tests/attitude.mjs && node tests/weather.mjs && node tests/cloud-geography.mjs && node tests/minimap-picking.mjs && node tests/moon.mjs && node tests/earth-detail.mjs && node tests/cloud-texture.mjs && node tests/cloud-mask-repair.mjs && node tests/atmosphere.mjs && node tests/minimap-assets.mjs && node tests/cloud-source.mjs && node tests/sun-optics.mjs && node tests/scene-share.mjs && node tests/phenomena.mjs && node tests/missions.mjs && node tests/mission-packages.mjs && python3 tests/cloud-service.py && node tests/music.mjs && node tests/music-player.mjs && node tests/rendering.mjs && node tests/spacecraft-shadow.mjs && node tests/star-chart-settings.mjs && node tests/star-chart-data.mjs && node tests/star-chart.mjs && node tests/geography.mjs && node tests/orbit-events.mjs && node tests/unbounded-time.mjs && node tests/dfh1-history.mjs && node tests/date-time-input.mjs && node tests/i18n.mjs && node tests/visitor-counter.mjs && node tests/dfh1-telemetry.mjs && node tests/dfh1-telemetry-audio.mjs && node tests/aurora-volume.mjs && node tests/orbit-path.mjs && node tests/cloud-lighting.mjs && node tests/pass-prediction.mjs && node tests/pass-reference.mjs && node tests/docking-physics.mjs && node tests/event-timeline.mjs && node tests/space-camera-depth.mjs && node tests/pass-display.mjs",
+    "test": "node tests/physics.mjs && node tests/environment.mjs && node tests/assembly.mjs && node tests/attitude.mjs && node tests/weather.mjs && node tests/cloud-geography.mjs && node tests/minimap-picking.mjs && node tests/moon.mjs && node tests/earth-detail.mjs && node tests/cloud-texture.mjs && node tests/cloud-mask-repair.mjs && node tests/atmosphere.mjs && node tests/minimap-assets.mjs && node tests/cloud-source.mjs && node tests/sun-optics.mjs && node tests/scene-share.mjs && node tests/phenomena.mjs && node tests/missions.mjs && node tests/mission-packages.mjs && python3 tests/cloud-service.py && node tests/music.mjs && node tests/music-player.mjs && node tests/rendering.mjs && node tests/spacecraft-shadow.mjs && node tests/star-chart-settings.mjs && node tests/star-chart-data.mjs && node tests/star-chart.mjs && node tests/geography.mjs && node tests/orbit-events.mjs && node tests/unbounded-time.mjs && node tests/dfh1-history.mjs && node tests/date-time-input.mjs && node tests/i18n.mjs && node tests/visitor-counter.mjs && node tests/dfh1-telemetry.mjs && node tests/dfh1-telemetry-audio.mjs && node tests/aurora-volume.mjs && node tests/orbit-path.mjs && node tests/cloud-lighting.mjs && node tests/pass-prediction.mjs && node tests/pass-reference.mjs && node tests/docking-physics.mjs && node tests/event-timeline.mjs && node tests/space-camera-depth.mjs && node tests/pass-display.mjs && node tests/resource-fetch.mjs && node tests/resource-cache.mjs && node tests/orbit-repository.mjs && node tests/resource-updates.mjs",
     "build:web": "node build.mjs --web"
   },
-  "displayVersion": "0.67"
+  "displayVersion": "0.68"
 }

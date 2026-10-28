@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.67 · 作者 / Author: wenshuishi0528**
+**v0.68 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -17,6 +17,8 @@
 一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
 
 ### 主要功能
+
+- **数据与资源**：右上角集中检查 NASA／GitHub 云图、NOAA 极光和当前任务轨道，分别显示下载版本、实际使用版本与检查结果；相同数据复用、失败保留原数据。默认开启缓存自动清理，保护正在使用、收藏和设置引用的快照。[v0.68 使用与验证](docs/v0.68-details.md)。
 
 - **任务实验室**：右上角进入过境预报与交会对接。按北京或自定义地点计算 24／48／72 小时几何过境，以三阶段方向指引、时间—仰角曲线与滑动读数说明何时往哪里看，支持候选观测窗口和日历导出；近距离对接训练提供 50／200／500 m 起点、机体系推力、姿态控制、外部与舰载相机和捕获判定，使用简化相对运动模型。[任务实验室](docs/v0.66-flight-lab.md) · [v0.67 更新](docs/v0.67-details.md)。
 
@@ -52,11 +54,11 @@
 
 新增航天器：点击左栏 **下载配置模板**，填写模型文件名、单位比例、前向轴、轨道法向轴和轨道文件名，再点击 **导入航天器** 一次选择这些文件。配置与例子见 [模块化任务说明](docs/v0.30-details.md)。
 
-从 **[v0.38 发布页](https://github.com/Wenshuishi0528/StarOrbit/releases/tag/v0.38)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **天宫空间站交互预览.html**。约 235 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+从 **[最新发布页](https://github.com/Wenshuishi0528/StarOrbit/releases/latest)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **StarOrbit.html**。约 237 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.67**；在线版随 main 分支自动部署，当前部署版本以页面顶部为准。GitHub 便携下载包为 **v0.38**。
+源码、网页构建与本机运行版共用 **v0.68**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -75,6 +77,8 @@ DFH-1 now includes live telemetry from reference Sun and infrared horizon probes
 StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Station, Dong Fang Hong 1 and imported spacecraft share Earth, clouds, stars, music and navigation, with independent orbit and attitude configurations.
 
 ### Features
+
+- **Data & resources:** A central panel checks NASA/GitHub clouds, NOAA aurora and the active mission's orbit, distinguishing available downloads from data actually in use. Identical data is reused and failures retain existing data. Automatic cache cleanup is on by default and protects active, starred and referenced snapshots. [v0.68 usage and validation](docs/v0.68-details.md).
 
 - **Mission lab:** Site-based 24/48/72-hour pass planning with three viewing stages, elevation curves, interactive direction readouts, candidate optical windows and calendar export. A separate docking exercise offers 50/200/500 m starts, body-frame thrust, attitude controls, external/onboard cameras and capture checks using simplified relative dynamics. [Mission Lab](docs/v0.66-flight-lab.md) · [v0.67 update](docs/v0.67-details.md).
 
@@ -102,11 +106,11 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 
 ### Getting started
 
-Download the portable package from the **[v0.38 release](https://github.com/Wenshuishi0528/StarOrbit/releases/tag/v0.38)**, extract it, and open **天宫空间站交互预览.html** in a recent Chrome, Edge, or Safari. The approximately 235 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+Download the portable package from the **[latest release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest)**, extract it, and open **StarOrbit.html** in a recent Chrome, Edge, or Safari. The approximately 237 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web build and local runtime share **v0.67**. The online edition deploys automatically from main; its current version appears at the top of the page. The GitHub portable download remains **v0.38**.
+The source, web build and local runtime share **v0.68**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-28 00:00 to 2026-11-04 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 
@@ -174,7 +178,7 @@ Source: [NASA Earth Observatory — Blue Marble Next Generation](https://science
 
 ### Ocean, night lights and twilight / 海洋、夜景与晨昏
 
-8K 档修正深海颜色，并加入 NASA Black Marble 2016 的城市夜光细节：500 米灰度源数据降采样至约 1 公里，按当前视野加载最多四块夜景切片，与最多四块地表切片共用单路解码。晨昏大气在地影边界分段积分，使用连续半影和轻微抖动消除条带。望月按钮可再次点击返回；顶部也提供「返回空间站」。单文件 HTML 约 235 MB。
+8K 档修正深海颜色，并加入 NASA Black Marble 2016 的城市夜光细节：500 米灰度源数据降采样至约 1 公里，按当前视野加载最多四块夜景切片，与最多四块地表切片共用单路解码。晨昏大气在地影边界分段积分，使用连续半影和轻微抖动消除条带。望月按钮可再次点击返回；顶部也提供「返回空间站」。单文件 HTML 约 237 MB。
 
 The 8K tier corrects deep-ocean reflectance and adds NASA Black Marble 2016 city lights, downsampled from 500 m sources to approximately 1 km. At most four night tiles and four daytime tiles are resident, with one shared decode queue. Atmosphere integration splits at the Earth-shadow boundary, with continuous penumbra and sub-code-value dithering. Look at Moon toggles back to the saved station view; a permanent Back to station action is also available. Standalone HTML: approximately 230 MB.
 

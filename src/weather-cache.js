@@ -1,4 +1,4 @@
-import {evictionIds} from './weather-math.js';
+import {cacheTrimPlan} from './weather-math.js';
 export class WeatherCache{
  constructor(database='tiangong-environment-data-v1'){this.memory=new Map();this.persistent=true;this.ready=new Promise(resolve=>{
   try{const req=indexedDB.open(database,1);req.onupgradeneeded=()=>req.result.createObjectStore('snapshots',{keyPath:'id'});req.onsuccess=()=>{this.db=req.result;resolve();};req.onerror=req.onblocked=()=>{this.persistent=false;resolve();};}catch{this.persistent=false;resolve();}
@@ -7,5 +7,14 @@ export class WeatherCache{
  async all(){return this.run('readonly',s=>s?s.getAll():[...this.memory.values()]);}
  async put(x){return this.run('readwrite',s=>s?s.put(x):this.memory.set(x.id,x));}
  async remove(id){return this.run('readwrite',s=>s?s.delete(id):this.memory.delete(id));}
- async trim(limit,protectedIds=[]){for(const id of evictionIds(await this.all(),limit,protectedIds))await this.remove(id);}
+ async trim(limit,protectedIds=[],automatic=true){
+  // Plan and delete inside one transaction. A failed transaction keeps every
+  // original record; quota errors from put() also remain visible to the caller.
+  cacheTrimPlan([],limit,protectedIds,automatic);let result;
+  await this.run(automatic?'readwrite':'readonly',store=>{
+   const trim=items=>{result=cacheTrimPlan(items,limit,protectedIds,automatic);for(const id of result.removedIds)store?store.delete(id):this.memory.delete(id);};
+   if(!store){trim([...this.memory.values()]);return;}
+   const request=store.getAll();request.onsuccess=()=>trim(request.result);return request;
+  });return result;
+ }
 }
