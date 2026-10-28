@@ -2,8 +2,7 @@ import {dot,norm,unit,sub,sunlightFraction} from './orbit.js';
 import {MOON_RADIUS} from './moon-math.js';
 
 // Lambert-sphere phase and inverse-square dilution, relative to direct sunlight.
-// The optional night-visibility display uses a bounded gain, not photometric HDR.
-export const CLOUD_MOON_GAIN=800;
+// Keep lunar irradiance at its physical ratio; no visibility amplification.
 export function cloudMoonIrradiance(position,sun){
  const distance=norm(position);
  if(!Number.isFinite(distance)||distance<=MOON_RADIUS)return 0;

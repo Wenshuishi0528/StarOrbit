@@ -760,5 +760,5 @@
   "一级 + 二级城市": "Niveaux 1 + 2",
   "一级 + 二级 + 三级城市": "Niveaux 1 + 2 + 3",
   "4K 使用经典极光，8K 使用柔和分层极光。": "La 4K utilise l’aurore classique ; la 8K, une lueur douce à plusieurs niveaux.",
-  "仅增强夜面的微弱月光，保留昼夜光照；白天亮度不变。": "Renforce uniquement le faible clair de lune côté nuit ; conserve l’éclairage solaire et la luminosité diurne."
+  "保留自然微弱月光，不额外提亮；夜面云层接近黑色，白天亮度不变。": "Conserve le faible clair de lune naturel sans amplification ; les nuages nocturnes restent presque noirs et la luminosité diurne est inchangée."
 }

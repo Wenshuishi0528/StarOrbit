@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.63 — 2026-10-28
+
+**中文：** 取消夜云的 800 倍月光增亮，去除深夜固定环境补光，使普通云和体积云在夜侧接近黑色；保留日面亮度、晨昏照明与云层遮挡。[说明与验证](docs/v0.63-details.md)。
+
+**English:** Removed the 800× moonlight boost and deep-night ambient fill from regular and volumetric clouds. Night clouds remain nearly black while daytime lighting, twilight and cloud occlusion are preserved. [Details and validation](docs/v0.63-details.md).
+
 ## v0.62 — 2026-10-28
 
 **中文：** 修复夜面云层发白及开关改变白天亮度的问题：恢复太阳光照、云内阴影与大气处理，仅在夜面加入受月相、方向和遮挡约束的微弱月光。保留设置、预设和场景分享。[说明与验证](docs/v0.62-details.md)。

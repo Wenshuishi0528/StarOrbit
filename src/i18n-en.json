@@ -760,5 +760,5 @@
   "一级 + 二级城市": "Tiers 1 + 2",
   "一级 + 二级 + 三级城市": "Tiers 1 + 2 + 3",
   "4K 使用经典极光，8K 使用柔和分层极光。": "4K uses the classic aurora; 8K uses soft, layered emission.",
-  "仅增强夜面的微弱月光，保留昼夜光照；白天亮度不变。": "Enhance weak moonlight only on the night side; retain solar lighting and unchanged daytime brightness."
+  "保留自然微弱月光，不额外提亮；夜面云层接近黑色，白天亮度不变。": "Retain natural faint moonlight without amplification; night clouds stay nearly black and daytime brightness is unchanged."
 }

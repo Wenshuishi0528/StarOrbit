@@ -70,3 +70,10 @@
 - The user identified the missing NASA controls as the existing web-edition difference and asked to ignore it. No NASA or cache behavior was changed in v0.62.
 - See docs/v0.62-details.md, v0.62-validation.json and v0.62-performance.json. Portable release remains v0.38.
 - Local runtime synchronized with SHA-256 verification for 36 files; application metadata is 0.62, signature verification and launcher check passed on port 8771. Previous runtime files retained in output/runtime-backup-v0.61-to-v0.62.
+
+## 2026-10-28 — v0.63 dark night clouds
+
+- User clarified that night clouds should be nearly invisible/black, rather than visibly gray. Removed the 800× lunar display gain and faded the ordinary/volume ambient floor to zero in deep night.
+- Corrected standard-quality browser test configuration and added final display pixel checks at maximum exposure, including the real HDR finish pass. All 54 browser checks, full unit suite and builds passed. See docs/v0.63-details.md.
+- Latest-version publication remains authorized; NASA features remain outside this batch.
+- Independent subagent code and screenshot review passed. Local runtime files were SHA-256 verified, app metadata/signature updated to 0.63, and launcher check passed on port 8771.

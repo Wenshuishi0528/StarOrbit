@@ -16,7 +16,7 @@ async page=>{
  });
  for(const volume of [false,true])for(const side of ['night','twilight','day'])for(const on of [false,true]){
   await page.evaluate(args=>cloudView(...args),[side,on,volume]);await page.waitForTimeout(300);
-  await page.locator('#stage canvas').screenshot({path:`output/playwright/cloud062-${volume?'volume':'layer'}-${side}-${on?'on':'off'}.png`});
+  await page.locator('#stage canvas').screenshot({path:`output/playwright/cloud063-${volume?'volume':'layer'}-${side}-${on?'on':'off'}.png`});
  }
  return await page.evaluate(()=>({time:viewer.sim.time,moonLight:viewer.sim.environment.uniforms.cloudMoonLight.value,gl:viewer.renderer.getContext().getError()}));
 }

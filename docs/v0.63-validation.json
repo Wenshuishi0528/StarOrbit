@@ -1,0 +1,320 @@
+[
+  {
+    "name": "new profile defaults off",
+    "pass": true
+  },
+  {
+    "name": "checkbox saves preference",
+    "pass": true
+  },
+  {
+    "name": "scene capture includes option",
+    "pass": true
+  },
+  {
+    "name": "scene import restores checkbox",
+    "pass": true
+  },
+  {
+    "name": "old scene resets option off",
+    "pass": true
+  },
+  {
+    "name": "preset restores option",
+    "pass": true
+  },
+  {
+    "name": "old preset resets option off",
+    "pass": true
+  },
+  {
+    "name": "simple quality disables unavailable cloud setting",
+    "pass": true
+  },
+  {
+    "name": "detailed quality enables setting",
+    "pass": true
+  },
+  {
+    "name": "shared cloud option in follow",
+    "pass": true
+  },
+  {
+    "name": "shared cloud option in orbit",
+    "pass": true
+  },
+  {
+    "name": "master cloud visibility remains authoritative",
+    "pass": true
+  },
+  {
+    "name": "cloud source off remains authoritative",
+    "pass": true
+  },
+  {
+    "name": "8K assets loaded",
+    "pass": true
+  },
+  {
+    "name": "medium final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "medium day pixels unchanged by option",
+    "pass": true,
+    "day": 194.4409621565137,
+    "maxDelta": 0
+  },
+  {
+    "name": "medium night remains dark",
+    "pass": true,
+    "day": 194.4409621565137,
+    "night": 0.0005504700445213562,
+    "off": 0
+  },
+  {
+    "name": "medium moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": 0.0005504700445213562,
+    "unlit": 0
+  },
+  {
+    "name": "medium no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "medium Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      1.1973604330250964e-07,
+      5.104846856340828e-08,
+      1.2567207459864468e-08,
+      1.071605748581561e-09,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "standard final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "standard day pixels unchanged by option",
+    "pass": true,
+    "day": 194.4409621565137,
+    "maxDelta": 0
+  },
+  {
+    "name": "standard night remains dark",
+    "pass": true,
+    "day": 194.4409621565137,
+    "night": 0.0005504700445213562,
+    "off": 0
+  },
+  {
+    "name": "standard moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": 0.0005504700445213562,
+    "unlit": 0
+  },
+  {
+    "name": "standard no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "standard Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      1.1973604330250964e-07,
+      5.104846856340828e-08,
+      1.2567207459864468e-08,
+      1.071605748581561e-09,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "layer8K-HDR final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "layer8K-HDR day pixels unchanged by option",
+    "pass": true,
+    "day": 170.2735325392132,
+    "maxDelta": 0
+  },
+  {
+    "name": "layer8K-HDR night remains dark",
+    "pass": true,
+    "day": 170.2735325392132,
+    "night": 0.035327999297796175,
+    "off": 0.03488438095987645
+  },
+  {
+    "name": "layer8K-HDR moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": 0.035327999297796175,
+    "unlit": 0.03488438095987645
+  },
+  {
+    "name": "layer8K-HDR no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "layer8K-HDR Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      9.438045102191002e-05,
+      9.432262959307991e-05,
+      9.429013092206635e-05,
+      9.428034900338389e-05,
+      9.427943465804371e-05,
+      9.427943465804371e-05
+    ]
+  },
+  {
+    "name": "volume8K-HDR final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "volume8K-HDR day pixels unchanged by option",
+    "pass": true,
+    "day": 215.225388313047,
+    "maxDelta": 0
+  },
+  {
+    "name": "volume8K-HDR night remains dark",
+    "pass": true,
+    "day": 215.225388313047,
+    "night": 0.04406186616487284,
+    "off": 0.04359510767488972
+  },
+  {
+    "name": "volume8K-HDR moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": 0.04406186616487284,
+    "unlit": 0.04359510767488972
+  },
+  {
+    "name": "volume8K-HDR no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "volume8K-HDR Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      0.00010397895918382953,
+      0.00010395223155986362,
+      0.00010393779302830808,
+      0.0001039335438690614,
+      0.00010393277019223508,
+      0.00010393277019223508
+    ]
+  },
+  {
+    "name": "layer8K-fallback final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "layer8K-fallback day pixels unchanged by option",
+    "pass": true,
+    "day": 182.59169999284495,
+    "maxDelta": 0
+  },
+  {
+    "name": "layer8K-fallback night remains dark",
+    "pass": true,
+    "day": 182.59169999284495,
+    "night": 2.7703335641407478e-05,
+    "off": -0.00047115027161245826
+  },
+  {
+    "name": "layer8K-fallback moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": 2.7703335641407478e-05,
+    "unlit": -0.00047115027161245826
+  },
+  {
+    "name": "layer8K-fallback no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "layer8K-fallback Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      0.0004259495666095366,
+      0.0004258873329187433,
+      0.0004258524374260257,
+      0.0004258420376572758,
+      0.0004258410772308707,
+      0.0004258410772308707
+    ]
+  },
+  {
+    "name": "volume8K-fallback final night pixels near black at maximum exposure",
+    "pass": true,
+    "peak": 0,
+    "scale": 255
+  },
+  {
+    "name": "volume8K-fallback day pixels unchanged by option",
+    "pass": true,
+    "day": 231.05557123075414,
+    "maxDelta": 0
+  },
+  {
+    "name": "volume8K-fallback night remains dark",
+    "pass": true,
+    "day": 231.05557123075414,
+    "night": -0.00011935909976702741,
+    "off": -0.0006375075248503392
+  },
+  {
+    "name": "volume8K-fallback moonlight adds weak illumination",
+    "pass": true,
+    "moonlit": -0.00011935909976702741,
+    "unlit": -0.0006375075248503392
+  },
+  {
+    "name": "volume8K-fallback no new light without a visible illuminated Moon",
+    "pass": true
+  },
+  {
+    "name": "volume8K-fallback Moon sets continuously behind Earth",
+    "pass": true,
+    "horizon": [
+      0.0004694831829207639,
+      0.00046945457385542494,
+      0.0004694391294227292,
+      0.0004694346183290084,
+      0.00046943381312303245,
+      0.00046943381312303245
+    ]
+  },
+  {
+    "name": "no WebGL errors",
+    "pass": true
+  },
+  {
+    "name": "hidden Moon does not change cloud lighting",
+    "pass": true
+  },
+  {
+    "name": "camera does not change lunar illumination",
+    "pass": true
+  },
+  {
+    "name": "reload persistence",
+    "pass": true
+  }
+]

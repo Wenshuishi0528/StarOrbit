@@ -1,5 +1,5 @@
 import {AuroraVolume} from './aurora-volume.js';
-import {cloudMoonIrradiance,CLOUD_MOON_GAIN} from './cloud-lighting.js';
+import {cloudMoonIrradiance} from './cloud-lighting.js';
 import {orbitSegment} from './dfh1-history.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from './atmosphere-spectrum.js';
 import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment,atmosphereTransmissionFragment} from './earth-shaders.js';
@@ -197,7 +197,7 @@ export class Environment{
   if(q&&s.cloudNightVisible&&s.clouds&&detailed){
    const position=this.moon.ephemeris.at(q.t).position;
    this.uniforms.cloudMoonPosition.value.fromArray(position);
-   this.uniforms.cloudMoonLight.value=Math.min(.003,CLOUD_MOON_GAIN*cloudMoonIrradiance(position,q.sun));
+   this.uniforms.cloudMoonLight.value=cloudMoonIrradiance(position,q.sun);
   }
   const volume=this.quality==='high'&&this.weather?.settings.volume;this.volumeClouds.visible=!!detailed&&s.clouds&&!!volume;this.volumeClouds.quaternion.copy(this.earth.quaternion);this.uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(this.earth.quaternion)).transpose();
   this.clouds.quaternion.copy(this.earth.quaternion);this.clouds.visible=!!detailed&&s.clouds&&!volume;

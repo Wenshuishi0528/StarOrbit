@@ -93,7 +93,7 @@ color+=(enhanced>.5?directSun:vec3(1.,.91,.73))*ocean*highlight*day*mix(.6,.3+fr
 gl_FragColor=vec4(color,1.);${output}}`;
 export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}${cloudMoonGLSL}
 void main(){float c=cloudAt(localN);float mu=dot(normalize(worldN),normalize(sun)),light=max(mu,0.);vec3 eye=normalize(cameraPosition-worldP);
-float alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004+light*1.4);
+float alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004*smoothstep(-.16,0.,mu)+light*1.4);
 if(enhanced>.5){c=pow(clamp(c,0.,1.),1.3);
 // Cloud tops can remain sunlit after the ground enters shadow. Use their height,
 // not an orange ramp tied only to solar elevation. Forward light shares its RGB extinction.
@@ -178,7 +178,7 @@ vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,out
 vec3 lightning=cloudLightning(reference);
 float ds=(end-begin)/float(cloudSteps),trans=1.,depthMoment=0.;vec3 sum=vec3(0.);float forward=pow(max(dot(d,s),0.),8.);
 for(int i=0;i<40;i++){if(i>=cloudSteps||trans<.025)break;vec3 p=o+d*(begin+(float(i)+.5)*ds);float den=densityAt(p);if(den<.001)continue;float mu=dot(normalize(p),s);float lightDepth=(densityAt(p+s*3.)*3.+densityAt(p+s*8.)*5.)*.22;vec3 direct=exp(-lightDepth)*sunlightAt(length(p)-6371.,mu);
-vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002);
+vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002)*smoothstep(-.16,0.,mu);
 vec3 moon=nightCloudLight(transpose(earthInverse)*p,mu);
 if(dot(moon,moon)>0.){vec3 m=normalize(earthInverse*cloudMoonPosition-p);float depth=(densityAt(p+m*3.)*3.+densityAt(p+m*8.)*5.)*.22;light+=moon*exp(-depth);}
 light+=lightning;
