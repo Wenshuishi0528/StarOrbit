@@ -1,4 +1,5 @@
 {
+  "夜面也显示云层": "Afficher les nuages côté nuit",
   "月球": "Lune",
   "望向月球": "Voir la Lune",
   "月面纹理未能加载": "Impossible de charger la texture lunaire",
@@ -758,5 +759,6 @@
   "一级城市": "Villes de niveau 1",
   "一级 + 二级城市": "Niveaux 1 + 2",
   "一级 + 二级 + 三级城市": "Niveaux 1 + 2 + 3",
-  "4K 使用经典极光，8K 使用柔和分层极光。": "La 4K utilise l’aurore classique ; la 8K, une lueur douce à plusieurs niveaux."
+  "4K 使用经典极光，8K 使用柔和分层极光。": "La 4K utilise l’aurore classique ; la 8K, une lueur douce à plusieurs niveaux.",
+  "仅增强夜面的微弱月光，保留昼夜光照；白天亮度不变。": "Renforce uniquement le faible clair de lune côté nuit ; conserve l’éclairage solaire et la luminosité diurne."
 }

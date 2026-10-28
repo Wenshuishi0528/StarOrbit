@@ -1,5 +1,23 @@
 # Changelog / 更新记录
 
+## v0.62 — 2026-10-28
+
+**中文：** 修复夜面云层发白及开关改变白天亮度的问题：恢复太阳光照、云内阴影与大气处理，仅在夜面加入受月相、方向和遮挡约束的微弱月光。保留设置、预设和场景分享。[说明与验证](docs/v0.62-details.md)。
+
+**English:** Fixed bright white night-side clouds and the toggle changing daytime brightness. Restored solar lighting, cloud self-shadowing and atmospheric transport; added weak night-only moonlight constrained by phase, direction and occultation. Preferences, presets and scene sharing remain supported. [Details and validation](docs/v0.62-details.md).
+
+## v0.61 — 2026-10-28
+
+**中文：** 云层设置新增默认关闭的“夜面也显示云层”，同时支持普通云层和 8K 体积云；选项随环境预设与分享场景保存。[说明与验证](docs/v0.61-details.md)。
+
+**English:** Added an optional “Show clouds on the night side” setting for both regular and 8K volumetric clouds, saved with environment presets and shared scenes. Off by default. [Details and validation](docs/v0.61-details.md).
+
+## v0.60 — 2026-10-28
+
+**中文：** 修复东方红一号轨道总览缺口：改为直接绘制当前航天器的完整轨道椭圆，不再受时间窗口限制；切换年代时整体切换轨道，保留日照／地影配色。[说明与验证](docs/v0.60-details.md)。
+
+**English:** Fixed the missing arc in the DFH-1 orbit overview by drawing the complete active orbital ellipse without a time window. Era changes replace the whole orbit; sunlight/eclipse colours are preserved. [Details and validation](docs/v0.60-details.md).
+
 ## v0.59 — 2026-10-28
 
 **中文：** 修复东方红一号启动时混入随机背景音乐的问题；自动播放等待任务恢复，旧曲目的结束事件与过期重播回调不再影响当前音频。[说明与验证](docs/v0.59-details.md)。

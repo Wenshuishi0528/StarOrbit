@@ -50,6 +50,17 @@ export function orbitComputationMode(data,t){
  if(!data||!validTime(t))return 'unavailable';
  return orbitSegment(data,t)==='historical'?'historical':sampledOrbitMode(data,t);
 }
+// Geometric ellipse of the active orbit, without sampling a time window.
+export function orbitEllipse(data,t){
+ const mode=orbitComputationMode(data,t);
+ if(mode==='historical')return historyEllipse??=historicalEllipse(EARTH_RADIUS,earthAxes(DFH1_HISTORY.epoch));
+ if(mode==='propagation')return endpoint(data,t>data.rows.at(-1)[0]);
+ if(mode==='interpolation'){
+  const pv=interpolate(data.rows,t);
+  return ellipse([t,...pv.position,...pv.velocity]);
+ }
+ return null;
+}
 let historyEllipse;
 // segmentTime fixes the branch for event-solver padding at the era boundary.
 export function stateAt(data,t,segmentTime=t){

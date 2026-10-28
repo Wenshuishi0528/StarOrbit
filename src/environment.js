@@ -1,4 +1,5 @@
 import {AuroraVolume} from './aurora-volume.js';
+import {cloudMoonIrradiance,CLOUD_MOON_GAIN} from './cloud-lighting.js';
 import {orbitSegment} from './dfh1-history.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from './atmosphere-spectrum.js';
 import {vertex,earthFragment,cloudFragment,atmosphereFragment,auroraFragment,volumeCloudFragment,atmosphereTransmissionFragment} from './earth-shaders.js';
@@ -28,14 +29,14 @@ export class Environment{
   const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
   // Parsed assets own the data now; release the large inline JSON DOM copy.
   assetNode.remove();
-  this.settings={quality:'standard',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
-  try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
+  this.settings={quality:'standard',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudNightVisible:false,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
+  try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','cloudNightVisible','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
    for(const k of ['cloudOpacity','starBrightness'])if(Number.isFinite(old?.[k]))this.settings[k]=THREE.MathUtils.clamp(old[k],0,k==='cloudOpacity'?1:2);
   }catch{}
   this.fallback=new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1);this.fallback.needsUpdate=true;
   this.climateMap=new THREE.DataTexture(climatePixels(),512,256,THREE.RGBAFormat);this.climateMap.wrapS=THREE.RepeatWrapping;this.climateMap.minFilter=this.climateMap.magFilter=THREE.LinearFilter;this.climateMap.needsUpdate=true;
-  this.uniforms={...flashUniforms(),linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudTone:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
+  this.uniforms={...flashUniforms(),linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},cloudNightVisible:{value:0},cloudMoonPosition:{value:new THREE.Vector3(0,0,384400)},cloudMoonLight:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudTone:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
   this.detail=new EarthDetail(this);this.nightDetail=new EarthDetail(this,true);
   this.earth=new THREE.Mesh(new THREE.SphereGeometry(EARTH_RADIUS,160,96),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:earthFragment}));
   sim.sky.add(this.earth);sim.earth=this.earth;
@@ -120,7 +121,7 @@ export class Environment{
  save(){try{localStorage.setItem('tiangong-environment-v1',JSON.stringify(this.settings));}catch{}}
  bind(){
   bindStarChartControls(this.settings,()=>this.save());bindGeographyControls(this.settings,()=>this.save());
-  const ids={moon:'showMoon',stars:'showStars',milky:'showMilky',clouds:'showClouds',groundTrack:'groundTrack'};
+  const ids={moon:'showMoon',stars:'showStars',milky:'showMilky',clouds:'showClouds',cloudNightVisible:'cloudNightVisible',groundTrack:'groundTrack'};
   for(const [key,id] of Object.entries(ids)){$(id).checked=this.settings[key];$(id).onchange=()=>{this.settings[key]=$(id).checked;this.save();if(key==='stars'||key==='milky')this.setSkyStyle();};}
   for(const [key,id] of [['cloudOpacity','cloudOpacity'],['starBrightness','starBrightness']]){$(id).value=this.settings[key];$(id).oninput=()=>{this.settings[key]=Number($(id).value);this.save();};}
   $('skyExposure').value=this.settings.exposure;$('skyExposure').onchange=()=>{this.settings.exposure=$('skyExposure').value;this.save();this.setSkyStyle();};
@@ -172,7 +173,7 @@ export class Environment{
     const count=catalogue.filter(r=>r[3]<=QUALITY[tier].limit).length;this.stars.geometry.setDrawRange(0,this.settings.exposure==='cinematic'?catalogue.length:count);this.starCount=count;
     this.updatePixelRatio();this.starUniforms.high.value=tier==='high'?1:0;
     $('earthQuality').value=tier;for(const id of ['volumeClouds','cloudMotion'])$(id).disabled=tier!=='high';setText('qualityStatus','');
-    for(const id of ['showClouds','cloudOpacity'])$(id).disabled=tier==='simple';this.save();if(this.weather)await this.weather.apply('cloud');
+    for(const id of ['showClouds','cloudOpacity','cloudNightVisible'])$(id).disabled=tier==='simple';this.save();if(this.weather)await this.weather.apply('cloud');
    }catch(e){
     loaded.forEach(t=>{t.dispose();t.image=null;});
     if(ticket!==this.ticket)return;
@@ -192,10 +193,16 @@ export class Environment{
  update(q,camera){
   this.moon.update(q,camera);
   const detailed=this.quality&&this.quality!=='simple',s=this.settings;
+  this.uniforms.cloudMoonLight.value=0;
+  if(q&&s.cloudNightVisible&&s.clouds&&detailed){
+   const position=this.moon.ephemeris.at(q.t).position;
+   this.uniforms.cloudMoonPosition.value.fromArray(position);
+   this.uniforms.cloudMoonLight.value=Math.min(.003,CLOUD_MOON_GAIN*cloudMoonIrradiance(position,q.sun));
+  }
   const volume=this.quality==='high'&&this.weather?.settings.volume;this.volumeClouds.visible=!!detailed&&s.clouds&&!!volume;this.volumeClouds.quaternion.copy(this.earth.quaternion);this.uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(this.earth.quaternion)).transpose();
   this.clouds.quaternion.copy(this.earth.quaternion);this.clouds.visible=!!detailed&&s.clouds&&!volume;
   this.detail.update(camera);this.nightDetail.update(camera);
-  this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.auroraCurtains.update(q?.t??this.sim.time,this.weather?.lowEffects);this.phenomena?.update(q,camera);
+  this.uniforms.cloudNightVisible.value=s.cloudNightVisible?1:0;this.uniforms.cloudAmount.value=detailed&&s.clouds?s.cloudOpacity:0;this.atmosphere.visible=!!detailed||!!this.phenomena?.settings.airglow;this.atmosphere.material.uniforms.airglowOnly.value=detailed?0:1;if(q)this.uniforms.localSun.value.copy(this.uniforms.sun.value).applyQuaternion(this.earth.quaternion.clone().invert());this.uniforms.cloudSeason.value=THREE.MathUtils.clamp(this.uniforms.localSun.value.z/.398,-1,1);this.weather?.update(q);this.auroraCurtains.update(q?.t??this.sim.time,this.weather?.lowEffects);this.phenomena?.update(q,camera);
   this.stars.visible=s.stars;this.milky.visible=s.stars&&s.milky;
   // The photographic option is an explicit display/exposure approximation.
   const cinematic=s.exposure==='cinematic';this.milky.material.uniforms.textured.value=cinematic&&this.galaxyTexture?1:0;

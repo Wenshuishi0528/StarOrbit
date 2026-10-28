@@ -2,6 +2,7 @@ import {lightningGLSL} from './phenomena.js';
 import {cloudToneGLSL} from './cloud-texture.js';
 import {scatteringGLSL} from './atmosphere-scattering.js';
 import {solarOpticsGLSL} from './atmosphere-glsl.js';
+import {cloudMoonGLSL} from './cloud-lighting.js';
 export const vertex=`varying vec3 localN;varying vec3 worldN;varying vec3 worldP;
 void main(){localN=normalize(position);worldN=normalize(mat3(modelMatrix)*localN);worldP=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(worldP,1.);}`;
 const mapUVCode=`vec2 mapUV(vec3 p){p=normalize(p);return vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);}`;
@@ -20,7 +21,7 @@ if(enhanced>.5&&linearOutput<.5){float grain=fract(52.9829189*fract(dot(gl_FragC
 const noise=`float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.2,.3));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise3(p);p=p*2.03+7.1;a*=.5;}return v;}`;
-const clouds=`${solarOpticsGLSL}${cloudToneGLSL}uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason,cloudChannel;${noise}
+const clouds=`${solarOpticsGLSL}${cloudToneGLSL}uniform sampler2D cloudMap,cloudTemplateMap,climateMap,oceanMap;uniform float cloudAmount,cloudNightVisible,cloudMode,weatherTime,seed,enhanced,cloudMotion,motionTime,cloudSeason,cloudChannel;${noise}
 vec3 aroundAxis(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);}
 float cloudAt(vec3 p){p=normalize(p);
 if(cloudMode<.5){vec4 mask=sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.)))));return cloudOpacity(mix(mask.r,mask.a,cloudChannel));}
@@ -90,7 +91,7 @@ float highlight=pow(max(0.,dot(reflect(-s,n),eye)),gloss);float fresnel=.04+.96*
 color+=(enhanced>.5?directSun:vec3(1.,.91,.73))*ocean*highlight*day*mix(.6,.3+fresnel*2.,enhanced);
 }
 gl_FragColor=vec4(color,1.);${output}}`;
-export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}
+export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}${cloudMoonGLSL}
 void main(){float c=cloudAt(localN);float mu=dot(normalize(worldN),normalize(sun)),light=max(mu,0.);vec3 eye=normalize(cameraPosition-worldP);
 float alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004+light*1.4);
 if(enhanced>.5){c=pow(clamp(c,0.,1.),1.3);
@@ -102,6 +103,8 @@ vec3 ambient=vec3(.003,.005,.008)*smoothstep(-.16,.08,mu);
 color=ambient+directSun*((max(mu,0.)+.035)*1.45+silver*.32);color*=.48+.52*c;
 alpha=clamp(c*cloudAmount,0.,.98);}
 if(alpha<.001)discard;
+// Preserve solar shading; the visibility option adds only weak night-side moonlight.
+color+=nightCloudLight(worldP,mu)*(enhanced>.5?(.48+.52*c):1.);
 color+=cloudLightning(localN);
 if(linearComposite>.5)color=cloudAerial(worldP,color,normalize(sun));
 gl_FragColor=vec4(color,clamp(alpha,0.,.96));${output}}`;
@@ -156,7 +159,7 @@ float height=length(worldP)-6371.;float fold=lon*180.+sin(lon*13.+t*.3)*9.+fbm(p
 float a=mask*curtain*vertical*strength*night*.08;vec3 color=mix(vec3(.008,1.,.035),vec3(.65,.002,.09),smoothstep(180.,310.,height));gl_FragColor=vec4(color*1.8,clamp(a,0.,.2));\n#include <colorspace_fragment>}`;
 // True ray-marched cloud shell. Satellite coverage is measured; vertical profile/detail is illustrative.
 export const volumeCloudFragment=`#define CLOUD_RAYMARCH
-uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}
+uniform vec3 sun,localSun;uniform mat3 earthInverse;uniform int cloudSteps;varying vec3 worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}${cloudMoonGLSL}
 vec2 cloudHit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
 float densityAt(vec3 p){float h=length(p)-6371.;if(h<1.5||h>15.)return 0.;float c=cloudAt(p);if(c<=0.)return 0.;
 // The measured mask controls both thickness and optical density. A continuous
@@ -175,7 +178,10 @@ vec2 outer=cloudHit(o,d,6387.),inner=cloudHit(o,d,6372.5);float begin=max(0.,out
 vec3 lightning=cloudLightning(reference);
 float ds=(end-begin)/float(cloudSteps),trans=1.,depthMoment=0.;vec3 sum=vec3(0.);float forward=pow(max(dot(d,s),0.),8.);
 for(int i=0;i<40;i++){if(i>=cloudSteps||trans<.025)break;vec3 p=o+d*(begin+(float(i)+.5)*ds);float den=densityAt(p);if(den<.001)continue;float mu=dot(normalize(p),s);float lightDepth=(densityAt(p+s*3.)*3.+densityAt(p+s*8.)*5.)*.22;vec3 direct=exp(-lightDepth)*sunlightAt(length(p)-6371.,mu);
-vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002)+lightning;
+vec3 light=vec3(.16,.22,.3)*max(mu+.12,0.)+direct*(.65+max(mu,0.)*.7+forward*.6)+vec3(.002);
+vec3 moon=nightCloudLight(transpose(earthInverse)*p,mu);
+if(dot(moon,moon)>0.){vec3 m=normalize(earthInverse*cloudMoonPosition-p);float depth=(densityAt(p+m*3.)*3.+densityAt(p+m*8.)*5.)*.22;light+=moon*exp(-depth);}
+light+=lightning;
 float alpha=1.-exp(-den*.25*ds);sum+=trans*alpha*light;depthMoment+=trans*alpha*(begin+(float(i)+.5)*ds);trans*=1.-alpha;}
 float alpha=1.-trans;if(alpha<.001)discard;vec3 color=sum/max(alpha,.001);
 if(linearComposite>.5){vec3 p=transpose(earthInverse)*(o+d*clamp(depthMoment/alpha,begin,end));color=cloudAerial(p,color,normalize(sun));}

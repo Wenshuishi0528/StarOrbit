@@ -1,4 +1,5 @@
 {
+  "夜面也显示云层": "Show clouds on the night side",
   "月球": "Moon",
   "望向月球": "Look at Moon",
   "月面纹理未能加载": "Moon texture could not load",
@@ -758,5 +759,6 @@
   "一级城市": "Tier 1 cities",
   "一级 + 二级城市": "Tiers 1 + 2",
   "一级 + 二级 + 三级城市": "Tiers 1 + 2 + 3",
-  "4K 使用经典极光，8K 使用柔和分层极光。": "4K uses the classic aurora; 8K uses soft, layered emission."
+  "4K 使用经典极光，8K 使用柔和分层极光。": "4K uses the classic aurora; 8K uses soft, layered emission.",
+  "仅增强夜面的微弱月光，保留昼夜光照；白天亮度不变。": "Enhance weak moonlight only on the night side; retain solar lighting and unchanged daytime brightness."
 }

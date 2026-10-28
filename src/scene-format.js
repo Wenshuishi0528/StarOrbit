@@ -57,6 +57,7 @@ export function validateScene(x){
  const e=x.environment,w=x.weather;
  const environment={quality:choice(e.quality,['simple','medium','standard','high']),exposure:choice(e.exposure,['view','photo','cinematic']),cloudOpacity:number(e.cloudOpacity,0,1),starBrightness:number(e.starBrightness,0,2)};
  for(const key of ['stars','milky','moon','clouds','groundTrack'])environment[key]=bool(e[key]);
+ environment.cloudNightVisible=e.cloudNightVisible===undefined?false:bool(e.cloudNightVisible);
  Object.assign(environment,normalizeStarChartSettings(e,{strict:true}),normalizeGeographySettings(e,{strict:true}));
  const weather={cloud:choice(w.cloud,['builtin','off','local','latest','history','satcorps']),aurora:choice(w.aurora,['off','local','latest','history']),seed:text(w.seed,80),auroraStrength:number(w.auroraStrength,0,4),exposure:number(w.exposure,.3,2.5),volume:bool(w.volume),motion:bool(w.motion),adaptive:bool(w.adaptive),cloudRecord:reference(w.cloudRecord),auroraRecord:reference(w.auroraRecord)};
  const phenomena=x.phenomena===undefined?{...PHENOMENA_DEFAULTS}:{mode:choice(x.phenomena?.mode,['natural','enhanced']),...Object.fromEntries(['lightning','upper','airglow','meteors'].map(k=>[k,bool(x.phenomena?.[k])]))};

@@ -1,0 +1,109 @@
+{
+  "version": "0.61",
+  "browser": "Chromium / WebGL",
+  "checks": [
+    {
+      "name": "new profile defaults off",
+      "pass": true
+    },
+    {
+      "name": "checkbox saves preference",
+      "pass": true
+    },
+    {
+      "name": "scene capture includes option",
+      "pass": true
+    },
+    {
+      "name": "scene import restores checkbox",
+      "pass": true
+    },
+    {
+      "name": "old scene resets option off",
+      "pass": true
+    },
+    {
+      "name": "preset restores option",
+      "pass": true
+    },
+    {
+      "name": "old preset resets option off",
+      "pass": true
+    },
+    {
+      "name": "simple quality disables unavailable cloud setting",
+      "pass": true
+    },
+    {
+      "name": "detailed quality enables setting",
+      "pass": true
+    },
+    {
+      "name": "shared cloud option in follow",
+      "pass": true
+    },
+    {
+      "name": "shared cloud option in orbit",
+      "pass": true
+    },
+    {
+      "name": "master cloud visibility remains authoritative",
+      "pass": true
+    },
+    {
+      "name": "cloud source off remains authoritative",
+      "pass": true
+    },
+    {
+      "name": "8K assets loaded",
+      "pass": true
+    },
+    {
+      "name": "medium illumination-independent pixels",
+      "pass": true,
+      "day": 166.06770833333334,
+      "night": 166.06770833333334,
+      "maxDelta": 0
+    },
+    {
+      "name": "medium default lighting preserved",
+      "pass": true,
+      "day": 168.75341796875,
+      "night": 0.8896484375
+    },
+    {
+      "name": "standard illumination-independent pixels",
+      "pass": true,
+      "day": 150.19864908854166,
+      "night": 150.19864908854166,
+      "maxDelta": 0
+    },
+    {
+      "name": "standard default lighting preserved",
+      "pass": true,
+      "day": 157.26839192708334,
+      "night": 0.0015462239583333333
+    },
+    {
+      "name": "volume8K illumination-independent pixels",
+      "pass": true,
+      "day": 197.20345052083334,
+      "night": 197.20345052083334,
+      "maxDelta": 0
+    },
+    {
+      "name": "volume8K default lighting preserved",
+      "pass": true,
+      "day": 201.17024739583334,
+      "night": 0.4095052083333333
+    },
+    {
+      "name": "no WebGL errors",
+      "pass": true
+    },
+    {
+      "name": "reload persistence",
+      "pass": true
+    }
+  ]
+}

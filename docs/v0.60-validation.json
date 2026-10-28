@@ -1,0 +1,65 @@
+{
+  "checks": [
+    {
+      "label": "DFH-1 screenshot date",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 131.62266422551266,
+      "longest": 132.3151557281487,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    },
+    {
+      "label": "DFH-1 sampled ephemeris",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 131.74899576398448,
+      "longest": 132.44268288783948,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    },
+    {
+      "label": "DFH-1 historical orbit",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 134.76392919230867,
+      "longest": 135.82848328025656,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    },
+    {
+      "label": "space station",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 118.06470829382465,
+      "longest": 118.06521099511019,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    },
+    {
+      "label": "era transition 946655999999",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 134.76392919230867,
+      "longest": 135.82848328025656,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    },
+    {
+      "label": "era transition 946656000000",
+      "vertices": 360,
+      "closed": true,
+      "closingEdge": 131.7619529385175,
+      "longest": 132.46616971957903,
+      "colors": 360,
+      "visible": true,
+      "gl": 0
+    }
+  ],
+  "toggleAndFollow": true
+}

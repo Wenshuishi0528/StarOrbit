@@ -1,0 +1,21 @@
+{
+  "viewport": [
+    1200,
+    900
+  ],
+  "disjoint": 0,
+  "results": [
+    {
+      "mode": "off",
+      "n": 8,
+      "medianMs": 11.977291,
+      "p90Ms": 13.90075
+    },
+    {
+      "mode": "on",
+      "n": 8,
+      "medianMs": 14.736749,
+      "p90Ms": 20.325
+    }
+  ]
+}

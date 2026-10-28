@@ -1,4 +1,5 @@
 import {DFH1_HISTORY,orbitSegment} from './dfh1-history.js';
+import {sampleOrbitPath} from './orbit-path.js';
 import {missionLibrary} from './mission-library.js';
 import {installDisplayControls} from './display-controls.js';
 import {t,setText,onLanguageChange} from './i18n.js';
@@ -28,7 +29,7 @@ export class Simulation{
   this.marker=new THREE.Mesh(new THREE.SphereGeometry(65,16,10),new THREE.MeshBasicMaterial({color:0x7deaff}));this.sky.add(this.marker);
   this.sunDisc=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshBasicMaterial({color:0xfff5ce}));this.sky.add(this.sunDisc);this.sunView=new SunView(this);
   this.sunArrow=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),11500,0xffd27e,700,300);this.sky.add(this.sunArrow);
-  this.orbitLine=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.8}));this.sky.add(this.orbitLine);
+  this.orbitLine=new THREE.LineLoop(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.8}));this.sky.add(this.orbitLine);
   this.localSunArrow=new THREE.ArrowHelper(new THREE.Vector3(0,0,1),new THREE.Vector3(),60,0xffd27e,6,3);api.scene.add(this.localSunArrow);
   this.tracker=new SolarTracker(api);this.lighting=new SpacecraftLighting(api);this.shadowCache=new SpacecraftShadowCache(api.sunLight);
   this.bind();this.rebuild();this.dataUI();
@@ -94,12 +95,10 @@ export class Simulation{
  overviewPosition(){const q=this.current;if(q){const r=V(q.position).normalize(),side=r.clone().cross(V(q.sunDir)).normalize();this.spaceCamera.position.copy(r.addScaledVector(side,.6).normalize().multiplyScalar(28000));}else this.spaceCamera.position.set(14000,-17000,10000);}
  fit(){if(this.view!=='orbit')return false;this.overviewPosition();this.orbitControls.target.set(0,0,0);this.orbitControls.update();return true;}
  updateOrbit(q){
-  const points=[],colors=[];let previous;
-  for(let t=q.t-2800000;t<=q.t+2800000;t+=20000){
-   const pv=stateAt(this.data,t);if(!pv){previous=null;continue;}
-   const segment=orbitSegment(this.data,t),lit=sunlightFraction(pv.position,q.sun),color=lit>.5?[.18,.72,.9]:[.36,.24,.48];
-   if(previous&&previous.segment===segment){points.push(...previous.position,...pv.position);colors.push(...previous.color,...color);}
-   previous={position:pv.position,color,segment};
+  const points=[],colors=[];
+  for(const position of sampleOrbitPath(this.data,q.t)){
+   const lit=sunlightFraction(position,q.sun),color=lit>.5?[.18,.72,.9]:[.36,.24,.48];
+   points.push(...position);colors.push(...color);
   }
   this.orbitLine.geometry.dispose();this.orbitLine.geometry=new THREE.BufferGeometry();this.orbitLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.orbitLine.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
  }

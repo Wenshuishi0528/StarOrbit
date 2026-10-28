@@ -47,3 +47,26 @@
 - Music initialization waits for the restored mission before autoplay. DFH-1 never starts the randomly selected library track during boot.
 - Media end events require the current resource to have ended; repeat callbacks validate their playback generation. The original audio element is retained for Safari autoplay authorization.
 - Added actual-player lifecycle tests and a browser playback trace covering DFH-1 repeats, the five-second gap, pause, library resume and stale end events.
+
+## 2026-10-28 — v0.60 complete orbit geometry
+
+- Replaced the fixed 5,600-second overview trail with the active orbital ellipse, sampled geometrically at 360 eccentric-anomaly angles and rendered as a LineLoop. This follows the user's request to draw one full orbit without a time window.
+- Historical orbit uses the existing historical ellipse; sampled ephemerides use the instantaneous osculating ellipse; propagation uses its endpoint ellipse. The year-2000 transition replaces the whole loop. Time-based ground tracks and physics are unchanged.
+- Numerical regressions and six browser scenarios cover both missions, historical/current boundary, closure, marker alignment, long-period and eccentric imports. Full tests, offline/web builds and web asset checks passed. See docs/v0.60-details.md and docs/v0.60-validation.json.
+- Local-only batch; published web remains v0.59 and portable Release v0.38.
+- Synced 16 source/build/document files to the installed runtime with SHA-256 checks, updated app metadata to 0.60, verified the app signature and launcher on port 8771. Previous runtime files are retained under output/runtime-backup-v0.59-to-v0.60.
+
+## 2026-10-28 — v0.61 night-side clouds
+
+- Added `cloudNightVisible`, default false, for ordinary and 8K volumetric clouds. Checkbox under cloud/aurora settings; saved in preferences, presets and scene shares. Older saved inputs default off.
+- Full unit suite, web/offline builds and 22 actual Chromium/WebGL checks passed, including pixel equality under reversed sunlight and original lighting when off. See docs/v0.61-details.md and docs/v0.61-validation.json.
+- Existing v0.60 orbit changes retained; local runtime synchronized. No commit, push or deployment.
+
+## 2026-10-28 — v0.62 physically constrained night clouds and publication
+
+- User cancelled the separate v0.60 publication and authorized publishing the latest version after the night-cloud fixes and subagent review. v0.60 orbit geometry and v0.61 preference/preset/scene plumbing are included.
+- Removed the illumination-independent white overrides. Solar lighting, self-shadowing and cloud aerial transport are retained. Optional weak night-only moonlight follows ephemeris direction, Lambert phase, inverse-square dilution, lunar eclipse and local Earth occultation. The visibility gain is bounded and not a photometric calibration.
+- Day-side on/off pixels match exactly across six production rendering configurations. 48 browser checks cover HDR/fallback, Moon setting, no-light cases, visibility, persistence and saved scenes. Full unit suite and offline/web builds passed. Independent subagent code and visual review found no blocking issues.
+- The user identified the missing NASA controls as the existing web-edition difference and asked to ignore it. No NASA or cache behavior was changed in v0.62.
+- See docs/v0.62-details.md, v0.62-validation.json and v0.62-performance.json. Portable release remains v0.38.
+- Local runtime synchronized with SHA-256 verification for 36 files; application metadata is 0.62, signature verification and launcher check passed on port 8771. Previous runtime files retained in output/runtime-backup-v0.61-to-v0.62.

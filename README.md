@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.59 · 作者 / Author: wenshuishi0528**
+**v0.62 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -17,6 +17,8 @@
 一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
 
 ### 主要功能
+
+- **夜面云层**：云层设置新增“夜面也显示云层”，开启后以月相、方向与遮挡约束的微弱月光显示夜面暗云，保持白天亮度和晨昏光照；普通云层和 8K 体积云均支持，默认关闭，可保存到预设与分享场景。[v0.62 说明](docs/v0.62-details.md)。
 
 - **三轴姿态**：在“航天器姿态”中调节 X 滚转、Y 俯仰、Z 偏航；输入框与滑条实时同步，支持 ±180°、0.1° 精度及归零。空间站与卫星通用，按任务保存。[v0.43 说明](docs/v0.43-details.md)。
 
@@ -52,7 +54,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.59**；已发布在线版为 **v0.59**，GitHub 便携下载包为 **v0.38**。
+源码、网页构建与本机运行版共用 **v0.62**；已发布在线版为 **v0.62**，GitHub 便携下载包为 **v0.38**。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -100,7 +102,7 @@ Download the portable package from the **[v0.38 release](https://github.com/Wens
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web build and local runtime share **v0.59**; the published online edition is **v0.59**; the GitHub portable download is **v0.38**.
+The source, web build and local runtime share **v0.62**; the published online edition is **v0.62**; the GitHub portable download is **v0.38**.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-19 00:00 to 2026-10-26 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

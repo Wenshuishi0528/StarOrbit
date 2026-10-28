@@ -63,6 +63,7 @@ __HELP_CSS__
 </details>
 
 <details data-memory-key="weather" open><summary>云图与极光</summary>
+<label class="check" title="仅增强夜面的微弱月光，保留昼夜光照；白天亮度不变。"><input id="cloudNightVisible" type="checkbox">夜面也显示云层</label>
 <label class="check"><input id="volumeClouds" type="checkbox">体积云 · 8K</label><label class="check"><input id="cloudMotion" type="checkbox" checked>动态云层 · 8K</label>
 <div class="row"><label for="cloudSource">云图来源</label><select id="cloudSource"><option value="builtin">内置静态云图</option><option value="latest">github最新已下载</option><option value="satcorps">NASA 全球云图 · 含极区</option><option value="history">历史快照</option><option value="local">本地生成</option><option value="off">关闭</option></select></div>
 <button id="updateCloudSource">下载当前云图源</button>

@@ -41,7 +41,7 @@ export function installSceneShare(sim,replaceAssembly){
     else{weather.settings[kind]=kind==='cloud'?'builtin':'off';missing.push(kind);}
    }
    env.phenomena.restore(scene.phenomena);weather.sync();weather.save();Object.assign(env.settings,scene.environment);env.save();
-   for(const [key,id] of Object.entries({moon:'showMoon',stars:'showStars',milky:'showMilky',clouds:'showClouds',groundTrack:'groundTrack'}))$(id).checked=env.settings[key];
+   for(const [key,id] of Object.entries({moon:'showMoon',stars:'showStars',milky:'showMilky',clouds:'showClouds',cloudNightVisible:'cloudNightVisible',groundTrack:'groundTrack'}))$(id).checked=env.settings[key];
    syncStarChartControls(env.settings);syncGeographyControls(env.settings);$('skyExposure').value=env.settings.exposure;$('cloudOpacity').value=env.settings.cloudOpacity;$('starBrightness').value=env.settings.starBrightness;
    if(env.quality!==scene.environment.quality)await env.setQuality(scene.environment.quality);
    if(env.quality!==scene.environment.quality){missing.push('quality');env.settings.quality=env.quality;env.save();}
