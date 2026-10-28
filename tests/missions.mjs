@@ -38,12 +38,17 @@ assert.ok(maxPositionM<10);assert.ok(maxVelocityMps<.02);
 for(let i=5;i<dfh.rows.length-5;i+=317){const t=dfh.rows[i][0]+27000,p=interpolate(dfh.rows,t),q=gpState(json2satrec(gp[0]),t);maxInterpolationM=Math.max(maxInterpolationM,1000*Math.hypot(...p.position.map((x,k)=>x-q.position[k])));}
 assert.ok(maxInterpolationM<1);
 // Actual supplied GLB: inspect polar antenna and equatorial antennas after import.
-const bytes=fs.readFileSync(new URL('../assets/spacecraft/dongfanghong1_v03_meters.glb',import.meta.url));
-const {scene}=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length),'');
+const bytes=fs.readFileSync(new URL('../'+spacecraft('dfh1').asset,import.meta.url));
+// Node tests load real geometry; image decoding is checked in the browser.
+const loader=new GLTFLoader().register(()=>({name:'geometry-test-textures',loadTexture:()=>Promise.resolve(new THREE.Texture())}));
+const {scene}=await loader.parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length),'');
 const root=normalizeSpacecraft(scene,spacecraft('dfh1'));
 const center=name=>new THREE.Box3().setFromObject(root.getObjectByName(name)).getCenter(new THREE.Vector3());
 const top=center('顶部天线_400mm'),bottom=center('底部极区及短接口_不含展台');assert.ok(top.z>3&&bottom.z<0);assert.ok(Math.hypot(top.x,top.y)<1e-6);
-for(let i=1;i<=4;i++)assert.ok(Math.abs(center(`长天线${i}_3000mm`).z)<.1);
+for(let i=1;i<=4;i++)for(let j=1;j<=3;j++)assert.ok(Math.abs(center(`长天线${i}_第${j}段`).z-(-.038*5))<.001,'long antennas remain at the lower L mounts');
+const counts={};let triangles=0;root.traverse(o=>{const type=o.userData['部件类型'];if(type)counts[type]=(counts[type]||0)+1;if(o.isMesh)triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;});
+assert.deepEqual(counts,{A:8,B:4,H:1,L:4,P:1,R:4,S:2});assert.equal(triangles,65472);assert.ok(root.getObjectByName('P01_060deg_平顶铭牌实体'));
+const span=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());assert.ok(Math.abs(span.x/5-7.067)<1e-5&&Math.abs(span.y/5-7.067)<1e-5,'metre asset is not scaled as the 1:50 print model');
 for(const [pose,direction]of [[{roll:90,pitch:0,yaw:0},[0,-1,0]],[{roll:0,pitch:90,yaw:0},[1,0,0]],[{roll:0,pitch:0,yaw:90},[0,0,1]]]){
  applyBodyPose(root,pose);assert.ok(center('顶部天线_400mm').normalize().distanceTo(new THREE.Vector3(...direction))<1e-6);
 }

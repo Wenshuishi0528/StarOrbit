@@ -1,0 +1,56 @@
+{
+  "version": "0.65",
+  "asset": "assets/spacecraft/dongfanghong1_v10_meters.glb",
+  "asset_sha256": "3b40f8c572a3d0a0f06f0de644e7756d6301ab950b4fa1651d4a44c430969d79",
+  "matches_confirmed_model": true,
+  "triangles": 65472,
+  "metres_per_asset_unit": 1,
+  "viewer_units_per_metre": 5,
+  "checks": {
+    "npm_test": true,
+    "web_build": true,
+    "web_resource_exact_model_bytes": true,
+    "offline_build": true,
+    "installed_offline_embedded_glb_exact_bytes": true,
+    "launcher_check": true,
+    "app_signature": true,
+    "git_diff_check": true
+  },
+  "browser": {
+    "status": "passed_in_app_browser",
+    "url": "http://127.0.0.1:8771/StarOrbit.html",
+    "version": "0.65",
+    "mission": "dfh1",
+    "station_to_satellite_round_trip": true,
+    "revised_waist_visible": true,
+    "plaque_color_texture_visible": true,
+    "screenshot": "docs/v0.65-dfh1-in-app.png",
+    "screenshot_fill_light": true,
+    "temporary_display_options_restored": true,
+    "chrome_fallback_note": "Chrome WebGL context unavailable; visual checks completed in the working in-app browser."
+  },
+  "runtime": {
+    "root": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "sha256_verified_files": [
+      "CHANGELOG.md",
+      "HANDOFF.md",
+      "README.md",
+      "StarOrbit.html",
+      "assets/app.bundle.js",
+      "assets/missions/catalog.json",
+      "assets/spacecraft/dongfanghong1_v10_meters.glb",
+      "docs/v0.65-details.md",
+      "docs/v0.65-validation.json",
+      "package-lock.json",
+      "package.json",
+      "tests/browser/shared-resources.js",
+      "tests/mission-packages.mjs",
+      "tests/missions.mjs",
+      "tests/web-build.mjs",
+      "天宫空间站交互预览.html",
+      "素材与迁移说明.md"
+    ],
+    "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/runtime-backup-v0.64-to-v0.65"
+  },
+  "published_at_initial_local_validation": false
+}

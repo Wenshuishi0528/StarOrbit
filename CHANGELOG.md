@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.65 — 2026-10-28
+
+**中文：** 东方红一号替换为新版整星模型，包含修订腰带、单台地平仪、靠下的长天线底座、两个太阳角计和平顶铭牌；保留米制尺寸、朝向及轨道姿态控制。[说明与验证](docs/v0.65-details.md)。
+
+**English:** Replaced DFH-1 with the revised complete satellite, including the waist fittings, single horizon sensor, lower antenna mounts, two Sun sensors and planar-relief plaque. Preserved metre scale, body axes and orbit/attitude controls. [Details and validation](docs/v0.65-details.md).
+
 ## v0.64 — 2026-10-28
 
 **中文：** “夜面也显示云层”现在实际控制夜面暗云对城市灯光的遮挡，厚云遮蔽、薄云透光；关闭后恢复无遮挡夜景。移除地表重复遮挡并保留日面光照。[说明与验证](docs/v0.64-details.md)。

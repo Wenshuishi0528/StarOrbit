@@ -15,7 +15,7 @@
     "dfh1": {
       "name": "东方红一号",
       "axes": "顶部短天线为星体 +Z，四根长天线位于 XY 平面；采用右手系。",
-      "asset": "assets/spacecraft/dongfanghong1_v03_meters.glb",
+      "asset": "assets/spacecraft/dongfanghong1_v10_meters.glb",
       "up": "Y",
       "metresPerUnit": 1,
       "capabilities": {

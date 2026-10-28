@@ -86,3 +86,17 @@
 - Full unit suite, offline/web builds, web asset checks and 109 browser checks passed; six output paths include brightest-city extinction at maximum exposure. Actual cloud-map on/off screenshots saved in output/playwright/cloud064-*.png. See docs/v0.64-details.md and validation JSON.
 - User's latest-version publication authorization remains in effect; NASA features remain unchanged.
 - Local runtime synced with SHA-256 checks; app version/signature and launcher verified at 0.64 on port 8771.
+
+## 2026-10-28 — v0.65 revised DFH-1 asset
+
+- Replaced the active v0.03 satellite asset with the confirmed v0.10 complete metre-scale model: revised waist fittings, single horizon sensor, lower L roots, two Sun sensors and planar-relief plaque.
+- Preserved the existing Y-up conversion, 5 viewer units/metre, mission orbits, attitude, spin and telemetry.
+- Updated real-asset geometry/axes checks and bundled-resource byte-equality verification. Full tests and offline/web builds passed. See docs/v0.65-details.md and v0.65-validation.json.
+- Local source/runtime update only; no commit, push or public release requested.
+
+## 2026-10-28 — v0.65 publication
+
+- User explicitly authorized uploading the latest version if it was not yet on GitHub. Remote main and Pages were verified at v0.64; the local v0.65 asset update had not been committed.
+- Full npm test, fresh web build, exact bundled-resource checks and git diff --check passed. Independent subagent review verified the new GLB against the confirmed metre-scale source and found no blocking issues.
+- Publishing the existing v0.65 batch through main and the existing Pages workflow. Portable Release remains v0.38. The initial local validation record now labels its publication state as historical.
+- Next requested development direction: pass predictions and rendezvous/docking with an onboard camera view; implementation has not started in this publication task.

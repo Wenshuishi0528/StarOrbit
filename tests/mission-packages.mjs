@@ -17,7 +17,7 @@ for(const forward of ['+X','-X','+Y','-Y','+Z','-Z'])for(const normal of ['+X','
  assert.ok(up.getWorldPosition(new THREE.Vector3()).distanceTo(new THREE.Vector3(0,.05,0))<1e-9);
 }
 for(const change of [{id:'constructor'},{id:'tiangong',model:{...template.model,forwardAxis:'+Y',normalAxis:'-Y'}},{center:'MARS'},{model:{...template.model,metresPerUnit:0}},{orbit:{updateSource:'celestrak',noradId:1234}},{spinRpm:Infinity}])assert.throws(()=>validateMissionPackage({...template,...change}));
-const bytes=fs.readFileSync('assets/spacecraft/dongfanghong1_v03_meters.glb');validateGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length));assert.throws(()=>validateGLB(new ArrayBuffer(12)));
+const bytes=fs.readFileSync('assets/spacecraft/dongfanghong1_v10_meters.glb');validateGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length));assert.throws(()=>validateGLB(new ArrayBuffer(12)));
 unregisterMissionPackage(template.id);assert.throws(()=>mission(template.id));
 registerMissionPackage({...template,orbit:{noradId:12345,objectId:'2020-001A',updateSource:'celestrak'}});assert.ok(orbitSource(template.id).includes('CATNR=12345'));
 const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
