@@ -1155,5 +1155,6 @@
   "历史轨道 · 报载时刻重建": "Historical orbit · Reconstructed from reported pass times",
   "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟": "Perigee 439 km · Apogee 2384 km\nInclination 68.5° · Reported period about 114 min",
   "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Checked against selected passes on 1970-04-25 through 05-02; not measured ephemerides. Other dates are illustrative extrapolations.",
-  "左右键切换年、月、日、时、分、秒，上下键调整数值": "Left/right selects year, month, day, hour, minute or second; up/down changes the value"
+  "左右键切换年、月、日、时、分、秒，上下键调整数值": "Left/right selects year, month, day, hour, minute or second; up/down changes the value",
+  "打开 GitHub 仓库，为星轨点 Star（新标签页）": "Open the GitHub repository to star StarOrbit (new tab)"
 }

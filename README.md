@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.79 · 作者 / Author: wenshuishi0528**
+**v0.80 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**

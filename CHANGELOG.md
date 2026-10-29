@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.80 — 2026-10-29
+
+**中文：** 顶栏新增 GitHub / Star 仓库入口，新标签页打开；手机端使用紧凑布局，支持键盘焦点和多语言说明，不新增网络请求或 Star 数量轮询。
+
+**English:** Added a GitHub / Star link to the header, opening the repository in a new tab. Includes a compact mobile layout, keyboard focus styling and localized descriptions, without additional requests or star-count polling.
+
 ## v0.79 — 2026-10-29
 
 **中文：** 日期和时间合并为一个固定年月日时分秒顺序的输入框，左右方向键连续切换所有字段，上下键调整选中项。保留 12/24 小时制与 UTC+8 跳转；月末和闰日调整保持有效日期，拒绝无效日期输入。验证跨日期/时间的键盘切换与格式转换。

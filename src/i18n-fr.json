@@ -1155,5 +1155,6 @@
   "历史轨道 · 报载时刻重建": "Orbite historique · Reconstitution à partir des passages publiés",
   "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟": "Périgée 439 km · Apogée 2384 km\nInclinaison 68,5° · Période annoncée d’environ 114 min",
   "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Comparée à certains passages du 25/04 au 02/05/1970 ; éphémérides non mesurées. Les autres dates sont des extrapolations illustratives.",
-  "左右键切换年、月、日、时、分、秒，上下键调整数值": "Gauche/droite sélectionne année, mois, jour, heure, minute ou seconde ; haut/bas modifie la valeur"
+  "左右键切换年、月、日、时、分、秒，上下键调整数值": "Gauche/droite sélectionne année, mois, jour, heure, minute ou seconde ; haut/bas modifie la valeur",
+  "打开 GitHub 仓库，为星轨点 Star（新标签页）": "Ouvrir le dépôt GitHub pour soutenir StarOrbit avec une étoile (nouvel onglet)"
 }
