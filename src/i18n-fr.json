@@ -714,7 +714,6 @@
   "时间制式": "Format de l’heure",
   "日期": "Date",
   "时间": "Heure",
-  "左右键切换时、分、秒，上下键调整数值": "Gauche/droite : heures, minutes ou secondes ; haut/bas : ajuster",
   "2000-01-01 00:00（UTC+8）起自动使用现有轨道": "Passage automatique à l’orbite actuelle le 01/01/2000 à 00:00 (UTC+8)",
   "网页累计访问 · {count}": "Visites du site · {count}",
   "统计更新：{time}；同一会话重复访问去重，数字定期更新。": "Statistiques récupérées : {time} ; les visites répétées au cours d’une session sont dédupliquées. Le total est actualisé périodiquement.",
@@ -1155,5 +1154,6 @@
   "转动力矩 · 按住施加": "Couple de rotation · maintenir",
   "历史轨道 · 报载时刻重建": "Orbite historique · Reconstitution à partir des passages publiés",
   "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟": "Périgée 439 km · Apogée 2384 km\nInclinaison 68,5° · Période annoncée d’environ 114 min",
-  "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Comparée à certains passages du 25/04 au 02/05/1970 ; éphémérides non mesurées. Les autres dates sont des extrapolations illustratives."
+  "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Comparée à certains passages du 25/04 au 02/05/1970 ; éphémérides non mesurées. Les autres dates sont des extrapolations illustratives.",
+  "左右键切换年、月、日、时、分、秒，上下键调整数值": "Gauche/droite sélectionne année, mois, jour, heure, minute ou seconde ; haut/bas modifie la valeur"
 }

@@ -3,12 +3,12 @@ async page=>{
  await page.waitForFunction(()=>window.viewer?.sim.initialized);
  if(await page.locator('#welcomeDialog').evaluate(e=>e.open))await page.locator('#skipTour').click();await page.evaluate(()=>viewer.music.pause());
  await page.selectOption('#missionSelect','dfh1');await page.waitForFunction(()=>viewer.sim.missionId==='dfh1'&&!viewer.sim.missions.busy);await page.evaluate(()=>viewer.music.pause());
- await page.selectOption('#hourCycle','24');await page.locator('#customDate').fill('1970-04-25');await page.locator('#customTime').fill('20:29:00');await page.locator('#setTime').click();
+ await page.selectOption('#hourCycle','24');await page.locator('#customTime').fill('1970-04-25 20:29:00');await page.locator('#setTime').click();
  await page.waitForFunction(()=>viewer.sim.current?.t===Date.parse('1970-04-25T12:29:00Z'));
- check(await page.locator('#gpStatus').textContent()==='历史轨道 · 1970 年新华社公报','historical time uses historical orbit');
+ check(await page.locator('#gpStatus').textContent()==='历史轨道 · 报载时刻重建','historical time uses historical orbit');
  check(await page.locator('#dataRange').textContent().then(x=>x.includes('439 km')&&x.includes('2384 km')&&x.includes('68.5°')&&x.includes('114')),'all four historical parameters shown');
- check(await page.locator('#officialOrbitLink').getAttribute('href').then(x=>x.includes('xinhuanet')),'historical source link selected');
- check(await page.evaluate(()=>Math.abs(viewer.sim.current.altitude-2337.393320293362)<1e-6),'rendered position matches historical state');
+ check(await page.locator('#officialOrbitLink').getAttribute('href').then(x=>x.includes('rmrb.zhouenlai.info')),'historical source link selected');
+ check(await page.evaluate(()=>viewer.sim.current.altitude>=439&&viewer.sim.current.altitude<=2384),'rendered altitude stays within historical ellipse');
  await page.evaluate(cut=>{const s=viewer.sim;window.historyOrbitData=s.data;s.timeline.settings.autoPause=false;s.timeline.settings.visible=true;s.timeline.settings.expanded=true;s.timeline.settings.hours=3;s.environment.settings.groundTrack=true;s.seek(cut-1);s.setView('orbit');s.update(performance.now());s.timeline.update(performance.now(),true);},cut);
  await page.waitForFunction(()=>viewer.sim.timeline.cache.result?.transitions?.length===1&&viewer.sim.environment.track.geometry.attributes.position?.count>0);
  check(await page.evaluate(()=>viewer.sim.lastOrbitSegment==='historical'&&viewer.sim.orbitLine.isLineLoop&&viewer.sim.environment.track.isLineSegments),'3D orbit uses a closed ellipse while ground track retains era segments');

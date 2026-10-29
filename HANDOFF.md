@@ -1,5 +1,10 @@
 # StarOrbit implementation handoff
 
+## 2026-10-29 — v0.79 unified date/time input
+
+- During the authorized GitHub/web synchronization, the user requested a small date/time editing change. Merged the date and clock into one ordered field with continuous arrow-key navigation; preserved 12/24-hour preferences and UTC+8.
+- v0.78 was deployed at commit 7ea544e; its public script hash matched the local web build. Continue the same synchronization request with v0.79 after validation.
+
 ## 2026-10-29 — v0.78 GitHub and web synchronization
 
 - After local validation, the user authorized synchronizing v0.78 to GitHub and Pages. Publish the existing batch without another version increment.

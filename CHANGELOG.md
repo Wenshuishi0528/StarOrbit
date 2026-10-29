@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.79 — 2026-10-29
+
+**中文：** 日期和时间合并为一个固定年月日时分秒顺序的输入框，左右方向键连续切换所有字段，上下键调整选中项。保留 12/24 小时制与 UTC+8 跳转；月末和闰日调整保持有效日期，拒绝无效日期输入。验证跨日期/时间的键盘切换与格式转换。
+
+**English:** Combined date and time into one year-month-day hour-minute-second field, with continuous left/right segment navigation and up/down adjustment. Retained 12/24-hour formats and UTC+8 seeking; calendar stepping handles month ends and leap days, and invalid dates are rejected. Checked keyboard navigation across the date/time boundary and format conversion.
+
 ## v0.78 — 2026-10-29
 
 **中文：** 修正东方红一号历史轨道的朝向与相位，以报载参数、酒泉发射面近似约束及多日过境时间重建，恢复上午北行、晚间向东南飞行。加入轨道面与近地点的缓慢漂移，轨道线、位置和速度保持一致。保留 2000 年切换规则，明确历史重建的精度边界；新增 47 条报载时间、方向和现代轨道不变性检查。[资料与验证](docs/v0.78-details.md)

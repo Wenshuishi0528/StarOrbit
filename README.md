@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.78 · 作者 / Author: wenshuishi0528**
+**v0.79 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -17,6 +17,8 @@
 一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
 
 ### 主要功能
+
+- **日期时间输入**：按年、月、日、时、分、秒顺序在一个输入框编辑，左右键连续切换，上下键调整选中项，支持 12/24 小时制。
 
 - **数据与资源**：右上角集中检查 NASA／GitHub 云图、NOAA 极光和当前任务轨道，分别显示下载版本、实际使用版本与检查结果；相同数据复用、失败保留原数据。默认开启缓存自动清理，保护正在使用、收藏和设置引用的快照。[v0.68 使用与验证](docs/v0.68-details.md)。
 
