@@ -1,195 +1,279 @@
 # 星轨 · StarOrbit
 
-**航天与轨道模拟 / Space & Orbit Simulator**
+**航天与轨道模拟 · 在地球与星空之间观察、组合与操纵航天器**
 
-**v0.80 · 作者 / Author: wenshuishi0528**
+中文 | [English](README.en.md)
 
-**[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
-**[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
+[**在线体验**](https://wenshuishi0528.github.io/StarOrbit/) · [下载便携版](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [使用手册](使用说明.md) · [技术资料](docs/README.md) · [更新记录](CHANGELOG.md)
 
-浏览器直接使用，默认内置轨道与云图。首次访问可选择简短导览，右上角“？帮助”通过箭头和高亮定位真实控件，可边看边操作，每个介绍可直接点击“下一个”。画质介绍包含整体画质与星空画质两个入口；首次使用默认为标准 4K 和“观赏增强 · 16K 银河”。[v0.42 引导说明](docs/v0.42-details.md)。[网页版与部署说明](docs/v0.40-details.md)。
+星轨是一款在浏览器中运行的三维航天与轨道模拟软件，将航天器模型、轨道运动、地球环境和交互操作结合在同一个场景中。你可以组合中国空间站舱体，观察太阳翼追日和轨道昼夜变化；切换到东方红一号，探索历史轨道、自旋与遥测演示；也可以导入自己的航天器，计算观测地点的过境窗口，或进入交会对接训练台练习操纵。
 
+它适合航天爱好者探索、科普教学演示，以及轨道场景观察与摄影。公开轨道数据、天文计算和历史资料为模拟提供依据，模型与视觉效果让这些过程能够被观察和操作。
 
-![中国空间站 · StarOrbit](docs/hero.jpg)
+![中国空间站、独立巡天、轨道读数与地面轨迹 · StarOrbit](docs/hero.jpg)
 
-## 中文简介
+*中国空间站场景：舱体组合、太阳翼、地球云层、星图、轨道读数与事件时间轴。*
 
-一个可离线运行的通用航天器三维交互与轨道模拟软件。中国空间站、东方红一号和导入的航天器共用地球、NASA 云图、星空、时间与相机操作；每个任务提供自己的模型、轨道和姿态配置。中国空间站支持舱体组合与太阳翼自动追日。
+**作者：wenshuishi0528 · 当前源码：v0.80 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
-### 主要功能
+> 版本说明：本页按 **v0.80** 整理。在线版随 `main` 分支部署，以页面顶部版本为准；便携版请核对下载文件的版本号与发布说明。
 
-- **日期时间输入**：按年、月、日、时、分、秒顺序在一个输入框编辑，左右键连续切换，上下键调整选中项，支持 12/24 小时制。
+## 目录
 
-- **数据与资源**：右上角集中检查 NASA／GitHub 云图、NOAA 极光和当前任务轨道，分别显示下载版本、实际使用版本与检查结果；相同数据复用、失败保留原数据。默认开启缓存自动清理，保护正在使用、收藏和设置引用的快照。[v0.68 使用与验证](docs/v0.68-details.md)。
+- [立即开始](#立即开始)
+- [界面与基本操作](#界面与基本操作)
+- [航天器与任务](#航天器与任务)
+- [空间站组合与太阳翼](#空间站组合与太阳翼)
+- [轨道、时间与姿态](#轨道时间与姿态)
+- [地球、星空与空间环境](#地球星空与空间环境)
+- [任务实验室](#任务实验室)
+- [数据与资源](#数据与资源)
+- [摄影、场景与个性化](#摄影场景与个性化)
+- [数据与计算说明](#数据与计算说明)
+- [本地运行与开发](#本地运行与开发)
+- [文档、素材与许可](#文档素材与许可)
 
-- **任务实验室**：右上角进入过境预报与交会对接。过境提供三阶段方向指引、时间—仰角曲线、候选观测窗口和日历导出。对接训练台提供末段对准、标准接近与偏差恢复场景，支持人工、位置保持、分段辅助接近及撤离；30 m／5 m 停靠点检查、舰载相机、无推力轨迹预测、接触判定和飞行记录回放形成完整训练流程，可导出 JSON／CSV。[对接训练台与模型范围](docs/v0.71-details.md) · [过境与任务实验室](docs/v0.66-flight-lab.md)。
+## 立即开始
 
-- **夜面云层**：云层设置新增“夜面也显示云层”，开启后夜面暗云按云图遮挡城市灯光，厚云遮蔽、薄云部分透光；关闭后显示无遮挡夜景，日面亮度不变；普通云层和 8K 体积云均支持，默认关闭，可保存到预设与分享场景。[v0.64 说明](docs/v0.64-details.md)。
+1. 打开 [在线模拟器](https://wenshuishi0528.github.io/StarOrbit/)，等待模型与环境资源加载。
+2. 首次使用可选择“快速导览”；之后随时通过右上角“？帮助”查看控件说明或重播导览。
+3. 在左栏“任务选择”中选择中国空间站或东方红一号，拖动画面旋转，滚轮缩放。
+4. 展开“轨道与时间”，切换航天器跟随与地球轨道总览，尝试暂停、改变时间或加速播放。
+5. 进入“任务实验室”查看过境预报或体验交会对接，也可以展开“地球与星空”调整环境。
 
-- **三轴姿态**：在“航天器姿态”中调节 X 滚转、Y 俯仰、Z 偏航；输入框与滑条实时同步，支持 ±180°、0.1° 精度及归零。空间站与卫星通用，按任务保存。[v0.43 说明](docs/v0.43-details.md)。
+首次使用默认采用标准 4K 整体画质和观赏增强 16K 银河。画面卡顿时，可将整体画质降至 2K，并切换到普通星空。高画质效果和高清纹理按需加载，首次切换可能需要等待。
 
-- **东方红一号实时遥测**：在音乐播放器的“东方红一号信号”中切换历史录音与实时遥测，选择太阳角计、红外地平仪连续收听或 10 秒实验路序。电压、波形与调频声音随模拟轨道和星体姿态变化；暂停、跳时及倍速切换同步处理。[v0.55 模型与验证](docs/v0.55-details.md)。
+| 使用方式 | 如何打开 | 资源与更新 |
+| --- | --- | --- |
+| 在线版 | 直接访问在线入口 | 首次加载需要网络；内置轨道与云图可直接使用，支持文件导入；部分数据处理依赖本机服务 |
+| 便携版 | 下载发布包并解压，打开包内 `StarOrbit.html` | 内嵌资源可离线使用；版本以发布包为准 |
+| 本机服务版 | 使用发布包附带的启动器，或从源码启动本机服务 | 为 NASA 云图处理和官方轨道更新提供本机接口；更新仍需网络 |
+| 源码开发版 | 安装依赖、构建并运行 | 使用当前源码，可修改功能与接入自己的素材 |
 
-- **背景音乐**：内置六首太空音乐，启动随机首曲并默认持续列表循环，最后一首结束后回到第一首，单首歌单重复播放；左下角音符在播放时旋转，鼠标移入展开、离开收起。支持导入、移除、拖动排序、音量和进度控制，普通任务之间保持连续播放。东方红一号专属彩蛋播放《东方红》乐曲与遥测信号，完整播放后间隔 5 秒循环；切走后恢复原歌单进度和播放状态。
-- **公共资源**：NASA 已下载云图保存在软件公共目录，启动自动恢复；更新期间继续提供已有云图，切换模型保留云图选择与纹理。
-- **任务切换**：中国空间站与东方红一号各有模型、轨道、姿态、自旋和镜头记忆；轨道缺失时可查看模型。后续航天器可在界面中导入配置 JSON、GLB 模型及轨道文件。
-- **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
-- **轨道事件时间轴**：底部紧凑显示日照／半影／全影、近远地点和赤道交点，支持 3／12／24 小时窗口、事件筛选与前后导航。拖动保留播放状态，可提前 30 秒观看事件或开启到事件暂停。所有航天器共用，按需计算并缓存。详见 [v0.37 时间轴](docs/v0.37-details.md)。
-- **公开访问统计**：顶部显示网页累计访问；本地版读取同一份数字，离线保留缓存。使用固定计数请求，详见 [访问统计说明](docs/v0.53-details.md)。
-- **东方红一号历史轨道**：2000 年以前使用近地点 439 km、远地点 2384 km、倾角 68.5°、报载周期约 114 分钟的历史重建；从 2000-01-01 00:00（UTC+8）起自动使用现有轨道。朝向和相位依据历史过境报道重建，非实测星历。详见 [v0.78 历史重建与验证](docs/v0.78-details.md)。
-- **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期与时间合为一条输入栏，默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
-- **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
-- **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
-- **8K 体积极光**：卷曲亮弧与透明光幕具有高度和厚度，绿色主体向上散开，配有淡红光与局部粉紫底缘。4K 保留原效果；8K 使用分辨率上限、低频形态更新和静止画面缓存。[说明与实拍参考](docs/v0.58-details.md)。
-- **四档地球**：1K 简易、2K 流畅、4K 标准、8K 精细；8K可开启体积云和动态演变，另有云图与极光数据模式。
-- **平滑阴影**：按模型尺寸适配阴影偏移，消除舱体表面的条纹；静止或仅移动镜头时复用阴影，太阳翼、自旋和太阳方向变化时按需刷新。详见 [v0.34 阴影修复与优化](docs/v0.34-details.md)。
-- **光照与清晰度**：辅助开关统一控制补光和金属展示反射；精细档大气合成启用多重采样抗锯齿，窗口缩放和跨屏时同步画布像素比。详见 [v0.32 修复与验证](docs/v0.32-details.md)。
-- **地球地点标识**：国家、首都、三级主要城市、国境线、海域、山脉地貌与河湖；北京使用红色五角星，中国轮廓与海上线段来自天地图官方矢量数据。小地图显示当前上空的国家或海域，所有航天器共用。详见 [v0.36 地理与星图](docs/v0.36-details.md)。
-- **星图标注**：地理与星图中的二级折叠菜单提供主要恒星、全部已收录星名和精选三项；支持 88 星座名称、连线、边界与标注密度，名称自动避让，所有航天器共用。详见 [v0.35 星图标注](docs/v0.35-details.md)。
-- **真实星表星空**：41,411颗独立星点；可选原生16K NASA银河背景、主星名称和曝光风格。增强背景按需加载，切回普通模式释放。
-- **实时轨道追踪地图**：显示当前位置、过去及未来地面轨迹，可随时开关。
-- **中英俄法四语切换**：顶部右侧一键切换界面、读数、提示和舱体名称，语言选择自动保存。
-- **场景分享**：导出／导入 JSON，恢复舱体组合、太阳翼、时间、镜头和环境设置；文件包含所用轨道，下载云图与极光按快照匹配。
-- **交互查看**：自由旋转缩放、空间站跟随／轨道总览、沉浸显示、全屏尺寸自适应及三维画面截图。
+完整启动步骤见[使用手册](使用说明.md#开始使用)。
 
-### 使用
+## 界面与基本操作
 
-新增航天器：点击左栏 **下载配置模板**，填写模型文件名、单位比例、前向轴、轨道法向轴和轨道文件名，再点击 **导入航天器** 一次选择这些文件。配置与例子见 [模块化任务说明](docs/v0.30-details.md)。
+| 区域 | 作用 |
+| --- | --- |
+| 左侧设置栏 | 选择任务，控制时间、环境、组合、太阳翼、姿态及场景文件；各组可独立折叠 |
+| 三维画面 | 观察航天器和环境；左键旋转、右键平移、滚轮缩放；触屏支持单指旋转、双指缩放与平移 |
+| 轨道数据框 | 显示模拟时刻、球面高度、轨道速度、日照状态、受光比例和经纬度 |
+| 地面轨迹小地图 | 查看当前位置、过去与未来的地面轨迹，以及当前上空位置 |
+| 底部事件时间轴 | 查看日照与地影、近远地点、赤道交点，并定位到相应时刻 |
+| 右上工具区 | 打开任务实验室、数据与资源、帮助及预设视角；窄窗口中部分入口收在“工具”里 |
+| 左下音乐播放器 | 播放背景音乐，或在东方红一号任务中收听录音与模拟遥测 |
 
-从 **[最新发布页](https://github.com/Wenshuishi0528/StarOrbit/releases/latest)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **StarOrbit.html**。约 237 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
+顶部支持中文、英语、俄语和法语切换。界面中的时间输入统一使用 **UTC+8**；轨道文件中的 UTC 历元会另行注明。
 
-本机开发版通过 `npm run build` 生成轻量入口，启动器保留原地址并按需加载资源，避免浏览器一次解析约 237 MB 的 HTML。更新恢复与稳定性说明见 [v0.72](docs/v0.72-details.md)。
+## 航天器与任务
 
-macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
+### 中国空间站
 
-交会训练提供默认开启的“新手辅助”开关。关闭后仅手动推力与转动力矩，取消自动接近、制动、阻尼、GO 停靠点、教学走廊与 2 km 范围限制。对接限速可调，默认 0.15 m/s，以接口接触瞬间的总相对速度判断；纯手动模式只检查有限接口接触区域和速度，不做整站网格碰撞。
+以天和核心舱为中心，提供问天、梦天、神舟、天舟和巡天模型。可以观察完整组合、三舱组合或单独天和，也可以重新配置接口、扩展组合并分别调节太阳翼。
 
-训练场景新增“随机位置”：神舟在接口前方 50–500 米随机生成横向偏移与姿态，重新开始会重新抽取。飞行取消固定速度上限，辅助接近根据剩余距离制动；对接瞬间的高速撞击判定保留。
+空间站轨道使用公开 OEM 位置与速度记录。航天器跟随视角适合观察舱体与环境，地球轨道总览适合查看轨道形状、运动位置和地面轨迹。
 
-交会对接画面右上角可切换“大视窗”或“铺满窗口”（浏览器内容区）；按 Esc 逐级恢复，训练与相机保持原状。
+### 东方红一号
 
-源码、网页构建与本机运行版共用 **v0.77**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
+提供独立的整星模型、轨道、姿态与声音体验：
 
-顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
+- **历史与现代轨道**：2000 年以前显示基于报载轨道参数与历史过境时刻的重建；从 2000-01-01 00:00（UTC+8）起使用当前所选现代轨道数据。
+- **自旋与姿态**：可切换航向跟随或惯性定轴，控制历史标称 120 转/分钟的自旋，并叠加手动三轴姿态偏移。
+- **乐曲与遥测**：收听内置历史广播录音，或使用太阳角计、红外地平仪与实验路序的模拟信号，观察姿态、日照与波形、声音之间的关系。
 
-中国空间站内置轨道快照覆盖 **2026-10-28 00:00 至 2026-11-04 00:00 UTC**；区间外使用最近端点的位置与速度接续椭圆轨道演算，时间控制可继续前进或后退。使用 **更新轨道数据.command**（macOS）或 `python3 scripts/update-orbit.py` 更新，也可在界面导入支持格式的数据。
+历史轨道是有资料约束的演示重建；模拟遥测由传感器参考模型生成。各自的资料与计算方法见[历史轨道说明](docs/v0.78-details.md)和[遥测说明](docs/v0.55-details.md)。
 
-东方红一号使用 CelesTrak 的 **DFH 1 / NORAD 4382 / 1970-034A** 根数，通过 SGP4 计算。内置根数历元为 **2026-10-24 03:47:28 UTC**，采样区间为历元前后各三天，区间外接续开普勒椭圆演算；顶部任务栏可切换，轨道数据栏显示当前计算模式。模型顶部短天线校正为星体 +Z；默认顶部朝轨道前进方向，支持开关 120 转/分自旋；下方通用姿态模块可切换惯性定轴示意与手动偏移。详见 [v0.29 任务框架与验证](docs/v0.29-details.md)。
+### 自定义航天器
 
-本软件使用模拟姿态与计算太阳翼角度。云图可选内置、下载快照或地理约束生成；体积与运动为示意。普通银河为艺术算法，增强银河来自NASA星表可视化。
+在“任务选择”中下载配置模板，准备配置 JSON、嵌入网格与纹理的 GLB 模型，以及配置指定的轨道文件，再点击“导入航天器”一次选择这些文件。只有模型时也可以建立观察任务。
 
-## English overview
+各任务独立保存轨道、姿态、自旋与镜头；地球、云图、极光、星空和模拟时刻共用。文件格式与操作步骤见[航天器导入说明](使用说明.md#导入航天器)。
 
-DFH-1 now includes live telemetry from reference Sun and infrared horizon probes, with continuous channel listening, a 10-second experimental sequence and voltage traces. Select the source in the music player’s DFH-1 signal panel. [Model and validation](docs/v0.55-details.md).
+## 空间站组合与太阳翼
 
-![English interface](docs/preview-en.png)
+### 自由组合
 
-StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Station, Dong Fang Hong 1 and imported spacecraft share Earth, clouds, stars, music and navigation, with independent orbit and attitude configurations.
+“舱体组合”提供完整组合、三舱组合、仅天和等预设，也支持逐个接口选择舱体。同型飞船可以重复部署；新增天和通过尾口接入，其节点接口可以继续扩展，左栏按核心舱分组显示。
 
-### Features
+“聚焦所选”方便观察具体舱体。“巡天独立飞行”显示伴飞的独立模型副本，用于同轨场景展示。修改父级天和会同时移除其下属组合，操作前可先导出场景。
 
-- **Data & resources:** A central panel checks NASA/GitHub clouds, NOAA aurora and the active mission's orbit, distinguishing available downloads from data actually in use. Identical data is reused and failures retain existing data. Automatic cache cleanup is on by default and protects active, starred and referenced snapshots. [v0.68 usage and validation](docs/v0.68-details.md).
+### 自动追日与手动调节
 
-- **Mission lab:** Pass planning includes viewing directions, elevation curves, candidate optical windows and calendar export. The docking workbench offers terminal alignment, standard approach and offset recovery, with manual control, position hold, gated assisted approach and retreat. It combines 30 m / 5 m hold-point checks, a body-fixed camera, coast prediction, contact checks, recorded replay and JSON/CSV export. [Docking workbench and model scope](docs/v0.71-details.md) · [Pass planning](docs/v0.66-flight-lab.md).
+在“太阳翼控制”中开启自动追日，软件按各翼板的安装方向和转轴约束计算朝向。可进一步开启“考虑舱体与翼板遮挡”，观察不同组合下的受光变化。
 
-- **Geography & star chart**: two compact second-level panels. Earth labels cover countries, capitals, three city tiers (tier 1 by default), boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star; China’s geometry comes directly from official Tianditu vectors. A shared subpoint lookup identifies the region below the spacecraft.
+手动模式支持选择舱体、调节整组与翼板角度、左右翼同步或独立控制，以及问天／梦天联动。手动调整会退出全舱自动追日；重新开启即可恢复自动计算。
 
-- **Background music:** Six built-in tracks, a random opening track and continuous playlist repeat. The last track returns to the first; a one-track playlist repeats that track. A spinning note expands on hover and collapses on exit, with import, removal, drag sorting, volume and seeking. Playback continues across ordinary missions. Dong Fang Hong 1 plays its exclusive melody and telemetry recording with a five-second gap between repeats; switching away restores the previous playlist position and playback state.
-- **Shared resources:** NASA cloud images persist in a shared application library, restore on startup and remain available during updates. Switching spacecraft retains the selected environment and texture.
-- **Mission switching:** China Space Station and Dong Fang Hong 1 have independent models, orbits, attitude controls, and cameras. Missions without an orbit retain a model preview. New Earth-orbit missions can be imported through the UI using configuration JSON, a GLB model and an orbit file.
+**“总有效受光”表示蓝色翼板有效正面的面积加权受光比例**，综合入射角、遮挡与太阳可见比例。地影中太阳翼继续按太阳方向调整，直射受光量为零。受光读数的计算方法见[模型说明](使用说明.md#太阳翼与受光)。
 
-- **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
-- **Public visit counter:** The header shows cumulative web visits; the local app reads the same count and retains an offline cache. Uses fixed counter requests. See [details](docs/v0.53-details.md).
-- **Dong Fang Hong 1 historical orbit:** Before 2000, uses a 439 × 2384 km ellipse with 68.5° inclination and a reported period of about 114 minutes. Automatically switches to the current orbit at 2000-01-01 00:00 (UTC+8). Historical phase and plane are reconstructed from newspaper times and an approximate launch-plane constraint; this is not measured ephemeris data. See [v0.78 reconstruction and validation](docs/v0.78-details.md).
-- **Orbit and time controls:** interpolate published OEM records within their sampled interval and propagate a Kepler ellipse outside it; use real time, a custom date, pause, or playback up to 1000×. The 1s/1m/10m/1h steps can continue across days and years while preserving playback state.
-- **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
-- **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.
-- **Layered aurora in 8K:** Broad diffuse emission, winding bright arcs, diffuse upper red glow and sparse pink-violet lower rims follow simulation time and existing NOAA/procedural modes. 4K keeps the original effect; 8K uses a shared small texture, one draw batch and adaptive detail. [Details](docs/v0.57-details.md).
-- **Four Earth quality levels:** 1K simple, 2K smooth, 4K standard, and 8K fine. Optional 8K ray-marched volumetric clouds, illustrative cloud evolution, improved atmosphere, twilight, cloud shadows, and aurora.
-- **Smooth spacecraft shadows:** scale-aware bias removes surface stripes; cached shadow maps refresh for solar direction, array motion and spacecraft spin. See [v0.34 validation](docs/v0.34-details.md).
-- **Sky annotations:** a compact nested panel provides major stars, all catalogued names and a three-label preset, plus names, lines and boundaries for 88 constellations. Labels avoid overlap and settings are shared across spacecraft. See [v0.35](docs/v0.35-details.md).
-- **Catalogue-based stars:** 41,411 independent stars, optional native 16K NASA Milky Way, bright-star labels, and exposure styles. The enhanced background loads on demand and is released in standard mode.
-- **Toggleable orbit minimap:** current sub-satellite position with past and future ground tracks, synchronized with simulation time.
-- **Chinese / English / Russian / French UI:** switch at the top right; labels, readouts, messages, and module names update without resetting the simulation. Your language choice is remembered.
-- **Scene sharing:** export/import compact JSON files with assemblies, solar arrays, time, cameras, environment settings and embedded orbit data. Downloaded weather matches exact local snapshots.
-- **Interactive viewing:** orbit/pan/zoom, station-follow and orbit-overview views, immersive display with adaptive fullscreen sizing, and 3D screenshot export.
+## 轨道、时间与姿态
 
-### Getting started
+### 时间控制
 
-Download the portable package from the **[latest release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest)**, extract it, and open **StarOrbit.html** in a recent Chrome, Edge, or Safari. The approximately 237 MB HTML embeds the model, textures, catalogue, libraries, and orbit snapshot for offline use. Repository ZIPs contain the source; the runnable portable package is provided on the release page.
+支持现实时间、自定义时间、暂停和最高 1000× 播放。日期时间在同一输入框内按年、月、日、时、分、秒编辑；左右键切换字段，上下键调整数值，支持 12／24 小时制。时间步进可选 1 秒、1 分钟、10 分钟或 1 小时，并可连续跨日期使用。
 
-On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
+### 轨迹与事件
 
-The source, web build and local runtime share **v0.72**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
+轨道总览展示绕地轨道；小地图显示地面轨迹。点击小地图轨迹或拖动当前位置，可以定位到所显示轨迹对应的有效时刻，并保留原来的播放或暂停状态。
 
-The China Space Station bundled orbit snapshot is valid from **2026-10-28 00:00 to 2026-11-04 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
+底部时间轴提供 3／12／24 小时窗口，按颜色表示日照、半影和全影，并标记近地点、远地点和赤道交点。可筛选事件、前后跳转、提前观看，或开启“到事件时暂停”。
 
-Dong Fang Hong 1 uses CelesTrak GP elements for **NORAD 4382 / 1970-034A**, propagated with SGP4. The bundled epoch is **2026-10-24 03:47:28 UTC**, with a ±3-day sampled interval and continued Kepler propagation beyond it. The polar short antenna maps to body +Z; its default prograde orientation and optional inertial-axis mode are illustrative, with toggleable 120 rpm historical spin. The shared attitude panel sits below the display settings. See [mission architecture and validation](docs/v0.29-details.md).
+### 航天器姿态
 
-Station attitude follows the ground track; array pointing is computed from the Sun direction. Clouds offer bundled, downloaded and geographically constrained modes; cloud volume and motion are illustrative. The enhanced Milky Way uses NASA catalogue visualization; the standard background is artistic.
+在“航天器姿态”中调节滚转、俯仰和偏航，范围 ±180°，输入与滑条同步。姿态以当前任务的参考方向为基础：空间站沿地面轨迹定向，卫星可选择航向跟随或惯性定轴。“姿态归零”清除手动偏移，保持轨道与模拟时刻。
 
-## 开发 / Development
+## 地球、星空与空间环境
 
-Node.js 18+ is required to build; Python 3 is used by the orbit-data scripts.
+环境设置由所有航天器共用，切换任务后仍保留当前选择。
+
+| 模块 | 可以观察与调整的内容 |
+| --- | --- |
+| 地球与月球 | 四档地球画质；昼夜、晨昏、大气、海洋反光、城市夜景；月球位置与月相，可切换望月与返回航天器视角 |
+| 高清地表 | 8K 档按视野加载 NASA 地表及夜光细节切片，近距离观察洲际地貌和城市灯光分布 |
+| 云层 | 内置云图、Live Cloud Maps、NASA SATCORPS、历史快照与本地生成；8K 可开启体积云和动态云层 |
+| 夜面云层 | 开启后按云层遮挡城市灯光，表现厚云遮蔽和薄云透光 |
+| 极光 | NOAA OVATION 快照或本地生成分布；8K 使用有厚度的光幕，4K 使用经典效果 |
+| 星空与星图 | 41,411 颗星表星点，原生 16K NASA 银河来源；恒星名称、88 星座名称、连线与边界可独立控制 |
+| 地理标注 | 国家、首都、主要城市、国境线、海域、山脉、河流和湖泊，支持层级与密度调整 |
+| 天气与奇观 | 云内闪电、高空闪光、夜侧气辉和流星演示，可选择自然或观赏增强效果 |
+
+整体画质与星空画质分别设置；“自动优化性能”会调整部分效果的采样负担。云层形态、奇观事件和观赏曝光用于视觉表现；数据来源、时间与实际分辨率见[环境使用说明](使用说明.md#地球星空与环境)。
+
+## 任务实验室
+
+右上角“任务实验室”包含过境预报与交会对接。进入时主场景暂停推进；退出后恢复主场景。对接训练使用独立的训练时间。
+
+### 过境预报
+
+按当前航天器和指定地点计算过境，适合了解什么时候、朝哪个方向、抬头多高观察。
+
+1. 在主界面选择航天器，再打开“任务实验室 → 过境预报”。
+2. 输入地点、经纬度、海拔、开始时间、预报时长和最低仰角。
+3. 计算后选择一次过境，查看进入门限、最高点和离开门限的时刻与朝向。
+4. 通过时间—仰角曲线和滑条查看过程；可导出 ICS 日历，符合数据条件时可跳转到主场景。
+
+候选观测窗口结合航天器日照与地面暮光条件。计算使用有效 OEM 数据或限定历元范围内的 SGP4 根数；天气、地形遮挡和实际亮度需另行判断。数据过期时，先在“数据与资源”中更新，或改用有效时段。
+
+### 交会对接训练
+
+通过相对运动、推力与姿态操纵练习接近空间站接口。提供四类起始场景：
+
+| 场景 | 起始条件与用途 |
+| --- | --- |
+| 末段对准 | 从约 12 m 开始，练习末段对准与捕获 |
+| 标准接近 | 从 200 m 开始，体验分段接近与停靠点放行 |
+| 偏差恢复 | 从 50 m 开始，修正横向漂移和姿态偏差 |
+| 随机位置 | 在接口前方 50–500 m 随机生成位置与姿态，重新开始可重新抽取 |
+
+**首次体验**：选择“末段对准”，保持“新手辅助”开启，选择“辅助接近”，再点击“开始／继续”。在适用的停靠点，检查项持续稳定后点击 GO 放行。
+
+新手辅助开启时，提供人工控制、辅助接近、保持位置、主动撤离和教学停靠点。关闭后进入纯手动推力与转动，停用自动控制、阻尼、相对制动、停靠点和教学范围约束。松开操纵键后飞船仍保留惯性。
+
+外部视角适合观察整体相对位置；对接相机固定在飞船接口轴线上，配合距离、闭合速度、横向偏差、姿态和角速率仪表完成操纵。画面可切换“大视窗”或“铺满窗口”。训练结束后可回放记录并导出 JSON／CSV。
+
+对接限速默认 **0.15 m/s**，可调整，按接触瞬间的总相对速度判定。训练使用教学相对运动与接口接触模型，详细控制、模式区别和判定规则见[对接操作手册](使用说明.md#交会对接训练)。
+
+## 数据与资源
+
+右上角“数据与资源”集中管理云图、极光与当前任务轨道。面板区分**已下载的数据、当前使用的数据、检查时间和检查结果**，可以单独检查，也可以检查全部更新。
+
+| 数据 | 主要来源 | 如何使用 |
+| --- | --- | --- |
+| 中国空间站轨道 | 中国载人航天工程办公室／BACC 发布的 OEM | 在记录区间内插值，区间外接续开普勒轨道演算 |
+| 东方红一号现代轨道 | CelesTrak，NORAD 4382 | 根据 GP／OMM 根数使用 SGP4 计算 |
+| 全球云图 | Live Cloud Maps／EUMETSAT、NASA Langley SATCORPS | 下载后选择使用，也可导入或保留历史快照 |
+| 极光分布 | NOAA SWPC OVATION | 使用预报分布驱动极光地理范围与强度 |
+
+NASA 云图在线处理需要桌面启动器提供的本机服务；网页版可导入相应快照。网络或来源异常时保留已有数据，检查失败会显示独立状态。
+
+下载历史支持收藏、导出、导入和按类型清理。缓存自动清理默认开启，并保护正在使用、收藏及设置引用的数据。轨道按任务保存，环境资源在任务之间复用。操作细节见[资源管理](使用说明.md#数据更新与缓存)。
+
+## 摄影、场景与个性化
+
+### 摄影与分享
+
+在“摄影与场景”中开启摄影模式，隐藏界面并调整镜头；可保存当前截图或 4K 宽度 PNG。固定曝光便于保持画面亮度，环境与视角收藏可以保存时刻、镜头和环境组合。
+
+“导出场景”生成 `.starorbit.json`，用于恢复任务、舱体组合、太阳翼、姿态、时间、相机和环境设置。轨道数据随场景保存；下载的云图与极光保存快照标识，需要复现相同天气时，另行导出并传递对应快照。
+
+### 音乐与语言
+
+普通任务提供六首内置音乐，支持导入、排序、移除、音量与进度控制，默认随机首曲并列表循环。鼠标移入左下音符展开播放器；浏览器阻止自动播放时，点击播放即可。
+
+东方红一号使用专属录音或模拟遥测；切换回其他任务时恢复普通歌单进度。界面支持中、英、俄、法四语，语言选择独立保存。
+
+### 设置记忆
+
+组合、姿态、时间模式、相机、环境与面板状态保存在当前浏览器和访问地址下。换浏览器、切换网站与本机地址时，这些设置不会自动共享，可使用场景文件传递。
+
+“恢复出厂设置”重置偏好与组合，保留下载数据和收藏。顶部公开访问统计汇总正式网页版的访问，本机版读取同一数字；统计方式见[说明](docs/v0.53-details.md)。
+
+## 数据与计算说明
+
+星轨将数据驱动的计算、历史重建和视觉演示放在同一场景中。理解读数时，可以按以下方式区分：
+
+| 内容 | 计算或数据依据 | 读数含义与适用范围 |
+| --- | --- | --- |
+| 空间站轨道 | OEM 位置、速度与区间内插值 | 区间外使用端点状态接续开普勒椭圆；过境预报另行检查有效期 |
+| 现代卫星轨道 | SGP4 与公开根数 | 精度随根数历元和预测距离变化；界面显示数据来源与时间 |
+| 东方红一号历史轨道 | 报载参数、发射面近似约束与多日过境记录 | 用于历史场景重建，资料拟合区间外为示意外推 |
+| 太阳、地球自转与地影 | 天文计算、坐标转换与太阳／地球视圆盘遮挡 | 地球采用半径 6371 km 的球体；高度与经纬度为球面／地心值 |
+| 航天器姿态与太阳翼 | 任务参考方向、手动偏移、转轴约束与遮挡采样 | 有效受光是几何比例，实际电功率还涉及电池效率、温度等因素 |
+| 交会对接 | 400 km 圆参考轨道的 HCW 相对运动、四元数姿态与有限推力 | 用于操纵训练；接口接触判定范围及辅助规则见手册 |
+| 云层、极光与奇观 | 云图／预报分布结合程序化渲染 | 形态和动态效果为视觉近似；奇观事件为模拟事件 |
+| 地表、夜光与星空 | NASA 历史合成图、星表与银河素材 | 地表与夜光保留素材年代，星空亮度采用显示映射 |
+
+算法、数据来源与验证资料集中在[技术资料索引](docs/README.md)。
+
+## 本地运行与开发
+
+源码构建需要 **Node.js 18+**，本机服务和部分测试使用 **Python 3**。CI 使用 Node.js 22。
 
 ```sh
+git clone https://github.com/Wenshuishi0528/StarOrbit.git
+cd StarOrbit
 npm ci
-npm test
 npm run build
+python3 scripts/serve.py --open
 ```
 
-构建后在项目根目录生成 **StarOrbit.html**，可用 **启动星轨.command** 或 **星轨.app** 启动。Generated standalone **StarOrbit.html** is written to the project root; it is distributed as a release asset because it exceeds GitHub’s 100 MB per-file limit.
+`npm run build` 生成便携 `StarOrbit.html` 和本机轻量入口；本机服务为浏览器提供资源与更新接口。macOS 也可使用 `启动星轨.command`。NASA 云图处理所需的可选 Python 依赖通过以下命令安装：
 
-- `src/`: application, orbit/solar calculations, Earth/stars, and minimap.
-- `assets/`: required model, prepared textures, catalogue, and orbital records.
-- `build.mjs`: build the self-contained HTML; version and author come from `package.json`.
-- `scripts/update-orbit.py`: refresh and validate the published orbital data, then rebuild.
-- `scripts/prepare-environment.py`: optional texture/catalogue preparation; requires Pillow and the original attributed source textures in `assets/earth/source/`. Prepared assets are already included for normal builds.
+```sh
+python3 -m pip install -r scripts/cloud-requirements.txt
+```
 
-## 素材与署名 / Credits
+| 命令 | 用途 |
+| --- | --- |
+| `npm test` | 运行轨道、环境、装配、姿态、数据管理及任务实验室等检查 |
+| `npm run build` | 生成便携与本机运行构建 |
+| `npm run build:local` | 生成本机轻量入口及资源 |
+| `npm run build:web` | 生成用于静态部署的 `dist/` |
 
-- Earth textures: [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/), **CC BY 4.0**; resized and compressed for the four quality levels.
-- Star catalogue: [d3-celestial / XHIP](https://github.com/ofrohn/d3-celestial), **BSD 3-Clause** notice retained in `assets/D3-CELESTIAL-LICENSE.txt`.
-- Starfield styling and artistic Milky Way: adapted from [StarSky Studio](https://github.com/Wenshuishi0528/StarSkyStudio), **CC BY 4.0**.
-- DFH 1 orbit: [CelesTrak GP JSON](https://celestrak.org/NORAD/elements/gp.php?CATNR=4382&FORMAT=JSON), propagated with [satellite.js](https://github.com/shashwatak/satellite-js) **6.0.2 / MIT**.
-- Orbit source: [China Manned Space Engineering Office / BACC](https://en.cmse.gov.cn/news/202107/t20210722_48418.html).
-- Three.js, Astronomy Engine, satellite.js, and three-mesh-bvh: **MIT**; notices are embedded in the standalone HTML.
+核心代码位于 `src/`，运行素材位于 `assets/`，构建入口为 `build.mjs`，更新与本机服务脚本位于 `scripts/`。原始素材处理只在更换相应资源时需要执行。仓库源码 ZIP 与发布页的便携包用途不同；便携 HTML 作为发布附件分发。
 
-Full asset notes: **[素材与迁移说明.md](素材与迁移说明.md)**. Third-party materials retain their respective licenses. Original project content is licensed under **CC BY-NC 4.0**; commercial use requires separate written permission from the author. See [licensing scope](LICENSING.md) and the [full license](LICENSE).
+## 文档、素材与许可
 
+- [使用手册](使用说明.md)：操作步骤、快捷键、参数含义与常见问题。
+- [技术资料索引](docs/README.md)：轨道、装配、环境、遥测、训练和数据处理专题。
+- [更新记录](CHANGELOG.md)：逐版本变化与对应验证。
+- [素材与迁移说明](素材与迁移说明.md)：素材来源、处理方法和第三方声明。
 
-### Earth & weather update / 地球与天气增强
+<a id="素材与署名--credits"></a>
 
-- 1K / 2K / 4K / 8K，8K可选体积云与连续演变；大气边缘、晨昏、夜景、云影和海面反光升级。
-- 云图与极光独立选择最新数据、已保存历史、本地生成或关闭。极光使用 NOAA OVATION 预测网格；程序生成的光幕与云层立体形态是示意。
-- 一键检查云图、极光和轨道；失败保留旧数据。历史缓存支持收藏、容量限制、删除与导入导出。云图未提供观测时刻时明确显示未知。
-- 摄影模式、固定曝光、4K宽PNG截图和环境视角收藏；保留原有自由组合、全屏适配、轨道与太阳能板计算。
-- 双击 `启动星轨.command` 可开启本地服务及固定来源的官方轨道中继。直接打开HTML仍能离线运行；云图/极光可按需联网更新，持久缓存能力取决于浏览器。
+### 素材与署名
 
-Four quality tiers with optional 8K ray-marched clouds and illustrative continuous weather evolution. Improved atmospheric limb, twilight, ocean glint and cloud shadows. Clouds and aurora offer downloaded, saved-history, procedural and off modes. NOAA OVATION supplies forecast coverage, not observed auroral curtains. One update button checks each source independently; failures retain existing data. Favorite/export/import snapshots, manage the cache budget, use photo mode and 4K-wide captures, and save reproducible environment presets. Existing orbital physics, solar tracking, fullscreen sizing and recursive assembly remain intact. Run `python3 scripts/serve.py --open` for the local viewer and official-orbit relay, or open the offline HTML directly. Historical coverage is limited to snapshots actually available in the local library.
+| 内容 | 来源与署名 |
+| --- | --- |
+| 地球基础贴图 | [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/)，CC BY 4.0 |
+| 高清地表与夜光 | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/)、[Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/)，NASA Earth Observatory；夜光来源 Suomi NPP / VIIRS |
+| 银河 | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/)，NASA/Goddard Space Flight Center Scientific Visualization Studio、Ernie Wright；Gaia DR2：ESA/Gaia/DPAC |
+| 月面 | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/)，NASA SVS / Ernie Wright；LRO / LROC |
+| 星表与星野 | [d3-celestial / XHIP](https://github.com/ofrohn/d3-celestial)，BSD 3-Clause；部分星野风格源自 [StarSky Studio](https://github.com/Wenshuishi0528/StarSkyStudio)，CC BY 4.0 |
+| 云图 | [Live Cloud Maps](https://github.com/matteason/live-cloud-maps)，Contains modified EUMETSAT data；[NASA Langley Cloud and Radiation Research Group](https://satcorps.larc.nasa.gov/) |
+| 极光 | [NOAA SWPC OVATION](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) |
+| 轨道 | [中国载人航天工程办公室／BACC](https://en.cmse.gov.cn/news/202107/t20210722_48418.html)、[CelesTrak](https://celestrak.org/NORAD/elements/gp.php?CATNR=4382&FORMAT=JSON) |
+| 地理数据与音乐 | 各数据集与曲目来源见[素材说明](素材与迁移说明.md)，中国轮廓使用天地图公开矢量资料 |
+| 计算与渲染依赖 | Three.js、Astronomy Engine、satellite.js、three-mesh-bvh 等，保留各自声明 |
 
-Clouds: [Live Cloud Maps](https://github.com/matteason/live-cloud-maps) — **Contains modified EUMETSAT data**. Aurora: [NOAA SWPC OVATION](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast). Procedural weather, cloud height and curtain motion are illustrative.
-Settings memory / 设置记忆：银河默认开启。组合、太阳翼控制、时间、视角、显示、环境和语言设置会在同一浏览器及地址下自动恢复。恢复出厂设置重置偏好和组合，保留下载快照与收藏。
-
-The Milky Way is enabled by default. Assembly, solar controls, time, cameras, display, environment and language preferences are remembered in the same browser and origin. Factory reset restores preferences and assembly while retaining downloaded snapshots and favorites. Native browser fullscreen still requires a click.
-
-Native 16K sky / 原生16K星空：[NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/). Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio; Ernie Wright; Gaia DR2: ESA/Gaia/DPAC. Native 16384×8192 source, no upscale or added blur. Device limits are shown explicitly when 8K/4K fallback is needed. The 356.5 MB source EXR and development dependencies are not needed to run the standalone app.
-
-小地图支持拖动站点或点击轨迹跳转到对应有效时刻，并自动暂停；不把空间站放到任意无效轨道位置。The minimap supports dragging the station or clicking the track to seek and pause at a valid orbital time.
-
-### Close-range Earth clarity / 近距离地球清晰度
-
-8K 档新增原生 21600×10800 NASA 地表的按需分块细节，最多四块常驻显存，离线可用。普通云层使用单层覆盖以避免叠层重影；大气与地表不再重复雾化，8K 像素比上限固定为 2。
-
-The 8K tier adds on-demand native 21,600×10,800 Earth detail, with at most four decoded tiles resident and offline support. A single ordinary cloud layer avoids duplicated silhouettes; atmospheric haze is no longer added twice, and the 8K pixel-ratio cap is independent of starfield settings.
-
-Source: [NASA Earth Observatory — Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/), July 2004 composite with topography. Details and SHA-256 hashes: `assets/earth/detail/manifest.json`.
-
-
-### Ocean, night lights and twilight / 海洋、夜景与晨昏
-
-8K 档修正深海颜色，并加入 NASA Black Marble 2016 的城市夜光细节：500 米灰度源数据降采样至约 1 公里，按当前视野加载最多四块夜景切片，与最多四块地表切片共用单路解码。晨昏大气在地影边界分段积分，使用连续半影和轻微抖动消除条带。望月按钮可再次点击返回；顶部也提供「返回空间站」。单文件 HTML 约 237 MB。
-
-The 8K tier corrects deep-ocean reflectance and adds NASA Black Marble 2016 city lights, downsampled from 500 m sources to approximately 1 km. At most four night tiles and four daytime tiles are resident, with one shared decode queue. Atmosphere integration splits at the Earth-shadow boundary, with continuous penumbra and sub-code-value dithering. Look at Moon toggles back to the saved station view; a permanent Back to station action is also available. Standalone HTML: approximately 230 MB.
-
-Night-light source: [NASA Earth Observatory — Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/), Suomi NPP / VIIRS historical composite. The light map represents city-light distribution, not individual buildings or current imagery. Tile and source hashes: `assets/earth/night-detail/manifest.json`.
+作者拥有授权权利的原创代码、模型、界面与文档采用 **[CC BY-NC 4.0](LICENSE)**，允许按许可署名并用于非商业用途；商业使用须事先获得作者书面许可。第三方库、数据、音乐与贴图继续适用各自条款。完整范围见[许可与商业授权](LICENSING.md)。

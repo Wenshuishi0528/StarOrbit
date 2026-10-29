@@ -6,6 +6,10 @@
 
 **English:** Added a GitHub / Star link to the header, opening the repository in a new tab. Includes a compact mobile layout, keyboard focus styling and localized descriptions, without additional requests or star-count polling.
 
+**文档与发布：** 按功能重写中文项目介绍，提供独立英文介绍、完整使用手册和技术资料索引；便携包附带文档与插图，统一说明运行方式和数据模型。
+
+**Documentation and distribution:** Reorganized the project overview by feature, with a separate English overview, a complete Chinese user manual and a technical reference index. Portable packages include documentation and illustrations, with consistent runtime and model guidance.
+
 ## v0.79 — 2026-10-29
 
 **中文：** 日期和时间合并为一个固定年月日时分秒顺序的输入框，左右方向键连续切换所有字段，上下键调整选中项。保留 12/24 小时制与 UTC+8 跳转；月末和闰日调整保持有效日期，拒绝无效日期输入。验证跨日期/时间的键盘切换与格式转换。
