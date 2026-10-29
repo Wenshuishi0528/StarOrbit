@@ -715,8 +715,6 @@
   "日期": "Date",
   "时间": "Heure",
   "左右键切换时、分、秒，上下键调整数值": "Gauche/droite : heures, minutes ou secondes ; haut/bas : ajuster",
-  "历史轨道 · 1970 年新华社公报": "Orbite historique · Communiqué Xinhua de 1970",
-  "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 周期 114 分钟": "Périgée 439 km · Apogée 2384 km\nInclinaison 68,5° · Période 114 min",
   "2000-01-01 00:00（UTC+8）起自动使用现有轨道": "Passage automatique à l’orbite actuelle le 01/01/2000 à 00:00 (UTC+8)",
   "网页累计访问 · {count}": "Visites du site · {count}",
   "统计更新：{time}；同一会话重复访问去重，数字定期更新。": "Statistiques récupérées : {time} ; les visites répétées au cours d’une session sont dédupliquées. Le total est actualisé périodiquement.",
@@ -1154,5 +1152,8 @@
   "新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。": "L’aide est activée par défaut. Désactivée, poussée et rotation sont manuelles, sans freinage automatique, amortissement, points d’arrêt, couloir ou limite de distance.",
   "对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。": "La limite porte sur la vitesse relative totale au contact ; la dépasser fait échouer l’amarrage. Le mode manuel vérifie le contact au port et la vitesse, pas les collisions du maillage complet.",
   "接口撞击超速 · 对接失败": "Vitesse d’impact excessive · Échec de l’amarrage",
-  "转动力矩 · 按住施加": "Couple de rotation · maintenir"
+  "转动力矩 · 按住施加": "Couple de rotation · maintenir",
+  "历史轨道 · 报载时刻重建": "Orbite historique · Reconstitution à partir des passages publiés",
+  "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟": "Périgée 439 km · Apogée 2384 km\nInclinaison 68,5° · Période annoncée d’environ 114 min",
+  "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Comparée à certains passages du 25/04 au 02/05/1970 ; éphémérides non mesurées. Les autres dates sont des extrapolations illustratives."
 }

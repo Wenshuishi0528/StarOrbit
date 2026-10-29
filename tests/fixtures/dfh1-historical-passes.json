@@ -1,0 +1,444 @@
+{
+  "description": "Minute-resolution newspaper fly-over times; approximate culmination constraints, not sub-satellite positions or precision ephemerides. Direction follows morning/evening pass sequences. Holdout dates are excluded from fitting.",
+  "sources": {
+    "04-26": "https://www.rmrb.zhouenlai.info/人民日报（1946-2003）/1970/04/1970-04-26.htm",
+    "04-27": "https://www.rmrb.zhouenlai.info/人民日报（1946-2003）/1970/04/1970-04-27.htm",
+    "04-29": "https://www.rmrb.zhouenlai.info/人民日报（1946-2003）/1970/04/1970-04-29.htm",
+    "05-01": "https://cn.govopendata.com/renminribao/1970/05/01/3/",
+    "05-02": "https://www.rmrb.zhouenlai.info/人民日报（1946-2003）/1970/05/1970-05-02.htm"
+  },
+  "observations": [
+    {
+      "split": "train",
+      "city": "广州",
+      "latitude": 23.1291,
+      "longitude": 113.2644,
+      "time": "1970-04-25T10:19:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "福州",
+      "latitude": 26.0745,
+      "longitude": 119.2965,
+      "time": "1970-04-25T10:20:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-25T10:23:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "南京",
+      "latitude": 32.0603,
+      "longitude": 118.7969,
+      "time": "1970-04-25T10:23:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-25T10:26:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "沈阳",
+      "latitude": 41.8057,
+      "longitude": 123.4315,
+      "time": "1970-04-25T10:27:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "长春",
+      "latitude": 43.8171,
+      "longitude": 125.3235,
+      "time": "1970-04-25T10:28:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "哈尔滨",
+      "latitude": 45.8038,
+      "longitude": 126.5349,
+      "time": "1970-04-25T10:29:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "呼和浩特",
+      "latitude": 40.8426,
+      "longitude": 111.7492,
+      "time": "1970-04-25T10:26:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "乌兰巴托",
+      "latitude": 47.918,
+      "longitude": 106.917,
+      "time": "1970-04-25T20:26:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "呼和浩特",
+      "latitude": 40.8426,
+      "longitude": 111.7492,
+      "time": "1970-04-25T20:28:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-25T20:29:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "济南",
+      "latitude": 36.6512,
+      "longitude": 117.1201,
+      "time": "1970-04-25T20:29:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "郑州",
+      "latitude": 34.7466,
+      "longitude": 113.6254,
+      "time": "1970-04-25T20:30:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "青岛",
+      "latitude": 36.0671,
+      "longitude": 120.3826,
+      "time": "1970-04-25T20:30:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-25T20:31:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "南京",
+      "latitude": 32.0603,
+      "longitude": 118.7969,
+      "time": "1970-04-25T20:31:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "杭州",
+      "latitude": 30.2741,
+      "longitude": 120.1551,
+      "time": "1970-04-25T20:31:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "福州",
+      "latitude": 26.0745,
+      "longitude": 119.2965,
+      "time": "1970-04-25T20:32:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "台北",
+      "latitude": 25.033,
+      "longitude": 121.5654,
+      "time": "1970-04-25T20:32:00+08:00",
+      "direction": "descending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "广州",
+      "latitude": 23.1291,
+      "longitude": 113.2644,
+      "time": "1970-04-26T11:04:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "南京",
+      "latitude": 32.0603,
+      "longitude": 118.7969,
+      "time": "1970-04-26T11:09:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "杭州",
+      "latitude": 30.2741,
+      "longitude": 120.1551,
+      "time": "1970-04-26T11:09:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-26T11:11:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "沈阳",
+      "latitude": 41.8057,
+      "longitude": 123.4315,
+      "time": "1970-04-26T11:13:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "长春",
+      "latitude": 43.8171,
+      "longitude": 125.3235,
+      "time": "1970-04-26T11:14:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "哈尔滨",
+      "latitude": 45.8038,
+      "longitude": 126.5349,
+      "time": "1970-04-26T11:15:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "train",
+      "city": "呼和浩特",
+      "latitude": 40.8426,
+      "longitude": 111.7492,
+      "time": "1970-04-26T11:10:00+08:00",
+      "direction": "ascending",
+      "source": "04-26"
+    },
+    {
+      "split": "holdout",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-27T20:01:00+08:00",
+      "direction": "descending",
+      "source": "04-27"
+    },
+    {
+      "split": "holdout",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-27T20:03:00+08:00",
+      "direction": "descending",
+      "source": "04-27"
+    },
+    {
+      "split": "holdout",
+      "city": "福州",
+      "latitude": 26.0745,
+      "longitude": 119.2965,
+      "time": "1970-04-27T20:04:00+08:00",
+      "direction": "descending",
+      "source": "04-27"
+    },
+    {
+      "split": "holdout",
+      "city": "台北",
+      "latitude": 25.033,
+      "longitude": 121.5654,
+      "time": "1970-04-27T20:05:00+08:00",
+      "direction": "descending",
+      "source": "04-27"
+    },
+    {
+      "split": "train",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-29T09:31:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "train",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-29T19:33:00+08:00",
+      "direction": "descending",
+      "source": "04-29"
+    },
+    {
+      "split": "train",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-29T09:28:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "train",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-29T19:35:00+08:00",
+      "direction": "descending",
+      "source": "04-29"
+    },
+    {
+      "split": "train",
+      "city": "哈尔滨",
+      "latitude": 45.8038,
+      "longitude": 126.5349,
+      "time": "1970-04-29T09:34:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-04-30T10:15:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "上海",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "time": "1970-04-30T10:14:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "哈尔滨",
+      "latitude": 45.8038,
+      "longitude": 126.5349,
+      "time": "1970-04-30T10:19:00+08:00",
+      "direction": "ascending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "西安",
+      "latitude": 34.3416,
+      "longitude": 108.9398,
+      "time": "1970-04-30T20:18:00+08:00",
+      "direction": "descending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "广州",
+      "latitude": 23.1291,
+      "longitude": 113.2644,
+      "time": "1970-04-30T20:21:00+08:00",
+      "direction": "descending",
+      "source": "04-29"
+    },
+    {
+      "split": "holdout",
+      "city": "北京",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "time": "1970-05-01T19:05:00+08:00",
+      "direction": "descending",
+      "source": "05-02"
+    },
+    {
+      "split": "holdout",
+      "city": "郑州",
+      "latitude": 34.7466,
+      "longitude": 113.6254,
+      "time": "1970-05-02T19:50:00+08:00",
+      "direction": "descending",
+      "source": "05-01"
+    },
+    {
+      "split": "holdout",
+      "city": "武汉",
+      "latitude": 30.5928,
+      "longitude": 114.3055,
+      "time": "1970-05-02T19:51:00+08:00",
+      "direction": "descending",
+      "source": "05-01"
+    },
+    {
+      "split": "holdout",
+      "city": "长沙",
+      "latitude": 28.2282,
+      "longitude": 112.9388,
+      "time": "1970-05-02T19:52:00+08:00",
+      "direction": "descending",
+      "source": "05-01"
+    },
+    {
+      "split": "holdout",
+      "city": "广州",
+      "latitude": 23.1291,
+      "longitude": 113.2644,
+      "time": "1970-05-02T19:53:00+08:00",
+      "direction": "descending",
+      "source": "05-01"
+    }
+  ],
+  "launchPlanePrior": {
+    "time": "1970-04-24T21:35:00+08:00",
+    "latitude": 41.3,
+    "longitude": 100.3,
+    "direction": "southeast",
+    "note": "Approximate Jiuquan area, not surveyed 1970 launch-pad coordinates. Plane prior only: powered ascent is not modeled.",
+    "locationSource": "https://planet4589.org/space/archive/sven/histind/Swefirst/Satellitedetails/Freja/FrejaFacts.htm",
+    "timeSource": "https://www.cnsa.gov.cn/n6758823/n6758838/c6809304/content.html"
+  }
+}

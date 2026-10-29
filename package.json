@@ -1,6 +1,6 @@
 {
   "name": "starorbit",
-  "version": "0.77.0",
+  "version": "0.78.0",
   "private": true,
   "description": "StarOrbit — Space & Orbit Simulator. Shared Earth resources, modular spacecraft, independent orbits and attitude controls.",
   "author": "wenshuishi0528",
@@ -19,5 +19,5 @@
     "build:web": "node build.mjs --web",
     "build:local": "node build.mjs --local"
   },
-  "displayVersion": "0.77"
+  "displayVersion": "0.78"
 }

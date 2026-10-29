@@ -31,7 +31,7 @@ for(const [id,orbit] of [['dfh1',dfh],['tiangong',station]]){
  for(const time of [H.epoch,orbit.rows[200][0],orbit.rows[0][0],orbit.rows.at(-1)[0],now,Date.parse('2030-01-01T00:00Z')])checks.push({id,time:new Date(time).toISOString(),...verify(orbit,time)});
 }
 const historic=sampleOrbitPath(dfh,H.epoch);
-assert.deepEqual(sampleOrbitPath(dfh,H.cutoff-1),historic,'entire historical ellipse remains active right up to the cutoff');
+assert.notDeepEqual(sampleOrbitPath(dfh,H.epoch+86400000),historic,'historical plane and perigee precess with time');
 assert.notDeepEqual(sampleOrbitPath(dfh,H.cutoff),historic,'exact cutoff switches the whole ellipse');
 assert.deepEqual(sampleOrbitPath(dfh,H.cutoff),sampleOrbitPath({...dfh,missionId:'other'},H.cutoff));
 verify(dfh,H.cutoff-1);verify(dfh,H.cutoff);

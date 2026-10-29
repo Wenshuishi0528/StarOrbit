@@ -715,8 +715,6 @@
   "日期": "Date",
   "时间": "Time",
   "左右键切换时、分、秒，上下键调整数值": "Left/right: select hours, minutes or seconds; up/down: adjust",
-  "历史轨道 · 1970 年新华社公报": "Historical orbit · 1970 Xinhua communiqué",
-  "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 周期 114 分钟": "Perigee 439 km · Apogee 2384 km\nInclination 68.5° · Period 114 min",
   "2000-01-01 00:00（UTC+8）起自动使用现有轨道": "Automatically uses the current orbit from 2000-01-01 00:00 (UTC+8)",
   "网页累计访问 · {count}": "Web visits · {count}",
   "统计更新：{time}；同一会话重复访问去重，数字定期更新。": "Statistics fetched: {time}; repeat visits in one session are deduplicated. Counts update periodically.",
@@ -1154,5 +1152,8 @@
   "新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。": "Beginner assistance is on by default. When off, thrust and rotation are manual, with no automatic braking, damping, holds, corridor or range boundary.",
   "对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。": "The limit checks total relative speed at contact; exceeding it fails docking. Manual mode checks only port contact and speed, not full station mesh collisions.",
   "接口撞击超速 · 对接失败": "Excessive impact speed · Docking failed",
-  "转动力矩 · 按住施加": "Rotation torque · hold to apply"
+  "转动力矩 · 按住施加": "Rotation torque · hold to apply",
+  "历史轨道 · 报载时刻重建": "Historical orbit · Reconstructed from reported pass times",
+  "近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟": "Perigee 439 km · Apogee 2384 km\nInclination 68.5° · Reported period about 114 min",
+  "已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。": "Checked against selected passes on 1970-04-25 through 05-02; not measured ephemerides. Other dates are illustrative extrapolations."
 }

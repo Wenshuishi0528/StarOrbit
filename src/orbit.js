@@ -53,7 +53,7 @@ export function orbitComputationMode(data,t){
 // Geometric ellipse of the active orbit, without sampling a time window.
 export function orbitEllipse(data,t){
  const mode=orbitComputationMode(data,t);
- if(mode==='historical')return historyEllipse??=historicalEllipse(EARTH_RADIUS,earthAxes(DFH1_HISTORY.epoch));
+ if(mode==='historical')return historyAt(t);
  if(mode==='propagation')return endpoint(data,t>data.rows.at(-1)[0]);
  if(mode==='interpolation'){
   const pv=interpolate(data.rows,t);
@@ -61,13 +61,17 @@ export function orbitEllipse(data,t){
  }
  return null;
 }
-let historyEllipse;
+let historyAxes,historyEllipse,historyTime;
+function historyAt(t){
+ historyAxes??=earthAxes(DFH1_HISTORY.epoch);
+ if(t!==historyTime){historyEllipse=historicalEllipse(EARTH_RADIUS,historyAxes,t);historyTime=t;}
+ return historyEllipse;
+}
 // segmentTime fixes the branch for event-solver padding at the era boundary.
 export function stateAt(data,t,segmentTime=t){
  if(!data||!validTime(t))return null;
  if(orbitSegment(data,segmentTime)==='historical'){
-  historyEllipse??=historicalEllipse(EARTH_RADIUS,earthAxes(DFH1_HISTORY.epoch));
-  return ellipseState(historyEllipse,t);
+  return ellipseState(historyAt(t),t);
  }
  const mode=sampledOrbitMode(data,t);if(mode==='unavailable')return null;
  if(mode==='interpolation')return interpolate(data.rows,t);
@@ -81,7 +85,9 @@ function ellipseState(q,t){
  let lo=0,hi=2*Math.PI,E=e<.8?M:Math.PI;
  for(let i=0;i<48;i++){const f=E-e*Math.sin(E)-M;if(Math.abs(f)<1e-13)break;if(f>0)hi=E;else lo=E;const next=E-f/(1-e*Math.cos(E));E=next>lo&&next<hi?next:(lo+hi)/2;}
  const c=Math.cos(E),s=Math.sin(E),rate=n/(1-e*c);
- return {position:x.map((v,i)=>a*(c-e)*v+b*s*y[i]),velocity:x.map((v,i)=>rate*(-a*s*v+b*c*y[i]))};
+ const position=x.map((v,i)=>a*(c-e)*v+b*s*y[i]),velocity=x.map((v,i)=>rate*(-a*s*v+b*c*y[i]));
+ if(q.angularVelocity){const drift=cross(q.angularVelocity,position);for(let i=0;i<3;i++)velocity[i]+=drift[i];}
+ return {position,velocity};
 }
 export function sunPosition(t){const v=Astronomy.GeoVector(Astronomy.Body.Sun,new Date(t),false);return [v.x*AU,v.y*AU,v.z*AU];}
 // Fraction of the apparent solar disc outside the spherical Earth's disc.

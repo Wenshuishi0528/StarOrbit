@@ -1,5 +1,19 @@
 # StarOrbit implementation handoff
 
+## 2026-10-29 — v0.78 GitHub and web synchronization
+
+- After local validation, the user authorized synchronizing v0.78 to GitHub and Pages. Publish the existing batch without another version increment.
+- Use the main branch and its existing Pages workflow; verify the deployed version and hashed bundle against the local web build.
+- The v0.78 local-validation record below and docs/v0.78-validation.json describe the pre-publication stage.
+
+## 2026-10-29 — v0.78 DFH-1 historical reconstruction (local)
+
+- Replaced the old three-angle historical solution with a Jiuquan launch-plane prior, newspaper pass-time reconstruction and secular plane/perigee drift. Geometry remains 439 × 2384 km / 68.5°, with the reported 114-minute period distinguished from the empirical phase period. See docs/v0.78-details.md.
+- 33 pass times on Apr 25/26/29 calibrate the model; 14 other times on Apr 27/30 and May 1/2 check it. This is an empirical reconstruction, not measured ephemerides, a blind test, or an ascent simulation.
+- Full tests/builds, hashed assets, modern-branch invariance, numerical derivatives and independent subagent review passed. Installed runtime and launcher are v0.78; localhost serves the matching bundle. Safari refresh was not forced while the user was actively switching pages.
+- No GitHub push, Pages deployment, or Release in this batch. Retain local modifications for the next authorized publication. Backup: output/dfh1-orbit-audit/runtime-backup-v0.77.
+
+
 ## 2026-10-28 — v0.68 publication
 
 - User explicitly authorized GitHub synchronization, web deployment and the latest Release after local v0.68 validation. Publish the existing batch without another version increment.

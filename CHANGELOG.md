@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.78 — 2026-10-29
+
+**中文：** 修正东方红一号历史轨道的朝向与相位，以报载参数、酒泉发射面近似约束及多日过境时间重建，恢复上午北行、晚间向东南飞行。加入轨道面与近地点的缓慢漂移，轨道线、位置和速度保持一致。保留 2000 年切换规则，明确历史重建的精度边界；新增 47 条报载时间、方向和现代轨道不变性检查。[资料与验证](docs/v0.78-details.md)
+
+**English:** Corrected DFH-1's historical plane and phase using reported geometry, an approximate Jiuquan launch-plane prior and multi-day pass times. Morning passes ascend northward and evening passes travel southeast. Secular plane/perigee drift keeps the orbit outline, position and velocity consistent. Retained the year-2000 switch and labeled reconstruction limits; added 47 newspaper timing/direction checks and modern-orbit invariance checks. [Sources and validation](docs/v0.78-details.md)
+
 ## v0.77 — 2026-10-29
 
 **中文：** 新增默认开启的新手辅助开关与可调对接限速。关闭辅助后进入纯手动推力/转动，取消自动控制、阻尼、教学走廊和距离边界；使用有限接口接触区，按总相对撞击速度判定失败。记录保留开关及阈值变化，回放和报告使用接触时的设置。验证切换连续性、自由飞行、高速穿越接触与低速辅助捕获。

@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.77 · 作者 / Author: wenshuishi0528**
+**v0.78 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -34,7 +34,7 @@
 - **自由组合**：天和、问天、梦天、神舟、天舟、巡天；各对接口可重复部署同型飞船；新增天和用尾口接入，其节点接口可继续扩展并在左栏分组显示。太阳翼独立调整，也支持实验舱联动。
 - **轨道事件时间轴**：底部紧凑显示日照／半影／全影、近远地点和赤道交点，支持 3／12／24 小时窗口、事件筛选与前后导航。拖动保留播放状态，可提前 30 秒观看事件或开启到事件暂停。所有航天器共用，按需计算并缓存。详见 [v0.37 时间轴](docs/v0.37-details.md)。
 - **公开访问统计**：顶部显示网页累计访问；本地版读取同一份数字，离线保留缓存。使用固定计数请求，详见 [访问统计说明](docs/v0.53-details.md)。
-- **东方红一号历史轨道**：2000 年以前使用近地点 439 km、远地点 2384 km、倾角 68.5°、周期 114 分钟的历史椭圆；从 2000-01-01 00:00（UTC+8）起自动使用现有轨道。详见 [v0.51 说明](docs/v0.51-details.md)。
+- **东方红一号历史轨道**：2000 年以前使用近地点 439 km、远地点 2384 km、倾角 68.5°、报载周期约 114 分钟的历史重建；从 2000-01-01 00:00（UTC+8）起自动使用现有轨道。朝向和相位依据历史过境报道重建，非实测星历。详见 [v0.78 历史重建与验证](docs/v0.78-details.md)。
 - **轨道与时间**：采用公开 OEM 轨道记录，在数据区间内插值，区间外接续开普勒椭圆演算；日期与时间合为一条输入栏，默认 24h，可切换并记住 12h；左右键切换时分秒，上下键调整数值；支持现实时间、自定义时间、暂停和最高 1000× 播放；时间步进可选 1s／1m／10m／1h，可连续跨天、跨年跳转并保留播放状态。
 - **地面轨迹定向**：计入地球自转，让天和前端沿地面轨迹前进；背景、光照和太阳翼追日使用同一姿态基准。
 - **太阳翼追日**：按各实例的单轴／双轴约束求解，考虑舱体与翼板遮挡；地影中继续连续追日，直射受光量保持为零。
@@ -98,7 +98,7 @@ StarOrbit is an offline-capable spacecraft and orbit simulator. China Space Stat
 
 - **Configurable assemblies:** Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou, and Xuntian. Deploy multiple copies of any module. Added Tianhe cores connect through their aft ports and expose four node ports for recursive expansion, grouped in the sidebar. Control arrays individually or link laboratory-module rotations.
 - **Public visit counter:** The header shows cumulative web visits; the local app reads the same count and retains an offline cache. Uses fixed counter requests. See [details](docs/v0.53-details.md).
-- **Dong Fang Hong 1 historical orbit:** Before 2000, uses a 439 × 2384 km ellipse with 68.5° inclination and a 114-minute period. Automatically switches to the current orbit at 2000-01-01 00:00 (UTC+8). See [v0.51 details](docs/v0.51-details.md).
+- **Dong Fang Hong 1 historical orbit:** Before 2000, uses a 439 × 2384 km ellipse with 68.5° inclination and a reported period of about 114 minutes. Automatically switches to the current orbit at 2000-01-01 00:00 (UTC+8). Historical phase and plane are reconstructed from newspaper times and an approximate launch-plane constraint; this is not measured ephemeris data. See [v0.78 reconstruction and validation](docs/v0.78-details.md).
 - **Orbit and time controls:** interpolate published OEM records within their sampled interval and propagate a Kepler ellipse outside it; use real time, a custom date, pause, or playback up to 1000×. The 1s/1m/10m/1h steps can continue across days and years while preserving playback state.
 - **Ground-track aligned attitude:** account for Earth rotation so Tianhe's front follows the ground track; the background, lighting, and solar tracking share the same attitude frame.
 - **Solar-array tracking:** solve single- and dual-axis pointing with sampled body/array occlusion. Tracking continues through eclipse while direct solar input remains zero.

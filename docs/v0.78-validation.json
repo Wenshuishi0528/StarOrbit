@@ -1,0 +1,18 @@
+{
+  "version": "0.78",
+  "localUrl": "http://127.0.0.1:8771/StarOrbit.html",
+  "entrySha256": "2a916890412da11b6a1c245847491d06781e53057f87f9590e3c1cf0ee51dba2",
+  "bundle": "assets/app.bundle-00852146dd89d31d.js",
+  "bundleSha256": "00852146dd89d31d2dc72af13fbfd443a2dea2ffb5a7ef38bed0d047d9e202d6",
+  "localServerMatchesBuild": true,
+  "fullNpmTests": "passed",
+  "builds": [
+    "offline",
+    "local",
+    "web"
+  ],
+  "assetChecks": "passed",
+  "subagentReview": "passed",
+  "browserUI": "Safari actions interrupted by user activity; page reload not forced",
+  "publication": "not performed in this batch"
+}

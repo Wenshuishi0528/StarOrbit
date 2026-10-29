@@ -56,9 +56,9 @@ export class Simulation{
   this.dataUI();this.missions?.syncUI();
  }
  dataUI(){if(this.data&&orbitSegment(this.data,this.time)==='historical'){
-  $('dataRange').textContent=t('历史轨道 · 1970 年新华社公报')+'\n'+t('近地点 439 km · 远地点 2384 km\n倾角 68.5° · 周期 114 分钟')+'\n'+t('2000-01-01 00:00（UTC+8）起自动使用现有轨道');return;
+  $('dataRange').textContent=t('历史轨道 · 报载时刻重建')+'\n'+t('近地点 439 km · 远地点 2384 km\n倾角 68.5° · 公报周期约 114 分钟')+'\n'+t('已核对 1970-04-25 至 05-02 的部分过境；非实测星历，其他日期为示意外推。')+'\n'+t('2000-01-01 00:00（UTC+8）起自动使用现有轨道');return;
  }if(!this.data){$('dataRange').textContent=t('此任务尚未配置轨道。可导入地心 EME2000 / UTC 的 OEM 或 JSON。');$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');return;}const s=clockText(this.start),e=clockText(this.end);$('dataRange').textContent=t('{source} · {count} 条\n{start} — {end}（UTC+8）\n生成：{created} · EME2000 / UTC',{source:t(this.data.source||'导入数据'),count:this.data.rows.length,start:s,end:e,created:t(this.data.created||'未提供')});$('customTime').removeAttribute('min');$('customTime').removeAttribute('max');}
- gpUI(){const mode=orbitComputationMode(this.data,this.time);$('gpStatus').textContent=t(mode==='historical'?'历史轨道 · 1970 年新华社公报':mode==='interpolation'?'星历插值':mode==='propagation'?'轨道演算 · 开普勒椭圆':'轨道演算不可用');}
+ gpUI(){const mode=orbitComputationMode(this.data,this.time);$('gpStatus').textContent=t(mode==='historical'?'历史轨道 · 报载时刻重建':mode==='interpolation'?'星历插值':mode==='propagation'?'轨道演算 · 开普勒椭圆':'轨道演算不可用');}
  timeUI(){this.syncOrbitEra();this.gpUI();this.stepUI();for(const id of ['stepBack','stepForward','pauseTime','speed'])$(id).disabled=false;$('viewMode').querySelector('[value=orbit]').disabled=this.orbitStatus!=='ready';$('lookMoon').disabled=this.orbitStatus!=='ready';$('timeMode').value=this.mode;$('speed').value=String(this.speed);$('pauseTime').textContent=this.paused?t('▶ 继续'):t('Ⅱ 暂停');this.timeInput.set(this.time);$('speed').disabled=this.mode==='real';}
  stepUI(){
   const options=[...document.querySelectorAll('[name=timeStep]')],selected=options.find(input=>Number(input.value)===this.timeStep);
