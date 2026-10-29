@@ -13,7 +13,7 @@ function runUntil(session,predicate,maxSeconds){
 // Each actual scenario reaches both its required teaching holds and physical capture.
 const scenarioResults=[];
 for(const scenario of DOCKING_SCENARIOS){
- const events=[],session=new DockingTraining(scenario.id,{onEvent:event=>events.push(copy(event))});
+ const events=[],session=new DockingTraining(scenario.id,{onEvent:event=>events.push(copy(event)),random:()=>.5});
  assert.equal(session.mode,'manual');assert.equal(session.finished,false);
  assert.equal(session.releaseGate(),false,'GO is unavailable before a stable hold');
  session.setMode('approach');
@@ -48,20 +48,22 @@ for(const scenario of DOCKING_SCENARIOS){
  assert.equal(session.releaseGate(),false);
 }
 
-// GO from the accepted outer side of a gate already belongs to the slower next leg.
+// GO changes the destination without the old 0.1 / 0.05 m/s cruise caps.
 {
- for(const [scenario,distance,limit] of [['approach',30.1,.1],['alignment',5.1,.05]]){
+ for(const [scenario,distance,oldLimit] of [['approach',30.1,.1],['alignment',5.1,.05]]){
   const session=new DockingTraining(scenario);
   session.state=setDockingAttitude({...session.state,position:[0,distance,0],velocity:[0,0,0]},[0,0,0]);
   session.setMode('hold');session.advance(2);
-  assert.equal(session.guidance().canRelease,true);assert.ok(session.state.position[1]>Math.floor(distance)+.05);
+  assert.equal(session.guidance().canRelease,true);
   assert.equal(session.releaseGate(),true);session.setMode('approach');
-  assert.ok(session.guidance().recommendedClosing<=limit,'GO immediately changes the recommended closing speed before crossing the plane');
-  for(let i=0;i<1000&&session.state.position[1]>Math.floor(distance)-.2;i++){
-   session.advance(DOCKING_STEP);
-   assert.ok(-session.state.velocity[1]<=limit+DOCKING_LIMITS.speedTolerance,`Excess speed after GO from ${distance} m`);
+  assert.equal(session.guidance().speedLimit,null);
+  assert.ok(session.guidance().recommendedClosing>oldLimit);
+  let peak=0;
+  for(let i=0;i<300&&!session.finished&&!session.guidance().canRelease;i++){
+   session.advance(.2);peak=Math.max(peak,-session.state.velocity[1]);
   }
-  assert.ok(session.state.position[1]<Math.floor(distance));assert.equal(session.state.status,'flying');
+  assert.ok(peak>oldLimit,'Actual motion exceeds the former flight speed cap');
+  assert.ok(['flying','docked'].includes(session.state.status));
  }
 }
 
@@ -161,8 +163,39 @@ assert.deepEqual(groupedRun(.03),groupedRun(.2));
 // All callback payloads are exportable; the guidance limits share physics definitions.
 {
  const session=new DockingTraining('alignment');
- assert.equal(session.guidance().speedLimit,.1);
+ assert.equal(session.guidance().speedLimit,null);
  assert.equal(DOCKING_GATE_RULES.at(-1).angularSpeed,DOCKING_LIMITS.captureAngularSpeed);
  assert.ok(Number.isFinite(dockingMetrics(session.state).angularSpeed));
 }
 console.log('Docking training tests passed:',scenarioResults.map(result=>`${result.scenario} ${result.time.toFixed(1)} s / ${result.deltaV.toFixed(3)} m/s`).join('; '));
+
+// Seeded random starts stay in front of the contact plane and can be recovered.
+{
+ let seed=76;
+ const random=()=>((seed=(1664525*seed+1013904223)>>>0)/2**32);
+ const session=new DockingTraining('random',{random});
+ let previous=session.state.position;
+ for(let i=0;i<100;i++){
+  session.reset();const {position,velocity,attitude}=session.state;
+  assert(position[1]>=50&&position[1]<=500);
+  assert(norm(position)<DOCKING_LIMITS.maxRange);
+  assert(norm([position[0],position[2]])<=position[1]*.25+1e-9);
+  assert.notDeepEqual(position,previous);previous=[...position];
+  assert.deepEqual(velocity,[0,0,0]);assert(attitude.every(v=>Math.abs(v)<=10+1e-9));
+  session.advance(.02);assert.equal(session.state.status,'flying');
+ }
+ for(let i=0;i<8;i++){
+  session.reset();session.setMode('approach');let peak=0;
+  for(let j=0;j<6000&&!session.finished;j++){
+   session.advance(.2);peak=Math.max(peak,-session.state.velocity[1]);
+   if(session.guidance().canRelease)session.releaseGate();
+  }
+  assert.equal(session.state.status,'docked');assert.equal(session.violations.length,0);
+  assert(peak>.3,'Long-range assistance exceeds the former 0.3 m/s cap');
+ }
+ // High-speed flight is not clamped; unsafe contact still ends as a collision.
+ session.reset('alignment');session.state=setDockingAttitude({...session.state,position:[0,2,0],velocity:[0,-5,0]},[0,0,0]);
+ session.advance(.02);assert(-session.state.velocity[1]>4.9);assert.equal(session.state.status,'flying');
+ session.advance(.5);assert.equal(session.state.status,'collision');assert.equal(session.state.contactMetrics.captureChecks.speed,false);
+}
+console.log('Random spawn bounds, reroll, assisted recovery and unrestricted flight with collision checks passed');

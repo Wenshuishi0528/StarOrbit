@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v0.76 — 2026-10-29
+
+**中文：** 新增神舟随机位置场景，可重新抽取初始位置与姿态，并将实际初始条件写入记录。取消飞行固定限速与超速提示，辅助控制改用距离制动；保留停靠点与高速撞击检查。验证随机初始状态、辅助回收、旧限速突破和高速碰撞。
+
+**English:** Added randomized Shenzhou starts with reroll and recorded initial conditions. Removed fixed flight speed caps and overspeed warnings; assistance uses distance-based braking while preserving hold checks and high-speed collision detection. Tested random starts, assisted recovery, speeds beyond former caps and unsafe impacts.
+
+## v0.75 — 2026-10-29
+
+**中文：** 交会对接新增“大视窗”和“铺满窗口”，将曲线与检查项移至可滚动控制台，扩大三维画面并保留操纵、GO 与暂停。支持 Esc 逐级恢复，切换尺寸保留训练、相机与回放状态。
+
+**English:** Added Large view and Fill window to the docking workbench, moving plots and checks into the scrollable console while preserving controls, GO and pause. Esc restores the previous layout; resizing retains training, camera and replay state.
+
 ## v0.74 — 2026-10-29
 
 **中文：** 接入天和 V23、问天 V24、梦天 V25、神舟 V26、天舟 V27 新版模型；保留巡天、既有装配接口和太阳翼转轴。[模型核对](docs/v0.74-model-validation.json)。

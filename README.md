@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.74 · 作者 / Author: wenshuishi0528**
+**v0.76 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -60,7 +60,11 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.74**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
+训练场景新增“随机位置”：神舟在接口前方 50–500 米随机生成横向偏移与姿态，重新开始会重新抽取。飞行取消固定速度上限，辅助接近根据剩余距离制动；对接瞬间的高速撞击判定保留。
+
+交会对接画面右上角可切换“大视窗”或“铺满窗口”（浏览器内容区）；按 Esc 逐级恢复，训练与相机保持原状。
+
+源码、网页构建与本机运行版共用 **v0.76**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 

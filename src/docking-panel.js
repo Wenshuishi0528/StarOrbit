@@ -6,6 +6,7 @@ import {DockingTraining,DOCKING_SCENARIOS,DOCKING_GATE_RULES} from './docking-tr
 import {DockingRecorder,deriveDockingInstruments,predictDockingCoast} from './docking-instruments.js';
 import {createDockingModels,createDockingCamera} from './docking-models.js';
 import {dockingCSS,dockingMarkup,alignmentSVG,trendSVG,reportHTML,escapeHTML,signed} from './docking-workbench.js';
+import {installDockingDisplay} from './docking-display.js';
 
 const labels={f:'前进 W',b:'后退 S',l:'左移 A',r:'右移 D',u:'上移 R',d:'下移 F',rollL:'左滚转 Q',rollR:'右滚转 E',pitchU:'抬头 ↑',pitchD:'低头 ↓',yawL:'左偏航 ←',yawR:'右偏航 →',brake:'按住相对制动 Space'};
 const keys={KeyW:'f',KeyS:'b',KeyA:'l',KeyD:'r',KeyR:'u',KeyF:'d',KeyQ:'rollL',KeyE:'rollR',ArrowUp:'pitchU',ArrowDown:'pitchD',ArrowLeft:'yawL',ArrowRight:'yawR',Space:'brake'};
@@ -63,7 +64,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
  const recorder=new DockingRecorder({id:'alignment',...DOCKING_SCENARIOS.find(s=>s.id==='alignment'),limits:DOCKING_LIMITS});
  const training=new DockingTraining('alignment',{
   onStep(state,context){recorder.sample(state,context);if(state.status!=='flying')recorder.finish(state,context);},
-  onEvent(event){recorder.event(event);},
+  onEvent(event){if(event.type==='reset')recorder.reset({...event.detail.definition,limits:DOCKING_LIMITS,flightSpeedLimited:false});recorder.event(event);},
  });
  const held=new Set(),keyboard=new Set(),pointerControls=new Map();
  let paused=true,view='external',analysis='trend',disposed=false,frameId=0,previousWall=null,lastRead=0,lastChart=0,lastTrajectory=0,lastTrajectoryTime=-1,lastStatus='',lastWidth=0,lastHeight=0;
@@ -75,7 +76,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   if(!paused&&!training.finished)recorder.event({type:'pause',time:training.state.time,messageKey:'训练已暂停'});
   paused=true;replayPlaying=false;previousWall=null;clearInput();updateReadouts();
  }
- function finishRecord(){if(training.finished)recorder.finish(training.state,{mode:training.mode,phase:'finished',finishReason:training.finishReason});}
+ function finishRecord(){if(training.finished)recorder.finish(training.state,{mode:training.mode,phase:'finished',speedLimit:null,recommendedClosing:0,finishReason:training.finishReason});}
  function syncPose(){const state=displayState();chaser.position.fromArray(hcwToScene(state.position));chaser.quaternion.fromArray(state.quaternion||dockingQuaternion(state.attitude));chaser.updateMatrixWorld(true);}
  function fit(){
   syncPose();const sphere=new THREE.Box3().setFromObject(station).expandByObject(chaser).getBoundingSphere(new THREE.Sphere());
@@ -110,8 +111,8 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   const effectiveFine=replay?!!state.context?.command?.fine:training.mode==='manual'&&get('fine').checked;
   const m=deriveDockingInstruments(state,{fine:effectiveFine}),g=training.guidance(),shownMode=replay?state.context?.mode||'manual':training.mode;
   for(const [key,value] of Object.entries({distance:m.axialDistance.toFixed(2),closing:signed(m.axialClosing,3),right:signed(m.right)+' m',up:signed(m.up)+' m','right-velocity':signed(m.rightVelocity,3)+' m/s','up-velocity':signed(m.upVelocity,3)+' m/s',angle:m.attitudeErrorDeg.toFixed(2)+'° / '+m.angularSpeedDegPerSec.toFixed(2)+'°/s',lateral:m.lateralOffset.toFixed(2)+' m / '+m.lateralSpeed.toFixed(3)+' m/s',deltaV:m.deltaV.toFixed(3)+' m/s',time:m.time.toFixed(1)+' s'}))$(`[data-read="${key}"]`).textContent=value;
-  const advisoryLimit=replay?state.context?.speedLimit??m.recommendedClosing:g.speedLimit;
-  get('closing-box').dataset.alert=String(m.axialClosing>advisoryLimit+DOCKING_LIMITS.speedTolerance);get('alignment').innerHTML=alignmentSVG(m);
+  const advisoryLimit=replay?(state.context?.speedLimit===null?null:state.context?.speedLimit??m.recommendedClosing):g.speedLimit;
+  get('closing-box').dataset.alert=String(advisoryLimit!==null&&m.axialClosing>advisoryLimit+DOCKING_LIMITS.speedTolerance);get('alignment').innerHTML=alignmentSVG(m);
   get('start').textContent=t(paused?'开始 / 继续':'暂停训练');get('start').disabled=training.finished||replay;get('finish').disabled=training.finished||replay;
   for(const button of panel.querySelectorAll('[data-mode]')){button.setAttribute('aria-pressed',String(button.dataset.mode===shownMode));button.disabled=training.finished||replay;}
   for(const button of panel.querySelectorAll('[data-control]'))button.disabled=paused||training.finished||replay;
@@ -122,8 +123,8 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   get('mode-help').textContent=replay?t('回放只读取记录；退出后回到暂停的实时训练。'):t(modeHelp[training.mode]);
   get('phase').textContent=replay?t('记录回放')+' · '+t(modeNames[state.context?.mode]||'人工控制'):t(g.phaseKey)+' · '+t(modeNames[training.mode]);
   get('guidance').textContent=replay?t('当前显示记录时刻 {time} s',{time:state.time.toFixed(1)}):g.finished?t('打开回放与报告，查看接触条件、操作事件和速度变化。'):g.gate&&!['hold','retreat'].includes(g.mode)?
-   t('下一停靠点 {distance} m · 稳定 {stable}/{required} s · 建议 ≤ {speed} m/s',{distance:g.gate.distance,stable:g.gate.stableSeconds.toFixed(1),required:g.gate.requiredSeconds,speed:g.speedLimit.toFixed(2)}):
-   t('目标距离 {distance} m · 建议闭合速度 ≤ {speed} m/s',{distance:g.targetDistance.toFixed(1),speed:g.speedLimit.toFixed(2)});
+   t('下一停靠点 {distance} m · 稳定 {stable}/{required} s · 飞行不限速',{distance:g.gate.distance,stable:g.gate.stableSeconds.toFixed(1),required:g.gate.requiredSeconds}):
+   t('目标距离 {distance} m · 飞行不限速',{distance:g.targetDistance.toFixed(1)});
   get('go').disabled=!g.canRelease||replay;get('go').textContent=t(g.canRelease?'检查就绪 · GO 放行':'确认放行 GO');
   const rule=DOCKING_GATE_RULES.find(rule=>rule.distance===g.gate?.distance);
   get('gatechecks').hidden=replay||!rule||training.finished||['hold','retreat'].includes(g.mode)&&g.gate?.status==='approaching';
@@ -141,7 +142,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
  }
  function reset(scenario=get('scenario').value){
   pause();restoreManualPreferences();replay=false;replayPlaying=false;replaySamples=[];
-  const selected=DOCKING_SCENARIOS.find(s=>s.id===scenario);recorder.reset({...(selected||{id:'custom',initialDistance:Number(scenario)}),limits:DOCKING_LIMITS});training.reset(scenario);
+  const selected=DOCKING_SCENARIOS.find(s=>s.id===scenario);training.reset(scenario);
   if(selected)get('scenario').value=selected.id;
   get('brief').textContent=t(selected?.descriptionKey||'从指定距离开始进行近距离对接训练。');
   lastTrajectoryTime=-1;cachedSamples=recorder.samples;syncPose();fit();lastStatus='';selectAnalysis('trend');updateReadouts();
@@ -160,7 +161,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   if(training.finished||replay)return;if(!paused){pause();return;}
   paused=false;previousWall=null;clearInput();recorder.event({type:'resume',time:training.state.time,messageKey:'训练开始或继续'});renderer.domElement.focus({preventScroll:true});updateReadouts();
  };
- get('reset').onclick=()=>reset();get('scenario').onchange=()=>reset();
+ get('reset').onclick=()=>reset();get('scenario').onchange=()=>{reset();if(get('scenario').value==='random')setCamera('external');};
  get('finish').onclick=()=>{pause();training.finish('ended');finishRecord();selectAnalysis('review');updateReadouts();};
  for(const button of panel.querySelectorAll('[data-mode]'))button.onclick=()=>{clearInput();training.setMode(button.dataset.mode);updateReadouts();updateAnalysis();};
  get('go').onclick=()=>{if(training.releaseGate()){updateReadouts();updateAnalysis();}};
@@ -185,13 +186,14 @@ export function mountDockingPanel(container,sim,{templates,meta}){
  function resize(){
   // On narrow screens the viewport stays above the scrollable instruments;
   // plots/reports join that scroll area instead of overflowing onto controls.
-  const narrow=matchMedia('(max-width:900px)').matches,analysisNode=$('.dock-analysis'),destination=narrow?$('.dock-console'):$('.dock-stage');
+  const narrow=matchMedia('(max-width:900px)').matches,expanded=panel.classList.contains('dock-expanded'),analysisNode=$('.dock-analysis'),destination=narrow||expanded?$('.dock-console'):$('.dock-stage');
   if(analysisNode.parentElement!==destination)destination.append(analysisNode);
-  const checks=get('gatechecks'),checksDestination=narrow?$('.dock-console'):$('.dock-guidance');
-  if(checks.parentElement!==checksDestination){if(narrow)checksDestination.append(checks);else checksDestination.insertBefore(checks,get('warnings'));}
+  const checks=get('gatechecks'),checksDestination=narrow||expanded?$('.dock-console'):$('.dock-guidance');
+  if(checks.parentElement!==checksDestination){if(narrow||expanded)checksDestination.append(checks);else checksDestination.insertBefore(checks,get('warnings'));}
   const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h||w===lastWidth&&h===lastHeight)return;lastWidth=w;lastHeight=h;renderer.setSize(w,h,false);for(const camera of [external,onboard]){camera.aspect=w/h;camera.updateProjectionMatrix();}
  }
  const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(viewport);
+ const display=installDockingDisplay(container.closest('dialog'),panel,{t,clearInput});
  function updateTrajectories(wall){
   const state=displayState();predicted.visible=get('prediction').checked&&state.status==='flying';
   if(state.time===lastTrajectoryTime||wall-lastTrajectory<500&&lastTrajectoryTime>=0)return;
@@ -213,14 +215,15 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   updateTrajectories(wall);render();
  }
  function translate(){
+  display.refresh();
   for(const el of panel.querySelectorAll('[data-dock-text]'))el.textContent=t(el.dataset.dockText);
   renderer.domElement.setAttribute('aria-label',t('交会对接训练画面'));
   get('replay-time').setAttribute('aria-label',t('记录时间'));get('export-json').setAttribute('aria-label',t('导出 JSON 飞行记录'));get('export-csv').setAttribute('aria-label',t('导出 CSV 飞行记录'));
   const selected=DOCKING_SCENARIOS.find(s=>s.id===get('scenario').value);get('brief').textContent=t(selected?.descriptionKey||'从指定距离开始进行近距离对接训练。');lastStatus='';updateReadouts();updateAnalysis();
  }
  const unsubscribe=onLanguageChange(translate);translate();reset('alignment');setCamera('onboard');frameId=requestAnimationFrame(frame);
- return {pause,reset,setCamera,render,get state(){return training.state;},get cameraMode(){return view;},get camera(){return view==='onboard'?onboard:external;},get renderer(){return renderer;},get simulation(){return training;},get recorder(){return recorder;},get paused(){return paused;},get modelRoots(){return {station,chaser};},
+ return {pause,reset,setCamera,render,deactivate(){pause();display.reset();},get state(){return training.state;},get cameraMode(){return view;},get camera(){return view==='onboard'?onboard:external;},get renderer(){return renderer;},get simulation(){return training;},get recorder(){return recorder;},get paused(){return paused;},get modelRoots(){return {station,chaser};},
   step(seconds,command={}){training.advance(seconds,command);finishRecord();syncPose();updateReadouts();return training.state;},
-  dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerUp);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();},
+  dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();display.dispose();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerUp);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();},
  };
 }

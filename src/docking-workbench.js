@@ -9,6 +9,7 @@ export const dockingCSS=`
 .dock-session .dock-terminal{margin-left:auto;min-width:110px;font-size:12px;color:#9dd6e4}.dock-terminal[data-status=docked]{color:#a8f4ce}.dock-terminal[data-status=collision],.dock-terminal[data-status=corridor],.dock-terminal[data-status=lost]{color:#ffbd9a}
 .dock-brief{margin:0;color:#96afc5;font-size:11px;line-height:1.45}.dock-workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 364px;gap:10px}
 .dock-stage{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px}.dock-toolbar{font-size:11px}.dock-toolbar button{font-size:11px;min-height:29px;padding:4px 8px}.dock-toolbar input[type=range]{width:65px;margin:0}.dock-toolbar label{font-size:11px}
+.dock-size-controls{display:flex;gap:5px;margin-left:auto}.dock-expanded .dock-brief{display:none}.dock-expanded .dock-toolbar{flex-shrink:0}.dock-expanded .dock-console>.dock-gate-checks{order:5}
 .dock-viewport{min-height:170px;flex:1;position:relative;background:radial-gradient(ellipse at 50% 110%,#102c40,#020810 70%);border:1px solid #2b485c;border-radius:10px;overflow:hidden}.dock-viewport canvas{display:block;width:100%;height:100%;outline:none;touch-action:none}.dock-viewport canvas:focus-visible{outline:2px solid #76d7e5;outline-offset:-3px}
 .dock-hud{position:absolute;inset:0;pointer-events:none;font:11px/1.5 ui-monospace,monospace;color:#97e5ed}.dock-view-caption{position:absolute;left:12px;top:10px;background:#030b14b0;padding:4px 6px;border-radius:3px;max-width:55%}.dock-hud-numbers{position:absolute;right:12px;top:12px;text-align:right;color:#d8f7ff;white-space:pre-line;background:#030b14b0;padding:4px 6px;border-radius:3px}.dock-pause-caption{position:absolute;left:12px;bottom:10px;right:12px;color:#b6cadb;line-height:1.7;white-space:pre-line;background:#030b1490;padding:4px 6px;border-radius:3px}.dock-target{position:absolute;width:18px;height:18px;border:2px solid #ffd17b;border-radius:3px;transform:translate(-50%,-50%)}.dock-crosshair{position:absolute;left:50%;top:50%;width:70px;height:70px;transform:translate(-50%,-50%);border:1px solid #8fe6ee60;border-radius:50%}.dock-crosshair:before,.dock-crosshair:after{content:'';position:absolute;background:#8fe6ee80}.dock-crosshair:before{height:1px;width:100px;left:-15px;top:34px}.dock-crosshair:after{width:1px;height:100px;left:34px;top:-15px}
 .dock-guidance{display:grid;grid-template-columns:1fr auto;gap:6px 12px;background:#102635;border:1px solid #2e5064;border-radius:8px;padding:9px 11px;flex-shrink:0}.dock-guidance strong{font-size:13px;color:#d7f5ff;line-height:1.6}.dock-guidance p{margin:3px 0 0;font-size:11px;line-height:1.5;color:#a8c2d4}.dock-guidance button{align-self:center}.dock-guidance .dock-warning{color:#f5c58a;grid-column:1/-1;margin:0}.dock-gate-checks{display:flex;flex-wrap:wrap;gap:4px 12px;grid-column:1/-1;font-size:10px;color:#b5c7d5}.dock-gate-checks span[data-pass=true]{color:#92d7bc}.dock-gate-checks span[data-pass=false]{color:#efbd83}
@@ -24,6 +25,7 @@ export const dockingCSS=`
 @media(max-height:780px) and (min-width:901px){.dock-brief{display:none}.dock-analysis-body{height:110px}.dock-analysis svg{height:78px}.dock-viewport{min-height:140px}.dock-panel{gap:6px}.dock-console{gap:6px}.dock-box{padding:8px}.dock-mode-help{min-height:0}.dock-submetrics{gap:4px}.dock-thrusters button{min-height:27px;padding:3px 2px}.dock-control-head{gap:4px;margin-bottom:5px;font-size:10px}.dock-control-box h3{margin-bottom:5px}.dock-metric{padding:6px 9px}}
 @media(max-width:900px){.dock-workspace{grid-template-columns:1fr;grid-template-rows:minmax(250px,1fr) minmax(180px,1fr)}.dock-brief{display:none}.dock-stage{gap:6px;overflow:auto}.dock-viewport{min-height:120px;flex-shrink:0}.dock-analysis-body{height:140px}.dock-analysis svg{height:105px}.dock-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.dock-toolbar .dock-fov{display:none}.dock-control-box button{min-height:38px}.dock-guidance{padding:7px 9px}.dock-guidance strong{font-size:12px}.dock-session .dock-terminal{font-size:11px}}
 @media(max-width:560px){.dock-session{gap:5px}.dock-session button{font-size:11px;padding:5px 7px;min-height:29px}.dock-session select{max-width:165px;font-size:11px;padding:5px}.dock-session .dock-terminal{margin-left:0;flex:1}.dock-session label{font-size:10px}.dock-toolbar{gap:4px}.dock-toolbar button{font-size:10px;padding:4px 6px}.dock-hud-numbers{top:auto;bottom:42px;font-size:10px}.dock-guidance p{font-size:10px}.dock-analysis-tabs{padding:4px}.dock-analysis-tabs button{font-size:10px;min-height:25px;padding:3px 7px}.dock-view-caption{font-size:10px}}
+@media(max-width:900px){.dock-expanded .dock-workspace{grid-template-columns:1fr;grid-template-rows:minmax(250px,3fr) minmax(180px,2fr)}}
 `;
 
 const text=key=>`data-dock-text="${key}"`;
@@ -35,6 +37,7 @@ export const dockingMarkup=`
   <button type="button" data-role="finish" ${text('结束并复盘')}></button>
   <label><span ${text('训练速度')}></span><select data-role="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select></label>
   <div class="dock-terminal" role="status" aria-live="polite"></div>
+    <div class="dock-size-controls"><button type="button" data-role="large-view" aria-pressed="false"></button><button type="button" data-role="fill-window" aria-pressed="false"></button></div>
  </div>
  <p class="dock-brief" data-role="brief"></p>
  <div class="dock-workspace">
@@ -50,7 +53,7 @@ export const dockingMarkup=`
    <div class="dock-analysis">
     <div class="dock-analysis-tabs" role="tablist" data-role="analysis-tabs"><button type="button" data-analysis="trend" role="tab" aria-selected="true" ${text('接近曲线')}></button><button type="button" data-analysis="events" role="tab" aria-selected="false" tabindex="-1" ${text('事件记录')}></button><button type="button" data-analysis="review" role="tab" aria-selected="false" tabindex="-1" ${text('回放与报告')}></button></div>
     <div class="dock-analysis-body">
-     <div data-analysis-panel="trend" role="tabpanel"><div data-role="trend"></div><p class="dock-chart-note" ${text('青线：轴向闭合速度 · 虚线：建议速度上限 · 横轴：训练时间')}></p></div>
+     <div data-analysis-panel="trend" role="tabpanel"><div data-role="trend"></div><p class="dock-chart-note" ${text('青线：轴向闭合速度 · 虚线：辅助接近参考速度 · 横轴：训练时间')}></p></div>
      <div data-analysis-panel="events" role="tabpanel" hidden><ol class="dock-events" data-role="events"></ol></div>
      <div data-analysis-panel="review" role="tabpanel" hidden>
       <div class="dock-review-toolbar"><button type="button" data-role="replay"></button><button type="button" data-role="replay-play" hidden></button><button type="button" data-role="export-json">JSON</button><button type="button" data-role="export-csv">CSV</button></div>
@@ -71,6 +74,7 @@ export const dockingMarkup=`
     <p data-role="thrust"></p>
    </div>
    <details class="dock-box dock-settings"><summary ${text('训练规则与模型说明')}></summary>
+    <p ${text('飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。')}></p>
     <p ${text('先选场景，再选人工或辅助接近，按开始。辅助接近在 30 m 与 5 m 停靠点减速稳定，检查就绪后按 GO；任何手动推力会接管为人工模式。')}></p>
     <p ${text('暂停会冻结时间；保持位置会消耗推力抑制漂移；撤离会沿接口外侧退开。松开平移键仍有惯性，Space 按住相对制动。')}></p>
     <p ${text('开启角速率阻尼时，松开姿态键会逐渐停止转动；关闭后保留角速率。相机固定在机体上，金框仅是已知目标位置的辅助标记。')}></p>
@@ -104,7 +108,7 @@ export function trendSVG(samples,currentTime){
   }
   points.push(rows.at(-1));
  }
- const speedLimit=p=>p.context?.speedLimit??p.instruments.recommendedClosing;
+ const speedLimit=p=>p.context?.recommendedClosing??p.context?.speedLimit??p.instruments.recommendedClosing;
  const low=Math.min(0,...rows.map(p=>p.instruments.axialClosing)),high=Math.max(.06,...rows.map(p=>Math.max(p.instruments.axialClosing,speedLimit(p))))*1.15;
  const x=time=>pad+(time-left)/(right-left)*(w-pad-12),y=v=>8+(high-v)/(high-low)*62;
  const path=get=>points.map((p,i)=>(i?'L':'M')+x(p.time).toFixed(1)+','+y(get(p)).toFixed(1)).join(' ');
@@ -128,5 +132,6 @@ export function captureRows(metrics){
 export function reportHTML(summary,violations=0){
  const esc=escapeHTML,m=summary.contactMetrics;
  const rows=captureRows(m).map(row=>`<tr><td>${esc(t(row.key))}</td><td data-pass="${row.pass}">${row.value.toFixed(3)} ${row.unit}</td><td>${row.min===0?'0 ≤ v ':''}&lt; ${row.limit.toFixed(3)} ${row.unit}</td><td>${esc(t(row.pass?'通过':'未通过'))}</td></tr>`).join('');
- return `<p>${esc(t('本次训练：{time} s · 累计平移 Δv {dv} m/s',{time:summary.duration.toFixed(1),dv:summary.deltaV.toFixed(3)}))}</p><p>${esc(t('最高闭合速度 {speed} m/s · 超过建议速度 {time} s',{speed:summary.maxClosing.toFixed(3),time:summary.timeAboveSpeedLimit.toFixed(1)}))}</p><p>${esc(t('建议速度统计容差 ±{value} m/s',{value:DOCKING_LIMITS.speedTolerance.toFixed(3)}))}</p><p>${esc(t('未放行越过停靠点：{count} 次',{count:violations}))}</p>${m?`<p>${esc(t('接触前瞬间的捕获检查'))}</p><table class="dock-review-table"><thead><tr><th>${esc(t('检查项'))}</th><th>${esc(t('实测'))}</th><th>${esc(t('教学门限'))}</th><th>${esc(t('结果'))}</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>${esc(t('尚未接触目标接口；曲线与事件保留实际操作过程。'))}</p>`}<p>${esc(t('保留 {samples} 个采样 · {events} 条事件',{samples:summary.sampleCount,events:summary.eventCount}))}${summary.droppedSamples?' · '+esc(t('较早轨迹已移出记录，汇总仍覆盖全程')):''}</p>`;
+ const speedSummary=summary.flightSpeedLimited===false?esc(t('最高闭合速度 {speed} m/s · 飞行不限速',{speed:summary.maxClosing.toFixed(3)})):esc(t('最高闭合速度 {speed} m/s · 超过建议速度 {time} s',{speed:summary.maxClosing.toFixed(3),time:summary.timeAboveSpeedLimit.toFixed(1)}));
+ return `<p>${esc(t('本次训练：{time} s · 累计平移 Δv {dv} m/s',{time:summary.duration.toFixed(1),dv:summary.deltaV.toFixed(3)}))}</p><p>${speedSummary}</p><p>${esc(t('未放行越过停靠点：{count} 次',{count:violations}))}</p>${m?`<p>${esc(t('接触前瞬间的捕获检查'))}</p><table class="dock-review-table"><thead><tr><th>${esc(t('检查项'))}</th><th>${esc(t('实测'))}</th><th>${esc(t('教学门限'))}</th><th>${esc(t('结果'))}</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>${esc(t('尚未接触目标接口；曲线与事件保留实际操作过程。'))}</p>`}<p>${esc(t('保留 {samples} 个采样 · {events} 条事件',{samples:summary.sampleCount,events:summary.eventCount}))}${summary.droppedSamples?' · '+esc(t('较早轨迹已移出记录，汇总仍覆盖全程')):''}</p>`;
 }

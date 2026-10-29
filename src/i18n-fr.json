@@ -1130,5 +1130,17 @@
   "自动重试已暂缓；重新联网后继续，也可手动检查。": "Les essais automatiques sont suspendus jusqu’au retour de la connexion ; la vérification manuelle reste disponible.",
   "三维图形暂不可用": "Graphismes 3D indisponibles",
   "浏览器未能启动 WebGL 2。请重新打开页面，或换用支持三维图形的浏览器。现有设置和下载数据已保留。": "Le navigateur ne peut pas démarrer WebGL 2. Rouvrez la page ou utilisez un navigateur prenant en charge les graphismes 3D. Vos réglages et données téléchargées sont conservés.",
-  "连接中断，正在继续未完成的 NASA 分段…": "Connexion interrompue ; reprise des segments NASA restants…"
+  "连接中断，正在继续未完成的 NASA 分段…": "Connexion interrompue ; reprise des segments NASA restants…",
+  "大视窗": "Grande vue",
+  "标准视窗": "Vue standard",
+  "铺满窗口": "Remplir la fenêtre",
+  "退出铺满": "Rétablir la fenêtre",
+  "铺满浏览器内容区，按 Esc 恢复": "Remplir la zone du navigateur ; Échap pour rétablir",
+  "随机位置": "Position aléatoire",
+  "在接口前方 50–500 m 随机生成位置与姿态；重新开始会重新抽取。": "Position et attitude aléatoires à 50–500 m devant le port ; recommencer pour un nouveau tirage.",
+  "下一停靠点 {distance} m · 稳定 {stable}/{required} s · 飞行不限速": "Prochain arrêt {distance} m · Stable {stable}/{required} s · Vitesse de vol non plafonnée",
+  "目标距离 {distance} m · 飞行不限速": "Distance cible {distance} m · Vitesse de vol non plafonnée",
+  "青线：轴向闭合速度 · 虚线：辅助接近参考速度 · 横轴：训练时间": "Cyan : vitesse de rapprochement axiale · Pointillés : référence d’approche assistée · Axe X : temps",
+  "最高闭合速度 {speed} m/s · 飞行不限速": "Vitesse de rapprochement maximale {speed} m/s · Vitesse de vol non plafonnée",
+  "飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。": "Aucun plafond fixe de vitesse en vol. L’assistance freine selon la distance restante ; les critères d’arrêt et de collision restent actifs."
 }

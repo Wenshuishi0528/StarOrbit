@@ -105,11 +105,34 @@ test('training to recorder to report preserves pre-capture speed and does not fa
  }
 });
 
-test('actual advisory overspeed still accumulates, while an operator-ended run has no capture verdict',()=>{
+test('actual advisory overspeed still accumulates for legacy records, while an operator-ended run has no capture verdict',()=>{
  const recorder=new DockingRecorder(),state=dockingInitial(50),speed=.1+DOCKING_LIMITS.speedTolerance+.005;
  recorder.sample({...state,velocity:[0,-speed,0]},{speedLimit:.1});
  recorder.finish({...state,time:1,velocity:[0,-speed,0]},{speedLimit:.1,finishReason:'ended'});
  const summary=recorder.summary(),html=reportHTML(summary);
  assert.equal(summary.timeAboveSpeedLimit,1);assert.equal(summary.contactMetrics,null);
  assert.match(html,/尚未接触目标接口/);assert.doesNotMatch(html,/接触前瞬间的捕获检查|<table/);
+});
+
+test('unrestricted flight records null caps and actual randomized initial conditions',()=>{
+ const recorder=new DockingRecorder();
+ const session=new DockingTraining('random',{
+  random:()=>.7,
+  onEvent:event=>{if(event.type==='reset')recorder.reset(event.detail.definition);recorder.event(event);},
+  onStep:(state,context)=>recorder.sample(state,context),
+ });
+ const initial=structuredClone(session.state);
+ session.state.velocity=[0,-2,0];session.advance(1);
+ const record=JSON.parse(recorder.exportJSON()),html=reportHTML(recorder.summary());
+ assert.deepEqual(record.scenario.position,initial.position);
+ assert.deepEqual(record.samples[0].position,initial.position);
+ assert(record.scenario.attitude.every((v,i)=>Math.abs(v-initial.attitude[i])<1e-10));
+ assert.equal(record.samples[0].context.speedLimit,null);
+ assert.equal(record.summary.timeAboveSpeedLimit,0);
+ assert.equal(record.summary.flightSpeedLimited,false);
+ assert.match(html,/飞行不限速/);assert.doesNotMatch(html,/超过建议速度/);
+ const csv=recorder.exportCSV().split('\r\n'),header=csv.find(row=>row.startsWith('time_s,'));
+ const limitColumn=header.split(',').indexOf('speed_limit_m_s');
+ assert.equal(csv[csv.indexOf(header)+1].split(',')[limitColumn],'','CSV must leave an unlimited cap blank');
+ assert.doesNotMatch(trendSVG(record.samples,session.state.time),/NaN|Infinity/);
 });

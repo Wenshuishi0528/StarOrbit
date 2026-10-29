@@ -25,7 +25,7 @@ export const DOCKING_RECORD_SCHEMA=freeze({
  model:'Circular 400 km reference orbit; ideal rate-controlled attitude; simulated navigation truth',
  frames:{position:'RTN: R radial outward, T along track, N orbit normal',velocity:'Time derivative of RTN position in the rotating reference frame',port:'X=T outward from target port, Y=N right, Z=R up',quaternion:'[x,y,z,w], body to target-port frame',attitude:'Rz(yaw) Ry(pitch) Rx(roll)',angularVelocity:'Body axes, relative to target-port frame'},
  units:{time:'s from scenario start',position:'m',velocity:'m/s',deltaV:'m/s',attitude:'deg',angularVelocity:'rad/s',angularRateDegPerSec:'deg/s',contactAngle:'deg',contactAngularSpeed:'rad/s',command:'Normalized translation and rotation commands in [-1,1]'},
- conventions:{axialClosing:'Positive towards the target port; -vT',losClosing:'Positive when full port-to-port range decreases',right:'Positive chaser displacement along target-port +Y; not the camera target-marker direction',up:'Positive chaser displacement along target-port +Z',idealStoppingDistance:'Axial v²/(2a), ignores HCW coupling and control settling; not a safe stopping guarantee',advisorySpeedStatistics:`Above-limit duration counts axial closing greater than the suggested limit plus ${DOCKING_LIMITS.speedTolerance} m/s; capture limits remain strict`},
+ conventions:{axialClosing:'Positive towards the target port; -vT',losClosing:'Positive when full port-to-port range decreases',right:'Positive chaser displacement along target-port +Y; not the camera target-marker direction',up:'Positive chaser displacement along target-port +Z',idealStoppingDistance:'Axial v²/(2a), ignores HCW coupling and control settling; not a safe stopping guarantee',advisorySpeedStatistics:`A null speedLimit disables flight overspeed statistics. Above-limit duration counts axial closing greater than the suggested limit plus ${DOCKING_LIMITS.speedTolerance} m/s; capture limits remain strict`},
 });
 
 /** All signed offsets are in the target-port frame, not the rotated body frame. */
@@ -78,7 +78,7 @@ function csvCell(value){
  return /[",\r\n]/u.test(text)?'"'+text.replaceAll('"','""')+'"':text;
 }
 const csvRow=values=>values.map(csvCell).join(',');
-const finiteLimit=(value,fallback)=>Number.isFinite(value)&&value>=0?value:fallback;
+const finiteLimit=(value,fallback)=>value===null?null:Number.isFinite(value)&&value>=0?value:fallback;
 
 export class DockingRecorder {
  constructor(scenarioMetadata={}, {maxSamples=7200,sampleInterval=.2,maxEvents=2000}={}){
@@ -99,7 +99,9 @@ export class DockingRecorder {
   if(previous&&previous.exceeding)s.timeAboveSpeedLimit+=Math.max(0,time-previous.time);
   if(s.startTime===null)s.startTime=time;
   s.endTime=time;s.status=state.status;s.deltaV=state.deltaV;
-  this._lastObservation={time,exceeding:instruments.axialClosing>finiteLimit(context.speedLimit,instruments.recommendedClosing)+DOCKING_LIMITS.speedTolerance};
+  const limit=finiteLimit(context.speedLimit,instruments.recommendedClosing);
+  if(limit===null)s.flightSpeedLimited=false;
+  this._lastObservation={time,exceeding:limit!==null&&instruments.axialClosing>limit+DOCKING_LIMITS.speedTolerance};
   // Capture clamps the live velocity to zero. Statistics must include the pre-contact state.
   const observed=state.impactState?deriveDockingInstruments(state.impactState):instruments;
   for(const [key,value]of Object.entries({maxClosing:observed.axialClosing,maxSpeed:observed.speed,maxLateralOffset:observed.lateralOffset,maxLateralSpeed:observed.lateralSpeed,maxAttitudeErrorDeg:observed.attitudeErrorDeg,maxAngularSpeedDegPerSec:observed.angularSpeedDegPerSec}))s[key]=Math.max(s[key],value);
@@ -108,7 +110,9 @@ export class DockingRecorder {
  }
  _sample(state,context={},force=false){
   if(this._finished)return false;
-  const instruments=deriveDockingInstruments(state,{fine:!!context.command?.fine});this._observe(state,context,instruments);
+  const instruments=deriveDockingInstruments(state,{fine:!!context.command?.fine});
+  if(Number.isFinite(context.recommendedClosing))instruments.recommendedClosing=context.recommendedClosing;
+  this._observe(state,context,instruments);
   if(!force&&this._nextSampleTime!==null&&state.time+1e-9<this._nextSampleTime)return false;
   const record=freeze({time:state.time,position:[...state.position],velocity:[...state.velocity],quaternion:orientation(state),attitude:[...instruments.attitudeDeg],angularVelocity:[...(state.angularVelocity||[0,0,0])],deltaV:state.deltaV,status:state.status,instruments,context:copy(context)});
   if(this._samples.last()?.time===state.time)this._samples.replaceLast(record);else this._samples.push(record);

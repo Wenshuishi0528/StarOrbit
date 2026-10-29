@@ -1,6 +1,6 @@
 import {
  DOCKING_STEP,DOCKING_RATE,DOCKING_THRUST,DOCKING_LIMITS,
- dockingInitial,setDockingAttitude,dockingMetrics,dockingSpeedLimit,dockingCorridorRadius,
+ dockingInitial,setDockingAttitude,dockingMetrics,dockingCorridorRadius,
  hcwToScene,rotateDockingVector,stepDocking,
 } from './docking-physics.js';
 
@@ -10,6 +10,7 @@ const freezeScenario=scenario=>Object.freeze({...scenario,position:Object.freeze
 
 // Reproducible exercises and all limits below are teaching rules, not mission procedures.
 export const DOCKING_SCENARIOS=Object.freeze([
+ freezeScenario({id:'random',nameKey:'随机位置',descriptionKey:'在接口前方 50–500 m 随机生成位置与姿态；重新开始会重新抽取。',initialDistance:200,position:[0,200,0],velocity:[0,0,0],attitude:[0,0,0]}),
  freezeScenario({id:'alignment',nameKey:'末段对准',descriptionKey:'从 12 m 开始，对准接口并完成末段捕获。',initialDistance:12,position:[.15,12,-.2],velocity:[0,-.03,0],attitude:[0,1.5,-1.5]}),
  freezeScenario({id:'approach',nameKey:'标准接近',descriptionKey:'从 200 m 接近，在 30 m 与 5 m 停靠点逐段放行。',initialDistance:200,position:[0,200,0],velocity:[0,0,0],attitude:[0,0,0]}),
  freezeScenario({id:'recovery',nameKey:'偏差恢复',descriptionKey:'从 50 m 开始，修正横向偏差与姿态后接近。',initialDistance:50,position:[1.5,50,-1.2],velocity:[.01,-.08,-.015],attitude:[1.5,3,-2]}),
@@ -30,7 +31,7 @@ function manualCommand(input={}){
 }
 const hasManualCommand=command=>command.brake||command.translation.some(value=>value!==0)||command.rotation.some(value=>value!==0);
 
-function resolveScenario(value){
+function resolveScenario(value,random){
  if(typeof value==='number'){
   const distance=[50,200,500].includes(value)?value:200;
   if(distance===200)return DOCKING_SCENARIOS.find(scenario=>scenario.id==='approach');
@@ -38,6 +39,10 @@ function resolveScenario(value){
  }
  const scenario=DOCKING_SCENARIOS.find(candidate=>candidate.id===value);
  if(!scenario)throw new RangeError(`Unknown docking scenario: ${String(value)}`);
+ if(value==='random'){
+  const axial=50+450*random(),radius=axial*.25*Math.sqrt(random()),azimuth=2*Math.PI*random();
+  return freezeScenario({...scenario,initialDistance:axial,position:[radius*Math.cos(azimuth),axial,radius*Math.sin(azimuth)],attitude:[0,1,2].map(()=>20*random()-10)});
+ }
  return scenario;
 }
 
@@ -51,20 +56,20 @@ function alignmentCommand(state){
 }
 
 export class DockingTraining{
- constructor(scenarioId='approach',{onStep,onEvent}={}){
-  this.onStep=onStep;this.onEvent=onEvent;
+ constructor(scenarioId='approach',{onStep,onEvent,random=Math.random}={}){
+  this.onStep=onStep;this.onEvent=onEvent;this.random=random;
   this.reset(scenarioId);
  }
 
  reset(scenarioIdOrDistance=this._scenarioInput??'approach'){
-  const scenario=resolveScenario(scenarioIdOrDistance);
+  const scenario=resolveScenario(scenarioIdOrDistance,this.random);
   this._scenarioInput=scenarioIdOrDistance;this.scenario=scenario;
   this.state=setDockingAttitude({...dockingInitial(scenario.initialDistance),position:[...scenario.position],velocity:[...scenario.velocity]},scenario.attitude);
   this.mode='manual';this.finished=false;this.finishReason=null;this.remainder=0;
   this.violations=[];this._holdPosition=null;this._retreatPosition=null;this._retreatReached=false;
   this._gates=DOCKING_GATE_RULES.filter(gate=>gate.distance<scenario.initialDistance).map(gate=>({...gate}));
   this._gateIndex=0;this._stableSeconds=0;this._gateWasReady=false;
-  this._emit('reset','训练场景已就绪',{scenario:scenario.id,distance:scenario.initialDistance});
+  this._emit('reset','训练场景已就绪',{scenario:scenario.id,distance:scenario.initialDistance,definition:scenario});
   this._sample(neutralCommand(),true);
   return this.state;
  }
@@ -119,7 +124,7 @@ export class DockingTraining{
  }
 
  guidance(){
-  const metrics=dockingMetrics(this.state),rule=this._gates[this._gateIndex],speedLimit=this._advisorySpeedLimit();
+  const metrics=dockingMetrics(this.state),rule=this._gates[this._gateIndex],speedLimit=null;
   const gate=rule?{distance:rule.distance,status:this._gateReady(rule)?'ready':Math.abs(metrics.axial-rule.distance)<=rule.positionTolerance?'stabilizing':'approaching',stableSeconds:this._stableSeconds,requiredSeconds:rule.stableSeconds}:null;
   const canRelease=!this.finished&&this.state.status==='flying'&&!!rule&&this._gateReady(rule);
   let phase='approach';
@@ -129,7 +134,6 @@ export class DockingTraining{
   else if(!rule&&metrics.axial<=5.5)phase='final';
   const warnings=[];
   if(!this.finished){
-   if(-this.state.velocity[1]>speedLimit+DOCKING_LIMITS.speedTolerance)warnings.push({key:'接近速度超过本阶段教学上限',params:{speed:-this.state.velocity[1],limit:speedLimit},severity:'warning'});
    if(gate?.status==='ready')warnings.push({key:'正在等待停靠点放行',params:{distance:gate.distance},severity:'info'});
    if(metrics.lateral>this._alignmentLateralLimit())warnings.push({key:'横向偏差较大，先修正对准',params:{lateral:metrics.lateral},severity:'warning'});
    if(metrics.angle>3||norm(this.state.angularVelocity)>DOCKING_LIMITS.captureAngularSpeed)warnings.push({key:'姿态尚未稳定，先完成姿态对准',params:{angle:metrics.angle,angularSpeed:norm(this.state.angularVelocity)},severity:'info'});
@@ -148,20 +152,12 @@ export class DockingTraining{
   return this.state.position[1]<=5.5?.15:Math.max(.2,Math.min(2,dockingCorridorRadius(this.state.position[1])*.65));
  }
 
- _advisorySpeedLimit(){
-  // A qualified hold may be slightly outside its nominal plane. Apply the next
-  // leg's cap as soon as GO clears it, rather than accelerating then braking at
-  // the plane (for example, 5.1 m must already use the final-approach limit).
-  const positionLimit=dockingSpeedLimit(this.state.position[1]);
-  const legLimit=dockingSpeedLimit((this._gates[this._gateIndex]?.distance??0)+1);
-  return this.mode==='retreat'||this.mode==='hold'?positionLimit:Math.min(positionLimit,legLimit);
- }
-
  _desiredVelocity(target){
   const error=target.map((value,i)=>value-this.state.position[i]);
-  const axialLimit=this.mode==='retreat'?.3:this._advisorySpeedLimit();
-  const limits=[.12,axialLimit,.12];
-  const desired=error.map((value,i)=>clamp(value*(i===1?.12:.25),-limits[i],limits[i]));
+  // No fixed cruise-speed cap. Reserve thrust for HCW compensation and
+  // simultaneous axes; the stopping envelope naturally slows near each target.
+  const braking=DOCKING_THRUST*.2;
+  const desired=error.map((value,i)=>Math.sign(value)*Math.min(Math.abs(value)*(i===1?.12:.25),Math.sqrt(2*braking*Math.abs(value))));
   if(this.mode==='approach'&&desired[1]<0){
    const metrics=dockingMetrics(this.state);
    if(metrics.lateral>this._alignmentLateralLimit()||metrics.angle>3||norm(this.state.angularVelocity)>DOCKING_LIMITS.captureAngularSpeed)desired[1]=0;
@@ -216,7 +212,7 @@ export class DockingTraining{
 
  _sample(command,initial=false){
   if(!this.onStep)return;
-  const {phase,gate,speedLimit,warnings}=this.guidance();
-  this.onStep(this.state,{mode:this.mode,phase,command,scenario:this.scenario.id,gate,speedLimit,warnings,initial});
+  const {phase,gate,speedLimit,recommendedClosing,warnings}=this.guidance();
+  this.onStep(this.state,{mode:this.mode,phase,command,scenario:this.scenario.id,gate,speedLimit,recommendedClosing,warnings,initial});
  }
 }
