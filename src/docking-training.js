@@ -56,8 +56,9 @@ function alignmentCommand(state){
 }
 
 export class DockingTraining{
- constructor(scenarioId='approach',{onStep,onEvent,random=Math.random}={}){
+ constructor(scenarioId='approach',{onStep,onEvent,random=Math.random,assistanceEnabled=true,contactSpeed=DOCKING_LIMITS.captureSpeed}={}){
   this.onStep=onStep;this.onEvent=onEvent;this.random=random;
+  this.assistanceEnabled=!!assistanceEnabled;this.contactSpeed=this._validContactSpeed(contactSpeed);
   this.reset(scenarioId);
  }
 
@@ -65,18 +66,40 @@ export class DockingTraining{
   const scenario=resolveScenario(scenarioIdOrDistance,this.random);
   this._scenarioInput=scenarioIdOrDistance;this.scenario=scenario;
   this.state=setDockingAttitude({...dockingInitial(scenario.initialDistance),position:[...scenario.position],velocity:[...scenario.velocity]},scenario.attitude);
+  this.state.rules={assistanceEnabled:this.assistanceEnabled,contactSpeed:this.contactSpeed};
   this.mode='manual';this.finished=false;this.finishReason=null;this.remainder=0;
   this.violations=[];this._holdPosition=null;this._retreatPosition=null;this._retreatReached=false;
-  this._gates=DOCKING_GATE_RULES.filter(gate=>gate.distance<scenario.initialDistance).map(gate=>({...gate}));
+  this._gates=this.assistanceEnabled?DOCKING_GATE_RULES.filter(gate=>gate.distance<scenario.initialDistance).map(gate=>({...gate})):[];
   this._gateIndex=0;this._stableSeconds=0;this._gateWasReady=false;
-  this._emit('reset','训练场景已就绪',{scenario:scenario.id,distance:scenario.initialDistance,definition:scenario});
-  this._sample(neutralCommand(),true);
+  this._emit('reset','训练场景已就绪',{scenario:scenario.id,distance:scenario.initialDistance,definition:{...scenario,rules:{...this.state.rules}}});
+  this._sample({...neutralCommand(),angularDamping:this.assistanceEnabled},true);
   return this.state;
+ }
+
+ _validContactSpeed(value){
+  if(typeof value!=='number'||!Number.isFinite(value)||value<=0)throw new RangeError('Invalid docking contact speed');
+  return value;
+ }
+ setAssistance(enabled){
+  enabled=!!enabled;if(this.finished||enabled===this.assistanceEnabled)return false;
+  this.setMode('manual');this.assistanceEnabled=enabled;
+  this.state.rules={assistanceEnabled:enabled,contactSpeed:this.contactSpeed};
+  this._holdPosition=null;this._retreatPosition=null;
+  this._gates=enabled?DOCKING_GATE_RULES.filter(g=>g.distance<this.state.position[1]-g.positionTolerance).map(g=>({...g})):[];
+  this._gateIndex=0;this._stableSeconds=0;this._gateWasReady=false;
+  this._emit('assistance',enabled?'已开启新手辅助':'已关闭新手辅助 · 纯手动飞行',{enabled});
+  this._sample({...neutralCommand(),angularDamping:enabled});return true;
+ }
+ setContactSpeed(value){
+  value=this._validContactSpeed(value);if(this.finished||value===this.contactSpeed)return false;
+  this.contactSpeed=value;this.state.rules={assistanceEnabled:this.assistanceEnabled,contactSpeed:value};
+  this._emit('contact-speed','对接限速设为 {speed} m/s',{speed:value});
+  this._sample({...neutralCommand(),angularDamping:this.assistanceEnabled});return true;
  }
 
  setMode(mode,{reason='pilot'}={}){
   if(!Object.hasOwn(modeMessages,mode))throw new RangeError(`Unknown docking control mode: ${String(mode)}`);
-  if(this.finished||this.state.status!=='flying'||this.mode===mode)return false;
+  if(this.finished||this.state.status!=='flying'||this.mode===mode||!this.assistanceEnabled&&mode!=='manual')return false;
   const previousMode=this.mode;this.mode=mode;
   if(mode==='hold')this._holdPosition=[...this.state.position];
   if(mode==='retreat'){
@@ -109,6 +132,7 @@ export class DockingTraining{
   if(this.finished)return this.state;
   if(this.state.status!=='flying'){this.finish(this.state.status);return this.state;}
   const manual=manualCommand(manualInput);
+  if(!this.assistanceEnabled){manual.angularDamping=false;manual.brake=false;}
   if(hasManualCommand(manual))this.setMode('manual',{reason:'manual-input'});
   this.remainder+=seconds;
   while(this.remainder>=DOCKING_STEP-1e-12&&!this.finished){
@@ -133,13 +157,13 @@ export class DockingTraining{
   else if(rule&&Math.abs(metrics.axial-rule.distance)<=Math.max(2,rule.positionTolerance))phase='gate';
   else if(!rule&&metrics.axial<=5.5)phase='final';
   const warnings=[];
-  if(!this.finished){
+  if(!this.finished&&this.assistanceEnabled){
    if(gate?.status==='ready')warnings.push({key:'正在等待停靠点放行',params:{distance:gate.distance},severity:'info'});
    if(metrics.lateral>this._alignmentLateralLimit())warnings.push({key:'横向偏差较大，先修正对准',params:{lateral:metrics.lateral},severity:'warning'});
    if(metrics.angle>3||norm(this.state.angularVelocity)>DOCKING_LIMITS.captureAngularSpeed)warnings.push({key:'姿态尚未稳定，先完成姿态对准',params:{angle:metrics.angle,angularSpeed:norm(this.state.angularVelocity)},severity:'info'});
   }
   const target=this._targetPosition(),desired=this._desiredVelocity(target);
-  return {mode:this.mode,phase,phaseKey:phaseMessages[phase],targetDistance:target[1],recommendedClosing:this.finished||this.mode==='hold'||this.mode==='retreat'?0:Math.max(0,-desired[1]),speedLimit,gate,canRelease,warnings,finished:this.finished,finishReason:this.finishReason,violations:this.violations.length};
+  return {mode:this.mode,phase,phaseKey:phaseMessages[phase],targetDistance:target[1],recommendedClosing:!this.assistanceEnabled||this.finished||this.mode==='hold'||this.mode==='retreat'?0:Math.max(0,-desired[1]),speedLimit,gate,canRelease,warnings,finished:this.finished,finishReason:this.finishReason,violations:this.violations.length};
  }
 
  _targetPosition(){
@@ -154,6 +178,8 @@ export class DockingTraining{
 
  _desiredVelocity(target){
   const error=target.map((value,i)=>value-this.state.position[i]);
+  // Reduce the final creep for a stricter user-selected contact threshold.
+  if(this.mode==='approach'&&!this._gates[this._gateIndex])error[1]=-Math.max(0,this.state.position[1]-DOCKING_LIMITS.capturePlane)-Math.min(DOCKING_LIMITS.capturePlane,this.contactSpeed*.3/.12);
   // No fixed cruise-speed cap. Reserve thrust for HCW compensation and
   // simultaneous axes; the stopping envelope naturally slows near each target.
   const braking=DOCKING_THRUST*.2;
@@ -213,6 +239,6 @@ export class DockingTraining{
  _sample(command,initial=false){
   if(!this.onStep)return;
   const {phase,gate,speedLimit,recommendedClosing,warnings}=this.guidance();
-  this.onStep(this.state,{mode:this.mode,phase,command,scenario:this.scenario.id,gate,speedLimit,recommendedClosing,warnings,initial});
+  this.onStep(this.state,{mode:this.mode,phase,command,scenario:this.scenario.id,assistanceEnabled:this.assistanceEnabled,contactSpeed:this.contactSpeed,gate,speedLimit,recommendedClosing,warnings,initial});
  }
 }

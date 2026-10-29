@@ -5,7 +5,7 @@ export const dockingCSS=`
 .dock-panel{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;color:#dce8f6;font-size:12px}
 .dock-panel button,.dock-panel select{font-size:12px}.dock-panel button{min-height:32px;padding:6px 10px}.dock-panel button:disabled{opacity:.42;cursor:not-allowed}
 .dock-panel [hidden]{display:none!important}.dock-panel button[aria-pressed=true]{background:#174e60;border-color:#76d7e5;color:#e4fcff}
-.dock-session,.dock-toolbar,.dock-modes{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.dock-session{flex-shrink:0}.dock-session label,.dock-toolbar label{display:flex;align-items:center;gap:5px}.dock-session select{max-width:235px}.dock-session .dock-primary{background:#1d6573;border-color:#76d7e5}
+.dock-session,.dock-toolbar,.dock-modes{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.dock-session{flex-shrink:0;column-gap:12px}.dock-session label,.dock-toolbar label{display:flex;align-items:center;gap:5px}.dock-session select{max-width:235px}.dock-session .dock-primary{background:#1d6573;border-color:#76d7e5}
 .dock-session .dock-terminal{margin-left:auto;min-width:110px;font-size:12px;color:#9dd6e4}.dock-terminal[data-status=docked]{color:#a8f4ce}.dock-terminal[data-status=collision],.dock-terminal[data-status=corridor],.dock-terminal[data-status=lost]{color:#ffbd9a}
 .dock-brief{margin:0;color:#96afc5;font-size:11px;line-height:1.45}.dock-workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 364px;gap:10px}
 .dock-stage{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px}.dock-toolbar{font-size:11px}.dock-toolbar button{font-size:11px;min-height:29px;padding:4px 8px}.dock-toolbar input[type=range]{width:65px;margin:0}.dock-toolbar label{font-size:11px}
@@ -36,6 +36,8 @@ export const dockingMarkup=`
   <button type="button" data-role="reset" ${text('重新开始')}></button>
   <button type="button" data-role="finish" ${text('结束并复盘')}></button>
   <label><span ${text('训练速度')}></span><select data-role="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select></label>
+  <label><input type="checkbox" data-role="assistance" checked><span ${text('新手辅助')}></span></label>
+  <label><span ${text('对接限速（m/s）')}></span><input type="number" data-role="contact-speed" value="0.15" min="0" step="any" style="width:76px"></label>
   <div class="dock-terminal" role="status" aria-live="polite"></div>
     <div class="dock-size-controls"><button type="button" data-role="large-view" aria-pressed="false"></button><button type="button" data-role="fill-window" aria-pressed="false"></button></div>
  </div>
@@ -70,11 +72,12 @@ export const dockingMarkup=`
    <div class="dock-box dock-telemetry"><div class="dock-submetrics"><div><span ${text('姿态夹角 / 合成角速率')}></span><b data-read="angle"></b></div><div><span ${text('横向偏差 / 横向速度')}></span><b data-read="lateral"></b></div><div><span ${text('累计平移 Δv')}></span><b data-read="deltaV"></b></div><div><span ${text('训练时间')}></span><b data-read="time"></b></div></div><div class="dock-attitude" data-role="attitude"></div></div>
    <div class="dock-box dock-manual">
     <div class="dock-control-head"><label><input type="checkbox" data-role="fine"><span ${text('精细推力')}></span></label><label><input type="checkbox" data-role="damping" checked><span ${text('角速率阻尼')}></span></label><span ${text('仅用于人工控制')}></span></div>
-    <div class="dock-bottom"><div class="dock-control-box"><h3 ${text('机体系平移 · 按住施力')}></h3><div class="dock-thrusters" data-controls="translation"></div></div><div class="dock-control-box"><h3 ${text('姿态角速率 · 按住控制')}></h3><div class="dock-thrusters" data-controls="rotation"></div></div></div>
+    <div class="dock-bottom"><div class="dock-control-box"><h3 ${text('机体系平移 · 按住施力')}></h3><div class="dock-thrusters" data-controls="translation"></div></div><div class="dock-control-box"><h3 data-role="rotation-label" ${text('姿态角速率 · 按住控制')}></h3><div class="dock-thrusters" data-controls="rotation"></div></div></div>
     <p data-role="thrust"></p>
    </div>
    <details class="dock-box dock-settings"><summary ${text('训练规则与模型说明')}></summary>
-    <p ${text('飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。')}></p>
+    <p ${text('新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。')}></p>
+    <p ${text('对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。')}></p>
     <p ${text('先选场景，再选人工或辅助接近，按开始。辅助接近在 30 m 与 5 m 停靠点减速稳定，检查就绪后按 GO；任何手动推力会接管为人工模式。')}></p>
     <p ${text('暂停会冻结时间；保持位置会消耗推力抑制漂移；撤离会沿接口外侧退开。松开平移键仍有惯性，Space 按住相对制动。')}></p>
     <p ${text('开启角速率阻尼时，松开姿态键会逐渐停止转动；关闭后保留角速率。相机固定在机体上，金框仅是已知目标位置的辅助标记。')}></p>
@@ -117,7 +120,7 @@ export function trendSVG(samples,currentTime){
 
 export function captureRows(metrics){
  if(!metrics)return [];
- const limits=DOCKING_LIMITS;
+ const limits=metrics.captureLimits||DOCKING_LIMITS;
  return [
   ['接口距离',metrics.distance,limits.captureDistance,'m','distance'],
   ['横向偏差',metrics.lateral,limits.captureLateral,'m','lateral'],
@@ -126,12 +129,12 @@ export function captureRows(metrics){
   ['横向速度',metrics.lateralSpeed,limits.captureLateralSpeed,'m/s','lateralSpeed'],
   ['姿态误差',metrics.angle,limits.captureAngle,'°','angle'],
   ['合成角速率',metrics.angularSpeed*180/Math.PI,limits.captureAngularSpeed*180/Math.PI,'°/s','angularSpeed'],
- ].map(([key,value,limit,unit,check])=>({key,value,limit,unit,min:check==='axialClosing'?0:null,pass:metrics.captureChecks?.[check]??(value<limit&&(check!=='axialClosing'||value>=0))}));
+ ].filter(row=>metrics.assistanceEnabled!==false||['distance','lateral','speed'].includes(row[4])).map(([key,value,limit,unit,check])=>({key,value,limit,unit,inclusive:metrics.speedInclusive&&['speed','axialClosing'].includes(check),min:check==='axialClosing'?0:null,pass:metrics.captureChecks?.[check]??(value<limit&&(check!=='axialClosing'||value>=0))}));
 }
 
 export function reportHTML(summary,violations=0){
  const esc=escapeHTML,m=summary.contactMetrics;
- const rows=captureRows(m).map(row=>`<tr><td>${esc(t(row.key))}</td><td data-pass="${row.pass}">${row.value.toFixed(3)} ${row.unit}</td><td>${row.min===0?'0 ≤ v ':''}&lt; ${row.limit.toFixed(3)} ${row.unit}</td><td>${esc(t(row.pass?'通过':'未通过'))}</td></tr>`).join('');
+ const rows=captureRows(m).map(row=>`<tr><td>${esc(t(row.key))}</td><td data-pass="${row.pass}">${row.value.toFixed(3)} ${row.unit}</td><td>${row.min===0?'0 ≤ v ':''}${row.inclusive?'≤':'&lt;'} ${row.limit.toFixed(3)} ${row.unit}</td><td>${esc(t(row.pass?'通过':'未通过'))}</td></tr>`).join('');
  const speedSummary=summary.flightSpeedLimited===false?esc(t('最高闭合速度 {speed} m/s · 飞行不限速',{speed:summary.maxClosing.toFixed(3)})):esc(t('最高闭合速度 {speed} m/s · 超过建议速度 {time} s',{speed:summary.maxClosing.toFixed(3),time:summary.timeAboveSpeedLimit.toFixed(1)}));
  return `<p>${esc(t('本次训练：{time} s · 累计平移 Δv {dv} m/s',{time:summary.duration.toFixed(1),dv:summary.deltaV.toFixed(3)}))}</p><p>${speedSummary}</p><p>${esc(t('未放行越过停靠点：{count} 次',{count:violations}))}</p>${m?`<p>${esc(t('接触前瞬间的捕获检查'))}</p><table class="dock-review-table"><thead><tr><th>${esc(t('检查项'))}</th><th>${esc(t('实测'))}</th><th>${esc(t('教学门限'))}</th><th>${esc(t('结果'))}</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>${esc(t('尚未接触目标接口；曲线与事件保留实际操作过程。'))}</p>`}<p>${esc(t('保留 {samples} 个采样 · {events} 条事件',{samples:summary.sampleCount,events:summary.eventCount}))}${summary.droppedSamples?' · '+esc(t('较早轨迹已移出记录，汇总仍覆盖全程')):''}</p>`;
 }

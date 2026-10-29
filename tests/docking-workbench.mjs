@@ -136,3 +136,11 @@ test('unrestricted flight records null caps and actual randomized initial condit
  assert.equal(csv[csv.indexOf(header)+1].split(',')[limitColumn],'','CSV must leave an unlimited cap blank');
  assert.doesNotMatch(trendSVG(record.samples,session.state.time),/NaN|Infinity/);
 });
+
+test('manual contact report uses the saved speed threshold and omits disabled teaching checks',()=>{
+ const metrics=captureMetrics({velocity:[0,-.4,0],attitude:[0,0,0],rules:{assistanceEnabled:false,contactSpeed:.5}});
+ const rows=captureRows(metrics);assert.equal(rows.length,3);assert(rows.every(row=>row.pass));
+ assert.equal(rowFor(rows,'相对速度').limit,.5);assert.equal(rowFor(rows,'相对速度').inclusive,true);
+ const html=reportHTML({duration:1,deltaV:0,maxClosing:.4,timeAboveSpeedLimit:0,sampleCount:2,eventCount:1,contactMetrics:metrics,flightSpeedLimited:false});
+ assert.match(reportRow(html,'相对速度'),/≤ 0\.500/);assert.doesNotMatch(html,/<td>姿态误差/);
+});

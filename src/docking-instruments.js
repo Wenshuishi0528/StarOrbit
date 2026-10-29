@@ -22,10 +22,10 @@ function orientation(state){
 }
 export const DOCKING_RECORD_SCHEMA=freeze({
  name:'StarOrbit docking training record',version:1,modelVersion:DOCKING_MODEL_VERSION,
- model:'Circular 400 km reference orbit; ideal rate-controlled attitude; simulated navigation truth',
+ model:'Circular 400 km reference orbit; assisted rate control or manual angular acceleration; simulated navigation truth',
  frames:{position:'RTN: R radial outward, T along track, N orbit normal',velocity:'Time derivative of RTN position in the rotating reference frame',port:'X=T outward from target port, Y=N right, Z=R up',quaternion:'[x,y,z,w], body to target-port frame',attitude:'Rz(yaw) Ry(pitch) Rx(roll)',angularVelocity:'Body axes, relative to target-port frame'},
  units:{time:'s from scenario start',position:'m',velocity:'m/s',deltaV:'m/s',attitude:'deg',angularVelocity:'rad/s',angularRateDegPerSec:'deg/s',contactAngle:'deg',contactAngularSpeed:'rad/s',command:'Normalized translation and rotation commands in [-1,1]'},
- conventions:{axialClosing:'Positive towards the target port; -vT',losClosing:'Positive when full port-to-port range decreases',right:'Positive chaser displacement along target-port +Y; not the camera target-marker direction',up:'Positive chaser displacement along target-port +Z',idealStoppingDistance:'Axial v²/(2a), ignores HCW coupling and control settling; not a safe stopping guarantee',advisorySpeedStatistics:`A null speedLimit disables flight overspeed statistics. Above-limit duration counts axial closing greater than the suggested limit plus ${DOCKING_LIMITS.speedTolerance} m/s; capture limits remain strict`},
+ conventions:{contactSpeedLimit:'Configured limits use total relative speed at interface contact, inclusive; null flight speedLimit disables cruise caps. Per-sample rules and setting events preserve changes.',axialClosing:'Positive towards the target port; -vT',losClosing:'Positive when full port-to-port range decreases',right:'Positive chaser displacement along target-port +Y; not the camera target-marker direction',up:'Positive chaser displacement along target-port +Z',idealStoppingDistance:'Axial v²/(2a), ignores HCW coupling and control settling; not a safe stopping guarantee',advisorySpeedStatistics:`A null speedLimit disables flight overspeed statistics. Above-limit duration counts axial closing greater than the suggested limit plus ${DOCKING_LIMITS.speedTolerance} m/s; capture limits remain strict`},
 });
 
 /** All signed offsets are in the target-port frame, not the rotated body frame. */
@@ -41,7 +41,7 @@ export function deriveDockingInstruments(state,{fine=false}={}){
   attitudeErrorDeg:2*Math.acos(clamp(Math.abs(q[3]),0,1))*DEG,angularSpeedDegPerSec:Math.hypot(...rates)*DEG,
   recommendedClosing:dockingSpeedLimit(state.position[1]),
   idealStoppingDistance:Math.max(0,axialClosing)**2/(2*brakingAcceleration),brakingAcceleration,
-  corridorRadius:dockingCorridorRadius(state.position[1]),corridorActive:state.position[1]<DOCKING_LIMITS.corridorStart,
+  corridorRadius:dockingCorridorRadius(state.position[1]),corridorActive:state.rules?.assistanceEnabled!==false&&state.position[1]<DOCKING_LIMITS.corridorStart,
   time:state.time,deltaV:state.deltaV,status:state.status,
  };
 }
@@ -114,7 +114,7 @@ export class DockingRecorder {
   if(Number.isFinite(context.recommendedClosing))instruments.recommendedClosing=context.recommendedClosing;
   this._observe(state,context,instruments);
   if(!force&&this._nextSampleTime!==null&&state.time+1e-9<this._nextSampleTime)return false;
-  const record=freeze({time:state.time,position:[...state.position],velocity:[...state.velocity],quaternion:orientation(state),attitude:[...instruments.attitudeDeg],angularVelocity:[...(state.angularVelocity||[0,0,0])],deltaV:state.deltaV,status:state.status,instruments,context:copy(context)});
+  const record=freeze({time:state.time,position:[...state.position],velocity:[...state.velocity],quaternion:orientation(state),attitude:[...instruments.attitudeDeg],angularVelocity:[...(state.angularVelocity||[0,0,0])],deltaV:state.deltaV,status:state.status,...(state.rules?{rules:copy(state.rules)}:{}),instruments,context:copy(context)});
   if(this._samples.last()?.time===state.time)this._samples.replaceLast(record);else this._samples.push(record);
   if(this._nextSampleTime===null)this._nextSampleTime=state.time+this.sampleInterval;
   else if(state.time+1e-9>=this._nextSampleTime)this._nextSampleTime+=Math.max(1,Math.floor((state.time+1e-9-this._nextSampleTime)/this.sampleInterval)+1)*this.sampleInterval;
@@ -142,9 +142,9 @@ export class DockingRecorder {
    ['# model',DOCKING_RECORD_SCHEMA.model],['# scenario',JSON.stringify(this.scenario)],
    ['# frames',JSON.stringify(DOCKING_RECORD_SCHEMA.frames)],['# units',JSON.stringify(DOCKING_RECORD_SCHEMA.units)],
    ['# conventions',JSON.stringify(DOCKING_RECORD_SCHEMA.conventions)],['# summary',JSON.stringify(this.summary())],
-   ['time_s','mode','phase','status','R_m','T_m','N_m','vR_m_s','vT_m_s','vN_m_s','axial_closing_m_s','los_closing_m_s','speed_m_s','right_m','up_m','right_velocity_m_s','up_velocity_m_s','roll_deg','pitch_deg','yaw_deg','wx_rad_s','wy_rad_s','wz_rad_s','deltaV_m_s','recommended_closing_m_s','speed_limit_m_s','command_forward','command_right','command_up','command_roll','command_pitch','command_yaw','command_fine','command_brake'],
+   ['time_s','mode','phase','status','R_m','T_m','N_m','vR_m_s','vT_m_s','vN_m_s','axial_closing_m_s','los_closing_m_s','speed_m_s','right_m','up_m','right_velocity_m_s','up_velocity_m_s','roll_deg','pitch_deg','yaw_deg','wx_rad_s','wy_rad_s','wz_rad_s','deltaV_m_s','recommended_closing_m_s','speed_limit_m_s','command_forward','command_right','command_up','command_roll','command_pitch','command_yaw','command_fine','command_brake','assistance_enabled','contact_speed_limit_m_s'],
   ];
-  for(const sample of this.samples){const m=sample.instruments,command=sample.context.command||{};rows.push([sample.time,sample.context.mode,sample.context.phase,sample.status,...sample.position,...sample.velocity,m.axialClosing,m.losClosing,m.speed,m.right,m.up,m.rightVelocity,m.upVelocity,...sample.attitude,...sample.angularVelocity,sample.deltaV,m.recommendedClosing,finiteLimit(sample.context.speedLimit,m.recommendedClosing),...(command.translation||[0,0,0]),...(command.rotation||[0,0,0]),!!command.fine,!!command.brake]);}
+  for(const sample of this.samples){const m=sample.instruments,command=sample.context.command||{};rows.push([sample.time,sample.context.mode,sample.context.phase,sample.status,...sample.position,...sample.velocity,m.axialClosing,m.losClosing,m.speed,m.right,m.up,m.rightVelocity,m.upVelocity,...sample.attitude,...sample.angularVelocity,sample.deltaV,m.recommendedClosing,finiteLimit(sample.context.speedLimit,m.recommendedClosing),...(command.translation||[0,0,0]),...(command.rotation||[0,0,0]),!!command.fine,!!command.brake,sample.context.assistanceEnabled??sample.rules?.assistanceEnabled??true,sample.context.contactSpeed??sample.rules?.contactSpeed??DOCKING_LIMITS.captureSpeed]);}
   rows.push(['# events'],['event_time_s','type','message_key','detail_json']);
   for(const event of this.events)rows.push([event.time,event.type,event.messageKey,event.detail]);
   return '\uFEFF'+rows.map(csvRow).join('\r\n')+'\r\n';

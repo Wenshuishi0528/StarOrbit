@@ -1142,5 +1142,17 @@
   "目标距离 {distance} m · 飞行不限速": "Target distance {distance} m · No flight speed cap",
   "青线：轴向闭合速度 · 虚线：辅助接近参考速度 · 横轴：训练时间": "Cyan: axial closing speed · Dashed: assisted approach reference · X-axis: training time",
   "最高闭合速度 {speed} m/s · 飞行不限速": "Peak closing speed {speed} m/s · No flight speed cap",
-  "飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。": "Flight has no fixed speed cap. Assistance brakes for the remaining distance; stable holds and high-speed collision checks still apply."
+  "飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。": "Flight has no fixed speed cap. Assistance brakes for the remaining distance; stable holds and high-speed collision checks still apply.",
+  "新手辅助": "Beginner assistance",
+  "对接限速（m/s）": "Contact speed limit (m/s)",
+  "已开启新手辅助": "Beginner assistance enabled",
+  "已关闭新手辅助 · 纯手动飞行": "Assistance disabled · Fully manual flight",
+  "对接限速设为 {speed} m/s": "Contact speed limit set to {speed} m/s",
+  "纯手动：按住施加推力或转动力矩，松开后保留惯性。": "Fully manual: hold to apply thrust or torque; releasing preserves inertia.",
+  "纯手动飞行": "Fully manual flight",
+  "接口接触速度 ≤ {speed} m/s；飞行不限速": "Port contact speed ≤ {speed} m/s; flight has no speed cap",
+  "新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。": "Beginner assistance is on by default. When off, thrust and rotation are manual, with no automatic braking, damping, holds, corridor or range boundary.",
+  "对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。": "The limit checks total relative speed at contact; exceeding it fails docking. Manual mode checks only port contact and speed, not full station mesh collisions.",
+  "接口撞击超速 · 对接失败": "Excessive impact speed · Docking failed",
+  "转动力矩 · 按住施加": "Rotation torque · hold to apply"
 }

@@ -1142,5 +1142,17 @@
   "目标距离 {distance} m · 飞行不限速": "Distance cible {distance} m · Vitesse de vol non plafonnée",
   "青线：轴向闭合速度 · 虚线：辅助接近参考速度 · 横轴：训练时间": "Cyan : vitesse de rapprochement axiale · Pointillés : référence d’approche assistée · Axe X : temps",
   "最高闭合速度 {speed} m/s · 飞行不限速": "Vitesse de rapprochement maximale {speed} m/s · Vitesse de vol non plafonnée",
-  "飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。": "Aucun plafond fixe de vitesse en vol. L’assistance freine selon la distance restante ; les critères d’arrêt et de collision restent actifs."
+  "飞行不设固定速度上限；辅助控制按距离制动，停靠点稳定条件与高速撞击判定仍然有效。": "Aucun plafond fixe de vitesse en vol. L’assistance freine selon la distance restante ; les critères d’arrêt et de collision restent actifs.",
+  "新手辅助": "Aide débutant",
+  "对接限速（m/s）": "Vitesse limite de contact (m/s)",
+  "已开启新手辅助": "Aide débutant activée",
+  "已关闭新手辅助 · 纯手动飞行": "Aide désactivée · Vol entièrement manuel",
+  "对接限速设为 {speed} m/s": "Vitesse limite de contact réglée à {speed} m/s",
+  "纯手动：按住施加推力或转动力矩，松开后保留惯性。": "Manuel : maintenir pour appliquer une poussée ou un couple ; l’inertie persiste au relâchement.",
+  "纯手动飞行": "Vol entièrement manuel",
+  "接口接触速度 ≤ {speed} m/s；飞行不限速": "Vitesse de contact ≤ {speed} m/s ; vitesse de vol non plafonnée",
+  "新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。": "L’aide est activée par défaut. Désactivée, poussée et rotation sont manuelles, sans freinage automatique, amortissement, points d’arrêt, couloir ou limite de distance.",
+  "对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。": "La limite porte sur la vitesse relative totale au contact ; la dépasser fait échouer l’amarrage. Le mode manuel vérifie le contact au port et la vitesse, pas les collisions du maillage complet.",
+  "接口撞击超速 · 对接失败": "Vitesse d’impact excessive · Échec de l’amarrage",
+  "转动力矩 · 按住施加": "Couple de rotation · maintenir"
 }

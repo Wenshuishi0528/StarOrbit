@@ -4,7 +4,7 @@
 export const DOCKING_STEP=.02;
 export const DOCKING_RATE=Math.sqrt(3.986004418e14/(6371000+400000)**3);
 export const DOCKING_THRUST=.025;
-export const DOCKING_MODEL_VERSION='HCW-400km-quaternion-rate-training-v1';
+export const DOCKING_MODEL_VERSION='HCW-400km-quaternion-rate-training-v2';
 const DEG=Math.PI/180;
 
 // These are training limits, not certified limits or Shenzhou flight parameters.
@@ -97,13 +97,19 @@ export function dockingMetrics(state){
   angularSpeed:length(stateAngularVelocity(state)),
   right:position[2],up:position[0],rightVelocity:velocity[2],upVelocity:velocity[0]
  };
+ const configured=state.rules?.contactSpeed,free=state.rules?.assistanceEnabled===false;
+ const speedLimit=Number.isFinite(configured)&&configured>0?configured:DOCKING_LIMITS.captureSpeed;
+ metrics.assistanceEnabled=!free;
+ metrics.captureLimits={...DOCKING_LIMITS,captureSpeed:speedLimit,captureAxialClosing:speedLimit};
+ metrics.speedInclusive=configured!==undefined;
  metrics.captureChecks={
   distance:metrics.distance<DOCKING_LIMITS.captureDistance,lateral:metrics.lateral<DOCKING_LIMITS.captureLateral,
-  speed:metrics.speed<DOCKING_LIMITS.captureSpeed,
-  axialClosing:metrics.axialClosing>=0&&metrics.axialClosing<DOCKING_LIMITS.captureAxialClosing,
+  speed:configured!==undefined?metrics.speed<=speedLimit:metrics.speed<speedLimit,
+  axialClosing:metrics.axialClosing>=0&&(configured!==undefined?metrics.axialClosing<=speedLimit:metrics.axialClosing<speedLimit),
   lateralSpeed:metrics.lateralSpeed<DOCKING_LIMITS.captureLateralSpeed,
   angle:metrics.angle<DOCKING_LIMITS.captureAngle,angularSpeed:metrics.angularSpeed<DOCKING_LIMITS.captureAngularSpeed
  };
+ if(free)metrics.captureChecks={distance:metrics.captureChecks.distance,lateral:metrics.captureChecks.lateral,speed:metrics.captureChecks.speed};
  return metrics;
 }
 export function hcwDerivative(p,v,acc=[0,0,0],n=DOCKING_RATE){
@@ -127,7 +133,7 @@ function normalizedState(state){
 }
 function impactSnapshot(state){
  return {position:state.position.slice(),velocity:state.velocity.slice(),quaternion:state.quaternion.slice(),
-  attitude:state.attitude.slice(),angularVelocity:state.angularVelocity.slice(),time:state.time,deltaV:state.deltaV,status:'flying'};
+  attitude:state.attitude.slice(),angularVelocity:state.angularVelocity.slice(),time:state.time,deltaV:state.deltaV,status:'flying',...(state.rules?{rules:{...state.rules}}:{})};
 }
 function contactResult(candidate,f){
  const impactState=impactSnapshot(candidate),metrics={...dockingMetrics(candidate),time:candidate.time,deltaV:candidate.deltaV};
@@ -143,8 +149,27 @@ function interpolateState(before,after,f){
 // A 0.35 m capture zone represents compliant docking hardware, not hard-body penetration.
 // This public segment check interpolates every state component at the same fraction.
 // stepDocking additionally refines the contact time by re-integrating the partial step.
+// A finite port volume for free flight: crossing the plane far from the
+// interface is not a collision. Sweep both ends to catch fast fly-throughs.
+function freePortInterval(before,after){
+ const p=before.position,d=after.position.map((v,i)=>v-p[i]);
+ const radius=DOCKING_LIMITS.captureLateral,depth=DOCKING_LIMITS.capturePlane;
+ let enter=0,exit=1;
+ if(Math.abs(d[1])<1e-15){if(Math.abs(p[1])>depth)return null;}
+ else{const a=(-depth-p[1])/d[1],b=(depth-p[1])/d[1];enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));}
+ const a=d[0]**2+d[2]**2,b=2*(p[0]*d[0]+p[2]*d[2]),c=p[0]**2+p[2]**2-radius**2;
+ if(a<1e-24){if(c>=0)return null;}
+ else{const disc=b*b-4*a*c;if(disc<=0)return null;const root=Math.sqrt(disc);enter=Math.max(enter,(-b-root)/(2*a));exit=Math.min(exit,(-b+root)/(2*a));}
+ return enter<=exit&&exit>=0&&enter<=1?{enter,exit}:null;
+}
+const insideFreePort=state=>Math.abs(state.position[1])<=DOCKING_LIMITS.capturePlane&&Math.hypot(state.position[0],state.position[2])<DOCKING_LIMITS.captureLateral;
+
 export function dockingContact(before,after){
  before=normalizedState(before);after=normalizedState(after);
+ if(after.rules?.assistanceEnabled===false){
+  const interval=freePortInterval(before,after);
+  return interval?{...contactResult(interpolateState(before,after,interval.enter),interval.enter),exitFraction:interval.exit}:null;
+ }
  const plane=DOCKING_LIMITS.capturePlane;
  if(before.position[1]>plane&&after.position[1]<=plane||before.position[1]<=plane){
   const denominator=before.position[1]-after.position[1],f=denominator>0?clamp((before.position[1]-plane)/denominator,0,1):0;
@@ -162,7 +187,9 @@ function controls(input){
 function integrate(state,input,dt){
  // A bounded rate actuator: omega is relative to the target port frame and
  // expressed in body axes, rad/s. Damping arrests rate; it does not level attitude.
+ const free=state.rules?.assistanceEnabled===false;
  const angularVelocity=state.angularVelocity.map((rate,i)=>{
+  if(free)return rate+input.rotation[i]*DOCKING_LIMITS.maxAngularAcceleration*dt;
   const demand=input.rotation[i]!==0||input.angularDamping?input.rotation[i]*DOCKING_LIMITS.maxAngularRate:rate;
   const acceleration=clamp((demand-rate)/DOCKING_LIMITS.angularResponseTime,-DOCKING_LIMITS.maxAngularAcceleration,DOCKING_LIMITS.maxAngularAcceleration);
   return rate+acceleration*dt;
@@ -173,7 +200,7 @@ function integrate(state,input,dt){
  // Per-axis body translation: forward (-X), right (+Y), up (+Z).
  let acceleration=sceneToHCW(rotateDockingVector([-body[0],body[1],body[2]],midpoint)).map(x=>x*DOCKING_THRUST*strength);
  // Optional bounded velocity braking, with no teleport/reset of velocity.
- if(input.brake){const speed=length(state.velocity),gain=Math.min(DOCKING_THRUST*strength,speed/.5);acceleration=state.velocity.map(v=>speed?-gain*v/speed:0);}
+ if(input.brake&&!free){const speed=length(state.velocity),gain=Math.min(DOCKING_THRUST*strength,speed/.5);acceleration=state.velocity.map(v=>speed?-gain*v/speed:0);}
  return {...state,...hcwStep(state.position,state.velocity,acceleration,dt),quaternion,attitude:dockingEuler(quaternion),angularVelocity,
   time:state.time+dt,deltaV:state.deltaV+length(acceleration)*dt};
 }
@@ -182,6 +209,16 @@ export function stepDocking(state,input={},dt=DOCKING_STEP){
  if(!Number.isFinite(dt)||dt<=0||dt>.05)throw Error('Invalid docking integration step');
  const before=normalizedState(state),command=controls(input);
  let next=integrate(before,command,dt),contact=dockingContact(before,next),contactHorizon=dt;
+ if(before.rules?.assistanceEnabled===false){
+  if(!contact)return next;
+  let low=0,high=insideFreePort(before)?0:(contact.f+contact.exitFraction)*dt/2;
+  if(high&&!insideFreePort(integrate(before,command,high)))return next;
+  for(let i=0;i<40&&high>0;i++){const mid=(low+high)/2;if(insideFreePort(integrate(before,command,mid)))high=mid;else low=mid;}
+  next=integrate(before,command,high);contact=contactResult(next,high/dt);
+  next.contactMetrics=contact.metrics;next.impactState=contact.impactState;next.status=contact.status;
+  if(next.status==='docked'){next.velocity=[0,0,0];next.angularVelocity=[0,0,0];}
+  return next;
+ }
  // A braking reversal can touch the plane and return during one step. Bracket
  // its interior minimum too; checking only the two endpoints would miss it.
  if(before.position[1]>DOCKING_LIMITS.capturePlane&&next.position[1]>DOCKING_LIMITS.capturePlane&&before.velocity[1]<0&&next.velocity[1]>0){

@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.77 — 2026-10-29
+
+**中文：** 新增默认开启的新手辅助开关与可调对接限速。关闭辅助后进入纯手动推力/转动，取消自动控制、阻尼、教学走廊和距离边界；使用有限接口接触区，按总相对撞击速度判定失败。记录保留开关及阈值变化，回放和报告使用接触时的设置。验证切换连续性、自由飞行、高速穿越接触与低速辅助捕获。
+
+**English:** Added default-on beginner assistance and an adjustable contact-speed threshold. Disabling assistance enables manual thrust/torque without automatic control, damping, teaching corridors or range boundaries. A finite port volume detects contact and rejects excessive total impact speed. Records retain setting changes for replay and contact reports; tested mode transitions, free flight, fast swept contact and assisted capture at a reduced threshold.
+
 ## v0.76 — 2026-10-29
 
 **中文：** 新增神舟随机位置场景，可重新抽取初始位置与姿态，并将实际初始条件写入记录。取消飞行固定限速与超速提示，辅助控制改用距离制动；保留停靠点与高速撞击检查。验证随机初始状态、辅助回收、旧限速突破和高速碰撞。
