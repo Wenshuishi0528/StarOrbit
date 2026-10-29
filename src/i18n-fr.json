@@ -1115,5 +1115,20 @@
   "仅用于人工控制": "Commande manuelle uniquement",
   "单轴加速度上限 {value} m/s²": "Limite d’accélération par axe {value} m/s²",
   "停靠位置偏差": "Écart au point d’attente",
-  "建议速度统计容差 ±{value} m/s": "Tolérance des statistiques de vitesse conseillée ±{value} m/s"
+  "建议速度统计容差 ±{value} m/s": "Tolérance des statistiques de vitesse conseillée ±{value} m/s",
+  "数据源连接超时": "La connexion à la source a expiré",
+  "数据源 TLS 连接中断": "La connexion TLS à la source a été interrompue",
+  "数据源 TLS 证书验证失败": "Le certificat TLS de la source n’a pas pu être vérifié",
+  "数据源连接中断": "La connexion à la source a été interrompue",
+  "数据源未返回正确的分段数据": "La source a renvoyé une plage d’octets incorrecte",
+  "数据源返回 HTTP {status}": "La source a renvoyé HTTP {status}",
+  "官方轨道数据源暂不可用": "La source orbitale officielle est temporairement indisponible",
+  "本次 NASA 检查已到时间上限": "Cette vérification NASA a atteint sa limite de temps",
+  "检查 {checked} 个候选：{missing} 个尚未发布，{rejected} 个覆盖不足，{failed} 个读取失败。": "{checked} fichiers examinés : {missing} non publiés, {rejected} à couverture insuffisante, {failed} échecs de lecture.",
+  "自动恢复第 {attempt} 次：将在 {time} 重试。": "Récupération automatique {attempt} : nouvel essai à {time}.",
+  "当前离线，联网后自动重试。": "Hors ligne. Nouvel essai automatique au retour de la connexion.",
+  "自动重试已暂缓；重新联网后继续，也可手动检查。": "Les essais automatiques sont suspendus jusqu’au retour de la connexion ; la vérification manuelle reste disponible.",
+  "三维图形暂不可用": "Graphismes 3D indisponibles",
+  "浏览器未能启动 WebGL 2。请重新打开页面，或换用支持三维图形的浏览器。现有设置和下载数据已保留。": "Le navigateur ne peut pas démarrer WebGL 2. Rouvrez la page ou utilisez un navigateur prenant en charge les graphismes 3D. Vos réglages et données téléchargées sont conservés.",
+  "连接中断，正在继续未完成的 NASA 分段…": "Connexion interrompue ; reprise des segments NASA restants…"
 }

@@ -3,9 +3,20 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess, tempfile, time
 from cloud_service import service as clouds
+from http_download import download_bytes, DownloadError
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
 class Handler(SimpleHTTPRequestHandler):
+ def translate_path(self,path):
+  # Keep the saved origin/URL, while avoiding a 237 MB HTML document in the
+  # browser and its host app. The local bundle retains the NASA/orbit APIs.
+  route=urllib.parse.unquote(urllib.parse.urlparse(path).path)
+  compact=ROOT/'dist-local'
+  if route in ('/','/StarOrbit.html') and (compact/'index.html').is_file():return str(compact/'index.html')
+  if route.startswith('/assets/'):
+   candidate=(compact/route.lstrip('/')).resolve()
+   if candidate.is_relative_to((compact/'assets').resolve()) and candidate.is_file():return str(candidate)
+  return super().translate_path(path)
  def cloud_origin_ok(self):
   return self.headers.get('Origin') in (None,f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}')
  def send_json(self,value,code=200):
@@ -37,15 +48,11 @@ class Handler(SimpleHTTPRequestHandler):
    if origin and origin not in (f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}'):
     self.send_error(403);return
    try:
-    try:
-     with urllib.request.urlopen(urllib.request.Request(source,headers={'User-Agent':'StarOrbit/0.44'}),timeout=20) as r:body=r.read(6000001)
-    except urllib.error.URLError as error:
-     if not isinstance(error.reason,ssl.SSLError):raise
-     # macOS Python can lack the system CA bundle; curl still verifies TLS normally.
-     body=subprocess.run(['curl','--fail','--silent','--show-error','--location','--max-time','20','--max-filesize','6000000',source],capture_output=True,check=True,timeout=22).stdout
-    if len(body)>6000000:raise ValueError('Response too large')
-    self.send_response(200);self.send_header('Content-Type','application/json' if gp else 'text/html; charset=utf-8');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(body)
-   except Exception:self.send_error(502,'Official orbit source unavailable; existing data retained')
+    body=download_bytes(source,limit=6000000,timeout=90,attempt_timeout=65)
+    self.send_response(200);self.send_header('Content-Type','application/json' if gp else 'text/html; charset=utf-8');self.send_header('Content-Length',str(len(body)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(body)
+   except DownloadError as error:self.send_json({'error':{'code':'UPSTREAM_'+error.code.upper(),'message':str(error),'status':error.status,'retryable':error.retryable}},502)
+   except (BrokenPipeError,ConnectionResetError):pass
+   except Exception:self.send_json({'error':{'code':'UPSTREAM_UNAVAILABLE','message':'官方轨道数据源暂不可用'}},502)
    return
   if self.path.startswith('/api/') or any(p.startswith('.') for p in urllib.parse.unquote(self.path).split('/') if p):self.send_error(404);return
   super().do_GET()

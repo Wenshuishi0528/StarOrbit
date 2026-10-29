@@ -1,3 +1,4 @@
 numpy>=1.23,<3
 Pillow>=9.1,<13
 h5py>=3.8,<4
+certifi

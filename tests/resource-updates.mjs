@@ -18,6 +18,18 @@ const nasa={...cached,...meta,id:'nasa'};reuse.items=[nasa];reuse.fetch=async()=
 const cache=fixture();await cache.store('cloud',new Blob(['new payload']),{provider:'github'});assert(cache.protectedIds().includes(cache.items[0].id),'unapplied in-flight payload protected against other writes');assert(cache.protectedIds().includes('current-orbit'));
 console.log('Resource single-flight updates, failure retention, apply rollback, identical-image reuse, NASA partial status and in-flight cache protection passed');
 
+// A requested update can fail and recover without changing source choices or
+// duplicating jobs. Exercise the scheduler through the actual Weather methods.
+const {ResourceRecovery}=await import('../src/resource-recovery.js');
+const recovering=fixture();let recoveryTimer,tries=0;
+recovering.recovery=new ResourceRecovery({now:()=>now,online:()=>true,setTimer:fn=>{recoveryTimer=fn;return 1;},clearTimer:()=>{recoveryTimer=null;},run:(key,attempt)=>recovering.retryResource(key,attempt),onState:(key,state)=>{recovering.resourceStates[key]={...recovering.resourceState('cloud','github'),...state};}});
+recovering.updateCloud=async()=>{if(++tries===1)throw Object.assign(Error('data source temporarily unavailable'),{retryable:true});return cached;};
+await assert.rejects(()=>recovering.updateResource('cloud',{provider:'github'}));
+assert.equal(recovering.resourceState('cloud','github').recovery,'waiting');assert.equal(recovering.active.cloud,'current');assert.equal(recovering.busy,false);
+const wake=recoveryTimer;wake();await Promise.resolve();await Promise.resolve();await recovering.jobs.get('cloud:github');
+assert.equal(tries,2);assert.equal(recovering.resourceState('cloud','github').phase,'updated');assert.equal(recovering.resourceState('cloud','github').recovery,undefined);assert.equal(recovering.recovery.pending.size,0);assert.equal(recovering.jobs.size,0);assert.equal(recovering.settings.cloud,'builtin');
+console.log('Requested download automatically recovers after a transient failure without replacing source choices or creating duplicate jobs');
+
 // NASA service recovery is independent of a manual update job. Exercise terminal
 // service states directly so these regressions never wait for the polling timer.
 globalThis.location={protocol:'http:'};globalThis.document={hidden:false};
@@ -109,3 +121,13 @@ assert.equal(removing.active.cloud,'old','manual removal invalidates the pending
 assert.equal(disposedRemoved,true,'a decoded but deleted image is disposed rather than bound');
 assert(removing.items.some(row=>row.id===removing.active.cloud));
 console.log('Manual cache deletion cancels pending texture application without resurrecting the removed record');
+
+const retryOrbit=fixture();let choice={recordId:'current-orbit',revision:1},attemptSelection;
+retryOrbit.sim.orbits.selection=()=>({...choice});
+retryOrbit.sim.orbits.update=async(id,selected)=>{attemptSelection=selected;throw Object.assign(Error('offline'),{retryable:true});};
+await assert.rejects(()=>retryOrbit.updateResource('orbit',{provider:'tiangong'}));
+choice={recordId:'manual-history',revision:2};
+retryOrbit.sim.orbits.update=async(id,selected)=>{attemptSelection=selected;return {status:'updated',applied:false};};
+await retryOrbit.updateResource('orbit',{provider:'tiangong',recoveryAttempt:1});
+assert.deepEqual(attemptSelection,{recordId:'current-orbit',revision:1},'recovery carries the original orbit selection instead of overwriting a newer manual choice');
+console.log('Automatic orbit retries retain the original selection guard');

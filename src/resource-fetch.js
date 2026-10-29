@@ -4,7 +4,16 @@ export async function fetchResource(url,{max=16e6,cached=null,onProgress=()=>{},
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
  try{
   const response=await fetcher(url,{cache:'no-cache',signal:controller.signal});
-  if(!response.ok)throw Error('HTTP '+response.status);
+  if(!response.ok){
+   const error=Object.assign(Error('HTTP '+response.status),{status:response.status});
+   // Only the same-origin relay returns trusted, bounded diagnostic messages.
+   if(url.startsWith('/api/')&&response.headers.get('content-type')?.includes('application/json')){
+    try{const detail=await response.json();if(typeof detail.error?.code==='string'&&/^UPSTREAM_[A-Z]+$/.test(detail.error.code)&&typeof detail.error.message==='string'){
+     error.code=detail.error.code;error.message=detail.error.message.slice(0,240);if(typeof detail.error.retryable==='boolean')error.retryable=detail.error.retryable;
+    }}catch{}
+   }
+   throw error;
+  }
   const length=Number(response.headers.get('content-length'))||0;
   if(length>max){controller.abort();throw Error('数据超过大小限制');}
   const etag=response.headers.get('etag'),modified=response.headers.get('last-modified');

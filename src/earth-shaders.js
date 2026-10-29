@@ -55,8 +55,10 @@ vec3 sampleDetail(sampler2D tex,vec4 rect,float fade,vec2 uv,vec2 dx,vec2 dy,vec
  if(fade<=0.)return base;
  vec2 p=(uv-rect.xy)/rect.zw;if(any(lessThan(p,vec2(0.)))||any(greaterThanEqual(p,vec2(1.))))return base;
  float scale=1800./1816.;vec2 tuv=(p*1800.+8.)/1816.;
- float footprint=max(length(dx*vec2(8192.,4096.)),length(dy*vec2(8192.,4096.)));
- float weight=fade*(1.-smoothstep(.6,1.5,footprint));
+ // textureGrad and anisotropic mip filtering already handle minification.
+ // Blending the coarse global map by the longest footprint also destroys
+ // detail along the magnified axis in oblique views.
+ float weight=fade;
  return mix(base,textureGrad(tex,tuv,dx/rect.zw*scale,dy/rect.zw*scale).rgb,weight);
 }
 vec3 groundColor(vec2 uv){

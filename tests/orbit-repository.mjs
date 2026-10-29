@@ -36,12 +36,25 @@ const manual=fixture(),manualHold=deferred();manual.resources.fetch=async()=>{aw
 const manualUpdate=manual.repo.update('tiangong');manual.repo.selected=null;manualHold.resolve();const saved=await manualUpdate;
 assert.equal(saved.status,'updated');assert.equal(saved.applied,false);assert.equal(manual.calls.set,0);assert.equal(manual.repo.selected,null,'an explicit same-value history/builtin choice still cancels late activation');assert.equal(manual.resources.items.length,1);assert.equal(manual.resources.pendingRecords.size,0);
 
+// Automatic retries keep the selection snapshot from the original request.
+const retryChoice=fixture(),originalSelection=retryChoice.repo.selection('tiangong');
+retryChoice.repo.selected=null;
+const retrySaved=await retryChoice.repo.update('tiangong',originalSelection);
+assert.equal(retrySaved.status,'updated');assert.equal(retrySaved.applied,false);assert.equal(retryChoice.calls.set,0,'a manual choice made between attempts survives automatic recovery');
+
 const switched=fixture(),switchHold=deferred();switched.resources.fetch=async()=>{await switchHold.promise;return {blob:new Blob([JSON.stringify(changed)])};};
 const switchUpdate=switched.repo.update('tiangong');switched.sim.missionId='dfh1';switched.sim.data=dfh;switchHold.resolve();const switchedResult=await switchUpdate;
 assert.equal(switchedResult.applied,false);assert.equal(switched.calls.set,0);assert.equal(switched.sim.data,dfh);assert.equal(switched.repo.records.tiangong,switchedResult.record.id);assert.equal(switched.repo.selected,null,'the inactive mission receives its own record only');
 
 const failed=fixture();failed.resources.fetch=async()=>{throw Error('network failed');};await assert.rejects(()=>failed.repo.update('tiangong'),/network failed/);assert.equal(failed.repo.updates.size,0);assert.equal(failed.repo.selected,null);assert.equal(failed.sim.data,station);
 failed.resources.fetch=async()=>({blob:new Blob([JSON.stringify(changed)])});failed.resources.store=async()=>{throw new DOMException('quota','QuotaExceededError');};await assert.rejects(()=>failed.repo.update('tiangong'),{name:'QuotaExceededError'});assert.equal(failed.calls.set,0);assert.equal(failed.repo.selected,null);assert.equal(failed.sim.data,station);
+const relay=fixture(),relayError=Object.assign(Error('数据源 TLS 连接中断'),{code:'UPSTREAM_TLS'}),relayCalls=[];
+relay.resources.fetch=async(url,max,options)=>{relayCalls.push({url,options});throw relayError;};
+await assert.rejects(()=>relay.repo.update('tiangong'),error=>error===relayError);
+assert.deepEqual(relayCalls,[{url:'/api/orbit',options:{timeout:105000}}],'local wait covers relay retry budget and retains its error instead of a CORS failure');
+assert.equal(relay.sim.data,station);
+const fallback=fixture(),localError=Error('local service unavailable');fallback.resources.fetch=async url=>{if(url.startsWith('/api/'))throw localError;return {blob:new Blob([JSON.stringify(changed)])};};
+assert.equal((await fallback.repo.update('tiangong')).status,'updated','direct source remains available when no local relay exists');
 const invalid=fixture();invalid.resources.fetch=async()=>({blob:new Blob(['not orbit data'])});await assert.rejects(()=>invalid.repo.update('tiangong'));assert.equal(invalid.calls.store,0);assert.equal(invalid.calls.set,0);
 
 // Older remote data can never downgrade the selected, bundled or cached version.

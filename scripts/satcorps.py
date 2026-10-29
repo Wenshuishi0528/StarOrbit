@@ -5,25 +5,22 @@ Run in a separate process. Temporary scientific chunks are removed on completion
 import io, json, subprocess, tempfile, time, datetime, hashlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from http_download import download_bytes, DownloadError
 BASE='https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/'
 DAY=86400
 FIELDS=('cloud_phase','cloud_optical_depth','relative_time','lat','lon')
 
-def request(url, byte_range=None, limit=2000000):
-    args=['curl','--fail','--silent','--show-error','--location','--retry','1','--connect-timeout','15','--max-time','90','--max-filesize',str(limit)]
-    if byte_range: args+=['--range',f'{byte_range[0]}-{byte_range[1]}']
-    result=subprocess.run(args+[url],capture_output=True,timeout=195)
-    if result.returncode: raise RuntimeError('NASA 下载暂不可用：'+result.stderr.decode(errors='replace')[-180:])
-    data=result.stdout
-    if len(data)>limit or (byte_range and len(data)!=byte_range[1]-byte_range[0]+1): raise ValueError('NASA 未返回正确的分段数据')
-    return data
+def request(url, byte_range=None, limit=2000000, deadline=None):
+    budget=min(180,deadline-time.monotonic()) if deadline is not None else 180
+    if budget<=0:raise DownloadError('timeout','本次 NASA 检查已到时间上限',retryable=True)
+    return download_bytes(url,byte_range=byte_range,limit=limit,timeout=budget,attempt_timeout=75)
 
 # Use daily 12:00 UTC GEO+LEO composites, newest first, inside a rolling
 # 30-day window. A product name or a new timestamp does not establish coverage.
 MAX_AGE=30*DAY
 RETIRED_TIME=1719748800
 CHECK_TTL=15*60
-CHECK_FIELDS=('updateStatus','checkedAt','checkComplete','cachedCheck','updateMessage')
+CHECK_FIELDS=('updateStatus','checkedAt','checkComplete','cachedCheck','updateMessage','retryable','checkSummary')
 
 class NoQualifiedFrameError(ValueError):
     def __init__(self,message,check):
@@ -63,17 +60,19 @@ def acceptable(info):
     return min(info['footprint'].values())>=.995 and info['coverage']>=.995 and min(info['polarCoverage'].values())>=.99
 
 class RangeFile(io.RawIOBase):
-    def __init__(self,url,path,reuse=None):
-        self.url=url;self.pos=0;self.blocks=set();self.chunks=set();self.bytes=0;self.reuse=reuse
+    def __init__(self,url,path,reuse=None,deadline=None):
+        self.url=url;self.pos=0;self.blocks=set();self.chunks=set();self.bytes=0;self.reuse=reuse;self.deadline=deadline
         if reuse and reuse.get('url')==url and Path(path).exists():
             self.file=open(path,'r+b');self.size=reuse['size'];self.blocks=reuse['blocks'];self.chunks=reuse['chunks'];return
         self.file=open(path,'w+b')
         # HDF5 v0 superblock provides the EOF address; no 1.3 GB download.
-        header=request(url,(0,65535),65536)
+        header=self.download((0,65535),65536)
         if header[:8]!=b'\x89HDF\r\n\x1a\n' or header[8]!=0 or header[13]!=8:raise ValueError('NASA 文件格式已变化')
         self.size=int.from_bytes(header[40:48],'little')
         if not 1000000<self.size<4_000_000_000:raise ValueError('NASA 文件大小无效')
         self.file.truncate(self.size);self.file.seek(0);self.file.write(header);self.blocks.add(0);self.bytes=len(header)
+    def download(self,byte_range,limit):
+        return request(self.url,byte_range,limit,**({'deadline':self.deadline} if self.deadline is not None else {}))
     def readable(self):return True
     def seekable(self):return True
     def tell(self):return self.pos
@@ -86,13 +85,14 @@ class RangeFile(io.RawIOBase):
         for block in range(self.pos//bs,(end-1)//bs+1):
             if block not in self.blocks:
                 start=block*bs;stop=min(start+bs,self.size)-1
-                data=request(self.url,(start,stop),bs)
+                data=self.download((start,stop),bs)
                 self.file.seek(start);self.file.write(data);self.blocks.add(block);self.bytes+=len(data)
         self.file.seek(self.pos);data=self.file.read(end-self.pos);b[:len(data)]=data;self.pos+=len(data);return len(data)
     def close(self):
         if not self.closed:
             if self.reuse is not None and hasattr(self,'size'):
                 self.reuse.update(url=self.url,size=self.size,blocks=self.blocks,chunks=self.chunks)
+                self.reuse['downloaded']=self.reuse.get('downloaded',0)+self.bytes
             self.file.close()
         super().close()
 
@@ -140,9 +140,9 @@ def convert(path,reference,now=None):
         valid_image=Image.fromarray(valid_map).resize((8192,4096),Image.Resampling.NEAREST)
     return im,valid_image,{'provider':'satcorps','time':int(reference*1000),'observedStart':int(oldest*1000),'observedEnd':int(newest*1000),'coverage':coverage,'polarCoverage':polar,'footprint':footprint,'resolution':'8192×4096','nativeResolution':'12960×6480','channel':'red'}
 
-def fetch_frame(url,path,progress,fields=FIELDS,reuse=None):
+def fetch_frame(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
     import h5py
-    remote=RangeFile(url,path,reuse)
+    remote=RangeFile(url,path,reuse,deadline)
     try:
         with h5py.File(remote,'r') as f:
             chunks=[]
@@ -156,7 +156,7 @@ def fetch_frame(url,path,progress,fields=FIELDS,reuse=None):
         chunks=[chunk for chunk in chunks if chunk not in remote.chunks]
         def load(chunk):
             offset,size=chunk
-            return offset,request(url,(offset,offset+size-1),size)
+            return offset,remote.download((offset,offset+size-1),size)
         # Submit only two chunks at a time; completed chunks cannot accumulate in RAM.
         with ThreadPoolExecutor(max_workers=2) as pool:
             for start in range(0,len(chunks),2):
@@ -166,6 +166,20 @@ def fetch_frame(url,path,progress,fields=FIELDS,reuse=None):
                     remote.chunks.add((offset,len(data)))
         remote.file.flush();return remote.bytes
     finally:remote.close()
+
+def fetch_resuming(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
+    # Preserve validated chunks within this job if a later chunk loses its
+    # connection. The same deadline still bounds both attempts.
+    reuse={} if reuse is None else reuse
+    before=reuse.get('downloaded',0)
+    for attempt in range(2):
+        try:
+            received=fetch_frame(url,path,progress,fields,reuse,deadline)
+            return reuse.get('downloaded',before+received)-before
+        except DownloadError as error:
+            if attempt or not error.retryable or not reuse.get('chunks') or (deadline is not None and time.monotonic()+2>=deadline):raise
+            progress('连接中断，正在继续未完成的 NASA 分段…')
+            time.sleep(2)
 
 def phase_coverage(path):
     """Cheap upper bound: missing/unknown phase cannot yield a valid retrieval."""
@@ -204,33 +218,39 @@ def build(output,progress=lambda s:None,now=None):
     checkfile=output/'checks.json'
     try:checks=json.loads(checkfile.read_text())
     except (OSError,ValueError):checks={}
-    checks={k:v for k,v in checks.items() if now-v.get('checked',0)<6*3600}
+    checks={k:v for k,v in checks.items() if 0<=now-v.get('checked',0)<(CHECK_TTL if v.get('reason')=='not published' else 6*3600)}
     cached=cached_frames(output);previous=cached[0] if cached else None
     recent=recent_check(output,previous,now)
     if recent:return {**previous,**recent}
-    errors=0;deadline=time.monotonic()+16*60
+    errors=0;connection_failures=0;last_error=None;retryable=False;deadline=time.monotonic()+16*60
+    summary={'checked':0,'missing':0,'rejected':0,'failed':0}
     def finish(result,status,message):
-        check={'updateStatus':'partial' if errors and result else status,'checkedAt':int((time.time() if live else now)*1000),'checkComplete':not errors,'cachedCheck':False,'updateMessage':message}
+        if last_error:message+='；'+last_error
+        summary['failed']=errors
+        check={'updateStatus':'partial' if errors and result else status,'checkedAt':int((time.time() if live else now)*1000),'checkComplete':not errors,'cachedCheck':False,'updateMessage':message,'retryable':retryable,'checkSummary':summary}
         value={**(result or {}),**check};save_check(output,value)
         if not result:raise NoQualifiedFrameError(message,check)
         return value
     for reference,url in candidates(now):
         if previous and previous['time']>=reference*1000:
             return finish(previous,'unchanged','近期候选未发现更新的合格云图，保留已下载云图' if not errors else '部分候选暂不可访问，未能完整确认是否有更新，保留已下载云图')
-        if time.monotonic()>deadline:errors+=1;break
-        if url in checks:continue
+        if time.monotonic()>deadline:errors+=1;retryable=True;last_error='本次 NASA 检查已到时间上限';break
+        summary['checked']+=1
+        if url in checks:
+            summary['missing' if checks[url].get('reason')=='not published' else 'rejected']+=1;continue
         date=datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y-%m-%d')
         progress('检查 NASA 全球与极区覆盖 · '+date+' 12:00 UTC')
         try:
             with tempfile.TemporaryDirectory(prefix='tiangong-gcc-') as tmp:
                 path=Path(tmp)/'fields.nc';reuse={}
-                downloaded=fetch_frame(url,path,progress,('cloud_phase','lat'),reuse=reuse)
-                if not acceptable(phase_coverage(path)):
-                    checks[url]={'checked':now,'reason':'phase coverage'};checkfile.write_text(json.dumps(checks));continue
-                downloaded+=fetch_frame(url,path,progress,reuse=reuse)
+                downloaded=fetch_resuming(url,path,progress,('cloud_phase','lat'),reuse=reuse,deadline=deadline)
+                coverage=phase_coverage(path)
+                if not acceptable(coverage):
+                    summary['rejected']+=1;checks[url]={'checked':now,'reason':'phase coverage',**coverage};checkfile.write_text(json.dumps(checks));continue
+                downloaded+=fetch_resuming(url,path,progress,reuse=reuse,deadline=deadline)
                 im,mask,info=convert(path,reference,now)
             if not acceptable(info):
-                checks[url]={'checked':now,'reason':'retrieval coverage'};checkfile.write_text(json.dumps(checks));continue
+                summary['rejected']+=1;checks[url]={'checked':now,'reason':'retrieval coverage'};checkfile.write_text(json.dumps(checks));continue
             # A candidate must still be within the window when conversion finishes.
             if not now-MAX_AGE<=info['time']/1000<=now:raise ValueError('NASA 云图不在最近 30 天内')
             target=output/(datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y%m%dT1200-v2a.png'))
@@ -241,8 +261,18 @@ def build(output,progress=lambda s:None,now=None):
             for p in output.iterdir():
                 if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile,output/'last-check.json') and (not previous or p.stem!=Path(previous['file']).stem):p.unlink()
             return finish({**info,'file':str(target)},'updated','已找到最近 30 天内覆盖合格的 NASA 全球云图' if not errors else '已下载覆盖合格的 NASA 云图；部分较新候选暂不可访问，未能完整确认最新状态')
+        except DownloadError as e:
+            if e.status in (404,410):
+                summary['missing']+=1;checks[url]={'checked':now,'reason':'not published'};checkfile.write_text(json.dumps(checks));continue
+            errors+=1;last_error=str(e);retryable=retryable or e.retryable
+            if e.status in (401,403) or (e.status==429 and not e.retryable):retryable=False;break
+            if e.code in ('network','tls','timeout') or e.status in (429,500,502,503,504):
+                connection_failures+=1
+                # A host-wide outage is not a reason to probe all 30 days.
+                if connection_failures>=2 or not e.retryable:break
+            progress('该候选未通过检查，继续查找 · '+date+' · '+str(e))
         except (RuntimeError,ValueError,OSError,subprocess.TimeoutExpired) as e:
-            errors+=1;progress('该候选未通过检查，继续查找 · '+date)
+            errors+=1;last_error=str(e);progress('该候选未通过检查，继续查找 · '+date+' · '+str(e))
     if previous:
         return finish(previous,'unchanged','本次未找到最近 30 天内可用的完整云图，保留已下载云图' if not errors else '部分候选暂不可访问，未能完整确认是否有更新，保留已下载云图')
     return finish(None,'unavailable','本次未找到最近 30 天内可用的完整 NASA 云图，原图源保持不变')

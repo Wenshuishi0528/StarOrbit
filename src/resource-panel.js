@@ -1,5 +1,5 @@
 import {restoreControlFocus} from './display-controls.js';
-import {t,onLanguageChange} from './i18n.js';
+import {t,errorText,onLanguageChange} from './i18n.js';
 import {WEB_BUILD} from './runtime-assets.js';
 import {clockText} from './time-format.js';
 import {mission} from './missions.js';
@@ -82,7 +82,7 @@ export function mountResourcePanel(weather){
   return kind==='orbit'||w.settings[kind]===(kind==='cloud'&&provider==='satcorps'?'satcorps':'latest');
  };
  function render(){
-  if(disposed)return;if(w.busy)feedback.hidden=true;if(!feedback.hidden)feedback.textContent=t(feedbackMessage);
+  if(disposed)return;if(w.busy)feedback.hidden=true;if(!feedback.hidden)feedback.textContent=errorText(feedbackMessage);
   title.textContent=t('数据与资源');toolbar.textContent=t('数据与资源');entry.textContent=t('打开数据与资源');closeButton.textContent=t('返回模拟器');
   logTitle.textContent=t('更新记录');cacheTitle.textContent=t('下载缓存与历史');bundledTitle.textContent=t('随软件提供的资源');
   bundledText.textContent=t('地球地表与夜景、星空、月面和地理标识随软件版本提供，按画质与视野载入。检查数据更新不会重新下载这些素材。');
@@ -99,7 +99,12 @@ export function mountResourcePanel(weather){
    card.current.label.textContent=t('当前画面使用');card.current.value.textContent=currentText(kind);
    card.checked.label.textContent=t('上次检查');card.checked.value.textContent=timestamp(state.checkedAt)||t('尚未检查');
    card.badge.dataset.phase=state.phase||'idle';card.badge.textContent=t(phaseKeys[state.phase]||phaseKeys.idle);card.progress.hidden=!updating;
-   card.message.textContent=state.message?(typeof state.message==='object'?t(state.message.key,state.message.params):t(state.message)):t('可检查该来源的新版本，也可使用已下载的数据。');
+   card.message.textContent=state.message?(typeof state.message==='object'?t(state.message.key,state.message.params):errorText(state.message)):t('可检查该来源的新版本，也可使用已下载的数据。');
+   const check=state.checkSummary;
+   if(check&&['checked','missing','rejected','failed'].every(k=>Number.isInteger(check[k])&&check[k]>=0))card.message.textContent+='\n'+t('检查 {checked} 个候选：{missing} 个尚未发布，{rejected} 个覆盖不足，{failed} 个读取失败。',check);
+   if(state.recovery==='waiting')card.message.textContent+='\n'+t('自动恢复第 {attempt} 次：将在 {time} 重试。',{attempt:state.retryAttempt,time:timestamp(state.retryAt)});
+   if(state.recovery==='offline')card.message.textContent+='\n'+t('当前离线，联网后自动重试。');
+   if(state.recovery==='paused')card.message.textContent+='\n'+t('自动重试已暂缓；重新联网后继续，也可手动检查。');
    const unavailable=kind==='cloud'&&provider==='satcorps'&&WEB_BUILD,noOrbit=kind==='orbit'&&!orbitSource(sim.missionId);
    card.check.textContent=t(updating?'更新进行中…':kind==='cloud'&&provider==='satcorps'?'检查 NASA 更新':kind==='cloud'?'检查 GitHub 云图更新':kind==='aurora'?'检查极光更新':'检查轨道更新');
    card.check.disabled=updating||unavailable||noOrbit||sceneBusy;card.use.textContent=t(used?'正在使用最新下载':'使用最新下载');card.use.disabled=!latest||used||updating||sceneBusy;

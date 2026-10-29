@@ -1,4 +1,5 @@
 import {fetchResource,blobHash} from './resource-fetch.js';
+import {ResourceRecovery,recoverableDownload} from './resource-recovery.js';
 import {presetWeatherSettings} from './environment-presets.js';
 import {mountResourcePanel} from './resource-panel.js';
 import {WEB_BUILD} from './runtime-assets.js';
@@ -10,7 +11,7 @@ import {cloudProvider,selectCloud,validateNASA,completeNASA,retireNASA} from './
 import {CLOUD_PNG,CLOUD_JPEG,cloudChannel,cloudDecodeSize,cloudTone} from './cloud-texture.js';
 import {OrbitRepository,orbitSource} from './orbit-repository.js';
 import * as THREE from 'three';
-import {t,onLanguageChange} from './i18n.js';
+import {t,errorText,onLanguageChange} from './i18n.js';
 import {WeatherCache} from './weather-cache.js';
 import {validateAurora,auroraPixels,selectSnapshot,seedNumber,clamp} from './weather-math.js';
 import {DEFAULT_MISSION,mission,bindOrbit,validatePose} from './missions.js';
@@ -37,7 +38,11 @@ export class Weather{
   if(!this.settings.resourceChecks||typeof this.settings.resourceChecks!=='object')this.settings.resourceChecks={};
   if(!['satcorps','github'].includes(this.settings.cloudDownloadProvider))this.settings.cloudDownloadProvider=this.settings.cloud==='satcorps'?'satcorps':WEB_BUILD?'github':'satcorps';
   this.resourcePanel=mountResourcePanel(this);
-  this.bind();this.sync();this.ready=this.restore();onLanguageChange(()=>{this.historyDirty=this.choicesDirty=true;this.render();this.renderPresets();});
+  this.recovery=new ResourceRecovery({run:(key,attempt)=>this.retryResource(key,attempt),onState:(key,state)=>{
+   const current=this.resourceStates[key]||this.settings.resourceChecks[key]||{};this.resourceStates[key]={...current,...state};this.settings.resourceChecks[key]=this.resourceStates[key];this.save();this.render();
+  }});
+  window.addEventListener('online',()=>this.recovery.reconnect());
+  this.bind();this.sync();this.ready=this.restore();this.ready.then(async()=>{await this.nasaRestore?.catch(()=>{});this.restoreRecovery();});onLanguageChange(()=>{this.historyDirty=this.choicesDirty=true;this.render();this.renderPresets();});
  }
  async restore(){try{
   const retired=await retireNASA(this.cache);if(retired.includes(this.settings.cloudHistory)){this.settings.cloudHistory='auto';if(this.settings.cloud==='history')this.settings.cloud='satcorps';this.sync();}
@@ -98,26 +103,40 @@ export class Weather{
   else await this.setSource(kind,kind==='cloud'&&provider==='satcorps'?'satcorps':'latest');
   this.historyDirty=true;await this.trim();this.render();
  }
- updateResource(kind,{provider}={}){
+ retryResource(key,attempt){
+  if(this.sim.sceneBusy||this.sim.missions?.busy){this.recovery.queue(key,attempt,Date.now()+5000);return;}
+  const [kind,provider]=key.split(':');return this.updateResource(kind,{provider,recoveryAttempt:attempt});
+ }
+ restoreRecovery(){
+  for(const [key,saved]of Object.entries(this.settings.resourceChecks)){
+   const state=this.resourceStates[key]||saved;
+   if(!this.recovery.pending.has(key)&&saved.recovery&&['error','partial'].includes(state.phase)&&state.retryable!==false&&Date.now()-(state.checkedAt||0)<86400000){
+    this.recovery.queue(key,saved.retryAttempt||1,saved.retryAt||undefined);
+   }
+  }
+ }
+ updateResource(kind,{provider,recoveryAttempt=0}={}){
   provider=kind==='cloud'?(provider||this.settings.cloudDownloadProvider):kind==='orbit'?(provider||this.sim.missionId):undefined;
   const key=this.resourceKey(kind,provider);if(this.jobs.has(key))return this.jobs.get(key);
   if(this.sim.sceneBusy||this.sim.missions?.busy)return Promise.reject(Error('正在恢复场景…'));
+  this.recovery?.cancel(key,!recoveryAttempt);
   const run=async()=>{
-   await this.ready;const before=new Set(this.items.map(r=>r.id));this.setResourceState(kind,provider,{phase:'checking',message:'检查中…'});
+   await this.ready;const before=new Set(this.items.map(r=>r.id));this.setResourceState(kind,provider,{phase:'checking',message:'检查中…',checkSummary:null});
+   const retrySelection=kind==='orbit'?(recoveryAttempt&&this.resourceState(kind,provider).retrySelection)||this.sim.orbits.selection(provider):undefined;
    try{
     let record,outcome;
     if(kind==='cloud'){record=await this.updateCloud(provider);outcome=record?this.lastCloudOutcome?.[provider]:null;}
     if(kind==='aurora')record=await this.updateAurora();
-    if(kind==='orbit'){if(!orbitSource(provider))throw Error('此任务没有在线轨道源，请导入轨道文件');const r=await this.sim.orbits.update(provider);record=r?.record;outcome=r;}
+    if(kind==='orbit'){if(!orbitSource(provider))throw Error('此任务没有在线轨道源，请导入轨道文件');const r=await this.sim.orbits.update(provider,retrySelection);record=r?.record;outcome=r;}
     if(kind!=='orbit')await this.apply(kind);
     await this.trim(record?[record.id]:[]);
     const phase=outcome?.status==='partial'?'partial':outcome?.status==='unchanged'||(!outcome?.status&&record&&before.has(record.id))?'unchanged':'updated';
-    const state={phase,checkedAt:outcome?.checkedAt||Date.now(),message:outcome?.message||(phase==='unchanged'?'已是最新可用数据':phase==='partial'?'检查未完成，保留已有数据':'已下载新版本'),recordId:record?.id};
-    this.resourceStates[key]=state;this.settings.resourceChecks[key]=state;this.settings.checked=Date.now();this.save();return {status:phase,record};
+    const state={phase,checkedAt:outcome?.checkedAt||Date.now(),message:outcome?.message||(phase==='unchanged'?'已是最新可用数据':phase==='partial'?'检查未完成，保留已有数据':'已下载新版本'),recordId:record?.id,retryable:!!outcome?.retryable,checkSummary:outcome?.checkSummary};
+    this.resourceStates[key]=state;this.settings.resourceChecks[key]=state;this.settings.checked=Date.now();this.save();if(phase==='partial'&&state.retryable)this.recovery?.queue(key,recoveryAttempt+1);return {status:phase,record};
    }catch(error){
     const timeout=['AbortError','TimeoutError'].includes(error.name),network=/Failed to fetch|Load failed|NetworkError|network request failed|^HTTP \d{3}$/i.test(error.message||'');
     const hint=timeout?'请求超时，已有数据已保留；请稍后重试。':network?(WEB_BUILD?'数据源暂不可访问或不允许网页直接读取；可使用桌面版更新或导入文件。已有数据已保留。':'数据源暂不可访问，请检查网络或稍后重试。已有数据已保留。'):null;
-    const state={phase:'error',checkedAt:Date.now(),message:hint||{key:'未更新，保留已有数据：{error}',params:{error:error.message||String(error)}}};this.resourceStates[key]=state;this.settings.resourceChecks[key]=state;this.save();throw hint?new Error(hint,{cause:error}):error;
+    const state={phase:'error',checkedAt:Date.now(),message:hint||{key:'未更新，保留已有数据：{error}',params:{error:error.message||String(error)}},retryable:recoverableDownload(error),retrySelection};this.resourceStates[key]=state;this.settings.resourceChecks[key]=state;this.save();if(state.retryable)this.recovery?.queue(key,recoveryAttempt+1);throw hint?new Error(hint,{cause:error}):error;
    }
    finally{for(const r of this.items)if(!before.has(r.id)&&r.kind===kind&&(kind!=='orbit'||(r.missionId||DEFAULT_MISSION)===provider)&&(kind!=='cloud'||cloudProvider(r)===provider))this.pendingRecords.delete(r.id);this.jobs.delete(key);this.busy=this.jobs.size>0||!!this.nasaWatch||!!this.nasaRestoreTask;this.render();}
   };
@@ -149,7 +168,7 @@ export class Weather{
  useOrbit(data,notify=true){return this.sim.orbits.use(data,notify);}
  async nasaCall(path,method='GET'){
   const response=await fetch('/api/cloud/satcorps/'+path,{method,cache:'no-store',signal:AbortSignal.timeout(15000)});
-  if(!response.ok)throw Error('NASA 本地资源服务暂不可用');const job=await response.json();if(job.cache||job.diskCache)this.serverCache=job.cache||job.diskCache;return job;
+  if(!response.ok)throw Object.assign(Error('NASA 本地资源服务暂不可用'),{retryable:response.status>=500});const job=await response.json();if(job.cache||job.diskCache)this.serverCache=job.cache||job.diskCache;return job;
  }
  restoreNASA(){
   if(WEB_BUILD||!/^https?:$/.test(location.protocol))return Promise.resolve();
@@ -165,9 +184,10 @@ export class Weather{
   let record;
   try{
    if(job.result){record=await this.acceptNASA(job);await this.apply('cloud');await this.trim([record.id]);}
-   if(job.state==='error')this.setResourceState('cloud','satcorps',{phase:'error',checkedAt:job.checkedAt,message:job.error||'NASA 云图更新失败'});
-   else if(job.result?.checkedAt)this.setResourceState('cloud','satcorps',{phase:job.result.updateStatus||'unchanged',checkedAt:job.result.checkedAt,message:job.result.updateMessage});
+   if(job.state==='error')this.setResourceState('cloud','satcorps',{phase:'error',checkedAt:job.checkedAt,message:job.error||'NASA 云图更新失败',retryable:job.retryable,checkSummary:job.checkSummary});
+   else if(job.result?.checkedAt)this.setResourceState('cloud','satcorps',{phase:job.result.updateStatus||'unchanged',checkedAt:job.result.checkedAt,message:job.result.updateMessage,retryable:job.result.retryable,checkSummary:job.result.checkSummary});
    else this.setResourceState('cloud','satcorps',{phase:'idle',checkedAt:null,message:record?'已恢复本机下载的云图':'尚未检查'});
+   if((job.retryable||job.result?.retryable)&&Date.now()-(job.checkedAt||job.result?.checkedAt||0)<86400000)this.recovery?.queue('cloud:satcorps',this.settings.resourceChecks['cloud:satcorps']?.retryAttempt||1,this.settings.resourceChecks['cloud:satcorps']?.retryAt||undefined);
   }finally{if(record)this.pendingRecords.delete(record.id);}
  }
  watchNASA(job){
@@ -175,16 +195,16 @@ export class Weather{
   const run=async()=>{const deadline=Date.now()+20*60e3;let record;
    try{
     while(job.state==='running'){
-     this.messages.cloud=job.status||'NASA 云图下载中…';this.setResourceState('cloud','satcorps',{phase:'downloading',message:this.nasaProgress(job.status)});
-     if(Date.now()>deadline)throw Error('NASA 下载超时，已有云图已保留');
+     this.messages.cloud=job.status||'NASA 云图下载中…';this.setResourceState('cloud','satcorps',{phase:'downloading',message:this.nasaProgress(job.status),checkSummary:null});
+     if(Date.now()>deadline)throw Object.assign(Error('NASA 下载超时，已有云图已保留'),{retryable:true});
      await new Promise(resolve=>setTimeout(resolve,document.hidden?8000:2500));job=await this.nasaCall('status');
     }
-    if(job.state==='error')throw Error(job.error||'NASA 云图更新失败');
+    if(job.state==='error')throw Object.assign(Error(job.error||'NASA 云图更新失败'),{retryable:job.retryable});
     if(!job.result)throw Error('NASA 云图暂不可用');
-    try{record=await this.acceptNASA(job);}catch{job=await this.nasaCall('status');if(job.state==='error'||!job.result)throw Error(job.error||'NASA 云图暂不可用');record=await this.acceptNASA(job);}
+    try{record=await this.acceptNASA(job);}catch{job=await this.nasaCall('status');if(job.state==='error'||!job.result)throw Object.assign(Error(job.error||'NASA 云图暂不可用'),{retryable:job.retryable});record=await this.acceptNASA(job);}
     await this.apply('cloud');await this.trim([record.id]);
-    if(!this.jobs.has('cloud:satcorps'))this.setResourceState('cloud','satcorps',{phase:job.result.updateStatus||'unchanged',checkedAt:job.result.checkedAt,message:job.result.updateMessage});return record;
-   }catch(error){if(!this.jobs.has('cloud:satcorps'))this.setResourceState('cloud','satcorps',{phase:'error',checkedAt:job.checkedAt||Date.now(),message:error.message});throw error;}
+    if(!this.jobs.has('cloud:satcorps')){this.setResourceState('cloud','satcorps',{phase:job.result.updateStatus||'unchanged',checkedAt:job.result.checkedAt,message:job.result.updateMessage,retryable:job.result.retryable,checkSummary:job.result.checkSummary});if(job.result.retryable)this.recovery?.queue('cloud:satcorps');}return record;
+   }catch(error){if(!this.jobs.has('cloud:satcorps')){const retryable=recoverableDownload(error);this.setResourceState('cloud','satcorps',{phase:'error',checkedAt:job.checkedAt||Date.now(),message:error.message,retryable});if(retryable)this.recovery?.queue('cloud:satcorps');}throw error;}
    finally{if(record)this.pendingRecords.delete(record.id);}
   };
   this.busy=true;this.nasaWatch=run().finally(()=>{this.nasaWatch=null;this.busy=this.jobs.size>0||!!this.nasaRestoreTask;this.render();});return this.nasaWatch;
@@ -199,13 +219,13 @@ export class Weather{
   if(this.nasaWatch)return this.nasaWatch;
   const job=await this.nasaCall('update','POST');
   if(job.state==='running')return this.watchNASA(job);
-  if(job.state==='error')throw Error(job.error||'NASA 云图更新失败');
+  if(job.state==='error')throw Object.assign(Error(job.error||'NASA 云图更新失败'),{retryable:job.retryable});
   if(!job.result)throw Error('NASA 云图暂不可用');return this.acceptNASA(job);
  }
  async acceptNASA(job){
   if(!job.result)throw Error(job.error||'NASA 云图暂不可用');
   const meta=validateNASA(job.result),existing=this.items.find(r=>r.kind==='cloud'&&cloudProvider(r)==='satcorps'&&r.sha256===meta.sha256&&r.time===meta.time);
-  this.lastCloudOutcome??={};this.lastCloudOutcome.satcorps={status:meta.updateStatus||(existing?'unchanged':'updated'),checkedAt:meta.checkedAt,message:meta.updateMessage};
+  this.lastCloudOutcome??={};this.lastCloudOutcome.satcorps={status:meta.updateStatus||(existing?'unchanged':'updated'),checkedAt:meta.checkedAt,message:meta.updateMessage,retryable:meta.retryable,checkSummary:meta.checkSummary};
   if(meta.updateMessage)this.messages.cloud=meta.updateMessage;
   if(existing)return existing;
   const {blob}=await this.fetch('/api/cloud/satcorps/image?sha256='+meta.sha256,40e6,{onProgress:p=>this.downloadProgress('cloud','satcorps',p)});
@@ -285,6 +305,7 @@ export class Weather{
    try{const response=await this.nasaCall('clear','POST');if(response.cleared===false)throw Error('云图正在下载，请完成后清理');this.serverCache={bytes:0,count:0};}
    catch(error){if(error.message.includes('正在下载'))throw error;this.messages.cache='本机云图服务未连接，仅清理浏览器缓存';}
   }
+  for(const key of [...(this.recovery?.pending.keys()||[])])if(selected.includes(key.split(':')[0]))this.recovery.cancel(key);
   await this.removeRecords(this.items.filter(r=>selected.includes(r.kind)&&(!r.favorite||include)).map(r=>r.id));
   $('cacheDialog').close();this.messages.cache='缓存已清理，组合和设置已保留';this.render();
  }
@@ -306,7 +327,7 @@ export class Weather{
  render(){if(!$('weatherHistory'))return;
   const historyContext=this.sim.missionId+'|'+this.active.orbit;if(historyContext!==this.historyContext){this.historyContext=historyContext;this.historyDirty=true;}
   const total=this.items.reduce((n,x)=>n+x.size,0);$('cacheUsage').textContent=t('缓存 {size} MB / {limit} MB · {count} 份',{size:(total/1048576).toFixed(1),limit:this.settings.limit,count:this.items.length})+(total>this.settings.limit*1048576?t(this.settings.autoClean?' · 收藏／当前使用数据超出预算，未自动删除':' · 已超出上限，自动清理已关闭'):'')+(this.cache.persistent?'':t(' · 当前浏览器仅支持临时缓存'));
-  $('lastDataCheck').textContent=t('上次检查')+': '+(this.settings.checked?fmt(this.settings.checked):t('尚未检查'));$('dataUpdates').replaceChildren();for(const k of ['cloud','aurora','orbit','assets','cache'])if(this.messages[k]){const p=document.createElement('p');p.className='small';p.textContent=(names[k]?t(names[k])+': ':'')+(typeof this.messages[k]==='object'?t(this.messages[k].key,this.messages[k].params):t(this.messages[k]));$('dataUpdates').append(p);}
+  $('lastDataCheck').textContent=t('上次检查')+': '+(this.settings.checked?fmt(this.settings.checked):t('尚未检查'));$('dataUpdates').replaceChildren();for(const k of ['cloud','aurora','orbit','assets','cache'])if(this.messages[k]){const p=document.createElement('p');p.className='small';p.textContent=(names[k]?t(names[k])+': ':'')+(typeof this.messages[k]==='object'?t(this.messages[k].key,this.messages[k].params):errorText(this.messages[k]));$('dataUpdates').append(p);}
   for(const id of ['clearEnvironment','confirmClearCache','importSnapshot'])$(id).disabled=this.busy;
   $('updateEnvironment').disabled=this.busy;
   for(const kind of ['cloud','aurora'])this.status(kind);

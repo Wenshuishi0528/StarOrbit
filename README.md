@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.71 · 作者 / Author: wenshuishi0528**
+**v0.73 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -56,9 +56,11 @@
 
 从 **[最新发布页](https://github.com/Wenshuishi0528/StarOrbit/releases/latest)** 下载便携包并解压，用新版 Chrome、Edge 或 Safari 打开 **StarOrbit.html**。约 237 MB 的 HTML 内嵌模型、贴图、星表、计算库和轨道快照，可离线运行。仓库 ZIP 提供源码；可运行便携包位于发布页。
 
+本机开发版通过 `npm run build` 生成轻量入口，启动器保留原地址并按需加载资源，避免浏览器一次解析约 237 MB 的 HTML。更新恢复与稳定性说明见 [v0.72](docs/v0.72-details.md)。
+
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.71**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
+源码、网页构建与本机运行版共用 **v0.73**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 
@@ -110,7 +112,7 @@ Download the portable package from the **[latest release](https://github.com/Wen
 
 On macOS, the portable package includes a launcher app with its own Earth/station icon. It supports Intel and Apple Silicon and starts the local server in the background.
 
-The source, web build and local runtime share **v0.71**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
+The source, web build and local runtime share **v0.72**. The online edition deploys automatically from main; its current version appears at the top of the page. Portable packages are available on the latest release page.
 
 The China Space Station bundled orbit snapshot is valid from **2026-10-28 00:00 to 2026-11-04 00:00 UTC**. Outside that interval, the nearest endpoint’s position and velocity define a Kepler ellipse for continued simulation. Refresh it with **更新轨道数据.command** on macOS or `python3 scripts/update-orbit.py`, or import supported data in the interface.
 

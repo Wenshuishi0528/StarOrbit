@@ -1115,5 +1115,20 @@
   "仅用于人工控制": "Manual control only",
   "单轴加速度上限 {value} m/s²": "Per-axis acceleration limit {value} m/s²",
   "停靠位置偏差": "Hold-point offset",
-  "建议速度统计容差 ±{value} m/s": "Suggested-speed statistics tolerance ±{value} m/s"
+  "建议速度统计容差 ±{value} m/s": "Suggested-speed statistics tolerance ±{value} m/s",
+  "数据源连接超时": "The data source connection timed out",
+  "数据源 TLS 连接中断": "The TLS connection to the data source was interrupted",
+  "数据源 TLS 证书验证失败": "The data source TLS certificate could not be verified",
+  "数据源连接中断": "The data source connection was interrupted",
+  "数据源未返回正确的分段数据": "The source returned an invalid byte range",
+  "数据源返回 HTTP {status}": "The data source returned HTTP {status}",
+  "官方轨道数据源暂不可用": "The official orbit source is temporarily unavailable",
+  "本次 NASA 检查已到时间上限": "This NASA check reached its time limit",
+  "检查 {checked} 个候选：{missing} 个尚未发布，{rejected} 个覆盖不足，{failed} 个读取失败。": "Checked {checked} candidates: {missing} unpublished, {rejected} with insufficient coverage, {failed} failed to load.",
+  "自动恢复第 {attempt} 次：将在 {time} 重试。": "Automatic recovery {attempt}: retry at {time}.",
+  "当前离线，联网后自动重试。": "Offline. Retrying automatically when the connection returns.",
+  "自动重试已暂缓；重新联网后继续，也可手动检查。": "Automatic retries are paused. Reconnecting resumes them; you can also check manually.",
+  "三维图形暂不可用": "3D graphics unavailable",
+  "浏览器未能启动 WebGL 2。请重新打开页面，或换用支持三维图形的浏览器。现有设置和下载数据已保留。": "The browser could not start WebGL 2. Reopen the page or use a browser with 3D graphics support. Your settings and downloaded data are preserved.",
+  "连接中断，正在继续未完成的 NASA 分段…": "Connection interrupted; resuming unfinished NASA chunks…"
 }

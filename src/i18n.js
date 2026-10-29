@@ -17,6 +17,9 @@ export function t(key,params={}){
 }
 export function errorText(message){
  if(language==='zh')return message;
+ const exact=dictionaries[language][message]??english[message];if(exact)return exact;
+ const http=message.match(/^数据源返回 HTTP (\d{3})$/);if(http)return t('数据源返回 HTTP {status}',{status:http[1]});
+ if(message.includes('；'))return message.split('；').map(errorText).join('; ');
  const match=message.match(/^无效轨道记录 (\d+)$/);
  return match?t('无效轨道记录 {index}',{index:match[1]}):(dictionaries[language][message]??english[message]??message);
 }

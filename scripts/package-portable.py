@@ -12,7 +12,7 @@ parser.add_argument('output', type=Path)
 parser.add_argument('--macos-launcher',type=Path)
 args = parser.parse_args()
 files = ['StarOrbit.html', '启动星轨.command',
-         'scripts/serve.py', 'scripts/cloud_service.py', 'scripts/satcorps.py', 'scripts/cloud-requirements.txt', '使用说明.md', '素材与迁移说明.md', 'LICENSE', 'LICENSING.md']
+         'scripts/serve.py', 'scripts/cloud_service.py', 'scripts/satcorps.py', 'scripts/http_download.py', 'scripts/cloud-requirements.txt', '使用说明.md', '素材与迁移说明.md', 'LICENSE', 'LICENSING.md']
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []
 size = sum((root / name).stat().st_size for name in files)+sum(p.stat().st_size for p in launcher_files)
 if size > 400_000_000:

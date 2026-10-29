@@ -74,6 +74,22 @@ with tempfile.TemporaryDirectory() as temp:
  unavailable=CloudService(folder,None).snapshot();assert unavailable['state']=='error' and unavailable['updateStatus']=='unavailable' and 'result' not in unavailable
  print('NASA updated/unchanged/partial/unavailable outcomes, identical releases and last-good retention passed')
 
+ from http_download import DownloadError
+ folder=Path(temp)/'not-published';previous=fixture(folder,clock-3*DAY)
+ with patch('satcorps.candidates',side_effect=lambda now:iter(rows)),patch('satcorps.fetch_frame',side_effect=DownloadError('http','数据源返回 HTTP 404',404)) as fetch:
+  result=build(folder,now=clock)
+  assert result['updateStatus']=='unchanged' and result['checkComplete'] and not result['retryable']
+  assert result['checkSummary']==dict(checked=2,missing=2,rejected=0,failed=0)
+  build(folder,now=clock+CHECK_TTL+1);assert fetch.call_count==4,'unpublished products are rechecked after 15 minutes'
+ folder=Path(temp)/'host-outage';fixture(folder,clock-10*DAY)
+ with patch('satcorps.candidates',return_value=iter(list(candidates(clock))[:8])),patch('satcorps.fetch_frame',side_effect=DownloadError('tls','数据源 TLS 连接中断',retryable=True)) as fetch,patch('satcorps.time.sleep'):
+  result=build(folder,now=clock)
+  assert fetch.call_count==2,'host outage must not probe all 30 days'
+  assert result['updateStatus']=='partial' and result['retryable'] and result['checkSummary']['failed']==2
+  assert 'TLS' in result['updateMessage'] and not result['checkComplete']
+ assert CloudService(folder,None).snapshot()['result']['retryable']
+ print('NASA missing-publication, coverage/failure counts, finite outage checks and persisted recovery diagnostics passed')
+
  # Exercise real RangeFile/fetch_frame reuse with synthetic HDF5 chunk locations.
  # This checks bytes and preserved sparse-file content without scientific dependencies.
  offsets={'cloud_phase':131072,'lat':196608,'cloud_optical_depth':262144,'relative_time':327680,'lon':393216}
@@ -99,3 +115,18 @@ with tempfile.TemporaryDirectory() as temp:
  with path.open('rb') as file:
   for offset in offsets.values():file.seek(offset);assert file.read(8)==bytes([offset//65536])*8
  print('NASA phase screening reuses metadata and compressed chunks; each selected field downloads once')
+
+# A failed late chunk resumes within the same temporary scientific file.
+from satcorps import fetch_resuming
+reuse={'downloaded':10,'chunks':{(100,10)}}
+calls=[]
+def partial_fetch(url,path,progress,fields,state,deadline):
+ calls.append((path,id(state),set(state['chunks'])))
+ if len(calls)==1:
+  state['chunks'].add((200,20));state['downloaded']+=20
+  raise DownloadError('network','connection lost',retryable=True)
+ assert (200,20) in state['chunks'];state['downloaded']+=30;return 30
+with patch('satcorps.fetch_frame',side_effect=partial_fetch),patch('satcorps.time.sleep'):
+ assert fetch_resuming('https://example.invalid/data','same.nc',lambda _:None,reuse=reuse)==50
+assert len(calls)==2 and calls[0][:2]==calls[1][:2]
+print('NASA resumes completed chunks after transient failure without resetting the temporary file or byte accounting')

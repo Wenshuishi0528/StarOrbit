@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v0.73 — 2026-10-29
+
+**中文：** 修复地表高清分块在斜视时被再次混回低清底图，改善夜景城市清晰度；保留四块缓存、按需加载与纹理抗锯齿。[说明](docs/v0.73-details.md)。
+
+**English:** Preserve loaded surface detail at oblique viewing angles instead of blending it back to the coarse global map. Keep the four-tile cache, on-demand loading and mip/anisotropic filtering. [Details](docs/v0.73-details.md).
+
+## v0.72 — 2026-10-29
+
+**中文：** 修复 NASA 云图与轨道下载的连接重试、超时衔接和错误信息丢失；区分未发布、覆盖不足与网络失败。新增有限次数的自动恢复、断网后接续及重试时间提示，保留已有数据与显示选择。新增约 126 KB 的本机轻量入口，修正 Safari 自动重试兼容性。[原因、恢复规则与验证](docs/v0.72-details.md)。
+
+**English:** Fixed connection retries, timeout coordination and lost diagnostics in NASA cloud and orbit updates. Unpublished files, insufficient coverage and network failures are distinguished. Added bounded automatic recovery, reconnection handling and retry-time feedback while preserving existing data and display choices. Added a roughly 126 KB local entry page and fixed Safari timer compatibility. [Causes, recovery rules and validation](docs/v0.72-details.md).
+
 ## v0.71 — 2026-10-29
 
 **中文：** 交会对接升级为完整训练台：三种场景、停靠点检查与 GO 放行、人工／辅助接近／保持／撤离、四元数姿态与有限角速率响应。新增方向仪表、无推力预测、事件记录、回放和 JSON／CSV 导出；捕获报告保留接触前真实读数。[模型、使用与验证](docs/v0.71-details.md)。

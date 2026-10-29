@@ -60,15 +60,24 @@ export class OrbitRepository{
   for(const record of candidates){try{if(versionTime(bindOrbit(validateOrbit(JSON.parse(await record.blob.text())),id))>time)return true;}catch{}}
   return false;
  }
- update(id){
+ selection(id){return {recordId:this.records[id]??null,revision:this.selectionRevisions[id]||0};}
+ update(id,selection){
   if(this.updates.has(id))return this.updates.get(id);
-  const promise=this.updateMission(id);this.updates.set(id,promise);
+  const promise=this.updateMission(id,selection);this.updates.set(id,promise);
   const finished=()=>{if(this.updates.get(id)===promise)this.updates.delete(id);};promise.then(finished,finished);return promise;
  }
- async updateMission(id){
+ async updateMission(id,selection=this.selection(id)){
   const r=this.resources,task=mission(id),source=orbitSource(id);if(!source)throw Error('此任务没有在线轨道源，请导入轨道文件');
-  const selection=this.records[id]??null,revision=this.selectionRevisions[id]||0,initial=await this.selectionData(id);
-  const fetchSource=async(local,max)=>{if(!WEB_BUILD){try{return await r.fetch(local,max);}catch{}}return r.fetch(source,max);};
+  const initial=await this.selectionData(id);
+  const fetchSource=async(local,max)=>{
+   let relayError;
+   if(!WEB_BUILD){try{return await r.fetch(local,max,{timeout:105000});}catch(error){
+    // The relay has already retried transient upstream failures within 90 s.
+    // Do not replace its diagnosis with a predictable browser CORS failure.
+    if(error.code?.startsWith('UPSTREAM_'))throw error;relayError=error;
+   }}
+   try{return await r.fetch(source,max);}catch(error){throw relayError||error;}
+  };
   let data,gp,key;
   if(task.updateSource==='celestrak'){
    const {blob}=await fetchSource('/api/orbit/gp?norad='+task.noradId,100000);gp=validateGP(JSON.parse(await blob.text()),id);key=gpKey(gp,id);
@@ -89,7 +98,7 @@ export class OrbitRepository{
   const previousIds=new Set(r.items.map(record=>record.id));let record;
   try{
    record=await r.store('orbit',new Blob([JSON.stringify(data)],{type:'application/json'}),{missionId:id,time:Date.parse(data.gpEpoch||data.created)||data.rows[0][0],source});
-   const unchangedSelection=(this.records[id]??null)===selection&&(this.selectionRevisions[id]||0)===revision;
+   const unchangedSelection=(this.records[id]??null)===selection.recordId&&(this.selectionRevisions[id]||0)===selection.revision;
    let applied=false;
    // Keep a late download in its own mission's library. Never overwrite a
    // manual history choice, or activate it on a different current mission.
