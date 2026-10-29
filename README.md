@@ -2,7 +2,7 @@
 
 **航天与轨道模拟 / Space & Orbit Simulator**
 
-**v0.73 · 作者 / Author: wenshuishi0528**
+**v0.74 · 作者 / Author: wenshuishi0528**
 
 **[CC BY-NC 4.0](LICENSE) · 原创内容限非商业使用；商用须经作者书面许可。 / Noncommercial use; commercial use requires the author’s written permission. [许可范围 / Scope](LICENSING.md)**
 **[打开在线模拟器 / Launch in your browser](https://wenshuishi0528.github.io/StarOrbit/)**
@@ -60,7 +60,7 @@
 
 macOS 便携包内附带地球与空间站图标的启动应用，支持 Intel 和 Apple Silicon，双击即可启动后台服务。
 
-源码、网页构建与本机运行版共用 **v0.73**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
+源码、网页构建与本机运行版共用 **v0.74**。在线版随 main 分支自动部署，当前部署版本以页面顶部为准；便携包见最新发布页。
 
 顶部显示软件版本和作者。完整操作见 **[使用说明](使用说明.md)**。
 

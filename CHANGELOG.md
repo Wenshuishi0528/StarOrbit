@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v0.74 — 2026-10-29
+
+**中文：** 接入天和 V23、问天 V24、梦天 V25、神舟 V26、天舟 V27 新版模型；保留巡天、既有装配接口和太阳翼转轴。[模型核对](docs/v0.74-model-validation.json)。
+
+**English:** Integrated the reviewed Tianhe V23, Wentian V24, Mengtian V25, Shenzhou V26 and Tianzhou V27 models, preserving Xuntian, assembly interfaces and solar-array pivots. [Validation](docs/v0.74-model-validation.json).
+
 ## v0.73 — 2026-10-29
 
 **中文：** 修复地表高清分块在斜视时被再次混回低清底图，改善夜景城市清晰度；保留四块缓存、按需加载与纹理抗锯齿。[说明](docs/v0.73-details.md)。

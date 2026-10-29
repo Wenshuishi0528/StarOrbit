@@ -1,0 +1,32 @@
+{
+  "source": "中国空间站_1比200_天舟表面精修_V27.blend",
+  "sourceSHA256": "48a0a8174e011efdb21d848d4c58b084ea29068bb3dc721dac6097f5e1737787",
+  "stationSHA256": "28f1ba9795b08e8e481086f916035ed4cf7946ba69730493ca0b62893c160ca7",
+  "modelVersions": {
+    "TH": "V23",
+    "WT": "V24",
+    "MT": "V25",
+    "SZ": "V26",
+    "TZ": "V27"
+  },
+  "exactModuleMatches": [
+    "TH",
+    "WT",
+    "MT",
+    "SZ",
+    "TZ"
+  ],
+  "preservedModules": [
+    "XT"
+  ],
+  "rigPortsAndTransformsUnchanged": true,
+  "allAccessorsFinite": true,
+  "moduleNodes": {
+    "module_TH": 280,
+    "module_WT": 86,
+    "module_MT": 82,
+    "module_TZ": 93,
+    "module_SZ": 91,
+    "module_XT": 40
+  }
+}
