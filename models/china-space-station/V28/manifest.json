@@ -1,0 +1,203 @@
+{
+  "model_version": "V28",
+  "published_date": "2026-11-04",
+  "author": "wenshuishi0528",
+  "scale": "1:200",
+  "blender_units": "1 unit = 1 mm",
+  "source_sha256": "4529dd55fd3b9bccd7a5baeb4820aa7ffa7eb3efc1be0cf0b48fa79e19cd81af",
+  "modules": {
+    "天和": "V23",
+    "问天": "V24",
+    "梦天": "V25",
+    "神舟": "V26",
+    "天舟": "V27",
+    "巡天": "V28"
+  },
+  "files": [
+    {
+      "path": "source/中国空间站_1比200_巡天表面精修_V28.blend",
+      "bytes": 26381503,
+      "sha256": "4529dd55fd3b9bccd7a5baeb4820aa7ffa7eb3efc1be0cf0b48fa79e19cd81af"
+    },
+    {
+      "path": "glb/station.glb",
+      "bytes": 51998764,
+      "sha256": "f993b46aea775cf8992e6d635bec0e226d78b073786ac776460558b03e6e7dbb"
+    },
+    {
+      "path": "glb/model.json",
+      "bytes": 9201,
+      "sha256": "906907ef18834b8926c28d5ea5b663249f7ed5b57188c9d5de1dc5e0e854ecd7"
+    },
+    {
+      "path": "glb/modules/天和_V23.glb",
+      "bytes": 20731300,
+      "sha256": "5684d074b3643b35f506342511a836cad89fe6758a386acc1fffdc497e278095"
+    },
+    {
+      "path": "print-candidates/天和_V23/天和_V23_统一本体.stl",
+      "bytes": 15667681,
+      "sha256": "c2865e59117c848613d773509175cb7a1d1924d31476b2b571a973cc10687393"
+    },
+    {
+      "path": "glb/modules/问天_V24.glb",
+      "bytes": 5170980,
+      "sha256": "76766e3df7f4fe0afe5befa90c15267a5878da1195fef9056ce105b1cecf39d7"
+    },
+    {
+      "path": "print-candidates/问天_V24/问天_V24_尾座单实体.stl",
+      "bytes": 216929,
+      "sha256": "9a061b75639631c3252fb0016f4c574f6b7398b8a6e7cf70fa83afed23147d76"
+    },
+    {
+      "path": "print-candidates/问天_V24/问天_V24_统一本体.stl",
+      "bytes": 4832410,
+      "sha256": "e6e80fd56d7b5998b6f8787bfec05213b34e28bf689866beedfa667dd59fccc7"
+    },
+    {
+      "path": "glb/modules/梦天_V25.glb",
+      "bytes": 4712912,
+      "sha256": "07561fc0833d35a91c73d235702d44059b548d4e5e9dc5dc585b67989cacfa5d"
+    },
+    {
+      "path": "print-candidates/梦天_V25/梦天_V25_尾座单实体.stl",
+      "bytes": 214547,
+      "sha256": "8461aa193805097db405c916a2596541276f20647b0856d451db092136f6500f"
+    },
+    {
+      "path": "print-candidates/梦天_V25/梦天_V25_统一本体.stl",
+      "bytes": 4124273,
+      "sha256": "73c98a0f98c58ad643b348451ea9582937df6cf4113ddbd8509e2257f413360c"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_上展开平台.stl",
+      "bytes": 162905,
+      "sha256": "fe51af263aa4460eab847c517030df464d5f78c8d04ca69bc9cf941182c7fa1a"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_下展开平台.stl",
+      "bytes": 164722,
+      "sha256": "cc5ca143fe5d0d9a20c96ba4b72efd95246a54ceb7ff21c3b20fc6eb15b79141"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_前接口帽.stl",
+      "bytes": 12635897,
+      "sha256": "747a444cb5d2689dc3d730cdbfc5b7d794304ad9ed457e009aa2180cf50c8c9e"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_太阳翼_正Y.stl",
+      "bytes": 179912,
+      "sha256": "6ceb083fca801eab5f515545c4c657847b7c2f3017d53b2c0a0004e68e8612d8"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_太阳翼_负Y.stl",
+      "bytes": 176884,
+      "sha256": "fd1b81a122a9431591ee05f981f99ae1ee3d7e0b9a62681b8fd09171bff468e2"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_资源舱天线.stl",
+      "bytes": 860448,
+      "sha256": "7df95e3ce1dfa5e270e3c1b430c49ad048e03e52106f138f5bfe32e826c2ccca"
+    },
+    {
+      "path": "print-candidates/梦天_V25/独立件/梦天_V25_转位机构收拢件.stl",
+      "bytes": 317720,
+      "sha256": "9b699e8892ab994290b173541fe34fb3da05bdf75113d091400e220195fc5bca"
+    },
+    {
+      "path": "glb/modules/神舟_V26.glb",
+      "bytes": 6673344,
+      "sha256": "4ce085446c0dc071976546572cbbd6ab2279950a6282d56360d67e319aba0311"
+    },
+    {
+      "path": "print-candidates/神舟_V26/独立件/神舟_V26_前接口帽.stl",
+      "bytes": 12422536,
+      "sha256": "a1bc32719037b6f68ab6c1cdb686a393add7a41e8f176ef635aeb4b418f66e00"
+    },
+    {
+      "path": "print-candidates/神舟_V26/独立件/神舟_V26_太阳翼_正Y.stl",
+      "bytes": 103982,
+      "sha256": "c5408414ba7671c32acfe6574c6f63563a436c51e7c0835c77ec5b714b219094"
+    },
+    {
+      "path": "print-candidates/神舟_V26/独立件/神舟_V26_太阳翼_负Y.stl",
+      "bytes": 105362,
+      "sha256": "13b439320918d7cfbec3594f163eae13179b1a4b7f3d770a7bdee650a1f56c26"
+    },
+    {
+      "path": "print-candidates/神舟_V26/神舟_V26_统一本体.stl",
+      "bytes": 25883254,
+      "sha256": "747d8435678c7e195e157d6decfde190c3026831a82a21ccc6da4bdd6d61dedb"
+    },
+    {
+      "path": "glb/modules/天舟_V27.glb",
+      "bytes": 6031828,
+      "sha256": "9a21831bc34678db12de9ae6340921b707c5005b7f2c4b1f2aefa69beb24ed87"
+    },
+    {
+      "path": "print-candidates/天舟_V27/天舟_V27_统一本体.stl",
+      "bytes": 11619886,
+      "sha256": "1118403238a476e50a7570cce2f1c60a0786ee6565fd28c45f541bde3785e986"
+    },
+    {
+      "path": "print-candidates/天舟_V27/独立件/天舟_V27_前接口帽.stl",
+      "bytes": 12651794,
+      "sha256": "0c420a9d61e303f8adf721b3b33b791f2e0f681869280890d9b760709b353aa2"
+    },
+    {
+      "path": "print-candidates/天舟_V27/独立件/天舟_V27_太阳翼_正Y.stl",
+      "bytes": 166144,
+      "sha256": "8e08a5d0e667db3a3a8cb869db1f408cf6a8988507378f0fd3a8bd46adcfa1bd"
+    },
+    {
+      "path": "print-candidates/天舟_V27/独立件/天舟_V27_太阳翼_负Y.stl",
+      "bytes": 153466,
+      "sha256": "36cd736b2ecfa3b3039dcfc80d260d789d7775a7e1a77a9a06eb7fdaceac0ab3"
+    },
+    {
+      "path": "glb/modules/巡天_V28.glb",
+      "bytes": 4644884,
+      "sha256": "b18840a696c0bf2938eba01b43fde85aadd375f2bb6c269d1e79e72fa0fc022c"
+    },
+    {
+      "path": "print-candidates/巡天_V28/巡天_V28_统一本体.stl",
+      "bytes": 6686905,
+      "sha256": "44890791ba64313ba71fc19e604edc99386939ebcac64e710b10fccce2eca84a"
+    },
+    {
+      "path": "print-candidates/巡天_V28/独立件/巡天_V28_后接口帽.stl",
+      "bytes": 12520099,
+      "sha256": "590ae871561d1d3c31dd7282ab931907a81b2c378bc4e1aa2549050a2b368610"
+    },
+    {
+      "path": "print-candidates/巡天_V28/独立件/巡天_V28_固定开盖含铰链.stl",
+      "bytes": 185734,
+      "sha256": "0fc42bd33218603b6dd0ed3d439acabc595dc98483855b9b5d178b9d0830d379"
+    },
+    {
+      "path": "print-candidates/巡天_V28/独立件/巡天_V28_太阳翼_正Y.stl",
+      "bytes": 390640,
+      "sha256": "89a5f463c0a2cb95970d92ea81ce8a503d3e92dac1fceecca3715d638aa174e9"
+    },
+    {
+      "path": "print-candidates/巡天_V28/独立件/巡天_V28_太阳翼_负Y.stl",
+      "bytes": 396737,
+      "sha256": "0ae810ad0acef782b5445f77d314ea8d6f752a5acbf7f4ccfaf0dd07a45f3428"
+    },
+    {
+      "path": "validation/wing_rib_removal_validation.json",
+      "bytes": 791,
+      "sha256": "eaa4afa7a5d00c85836c08a56e6284859f33e63550ff4092966b17eaec327236"
+    },
+    {
+      "path": "validation/glb_export_validation.json",
+      "bytes": 720,
+      "sha256": "bf3879563949fa3970498509b59e019986f19cbe7ef94d11c739b73faadfbd6f"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    }
+  ]
+}
