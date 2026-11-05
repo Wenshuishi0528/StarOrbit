@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {geodeticToEcf,ecfToLookAngles,json2satrec,propagate,eciToEcf,gstime} from 'satellite.js';
 import {validateObserver,observerFrame,lookAngles,predictionSource,predictionWindow,createPassSampler,scanPasses,predictPasses,passesToICS,PASS_GP_MAX_AGE} from '../src/pass-prediction.js';
+import {parseOfficialOrbit} from '../src/data-sources.js';
+import {earthAxes,interpolate,stateAt} from '../src/orbit.js';
+import {OEM_ESTIMATE_LIMIT} from '../src/pass-oem-estimate.js';
 const degree=Math.PI/180,read=name=>JSON.parse(fs.readFileSync(new URL(name,import.meta.url)));
 const site={name:'北京',latitude:39.9042,longitude:116.4074,height:50},frame=observerFrame(site);
 const independentSite={latitude:site.latitude*degree,longitude:site.longitude*degree,height:site.height/1000};
@@ -48,4 +51,28 @@ const ics=passesToICS({...result,observer:{...site,name:'北京,观测站\nEND:V
 assert(ics.includes('DTSTART:2026'));assert(!ics.includes('TZID'));assert.equal((ics.match(/\r\nBEGIN:VEVENT\r\n/g)||[]).length,result.passes.length);
 assert(ics.includes('\\,')&&ics.includes('\\;'));assert(ics.split('\r\n').every(line=>Buffer.byteLength(line)<=75));
 assert(ics.endsWith('END:VCALENDAR\r\n'));
+// Archived official ephemeris is a reproducible holdout. It also lets the
+// current bundled station ephemeris be refreshed independently.
+const archived=parseOfficialOrbit(fs.readFileSync(new URL('../assets/official-orbit-source.html',import.meta.url),'utf8'));
+const cutoff=archived.rows[0][0]+2.93*86400000;
+const train={...archived,missionId:'tiangong',rows:archived.rows.filter(row=>row[0]<=cutoff)};
+const extrap=predictionSource(train,{allowEstimate:true}),last=train.rows.at(-1)[0];
+assert.equal(extrap.recordEnd,last);assert.equal(extrap.end,last+OEM_ESTIMATE_LIMIT);
+assert.deepEqual(extrap.position(last,earthAxes(last)).inertial,interpolate(train.rows,last).position);
+for(const hours of [24,48,72]){
+ const t=last+hours*3600000,truth=interpolate(archived.rows,t).position;
+ const error=p=>Math.hypot(...p.map((v,i)=>v-truth[i]));
+ assert(error(extrap.position(t,earthAxes(t)).inertial)<error(stateAt(train,t).position)*.2,'recent-node fit improves this held-out ephemeris at '+hours+' h');
+}
+assert.throws(()=>extrap.position(extrap.end+1,earthAxes(extrap.end)),/有效轨道/);
+assert.equal(predictionSource({...train,missionId:'other'},{allowEstimate:true}).end,last);
+assert.equal(predictionSource(dfh,{allowEstimate:true}).end,sgp.end);
+assert.throws(()=>predictionWindow(train,train.rows[0][0]-1,24,{allowEstimate:true}),/有效轨道/);
+assert.throws(()=>predictionWindow(train,extrap.end,24,{allowEstimate:true}),/有效轨道/);
+const mixed=await predictPasses(train,site,last-12*3600000,24,{minimumElevation:5,allowEstimate:true});
+assert.equal(mixed.mode,'mixed');assert(mixed.passes.some(p=>p.estimated)&&mixed.passes.some(p=>!p.estimated));
+const rough=await predictPasses(train,site,last+60*3600000,24,{minimumElevation:5,allowEstimate:true});
+assert(rough.clipped&&rough.mode==='estimate'&&rough.end===extrap.end);
+assert(rough.passes.length&&rough.passes.every(p=>p.estimated));
+assert(passesToICS(rough,'Station').includes('[Estimate]'));
 console.log('Pass prediction: WGS84/SGP4 cross-check, grazing/window boundaries, eclipse/twilight, data validity, cancellation and ICS passed', {passes:result.passes.length});

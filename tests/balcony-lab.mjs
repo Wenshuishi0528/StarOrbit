@@ -1,0 +1,74 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {earthAxes,unit} from '../src/orbit.js';
+import {observerFrame,predictionSource,predictPasses,createPassSampler} from '../src/pass-prediction.js';
+import {BEIJING_BALCONY,EXAMPLE_HORIZON,angularSeparation,azimuthOffset,balconyEvents,balconyTrack,diskPoint,diskSurface,groundBasis,horizonHeight,normalizeHorizon,observationState,previewTime,recommendedPass,reverseCamera,siteKey,stellarAngles} from '../src/balcony-lab-geometry.js';
+import {lastObserver,rememberObserver,observerOrbit,orbitSelection,sameSelection,locationDraft} from '../src/observer-settings.js';
+
+const close=(value,target,tolerance=1e-7)=>assert.ok(Math.abs(value-target)<tolerance,`${value} ≠ ${target}`);
+const shape=normalizeHorizon([[360,10],[20,30],[340,20],[0,15],[-8,22],[350,92],[NaN,0]]);
+assert.deepEqual(shape,[[0,15],[20,30],[340,20]]);
+close(horizonHeight(shape,350),17.5);close(horizonHeight(shape,370),22.5);
+close(horizonHeight([],6),0);close(horizonHeight([[45,12]],260),12);
+close(azimuthOffset(1,359),2);close(azimuthOffset(359,1),-2);
+assert.equal(siteKey({...BEIJING_BALCONY,name:'阳台'}),siteKey(BEIJING_BALCONY));
+assert.notEqual(siteKey({...BEIJING_BALCONY,height:100}),siteKey(BEIJING_BALCONY));
+const point={azimuth:0,elevation:16,illumination:1,sunElevation:-8};
+assert.ok(observationState(point,shape).candidate);
+assert.equal(observationState({...point,elevation:3},shape).status,'楼顶或地平线遮挡');
+assert.equal(observationState({...point,illumination:0},shape).shadow,'全影');
+assert.equal(observationState({...point,illumination:.4},shape).shadow,'半影');
+assert.equal(observationState({...point,sunElevation:-3},shape).status,'当地天光较亮');
+close(angularSeparation({azimuth:0,elevation:0},{azimuth:90,elevation:0}),90);
+
+const data=JSON.parse(readFileSync(new URL('../assets/orbit.json',import.meta.url),'utf8'));
+const source=predictionSource(data),site=BEIJING_BALCONY,frame=observerFrame(site);
+const result=await predictPasses(data,site,source.start,48,{minimumElevation:5});
+const demo=result.passes[recommendedPass(result.passes,EXAMPLE_HORIZON)];
+assert.ok(demo&&demo.visible.length,'Beijing demo has a real optical candidate');
+const sample=createPassSampler(source,site),time=previewTime(demo,EXAMPLE_HORIZON),centre=sample(time);
+assert.ok(observationState(centre,EXAMPLE_HORIZON).candidate);
+assert.ok(demo.start>=source.start&&demo.end<=source.end);
+const events=balconyEvents(demo,EXAMPLE_HORIZON,sample);
+assert.ok(events.some(event=>event.label==='最高点'));
+assert.ok(events.some(event=>event.label==='进入地影'));
+const track=balconyTrack(demo,EXAMPLE_HORIZON,sample,events);
+assert.equal(track[0].a.time,demo.start);assert.equal(track.at(-1).b.time,demo.end);
+assert.ok(track.some(s=>s.state.candidate)&&track.some(s=>!s.state.candidate));
+for(const event of events){
+ assert.ok(event.time>=demo.start&&event.time<=demo.end);
+ const q=sample(event.time);
+ if(event.label==='进入地影'||event.label==='离开地影')close(q.illumination,1,.003);
+ if(event.label==='进入地影')assert.equal(observationState(q,EXAMPLE_HORIZON).shadow,'半影');
+ if(event.label==='楼顶后出现'||event.label==='落到楼顶后')close(q.elevation,horizonHeight(EXAMPLE_HORIZON,q.azimuth),.2);
+}
+const axes=earthAxes(time),basis=groundBasis(frame,time),toJ2000=ecef=>axes[0].map((_,i)=>axes.reduce((v,axis,j)=>v+axis[i]*ecef[j],0));
+close(stellarAngles(toJ2000(frame.east),basis).azimuth,90);
+close(stellarAngles(toJ2000(frame.north),basis).elevation,0);
+close(stellarAngles(toJ2000(frame.up),basis).elevation,90,2e-6);
+const fixed=source.position(time,axes).fixed,view=reverseCamera(fixed);
+assert.ok(diskPoint(view,unit(frame.position)).visible);
+assert.equal(diskPoint(view,view.radial.map(v=>-v)).visible,false);
+for(const [x,y] of [[0,0],[.2,.4],[.7,-.5],[.96,0]]){
+ const p=diskSurface(view,x,y);close(Math.hypot(...p),1);
+ const reverse=diskPoint(view,p);close(reverse.x,x);close(reverse.y,y);assert.ok(reverse.visible);
+}
+assert.equal(diskSurface(view,1.2,0),null);
+let local=null;
+globalThis.localStorage={getItem:()=>local,setItem:(_k,v)=>{local=v;}};
+assert.equal(lastObserver(),null);
+const localSite={name:'庭院',latitude:-34.62,longitude:-58.38,height:19};
+assert(rememberObserver(localSite));assert.deepEqual(lastObserver(),localSite);
+local='{}';assert.equal(lastObserver(),null);delete globalThis.localStorage;
+let selectionRevision=0;
+const sim={missionId:'dfh1',data:{missionId:'dfh1'},orbits:{selection:()=>({recordId:'local-station',revision:selectionRevision}),selectionData:async()=>({data})}};
+assert.equal(await observerOrbit(sim,'tiangong'),data);assert.equal(await observerOrbit(sim,'dfh1'),sim.data);
+const before=orbitSelection(sim,'tiangong');assert(sameSelection(before,orbitSelection(sim,'tiangong')));
+selectionRevision++;assert(!sameSelection(before,orbitSelection(sim,'tiangong')));
+const position={latitude:40,longitude:116,altitude:null,accuracy:9.6,altitudeAccuracy:null};
+const missing=locationDraft(position,{savedSites:[localSite]});
+assert.equal(missing.height,null);assert.equal(missing.heightSource,'missing');assert.equal(missing.horizontalAccuracy,10);
+const manual=locationDraft(position,{typedHeight:3200});assert.equal(manual.height,3200);assert.equal(manual.heightSource,'manual');
+const stored=locationDraft(position,{savedSites:[{latitude:40.00001,longitude:116,height:77,name:'阳台'}]});assert.equal(stored.height,77);assert.equal(stored.heightSource,'saved');
+const measured=locationDraft({...position,altitude:5067.2,altitudeAccuracy:11.4},{typedHeight:88});assert.equal(measured.height,5067);assert.equal(measured.verticalAccuracy,12);
+console.log('Balcony: skyline wrap, real Beijing pass and events, stellar frame, nadir projection passed.');

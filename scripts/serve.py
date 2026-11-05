@@ -8,6 +8,7 @@ from cloud_history import query as query_history
 from cloud_versions import catalog as cloud_catalog, library as cloud_library, local_image, known_checks
 import threading
 from http_download import download_bytes, DownloadError
+from balcony_motion import orientation_stream
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
 cloud_job_lock=threading.Lock()
@@ -33,6 +34,19 @@ class Handler(SimpleHTTPRequestHandler):
   self.send_response(code);self.send_header('Content-Type','application/json');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(json.dumps(value,ensure_ascii=False).encode())
  def do_POST(self):
   if not self.cloud_origin_ok():self.send_error(403);return
+  if self.path=='/api/balcony/orientation':
+   # Only an opt-in, same-origin local app may start this stream; reject cross-site forms and DNS rebinding.
+   hosts={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
+   host=self.headers.get('Host')
+   if host not in hosts or self.headers.get('Origin')!='http://'+host or self.headers.get('X-StarOrbit-Motion')!='1':
+    self.send_error(403);return
+   self.send_response(200);self.send_header('Content-Type','application/x-ndjson');self.send_header('Cache-Control','no-store');self.send_header('Connection','close');self.end_headers()
+   frames=orientation_stream()
+   try:
+    for pose in frames:self.wfile.write((json.dumps(pose)+'\n').encode());self.wfile.flush()
+   except (BrokenPipeError,ConnectionResetError):pass
+   finally:frames.close()
+   return
   if self.path=='/api/cloud/satcorps/update':
    self.send_json({'state':'error','error':'请在云图版本列表中刷新目录并选择下载；已取消逐日回查','retryable':False});return
   route=urllib.parse.urlparse(self.path)

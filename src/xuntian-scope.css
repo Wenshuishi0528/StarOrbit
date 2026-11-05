@@ -1,0 +1,91 @@
+#openXuntian{margin:0 8px 8px 0;border-color:#38746e;color:#a6eee2}
+#openXuntianMap{padding:3px 7px;font-size:11px;white-space:nowrap}
+#openXuntianMap[hidden],#xuntianScope[hidden],#xuntianScope [hidden]{display:none!important}
+body.xt-scope-open #orbitMinimap{display:none!important}
+#xuntianScope{--xt-ink:#9beddf;position:absolute;right:20px;bottom:100px;z-index:4;width:min(352px,calc(100vw - 34px));max-height:calc(100dvh - 190px);display:flex;flex-direction:column;color:#deecf6;background:#0a1828f7;border:1px solid #38606f;border-radius:12px;box-shadow:0 12px 34px #0007;overflow:hidden;font-size:12px}
+.xt-heading{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:7px 10px;background:#102237;border-bottom:1px solid #2d4356}
+.xt-heading strong{color:var(--xt-ink);white-space:nowrap}
+.xt-heading .xt-tag{margin-left:auto;font:10px ui-monospace,monospace;letter-spacing:.14em;color:#8faab8}
+#xuntianScope button{font:inherit;color:inherit;padding:4px 8px;min-height:25px;border-radius:6px}
+#xuntianScope #xtClose{font-size:17px;line-height:16px;min-width:25px;padding:0}
+.xt-body{padding:10px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;min-height:0}
+.xt-caption{display:block;font-size:11px;color:#a7becb;margin-bottom:4px}
+.xt-search{position:relative}
+#xtSearch{width:100%;padding:7px 9px;border:1px solid #35536a;border-radius:6px;background:#08131e;color:#e5f4fb;font-size:12px}
+#xtResults{position:absolute;z-index:5;top:100%;left:0;right:0;max-height:192px;overflow:auto;background:#15283a;border:1px solid #496775;box-shadow:0 7px 16px #0009;border-radius:5px}
+#xtResults button{display:flex;width:100%;align-items:center;text-align:left;gap:6px;border:0;border-radius:0;background:transparent}
+#xtResults small{margin-left:auto;color:#a9c2cd}
+#xtResults button[aria-selected=true],#xtResults button:hover{background:#28514f}
+#xtResults p{margin:8px}
+.xt-ocular{margin:8px 0 6px;position:relative;overflow:hidden;border:1px solid #2c465a;background:#030912;border-radius:6px}
+#xtCanvas{width:100%;aspect-ratio:8/5;display:block;cursor:grab;touch-action:none}
+#xtCanvas:focus-visible{outline:2px solid #82ddd2;outline-offset:-2px}
+#xtCanvas.dragging{cursor:grabbing}
+.xt-reticle{pointer-events:none;position:absolute;left:50%;top:50%;width:23px;height:23px;transform:translate(-50%,-50%);opacity:.78;background:linear-gradient(#a8efdc,#a8efdc) left center/6px 1px,linear-gradient(#a8efdc,#a8efdc) right center/6px 1px,linear-gradient(#a8efdc,#a8efdc) center top/1px 6px,linear-gradient(#a8efdc,#a8efdc) center bottom/1px 6px;background-repeat:no-repeat}
+.xt-field,.xt-coords{position:absolute;pointer-events:none;padding:3px 5px;color:#c0d8e3;text-shadow:0 1px 4px #000;font:10px ui-monospace,monospace;background:#07132188;border-radius:3px}
+.xt-field{top:3px;left:4px}.xt-coords{bottom:3px;left:4px}
+.xt-unavailable{position:absolute;inset:0;display:grid;place-content:center;text-align:center;background:#071322f5;color:#b4c7d9}
+.xt-object{display:flex;gap:6px;align-items:baseline;justify-content:space-between;min-height:20px}
+.xt-object strong{color:var(--xt-ink)}.xt-object span{font-size:11px;color:#afc2d3;text-align:right}
+.xt-object span[data-blocked=true]{color:#f5c27c}
+.xt-controls{display:grid;grid-template-columns:auto minmax(40px,1fr) auto;align-items:center;gap:4px 8px;margin:6px 0 8px;font-size:11px}
+.xt-controls input{width:100%;margin:0;accent-color:#85d7c9}
+.xt-controls output{text-align:right;font-variant-numeric:tabular-nums;min-width:54px}
+.xt-actions,.xt-presets{display:flex;gap:5px;flex-wrap:wrap}
+#xuntianScope .xt-actions .primary{border-color:#44857b;background:#183c39;color:#c7fff3}
+.xt-hint{color:#93abbc;font-size:10px;margin:5px 0 0}
+#xtMore{border-top:1px solid #273e50;margin:8px -10px -4px;padding:7px 10px 4px}
+#xtMore summary{color:#b5cad5;cursor:pointer;font-size:11px}
+.xt-presets{margin:8px 0 5px}
+.xt-guide{display:flex;align-items:center;gap:5px;font-size:11px}
+body.photo-mode #xuntianScope,body.immersive:not(.hud-visible) #xuntianScope{display:none}
+@media (min-width:761px) and (max-height:700px){#xuntianScope{bottom:70px;max-height:calc(100dvh - 152px);width:310px}}
+@media (max-width:760px){
+ #xuntianScope{z-index:5;right:0;bottom:0;width:100%;max-height:53dvh;border-radius:14px 14px 0 0}
+ body.xt-scope-open aside{visibility:hidden}
+ #xuntianScope .xt-body{padding:8px 12px}
+ #xuntianScope .xt-ocular{max-width:min(100%,52dvh);margin:6px auto}
+ #openXuntianMap{font-size:11px;min-height:26px}
+}
+
+body.xt-scope-open #telemetry,body.xt-scope-open .station-tag:not([data-instance="TH"]):not([data-instance="freeXT"]){display:none!important}
+#xtClock{position:absolute;right:4px;top:3px;color:#b8ccd9;background:#07132188;border-radius:3px;padding:3px 5px;font:9px ui-monospace,monospace;pointer-events:none}
+#xuntianScope #xtExpand{padding:3px 7px;font-size:11px;white-space:nowrap}
+#xtExpand[aria-pressed=false] .xt-expand-close,#xtExpand[aria-pressed=true] .xt-expand-open{display:none}
+
+#xtDepth{position:absolute;bottom:3px;right:4px;color:#b2ccd5;background:#07132188;border-radius:3px;padding:3px 5px;font:9px ui-monospace,monospace;pointer-events:none}
+#xtSources{font-size:10px;color:#9db8c8;min-height:12px;line-height:1.3;font-variant-numeric:tabular-nums}
+#xtIllumination{margin-left:auto;color:#cfbc91;font-size:10px;white-space:nowrap}
+#xtPhotoWidth{min-width:0;padding:3px 4px;border:1px solid #3a5364;border-radius:5px;background:#101f31;color:#d6e7ef;font:11px system-ui}
+@media(min-width:761px){
+ #xuntianScope.expanded{position:fixed;top:76px;right:12px;bottom:auto;z-index:6;width:min(92vw,calc(146dvh - 110px));max-height:calc(100dvh - 90px)}
+}
+@media(min-width:1000px){
+ #xuntianScope.expanded{width:min(95vw,calc(160dvh + 60px))}
+ #xuntianScope.expanded .xt-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,300px);column-gap:14px;align-content:start}
+ #xuntianScope.expanded .xt-body > :not(.xt-ocular){grid-column:2;min-width:0}
+ #xuntianScope.expanded .xt-ocular{grid-column:1;grid-row:1/span 14;align-self:start;margin:0}
+ #xuntianScope.expanded #xtMore{margin:6px 0 0;padding-inline:0}
+}
+@media(max-width:760px){#xuntianScope.expanded{max-height:84dvh}#xuntianScope.expanded .xt-ocular{max-width:none}}
+
+.xt-exterior{display:flex;align-items:center;gap:5px;margin-top:7px}
+.xt-exterior>span{font-size:11px;color:#93abbc;margin-right:2px}
+#xuntianScope .xt-exterior button{font-size:11px;min-height:24px;padding:2px 7px}
+#xuntianScope .xt-exterior button[aria-pressed=true]{border-color:#49877f;color:#adf3e3;background:#153434}
+
+#xtSurveyOverlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#xtSurveyMission{border-left:2px solid #d1aa70;background:#1b2632;padding:6px 8px;margin-top:7px;border-radius:4px}
+.xt-survey-title,.xt-survey-buttons,#xtSurveyTiles{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.xt-survey-title{justify-content:space-between;color:#f2ce94}.xt-survey-title strong{font-size:12px}
+#xuntianScope #xtSurveyExit{background:transparent;border:0;min-height:20px}
+#xtSurveyTiles{margin:3px 0 5px}#xtSurveyTiles button[aria-pressed=true],#xuntianScope #xtSurveyCapture{color:#ffe0a5;border-color:#a7834b;background:#413724}
+#xtSurveyNote{display:block;line-height:1.4;margin-top:4px;color:#c5c8bb}
+
+#xtTrackingInfo{font-size:10px;color:#a5d9ce;line-height:1.4;font-variant-numeric:tabular-nums}
+.xt-roll-value{display:flex;align-items:center;justify-content:flex-end;gap:3px}#xuntianScope .xt-roll-value output{min-width:0}
+#xuntianScope #xtRollReset{padding:0 4px;min-height:20px;line-height:16px}
+#xuntianScope #xtPin[data-action=pin]{border-color:#4a8a7c;background:#153a34;color:#c7f2e6}
+
+.xt-track-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:4px 0}
+#xuntianScope .xt-track-actions button{min-height:23px;font-size:11px;padding:2px 7px}

@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {MISSIONS} from '../src/missions.js';
+import {registerMissionPackage,unregisterMissionPackage,MISSION_TEMPLATE} from '../src/mission-package.js';
+import {predictionSource,predictionWindow,predictPasses} from '../src/pass-prediction.js';
+import {observerOrbit} from '../src/observer-settings.js';
+import {importObserverOrbit} from '../src/observer-orbit-import.js';
+import {BEIJING_BALCONY} from '../src/balcony-lab-geometry.js';
+const load=(name,id)=>({...JSON.parse(readFileSync(name)),missionId:id});
+const station=load('assets/orbit.json','tiangong'),satellite=load('assets/spacecraft/dfh1-orbit.json','dfh1');
+const dfh=predictionSource(satellite,{allowEstimate:true});
+assert.equal(dfh.kind,'sgp4');assert.equal(dfh.recordEnd,undefined);
+assert.throws(()=>predictionWindow(satellite,dfh.end+1,24,{allowEstimate:true}),/时效/);
+assert.throws(()=>predictionWindow(satellite,Date.parse('1970-04-25T16:00Z'),24,{allowEstimate:true}),/历史/);
+// Synthetic rows only verify that a separately supplied old archive is bounded by its own timestamps.
+const shift=station.rows[0][0]-Date.parse('1990-03-02T00:00:00Z');
+const archival={...station,missionId:'dfh1',rows:station.rows.map(([time,...pv])=>[time-shift,...pv])};
+const archivalSource=predictionSource(archival,{allowEstimate:true});
+assert.equal(predictionWindow(archival,archivalSource.start,24).start,archivalSource.start);
+assert.equal(archivalSource.end,archival.rows.at(-1)[0]);assert.throws(()=>predictionWindow(archival,archivalSource.end,24),/历史/);
+const originalGP=JSON.parse(readFileSync('assets/spacecraft/dfh1-gp.json'))[0],removed='unregistered-archived-model';
+const orphan={...satellite,missionId:removed,gp:{...originalGP,NORAD_CAT_ID:54321,OBJECT_ID:'2010-001A'},noradId:54321,objectId:'2010-001A'};
+assert.throws(()=>predictionSource(orphan));
+assert.equal(predictionSource(orphan,{archived:true}).kind,'sgp4');
+assert.throws(()=>predictionSource({...orphan,noradId:11111},{archived:true}),/编号/);
+const historic=await predictPasses(satellite,BEIJING_BALCONY,dfh.epoch,24,{minimumElevation:5});
+assert.ok(historic.passes.length>0);assert.ok(historic.passes.every(p=>!p.estimated));
+const custom='observer-test-orbiter',modelOnly='observer-test-model';
+registerMissionPackage({...MISSION_TEMPLATE,id:custom,orbit:{}});registerMissionPackage({...MISSION_TEMPLATE,id:modelOnly,orbit:{}});
+try{
+ const generic={...station,missionId:custom},fixed=predictionSource(generic,{allowEstimate:true});
+ assert.equal(fixed.end,generic.rows.at(-1)[0]);assert.equal(predictionSource(station,{allowEstimate:true}).end-station.rows.at(-1)[0],72*3600000);
+ assert.ok(Object.hasOwn(MISSIONS,custom)&&Object.hasOwn(MISSIONS,modelOnly));
+ const sim={missionId:'tiangong',data:station,bundledOrbits:{dfh1:satellite,[custom]:generic,[modelOnly]:null}};
+ assert.equal(await observerOrbit(sim,'dfh1'),satellite);assert.equal(await observerOrbit(sim,modelOnly),null);
+ assert.equal(await observerOrbit(sim,custom),generic);assert.equal((await predictPasses(generic,BEIJING_BALCONY,fixed.start,24,{minimumElevation:5})).passes.length>0,true);
+ let accepted=null,savedId=null;
+ const weather={ready:Promise.resolve(),store:async(kind,blob,meta)=>{savedId=meta.missionId;return {id:'test-storage'};},trim:async()=>{}};
+ sim.environment={weather};sim.orbits={selection:()=>({revision:0,recordId:null}),accept:(data,_,id)=>{accepted={data,id};}};
+ const file=new File([JSON.stringify(generic)],'orbit.json');
+ await assert.rejects(importObserverOrbit(sim,modelOnly,file),/其他任务/);
+ assert.equal(await importObserverOrbit(sim,custom,file,()=>false).then(x=>x.applied),false);
+ assert.equal(savedId,custom);assert.equal(accepted,null);
+ assert.equal(await importObserverOrbit(sim,custom,file,()=>true).then(x=>x.applied),true);
+ assert.equal(accepted.id,custom);assert.equal(accepted.data.missionId,custom);assert.equal(sim.data,station);
+ console.log('Observer targets: Tiangong OEM, DFH 1 historic SGP4 period, two registered future models, no orbit, mismatched and late imports.');
+}finally{unregisterMissionPackage(custom);unregisterMissionPackage(modelOnly);}

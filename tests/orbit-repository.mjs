@@ -31,6 +31,18 @@ const fresh=fixture(),hold=deferred();fresh.resources.fetch=async url=>{fresh.ca
 const one=fresh.repo.update('tiangong'),two=fresh.repo.update('tiangong');assert.equal(one,two,'repeated checks share the exact same in-flight promise');
 hold.resolve();const result=await one;assert.equal(fresh.calls.fetch.length,1);assert.equal(result.status,'updated');assert.equal(result.applied,true);assert.equal(fresh.calls.set,1);assert.equal(fresh.repo.selected,result.record.id);assert.equal(fresh.resources.active.orbit,result.record.id);assert.equal(fresh.resources.pendingRecords.size,0);assert.deepEqual(fresh.calls.trim,[[result.record.id]]);
 const activeData=fresh.sim.data;assert.equal((await fresh.repo.update('tiangong')).status,'unchanged');assert.equal(fresh.calls.store,1);assert.equal(fresh.calls.set,1);assert.equal(fresh.sim.data,activeData);
+const localBest=fixture();
+cached(localBest,'old',station);cached(localBest,'new',changed);
+localBest.resources.items.push({id:'bad',kind:'orbit',missionId:'tiangong',time:Date.now()+1e12,blob:new Blob(['invalid'])});
+localBest.repo.accept(station,'old','tiangong');
+assert.equal(await localBest.repo.useLatestLocal('tiangong'),'已切换到本机最新星历，旧记录仍保留。');
+assert.equal(localBest.repo.selected,'new');assert.equal(localBest.sim.data.created,changed.created);
+assert.equal(localBest.resources.items.length,3);assert.equal(localBest.calls.fetch.length,0);
+assert.equal(await localBest.repo.useLatestLocal('tiangong'),'当前已选用本机最新星历。');
+const localRace=fixture(),localHold=deferred();
+const pendingLocal=cached(localRace,'new',changed);pendingLocal.blob={async text(){await localHold.promise;return JSON.stringify(changed);}};
+const localSelection=localRace.repo.useLatestLocal('tiangong');localRace.repo.selected='none';localHold.resolve();
+assert.equal(await localSelection,'轨道选择已改变，已保留新选择。');assert.equal(localRace.repo.selected,'none');
 
 const manual=fixture(),manualHold=deferred();manual.resources.fetch=async()=>{await manualHold.promise;return {blob:new Blob([JSON.stringify(changed)])};};
 const manualUpdate=manual.repo.update('tiangong');manual.repo.selected=null;manualHold.resolve();const saved=await manualUpdate;
@@ -45,6 +57,8 @@ assert.equal(retrySaved.status,'updated');assert.equal(retrySaved.applied,false)
 const switched=fixture(),switchHold=deferred();switched.resources.fetch=async()=>{await switchHold.promise;return {blob:new Blob([JSON.stringify(changed)])};};
 const switchUpdate=switched.repo.update('tiangong');switched.sim.missionId='dfh1';switched.sim.data=dfh;switchHold.resolve();const switchedResult=await switchUpdate;
 assert.equal(switchedResult.applied,false);assert.equal(switched.calls.set,0);assert.equal(switched.sim.data,dfh);assert.equal(switched.repo.records.tiangong,switchedResult.record.id);assert.equal(switched.repo.selected,null,'the inactive mission receives its own record only');
+const [cameraData,balconyData]=await Promise.all([switched.repo.selectionData('tiangong'),switched.repo.selectionData('tiangong')]);
+assert.equal(cameraData.data,balconyData.data,'camera and balcony share the same decoded station ephemeris while another mission is active');
 
 const failed=fixture();failed.resources.fetch=async()=>{throw Error('network failed');};await assert.rejects(()=>failed.repo.update('tiangong'),/network failed/);assert.equal(failed.repo.updates.size,0);assert.equal(failed.repo.selected,null);assert.equal(failed.sim.data,station);
 failed.resources.fetch=async()=>({blob:new Blob([JSON.stringify(changed)])});failed.resources.store=async()=>{throw new DOMException('quota','QuotaExceededError');};await assert.rejects(()=>failed.repo.update('tiangong'),{name:'QuotaExceededError'});assert.equal(failed.calls.set,0);assert.equal(failed.repo.selected,null);assert.equal(failed.sim.data,station);
@@ -67,7 +81,11 @@ const corrupt=fixture();corrupt.resources.items.push({id:'invalid',kind:'orbit',
 const withGP={...dfh,gp,gpEpoch:new Date(Date.parse(gp.EPOCH+'Z')).toISOString()};
 const gpSame=fixture('dfh1',withGP);gpSame.resources.fetch=async()=>({blob:new Blob([JSON.stringify([{...gp,OBJECT_NAME:'renamed',EPOCH:gp.EPOCH+'Z',MEAN_MOTION:String(gp.MEAN_MOTION)}])])});
 assert.equal((await gpSame.repo.update('dfh1')).status,'unchanged');assert.equal(gpSame.repo.payloads.get('dfh1').data,withGP,'canonical GP equality reuses the complete active sample object');assert.equal(gpSame.calls.store,0);assert.equal(gpSame.calls.set,0);
-const gpOld=fixture('dfh1',{...withGP,gpEpoch:'2026-11-01T00:00:00Z'});gpOld.resources.fetch=gpSame.resources.fetch;assert.match((await gpOld.repo.update('dfh1')).message,/早于/);assert.equal(gpOld.repo.payloads.size,0,'reject stale GP before generating a new sample window');
+const gpOld=fixture('dfh1',withGP);
+const yesterday=new Date(Date.parse(withGP.gpEpoch)-86400000).toISOString();
+gpOld.resources.fetch=async()=>({blob:new Blob([JSON.stringify([{...gp,EPOCH:yesterday}])])});
+assert.match((await gpOld.repo.update('dfh1')).message,/早于/);
+assert.equal(gpOld.repo.payloads.size,0,'reject stale GP before generating a new sample window');
 
 // Node evaluates the same compile-time web flag as the browser bundle. Verify
 // static hosting goes straight to the public endpoint without a doomed /api call.

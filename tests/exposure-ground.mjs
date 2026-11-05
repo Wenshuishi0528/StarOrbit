@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {dot,earthAxes,unit,sub} from '../src/orbit.js';
+import {BEIJING_EXPOSURE,exposureSite,groundSource,groundWindow,siteElevation,groundCamera,groundExposureState,exposureModes} from '../src/exposure-ground.js';
+import {trackingAxes,presetCamera,transformAxes,localVector} from '../src/exposure-lab-math.js';
+import {predictPasses} from '../src/pass-prediction.js';
+
+const close=(a,b,d=1e-8)=>assert(Math.abs(a-b)<d,`${a} != ${b}`),near=(a,b,d)=>a.forEach((v,i)=>close(v,b[i],d));
+const raw=JSON.parse(readFileSync(new URL('../assets/orbit.json',import.meta.url)));raw.missionId='tiangong';
+const source=groundSource(raw),site=exposureSite(BEIJING_EXPOSURE),next=await predictPasses(raw,site.site,source.start,48,{minimumElevation:0,allowEstimate:true});
+const pass=next.passes.find(p=>p.maximum.elevation>25&&p.end-p.start>180000);assert(pass);
+const start=pass.maximum.time-15000,finish=start+30000,first=groundExposureState(raw,source,start),last=groundExposureState(raw,source,finish);
+const cam=presetCamera('wide'),open=groundCamera(first,first.position,site,cam),fixed=trackingAxes(first,first.basis,open,'body');
+open.forEach((v,i)=>near(v,fixed[i]));close(dot(open[0],open[2]),0);
+const targetAt=q=>unit(sub(transformAxes(q.earthAxes,site.surface),q.position));
+near(open[2],targetAt(first));const ground=groundCamera(last,last.position,site,cam);near(ground[2],targetAt(last));
+assert(dot(ground[2],trackingAxes(last,first.basis,open,'body')[2])<.999,'a body-fixed camera lets the city drift');
+const offset={...cam,azimuth:cam.azimuth+11,pitch:cam.pitch-5,roll:23};
+near(localVector(groundCamera(first,first.position,site,offset),targetAt(first)),localVector(groundCamera(last,last.position,site,offset),targetAt(last)));
+assert(groundWindow(source,site,start,30).ok);assert.equal(groundWindow(source,site,source.end-2000,30).reason,'coverage');assert.equal(groundWindow(source,site,pass.maximum.time-1800000,30).reason,'hidden');
+const transition=groundWindow(source,site,pass.end-20000,60);assert.equal(transition.reason,'setting');assert(transition.seconds>=0&&transition.seconds<60);
+const future=source.recordEnd+10*60000,est=groundExposureState(raw,source,future);
+near(est.position,source.position(future,earthAxes(future)).inertial);assert.equal(groundExposureState(raw,source,source.end+1),null);
+assert.deepEqual(exposureModes['compare-stars'],['body','inertial']);assert.deepEqual(exposureModes['compare-ground'],['body','ground']);assert(siteElevation(source,site,start)>0);
+console.log('Exposure ground: same opening, Earth-fixed centre and user framing, moving reference, full visibility/setting/limits and bounded balcony ephemeris passed.');

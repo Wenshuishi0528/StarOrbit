@@ -18,7 +18,7 @@ async page=>{
  },time);
  for(const [id,time,label] of [
   ['dfh1',Date.parse('2026-10-28T02:40:40Z'),'DFH-1 screenshot date'],
-  ['dfh1',Date.parse('2026-10-24T03:47:28.325Z'),'DFH-1 sampled ephemeris'],
+  ['dfh1',await page.evaluate(()=>Date.parse(viewer.sim.bundledOrbits.dfh1.gpEpoch)),'DFH-1 sampled ephemeris'],
   ['dfh1',Date.parse('1970-04-25T12:29:00Z'),'DFH-1 historical orbit'],
   ['tiangong',Date.parse('2026-10-28T02:40:40Z'),'space station'],
  ]){

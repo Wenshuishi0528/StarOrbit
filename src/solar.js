@@ -32,9 +32,10 @@ export class SolarTracker{
   }
  }
  // Rigid body attitude changes reuse sampled triangles and BVHs.
- refreshPose(){
-  this.api.model.updateMatrixWorld(true);
-  for(const bucket of Object.values(this.occluders)){
+ refreshPose(id){
+  if(id&&!this.occluders[id])return;
+  if(id)this.api.groups[id]?.updateWorldMatrix(true,true);else this.api.model.updateMatrixWorld(true);
+  for(const bucket of id?[this.occluders[id]]:Object.values(this.occluders)){
    bucket.fixed.makeEmpty();bucket.box.makeEmpty();
    const moving=new Set(bucket.moving);
    for(const record of bucket.records){record.box.copy(record.mesh.geometry.boundingBox).applyMatrix4(record.mesh.matrixWorld);bucket.box.union(record.box);if(!moving.has(record))bucket.fixed.union(record.box);}

@@ -2,6 +2,7 @@ import {json2satrec,propagate,gstime} from 'satellite.js';
 import {dot,earthAxes,interpolate,sunPosition,sunlightFraction} from './orbit.js';
 import {validateGP} from './gp-orbit.js';
 import {DFH1_HISTORY} from './dfh1-history.js';
+import {OEM_ESTIMATE_LIMIT,oemEstimate} from './pass-oem-estimate.js';
 import bundledGP from '../assets/spacecraft/dfh1-gp.json' with {type:'json'};
 
 const DEG=Math.PI/180,DAY=86400000;
@@ -28,40 +29,48 @@ export function lookAngles(fixedPosition,frame){
   elevation:Math.asin(clamp(dot(relative,frame.up)/range,-1,1))/DEG,range};
 }
 function epochOf(gp){return Date.parse(gp.EPOCH.endsWith('Z')?gp.EPOCH:gp.EPOCH+'Z');}
-function matchingGP(data){
+function matchingGP(data,archived){
  let raw=data?.gp;
  if(!raw&&data?.propagator==='SGP4'&&data.missionId==='dfh1'&&data.noradId===4382&&data.objectId==='1970-034A'&&Math.abs(Date.parse(data.gpEpoch)-epochOf(bundledGP[0]))<1)raw=bundledGP[0];
  if(!raw)return null;
  // Imported scene JSON can contain arbitrary extra fields: revalidate identity and frame.
- const gp=validateGP(raw,data.missionId),epoch=epochOf(gp);
+ const identity=archived?{noradId:Number(data.noradId),objectId:data.objectId}:undefined;
+ const gp=validateGP(raw,data.missionId,identity),epoch=epochOf(gp);
  if(Number(data.noradId)!==gp.NORAD_CAT_ID||data.objectId!==gp.OBJECT_ID||!Number.isFinite(Date.parse(data.gpEpoch))||Math.abs(Date.parse(data.gpEpoch)-epoch)>1)throw Error('轨道根数与数据历元不一致');
  return {gp,epoch};
 }
-export function predictionSource(data){
+export function predictionSource(data,{allowEstimate=false,archived=false}={}){
  if(!data?.rows?.length)throw Error('此任务尚未配置轨道');
- const gp=matchingGP(data);
+ const gp=matchingGP(data,archived);
  if(gp){
   const satrec=json2satrec(gp.gp);
-  return {kind:'sgp4',epoch:gp.epoch,start:Math.max(gp.epoch-PASS_GP_MAX_AGE,data.missionId==='dfh1'?DFH1_HISTORY.cutoff:-Infinity),end:gp.epoch+PASS_GP_MAX_AGE,
+  return {kind:'sgp4',epoch:gp.epoch,start:gp.epoch-PASS_GP_MAX_AGE,end:gp.epoch+PASS_GP_MAX_AGE,
    position(time,axes){
     const q=propagate(satrec,new Date(time));if(!q?.position||satrec.error)throw Error('轨道传播失败');
     const p=q.position,a=gstime(new Date(time)),c=Math.cos(a),s=Math.sin(a),fixed=[c*p.x+s*p.y,-s*p.x+c*p.y,p.z];
     return {fixed,inertial:axes[0].map((_,i)=>fixed.reduce((sum,v,j)=>sum+v*axes[j][i],0))};
    }};
  }
- const start=Math.max(data.rows[0][0],data.missionId==='dfh1'?DFH1_HISTORY.cutoff:-Infinity),end=data.rows.at(-1)[0];
- return {kind:'oem',epoch:Date.parse(data.created)||start,start,end,position(time,axes){
-  const q=interpolate(data.rows,time);if(!q)throw Error('预报时间超出有效轨道区间');
-  return {inertial:q.position,fixed:axes.map(axis=>dot(axis,q.position))};
+ const start=data.rows[0][0],recordEnd=data.rows.at(-1)[0];
+ const estimate=allowEstimate&&data.missionId==='tiangong'&&data.propagator!=='SGP4'?oemEstimate(data):null;
+ return {kind:'oem',epoch:Date.parse(data.created)||start,start,recordEnd,end:recordEnd+(estimate?OEM_ESTIMATE_LIMIT:0),position(time,axes){
+  const inertial=time>recordEnd?estimate?.position(time):interpolate(data.rows,time)?.position;
+  if(!inertial)throw Error('预报时间超出有效轨道区间');
+  return {inertial,fixed:axes.map(axis=>dot(axis,inertial))};
  }};
 }
-export function predictionWindow(data,start,hours){
+export function predictionWindow(data,start,hours,{allowEstimate=false}={}){
  if(!Number.isFinite(start)||![24,48,72].includes(hours))throw Error('预报时间无效');
- if(data?.missionId==='dfh1'&&start<DFH1_HISTORY.cutoff)throw Error('历史示意轨道不能用于过境预报');
- const source=predictionSource(data);
- if(start<source.start||start>=source.end)throw Error(source.kind==='sgp4'?'轨道根数已超出预报时效':'预报时间超出有效轨道区间');
+ const source=predictionSource(data,{allowEstimate});
+ if(start<source.start||start>=source.end){
+  // An actual archived OEM/GP can cover this era. The main scene's illustrative
+  // DFH reconstruction alone cannot supply a pass prediction.
+  if(data.missionId==='dfh1'&&start<DFH1_HISTORY.cutoff)throw Error('历史示意轨道不能用于过境预报');
+  throw Error(source.kind==='sgp4'?'轨道根数已超出预报时效':'预报时间超出有效轨道区间');
+ }
  const end=Math.min(start+hours*3600000,source.end);
- return {source,start,end,clipped:end<start+hours*3600000};
+ const mode=source.recordEnd===undefined||end<=source.recordEnd?'catalog':start>=source.recordEnd?'estimate':'mixed';
+ return {source,start,end,clipped:end<start+hours*3600000,mode};
 }
 export function createPassSampler(source,observer){
  const frame=observerFrame(observer),suns=new Map();
@@ -125,9 +134,9 @@ export function* scanPasses(sample,start,end,{minimumElevation=10,stepMs=30000}=
  }
  return passes;
 }
-export function predictPasses(data,observer,start,hours,{minimumElevation=10,signal}={}){
+export function predictPasses(data,observer,start,hours,{minimumElevation=10,signal,allowEstimate=false}={}){
  let window,scan;
- try{window=predictionWindow(data,start,hours);scan=scanPasses(createPassSampler(window.source,observer),window.start,window.end,{minimumElevation});}catch(error){return Promise.reject(error);}
+ try{window=predictionWindow(data,start,hours,{allowEstimate});scan=scanPasses(createPassSampler(window.source,observer),window.start,window.end,{minimumElevation});}catch(error){return Promise.reject(error);}
  return new Promise((resolve,reject)=>{
   let timer;const abort=()=>{clearTimeout(timer);reject(new DOMException('Aborted','AbortError'));};
   if(signal?.aborted)return abort();signal?.addEventListener('abort',abort,{once:true});
@@ -135,7 +144,11 @@ export function predictPasses(data,observer,start,hours,{minimumElevation=10,sig
   const run=()=>{try{
    if(signal?.aborted)return;
    const begin=performance.now();let step;do{step=scan.next();}while(!step.done&&performance.now()-begin<4);
-   if(step.done){signal?.removeEventListener('abort',abort);resolve({start:window.start,end:window.end,clipped:window.clipped,kind:window.source.kind,epoch:window.source.epoch,observer:validateObserver(observer),minimumElevation,passes:step.value});}
+   if(step.done){
+    signal?.removeEventListener('abort',abort);
+    for(const pass of step.value)pass.estimated=Number.isFinite(window.source.recordEnd)&&pass.end>window.source.recordEnd;
+    resolve({start:window.start,end:window.end,clipped:window.clipped,kind:window.source.kind,mode:window.mode,recordEnd:window.source.recordEnd,epoch:window.source.epoch,observer:validateObserver(observer),minimumElevation,passes:step.value});
+   }
    else timer=setTimeout(run,0);
   }catch(error){fail(error);}};timer=setTimeout(run,0);
  });
@@ -144,7 +157,7 @@ const escapeICS=value=>String(value).replace(/\\/g,'\\\\').replace(/[\r\n]+/g,'\
 const stamp=time=>new Date(time).toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
 export function passesToICS(result,missionName,created=Date.now()){
  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//StarOrbit//Pass Planner//EN','CALSCALE:GREGORIAN'];
- for(const [i,pass] of result.passes.entries())lines.push('BEGIN:VEVENT',`UID:starorbit-${Math.round(pass.start)}-${i}@local`,'DTSTAMP:'+stamp(created),'DTSTART:'+stamp(pass.start),'DTEND:'+stamp(pass.end),'SUMMARY:'+escapeICS(missionName+' · '+result.observer.name),'DESCRIPTION:'+escapeICS(`Geometric pass. Max elevation ${pass.maximum.elevation.toFixed(1)} deg. Optical visibility is not guaranteed. Data epoch ${new Date(result.epoch).toISOString()}.`),'END:VEVENT');
+ for(const [i,pass] of result.passes.entries())lines.push('BEGIN:VEVENT',`UID:starorbit-${Math.round(pass.start)}-${i}@local`,'DTSTAMP:'+stamp(created),'DTSTART:'+stamp(pass.start),'DTEND:'+stamp(pass.end),'SUMMARY:'+escapeICS((pass.estimated?'[Estimate] ':'')+missionName+' · '+result.observer.name),'DESCRIPTION:'+escapeICS(`Geometric pass. Max elevation ${pass.maximum.elevation.toFixed(1)} deg. Optical visibility is not guaranteed. Data epoch ${new Date(result.epoch).toISOString()}.`+(pass.estimated?' Locally extrapolated beyond the OEM records.':'')),'END:VEVENT');
  lines.push('END:VCALENDAR');
  // Fold UTF-8 lines at 73 octets; continuation spaces remain within the 75-octet limit.
  return lines.flatMap(line=>{const rows=[];let row='',bytes=0;for(const ch of line){const length=new TextEncoder().encode(ch).length;if(bytes+length>73){rows.push(row);row=' ';bytes=1;}row+=ch;bytes+=length;}rows.push(row);return rows;}).join('\r\n')+'\r\n';

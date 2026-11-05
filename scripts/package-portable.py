@@ -14,6 +14,7 @@ args = parser.parse_args()
 files = ['StarOrbit.html', '启动星轨.command',
          'scripts/serve.py', 'scripts/cloud_service.py', 'scripts/satcorps.py', 'scripts/cloud_quality.py', 'scripts/cloud_history.py', 'scripts/gmgsi.py', 'scripts/himawari.py', 'scripts/cloud_history_service.py', 'scripts/cloud_versions.py', 'scripts/http_download.py', 'scripts/cloud-requirements.txt', 'README.md', 'README.en.md', 'CHANGELOG.md', '使用说明.md', '素材与迁移说明.md', 'LICENSE', 'LICENSING.md']
 # Keep the manuals, technical references and their illustrations usable offline.
+files.append('scripts/balcony_motion.py')
 files += [str(p.relative_to(root)) for p in sorted((root / 'docs').rglob('*'))
           if p.is_file() and not any(part.startswith('.') for part in p.relative_to(root).parts)]
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []

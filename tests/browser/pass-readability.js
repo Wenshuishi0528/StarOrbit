@@ -9,7 +9,7 @@ async page=>{
  const checks=[],check=(pass,name,data={})=>{if(!pass)throw Error(name+' '+JSON.stringify(data));checks.push({name,...data});};
  const run=async()=>{await page.locator('[data-action=predict]').click();await page.waitForFunction(()=>!document.querySelector('[data-action=predict]').disabled);};
  await page.locator('[data-pass-field=minimum]').fill('10');await run();
- const result=await page.evaluate(()=>{const r=viewer.sim.flightLab.panels.pass.result;return {count:r.passes.length,first:r.passes[0]};});
+ const result=await page.evaluate(()=>{const r=viewer.sim.flightLab.panels.pass.result;const selected=Number(document.querySelector('.pass-item[aria-pressed=true]').dataset.passIndex);return {count:r.passes.length,selected,first:r.passes[selected]};});
  check(result.count>0,'calculation produces passes');
  check(await page.locator('.pass-stage').count()===3,'three labelled viewing stages');
  const axis=await page.locator('.pass-chart').textContent();check(['0°','45°','90°','地平线','头顶','UTC+8'].every(label=>axis.includes(label)),'explicit time and elevation axes',{axis});
@@ -21,8 +21,8 @@ async page=>{
   check(Math.abs(reading.time-expected.time)<1&&reading.direction.includes(expected.azimuth.toFixed(1)+'°')&&reading.direction.includes(expected.elevation.toFixed(1)+'°'),'slider reports the sampled direction at '+value,reading);
  }
  if(result.count>1){
-  await page.locator('[data-pass-index="1"]').click();
-  const times=await page.evaluate(()=>({shown:Date.parse(document.querySelector('.pass-readout-time').dateTime),peak:viewer.sim.flightLab.panels.pass.result.passes[1].maximum.time}));
+  const other=(result.selected+1)%result.count;await page.locator('[data-pass-index="'+other+'"]').click();
+  const times=await page.evaluate(i=>({shown:Date.parse(document.querySelector('.pass-readout-time').dateTime),peak:viewer.sim.flightLab.panels.pass.result.passes[i].maximum.time}),other);
   check(Math.abs(times.shown-times.peak)<1,'selecting another pass resets the cursor to its peak',times);
  }
  for(const language of ['En','Fr','Ru','Zh']){
@@ -33,6 +33,7 @@ async page=>{
  await page.waitForFunction(()=>{const chart=document.querySelector('.pass-chart');return Math.abs(chart.viewBox.baseVal.width-chart.clientWidth)<2;});
  const dimensions=await page.locator('.pass-chart').evaluate(element=>({width:element.clientWidth,viewBox:element.viewBox.baseVal.width,container:element.closest('.pass-panel').clientWidth}));
  check(dimensions.width<=dimensions.container&&Math.abs(dimensions.viewBox-dimensions.width)<2,'mobile chart keeps readable unscaled labels',dimensions);
+ const setup=page.locator('.pass-setup');if(!await setup.evaluate(el=>el.open))await setup.locator('summary').click();
  await page.locator('[data-pass-field=latitude]').fill('100');
  check(!await page.locator('.pass-results').isVisible()&&await page.locator('.pass-stage').count()===0&&(await page.locator('.pass-readout-direction').textContent())==='','input changes clear stale cards and slider readout');
  await run();check((await page.locator('.pass-status').textContent()).includes('坐标无效'),'invalid observer is still rejected');

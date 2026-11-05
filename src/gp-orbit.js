@@ -5,8 +5,8 @@ import {mission,bindOrbit} from './missions.js';
 export const GP_WINDOW_MS=3*86400000;
 export function gpURL(noradId){if(!Number.isSafeInteger(noradId)||noradId<1||noradId>999999999)throw Error('无效 NORAD 编号');return 'https://celestrak.org/NORAD/elements/gp.php?CATNR='+noradId+'&FORMAT=JSON';}
 export const DFH1_GP_URL=gpURL(4382);
-export function validateGP(input,id){
- const x=Array.isArray(input)&&input.length===1?input[0]:input,task=mission(id);
+export function validateGP(input,id,task=mission(id)){
+ const x=Array.isArray(input)&&input.length===1?input[0]:input;
  if(!x||Array.isArray(x)||typeof x!=='object'||!task.noradId||Number(x.NORAD_CAT_ID)!==task.noradId||x.OBJECT_ID!==task.objectId)throw Error('轨道文件的卫星编号与当前任务不符');
  for(const [key,value]of Object.entries({CENTER_NAME:'EARTH',REF_FRAME:'TEME',TIME_SYSTEM:'UTC',MEAN_ELEMENT_THEORY:'SGP4'}))if(x[key]!==undefined&&x[key]!==value)throw Error('不支持此轨道根数参考系或算法');
  if(typeof x.EPOCH!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z?$/.test(x.EPOCH)||!Number.isFinite(Date.parse(x.EPOCH.endsWith('Z')?x.EPOCH:x.EPOCH+'Z')))throw Error('无效轨道根数历元');

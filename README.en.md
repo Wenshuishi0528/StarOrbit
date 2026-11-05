@@ -14,9 +14,11 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v0.94 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v1.01 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-> This page describes the current source. The online edition deploys from `main`; its header identifies the deployed version. Check the portable release's tag and release notes for the features included in that download.
+> This guide describes the v1.01 release. The online and portable editions each show their version in the header.
+
+In the China Space Station scene, open **Xuntian viewfinder** beside the orbit map. Search for Vega, Orion, a HIP identifier or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
 
 ## Contents
 
@@ -39,9 +41,9 @@ The application supports space exploration, educational demonstrations and scene
 2. Choose the introductory tour, or use **Help** at the upper right to find controls and replay the tour later.
 3. Select the China Space Station or Dong Fang Hong 1 in the mission selector. Drag to rotate and use the wheel to zoom.
 4. Open the orbit and time panel. Try spacecraft follow or Earth orbit overview, pause the simulation, change the date or accelerate playback.
-5. Open **Mission Lab** for pass forecasts and docking practice, or explore the Earth and sky settings.
+5. Open **Mission Lab** for pass forecasts and docking practice. The same tab bar opens orbital long exposures, balcony observing and the Xuntian survey planner.
 
-First use defaults to standard 4K overall quality and the enhanced 16K Milky Way. For lower rendering load, choose 2K overall quality and the ordinary sky mode. Detailed textures and effects load on demand, so the first switch may take a moment.
+First use defaults to detailed 8K overall quality and the enhanced 16K Milky Way. For lower rendering load, choose 2K overall quality and the ordinary sky mode. Detailed textures and effects load on demand, so the first switch may take a moment.
 
 | Edition | How to open it | Resources and updates |
 | --- | --- | --- |
@@ -140,6 +142,14 @@ Overall quality and sky quality are independent. Automatic performance protectio
 ## Mission Lab
 
 Open **Mission Lab** at the upper right. The main scene stops advancing while the lab is open and resumes on return. Docking has an independent training clock.
+
+### Long exposures, balcony observing and Xuntian scheduling
+
+- **Orbital long exposure** captures two tracking modes from the same opening direction and exposure interval. Compare the frames with a wipe, or send a ground site and time from a station pass to try ground tracking.
+- **Balcony observing** can follow the China Space Station, Dong Fang Hong 1 or an imported Earth-orbit mission from the same saved site. Each target has its own orbital data. The pass card accounts for the site's skyline and shows when and where to look. Choose a rehearsal or watch with the current clock.
+- **Xuntian survey planning** can send a planned tile to the live telescope. The main scene captures a real frame within the simulation at its current time. A four-tile contact sheet shows individual images and missing tiles. Teaching exposures use their independent orbit.
+
+The local observation log saves the epoch, orbital data, settings and available pictures for reopening. [Mission Lab guide (Chinese)](docs/v1.00-observing.md)
 
 ### Pass forecasts
 

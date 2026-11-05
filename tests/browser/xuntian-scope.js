@@ -1,0 +1,88 @@
+async page=>{
+ await page.setViewportSize({width:1440,height:880});
+ await page.waitForFunction(()=>!!window.viewer?.sim.xuntian,{},{timeout:60000});
+ const check=(v,m)=>{if(!v)throw Error(m);};
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const root=page.locator('#xuntianScope'),search=page.locator('#xtSearch'),canvas=page.locator('#xtCanvas');
+ if(await page.locator('#welcomeDialog').evaluate(e=>e.open))await page.locator('#skipTour').click();
+ const sim=await page.evaluate(()=>({t:viewer.sim.time,mode:viewer.sim.mode,paused:viewer.sim.paused}));
+ let frames=0;
+ const ready=()=>page.waitForFunction(()=>viewer.sim.xuntian?.active&&!!viewer.sim.xuntian.optics&&Number(document.querySelector('#xtCanvas').dataset.xuntianFrame)>0,null,{timeout:45000});
+ const state=()=>page.evaluate(()=>{const s=viewer.sim.xuntian;return {p:s.pointing,optics:s.optics,center:s.result?.center,starCount:s.result?.starCount,time:viewer.sim.time,frames:s.stats.frames};});
+ const settle=(id,mode='sky')=>page.waitForFunction(({id,mode})=>{const p=viewer.sim.xuntian.pointing;return p.locked&&p.mode===mode&&(!id||p.target===id);},{id,mode},{timeout:25000});
+ const stamp=Date.UTC(2026,9,28,8);
+ if(!await root.isVisible())await page.locator('#openXuntianMap').click();await ready();
+ const first=await state();check(first.p.mode==='sky'&&first.p.target&&first.starCount>0,'No star field at the initial observation epoch');
+ await page.evaluate(stamp=>viewer.sim.seek(stamp),stamp);
+ if(await root.isVisible())await page.locator('#xtClose').click();
+ await page.locator('#openXuntianMap').click();await ready();
+ // Reopening preserves the first pointing, which may be behind Earth at the new epoch.
+ await page.locator('#xtRecommend').click();
+ await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky');
+ await page.locator('#xtAperture').evaluate(el=>{el.value=Math.round(Math.log(600/25)/Math.log(80)*1000);el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await page.waitForFunction(()=>viewer.sim.xuntian.result?.limitMagnitude>8);
+ const initial=await state();check(initial.starCount>0&&initial.p.mode==='sky','No visible field recommended at the fixed epoch');
+ await search.fill('not-a-celestial-body-71322');check(await page.locator('#xtResults p').isVisible(),'No-match feedback is missing');
+ await search.fill('织女星');await page.waitForSelector('#xtResults [data-target="hip:91262"]');
+ await search.evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true})));
+ check((await state()).p.target!=='hip:91262','IME composition prematurely selected a result');
+ await search.press('Enter');await settle('hip:91262');
+ const vega=await state(),ra=279.2347348*Math.PI/180,dec=38.78368896*Math.PI/180;
+ const dot=vega.optics.axes.forward.reduce((a,x,i)=>a+x*[Math.cos(ra)*Math.cos(dec),Math.sin(ra)*Math.cos(dec),Math.sin(dec)][i],0);
+ check(dot>.999999&&vega.time===stamp,'Optical axis missed Vega or the search changed the main clock: '+dot);
+ await search.fill('Orion');await page.locator('#xtResults [data-target="constellation:Ori"]').click();await settle('constellation:Ori');
+ const orion=await state();check(orion.p.field>vega.p.field*2,'Constellation was not framed more widely than a star');
+ // The observer may explicitly choose a target behind Earth; its time must not be silently advanced.
+ let blockedName=null;
+ for(const name of ['天狼星','织女星','南门二','老人星','轩辕十四','角宿一','心宿二','河鼓二','参宿四','北极星','Fomalhaut','Capella','Achernar']){
+  await search.fill(name);const first=page.locator('#xtResults [data-target]').first();
+  if(await first.count()&&(await first.innerText()).includes('地球遮挡')){blockedName=await first.getAttribute('data-target');await first.click();break;}
+ }
+ check(blockedName,'Test epoch needs an occulted catalogue star');await settle(blockedName);
+ await page.waitForFunction(()=>document.querySelector('#xtStatus').textContent==='地球遮挡',null,{timeout:15000});
+ check((await state()).time===stamp,'Occulted star changed the simulation time');
+ await page.locator('#xtRecommend').click();await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky');
+ const recommend=await state();
+ const slider=async(id,value)=>page.locator(id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+ const originalFocal=await page.locator('#xtFocal').inputValue();
+ await slider('#xtFocal',800);check((await state()).p.field<recommend.p.field,'Focal length did not narrow the view');
+ await slider('#xtFocal',originalFocal);
+ await slider('#xtAperture',0);await page.waitForFunction(()=>viewer.sim.xuntian.result.limitMagnitude<6);
+ const dim=await state();await slider('#xtAperture',Math.round(Math.log(600/25)/Math.log(80)*1000));
+ await page.waitForFunction(()=>viewer.sim.xuntian.result.limitMagnitude>8);
+ const bright=await state();check(bright.starCount>dim.starCount,'Larger aperture did not reveal more stars');
+ await page.waitForTimeout(380);const heldImage=await canvas.getAttribute('data-xuntian-frame');await page.waitForTimeout(420);
+ check(await canvas.getAttribute('data-xuntian-frame')===heldImage,'Paused and settled eyepiece rendered identical images again');
+ await page.locator('#xtMore summary').first().click();
+ await page.locator('[data-xt-mode="station"]').click();await settle(null,'station');
+ const station=await state();check(station.p.field>8,'Station framing did not account for extent');
+ await page.locator('[data-xt-mode="nadir"]').click();await settle(null,'nadir');
+ await page.waitForFunction(()=>viewer.sim.xuntian.result?.center.kind==='earth');
+ const earth=await state();check(Math.abs(earth.center.latitude)<=90&&earth.center.distanceKm>200,'Missing ground intersection');
+ await page.locator('#xtReturn').click();await settle(bright.p.target);
+ const back=await state();check(Math.abs(back.p.field-bright.p.field)<1e-8&&back.p.axes.forward.reduce((s,n,i)=>s+n*bright.p.axes.forward[i],0)>.999999,'Return failed to restore star field and lens');
+ await page.locator('#xtMore summary').first().click();await canvas.scrollIntoViewIfNeeded();
+ const rect=await canvas.boundingBox(),cx=rect.x+rect.width*.5,cy=rect.y+rect.height*.5;
+ await page.mouse.move(cx,cy);await page.mouse.down();await page.mouse.move(cx+38,cy+14,{steps:4});await page.mouse.up();
+ const drag=await state();check(drag.p.target===null&&back.p.axes.forward.reduce((s,n,i)=>s+n*drag.p.axes.forward[i],0)<.999999,'Eyepiece did not take over from the target');
+ await page.keyboard.down('w');await page.waitForTimeout(220);await page.keyboard.up('w');
+ const step=await state();check(step.p.axes.forward.reduce((s,n,i)=>s+n*drag.p.axes.forward[i],0)<.999999,'Focused telescope did not respond to keys');
+ await search.fill('HIP 91262');await search.press('Enter');await settle('hip:91262');
+ await page.locator('#xtRecommend').click();await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky');
+ await page.locator('#xtPhotoWidth').selectOption('1440');
+ const download=page.waitForEvent('download',{timeout:30000});await page.locator('#xtCapture').click();
+ const photo=await download;check(photo.suggestedFilename().startsWith('StarOrbit_Xuntian_')&&photo.suggestedFilename().endsWith('.png'),'Wrong photo filename');const revision=(await page.locator('.app-version').first().innerText()).replace(/[^a-zA-Z0-9]/g,'');await photo.saveAs('output/'+revision+'-starfield.png');
+ await page.locator('#xtClose').click();const offFrames=(await state()).frames;
+ await page.waitForTimeout(350);check((await state()).frames===offFrames,'Closed eyepiece continued rendering');
+ await page.setViewportSize({width:390,height:844});
+ await page.locator('#openXuntianMap').click();await ready();
+ const layout=await page.evaluate(()=>{const b=document.querySelector('#xuntianScope').getBoundingClientRect(),c=document.querySelector('#xtCanvas').getBoundingClientRect(),m=document.querySelector('#orbitMinimap');return {width:innerWidth,bottom:b.bottom,top:b.top,left:b.left,right:b.right,canvasWidth:c.width,map:getComputedStyle(m).display,scroll:document.documentElement.scrollWidth};});
+ check(layout.left>=-.5&&layout.right<=390.5&&layout.bottom<=845&&layout.top>300&&layout.canvasWidth>175&&layout.map==='none'&&layout.scroll<=390,'Mobile layout does not leave the spacecraft visible '+JSON.stringify(layout));
+ await page.locator('#xtMapTab').click();check(await page.locator('#orbitMinimap').isVisible()&&!await root.isVisible(),'Map/scope switch failed on mobile');
+ await page.setViewportSize({width:1440,height:880});await page.locator('#openXuntianMap').click();await ready();
+ await page.evaluate(({t,mode,paused})=>{viewer.sim.seek(t);viewer.sim.mode=mode;viewer.sim.paused=paused;viewer.sim.timeUI();},sim);
+ await page.locator('#xtRecommend').click();await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked);
+ frames=(await state()).frames;
+ check(!errors.length,'Browser exception: '+errors.join('\n'));
+ return {initialStars:initial.starCount,VegaAlignment:dot,OrionField:orion.p.field,occulted:blockedName,apertureStars:[dim.starCount,bright.starCount],stationFov:station.p.field,ground:earth.center,frames,photo:photo.suggestedFilename(),mobile:layout};
+}

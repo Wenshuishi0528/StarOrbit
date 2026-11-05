@@ -30,7 +30,7 @@ export class Environment{
   const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
   // Parsed assets own the data now; release the large inline JSON DOM copy.
   assetNode.remove();
-  this.settings={quality:'standard',daySource:'2026-q2-1km',nightSource:'2024-1km',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudNightVisible:false,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
+  this.settings={quality:'high',daySource:'2026-q2-1km',nightSource:'2024-1km',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudNightVisible:false,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
   try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','cloudNightVisible','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
    if(this.assets.daySources?.[old?.daySource])this.settings.daySource=old.daySource;
    if(this.assets.nightSources?.[old?.nightSource])this.settings.nightSource=old.nightSource;

@@ -15,9 +15,12 @@ async page=>{
  await open();
  assert(!await page.locator('.pass-results').isVisible(),'empty results hidden',{});
  await start.fill(expiredOEMInput);await run();
- assert((await page.locator('.pass-status').textContent()).includes('超出有效轨道区间'),'expired OEM rejected',{});
+ assert((await page.locator('.pass-status').textContent()).includes('本地短期估算'),'recently expired OEM explicitly estimated',{});
+ const tooFar=await page.evaluate(()=>new Date(viewer.sim.data.rows.at(-1)[0]+(96+8)*3600000).toISOString().slice(0,16));
+ await start.fill(tooFar);await run();
+ assert((await page.locator('.pass-status').textContent()).includes('超出有效轨道区间'),'distant expired OEM rejected',{});
  await page.getByRole('button',{name:'使用有效数据时段',exact:true}).click();await run();
- const oem=await page.evaluate(()=>{const p=viewer.sim.flightLab.panels.pass.result;return {count:p.passes.length,start:p.start,end:p.end,peak:p.passes[0].maximum.time};});
+ const oem=await page.evaluate(()=>{const p=viewer.sim.flightLab.panels.pass.result;return {count:p.passes.length,start:p.start,end:p.end,peak:p.passes[Number(document.querySelector('.pass-item[aria-pressed=true]').dataset.passIndex)].maximum.time};});
  assert(oem.count>0,'OEM pass calculation',oem);
  await page.locator('#flightLab').screenshot({path:'output/playwright/flight066-passes.png'});
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'导出日历 ICS',exact:true}).click();
@@ -40,7 +43,7 @@ async page=>{
  await start.fill('2026-10-28T08:00');await page.locator('[data-pass-field=hours]').selectOption('24');await run();
  await page.evaluate(()=>{window.__savedOrbitUpdate=viewer.sim.orbits.update;viewer.sim.orbits.update=async()=>{throw Error('Network test');};window.__savedOrbitData=viewer.sim.data;});
  await page.getByRole('button',{name:'更新当前轨道',exact:true}).click();
- assert((await page.locator('.pass-status').textContent()).includes('已保留原数据')&&await page.evaluate(()=>viewer.sim.data===window.__savedOrbitData),'failed refresh retains current orbit',{});
+ assert((await page.locator('[data-testid=pass-update-status]').textContent()).includes('已保留原数据')&&await page.evaluate(()=>viewer.sim.data===window.__savedOrbitData),'failed refresh retains current orbit',{});
  await page.evaluate(()=>{viewer.sim.orbits.update=window.__savedOrbitUpdate;delete window.__savedOrbitUpdate;delete window.__savedOrbitData;});
  const missionBefore=await page.evaluate(()=>({id:viewer.sim.missionId,time:viewer.sim.time,assembly:JSON.stringify(viewer.state)}));
  await page.locator('#dockingTab').click();await page.waitForFunction(()=>viewer.sim.flightLab.panels.docking?.renderer);

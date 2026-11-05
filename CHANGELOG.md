@@ -1,5 +1,49 @@
 # Changelog / 更新记录
 
+## v1.01 — 2026-11-05 · 正式版 / Release
+
+巡天取景可搜索城市、固定十字线瞄准的天球方向、地面或空间站部件，并绕镜头光轴旋转构图。解除自动跟踪后可随轨道转动，让星野随时间扫过画面。「放大取景」按大窗实际尺寸绘制。外景视锥可单独缩放，默认 1×。装配模型更新至巡天 V28。阳台半球默认朝向天顶。「巡天拍摄计划」默认使用 16K 银河图源，轨道总览新增赤道面视角和升降交点。[使用手册](使用说明.md#主页面的巡天望远镜)
+
+首次运行默认选择精细 8K 整体画质。取景窗和 PNG 直接采样主场景载入的银河图源，按星点在每个像素内的落点计算亮度，缩小宽视场中亮星的光晕，同时保留小口径、长焦距下的衍射效果。
+
+The Xuntian finder can track cities, lock the crosshair to the sky, ground or a station surface, and roll the camera. Releasing tracking lets the sky drift through the frame with orbital motion. New installations default to detailed 8K overall quality. Both live view and PNG capture sample the main scene’s sky map and integrate starlight over individual pixels, preserving aperture-dependent diffraction. The enlarged finder renders at its displayed size. The exterior field guide has its own scale, with 1× as the default. The scene now uses Xuntian V28. The balcony hemisphere opens at the zenith. The survey imaging planner opens with the 16K Milky Way layer and offers an equatorial view with ascending and descending nodes.
+
+## v1.00 — 2026-11-05 · 本机实验版 / Local preview
+
+**中文：** 阳台成为多航天器地面观测器，能独立选择天宫、东方红一号和导入的任务，按各自星历预测，使用同一地点和天际线预演或实时守候。天宫长曝光新增同快门跟踪对照和地面点追拍。巡天排程可把选中的格子交给主场景补拍，查看带遮挡信息的四格成果。新增可按原星历和参数重开的本机观测记录。东方红一号的随包根数更新至 11 月 4 日 20:58 UTC。已验证第三方任务导入、实际守候、成片分割、巡天遮挡及记录重开。[任务实验室指南](docs/v1.00-observing.md)
+
+**English:** Balcony observing now selects spacecraft independently and computes each target's passes from its own orbit and the site's skyline. Added live watching, paired long exposures with ground tracking, survey follow-up frames in the main telescope and a local observation log with archived ephemerides. The bundled DFH-1 elements have a November 4 epoch. Checks cover imported targets, live watching, image comparisons, telescope occultations and reopening records.
+
+## v0.99 — 2026-11-05 · 本机实验版 / Local preview
+
+**中文：** 巡天取景跟随实际载入的地表、云与银河设置，修复日面过暗和银河细节丢失，按屏幕实际像素绘制。新增大取景窗、曝光补偿、最高 3840 × 2400 的 PNG、日照地表指向和巡天外景近镜头；短按方向键也可微调。验证覆盖日夜地表、动态云、银河像素、模型光轴与照片尺寸。[取景画质与操作](docs/v0.99-xuntian-image.md)。
+
+**English:** The telescope now uses the active surface imagery, clouds and sky presentation at its physical display resolution. Fixed overly dark daytime terrain and lost Milky Way detail. Added a larger finder, exposure compensation, PNGs up to 3840 × 2400, a shortcut to visible sunlit terrain and a close-up exterior camera. Verified day and night imagery, clouds, sky pixels, model pointing and image dimensions.
+
+## v0.98 — 2026-11-05
+
+**中文：** 主页面增加实时巡天望远镜。搜索恒星、HIP 编号或星座可让独立巡天转向目标；支持手动取景、等效焦距、有效口径和 PNG。外景可同时看到巡天与空间站，伴飞位置可调整，地球和站体会按各自实际方向遮住星空。已验证自动对准、暗星随口径变化、局部遮挡和 PNG 导出。[操作与数据](docs/v0.98-xuntian.md)。
+
+**English:** Added a live Xuntian telescope to the main station scene. Slew to a star, HIP identifier or constellation; steer by hand, change focal length and aperture, or save a PNG. Both craft share an exterior view with adjustable formation and physical Earth and station occultations. Verified pointing, aperture response, partial occultation and PNG capture.
+
+## v0.97 — 2026-11-05 · 本机实验版 / Local preview
+
+**中文：** 长曝光可打开“自由取景”，点进取景框后用鼠标转向、键盘滚转和移动相机。巡天切换天区时同步四格排程；可切换星点密度、叠加 16K 来源的银河背景，查看和导出本圈已拍的拼图。地球轨道图联动排程，标出可曝光弧段、地球遮挡和太阳避让。阳台半球默认平视西南地平线，全球默认显示地平线下的星空。[操作说明](使用说明.md#长曝光阳台观测与巡天排程) · [巡天数据与几何](docs/v0.97-survey.md)
+
+**English:** Long exposures gain an opt-in viewfinder with mouse aiming and keyboard camera movement and roll. Changing survey fields retargets all four exposures. The planner offers a denser star catalogue and a Milky Way layer from a 16K source, with previews and PNG export of completed exposures. Its orbit map links exposure intervals to the telescope’s pointing, Earth occultation and Sun avoidance. The balcony dome opens facing the southwest horizon; the full sphere also shows stars below the horizon by default.
+
+## v0.96 — 2026-11-05 · 本机实验版 / Local preview
+
+**中文：** 长曝光恢复天宫表面与太阳翼的材质，新增四个机位、位置和角度调节、单帧取景及可选补光。阳台改用共享轨道库，从现在和已选地点计算；可更新轨道、查看覆盖日期、用近期历史数据短期估算或回放真实星历。新增半球和全天球、经纬度和海拔管理、设备跟随与北向校准。随附空间站星历更新至 11 月 4 日发布的数据。[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
+
+**English:** Orbital photography gains the station’s surface materials, four camera mounts, adjustable position and lens, an instant viewfinder and optional fill lighting. Balcony observing uses the shared orbit library, starts from the current time and distinguishes ephemeris coverage, short estimates and historical replay. Sites now have editable coordinates and altitude, with hemispherical and full-sphere sky views, optional device tracking and north alignment. The bundled station ephemeris was refreshed to the November 4 issue.
+
+## v0.95 — 2026-11-05 · 本机实验版 / Local preview
+
+**中文：** 任务实验室新增三个与过境预报、交会对接平级的标签。轨道长曝光支持舱体固定与恒星锁定，可导出 1080p PNG。阳台观测可带入选中的过境、绘制地点天际线，并同步回放地面星空与航天器俯视图。巡天观测排程支持拖动曝光、检查遮挡和转向冲突、执行一圈并查看四格覆盖。已验证曝光几何与 PNG 输出、有效星历内的北京过境、巡天曝光约束和切换标签暂停。[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
+
+**English:** Three peer tabs join pass forecasts and docking in the Mission Lab. Orbital long exposure exports 1080p PNGs in station-fixed and star-tracking modes. Balcony observing replays a selected pass against a saved site skyline with a simultaneous view from orbit. The Xuntian planner checks exposure timing, occultations and slewing, then plays back a four-tile survey. Checks cover camera frames and PNG output, Beijing pass geometry, survey constraints and tab switching.
+
 ## v0.94 — 2026-11-05
 
 **中文：** 修复 WebKit 切换已保存云图时旧图片引用失效的问题；优先读取当前副本，必要时按相同来源、时次和 SHA 从本机图库恢复。新增向日葵-9 亚太十分钟云分类和加拿大 GDPS 全球总云量预报。向日葵的观测范围外及缺测位置留空，GDPS 分别标明起报和有效时刻。[云图库使用说明](使用说明.md#云图与极光)。

@@ -110,9 +110,9 @@ vec3 nightColor(vec2 uv){
  c=sampleDetail(nightDetailMap3,nightDetailRect3,nightDetailFade3,uv,dx,dy,c,true);
  return c.r*vec3(1.,.72,.38);
 }`;
-export const earthFragment=`${radiometryGLSL}uniform sampler2D dayMap,nightMap;uniform vec3 sun,localSun;uniform float detailed,gloss;
-varying vec3 localN,worldN,worldP;${mapping}${clouds}${detail}
-void main(){vec3 n=normalize(worldN),s=normalize(sun),eye=normalize(cameraPosition-worldP);vec2 uv=mapUV(localN);float mu=dot(n,s),day=max(mu,0.);vec3 albedo=groundColor(uv);
+export const earthSurfaceRadiance=`${radiometryGLSL}uniform sampler2D dayMap,nightMap;uniform vec3 sun,localSun;uniform float detailed,gloss;
+${mapping}${clouds}${detail}
+vec3 earthSurfaceColour(vec3 localN,vec3 worldN,vec3 worldP){vec3 n=normalize(worldN),s=normalize(sun),eye=normalize(cameraPosition-worldP);vec2 uv=mapUV(localN);float mu=dot(n,s),day=max(mu,0.);vec3 albedo=groundColor(uv);
 // NASA land composite has nearly black open water. Apply a water reflectance only
 // to dark ocean texels; retain land/coast colours and the existing solar glint.
 float ocean=smoothstep(.2,.8,sampleMap(oceanMap,uv).r);
@@ -126,7 +126,9 @@ vec3 night=nightColor(uv);color+=night*mix(2.3,1.2,enhanced)*(1.-smoothstep(-.15
 float highlight=pow(max(0.,dot(reflect(-s,n),eye)),gloss);float fresnel=.04+.96*pow(1.-max(0.,dot(n,eye)),5.);
 color+=(enhanced>.5?directSun:vec3(1.,.91,.73))*ocean*highlight*day*mix(.6,.3+fresnel*2.,enhanced);
 }
-gl_FragColor=vec4(color,1.);${output}}`;
+return color;}`;
+export const earthFragment=`${earthSurfaceRadiance}varying vec3 localN,worldN,worldP;
+void main(){gl_FragColor=vec4(earthSurfaceColour(localN,worldN,worldP),1.);${output}}`;
 export const cloudFragment=`uniform vec3 sun;varying vec3 localN,worldN,worldP;${mapping}${clouds}${scatteringGLSL}${lightningGLSL}${cloudMoonGLSL}
 void main(){float c=cloudAt(localN);float mu=dot(normalize(worldN),normalize(sun)),light=max(mu,0.);vec3 eye=normalize(cameraPosition-worldP);
 float coverage=c,alpha=c*cloudAmount;vec3 color=vec3(.9,.96,1.)*(.004*smoothstep(-.16,0.,mu)+light*1.4);
@@ -192,7 +194,13 @@ void main(){vec3 o=cameraPosition,d=normalize(worldP-o);float b=dot(o,d),r2=dot(
 float start=max(0.,-b-sqrt(h));vec3 p=o+d*start;float g=b*b-r2+6371.*6371.;vec3 depth;
 if(g>0.&&-b-sqrt(g)>0.){p=o+d*(-b-sqrt(g));depth=lightDepth(0.,dot(normalize(p),-d));}
 else depth=lightDepth(clamp(length(p)-6371.,0.,100.),dot(normalize(p),d));
-gl_FragColor=vec4(spectralTransmission(depth),1.);}`;
+vec3 trans=spectralTransmission(depth);
+#ifdef OPTICAL_COVERAGE
+gl_FragColor=vec4(trans,1.-dot(trans,vec3(.2126,.7152,.0722)));
+#else
+gl_FragColor=vec4(trans,1.);
+#endif
+}`;
 export const auroraFragment=`uniform sampler2D auroraMap;uniform vec3 sun;uniform float useData,strength,weatherTime,seed;varying vec3 localN,worldN,worldP;${mapping}${noise}
 void main(){vec3 p=normalize(localN);vec3 pole=normalize(vec3(.048,-.154,.987));float lat=asin(clamp(dot(p,pole),-1.,1.));float lon=atan(p.y,p.x);float t=weatherTime*6.;float wave=sin(lon*7.+t*.3+seed)*.025+sin(lon*17.-t*.16)*.012;
 float oval=exp(-pow((abs(lat)-1.16-wave)/.065,2.));float data=sampleMap(auroraMap,mapUV(p)).r;float mask=mix(oval,data,useData);

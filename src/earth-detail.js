@@ -29,9 +29,9 @@ export class EarthDetail{
  }
  release(i){const slot=this.slots[i];if(slot.texture){slot.texture.dispose();slot.texture.image?.close?.();slot.texture.image=null;}slot.key=null;slot.texture=null;this.env.uniforms[`${this.prefix}Map${i}`].value=this.env.fallback;this.env.uniforms[`${this.prefix}Fade${i}`].value=0;}
  clear(){this.epoch++;this.wanted=[];for(let i=0;i<4;i++)this.release(i);}
- update(camera){
+ update(camera,pixelHeight){
   const now=performance.now(),e=this.env;
-  if(!(e.quality&&e.quality!=='simple')||!(this.tiles||e.assets[this.prefix])||!detailNeeded(camera.position.length(),camera.projectionMatrix.elements[5],e.api.renderer.domElement.height,e.uniforms[this.night?'nightMap':'dayMap'].value.image.width)){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
+  if(!(e.quality&&e.quality!=='simple')||!(this.tiles||e.assets[this.prefix])||!detailNeeded(camera.position.length(),camera.projectionMatrix.elements[5],pixelHeight??e.api.renderer.domElement.height,e.uniforms[this.night?'nightMap':'dayMap'].value.image.width)){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
   for(let i=0;i<4;i++)e.uniforms[`${this.prefix}Fade${i}`].value=this.slots[i].texture?Math.min(1,(now-this.slots[i].born)/400):0;
   if(now-this.lastCheck<250)return;this.lastCheck=now;
   camera.updateMatrixWorld();this.inverse.copy(e.earth.quaternion).invert();this.origin.copy(camera.position).applyQuaternion(this.inverse);this.sunDirection.copy(e.uniforms.sun.value).applyQuaternion(this.inverse);
