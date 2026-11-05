@@ -1,3 +1,4 @@
+import {finderLabels,paintFinderLabels} from './xuntian-labels.js';
 import * as THREE from 'three';
 import {dot} from './orbit.js';
 import {inspectStationRay} from './xuntian-station-pin.js';
@@ -86,7 +87,7 @@ function makeStarLayer(renderer,shared){
     for(const star of records)if(star.mag-2.5*Math.log10(Math.max(1e-8,star.edgeWeight??1))<=limit&&starInSky(star.direction,frame.axes,optics.tangent,aspect,frame.eyeKm))count++;
     return count;
   }
-  return {scene,material,update,dispose(){geometry.dispose();material.dispose();}};
+  return {scene,material,update,get records(){return records;},dispose(){geometry.dispose();material.dispose();}};
 }
 
 // Reuse the chart's measured J2000 constellation polylines. A great-circle arc
@@ -140,7 +141,11 @@ function stationView(sim){
       scene.background=bg;scene.environment=env;scene.environmentIntensity=envStrength;api.fillLight.intensity=fillIntensity;
     }
   }
-  return {prepare,inspect,draw};
+  function hides(frame,dir){
+    raycaster.set(camera.position,direction.fromArray(toLocal(frame.q.basis,dir)));
+    return inspectStationRay(sim,raycaster,{frustum}).center.kind==='station';
+  }
+  return {prepare,inspect,draw,hides};
 }
 
 function writeCanvas(canvas,image,bytes,w,h){
@@ -186,7 +191,10 @@ export function createXuntianViewRenderer(sim,canvas){
       renderer.setRenderTarget(target.film);renderer.clear(true,false,false);renderer.render(film.scene,screenCamera);
       if([background.material,stars.material,film.material].some(material=>renderer.properties.get(material).currentProgram?.diagnostics?.runnable===false))throw Error('巡天取景图像生成失败');
     });
-    return {available:true,center:local.center,starCount:count,limitMagnitude:limit,busy:false};
+    const wantNames=annotations?frame.previewNames:frame.photoNames;
+    const labels=wantNames?finderLabels(frame,size,annotations?size.w/Math.max(1,canvas.clientWidth):Math.max(1,size.w/800),
+      stars.records,limit,dir=>local.visible&&station.hides(frame,dir),annotations):null;
+    return {labels,available:true,center:local.center,starCount:count,limitMagnitude:limit,busy:false};
   }
   async function read(target){
     if(renderer.readRenderTargetPixelsAsync)await renderer.readRenderTargetPixelsAsync(target.film,0,0,target.w,target.h,target.bytes);
@@ -200,9 +208,9 @@ export function createXuntianViewRenderer(sim,canvas){
       const now=performance.now();
       if(previewPending||capturePending||now-lastRender<1000/VIEW_MAX_RATE)return {...lastStatus,busy:previewPending};
       const size=frameSize(canvas,frame,undefined,renderer.capabilities.maxTextureSize);if(!preview||preview.w!==size.w||preview.h!==size.h){preview?.dispose();preview=makeTargets(renderer,size.w,size.h);}
-      const current=preview;lastRender=now;lastStatus=draw(frame,size,current,true);previewPending=true;
+      const current=preview;lastRender=now;const result=draw(frame,size,current,true);lastStatus=result;previewPending=true;
       read(current).then(()=>{
-        if(disposed)return;previewImage=writeCanvas(canvas,previewImage,current.bytes,size.w,size.h);canvas.dataset.xuntianFrame=String(++previewCount);
+        if(disposed)return;previewImage=writeCanvas(canvas,previewImage,current.bytes,size.w,size.h);paintFinderLabels(canvas,result.labels);canvas.dataset.xuntianFrame=String(++previewCount);
       }).catch(()=>{if(!disposed){lastStatus={...lastStatus,available:false};canvas.dataset.xuntianFrame='error';}}).finally(()=>{previewPending=false;if(disposed)current.dispose();});
       return {...lastStatus,busy:true,submitted:true};
     },
@@ -224,7 +232,7 @@ export function createXuntianViewRenderer(sim,canvas){
           onExposure(actual,{center:result.center,coverage,width:size.w,height:size.h});
         }
         await read(target);if(disposed)throw Error('巡天取景器已关闭');
-        const out=document.createElement('canvas');writeCanvas(out,null,target.bytes,size.w,size.h);
+        const out=document.createElement('canvas');writeCanvas(out,null,target.bytes,size.w,size.h);paintFinderLabels(out,result.labels);
         const blob=await new Promise(resolve=>out.toBlob(resolve,'image/png'));if(!blob||disposed)throw Error('巡天取景图像生成失败');return blob;
       }finally{target?.dispose();capturePending=false;}
     },

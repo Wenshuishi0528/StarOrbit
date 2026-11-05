@@ -14,9 +14,9 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v1.05 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v1.06 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-> This guide describes the v1.05 release. The online and portable editions each show their version in the header.
+> This guide describes the v1.06 release. The online and portable editions each show their version in the header.
 
 In the China Space Station scene, open **Xuntian viewfinder** beside the orbit map. Search for Vega, Orion, a HIP identifier or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
 

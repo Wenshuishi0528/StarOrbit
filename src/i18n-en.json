@@ -1883,5 +1883,7 @@
   "火星、织女星、Orion、北京": "Mars, Vega, Orion, Beijing",
   "视直径 {diam}″ · 亮面 {lit}%": "Apparent diameter {diam}″ · {lit}% illuminated",
   "主画面看目标": "View in main scene",
-  "恒星与太阳系天体名称": "Star and Solar System names"
+  "恒星与太阳系天体名称": "Star and Solar System names",
+  "取景星图标注": "Finder labels",
+  "照片包含星名": "Include names in photos"
 }

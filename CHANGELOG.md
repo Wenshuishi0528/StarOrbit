@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v1.06 — 2026-11-05 · 正式版 / Release
+
+巡天取景新增独立的星名显示与 PNG 星名选项。文字随镜头转动、滚转和变焦，避开遮挡。
+
+The Xuntian finder can label visible stars and Solar System bodies. A separate option includes names in saved PNGs.
+
 ## v1.05 — 2026-11-05 · 正式版 / Release
 
 启用主画面的星图标注后，会同时显示视野内的恒星、行星、太阳和月球名称。太阳系标签随天体移动，并避让遮挡和其它标签。

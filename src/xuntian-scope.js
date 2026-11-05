@@ -32,8 +32,8 @@ export function installXuntianScope(sim){
  let capturing=false,unavailable=false,needsFrame=false,stationRefresh=false,nightCap=false,selectedAt=0,locked=false,exterior='both';
  const stats={frames:0,lastRenderMs:0};let surveyMission,anchor=null,tracked=null,freePose=null,releaseNote='',roll=0,rollTimer=0;
  const cities=createCityFinder(sim.environment.geography.items);
- try{const prefs=JSON.parse(localStorage.getItem(KEY))||{};if(Number.isFinite(prefs.aperture))aperture=clamp(prefs.aperture,25,2000);if(Number.isFinite(prefs.ev))ev=clamp(prefs.ev,-3,3);if(PHOTO_WIDTHS.includes(prefs.photoWidth))photoWidth=prefs.photoWidth;$('xtShowGuide').checked=prefs.guide!==false;$('xtSkyCompass').checked=prefs.compass!==false;}catch{}
- const prefs=()=>{try{localStorage.setItem(KEY,JSON.stringify({aperture,ev,photoWidth,guide:$('xtShowGuide').checked,compass:$('xtSkyCompass').checked}));}catch{}};
+ try{const prefs=JSON.parse(localStorage.getItem(KEY))||{};if(Number.isFinite(prefs.aperture))aperture=clamp(prefs.aperture,25,2000);if(Number.isFinite(prefs.ev))ev=clamp(prefs.ev,-3,3);if(PHOTO_WIDTHS.includes(prefs.photoWidth))photoWidth=prefs.photoWidth;$('xtNames').checked=!!prefs.previewNames;$('xtPhotoNames').checked=!!prefs.photoNames;$('xtShowGuide').checked=prefs.guide!==false;$('xtSkyCompass').checked=prefs.compass!==false;}catch{}
+ const prefs=()=>{try{localStorage.setItem(KEY,JSON.stringify({aperture,ev,photoWidth,previewNames:$('xtNames').checked,photoNames:$('xtPhotoNames').checked,guide:$('xtShowGuide').checked,compass:$('xtSkyCompass').checked}));}catch{}};
  const setLens=f=>{field=clamp(f,MIN_FOV,MAX_FOV);$('xtFocal').value=String(Math.round(zoomAtFov(field)*1000));setText($('xtFocalLabel'),Math.round(focalLength(field))+' mm');lastDraw=-Infinity;};
  const setAperture=a=>{aperture=clamp(a,25,2000);$('xtAperture').value=String(Math.round(Math.log(aperture/25)/Math.log(80)*1000));setText($('xtApertureLabel'),Math.round(aperture)+' mm');lastDraw=-Infinity;};
  const setEV=value=>{ev=clamp(value,-3,3);$('xtEV').value=ev;setText($('xtEVLabel'),(ev>0?'+':'')+Number(ev.toFixed(2))+' EV');lastDraw=-Infinity;};
@@ -232,7 +232,7 @@ export function installXuntianScope(sim){
   exterior=which;const close=which==='near';$('xtNear').setAttribute('aria-pressed',String(close));$('xtFrameBoth').setAttribute('aria-pressed',String(!close));
   if(close)formation?.frameTelescope(panel);else formation?.frameBoth(panel);
  }
- const frame=()=>({q:sim.current,eyeKm:optics.eyeKm,eyeLocal:optics.eyeLocal,axes:optics.axes,localAxes:optics.localAxes,fovY:field,apertureMm:aperture,exposure:2**ev,showGalaxy:sim.environment.settings.milky&&sim.environment.settings.stars,showStars:sim.environment.settings.stars,skyExposure:sim.environment.settings.exposure,skyBrightness:sim.environment.settings.starBrightness,showStation:true,constellationId:mode==='sky'&&named?.type==='constellation'?named.id.split(':')[1]:null,fillLight:$('fillLight').checked,aspect:ASPECT});
+ const frame=()=>({language:getLanguage(),previewNames:$('xtNames').checked,photoNames:$('xtPhotoNames').checked,q:sim.current,eyeKm:optics.eyeKm,eyeLocal:optics.eyeLocal,axes:optics.axes,localAxes:optics.localAxes,fovY:field,apertureMm:aperture,exposure:2**ev,showGalaxy:sim.environment.settings.milky&&sim.environment.settings.stars,showStars:sim.environment.settings.stars,skyExposure:sim.environment.settings.exposure,skyBrightness:sim.environment.settings.starBrightness,showStation:true,constellationId:mode==='sky'&&named?.type==='constellation'?named.id.split(':')[1]:null,fillLight:$('fillLight').checked,aspect:ASPECT});
  function aimTile(target){
   discardAnchor();mode='sky';named=null;fieldId=target.fieldId;setLens(4.7);aim(target.direction);
   selectedAt=performance.now();$('xtSearch').value='';hud();canvas.focus({preventScroll:true});
@@ -259,7 +259,7 @@ export function installXuntianScope(sim){
   const f=frame(),env=sim.environment,u=env.uniforms;
   // At a paused epoch the same photons need no second exposure. Invalidate for
   // pointing, focus, a moving panel, cloud/texture replacement and local illumination.
-  const signature=sim.paused&&sim.mode!=='real'?[sim.current.t,assemblyRevision,mode,f.constellationId,field,aperture,ev,canvas.clientWidth,devicePixelRatio,f.showStars,f.skyExposure,f.skyBrightness,env.skyLoading,env.galaxyTexture?.version,renderer?.earthAppearanceKey?.(),renderer?.solarAppearanceKey?.(),
+  const signature=sim.paused&&sim.mode!=='real'?[sim.current.t,f.language,f.previewNames,assemblyRevision,mode,f.constellationId,field,aperture,ev,canvas.clientWidth,devicePixelRatio,f.showStars,f.skyExposure,f.skyBrightness,env.skyLoading,env.galaxyTexture?.version,renderer?.earthAppearanceKey?.(),renderer?.solarAppearanceKey?.(),
    ...pose.toArray(),...optics.eyeLocal,...sim.api.model.quaternion.toArray(),f.fillLight,f.showGalaxy,env.galaxyTexture?.id,
    ...['dayMap','nightMap','cloudMap','oceanMap'].map(k=>u[k].value?.id),u.cloudAmount.value,env.settings.cloudNightVisible,
    ...Object.values(sim.api.rig).flatMap(r=>[r.roll?.rotation.x,r.left?.rotation.y,r.right?.rotation.y])].join('|'):'';
@@ -311,6 +311,7 @@ export function installXuntianScope(sim){
  for(const option of $('xtPhotoWidth').options)option.disabled=+option.value>maxPhoto;
  photoWidth=PHOTO_WIDTHS.includes(photoWidth)&&photoWidth<=maxPhoto?photoWidth:(PHOTO_WIDTHS.filter(w=>w<=maxPhoto).at(-1)||Math.min(maxPhoto,1440));
  $('xtPhotoWidth').value=String(photoWidth);$('xtPhotoWidth').onchange=e=>{const n=Number(e.target.value);if(PHOTO_WIDTHS.includes(n)&&n<=maxPhoto){photoWidth=n;prefs();}};
+ $('xtNames').onchange=()=>{pausedFrame='';lastDraw=-Infinity;prefs();};$('xtPhotoNames').onchange=prefs;
  $('xtNear').onclick=()=>frameExternal('near');
  $('xtFocal').oninput=e=>setLens(fovAtZoom(Number(e.target.value)/1000));
  $('xtShowGuide').onchange=prefs;$('xtCapture').onclick=capture;$('xtRecommend').onclick=()=>recommend(false);$('xtReturn').onclick=restoreSky;

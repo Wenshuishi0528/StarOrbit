@@ -13,6 +13,7 @@
   <label for="xtAperture" title="增大光圈口径，可看见更暗的恒星。">光圈口径</label><input id="xtAperture" type="range" min="0" max="1000" value="725"><output id="xtApertureLabel" for="xtAperture"></output>
   <label for="xtEV">曝光补偿</label><input id="xtEV" type="range" min="-3" max="3" step="0.25" value="0"><output id="xtEVLabel" for="xtEV"></output>
   <label for="xtRoll">画面旋转</label><input id="xtRoll" type="range" min="-180" max="180" step="1" value="0"><span class="xt-roll-value"><output id="xtRollLabel" for="xtRoll"></output><button type="button" id="xtRollReset" aria-label="旋转归零" title="旋转归零">↺</button></span></div>
+  <div class="xt-presets"><label class="xt-guide"><input type="checkbox" id="xtNames">取景星图标注</label><label class="xt-guide"><input type="checkbox" id="xtPhotoNames">照片包含星名</label></div>
   <div class="xt-actions"><button type="button" id="xtCapture" class="primary">拍摄 PNG</button><select id="xtPhotoWidth" aria-label="照片尺寸" title="照片尺寸"><option value="1440">1440 × 900</option><option value="2560">2560 × 1600</option><option value="3840">3840 × 2400</option></select><button type="button" id="xtRecommend">推荐星野</button><button type="button" id="xtReturn" hidden>返回星野</button></div>
   <div class="xt-hint">拖动或 W A S D 转向，Q / E 旋转，F 切换固定与随轨转动，滚轮或双指变焦。</div>
   <div class="xt-exterior" role="group" aria-label="外景构图"><span>外景</span><button type="button" id="xtFrameBoth" aria-pressed="true">两器同框</button><button type="button" id="xtNear" aria-pressed="false">近看巡天</button></div>
