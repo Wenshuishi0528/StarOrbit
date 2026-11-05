@@ -1,16 +1,19 @@
 // Stream bounded resources and reuse a validated cached payload when HTTP validators match.
 // Cross-origin requests use the browser's ordinary conditional cache, avoiding custom CORS headers.
-export async function fetchResource(url,{max=16e6,cached=null,onProgress=()=>{},timeout=25000,fetcher=fetch}={}){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
+export async function fetchResource(url,{max=16e6,cached=null,onProgress=()=>{},timeout=25000,fetcher=fetch,signal}={}){
+ let timedOut=false;const controller=new AbortController(),timer=setTimeout(()=>{timedOut=true;controller.abort();},timeout);
+ const cancel=()=>controller.abort();if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});
  try{
   const response=await fetcher(url,{cache:'no-cache',signal:controller.signal});
   if(!response.ok){
    const error=Object.assign(Error('HTTP '+response.status),{status:response.status});
    // Only the same-origin relay returns trusted, bounded diagnostic messages.
    if(url.startsWith('/api/')&&response.headers.get('content-type')?.includes('application/json')){
-    try{const detail=await response.json();if(typeof detail.error?.code==='string'&&/^UPSTREAM_[A-Z]+$/.test(detail.error.code)&&typeof detail.error.message==='string'){
-     error.code=detail.error.code;error.message=detail.error.message.slice(0,240);if(typeof detail.error.retryable==='boolean')error.retryable=detail.error.retryable;
-    }}catch{}
+    try{const detail=await response.json(),info=detail.error;
+     if(typeof info==='string')error.message=info.slice(0,240);
+     else if(typeof info?.message==='string'){error.message=info.message.slice(0,240);if(typeof info.code==='string')error.code=info.code;}
+     if(typeof (info?.retryable??detail.retryable)==='boolean')error.retryable=info?.retryable??detail.retryable;
+    }catch{}
    }
    throw error;
   }
@@ -31,6 +34,7 @@ export async function fetchResource(url,{max=16e6,cached=null,onProgress=()=>{},
    blob=new Blob(chunks,{type:response.headers.get('content-type')||'application/octet-stream'});
   }else{blob=await response.blob();if(blob.size>max)throw Error('数据超过大小限制');onProgress({received:blob.size,total:length||null});}
   return {blob,r:response,unchanged:false,http:validators};
- }finally{clearTimeout(timer);}
+ }catch(error){if(timedOut&&!signal?.aborted)throw Object.assign(Error('请求超时，请重试；已有数据已保留'),{name:'TimeoutError',retryable:true});throw error;}
+ finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
 }
 export async function blobHash(blob){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');}

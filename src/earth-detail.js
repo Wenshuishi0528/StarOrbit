@@ -24,11 +24,14 @@ export class EarthDetail{
    env.uniforms[`${this.prefix}Map${i}`]={value:env.fallback};env.uniforms[`${this.prefix}Rect${i}`]={value:new THREE.Vector4()};env.uniforms[`${this.prefix}Fade${i}`]={value:0};
   }
  }
+ setSource(tiles,columns,rows){
+  this.clear();this.failed.clear();this.tiles=tiles;this.columns=columns;this.rows=rows;this.lastCheck=-Infinity;
+ }
  release(i){const slot=this.slots[i];if(slot.texture){slot.texture.dispose();slot.texture.image?.close?.();slot.texture.image=null;}slot.key=null;slot.texture=null;this.env.uniforms[`${this.prefix}Map${i}`].value=this.env.fallback;this.env.uniforms[`${this.prefix}Fade${i}`].value=0;}
  clear(){this.epoch++;this.wanted=[];for(let i=0;i<4;i++)this.release(i);}
  update(camera){
   const now=performance.now(),e=this.env;
-  if(e.quality!=='high'||!e.assets[this.prefix]||!detailNeeded(camera.position.length(),camera.projectionMatrix.elements[5],e.api.renderer.domElement.height,e.uniforms[this.night?'nightMap':'dayMap'].value.image.width)){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
+  if(!(e.quality&&e.quality!=='simple')||!(this.tiles||e.assets[this.prefix])||!detailNeeded(camera.position.length(),camera.projectionMatrix.elements[5],e.api.renderer.domElement.height,e.uniforms[this.night?'nightMap':'dayMap'].value.image.width)){if(this.wanted.length||this.slots.some(s=>s.key))this.clear();return;}
   for(let i=0;i<4;i++)e.uniforms[`${this.prefix}Fade${i}`].value=this.slots[i].texture?Math.min(1,(now-this.slots[i].born)/400):0;
   if(now-this.lastCheck<250)return;this.lastCheck=now;
   camera.updateMatrixWorld();this.inverse.copy(e.earth.quaternion).invert();this.origin.copy(camera.position).applyQuaternion(this.inverse);this.sunDirection.copy(e.uniforms.sun.value).applyQuaternion(this.inverse);
@@ -54,14 +57,14 @@ export class EarthDetail{
   this.pending=true;this.env.detailDecodeBusy=true;const epoch=this.epoch;let texture;
   try{
    // ImageBitmap decoding keeps JPEG work off the main animation thread.
-   const response=await fetch(this.env.assets[this.prefix][cell.key]);if(!response.ok)throw Error('Detail tile unavailable');
+   const response=await fetch((this.tiles||this.env.assets[this.prefix])[cell.key]);if(!response.ok)throw Error('Detail tile unavailable');
    const bitmap=await createImageBitmap(await response.blob(),{imageOrientation:'flipY',premultiplyAlpha:'none'});
    texture=new THREE.Texture(bitmap);texture.flipY=false;texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,this.env.api.renderer.capabilities.getMaxAnisotropy());texture.needsUpdate=true;
-   if(epoch!==this.epoch||!this.wanted.some(c=>c.key===cell.key)||this.env.quality!=='high'){texture.dispose();bitmap.close();return;}
+   if(epoch!==this.epoch||!this.wanted.some(c=>c.key===cell.key)||!(this.env.quality&&this.env.quality!=='simple')){texture.dispose();bitmap.close();return;}
    this.env.api.renderer.initTexture(texture);
    this.slots[index]={key:cell.key,texture,born:performance.now()};
    this.env.uniforms[`${this.prefix}Map${index}`].value=texture;this.env.uniforms[`${this.prefix}Rect${index}`].value.fromArray(detailRect(cell,this.columns,this.rows));
-  }catch(error){if(texture){texture.dispose();texture.image?.close?.();}this.failed.add(cell.key);console.warn('Earth detail fallback:',cell.key,error.message);}
+  }catch(error){if(texture){texture.dispose();texture.image?.close?.();}if(epoch===this.epoch)this.failed.add(cell.key);console.warn('Earth detail fallback:',cell.key,error.message);}
   finally{this.pending=false;this.env.detailDecodeBusy=false;}
  }
 }

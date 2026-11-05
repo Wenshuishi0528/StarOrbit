@@ -2,7 +2,10 @@
 // Live Cloud Maps PNGs store the unblurred mask in alpha (their RGB is shaded).
 export const CLOUD_PNG='https://clouds.matteason.co.uk/images/8192x4096/clouds-alpha.png';
 export const CLOUD_JPEG='https://clouds.matteason.co.uk/images/8192x4096/clouds.jpg';
-export function cloudChannel(record){return record.channel==='alpha'||record.source===CLOUD_PNG?'alpha':'red';}
+// RGBA validity masks are larger than the retired single-channel derivatives.
+export const CLOUD_MAX_BYTES=64*1024*1024;
+export const CLOUD_SNAPSHOT_MAX_BYTES=96*1024*1024;
+export function cloudChannel(record){return record.channel==='validity'||record.provider==='viirs'?'validity':record.channel==='alpha'||record.source===CLOUD_PNG?'alpha':'red';}
 export function cloudDecodeSize(width,height,tier,maxSize){
  if(width<1024||width>8192||width!==height*2)throw Error('云图尺寸无效');
  const cap=tier==='high'?8192:tier==='standard'?4096:tier==='simple'?1024:2048;

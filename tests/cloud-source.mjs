@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {selectCloud,validateNASA,completeNASA,retireNASA} from '../src/cloud-source.js';
-const now=Date.now(),time=now-8*86400e3,old={kind:'cloud',id:'old',downloaded:now,time:null},nasa={kind:'cloud',id:'nasa',provider:'satcorps',time,observedStart:time-5e6,observedEnd:time+2e6,downloaded:now,resolution:'8192×4096',nativeResolution:'12960×6480',channel:'red',coverage:.995,polarCoverage:{north:.999,south:.999},footprint:{global:1,north:1,south:1}};
-assert.equal(selectCloud([old,nasa],'latest',now).id,'old');
+import {selectCloud,validateNASA,completeNASA,retireNASA,protectedCloudIds} from '../src/cloud-source.js';
+const now=Date.now(),time=now-8*86400e3,old={kind:'cloud',id:'old',downloaded:now,time:null},nasa={kind:'cloud',id:'nasa',provider:'satcorps',quality:{schema:1,status:'accepted',reasons:[],metrics:{}},time,observedStart:time-5e6,observedEnd:time+2e6,downloaded:now,resolution:'8192×4096',nativeResolution:'12960×6480',channel:'red',coverage:.995,polarCoverage:{north:.999,south:.999},footprint:{global:1,north:1,south:1}};
+assert.equal(selectCloud([old,nasa],'latest',now),null);
 assert.equal(selectCloud([old,nasa],'satcorps',now).id,'nasa','complete historical data remains available regardless of age');
 assert.equal(selectCloud([old,{...nasa,footprint:{global:.99,north:.7,south:.6}}],'satcorps',now),null);
-assert.equal(selectCloud([old,nasa],'history',now,'old').id,'old');
+assert.equal(selectCloud([old,nasa],'history',now,'old'),null);
 assert.equal(selectCloud([old,nasa],'history',now,'nasa').id,'nasa');
 assert.equal(validateNASA(nasa),nasa);
 for(const change of [{nativeResolution:'4096×2048'},{observedStart:now+1e6},{coverage:.8},{polarCoverage:{north:1,south:.3}},{footprint:{global:1,north:1,south:.7}}])assert.throws(()=>validateNASA({...nasa,...change},now));
@@ -16,4 +16,8 @@ assert.ok(!completeNASA(retired,now));assert.throws(()=>validateNASA(retired,now
 assert.equal(selectCloud([retired],'history',now,'retired'),null);
 const records=new Map([old,nasa,retired].map(x=>[x.id,x]));
 assert.deepEqual(await retireNASA({all:async()=>[...records.values()],remove:async id=>records.delete(id)}),['retired']);
-assert.deepEqual([...records.keys()],['old','nasa']);
+assert.deepEqual([...records.keys()],['old','nasa','retired'],'retired bytes remain available for export');
+
+for(const quality of [undefined,{schema:0,status:'accepted',reasons:[]},{schema:1,status:'rejected',reasons:['seam']},{schema:1,status:'accepted',reasons:['seam']}]){const rejected={...nasa,quality};assert.equal(completeNASA(rejected),false);assert.equal(selectCloud([rejected],'history',now,'nasa'),null);assert.throws(()=>validateNASA(rejected));}
+assert.deepEqual(protectedCloudIds([{...nasa,id:'first',time:1},{...nasa,id:'second',time:2},{...nasa,id:'third',time:3},{...nasa,id:'unverified',time:4,quality:undefined}]),['third','second']);
+console.log('Cloud schema gate, disabled GitHub archives and two accepted rollback generations passed');

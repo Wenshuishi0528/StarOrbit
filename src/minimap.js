@@ -1,6 +1,7 @@
 import {restoreControlFocus} from './display-controls.js';
 import {orbitSegment} from './dfh1-history.js';
 import {nearestTrackTime} from './minimap-picking.js';
+import {MinimapNightRaster,NIGHT_WIDTH,NIGHT_HEIGHT} from './minimap-lighting.js';
 import {t,onLanguageChange} from './i18n.js';
 import {shortClock} from './time-format.js';
 import {stateAt,earthAxes,dot,norm,unit} from './orbit.js';
@@ -19,7 +20,7 @@ export class OrbitMinimap{
   $('closeMinimap').onclick=()=>{this.setVisible(false);restoreControlFocus($('showMinimap'));};
   onLanguageChange(()=>{this.lastDraw=-Infinity;});
   this.image=new Image();this.image.onload=()=>{this.lastDraw=-Infinity;};
-  this.image.src=sim.environment.assets.simple.day;
+  this.image.src=sim.environment.assets.minimap||sim.environment.assets.simple.day;
   this.resizeObserver=new ResizeObserver(()=>{this.lastDraw=-Infinity;});this.resizeObserver.observe(this.canvas);this.bindPicking();
  }
  bindPicking(){
@@ -72,7 +73,18 @@ export class OrbitMinimap{
    }else c.lineTo(...p);
    last=p;lastSegment=segment;
   }
-  c.stroke();
+  c.strokeStyle='#07101ddd';c.lineWidth=4;c.stroke();
+  c.strokeStyle=color;c.lineWidth=1.7;c.stroke();
+ }
+ drawNight(sun,w,h){
+  if(!this.night){
+   const canvas=document.createElement('canvas');canvas.width=NIGHT_WIDTH;canvas.height=NIGHT_HEIGHT;
+   const context=canvas.getContext('2d'),raster=new MinimapNightRaster();
+   this.night={canvas,context,raster,image:new ImageData(raster.pixels,NIGHT_WIDTH,NIGHT_HEIGHT)};
+  }
+  const {canvas,context,raster,image}=this.night;
+  if(raster.update(sun))context.putImageData(image,0,0);
+  this.ctx.imageSmoothingEnabled=true;this.ctx.drawImage(canvas,0,0,w,h);
  }
  update(q,wall){
   this.panel.hidden=!this.visible||!q;
@@ -82,15 +94,10 @@ export class OrbitMinimap{
   if(this.canvas.width!==pw||this.canvas.height!==ph){this.canvas.width=pw;this.canvas.height=ph;}
   c.setTransform(ratio,0,0,ratio,0,0);c.fillStyle='#102b3e';c.fillRect(0,0,w,h);
   if(this.image.complete&&this.image.naturalWidth)c.drawImage(this.image,0,0,w,h);
-  c.fillStyle='#04132155';c.fillRect(0,0,w,h);
   if(q){
    // Same solar direction and Earth rotation as the 3D view; no new orbit model.
-   const sun=q.earthAxes.map(a=>dot(unit(q.sun),a)),step=5;
-   for(let y=0;y<h;y+=step)for(let x=0;x<w;x+=step){
-    const lon=((x+step/2)/w*360-180)*DEG,lat=(90-(y+step/2)/h*180)*DEG;
-    const lit=Math.cos(lat)*(Math.cos(lon)*sun[0]+Math.sin(lon)*sun[1])+Math.sin(lat)*sun[2];
-    const a=Math.min(.6,Math.max(0,-lit*8)*.6);if(a){c.fillStyle=`rgba(1,6,20,${a})`;c.fillRect(x,y,step,step);}
-   }
+   const sun=q.earthAxes.map(a=>dot(unit(q.sun),a));
+   this.drawNight(sun,w,h);
   }
   c.strokeStyle='#b1d8e126';c.lineWidth=.6;c.beginPath();
   for(const lon of [-120,-60,0,60,120]){const x=project(lon,0,w,h)[0];c.moveTo(x,0);c.lineTo(x,h);}

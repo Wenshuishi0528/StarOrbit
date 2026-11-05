@@ -1,5 +1,99 @@
 # Changelog / 更新记录
 
+## v0.92 — 2026-11-04
+
+**中文：** 修复 Safari 恢复 NASA 有效性云图时长时间停留在启动页的问题。8K 云图由逐行读回改为 64 行条带，读回次数从 4096 降至 64；保留原始数据与有效性通道。启动先恢复模型、轨道和画质，首帧后后台恢复已选云图，避免云图解码阻塞主界面或按未确定画质重复处理。增加真实分阶段启动状态；保留 v0.91 的全部小地图功能与轻量底图。
+
+**English:** Fixed prolonged Safari startup while restoring NASA validity-mask clouds. Reading 64-row strips reduces 8K readbacks from 4096 to 64 while preserving source data and validity alpha. Selected weather textures restore after the first scene update instead of blocking startup or decoding twice before quality is known. Added startup stage reporting; all v0.91 minimap features remain intact.
+
+复现与验证：[Safari 启动修复](docs/v0.92-startup.md)。
+
+## v0.91 — 2026-11-04
+
+**中文：** 补齐小地图的平滑昼夜渐变和轨迹暗色描边，保留独立明亮底图、昼夜图例与原有定位交互；按要求不绘制浅色晨昏边界线。底图约 90 KB，夜区使用固定 360×180 缓冲区、重复使用像素并缓存太阳方向，不随主场景 8K 画质或窗口尺寸扩大。
+
+**English:** Restored smooth minimap twilight and outlined tracks while retaining the bright independent base map, day/night legend and existing seeking controls. The unwanted pale terminator is omitted. The approximately 90 KB map and reused 360×180 shade buffer remain independent of main-scene quality and window size; unchanged sunlight reuses cached pixels.
+
+## v0.90 — 2026-11-04
+
+**中文：** 针对 v0.89 后的启动卡住反馈，撤回新增的小地图逐像素画布与晨昏线绘制，恢复修改前的成熟渲染路径。保留独立明亮底图和增强的昼夜对比，移除浅色边界线及对应图例。按用户要求仅在内置浏览器验证重开，不改主场景画质和已有设置。
+
+**English:** Reverted the new v0.89 per-pixel minimap canvas and terminator rendering following a startup-stall report, restoring the previous drawing path. Retained the independent brighter map and stronger day/night shading, and removed the pale boundary and its legend entry. Restart validation uses the in-app browser as requested, without changing main-scene quality or existing settings.
+
+范围与验证：[启动回退与小地图简化](docs/v0.90-minimap-rollback.md)。
+
+## v0.89 — 2026-11-04
+
+**中文：** 实时轨道小地图改用独立的明亮底图，增强昼夜区分，新增连续晨昏线、窄的平滑过渡与地面昼夜图例。过去／未来轨迹保留青／金配色并增加描边，四种语言同步说明。晨昏线沿用模拟太阳与地球旋转，覆盖春秋分、至日、极区和日期变更线；主场景地表与曝光独立。
+
+**English:** Gave the orbit minimap its own readable base map, stronger day/night contrast, a continuous ground terminator, smooth narrow twilight and a compact legend. Past/future tracks retain cyan/gold with dark outlines; labels support all four languages. Geometry reuses the simulation Sun and Earth rotation, including equinoxes, solstices, poles and the date line, independently of the main scene surface and exposure.
+
+说明与验证：[小地图昼夜显示](docs/v0.89-minimap-daylight.md)。
+
+## v0.88 — 2026-11-04
+
+**中文：** 云图入口统一为云图库，已保存图一键使用，明确显示当前版本、保存位置、下载进度与错误。新下载独立于当前画面；完成文件持久保存在本机，页面重开可接续运行中的任务。修复来源／快照不同步、旧最新模式遗漏新下载、目录阻塞其他更新及错误说明丢失，保留已有图与旧快照。
+
+**English:** Unified cloud selection, preview, downloads and active state in one library. Saved maps apply directly; downloads leave the view unchanged and completed files persist locally. Reopening reconnects to running downloads. Fixed stale selection controls, excluded new frames, catalog-blocked resource updates and lost diagnostics while preserving existing maps and snapshots.
+
+操作与验证：[云图库](docs/v0.88-cloud-library.md)。
+
+## v0.87 — 2026-10-30
+
+**中文：** 云图统一为版本列表，合并官方已发布时次、浏览器缓存和本机 NASA 旧图；刷新只查目录，移除旧自动逐日回查。下载仅处理选定时次并可取消，接缝/局部缺测改为提示且允许手动加载。NASA 部分覆盖保留有效性通道；撤下有分区缺测且清晰度不足的 VIIRS 试验来源与地球加载入口，原始试验缓存保留。保留收藏、导出、切回内置图和当前版本保护。
+
+**English:** Unified published cloud versions and browser/server archives in one list. Refresh reads catalogs only; downloads are explicit, exact-time and cancellable. Visual artifacts and partial coverage are warnings for manual loading. NASA validity masks retain an explicit static fallback. Removed the incomplete, low-resolution VIIRS experiment from normal cloud selection and Earth loading, preserving its archived data.
+
+说明与验证：[统一云图版本](docs/v0.87-cloud-versions.md)。
+
+## v0.86 — 2026-10-30
+
+**中文：** 数据与资源新增历史云图入口：按 UTC 日期/小时查询 NASA SATCORPS GCC V2A，按日期/昼夜下载 VIIRS 科学预览。支持完整性校验、去重、预览、收藏和导出，沿用容量管理；NASA 仅通过质量检查后可手动应用，历史下载不改变当前云图或自动跟随结果。
+
+**English:** Added exact-date cloud history downloads for SATCORPS GCC V2A and daily VIIRS day/night scientific previews, with integrity checks, cache reuse, preview, favorites and export. History shares cache limits but never automatically changes the current cloud map; only screened NASA frames can be applied manually.
+
+使用与限制：[历史云图](docs/v0.86-cloud-history.md)。
+
+## v0.85 — 2026-10-30
+
+**中文：** 新增独立 VIIRS 云图样本对比窗口，保留现有云图与默认设置。可查看 2026-10-28 NOAA-20 白天/夜间晴空置信度预览，以及内置静态图；支持亚洲、日期线和北极视图，明确标出无数据、样本日期与预览分辨率。未将试验掩膜用于模拟器云层。
+
+**English:** Added an isolated VIIRS sample viewer without changing existing cloud sources or defaults. Compare NOAA-20 daytime/nighttime clear-sky-confidence previews for 2026-10-28 with the bundled static map, including Asia, date-line and polar views. Missing data, sample date and preview resolution remain explicit; the experiment does not replace simulator clouds.
+
+样本、限制与验证：[VIIRS 云图试验](docs/v0.85-viirs-trial.md)。
+
+## v0.84 — 2026-10-30
+
+**中文：** NASA 云图增加异常亮度平台、日期线及内部长直线接缝检查；不合格候选不覆盖已通过检查的版本，旧缓存和导入文件也需核验。自动清理保护两代合格云图。暂停无法可靠还原云层的 GitHub 增强图源，保留历史预览和导出；无合格下载时明确回退内置静态云图。
+
+**English:** Added NASA cloud artifact checks for broad quantized bright plateaus and long dateline/internal seams. Rejected candidates cannot replace accepted data; legacy caches and imports are screened too. Automatic cleanup protects two accepted generations. Paused the irreversibly enhanced GitHub source while retaining history preview/export and clearly labeling the static fallback.
+
+依据、限制与验证：[云图质量与回退](docs/v0.84-cloud-quality.md)。
+
+## v0.83 — 2026-10-30
+
+**中文：** 2026 Q2 地表改用质量筛选的 NASA MODIS NBAR 季度合成，减少源观测条带；修正反射率与 sRGB 转换，统一地表/大气光照标度。修复细节块、日期变更线与部分加载交点的硬边，保留 2004 地表和已有夜景选项。缺测及低一级质量后备明确记录，未通过局部调色抹除差异。
+
+**English:** Replaced the 2026 Q2 surface with a QA-filtered NASA MODIS NBAR composite to reduce observation-strip artifacts. Corrected reflectance/sRGB encoding and normalized ground/atmospheric illumination. Smoothed exposed detail edges, partial-load junctions and the date line while retaining the 2004 surface and existing night maps. Missing data and lower-quality fallback remain documented; no regional recoloring is applied.
+
+依据与验证：[地表反射率与大气](docs/v0.83-surface-radiometry.md)。
+
+## v0.82 — 2026-10-29
+
+**中文：** 新增 2026 第二季度约 1 公里白天地表（约 52.87 MB），保留 NASA 2004 原版切换；使用固定 RGB 真彩色显示，避免中间调过度提亮造成地表泛灰。仅按视角载入地表细节，选择持久化，失败保留原地图；注明海洋及缺测区域的旧图补充。
+
+**English:** Added a selectable approximately 1 km daytime surface for 2026 Q2 alongside the original NASA 2004 map. Uses a fixed RGB true-color display without excessive midtone brightening, view-dependent detail loading, persistent selection and rollback on load failure. Ocean and missing-observation fallback areas are disclosed.
+
+来源、处理与验证：[白天地表说明](docs/v0.82-day-surface.md)。
+
+## v0.81 — 2026-10-29
+
+**中文：** 新增 2024 年 NASA Black Marble 1 公里夜景，与 2016 原版一键切换并记住选择。新增资源约 40.4 MB，不打包 500 米版；近看时按视野载入最多四块夜景细节，切换年份只替换夜景。标明 2024 覆盖范围及极区的 2016 底图补充。
+
+**English:** Added a 2024 NASA Black Marble 1 km night map alongside the preserved 2016 option, with persistent selection. Adds about 40.4 MB of display assets and no 500 m atlas. Up to four view-dependent night tiles are resident; changing year replaces only night textures. The 2024 coverage and 2016 polar fallback are disclosed.
+
+来源、处理方法及验证：[2024 夜景说明](docs/v0.81-night-lights.md)。
+
 ## v0.80 — 2026-10-29
 
 **中文：** 顶栏新增 GitHub / Star 仓库入口，新标签页打开；手机端使用紧凑布局，支持键盘焦点和多语言说明，不新增网络请求或 Star 数量轮询。

@@ -1,0 +1,43 @@
+// Isolated 8797 origin with copies of real NASA archives. No production state.
+async page=>{
+ if(!page.url().startsWith('http://127.0.0.1:8797/'))throw Error('Use isolated test origin');
+ const checks=[],check=(v,name)=>{if(!v)throw Error(name);checks.push(name);};
+ const remote={provider:'satcorps',time:1793275200000,date:'2026-10-29',slot:'12',remote:true};
+ await page.route('**/api/cloud/versions?*',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({items:[remote],dates:['2026-10-29','2026-10-23'],message:'test catalog'})}));
+ await page.reload();await page.setViewportSize({width:1440,height:1000});
+ await page.waitForFunction(()=>window.viewer?.sim.initialized&&!viewer.sim.environment.loading);
+ await page.evaluate(async()=>{const w=viewer.sim.environment.weather;await w.ready;viewer.music.pause();document.getElementById('welcomeDialog')?.close();w.resourcePanel.open('cloud');});
+ await page.locator('#openCloudHistory').click();await page.waitForFunction(()=>document.getElementById('historyStatus').textContent.includes('目录已刷新'));
+ check(!await page.locator('#historyProvider option[value=viirs]').count(),'VIIRS scans are excluded from formal cloud sources');
+ check(await page.locator('.version-row').count()===3,'published versions and both normal server archives share one list');
+ await page.locator('.version-row').filter({hasText:'2026-10-23 12:00'}).click();
+ if(await page.locator('#historyDownload').isEnabled())await page.locator('#historyDownload').click();
+ await page.waitForFunction(()=>!document.getElementById('historyProvider').disabled);
+ const before=await page.evaluate(()=>viewer.sim.environment.weather.active.cloud||null);
+ check(await page.locator('#historyDownload').isDisabled(),'downloaded original NASA file is reused');
+ await page.locator('#historyApply').click();await page.waitForFunction(()=>document.getElementById('historyStatus').textContent.includes('已加载到地球'));
+ check(await page.evaluate(()=>{const w=viewer.sim.environment.weather,r=w.items.find(r=>r.id===w.active.cloud);return r.provider==='satcorps'&&r.time===1792756800000&&r.quality.status==='rejected'&&w.env.uniforms.cloudMap.value!==w.env.builtinCloud;}),'real NASA archive loads onto Earth despite visual quality warnings');
+ check(await page.evaluate(()=>viewer.renderer.getContext().getError()===0),'global cloud rendering has no WebGL error');
+ await page.waitForFunction(()=>!document.getElementById('historyProvider').disabled);
+ const count=await page.evaluate(()=>viewer.sim.environment.weather.items.length);
+ const downloading=page.waitForEvent('download');await page.getByRole('button',{name:'导出快照',exact:true}).click();const file=await downloading;
+ const output='output/playwright/cloud-versions87/nasa-snapshot.json';await file.saveAs(output);
+ await page.locator('#importCloudVersion').setInputFiles(output);await page.waitForFunction(()=>document.getElementById('historyStatus').textContent.includes('快照已导入'));
+ check(await page.evaluate(n=>{const w=viewer.sim.environment.weather,r=w.items.find(r=>r.id===w.active.cloud);return w.items.length===n&&r.favorite&&r.sha256==='5bec2cc5ad288fca8bb001431c852bcf19e9ef43bf4448c26c3ea6488f64d6df';},count),'real NASA snapshot import preserves identity and favorite without duplicate bytes');
+ await page.screenshot({path:'output/playwright/cloud-versions87/versions-desktop.png'});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'output/playwright/cloud-versions87/versions-mobile.png'});
+ check(await page.evaluate(()=>{const d=document.getElementById('cloudHistoryDialog');return d.scrollWidth<=d.clientWidth+1;}),'version manager fits narrow screens');
+ await page.setViewportSize({width:1440,height:1000});
+ let requestId,cancelledId;
+ await page.route('**/api/cloud/history/download?*',async route=>{requestId=new URL(route.request().url()).searchParams.get('requestId');await new Promise(r=>setTimeout(r,1200));await route.fulfill({contentType:'application/json',body:JSON.stringify({state:'running',id:requestId,date:'2026-10-29',hour:'12'})}).catch(()=>{});});
+ await page.route('**/api/cloud/history/cancel?*',route=>{cancelledId=new URL(route.request().url()).searchParams.get('id');return route.fulfill({contentType:'application/json',body:'{"cancelled":true}'});});
+ await page.route('**/api/cloud/history/status',route=>route.fulfill({contentType:'application/json',body:'{"state":"idle"}'}));
+ await page.locator('.version-row').filter({hasText:'2026-10-29 12:00'}).click();const active=await page.evaluate(()=>viewer.sim.environment.weather.active.cloud);
+ await page.locator('#historyDownload').click();await page.waitForFunction(()=>document.getElementById('historyStatus').textContent.includes('准备下载'));await page.locator('#historyCancel').click();
+ await page.waitForFunction(()=>!document.getElementById('historyProvider').disabled);
+ check(requestId&&cancelledId===requestId,'cancel targets the preallocated request before the POST response');
+ check(await page.evaluate(id=>viewer.sim.environment.weather.active.cloud===id,active),'cancel leaves the active global cloud unchanged');
+ await page.reload();await page.waitForFunction(()=>window.viewer?.sim.initialized&&!viewer.sim.environment.loading);await page.evaluate(async()=>{await viewer.sim.environment.weather.ready;});
+ check(await page.evaluate(()=>{const w=viewer.sim.environment.weather,r=w.items.find(r=>r.id===w.active.cloud);return r?.provider==='satcorps'&&r.favorite&&r.time===1792756800000;}),'manually selected warned global cloud and favorite survive reload');
+ return checks;
+}

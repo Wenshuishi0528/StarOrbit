@@ -6,6 +6,7 @@ import io, json, subprocess, tempfile, time, datetime, hashlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from http_download import download_bytes, DownloadError
+from cloud_quality import inspect_image, quality_ok, SCHEMA, describe_reasons
 BASE='https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/'
 DAY=86400
 FIELDS=('cloud_phase','cloud_optical_depth','relative_time','lat','lon')
@@ -26,10 +27,14 @@ class NoQualifiedFrameError(ValueError):
     def __init__(self,message,check):
         super().__init__(message);self.check=check
 
-def load_check(output,previous):
+def load_check(output,previous,allow_recovery=False):
     try:
         value=json.loads((Path(output)/'last-check.json').read_text())
-        if value.get('sha256')!=(previous or {}).get('sha256'):return None
+        if value.get('sha256')!=(previous or {}).get('sha256'):
+            # A rejected asset must never restore a successful freshness claim.
+            # Its interrupted-network diagnostic can still drive a later retry.
+            recovery=allow_recovery and value.get('updateStatus') in ('partial','unavailable') and value.get('retryable') is True
+            if not recovery:return None
         if value.get('updateStatus') not in ('updated','unchanged','partial','unavailable'):return None
         if not isinstance(value.get('checkedAt'),(int,float)) or not 0<value['checkedAt']<1e16:return None
         if not isinstance(value.get('checkComplete'),bool):return None
@@ -104,7 +109,9 @@ def opacity(phase,depth,relative,attrs,reference,now):
     import numpy as np
     clear=(phase==0)|(phase==4);cloud=np.isin(phase,[1,2,6,7])
     fresh=(relative!=-32768)&(np.abs(relative.astype(np.float64))<=12*3600)&(reference+relative.astype(np.float64)<=now+300)
-    good_depth=(depth!=scalar(attrs,'_FillValue',65535))
+    limits=np.asarray(attrs.get('valid_range',[1,15000])).reshape(-1)
+    if len(limits)!=2:raise ValueError('NASA 光学厚度范围元数据无效')
+    good_depth=(depth!=scalar(attrs,'_FillValue',65535))&(depth>=limits[0])&(depth<=limits[1])
     valid=fresh&(clear|(cloud&good_depth))
     tau=depth.astype(np.float32)*scalar(attrs,'scale_factor',1)+scalar(attrs,'add_offset',0)
     # Effective reflectance of a scattering slab, preserving thick-cloud structure.
@@ -161,7 +168,8 @@ def fetch_frame(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
         with ThreadPoolExecutor(max_workers=2) as pool:
             for start in range(0,len(chunks),2):
                 for i,(offset,data) in enumerate(pool.map(load,chunks[start:start+2])):
-                    progress(f'下载 NASA 云层字段 {start+i+1}/{len(chunks)}')
+                    prior=remote.reuse.get('downloaded',0) if remote.reuse else 0
+                    progress(f'下载 NASA 云层字段 {start+i+1}/{len(chunks)} · {(prior+remote.bytes+len(data))/1048576:.1f} MB')
                     remote.file.seek(offset);remote.file.write(data);remote.bytes+=len(data)
                     remote.chunks.add((offset,len(data)))
         remote.file.flush();return remote.bytes
@@ -206,25 +214,35 @@ def cached_frames(output):
             info=json.loads(p.read_text());image=p.with_suffix('.png')
             if info.get('provider')!='satcorps' or info.get('time')==RETIRED_TIME*1000:continue
             if acceptable(info) and hashlib.sha256(image.read_bytes()).hexdigest()==info.get('sha256'):
+                # Migrate old assets once, by pixels and digest. An old date is not
+                # proof of quality; rejected originals remain available for audit.
+                quality=info.get('quality',{})
+                if quality.get('schema')!=SCHEMA or quality.get('sha256')!=info['sha256']:
+                    from PIL import Image
+                    with Image.open(image) as im:quality=inspect_image(im)
+                    info['quality']={**quality,'sha256':info['sha256']}
+                    temp=p.with_suffix('.json.tmp');temp.write_text(json.dumps(info));temp.replace(p)
+                if not quality_ok(info.get('quality')):continue
                 frames.append({**info,'file':str(image)})
-        except (ValueError,KeyError,OSError):continue
+        except (ValueError,KeyError,OSError,TypeError,AttributeError,ImportError):continue
     return sorted(frames,key=lambda x:x['time'],reverse=True)
 
 def build(output,progress=lambda s:None,now=None):
     live=now is None;now=time.time() if live else now
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
-    # Explicit retirement applies only to our old NASA derivative, never GitHub.
-    for ext in ('.png','.json'):(output/('20240630T1200-v1a'+ext)).unlink(missing_ok=True)
+    # Retired and rejected derivatives stay on disk for audit/manual cleanup.
     checkfile=output/'checks.json'
     try:checks=json.loads(checkfile.read_text())
     except (OSError,ValueError):checks={}
-    checks={k:v for k,v in checks.items() if 0<=now-v.get('checked',0)<(CHECK_TTL if v.get('reason')=='not published' else 6*3600)}
+    checks={k:v for k,v in checks.items() if 0<=now-v.get('checked',0)<(CHECK_TTL if v.get('reason')=='not published' else 6*3600) and (v.get('reason')!='image quality' or v.get('schema')==SCHEMA)}
     cached=cached_frames(output);previous=cached[0] if cached else None
     recent=recent_check(output,previous,now)
     if recent:return {**previous,**recent}
-    errors=0;connection_failures=0;last_error=None;retryable=False;deadline=time.monotonic()+16*60
+    errors=0;connection_failures=0;last_error=None;retryable=False;deadline=time.monotonic()+16*60;quality_rejected=0;quality_reason=None
     summary={'checked':0,'missing':0,'rejected':0,'failed':0}
     def finish(result,status,message):
+        if quality_rejected:
+            message=f'{quality_rejected} 份候选云图质量检查未通过（{quality_reason}）；'+('已下载另一份通过检查的云图' if status=='updated' else '继续保留已核验的旧云图' if result else '本机没有已核验的下载版本；保留浏览器已有云图，或使用内置静态云图；原始档案保留')
         if last_error:message+='；'+last_error
         summary['failed']=errors
         check={'updateStatus':'partial' if errors and result else status,'checkedAt':int((time.time() if live else now)*1000),'checkComplete':not errors,'cachedCheck':False,'updateMessage':message,'retryable':retryable,'checkSummary':summary}
@@ -237,6 +255,8 @@ def build(output,progress=lambda s:None,now=None):
         if time.monotonic()>deadline:errors+=1;retryable=True;last_error='本次 NASA 检查已到时间上限';break
         summary['checked']+=1
         if url in checks:
+            if checks[url].get('reason')=='image quality' and checks[url].get('schema')==SCHEMA:
+                quality_rejected+=1;quality_reason=describe_reasons(checks[url].get('details',[]))
             summary['missing' if checks[url].get('reason')=='not published' else 'rejected']+=1;continue
         date=datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y-%m-%d')
         progress('检查 NASA 全球与极区覆盖 · '+date+' 12:00 UTC')
@@ -251,16 +271,27 @@ def build(output,progress=lambda s:None,now=None):
                 im,mask,info=convert(path,reference,now)
             if not acceptable(info):
                 summary['rejected']+=1;checks[url]={'checked':now,'reason':'retrieval coverage'};checkfile.write_text(json.dumps(checks));continue
+            quality=inspect_image(im)
+            if not quality_ok(quality):
+                summary['rejected']+=1;quality_rejected+=1;quality_reason=describe_reasons(quality['reasons'])
+                checks[url]={'checked':now,'reason':'image quality','schema':SCHEMA,'details':quality['reasons'],'metrics':quality['metrics']};checkfile.write_text(json.dumps(checks))
+                progress('云图质量检查未通过，保留已有版本 · '+date+' · '+quality_reason)
+                continue
             # A candidate must still be within the window when conversion finishes.
             if not now-MAX_AGE<=info['time']/1000<=now:raise ValueError('NASA 云图不在最近 30 天内')
             target=output/(datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y%m%dT1200-v2a.png'))
             temp=target.with_suffix('.tmp');im.save(temp,'PNG',compress_level=4);temp.replace(target)
             info.update(source=url,release='GCC V2A',downloadBytes=downloaded)
             info['sha256']=hashlib.sha256(target.read_bytes()).hexdigest()
-            target.with_suffix('.json').write_text(json.dumps(info))
-            for p in output.iterdir():
-                if p.suffix in ('.png','.json') and p not in (target,target.with_suffix('.json'),checkfile,output/'last-check.json') and (not previous or p.stem!=Path(previous['file']).stem):p.unlink()
-            return finish({**info,'file':str(target)},'updated','已找到最近 30 天内覆盖合格的 NASA 全球云图' if not errors else '已下载覆盖合格的 NASA 云图；部分较新候选暂不可访问，未能完整确认最新状态')
+            info['quality']={**quality,'sha256':info['sha256']}
+            metadata=target.with_suffix('.json');temp=metadata.with_suffix('.json.tmp');temp.write_text(json.dumps(info));temp.replace(metadata)
+            # Only retire previously accepted history after the new pair commits.
+            # Unverified/rejected originals are evidence, never silently erased.
+            for old in cached[1:]:
+                oldpath=Path(old['file'])
+                if oldpath!=target:
+                    oldpath.unlink(missing_ok=True);oldpath.with_suffix('.json').unlink(missing_ok=True)
+            return finish({**info,'file':str(target)},'updated','已下载通过覆盖与图像质量检查的 NASA 云图' if not errors else '已下载通过检查的 NASA 云图；部分较新候选暂不可访问，未能完整确认最新状态')
         except DownloadError as e:
             if e.status in (404,410):
                 summary['missing']+=1;checks[url]={'checked':now,'reason':'not published'};checkfile.write_text(json.dumps(checks));continue

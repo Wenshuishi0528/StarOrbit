@@ -3,9 +3,19 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess, tempfile, time
 from cloud_service import service as clouds
+from cloud_history_service import HistoryService
+from cloud_history import query as query_history
+from cloud_versions import catalog as cloud_catalog, library as cloud_library, local_image, known_checks
+import threading
 from http_download import download_bytes, DownloadError
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
+cloud_job_lock=threading.Lock()
+# Several local viewer addresses may share saved maps. Their live job state must
+# remain independent, including when a launcher probes an already-running app.
+_port_index=os.sys.argv.index('--port')+1 if '--port' in os.sys.argv else None
+_cloud_port=os.sys.argv[_port_index] if _port_index is not None else '8771'
+history=HistoryService(clouds.cache,job_name='download-job-'+str(int(_cloud_port)))
 class Handler(SimpleHTTPRequestHandler):
  def translate_path(self,path):
   # Keep the saved origin/URL, while avoiding a 237 MB HTML document in the
@@ -23,14 +33,54 @@ class Handler(SimpleHTTPRequestHandler):
   self.send_response(code);self.send_header('Content-Type','application/json');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(json.dumps(value,ensure_ascii=False).encode())
  def do_POST(self):
   if not self.cloud_origin_ok():self.send_error(403);return
-  if self.path=='/api/cloud/satcorps/update':self.send_json(clouds.start());return
-  if self.path=='/api/cloud/satcorps/clear':self.send_json({'cleared':clouds.clear()});return
+  if self.path=='/api/cloud/satcorps/update':
+   self.send_json({'state':'error','error':'请在云图版本列表中刷新目录并选择下载；已取消逐日回查','retryable':False});return
+  route=urllib.parse.urlparse(self.path)
+  if route.path=='/api/cloud/history/cancel':
+   args=urllib.parse.parse_qs(route.query);self.send_json({'cancelled':history.cancel(args.get('id',[''])[0])});return
+  if route.path=='/api/cloud/legacy-cancel':
+   self.send_json({'cancelled':clouds.cancel()});return
+  if route.path=='/api/cloud/history/download':
+   args=urllib.parse.parse_qs(route.query)
+   try:
+    with cloud_job_lock:
+     if clouds.snapshot()['state']=='running':self.send_json({'error':'最新云图正在更新，请稍后下载历史数据'},409);return
+     self.send_json(history.start(args.get('date',[''])[0],args.get('hour',[''])[0],args.get('requestId',[None])[0]))
+   except ValueError as error:self.send_json({'error':str(error)},400)
+   return
+  if self.path=='/api/cloud/satcorps/clear':
+   with cloud_job_lock:
+    if history.snapshot()['state'] in ('running','cancelling') or clouds.snapshot()['state']=='running':self.send_json({'cleared':False});return
+    self.send_json({'cleared':history.clear() and clouds.clear()});return
   self.send_error(404)
  def do_GET(self):
   if self.path.startswith('/api/cloud/'):
    if not self.cloud_origin_ok():self.send_error(403);return
    if self.path=='/api/cloud/satcorps/status':self.send_json(clouds.snapshot());return
    parsed=urllib.parse.urlparse(self.path)
+   if parsed.path=='/api/cloud/library':self.send_json({'items':cloud_library(clouds.cache)});return
+   if parsed.path=='/api/cloud/versions':
+    args=urllib.parse.parse_qs(parsed.query)
+    try:self.send_json(known_checks(cloud_catalog(args.get('month',[''])[0],args.get('date',[None])[0],args.get('force',['0'])[0]=='1'),clouds.cache))
+    except ValueError as error:self.send_json({'error':str(error)},400)
+    except DownloadError as error:self.send_json({'error':{'code':'UPSTREAM_'+error.code.upper(),'message':'NASA 目录查询失败：'+str(error)+'。已保存云图仍可使用。','retryable':error.retryable}},502)
+    except Exception:self.send_json({'error':'官方目录暂不可访问；已保存云图仍可使用，请稍后重试'},502)
+    return
+   if parsed.path=='/api/cloud/library/image':
+    args=urllib.parse.parse_qs(parsed.query);data=local_image(clouds.cache,args.get('name',[''])[0],args.get('sha256',[''])[0],args.get('preview',['0'])[0]=='1')
+    if data is None:self.send_error(404);return
+    self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
+   if parsed.path=='/api/cloud/history/query':
+    args=urllib.parse.parse_qs(parsed.query)
+    try:self.send_json(query_history(args.get('date',[''])[0],args.get('hour',[''])[0]))
+    except ValueError as error:self.send_json({'error':str(error)},400)
+    except DownloadError as error:self.send_json({'error':'暂时无法连接图源：'+str(error),'retryable':error.retryable},502)
+    return
+   if parsed.path=='/api/cloud/history/status':self.send_json(history.snapshot());return
+   if parsed.path=='/api/cloud/history/image':
+    args=urllib.parse.parse_qs(parsed.query);data=history.image_bytes(args.get('id',[''])[0],args.get('sha256',[''])[0])
+    if data is None:self.send_error(404);return
+    self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
    if parsed.path=='/api/cloud/satcorps/image':
     data=clouds.image_bytes(urllib.parse.parse_qs(parsed.query).get('sha256',[None])[0])
     if data is None:self.send_error(404);return

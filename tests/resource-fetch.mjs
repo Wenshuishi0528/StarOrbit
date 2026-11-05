@@ -10,7 +10,7 @@ assert(reads<=3,'reject unbounded payload before complete buffering');
 const seen=[];const fresh=await fetchResource(cached.source,{cached,max:10,onProgress:p=>seen.push(p),fetcher:async()=>new Response('new data',{headers:{etag:'"frame-2"','content-length':'8'}})});
 assert.equal(await fresh.blob.text(),'new data');assert.equal(fresh.unchanged,false);assert.equal(fresh.http.etag,'"frame-2"');assert.equal(seen.at(-1).received,8);
 await assert.rejects(()=>fetchResource('x',{fetcher:async()=>new Response('unavailable',{status:503})}),/HTTP 503/);
-await assert.rejects(()=>fetchResource('x',{timeout:5,fetcher:async(_url,{signal})=>new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted'))))}),/aborted/);
+await assert.rejects(()=>fetchResource('x',{timeout:5,fetcher:async(_url,{signal})=>new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted'))))}),error=>error.name==='TimeoutError'&&error.retryable&&error.message.includes('超时'));
 const relayFailure=()=>new Response(JSON.stringify({error:{code:'UPSTREAM_TLS',message:'数据源 TLS 连接中断'}}),{status:502,headers:{'content-type':'application/json'}});
 await assert.rejects(()=>fetchResource('/api/orbit',{fetcher:async()=>relayFailure()}),error=>error.code==='UPSTREAM_TLS'&&error.message==='数据源 TLS 连接中断'&&error.status===502);
 await assert.rejects(()=>fetchResource('https://example.test/error',{fetcher:async()=>relayFailure()}),error=>error.message==='HTTP 502'&&!error.code);

@@ -3,6 +3,7 @@ import {cloudToneGLSL} from './cloud-texture.js';
 import {scatteringGLSL} from './atmosphere-scattering.js';
 import {solarOpticsGLSL} from './atmosphere-glsl.js';
 import {cloudMoonGLSL} from './cloud-lighting.js';
+import {radiometryGLSL} from './earth-radiometry.js';
 export const vertex=`varying vec3 localN;varying vec3 worldN;varying vec3 worldP;
 void main(){localN=normalize(position);worldN=normalize(mat3(modelMatrix)*localN);worldP=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(worldP,1.);}`;
 const mapUVCode=`vec2 mapUV(vec3 p){p=normalize(p);return vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);}`;
@@ -26,7 +27,7 @@ const clouds=`${solarOpticsGLSL}${cloudToneGLSL}uniform sampler2D cloudMap,cloud
 float cloudVisibility(float mu){return mix(smoothstep(-.16,0.,mu),1.,cloudNightVisible);}
 vec3 aroundAxis(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);}
 float cloudAt(vec3 p){p=normalize(p);
-if(cloudMode<.5){vec4 mask=sampleMap(cloudMap,mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.)))));return cloudOpacity(mix(mask.r,mask.a,cloudChannel));}
+if(cloudMode<.5){vec2 uv=mapUV(aroundAxis(p,cloudMotion*motionTime*.004*(.5+.5*sin(p.z*4.))));vec4 mask=sampleMap(cloudMap,uv);if(cloudChannel>1.5)return clamp(sampleMap(cloudTemplateMap,uv).r*(1.-mask.a)+mask.r,0.,1.);return cloudOpacity(mix(mask.r,mask.a,cloudChannel));}
 // Geography remains Earth-fixed while synoptic texture evolves inside its envelope.
 vec2 uv=mapUV(p);float lat=(uv.y-.5)*180.,lon=(uv.x-.5)*6.2831853,ab=abs(lat);
 float ocean=smoothstep(.15,.85,sampleMap(oceanMap,uv).r);vec3 region=sampleMap(climateMap,uv).rgb;
@@ -51,34 +52,65 @@ uniform vec4 nightDetailRect0,nightDetailRect1,nightDetailRect2,nightDetailRect3
 uniform float nightDetailFade0,nightDetailFade1,nightDetailFade2,nightDetailFade3;
 uniform vec4 detailRect0,detailRect1,detailRect2,detailRect3;
 uniform float detailFade0,detailFade1,detailFade2,detailFade3;
-vec3 sampleDetail(sampler2D tex,vec4 rect,float fade,vec2 uv,vec2 dx,vec2 dy,vec3 base){
+// Resident neighbours suppress the coarse-map feather on their shared edge.
+// Wrap longitude so columns on either side of the date line are neighbours.
+vec4 detailAdjacent(vec4 rect,vec4 other,float fade,bool diagonal){
+ if(fade<=0.||any(greaterThan(abs(rect.zw-other.zw),vec2(.00001))))return vec4(0.);
+ vec2 delta=other.xy-rect.xy;delta.x-=floor(delta.x+.5);
+ if(diagonal)return fade*vec4(abs(delta.x+rect.z)<.00001&&abs(delta.y+rect.w)<.00001?1.:0.,abs(delta.x-rect.z)<.00001&&abs(delta.y+rect.w)<.00001?1.:0.,abs(delta.x+rect.z)<.00001&&abs(delta.y-rect.w)<.00001?1.:0.,abs(delta.x-rect.z)<.00001&&abs(delta.y-rect.w)<.00001?1.:0.);
+ return fade*vec4(abs(delta.x+rect.z)<.00001&&abs(delta.y)<.00001?1.:0.,abs(delta.x-rect.z)<.00001&&abs(delta.y)<.00001?1.:0.,abs(delta.y+rect.w)<.00001&&abs(delta.x)<.00001?1.:0.,abs(delta.y-rect.w)<.00001&&abs(delta.x)<.00001?1.:0.);
+}
+vec4 detailNeighbours(vec4 rect,bool night,bool diagonal){
+ // The poles are ends of the map, not boundaries against a missing tile.
+ vec4 edges=vec4(0.,0.,rect.y<.00001?1.:0.,rect.y+rect.w> .99999?1.:0.);
+ if(diagonal)edges=edges.zzww;
+ if(night){
+  edges=max(edges,detailAdjacent(rect,nightDetailRect0,nightDetailFade0,diagonal));edges=max(edges,detailAdjacent(rect,nightDetailRect1,nightDetailFade1,diagonal));
+  edges=max(edges,detailAdjacent(rect,nightDetailRect2,nightDetailFade2,diagonal));edges=max(edges,detailAdjacent(rect,nightDetailRect3,nightDetailFade3,diagonal));
+ }else{
+  edges=max(edges,detailAdjacent(rect,detailRect0,detailFade0,diagonal));edges=max(edges,detailAdjacent(rect,detailRect1,detailFade1,diagonal));
+  edges=max(edges,detailAdjacent(rect,detailRect2,detailFade2,diagonal));edges=max(edges,detailAdjacent(rect,detailRect3,detailFade3,diagonal));
+ }
+ return edges;
+}
+vec3 sampleDetail(sampler2D tex,vec4 rect,float fade,vec2 uv,vec2 dx,vec2 dy,vec3 base,bool night){
  if(fade<=0.)return base;
- vec2 p=(uv-rect.xy)/rect.zw;if(any(lessThan(p,vec2(0.)))||any(greaterThanEqual(p,vec2(1.))))return base;
+ vec2 p=(vec2(fract(uv.x),uv.y)-rect.xy)/rect.zw;if(any(lessThan(p,vec2(0.)))||any(greaterThanEqual(p,vec2(1.))))return base;
  float scale=1800./1816.;vec2 tuv=(p*1800.+8.)/1816.;
  // textureGrad and anisotropic mip filtering already handle minification.
  // Blending the coarse global map by the longest footprint also destroys
  // detail along the magnified axis in oblique views.
- float weight=fade;
+ // Two screen pixels normal to each exposed edge, independent of view angle.
+ // This never blends away tile interiors or a fully resident shared edge.
+ vec2 width=max(2.*sqrt(dx*dx+dy*dy)/rect.zw,vec2(.000001));
+ vec4 edge=smoothstep(vec4(0.),vec4(width.x,width.x,width.y,width.y),vec4(p.x,1.-p.x,p.y,1.-p.y));
+ vec4 proximity=vec4(1.)-edge;
+ // Include the diagonal tile: all four corner limits then share the product
+ // of their fades, even while one tile is loading or absent.
+ vec4 corner=vec4(proximity.x*proximity.z,proximity.y*proximity.z,proximity.x*proximity.w,proximity.y*proximity.w);
+ corner=vec4(1.)-corner*(vec4(1.)-detailNeighbours(rect,night,true));
+ edge=mix(edge,vec4(1.),detailNeighbours(rect,night,false));
+ float weight=fade*edge.x*edge.y*edge.z*edge.w*corner.x*corner.y*corner.z*corner.w;
  return mix(base,textureGrad(tex,tuv,dx/rect.zw*scale,dy/rect.zw*scale).rgb,weight);
 }
 vec3 groundColor(vec2 uv){
- vec3 c=sampleMap(dayMap,uv).rgb;if(enhanced<.5)return c;
+ vec3 c=sampleMap(dayMap,uv).rgb;
  vec2 dx=dFdx(uv),dy=dFdy(uv);dx.x-=floor(dx.x+.5);dy.x-=floor(dy.x+.5);
- c=sampleDetail(detailMap0,detailRect0,detailFade0,uv,dx,dy,c);
- c=sampleDetail(detailMap1,detailRect1,detailFade1,uv,dx,dy,c);
- c=sampleDetail(detailMap2,detailRect2,detailFade2,uv,dx,dy,c);
- return sampleDetail(detailMap3,detailRect3,detailFade3,uv,dx,dy,c);
+ c=sampleDetail(detailMap0,detailRect0,detailFade0,uv,dx,dy,c,false);
+ c=sampleDetail(detailMap1,detailRect1,detailFade1,uv,dx,dy,c,false);
+ c=sampleDetail(detailMap2,detailRect2,detailFade2,uv,dx,dy,c,false);
+ return sampleDetail(detailMap3,detailRect3,detailFade3,uv,dx,dy,c,false);
 }
 vec3 nightColor(vec2 uv){
- vec3 c=sampleMap(nightMap,uv).rgb;if(enhanced<.5)return c;
+ vec3 c=sampleMap(nightMap,uv).rgb;
  vec2 dx=dFdx(uv),dy=dFdy(uv);dx.x-=floor(dx.x+.5);dy.x-=floor(dy.x+.5);
- c=sampleDetail(nightDetailMap0,nightDetailRect0,nightDetailFade0,uv,dx,dy,c);
- c=sampleDetail(nightDetailMap1,nightDetailRect1,nightDetailFade1,uv,dx,dy,c);
- c=sampleDetail(nightDetailMap2,nightDetailRect2,nightDetailFade2,uv,dx,dy,c);
- c=sampleDetail(nightDetailMap3,nightDetailRect3,nightDetailFade3,uv,dx,dy,c);
+ c=sampleDetail(nightDetailMap0,nightDetailRect0,nightDetailFade0,uv,dx,dy,c,true);
+ c=sampleDetail(nightDetailMap1,nightDetailRect1,nightDetailFade1,uv,dx,dy,c,true);
+ c=sampleDetail(nightDetailMap2,nightDetailRect2,nightDetailFade2,uv,dx,dy,c,true);
+ c=sampleDetail(nightDetailMap3,nightDetailRect3,nightDetailFade3,uv,dx,dy,c,true);
  return c.r*vec3(1.,.72,.38);
 }`;
-export const earthFragment=`uniform sampler2D dayMap,nightMap;uniform vec3 sun,localSun;uniform float detailed,gloss;
+export const earthFragment=`${radiometryGLSL}uniform sampler2D dayMap,nightMap;uniform vec3 sun,localSun;uniform float detailed,gloss;
 varying vec3 localN,worldN,worldP;${mapping}${clouds}${detail}
 void main(){vec3 n=normalize(worldN),s=normalize(sun),eye=normalize(cameraPosition-worldP);vec2 uv=mapUV(localN);float mu=dot(n,s),day=max(mu,0.);vec3 albedo=groundColor(uv);
 // NASA land composite has nearly black open water. Apply a water reflectance only
@@ -86,7 +118,7 @@ void main(){vec3 n=normalize(worldN),s=normalize(sun),eye=normalize(cameraPositi
 float ocean=smoothstep(.2,.8,sampleMap(oceanMap,uv).r);
 if(enhanced>.5){float water=ocean*(1.-smoothstep(.015,.06,max(albedo.r,max(albedo.g,albedo.b))));albedo=mix(albedo,max(albedo,vec3(.008,.038,.12)),water);}
 vec3 directSun=enhanced>.5?sunlightAt(0.,mu):vec3(1.);
-vec3 color=albedo*(.002+directSun*1.15*day);
+vec3 color=albedo*(.002+directSun*lambertDirect*day);
 if(detailed>.5){float c=cloudAt(localN)*cloudAmount;float shadow=c;
 if(enhanced>.5){float b=dot(normalize(localN)*6371.,normalize(localSun));float dist=-b+sqrt(max(0.,b*b+2.*6371.*8.+64.));shadow=cloudAt(normalize(localN)*6371.+normalize(localSun)*dist)*cloudAmount;}
 color*=1.-shadow*mix(.22,.48,enhanced)*smoothstep(-.01,.08,mu);
@@ -152,7 +184,7 @@ for(int j=0;j<3;j++){
   sum+=exp(-tau)*(betaR*r*pr+betaM*m*pm)*ds*visibility;odR+=r*ds;odM+=m*ds;
  }
 }
-vec3 trans=exp(-(betaR*odR+betaM*odM));float alpha=clamp(1.-dot(trans,vec3(.2126,.7152,.0722)),0.,.98);vec3 color=sum*8./max(alpha,.001);vec3 glow=nightglow(o,d,s,ground.x>0.?ground.x:1e8);
+vec3 trans=exp(-(betaR*odR+betaM*odM));float alpha=clamp(1.-dot(trans,vec3(.2126,.7152,.0722)),0.,.98);vec3 color=sum*solarIrradiance/max(alpha,.001);vec3 glow=nightglow(o,d,s,ground.x>0.?ground.x:1e8);
 float combined=max(alpha,clamp(max(glow.r,max(glow.g,glow.b))*4.,0.,.15));
 gl_FragColor=vec4((color*alpha+glow)/max(combined,.00001),combined);${output}}`;
 export const atmosphereTransmissionFragment=`${solarOpticsGLSL}varying vec3 worldP;

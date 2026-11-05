@@ -1,0 +1,35 @@
+async page=>{
+ await page.reload();
+ const checks=[],check=(v,name)=>{if(!v)throw Error(name);checks.push(name);};
+ await page.setViewportSize({width:1440,height:1000});
+ await page.waitForFunction(()=>window.viewer?.sim.initialized&&!viewer.sim.environment.loading);
+ const before=await page.evaluate(async()=>{const w=viewer.sim.environment.weather;await w.ready;await w.nasaRestore;viewer.music.pause();document.getElementById('welcomeDialog')?.close();w.resourcePanel.open('cloud');return {settings:JSON.stringify(w.settings),active:JSON.stringify(w.active),texture:w.env.uniforms.cloudMap.value.uuid,records:w.items.map(r=>r.id).join(',')};});
+ await page.locator('#openCloudTrial').click();
+ await page.waitForFunction(()=>document.getElementById('cloudTrialStatus').textContent.includes('2026-10-28'));
+ check(await page.locator('.cloud-trial').isVisible(),'independent trial opens from cloud resources');
+ check((await page.locator('#cloudTrialStatus').textContent()).includes('约 20 公里'),'preview resolution is honest');
+ check(await page.evaluate(()=>document.getElementById('cloudTrialMap').getContext('2d').getImageData(640,1,1,1).data[3]===0),'daytime polar gap remains transparent');
+ await page.locator('#cloudTrialRegion').selectOption('asia');
+ await page.waitForFunction(()=>document.getElementById('cloudTrialMap').width===960);
+ await page.screenshot({path:'output/viirs-trial/asia.png'});
+ await page.locator('#cloudTrialSource').selectOption('night');await page.waitForFunction(()=>document.getElementById('cloudTrialStatus').textContent.includes('夜间观测'));
+ check((await page.locator('#cloudTrialStatus').textContent()).includes('1.04 MiB'),'night sample loads with its own size and date');
+ await page.locator('#cloudTrialRegion').selectOption('dateline');await page.waitForFunction(()=>document.getElementById('cloudTrialMap').width===640);
+ const bounds=await page.locator('#cloudTrialMap').boundingBox();await page.mouse.move(bounds.x+bounds.width*.48975,bounds.y+bounds.height*.5);
+ const readout=await page.locator('#cloudTrialPoint').textContent(),longitude=Number(readout.match(/([\d.]+)°E/)?.[1]);check(Math.abs(longitude-179.59)<.1,'dateline view reaches user coordinate across wrapped source');
+ await page.locator('#cloudTrialRegion').selectOption('north');await page.waitForFunction(()=>document.getElementById('cloudTrialMap').getAttribute('aria-label').includes('北极'));
+ check(await page.evaluate(()=>{const c=document.getElementById('cloudTrialMap');return c.getContext('2d').getImageData(0,0,1,1).data[3]===0;}),'polar projection has no fabricated corner pixels');
+ await page.screenshot({path:'output/viirs-trial/north.png'});
+ await page.locator('#cloudTrialSource').selectOption('builtin');await page.waitForFunction(()=>document.getElementById('cloudTrialStatus').textContent.includes('无同日观测时间'));
+ check(true,'static comparison is clearly undated');
+ await page.evaluate(()=>{const el=document.getElementById('cloudTrialSource');for(const kind of ['day','night','day']){el.value=kind;el.dispatchEvent(new Event('change'));}});
+ await page.waitForFunction(()=>document.getElementById('cloudTrialStatus').textContent.includes('白天观测'));
+ check(true,'rapid switching finishes on the final selection');
+ await page.keyboard.press('Escape');check(!await page.locator('.cloud-trial').isVisible(),'Escape closes only trial');
+ check(await page.locator('#resourceDialog').isVisible(),'resource panel remains open');
+ check(await page.evaluate(()=>document.activeElement.id==='openCloudTrial'),'focus returns to trial entry');
+ const after=await page.evaluate(()=>{const w=viewer.sim.environment.weather;return {settings:JSON.stringify(w.settings),active:JSON.stringify(w.active),texture:w.env.uniforms.cloudMap.value.uuid,records:w.items.map(r=>r.id).join(',')};});
+ check(JSON.stringify(before)===JSON.stringify(after),'all simulator cloud settings, active texture and cache records remain unchanged');
+ check(await page.evaluate(()=>viewer.renderer.getContext().getError()===0),'no WebGL error');
+ return checks;
+}

@@ -4,6 +4,7 @@ import {WEB_BUILD} from './runtime-assets.js';
 import {clockText} from './time-format.js';
 import {mission} from './missions.js';
 import {orbitSource} from './orbit-repository.js';
+import {mountCloudHistory} from './cloud-history.js';
 
 const css=`
 .resource-dialog{box-sizing:border-box;width:min(1100px,95vw);height:min(900px,92dvh);max-width:none;max-height:none;padding:0;border:1px solid #355069;border-radius:16px;background:#091321;color:#e7effa;overflow:hidden}.resource-dialog::backdrop{background:#020610b8;backdrop-filter:blur(4px)}.resource-dialog[open]{display:flex;flex-direction:column}.resource-dialog [hidden]{display:none!important}.resource-dialog .resource-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:18px 22px;border-bottom:1px solid #27374b;flex-shrink:0}.resource-dialog .resource-header h2{font-size:19px;margin:0 0 7px}.resource-dialog .resource-header p{margin:0;max-width:740px;line-height:1.6;color:#9eb3c9;font-size:12px}.resource-dialog .resource-close{flex-shrink:0}.resource-dialog .resource-body{padding:18px 22px;overflow:auto;min-height:0}.resource-dialog .resource-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}.resource-dialog .resource-actions button{flex:initial;min-height:38px;font-size:13px}.resource-dialog button,.resource-dialog input,.resource-dialog select{font:inherit;touch-action:manipulation}.resource-dialog button{font-size:12px;padding:8px 11px}.resource-dialog button:focus-visible,.resource-dialog select:focus-visible,.resource-dialog input:focus-visible{outline:2px solid #74d9ef;outline-offset:3px}.resource-dialog .resource-feedback{white-space:pre-line;color:#ffbdac;line-height:1.6;font-size:12px}.resource-dialog .resource-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.resource-dialog .resource-card{padding:15px;background:#0f2032;border:1px solid #2c435a;border-radius:11px;min-width:0;display:flex;flex-direction:column;gap:10px;scroll-margin-top:12px}.resource-dialog .resource-card-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.resource-dialog .resource-card h3{font-size:15px;margin:0}.resource-dialog .resource-badge{display:inline-block;max-width:64%;font-size:11px;line-height:1.4;padding:4px 7px;border-radius:6px;background:#23394c;color:#bdcedb;text-align:right}.resource-dialog .resource-badge[data-phase=updated],.resource-dialog .resource-badge[data-phase=unchanged]{background:#153d3d;color:#a1e6d8}.resource-dialog .resource-badge[data-phase=error]{background:#4c292b;color:#ffbfb4}.resource-dialog .resource-badge[data-phase=partial]{background:#493c24;color:#f1d397}.resource-dialog .resource-badge[data-phase=checking],.resource-dialog .resource-badge[data-phase=downloading],.resource-dialog .resource-badge[data-phase=processing]{background:#16465c;color:#9be8f2}.resource-dialog .resource-source{display:flex;flex-direction:column;gap:6px;color:#a9bed1;font-size:12px}.resource-dialog .resource-source select{width:100%;min-width:0;max-width:none;background:#102b3d}.resource-dialog .resource-fact{margin:0;padding-top:9px;border-top:1px solid #263d51;line-height:1.55}.resource-dialog .resource-fact dt{font-size:11px;color:#89a4ba;margin-bottom:4px}.resource-dialog .resource-fact dd{margin:0;font-size:12px;white-space:pre-line;overflow-wrap:anywhere;color:#d6e6f2}.resource-dialog .resource-fact.resource-current dd{color:#a2e7ed}.resource-dialog .resource-message{white-space:pre-line;font-size:12px;line-height:1.6;color:#b4ccdf;overflow-wrap:anywhere;min-height:1.6em;margin:0}.resource-dialog .resource-progress{width:100%;height:5px;accent-color:#74d9ef;margin:0}.resource-dialog .resource-hint{color:#9bb1c5;font-size:11px;line-height:1.65;margin:0;overflow-wrap:anywhere}.resource-dialog .resource-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:0;padding-top:6px}.resource-dialog .resource-card-actions button:last-child:nth-child(3){grid-column:1/-1}.resource-dialog .resource-card-actions button{width:100%}.resource-dialog .resource-card-actions .resource-use{background:#173d47;border-color:#38646d}.resource-dialog .resource-bundled{margin:15px 0 18px;padding:14px 16px;border:1px solid #2c435a;border-radius:10px;background:#102030;display:flex;align-items:flex-start;gap:15px}.resource-dialog .resource-bundled h3{font-size:13px;margin:0;min-width:115px}.resource-dialog .resource-bundled p{font-size:12px;line-height:1.7;color:#a9bed1;margin:0}.resource-dialog .resource-section-title{font-size:15px;margin:20px 0 12px}.resource-dialog .resource-legacy{padding:0 16px 15px;border:1px solid #2c435a;border-radius:10px;background:#0d1c2d}.resource-dialog .resource-legacy>.small{font-size:12px}.resource-dialog .resource-legacy>.row{justify-content:flex-start;gap:14px}.resource-dialog .resource-legacy input[type=number]{width:100px;padding:7px;font-size:13px}.resource-dialog .resource-legacy>.check{margin-bottom:7px}.resource-dialog .resource-cache-note{font-size:12px;color:#9fb5c7;line-height:1.7;margin:8px 0}.resource-dialog .resource-cache-result{font-size:12px;color:#9ddccf;line-height:1.6;white-space:pre-line}.resource-dialog .resource-server-cache{color:#9eb3c9}.resource-dialog .resource-log{margin:0 0 14px}.resource-dialog .resource-log summary{font-size:12px;color:#9eb3c9}.resource-dialog .resource-log #dataUpdates{padding:0 10px 10px}.resource-dialog #weatherHistory{max-height:470px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.resource-dialog .snapshot-card{min-width:0;border:1px solid #2a4157;border-radius:9px;padding:10px}.resource-dialog .snapshot-card p{font-size:11px}.resource-dialog .snapshot-card img{max-height:145px;object-fit:contain;background:#08121f}.resource-dialog .snapshot-card .angle-actions{flex-wrap:wrap}.resource-dialog .snapshot-card button{font-size:11px}.resource-dialog #importSnapshot{display:block;max-width:100%;margin:10px 0 14px;font-size:12px}.resource-sidebar-summary{white-space:pre-line}.resource-sidebar-open{width:100%;margin-top:10px}
@@ -11,7 +12,7 @@ const css=`
 @media(max-width:560px){.resource-dialog{width:100vw;height:100dvh;border-radius:0;border:0}.resource-dialog .resource-header{padding:14px 13px;gap:10px}.resource-dialog .resource-header h2{font-size:17px}.resource-dialog .resource-header p{font-size:11px}.resource-dialog .resource-close{padding:7px 9px;font-size:11px}.resource-dialog .resource-body{padding:13px}.resource-dialog .resource-actions button{font-size:12px;flex:1}.resource-dialog .resource-card{padding:13px;column-gap:12px}.resource-dialog .resource-card-actions{grid-template-columns:1fr}.resource-dialog .resource-card-actions button:last-child:nth-child(3){grid-column:auto}.resource-dialog .resource-legacy{padding:0 12px 12px}.resource-dialog #weatherHistory{grid-template-columns:1fr}.resource-dialog .resource-bundled{padding:12px}.resource-dialog .resource-badge{max-width:60%}}
 `;
 const node=(tag,className,parent)=>{const element=document.createElement(tag);if(className)element.className=className;parent?.append(element);return element;};
-const providerName=provider=>provider==='satcorps'?'NASA SATCORPS':'Live Cloud Maps · GitHub';
+const providerName=provider=>provider==='satcorps'?'NASA SATCORPS':provider==='viirs'?'VIIRS 近似云层':'GitHub 本机旧版';
 const timestamp=value=>Number.isFinite(value)?clockText(value)+' UTC+8':null;
 const megabytes=value=>(Math.max(0,Number(value)||0)/1048576).toFixed(1);
 const phaseKeys={idle:'尚未检查',checking:'正在检查…',downloading:'正在下载…',processing:'正在处理…',unchanged:'未发现更新',updated:'新版本已下载',partial:'检查不完整',error:'更新失败'};
@@ -50,6 +51,10 @@ export function mountResourcePanel(weather){
   return api;
  };
  for(const kind of ['cloud','aurora','orbit'])createCard(kind);
+ const archive=mountCloudHistory(w);
+ const openCloud=()=>{if(dialog.open)dialog.close();archive.open();};
+ const archiveButton=cards.cloud.check;archiveButton.id='openCloudHistory';archiveButton.onclick=openCloud;
+ cards.cloud.use.hidden=true;cards.cloud.sourceValue.parentElement.hidden=true;
  const bundled=node('div','resource-bundled',body),bundledTitle=node('h3','',bundled),bundledText=node('p','',bundled);
  const cacheTitle=node('h3','resource-section-title',body),legacy=node('div','resource-legacy',body);
  for(const element of previous)if(element.parentNode===side)legacy.append(element);
@@ -82,14 +87,25 @@ export function mountResourcePanel(weather){
   return kind==='orbit'||w.settings[kind]===(kind==='cloud'&&provider==='satcorps'?'satcorps':'latest');
  };
  function render(){
+  archive.render();archiveButton.textContent=t('打开云图库…');
   if(disposed)return;if(w.busy)feedback.hidden=true;if(!feedback.hidden)feedback.textContent=errorText(feedbackMessage);
   title.textContent=t('数据与资源');toolbar.textContent=t('数据与资源');entry.textContent=t('打开数据与资源');closeButton.textContent=t('返回模拟器');
-  logTitle.textContent=t('更新记录');cacheTitle.textContent=t('下载缓存与历史');bundledTitle.textContent=t('随软件提供的资源');
+  logTitle.textContent=t('更新记录');cacheTitle.textContent=t('下载缓存与其他数据历史');bundledTitle.textContent=t('随软件提供的资源');
   bundledText.textContent=t('地球地表与夜景、星空、月面和地理标识随软件版本提供，按画质与视野载入。检查数据更新不会重新下载这些素材。');
   cacheNote.textContent=t('开启后，超过容量时自动删除最早下载的安全旧版本，保留正在使用、已收藏和被设置引用的数据。关闭后不再按容量自动清理。');
   const sceneBusy=!!(sim.sceneBusy||sim.missions?.busy),provider=w.settings.cloudDownloadProvider==='satcorps'?'satcorps':'github';
   cards.cloud.sourceValue.value=provider;
   for(const [kind,card]of Object.entries(cards)){
+   if(kind==='cloud'){
+    const library=w.cloudLibrary,count=library.saved.length,checking=library.catalog.state==='checking',catalogFailed=library.catalog.state==='error';
+    const phase=library.downloading?'downloading':checking?'checking':catalogFailed?'error':'idle';
+    card.name.textContent=t('云图');card.badge.textContent=t(phase==='idle'?'云图库':phaseKeys[phase]);card.badge.dataset.phase=phase;
+    card.available.label.textContent=t('已保存云图');card.available.value.textContent=String(count)+' '+t('份');
+    card.current.label.textContent=t('当前画面使用');card.current.value.textContent=library.currentText;
+    card.checked.label.parentElement.hidden=true;card.progress.hidden=!(library.downloading||checking);card.message.textContent=(checking||catalogFailed)&&!library.downloading?library.catalog.message:library.task.message||t('已保存云图可直接使用；下载新图不会改变当前画面。');
+    card.hint.textContent=t('选择、预览、下载和使用都在同一个云图库中完成。');
+    card.check.disabled=!!(sim.sceneBusy||sim.missions?.busy);continue;
+   }
    const source=kind==='cloud'?provider:undefined,state=w.resourceState(kind,source)||{},updating=w.isUpdating(kind,source),latest=w.latestRecord(kind,source),used=usingLatest(kind,source,latest);
    card.name.textContent=t(kind==='cloud'?'云图':kind==='aurora'?'极光':'当前任务轨道');
    card.sourceLabel.textContent=t(kind==='cloud'?'检查的云图来源':kind==='aurora'?'数据来源':'当前任务');
@@ -101,17 +117,18 @@ export function mountResourcePanel(weather){
    card.badge.dataset.phase=state.phase||'idle';card.badge.textContent=t(phaseKeys[state.phase]||phaseKeys.idle);card.progress.hidden=!updating;
    card.message.textContent=state.message?(typeof state.message==='object'?t(state.message.key,state.message.params):errorText(state.message)):t('可检查该来源的新版本，也可使用已下载的数据。');
    const check=state.checkSummary;
-   if(check&&['checked','missing','rejected','failed'].every(k=>Number.isInteger(check[k])&&check[k]>=0))card.message.textContent+='\n'+t('检查 {checked} 个候选：{missing} 个尚未发布，{rejected} 个覆盖不足，{failed} 个读取失败。',check);
+   if(check&&['checked','missing','rejected','failed'].every(k=>Number.isInteger(check[k])&&check[k]>=0))card.message.textContent+='\n'+t('检查 {checked} 个候选：{missing} 个尚未发布，{rejected} 个未通过检查，{failed} 个读取失败。',check);
    if(state.recovery==='waiting')card.message.textContent+='\n'+t('自动恢复第 {attempt} 次：将在 {time} 重试。',{attempt:state.retryAttempt,time:timestamp(state.retryAt)});
    if(state.recovery==='offline')card.message.textContent+='\n'+t('当前离线，联网后自动重试。');
    if(state.recovery==='paused')card.message.textContent+='\n'+t('自动重试已暂缓；重新联网后继续，也可手动检查。');
-   const unavailable=kind==='cloud'&&provider==='satcorps'&&WEB_BUILD,noOrbit=kind==='orbit'&&!orbitSource(sim.missionId);
+   const unavailable=kind==='cloud'&&provider==='satcorps'&&WEB_BUILD,noOrbit=kind==='orbit'&&!orbitSource(sim.missionId),paused=kind==='cloud'&&provider==='github';
    card.check.textContent=t(updating?'更新进行中…':kind==='cloud'&&provider==='satcorps'?'检查 NASA 更新':kind==='cloud'?'检查 GitHub 云图更新':kind==='aurora'?'检查极光更新':'检查轨道更新');
-   card.check.disabled=updating||unavailable||noOrbit||sceneBusy;card.use.textContent=t(used?'正在使用最新下载':'使用最新下载');card.use.disabled=!latest||used||updating||sceneBusy;
+   card.check.disabled=updating||unavailable||paused||noOrbit||sceneBusy;card.use.textContent=t(used?'正在使用最新下载':'使用最新下载');card.use.disabled=paused||!latest||used||updating||sceneBusy;
    if(kind==='cloud')card.sourceValue.disabled=sceneBusy;
-   if(unavailable)card.hint.textContent=t('NASA 在线更新需要桌面启动器的本机服务。网页版仍可导入并使用已下载的 NASA 快照。');
+   if(paused)card.hint.textContent=t('GitHub 图源含地表信号和镜像极区，无法可靠还原云层，已暂停下载与应用。历史文件仍可预览、导出和删除。');
+   else if(unavailable)card.hint.textContent=t('NASA 在线更新需要桌面启动器的本机服务。网页版仍可导入并使用已下载的 NASA 快照。');
    else if(noOrbit)card.hint.textContent=t('此任务没有在线轨道源，请导入轨道文件');
-   else if(kind==='cloud'&&provider==='satcorps')card.hint.textContent=t('NASA 更新会核验全球与极区覆盖，可能需要数分钟；检查期间继续使用当前云图。');
+   else if(kind==='cloud'&&provider==='satcorps')card.hint.textContent=t('NASA 更新会检查覆盖、异常色块和长直线接缝；不合格新图不会覆盖已通过检查的版本。没有可用版本时使用内置静态云图。');
    else if(kind==='orbit')card.hint.textContent=t('轨道仅用于当前任务；更新失败时保留现有轨道。');
    else card.hint.textContent=t('正在跟随该来源的最新数据时会自动使用新版本；固定历史快照或关闭状态会保留。');
    if(card.importButton){card.importButton.textContent=t('导入轨道');card.importButton.disabled=sceneBusy||w.busy;}
@@ -125,6 +142,7 @@ export function mountResourcePanel(weather){
  }
  function open(kind){
   if(disposed)return;
+  if(kind==='cloud'){openCloud();return;}
   if(!document.getElementById('helpPanel')?.hidden)document.getElementById('closeHelp')?.click();
   if(sim.flightLab?.active)sim.flightLab.close();
   if(!dialog.open){returnFocus=document.activeElement;dialog.showModal();}render();w.render();
@@ -134,5 +152,5 @@ export function mountResourcePanel(weather){
  dialog.addEventListener('keydown',event=>event.stopPropagation());
  dialog.addEventListener('close',()=>{sim.lastWall=performance.now();restoreControlFocus(returnFocus);});
  const unsubscribe=onLanguageChange(render);render();
- return {open,close,render,get active(){return dialog.open;},dispose(){disposed=true;if(dialog.open)dialog.close();unsubscribe();side.replaceChildren(...previous);dialog.remove();toolbar.remove();sheet.remove();}};
+ return {open,openCloud,close,render,refreshCloudVersions:()=>archive.refresh(),get active(){return dialog.open;},dispose(){disposed=true;archive.dispose();w.cloudLibrary.dispose();if(dialog.open)dialog.close();unsubscribe();side.replaceChildren(...previous);dialog.remove();toolbar.remove();sheet.remove();}};
 }

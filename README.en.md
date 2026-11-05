@@ -14,7 +14,7 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v0.80 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v0.92 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 > This page describes the current source. The online edition deploys from `main`; its header identifies the deployed version. Check the portable release's tag and release notes for the features included in that download.
 
@@ -128,7 +128,7 @@ Environment settings persist across spacecraft switches.
 | --- | --- |
 | Earth and Moon | Four Earth quality levels; day/night, twilight, atmosphere, ocean reflections and city lights; time-dependent Moon position and phase with a look-at/return view |
 | Surface detail | In 8K mode, view-dependent NASA surface and night-light tiles add detail for close observation |
-| Clouds | Bundled imagery, Live Cloud Maps, NASA SATCORPS, historical snapshots or local generation; optional 8K volumetric and evolving clouds |
+| Clouds | One cloud library for bundled imagery, saved NASA frames and local generation; archived GitHub maps remain available for manual comparison; optional 8K volumetric and evolving clouds |
 | Night-side clouds | Cloud coverage can obscure city lights, with stronger occlusion under thicker clouds |
 | Aurora | NOAA OVATION snapshots or local distribution; volumetric curtains in 8K and the classic effect in 4K |
 | Stars and constellations | 41,411 catalogue stars and native 16K NASA Milky Way source imagery; star labels and names, lines and boundaries for 88 constellations |
@@ -173,13 +173,13 @@ The contact-speed limit defaults to **0.15 m/s**, is adjustable, and applies to 
 
 ## Data and resources
 
-**Data & resources** manages clouds, aurora and the current mission's orbit. It distinguishes downloaded data, active data, check time and check outcome. Check resources separately or together.
+**Open cloud library** in Earth settings opens the same library as the cloud card in **Data & resources**. Choose and preview saved maps, download a published frame, and explicitly apply it. The active map stays visible at the top; matching disk and browser copies share one row. Catalog checks run independently of aurora and orbit updates.
 
 | Data | Main source | Use |
 | --- | --- | --- |
 | Station orbit | China Manned Space Engineering Office / BACC OEM | Interpolation within records; Kepler continuation outside coverage |
 | Modern DFH-1 orbit | CelesTrak, NORAD 4382 | SGP4 propagation from GP/OMM elements |
-| Global clouds | Live Cloud Maps / EUMETSAT; NASA Langley SATCORPS | Download and apply a snapshot, retain history or import files |
+| Global clouds | NASA SATCORPS; archived GitHub maps for manual comparison | Apply saved maps directly; downloads leave the view unchanged; coverage and visual warnings remain visible; corrupt files are blocked |
 | Aurora distribution | NOAA SWPC OVATION | Forecast distribution controls geographical activity and intensity |
 
 Online NASA cloud processing needs the local service; web users can import processed snapshots. Connection or source failures preserve existing data and appear as failed checks.
@@ -260,6 +260,7 @@ Application code is in `src/`, runtime assets in `assets/`, the build entry in `
 | Content | Source and attribution |
 | --- | --- |
 | Base Earth textures | [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/), CC BY 4.0 |
+| 2026 daytime surface | NASA MODIS MCD43A4.061 2026 Q2 NBAR, QA-filtered approximately 1 km composite; [public mirror](https://planetarycomputer.microsoft.com/dataset/modis-43A4-061), [radiometry and limitations](docs/v0.83-surface-radiometry.md) |
 | Detailed surface and night lights | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/) and [Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/), NASA Earth Observatory; Suomi NPP / VIIRS for night lights |
 | Milky Way | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/), NASA/Goddard Space Flight Center Scientific Visualization Studio, Ernie Wright; Gaia DR2: ESA/Gaia/DPAC |
 | Moon | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/), NASA SVS / Ernie Wright; LRO / LROC |

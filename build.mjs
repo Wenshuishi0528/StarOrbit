@@ -14,11 +14,26 @@ const missionOrbits=Object.fromEntries(Object.entries(MISSIONS).map(([id,x])=>[i
 const music=JSON.parse(fs.readFileSync('assets/music/catalog.json','utf8')).map(({file,...track})=>({...track,...(split?{url:publish(file)}:{base64:fs.readFileSync(file).toString('base64')})}));
 music.push({id:'mission-dfh1-broadcast',title:'东方红一号 · 乐曲与遥测信号',mission:'dfh1',sha256:crypto.createHash('sha256').update(fs.readFileSync('assets/music/dfh1-broadcast.m4a')).digest('hex'),type:'audio/mp4',duration:56.067755,...(split?{url:publish('assets/music/dfh1-broadcast.m4a')}:{base64:fs.readFileSync('assets/music/dfh1-broadcast.m4a').toString('base64')})});
 const app=JSON.parse(fs.readFileSync('package.json','utf8'));
+const trial=JSON.parse(fs.readFileSync('assets/cloud-trial/manifest.json','utf8'));
+trial.samples=Object.fromEntries(['day','night'].map(kind=>{const file='assets/cloud-trial/'+kind+'.png';return [kind,split?publish(file):'data:image/png;base64,'+fs.readFileSync(file).toString('base64')];}));
 const worklet=await build({entryPoints:['src/dfh1-telemetry-worklet.js'],bundle:true,format:'iife',minify:true,write:false,legalComments:'none'});
-await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text)}});
-const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image('assets/earth/'+tier+'/'+f)]))]));
+await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
+const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image(f==='day.jpg'&&tier!=='high'?'assets/earth/day-2004/'+tier+'.jpg':'assets/earth/'+tier+'/'+f)]))]));
+// The minimap is a readable display map, independent of 3D reflectance assets.
+environmentAssets.minimap=image('assets/earth/simple/day.jpg');
 environmentAssets.detail=Object.fromEntries(fs.readdirSync('assets/earth/detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/detail/'+f)]));
 environmentAssets.nightDetail=Object.fromEntries(fs.readdirSync('assets/earth/night-detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/night-detail/'+f)]));
+environmentAssets.nightSources={'2016':{columns:24,rows:12,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,environmentAssets[tier].night]))}};
+for(const id of ['2024-1km']){
+ const dir='assets/earth/night-'+id,meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8'));
+ environmentAssets.nightSources[id]={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
+}
+// The old July 2004 map remains a complete selectable source. Reuse its existing tiles.
+environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
+{
+ const dir='assets/earth/day-2026-q2-1km',meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8'));
+ environmentAssets.daySources['2026-q2-1km']={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
+}
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
 environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py','ny','pz','nz'].map(face=>image(`assets/sky/milkyway-${size}k-${face}.jpg`))]));
 let html=fs.readFileSync('src/layout.html','utf8').replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8')).replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8')).replace('__WORKSPACE_CSS__',()=>fs.readFileSync('src/workspace.css','utf8')).replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8')).replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8')).replace('__MUSIC_CSS__',()=>fs.readFileSync('src/music.css','utf8')).replace('__MUSIC_UI__',()=>fs.readFileSync('src/music-widget.html','utf8')).replace('__MUSIC_DATA__',()=>JSON.stringify(music).replaceAll('</script','<\\/script')).replace('__APP_VERSION__',app.displayVersion||app.version).replace('__APP_AUTHOR__',app.author).replace('__ENV_ASSETS__',()=>JSON.stringify(environmentAssets)).replace('__SPACECRAFT_MODELS__',()=>JSON.stringify(spacecraftModels)).replace('__MISSION_ORBITS__',()=>JSON.stringify(split?{url:publish('orbits.json',Buffer.from(JSON.stringify(missionOrbits)))}:missionOrbits).replaceAll('</script','<\\/script')).replace('__META__',fs.readFileSync('assets/model.json','utf8')).replace('__MODEL__',split?JSON.stringify(packed('assets/station.glb')):packed('assets/station.glb')).replace('<script>__JS__</script>',()=>split?'<script defer src="'+publish('assets/app.bundle.js')+'"></script>':'<script>'+fs.readFileSync('assets/app.bundle.js','utf8').replaceAll('</script','<\\/script')+'</script>');

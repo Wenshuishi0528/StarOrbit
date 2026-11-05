@@ -1,5 +1,6 @@
+import {radiometryGLSL} from './earth-radiometry.js';
 // Shared finite-path atmosphere for ground, cloud tops and cloud representative depths.
-export const scatteringGLSL=`uniform int steps;uniform float linearComposite,airglowStrength,multipleStrength;uniform sampler2D multipleDepth,multipleDepthB;
+export const scatteringGLSL=`${radiometryGLSL}uniform int steps;uniform float linearComposite,airglowStrength,multipleStrength;uniform sampler2D multipleDepth,multipleDepthB;
 const float R=6371.;const float A=6471.;const vec3 betaR=vec3(.0058,.0135,.0331);const vec3 betaM=vec3(.004);
 vec2 hit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
 vec3 multipleLight(sampler2D lut,float h,float mu){
@@ -65,8 +66,8 @@ vec4 fineAtmosphere(vec3 o,vec3 d,vec3 s,float begin,float end){
  }
  sum=spectralRGB(sum,sumB);trans=spectralRGB(trans,transB);
  float alpha=clamp(1.-dot(trans,vec3(.2126,.7152,.0722)),0.,.9999);
- if(linearComposite>.5)return vec4(sum*4.,1.);
- return vec4(sum*4./max(alpha,.00001),alpha);
+ if(linearComposite>.5)return vec4(sum*solarIrradiance,1.);
+ return vec4(sum*solarIrradiance/max(alpha,.00001),alpha);
 }
 vec3 cloudAerial(vec3 p,vec3 color,vec3 s){
  vec3 o=cameraPosition,d=normalize(p-o);float end=length(p-o),begin=max(0.,hit(o,d,A).x);

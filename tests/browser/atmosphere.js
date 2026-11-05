@@ -2,6 +2,7 @@ import {flashUniforms} from '../../src/phenomena.js';
 import {Weather} from '../../src/weather.js';
 import {cloudToneGLSL,githubCloudOpacity} from '../../src/cloud-texture.js';
 import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from '../../src/atmosphere-spectrum.js';
+import {SOLAR_IRRADIANCE} from '../../src/earth-radiometry.js';
 // Small on-demand GPU fixture: production shaders, no embedded app/assets/animation.
 import * as THREE from 'three';
 import {vertex,atmosphereFragment,earthFragment,cloudFragment,volumeCloudFragment,atmosphereTransmissionFragment} from '../../src/earth-shaders.js';
@@ -49,7 +50,7 @@ function check(){
   const rayPoint=new THREE.Vector3(),aUniforms={...uniforms,rayPoint:{value:rayPoint}},air=new THREE.ShaderMaterial({uniforms:aUniforms,vertexShader:'uniform vec3 rayPoint;varying vec3 worldP;void main(){worldP=rayPoint;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:atmosphereFragment,toneMapped:false});
   quad.material=air;const original=camera.position.clone(),rotation=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,2,3).normalize(),.7);
   let ratio=6381/6771;
-  const radiance=(angle,az,rotated=false)=>{const el=angle*Math.PI/180,phi=az*Math.PI/180,d=new THREE.Vector3(ratio*Math.cos(phi),ratio*Math.sin(phi),-Math.sqrt(1-ratio*ratio));sun.set(Math.cos(el),0,Math.sin(el));camera.position.copy(original);if(rotated){sun.applyQuaternion(rotation);d.applyQuaternion(rotation);camera.position.applyQuaternion(rotation);}rayPoint.copy(camera.position).addScaledVector(d,100);renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3).map(v=>Math.max(0,v*buf[3]/4));};
+  const radiance=(angle,az,rotated=false)=>{const el=angle*Math.PI/180,phi=az*Math.PI/180,d=new THREE.Vector3(ratio*Math.cos(phi),ratio*Math.sin(phi),-Math.sqrt(1-ratio*ratio));sun.set(Math.cos(el),0,Math.sin(el));camera.position.copy(original);if(rotated){sun.applyQuaternion(rotation);d.applyQuaternion(rotation);camera.position.applyQuaternion(rotation);}rayPoint.copy(camera.position).addScaledVector(d,100);renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3).map(v=>Math.max(0,v*buf[3]/SOLAR_IRRADIANCE));};
   for(const el of [45,-19,-45])for(const az of [0,90,180])directional.push({sunElevation:el,azimuth:az,rgb:radiance(el,az)});
   const daySide=directional[1].rgb,twilight=directional[3].rgb,opposite=directional[5].rgb;
   assert(daySide[2]>daySide[0],'白天侧向薄边偏蓝');assert(twilight[0]>opposite[0]*20,'晨昏朝日与背日亮度不同');
@@ -70,6 +71,33 @@ function check(){
  window.atmosphereCheck={results,directional,shaderErrors:errors};$('report').textContent=JSON.stringify(window.atmosphereCheck,null,2);return window.atmosphereCheck;
 }
 $('check').onclick=check;window.runAtmosphereCheck=check;window.atmosphereFixture={renderer,hdr,scene,camera,uniforms,render,multi,sunView};
+// Absolute linear-radiance probe: no tone mapping, output encoding, clouds,
+// ocean glint, night emission or airglow. Retain and account for the .002 floor.
+window.runEarthRadiometryCheck=()=>{
+ const results=[],saved=Object.fromEntries(['dayMap','oceanMap','detailed','enhanced','linearOutput','linearComposite','airglowStrength','multipleStrength'].map(k=>[k,uniforms[k].value]));
+ const position=camera.position.clone(),sunDirection=sun.clone(),rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false}),buf=new Float32Array(4),probe=new THREE.Scene();
+ const texture=new THREE.DataTexture(new Float32Array([.18,.18,.18,1]),1,1,THREE.RGBAFormat,THREE.FloatType);texture.needsUpdate=true;
+ const terrain=new THREE.ShaderMaterial({uniforms,vertexShader:'varying vec3 localN,worldN,worldP;void main(){localN=worldN=vec3(0.,0.,1.);worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:earthFragment,toneMapped:false});
+ const air=new THREE.ShaderMaterial({uniforms,vertexShader:'varying vec3 worldP;void main(){worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:atmosphereFragment,toneMapped:false});
+ const quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),terrain);quad.frustumCulled=false;probe.add(quad);
+ const sample=()=>{renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3);};
+ const assert=(ok,name,detail)=>{results.push({name,pass:!!ok,...detail});if(!ok)throw Error(name);};
+ try{
+  camera.position.set(0,0,6771);sun.set(0,0,1);uniforms.dayMap.value=texture;uniforms.oceanMap.value=black;uniforms.detailed.value=0;uniforms.linearOutput.value=1;uniforms.linearComposite.value=1;uniforms.airglowStrength.value=0;uniforms.multipleStrength.value=0;
+  for(const rho of [.05,.18,.5,1]){
+   texture.image.data.set([rho,rho,rho,1]);texture.needsUpdate=true;uniforms.enhanced.value=0;const vacuum=sample();
+   assert(vacuum.every(v=>Math.abs(v-rho*1.002)<.00001),`灰板 ${rho}: 无空气 Lambert 基准`,{rgb:vacuum});
+   uniforms.enhanced.value=1;const solar=sample(),T=[.90782455,.86517139,.76641972];
+   assert(solar.every((v,i)=>Math.abs(v-rho*(T[i]+.002))<.001),`灰板 ${rho}: 仅太阳路径衰减`,{rgb:solar});
+  }
+  quad.material=air;const single=sample(),expected=[.01877078,.03615139,.07594988];
+  assert(single.every((v,i)=>Math.abs(v/expected[i]-1)<.05),'天底单次散射与独立密集积分相符（5%）',{rgb:single,reference:expected});
+  assert(errors.length===0,'辐射基准生产着色器编译无错误');
+ }catch(error){results.push({error:error.message});}finally{
+  for(const [k,v] of Object.entries(saved))uniforms[k].value=v;camera.position.copy(position);sun.copy(sunDirection);renderer.setRenderTarget(null);rt.dispose();texture.dispose();terrain.dispose();air.dispose();quad.geometry.dispose();render();
+ }
+ return {results,shaderErrors:[...errors]};
+};
 addEventListener('pagehide',()=>{hdr.dispose();renderer.dispose();renderer.forceContextLoss();});render();
 
 window.checkAtmosphereFrames=()=>{
@@ -212,4 +240,43 @@ window.checkCloudRequestCoalescing=async()=>{
  const cancelled=fake.active.cloud===null&&disposed===1;
  fake.settings.cloud='latest';const old=apply.call(fake,'cloud'),finishOld=complete;++fake.tokens.cloud;const newer=apply.call(fake,'cloud'),finishNew=complete;finishOld();finishNew();await Promise.all([old,newer]);
  return {shared,cancelled,invalidatedReload:calls===4&&fake.active.cloud===record.id,requestsCleared:!fake.pendingApply.cloud};
+};
+
+// Exercise actual GLSL detail weights in a float target, including partial-load
+// corners. Constant white details over black make the readback equal the weight.
+window.runDetailEdgeGPUCheck=()=>{
+ const u={...uniforms,testUV:{value:new THREE.Vector2()}},results=[];
+ for(let i=0;i<4;i++){
+  u['detailMap'+i]={value:white};u['detailRect'+i]={value:new THREE.Vector4()};u['detailFade'+i]={value:0};
+ }
+ const head=earthFragment.split('void main(){vec3 n=normalize(worldN)')[0];
+ const material=new THREE.ShaderMaterial({uniforms:u,toneMapped:false,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:head+`uniform vec2 testUV;
+ void main(){vec3 c=vec3(0.);vec2 dx=vec2(.001,0.),dy=vec2(0.,.001);
+ c=sampleDetail(detailMap0,detailRect0,detailFade0,testUV,dx,dy,c,false);
+ c=sampleDetail(detailMap1,detailRect1,detailFade1,testUV,dx,dy,c,false);
+ c=sampleDetail(detailMap2,detailRect2,detailFade2,testUV,dx,dy,c,false);
+ c=sampleDetail(detailMap3,detailRect3,detailFade3,testUV,dx,dy,c,false);
+ gl_FragColor=vec4(c,1.);}`});
+ const rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false});
+ const probe=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material),buffer=new Float32Array(4);quad.frustumCulled=false;probe.add(quad);
+ const setup=(columns,rows,fades,wrap=false)=>{
+  const left=wrap?columns-1:3,right=wrap?0:4;
+  [[left,3],[right,3],[left,2],[right,2]].forEach(([x,y],i)=>{u['detailRect'+i].value.set(x/columns,y/rows,1/columns,1/rows);u['detailFade'+i].value=fades[i];});
+  return [wrap?0:4/columns,3/rows];
+ };
+ const sample=(x,y)=>{u.testUV.value.set(x,y);renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buffer);return buffer[0];};
+ try{
+  for(const [columns,rows] of [[12,6],[24,12]])for(const wrap of [false,true]){
+   for(const fades of [[1,1,1,1],[1,.2,.6,.8],[1,1,1,0]]){
+    const [x,y]=setup(columns,rows,fades,wrap),expected=fades.reduce((a,b)=>a*b,1),values=[];
+    for(const sx of [-1,1])for(const sy of [-1,1])values.push(sample((x+sx*1e-6+1)%1,y+sy*1e-6));
+    const pass=values.every(v=>Math.abs(v-expected)<.0001);
+    results.push({name:`GLSL ${columns}x${rows} ${wrap?'date line':'corner'} ${fades}`,pass,expected,values});
+    if(!pass)throw Error('Detail corner readback is discontinuous');
+   }
+  }
+  results.push({name:'detail shaders compile',pass:errors.length===0});
+ }catch(error){results.push({error:error.message});}
+ finally{renderer.setRenderTarget(null);rt.dispose();material.dispose();quad.geometry.dispose();render();}
+ return {results,shaderErrors:[...errors]};
 };

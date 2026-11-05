@@ -5,8 +5,10 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 with tempfile.TemporaryDirectory() as temp:
  os.environ['TIANGONG_CLOUD_CACHE']=str(Path(temp)/'default')
  from cloud_service import CloudService
+ accepted={'schema':1,'status':'accepted','reasons':[],'metrics':{}}
+ quality_patch=patch('satcorps.inspect_image',return_value=accepted);quality_patch.start()
  old=Path(temp)/'legacy';old.mkdir();image=old/'frame.png';image.write_bytes(b'verified asset')
- meta={'provider':'satcorps','time':1792497600000,'coverage':1,'polarCoverage':{'north':1,'south':1},'footprint':{'global':1,'north':1,'south':1},'sha256':hashlib.sha256(image.read_bytes()).hexdigest()};image.with_suffix('.json').write_text(json.dumps(meta))
+ meta={'provider':'satcorps','time':1792497600000,'coverage':1,'polarCoverage':{'north':1,'south':1},'footprint':{'global':1,'north':1,'south':1},'sha256':hashlib.sha256(image.read_bytes()).hexdigest()};meta['quality']={**accepted,'sha256':meta['sha256']};image.with_suffix('.json').write_text(json.dumps(meta))
  target=Path(temp)/'shared';service=CloudService(target,old)
  assert service.snapshot()['state']=='ready' and service.image_bytes()==image.read_bytes()
  restarted=CloudService(target,old);assert restarted.snapshot()['result']==meta
@@ -29,7 +31,7 @@ with tempfile.TemporaryDirectory() as temp:
  def fixture(folder,reference,name='cached'):
   folder.mkdir(parents=True,exist_ok=True);path=folder/(name+'.png');path.write_bytes(name.encode())
   info={**meta,'time':reference*1000,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
-  path.with_suffix('.json').write_text(json.dumps(info));return {**info,'file':str(path)}
+  info['quality']={**accepted,'sha256':info['sha256']};path.with_suffix('.json').write_text(json.dumps(info));return {**info,'file':str(path)}
  now=time.time();folder=Path(temp)/'recent';frame=fixture(folder,now-DAY)
  checked=int((now-60)*1000);save_check(folder,{**frame,'updateStatus':'updated','checkedAt':checked,'checkComplete':True,'cachedCheck':False})
  recent=CloudService(folder,None)
@@ -73,6 +75,41 @@ with tempfile.TemporaryDirectory() as temp:
   except NoQualifiedFrameError as error:assert error.check['updateStatus']=='unavailable' and error.check['checkComplete'] is False
  unavailable=CloudService(folder,None).snapshot();assert unavailable['state']=='error' and unavailable['updateStatus']=='unavailable' and 'result' not in unavailable
  print('NASA updated/unchanged/partial/unavailable outcomes, identical releases and last-good retention passed')
+ # A complete, recent but visibly defective candidate never displaces the good frame.
+ folder=Path(temp)/'bad-quality';previous=fixture(folder,clock-3*DAY)
+ bad={'schema':1,'status':'rejected','reasons':['high-opacity-plateau'],'metrics':{'plateauFraction':.02}}
+ with patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])),patch('satcorps.fetch_frame',return_value=10),patch('satcorps.phase_coverage',return_value=good(rows[0][0])),patch('satcorps.convert',return_value=(Image(),None,good(rows[0][0]))),patch('satcorps.inspect_image',return_value=bad):
+  result=build(folder,now=clock)
+ assert result['sha256']==previous['sha256'] and result['updateStatus']=='unchanged'
+ assert '质量检查未通过' in result['updateMessage'] and not result['retryable']
+ assert result['checkSummary']['rejected']==1 and len(list(folder.glob('*.png')))==1
+ with patch('satcorps.fetch_frame',side_effect=AssertionError('known bad candidate must not be downloaded again')),patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])):
+  repeated=build(folder,now=clock+CHECK_TTL+1)
+ assert '质量检查未通过' in repeated['updateMessage']
+ assert CloudService(folder,None).snapshot()['result']['sha256']==previous['sha256']
+ # A quality-rejected disk entry is retained as evidence, never restored.
+ rejected=fixture(folder,clock,'rejected');metadata=Path(rejected['file']).with_suffix('.json')
+ rejected['quality']={**bad,'sha256':rejected['sha256']};metadata.write_text(json.dumps(rejected))
+ assert CloudService(folder,None).snapshot()['result']['sha256']==previous['sha256']
+ assert Path(rejected['file']).exists()
+ restarted=CloudService(folder,None).snapshot()
+ assert '已恢复上一份' in restarted['updateMessage'] and '高不透明度异常平台' in restarted['updateMessage']
+ # Restart must disclose migration rejection without erasing a network retry.
+ save_check(folder,{**rejected,'updateStatus':'partial','checkedAt':clock*1000,'checkComplete':False,'retryable':True,'updateMessage':'网络暂时不可用'})
+ restored=CloudService(folder,None).snapshot()
+ assert restored['retryable'] and restored['checkedAt']==clock*1000 and '网络暂时不可用' in restored['updateMessage']
+ isolated=Path(temp)/'rejected-offline';rejected_only=fixture(isolated,clock,'rejected')
+ rejected_only['quality']={**bad,'sha256':rejected_only['sha256']}
+ Path(rejected_only['file']).with_suffix('.json').write_text(json.dumps(rejected_only))
+ save_check(isolated,{'sha256':rejected_only['sha256'],'updateStatus':'unavailable','checkedAt':clock*1000,'checkComplete':False,'retryable':True,'updateMessage':'网络暂时不可用'})
+ unavailable=CloudService(isolated,None).snapshot()
+ assert unavailable['retryable'] and unavailable['checkedAt']==clock*1000 and '网络暂时不可用' in unavailable['updateMessage']
+ from satcorps import load_check, recent_check
+ assert load_check(isolated,None) is None, 'strict check lookup keeps digest identity'
+ save_check(isolated,{'sha256':rejected_only['sha256'],'updateStatus':'updated','checkedAt':clock*1000,'checkComplete':True,'retryable':True,'updateMessage':'旧图成功'})
+ assert load_check(isolated,None,allow_recovery=True) is None, 'success cannot cross image identities'
+ assert recent_check(isolated,None,clock) is None
+ print('Quality rejection, unchanged last-good frame, repeated bad version suppression and restart isolation passed')
 
  from http_download import DownloadError
  folder=Path(temp)/'not-published';previous=fixture(folder,clock-3*DAY)

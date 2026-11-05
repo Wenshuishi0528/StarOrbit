@@ -2,6 +2,7 @@
 import json, subprocess, sys, threading, tempfile, shutil, os, time
 from pathlib import Path
 from satcorps import cached_frames,load_check,recent_check,CHECK_FIELDS
+from cloud_quality import quality_ok,SCHEMA,describe_reasons
 LEGACY_CACHE=Path(tempfile.gettempdir())/'tiangong-satcorps-cache'
 CACHE=Path(os.environ.get('TIANGONG_CLOUD_CACHE',Path.home()/'Library/Application Support/Tiangong Orbit Simulator/clouds'))
 class CloudService:
@@ -17,9 +18,29 @@ class CloudService:
     frames=cached_frames(self.cache)
    (self.cache/'migration-complete').touch()
   if frames:self.publish(frames[0]);self.state={'state':'ready'}
-  self.check=load_check(self.cache,self.result) or {}
+  self.check=load_check(self.cache,self.result,allow_recovery=True) or {}
+  if self.result:
+   # Restore the newest accepted asset, while disclosing a newer rejected one.
+   rejected=[]
+   for path in self.cache.glob('*.json'):
+    try:
+     item=json.loads(path.read_text());quality=item.get('quality',{})
+     if item.get('provider')=='satcorps' and quality.get('schema')==SCHEMA and quality.get('status')=='rejected' and item.get('time',0)>self.result['time']:
+      rejected.append(item)
+    except (ValueError,OSError,TypeError,AttributeError):continue
+   if rejected:
+    latest=max(rejected,key=lambda item:item['time'])
+    message='较新的本地云图未通过质量检查（'+describe_reasons(latest['quality'].get('reasons',[]))+'）；已恢复上一份通过检查的云图，原始档案保留。'
+    if self.check.get('retryable') and self.check.get('updateMessage'):message+=' '+self.check['updateMessage']
+    self.check={**self.check,'updateStatus':'partial','checkedAt':self.check.get('checkedAt',int(time.time()*1000)),'checkComplete':False,'cachedCheck':False,'retryable':self.check.get('retryable',False),'updateMessage':message}
   if not self.result and self.check.get('updateStatus')=='unavailable':self.state={'state':'error','error':self.check.get('updateMessage','NASA 云图暂不可用')}
+  if not self.result and any(self.cache.glob('*.png')):
+   message='本机没有通过当前质量检查的可用云图；原始档案保留，可继续使用浏览器中已核验的旧图或内置静态云图。'
+   if self.check.get('updateMessage'):message+=' '+self.check['updateMessage']
+   self.state={'state':'error','error':message}
+   self.check={'updateStatus':'unavailable','checkComplete':False,'cachedCheck':False,'retryable':False,**self.check,'updateMessage':message}
  def publish(self,result):
+  if not quality_ok(result.get('quality')) or result['quality'].get('sha256')!=result.get('sha256'):raise ValueError('NASA 云图质量检查未通过')
   self.image=Path(result['file']);self.result={k:v for k,v in result.items() if k!='file' and k not in CHECK_FIELDS}
  def cache_usage(self):
   size=count=0
@@ -75,4 +96,9 @@ class CloudService:
    shutil.rmtree(self.cache,ignore_errors=True);self.cache.mkdir(parents=True,exist_ok=True)
    # A cleared library stays empty after restart instead of importing the old cache again.
    (self.cache/'migration-complete').touch();self.state={'state':'idle'};self.image=None;self.result=None;self.check={};return True
+ def cancel(self):
+  with self.lock:
+   if self.process and self.process.poll() is None:self.process.terminate()
+   self.process=None;self.state={'state':'idle'};self.check={}
+   return True
 service=CloudService()

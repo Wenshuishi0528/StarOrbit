@@ -14,9 +14,9 @@
 
 *中国空间站场景：舱体组合、太阳翼、地球云层、星图、轨道读数与事件时间轴。*
 
-**作者：wenshuishi0528 · 当前源码：v0.80 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
+**作者：wenshuishi0528 · 当前源码：v0.92 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
-> 版本说明：本页按 **v0.80** 整理。在线版随 `main` 分支部署，以页面顶部版本为准；便携版请核对下载文件的版本号与发布说明。
+> 版本说明：本页按 **v0.92** 整理。在线版随 `main` 分支部署，以页面顶部版本为准；便携版请核对下载文件的版本号与发布说明。
 
 ## 目录
 
@@ -128,9 +128,9 @@
 
 | 模块 | 可以观察与调整的内容 |
 | --- | --- |
-| 地球与月球 | 四档地球画质；昼夜、晨昏、大气、海洋反光、城市夜景；月球位置与月相，可切换望月与返回航天器视角 |
+| 地球与月球 | 四档地球画质；2026 第二季度 / 2004 白天地表切换，2024 / 2016 夜景切换；昼夜、晨昏、大气、海洋反光、城市夜景；月球位置与月相，可切换望月与返回航天器视角 |
 | 高清地表 | 8K 档按视野加载 NASA 地表及夜光细节切片，近距离观察洲际地貌和城市灯光分布 |
-| 云层 | 内置云图、Live Cloud Maps、NASA SATCORPS、历史快照与本地生成；8K 可开启体积云和动态云层 |
+| 云层 | 统一云图库选择内置图、NASA 已保存版本或本地生成；旧 GitHub 图保留手动对比；8K 可开启体积云和动态云层 |
 | 夜面云层 | 开启后按云层遮挡城市灯光，表现厚云遮蔽和薄云透光 |
 | 极光 | NOAA OVATION 快照或本地生成分布；8K 使用有厚度的光幕，4K 使用经典效果 |
 | 星空与星图 | 41,411 颗星表星点，原生 16K NASA 银河来源；恒星名称、88 星座名称、连线与边界可独立控制 |
@@ -175,18 +175,18 @@
 
 ## 数据与资源
 
-右上角“数据与资源”集中管理云图、极光与当前任务轨道。面板区分**已下载的数据、当前使用的数据、检查时间和检查结果**，可以单独检查，也可以检查全部更新。
+“地球与星空 → 打开云图库…”可直接选图、预览、下载和使用；“数据与资源”中的云图按钮打开同一个窗口。图库置顶显示**当前使用**，本机与浏览器中的相同文件只列一行。极光与当前任务轨道独立更新，云图目录查询不会拖住其他更新。
 
 | 数据 | 主要来源 | 如何使用 |
 | --- | --- | --- |
 | 中国空间站轨道 | 中国载人航天工程办公室／BACC 发布的 OEM | 在记录区间内插值，区间外接续开普勒轨道演算 |
 | 东方红一号现代轨道 | CelesTrak，NORAD 4382 | 根据 GP／OMM 根数使用 SGP4 计算 |
-| 全球云图 | Live Cloud Maps／EUMETSAT、NASA Langley SATCORPS | 下载后选择使用，也可导入或保留历史快照 |
+| 全球云图 | NASA Langley SATCORPS；GitHub 旧档手动对比 | 已保存版本一键使用，下载后手动切换；缺测与视觉警告明确显示，损坏文件禁止使用 |
 | 极光分布 | NOAA SWPC OVATION | 使用预报分布驱动极光地理范围与强度 |
 
 NASA 云图在线处理需要桌面启动器提供的本机服务；网页版可导入相应快照。网络或来源异常时保留已有数据，检查失败会显示独立状态。
 
-下载历史支持收藏、导出、导入和按类型清理。缓存自动清理默认开启，并保护正在使用、收藏及设置引用的数据。轨道按任务保存，环境资源在任务之间复用。操作细节见[资源管理](使用说明.md#数据更新与缓存)。
+云图库支持收藏、导出和导入；返回模拟器不停止下载，重开页面可接回本机进度，完成文件保存在本机图库。浏览器副本的容量与删除范围单独标明。[云图库说明](docs/v0.88-cloud-library.md)。缓存自动清理保护正在使用、收藏及设置引用的数据。轨道按任务保存，环境资源在任务之间复用。操作细节见[资源管理](使用说明.md#数据更新与缓存)。
 
 ## 摄影、场景与个性化
 
@@ -266,6 +266,7 @@ python3 -m pip install -r scripts/cloud-requirements.txt
 | 内容 | 来源与署名 |
 | --- | --- |
 | 地球基础贴图 | [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/)，CC BY 4.0 |
+| 2026 白天地表 | NASA MODIS MCD43A4.061 2026 Q2 NBAR，质量筛选后合成约 1 km；[公共镜像](https://planetarycomputer.microsoft.com/dataset/modis-43A4-061)，[颜色与大气说明](docs/v0.83-surface-radiometry.md) |
 | 高清地表与夜光 | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/)、[Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/)，NASA Earth Observatory；夜光来源 Suomi NPP / VIIRS |
 | 银河 | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/)，NASA/Goddard Space Flight Center Scientific Visualization Studio、Ernie Wright；Gaia DR2：ESA/Gaia/DPAC |
 | 月面 | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/)，NASA SVS / Ernie Wright；LRO / LROC |

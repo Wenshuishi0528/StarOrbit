@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {historySelection,listedDate,viirsURL} from '../src/cloud-history-data.js';
+import {selectCloud,protectedCloudIds} from '../src/cloud-source.js';
+const now=Date.UTC(2026,9,30),s=historySelection('satcorps','2024-02-29','23',now);
+assert.equal(s.time,Date.UTC(2024,1,29,23));
+for(const args of [['satcorps','2025-02-29','12'],['satcorps','2026-10-30','1'],['satcorps','2026-10-29','24'],['satcorps','2026-10-29','12/../x'],['viirs','2026-10-28','noon'],['github','2026-10-28','day']])assert.throws(()=>historySelection(...args,now));
+assert.equal(listedDate('2018-02-23',['2018-02-17/2018-02-21/P1D','2018-02-25/2018-03-12/P1D']),false,'catalog gaps cannot silently use the nearest date');
+assert.equal(listedDate('2018-02-25',['2018-02-25/2018-03-12/P1D']),true);
+assert.equal(listedDate('2026-10-28',['2026-10-28']),true);
+const url=new URL(viirsURL(historySelection('viirs','2026-10-28','night',now)));
+assert.equal(url.searchParams.get('TIME'),'2026-10-28');assert.ok(url.searchParams.get('LAYERS').endsWith('_Night'));assert.equal(url.searchParams.get('TRANSPARENT'),'TRUE');
+const row={kind:'cloud',provider:'satcorps',quality:{schema:1,status:'accepted',reasons:[]},observedStart:now-9e6,observedEnd:now-1e6,coverage:1,polarCoverage:{north:1,south:1},footprint:{global:1,north:1,south:1}};
+const latest={...row,id:'latest',time:now-5e6},archive={...row,id:'archive',archiveOnly:true,time:now-3e6};
+assert.equal(selectCloud([latest,archive],'satcorps',now).id,'archive','all qualified downloads are eligible for the legacy latest selector');
+assert.equal(selectCloud([latest,archive],'history',now,'auto').id,'archive','legacy automatic selection sees the unified qualified library');
+assert.equal(selectCloud([latest,archive],'history',now,'archive').id,'archive','explicit use can select a historical frame');
+assert.deepEqual(protectedCloudIds([latest,archive]),['archive','latest'],'protect the two newest accepted maps across legacy and new downloads');
+console.log('Historical date validation, catalog gaps, exact request and automatic-selection isolation passed');

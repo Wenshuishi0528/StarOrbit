@@ -1,3 +1,4 @@
+import {startupStatus} from './startup-status.js';
 import {AuroraVolume} from './aurora-volume.js';
 import {cloudMoonIrradiance} from './cloud-lighting.js';
 import {orbitSegment} from './dfh1-history.js';
@@ -29,8 +30,10 @@ export class Environment{
   const assetNode=$('environmentAssets');this.assets=JSON.parse(assetNode.textContent);
   // Parsed assets own the data now; release the large inline JSON DOM copy.
   assetNode.remove();
-  this.settings={quality:'standard',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudNightVisible:false,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
+  this.settings={quality:'standard',daySource:'2026-q2-1km',nightSource:'2024-1km',stars:true,milky:true,moon:true,...normalizeStarChartSettings(),...normalizeGeographySettings(),clouds:true,cloudNightVisible:false,cloudOpacity:.85,starBrightness:1,exposure:'cinematic',groundTrack:false};
   try{const old=JSON.parse(localStorage.getItem('tiangong-environment-v1'));Object.assign(this.settings,normalizeStarChartSettings(old),normalizeGeographySettings(old));for(const k of ['stars','milky','moon','clouds','cloudNightVisible','groundTrack'])if(typeof old?.[k]==='boolean')this.settings[k]=old[k];
+   if(this.assets.daySources?.[old?.daySource])this.settings.daySource=old.daySource;
+   if(this.assets.nightSources?.[old?.nightSource])this.settings.nightSource=old.nightSource;
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
    for(const k of ['cloudOpacity','starBrightness'])if(Number.isFinite(old?.[k]))this.settings[k]=THREE.MathUtils.clamp(old[k],0,k==='cloudOpacity'?1:2);
   }catch{}
@@ -125,27 +128,43 @@ export class Environment{
   for(const [key,id] of Object.entries(ids)){$(id).checked=this.settings[key];$(id).onchange=()=>{this.settings[key]=$(id).checked;this.save();if(key==='stars'||key==='milky')this.setSkyStyle();};}
   for(const [key,id] of [['cloudOpacity','cloudOpacity'],['starBrightness','starBrightness']]){$(id).value=this.settings[key];$(id).oninput=()=>{this.settings[key]=Number($(id).value);this.save();};}
   $('skyExposure').value=this.settings.exposure;$('skyExposure').onchange=()=>{this.settings.exposure=$('skyExposure').value;this.save();this.setSkyStyle();};
-  $('earthQuality').value=this.settings.quality;$('earthQuality').onchange=()=>this.setQuality($('earthQuality').value);
+  $('earthQuality').value=this.settings.quality;$('earthQuality').onchange=()=>this.setQuality($('earthQuality').value,$('nightSource').value,$('daySource').value);
+  $('daySource').value=this.settings.daySource;$('daySource').onchange=()=>this.setQuality($('earthQuality').value,$('nightSource').value,$('daySource').value);
+  $('nightSource').value=this.settings.nightSource;$('nightSource').onchange=()=>this.setQuality($('earthQuality').value,$('nightSource').value,$('daySource').value);
  }
- setQuality(requested){
+ setQuality(requested,requestedNight=this.settings.nightSource,requestedDay=this.settings.daySource){
   const ticket=++this.ticket;this.loading=true;setText('qualityStatus','正在准备画质素材…');
   const tier=qualityFor(requested,this.api.renderer.capabilities.maxTextureSize);
+  const nightSource=this.assets.nightSources?.[requestedNight]?requestedNight:'2016';
+  const night=this.assets.nightSources?.[nightSource];
+  const daySource=this.assets.daySources?.[requestedDay]?requestedDay:'2004',day=this.assets.daySources?.[daySource];
   if(tier!==requested)this.api.toast('设备纹理上限不足，已改用中等画质');
   this.ready=this.queue=this.queue.catch(()=>{}).then(async()=>{
    if(ticket!==this.ticket)return;
    let loaded=[];
    try{
-    const maps=this.assets[tier];const entries=Object.entries(maps);
+    const sameQuality=tier===this.quality,changeDay=!sameQuality||daySource!==this.settings.daySource,changeNight=!sameQuality||nightSource!==this.settings.nightSource;
+    const maps=sameQuality?{}:{...this.assets[tier]};
+    if(changeDay)maps.day=day?.base[tier]||this.assets[tier].day;
+    const nightURL=night?.base[tier]||this.assets[tier].night;
+    if(changeNight&&tier!=='simple'&&nightURL)maps.night=nightURL;else delete maps.night;
+    const entries=Object.entries(maps),changedKeys=sameQuality?Object.keys(maps):['day','night','cloud','ocean'];
+    const previous=new Set(changedKeys.map(key=>this.uniforms[key+'Map'].value));
     const results=await Promise.allSettled(entries.map(async([key,url])=>{
-     const t=await new THREE.TextureLoader().loadAsync(url);t.wrapS=THREE.RepeatWrapping;t.wrapT=THREE.ClampToEdgeWrapping;
+     startupStatus('texture-'+key,'Earth '+key);const t=await new THREE.TextureLoader().loadAsync(url);startupStatus('texture-'+key,null);t.wrapS=THREE.RepeatWrapping;t.wrapT=THREE.ClampToEdgeWrapping;
      t.colorSpace=['day','night'].includes(key)?THREE.SRGBColorSpace:THREE.NoColorSpace;t.anisotropy=Math.min(tier==='high'?16:2,this.api.renderer.capabilities.getMaxAnisotropy());loaded.push(t);return [key,t];
     }));
     const failure=results.find(r=>r.status==='rejected');if(failure)throw failure.reason;
     if(ticket!==this.ticket){loaded.forEach(t=>t.dispose());return;}
     const textures=Object.fromEntries(results.map(r=>r.value));
-    for(const [key,uniform] of Object.entries({day:'dayMap',night:'nightMap',cloud:'cloudMap',ocean:'oceanMap'}))this.uniforms[uniform].value=textures[key]||this.fallback;
-    this.builtinCloud=textures.cloud||this.fallback;this.uniforms.cloudTemplateMap.value=this.builtinCloud;
-    this.textures.forEach(t=>{t.dispose();t.image=null;});this.textures=loaded;this.quality=tier;this.settings.quality=tier;
+    for(const [key,uniform] of Object.entries({day:'dayMap',night:'nightMap',cloud:'cloudMap',ocean:'oceanMap'}))if(changedKeys.includes(key))this.uniforms[uniform].value=textures[key]||this.fallback;
+    if(!sameQuality){this.builtinCloud=textures.cloud||this.fallback;this.uniforms.cloudTemplateMap.value=this.builtinCloud;}
+    const obsolete=sameQuality?this.textures.filter(t=>previous.has(t)):this.textures;
+    obsolete.forEach(t=>{t.dispose();t.image=null;});this.textures=[...(sameQuality?this.textures.filter(t=>!previous.has(t)):[]),...loaded];this.quality=tier;this.settings.quality=tier;
+    this.settings.daySource=daySource;if(changeDay)this.detail.setSource(day?.tiles||this.assets.detail,day?.columns||12,day?.rows||6);
+    $('daySource').value=daySource;
+    this.settings.nightSource=nightSource;if(changeNight)this.nightDetail.setSource(night?.tiles||this.assets.nightDetail,night?.columns||24,night?.rows||12);
+    $('nightSource').value=nightSource;$('nightSource').disabled=tier==='simple';
     this.uniforms.detailed.value=tier==='simple'?0:1;this.uniforms.enhanced.value=tier==='high'?1:0;this.uniforms.gloss.value=tier==='high'?90:40;
     if(tier==='high'&&!this.solarDepth){
      const table=buildOpticalDepthTable();this.opticalTable=table;const pixels=new Uint16Array(table.data.length);
@@ -173,11 +192,11 @@ export class Environment{
     const count=catalogue.filter(r=>r[3]<=QUALITY[tier].limit).length;this.stars.geometry.setDrawRange(0,this.settings.exposure==='cinematic'?catalogue.length:count);this.starCount=count;
     this.updatePixelRatio();this.starUniforms.high.value=tier==='high'?1:0;
     $('earthQuality').value=tier;for(const id of ['volumeClouds','cloudMotion'])$(id).disabled=tier!=='high';setText('qualityStatus','');
-    for(const id of ['showClouds','cloudOpacity','cloudNightVisible'])$(id).disabled=tier==='simple';this.save();if(this.weather)await this.weather.apply('cloud');
+    for(const id of ['showClouds','cloudOpacity','cloudNightVisible'])$(id).disabled=tier==='simple';this.save();if(this.weather&&!sameQuality&&this.sim.initialized)await this.weather.apply('cloud').catch(e=>console.warn('Cloud refresh failed:',e.message||String(e)));
    }catch(e){
     loaded.forEach(t=>{t.dispose();t.image=null;});
     if(ticket!==this.ticket)return;
-    $('earthQuality').value=this.quality||tier;
+    $('earthQuality').value=this.quality||tier;$('nightSource').value=this.settings.nightSource;$('daySource').value=this.settings.daySource;
     if(!this.quality&&tier!=='simple'){
      setText('qualityStatus','素材载入失败，正在回退简易地图…');
      setTimeout(()=>{if(ticket===this.ticket)this.setQuality('simple');},0);
