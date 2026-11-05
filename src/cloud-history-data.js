@@ -4,11 +4,20 @@ import {CLOUD_MAX_BYTES} from './cloud-texture.js';
 const GIBS='https://gibs.earthdata.nasa.gov';
 const WMTS='http://www.opengis.net/wmts/1.0',OWS='http://www.opengis.net/ows/1.1';
 export function historySelection(provider,date,slot,now=Date.now()){
- if(!['satcorps','viirs'].includes(provider)||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('请选择有效图源和日期');
+ if(!['satcorps','gmgsi','himawari','viirs'].includes(provider)||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('请选择有效图源和日期');
  const start=Date.parse(date+'T00:00:00Z');
  if(!Number.isFinite(start)||new Date(start).toISOString().slice(0,10)!==date||start>now)throw Error('日期无效或位于未来');
- if(provider==='satcorps'&&!/^(?:[0-9]|1[0-9]|2[0-3])$/.test(slot)||provider==='viirs'&&!['day','night'].includes(slot))throw Error('请选择有效时次');
- const time=start+(provider==='satcorps'?Number(slot)*3600000:0);if(time>now)throw Error('不能查询未来时刻');
+ let minutes=0;
+ if(provider==='viirs'){
+  if(!['day','night'].includes(slot))throw Error('请选择有效时次');
+ }else if(provider==='himawari'){
+  if(!/^(?:[01]\d|2[0-3]):[0-5]0$/.test(slot))throw Error('请选择有效时次');
+  const [hour,minute]=slot.split(':').map(Number);minutes=hour*60+minute;
+ }else{
+  if(!/^(?:[0-9]|1[0-9]|2[0-3])$/.test(slot))throw Error('请选择有效时次');
+  minutes=Number(slot)*60;
+ }
+ const time=start+minutes*60000;if(time>now)throw Error('不能查询未来时刻');
  return {provider,date,slot,time,key:provider+':'+date+':'+slot};
 }
 export function listedDate(date,intervals){return intervals.some(s=>{const p=s.split('/');return p.length===1?p[0]===date:p.length===3&&p[2]==='P1D'&&p[0]<=date&&date<=p[1];});}
@@ -39,7 +48,7 @@ async function viirsCatalog(force=false,signal){
  })();catalog={time:Date.now(),promise};try{return await promise;}catch(e){if(catalog?.promise===promise)catalog=null;throw e;}
 }
 export async function historyAPI(action,selection,method='GET',signal){
- const params=selection?'?'+new URLSearchParams({date:selection.date,hour:selection.slot,...(selection.requestId?{requestId:selection.requestId}:{})}):'';
+ const params=selection?'?'+new URLSearchParams({date:selection.date,hour:selection.slot,...(['gmgsi','himawari'].includes(selection.provider)?{provider:selection.provider,...(selection.revision?{revision:String(selection.revision)}:{})}:{}),...(selection.requestId?{requestId:selection.requestId}:{})}):'';
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),75000);
  const cancel=()=>controller.abort();if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});
  try{
@@ -74,14 +83,14 @@ export async function downloadHistory(s,weather,onProgress=()=>{},{signal,onJob=
   s={...s,requestId:s.requestId||crypto.randomUUID().replaceAll('-','')};onJob(resumeJob?.id||s.requestId);
   let job=resumeJob||await historyAPI('download',s,'POST',signal);const id=job.id;onJob(id);const deadline=Date.now()+20*60000;
   while(['running','cancelling'].includes(job.state)){
-   if(signal?.aborted)throw new DOMException('已取消','AbortError');onState(job);onProgress(job.status||'下载并检查 NASA 云图…');
+   if(signal?.aborted)throw new DOMException('已取消','AbortError');onState(job);onProgress(job.status||'下载并检查云图…');
    if(Date.now()>deadline)throw Error('等待历史下载超时；可重试以查看本机任务结果');
    await new Promise((resolve,reject)=>{if(signal?.aborted){reject(new DOMException('已取消','AbortError'));return;}const abort=()=>{clearTimeout(timer);reject(new DOMException('已取消','AbortError'));},timer=setTimeout(()=>{signal?.removeEventListener('abort',abort);resolve();},2500);signal?.addEventListener('abort',abort,{once:true});});job=await historyAPI('status',null,'GET',signal);
    if(job.id!==id)throw Error('本机下载任务已变化，请重新查询');
   }
   if(job.state==='cancelled')throw new DOMException('已取消','AbortError');
   if(job.state!=='ready'||!job.result)throw Error(job.error||'云图下载未完成');
-  meta=job.result;if(meta.provider!=='satcorps'||meta.resolution!=='8192×4096'||!(meta.coverage>0)||!['red','validity'].includes(meta.channel))throw Error('返回的云图格式或有效数据无效');if(meta.time!==s.time)throw Error('返回的观测时次与选择不符，未保存');
+  meta=job.result;if(meta.provider!==s.provider||meta.resolution!==(s.provider==='satcorps'?'8192×4096':'4096×2048')||!(meta.coverage>0)||!['red','validity'].includes(meta.channel))throw Error('返回的云图格式或有效数据无效');if(meta.time!==s.time)throw Error('返回的观测时次与选择不符，未保存');
   onProgress('已保存到本机，正在校验浏览器副本…');
   ({blob}=await fetchResource('/api/cloud/history/image?'+new URLSearchParams({id,sha256:meta.sha256}),{max:CLOUD_MAX_BYTES,timeout:60000,signal}));
   if(await blobHash(blob)!==meta.sha256)throw Error('历史云图完整性校验失败，未保存');
@@ -110,8 +119,12 @@ export async function versionCatalog(provider,month,date='',force=false,signal){
  return {dates:dates.reverse(),items:items.sort((a,b)=>b.time-a.time),checkedAt:Date.now(),message:'官方目录列出的日合成版本；白天与夜间分别下载。'};
 }
 export function versionKey(r){
+ if(r.provider==='gdps')return 'gdps:'+r.forecastRun+':'+r.time;
+ if(r.provider==='himawari'&&Number.isFinite(r.time)&&r.time>0&&r.time<8.64e15){
+  const iso=new Date(r.time).toISOString();return 'himawari:'+iso.slice(0,10)+':'+iso.slice(11,16);
+ }
  if(r.provider==='viirs')return 'viirs:'+r.date+':'+(r.period||r.slot);
- if(r.provider==='satcorps'&&Number.isFinite(r.time)&&r.time>0&&r.time<8.64e15){const d=new Date(r.time);return 'satcorps:'+d.toISOString().slice(0,10)+':'+d.getUTCHours();}
+ if(['satcorps','gmgsi'].includes(r.provider)&&Number.isFinite(r.time)&&r.time>0&&r.time<8.64e15){const d=new Date(r.time);return r.provider+':'+d.toISOString().slice(0,10)+':'+d.getUTCHours();}
  return 'github:'+(r.id||r.sha256||r.disk);
 }
 export function mergeCloudVersions(remote,records,disk){

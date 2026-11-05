@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {PHENOMENA_DEFAULTS,phenomenaSettings,randomAt,direction,stormPrior,flashEnvelope,eventClock,earthOccluded} from './phenomena-math.js';
 import {seedNumber} from './weather-math.js';
-import {cloudCoverage,maskSample} from './phenomena-cloud.js';
+import {cloudCoverage,maskSample,sampleDataTexture} from './phenomena-cloud.js';
 import {solarOpticsGLSL} from './atmosphere-glsl.js';
 import {scatteringGLSL} from './atmosphere-scattering.js';
 const KEY='tiangong-phenomena-v1', $=id=>document.getElementById(id);
@@ -39,7 +39,7 @@ export class Phenomena{
   this.masks??={};this.maskTextures??={};const u=this.env.uniforms;
   for(const [name,key]of Object.entries({cloud:'cloudMap',template:'cloudTemplateMap',ocean:'oceanMap'})){
    const tex=u[key].value;if(tex===this.maskTextures[name])continue;this.maskTextures[name]=tex;this.masks[name]=null;
-   try{const image=tex.image;if(!image)continue;if(image.data&&image.width<=512&&image.height<=256){const data=new Uint8Array(image.width*image.height*4);for(let y=0;y<image.height;y++)for(let x=0;x<image.width;x++){const src=((tex.flipY?y:image.height-1-y)*image.width+x)*4;data.set(image.data.subarray(src,src+4),(y*image.width+x)*4);}this.masks[name]={data,width:image.width,height:image.height};continue;}if(image.width<1)continue;const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(image,0,0,512,256);this.masks[name]=c.getImageData(0,0,512,256);}catch{}
+   try{const image=tex.image;if(!image)continue;if(image.data){this.masks[name]=sampleDataTexture(image,tex.flipY);continue;}if(image.width<1)continue;const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(image,0,0,512,256);this.masks[name]=c.getImageData(0,0,512,256);}catch{}
   }
   this.cloudState??={};for(const k of ['cloudMode','cloudMotion','motionTime','cloudChannel','cloudTone','cloudSeason','weatherTime','seed'])this.cloudState[k]=u[k].value;
   this.sample??=((name,n,ch)=>maskSample(this.masks[name],n,ch));

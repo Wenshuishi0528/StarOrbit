@@ -45,7 +45,7 @@ class Handler(SimpleHTTPRequestHandler):
    try:
     with cloud_job_lock:
      if clouds.snapshot()['state']=='running':self.send_json({'error':'最新云图正在更新，请稍后下载历史数据'},409);return
-     self.send_json(history.start(args.get('date',[''])[0],args.get('hour',[''])[0],args.get('requestId',[None])[0]))
+     self.send_json(history.start(args.get('date',[''])[0],args.get('hour',[''])[0],args.get('requestId',[None])[0],args.get('provider',['satcorps'])[0],args.get('revision',[None])[0]))
    except ValueError as error:self.send_json({'error':str(error)},400)
    return
   if self.path=='/api/cloud/satcorps/clear':
@@ -70,6 +70,17 @@ class Handler(SimpleHTTPRequestHandler):
     args=urllib.parse.parse_qs(parsed.query);data=local_image(clouds.cache,args.get('name',[''])[0],args.get('sha256',[''])[0],args.get('preview',['0'])[0]=='1')
     if data is None:self.send_error(404);return
     self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
+   if parsed.path in ('/api/cloud/gmgsi/latest','/api/cloud/himawari/latest'):
+    label='NOAA' if parsed.path.endswith('/gmgsi/latest') else '向日葵'
+    try:
+     if label=='NOAA':
+      from gmgsi import latest
+     else:
+      from himawari import latest
+     self.send_json(latest())
+    except ImportError:self.send_json({'error':label+'云图需要本机 Python 的云图依赖，请安装 scripts/cloud-requirements.txt'},503)
+    except (ValueError,DownloadError,OSError) as error:self.send_json({'error':label+'最新时次查询失败：'+str(error)},502)
+    return
    if parsed.path=='/api/cloud/history/query':
     args=urllib.parse.parse_qs(parsed.query)
     try:self.send_json(query_history(args.get('date',[''])[0],args.get('hour',[''])[0]))

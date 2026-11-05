@@ -38,3 +38,10 @@ export async function fetchResource(url,{max=16e6,cached=null,onProgress=()=>{},
  finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
 }
 export async function blobHash(blob){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');}
+
+// A digest cached earlier in the session cannot establish that WebKit still
+// has the file behind this particular IndexedDB Blob handle.
+export async function readableBlobMatches(blob,digest){
+ try{return await blobHash(blob)===digest;}
+ catch(error){if(['NotFoundError','NotReadableError'].includes(error.name))return false;throw error;}
+}

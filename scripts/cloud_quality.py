@@ -55,8 +55,10 @@ def inspect_image(image):
     if not isinstance(image, Image.Image) or image.width < 2 or image.height < 2:
         return {'schema':SCHEMA,'status':'rejected','reasons':['invalid-image'],'metrics':{}}
     # Derived NASA opacity is in red; never luminance-convert an RGBA texture.
-    source = image if image.mode == 'L' else image.getchannel('R')
-    a = np.asarray(source.resize((WIDTH, HEIGHT), Image.Resampling.NEAREST), dtype=np.int16)
+    sample = image.resize((WIDTH, HEIGHT), Image.Resampling.NEAREST)
+    if sample.mode == 'LA':sample = sample.getchannel('L')
+    elif sample.mode != 'L':sample = sample.convert('RGB').getchannel('R')
+    a = np.asarray(sample, dtype=np.int16)
     lo, hi = a.copy(), a.copy()
     padded = np.pad(a, ((1,1),(0,0)), mode='edge')
     for dy in (-1,0,1):

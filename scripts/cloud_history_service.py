@@ -6,6 +6,18 @@ from cloud_history import selection
 CACHE = Path(os.environ.get('TIANGONG_CLOUD_CACHE', Path.home()/'Library/Application Support/Tiangong Orbit Simulator/clouds'))
 
 
+WORKERS = {'satcorps': 'cloud_history.py', 'gmgsi': 'gmgsi.py', 'himawari': 'himawari.py'}
+
+
+def frame_stamp(provider, date, slot):
+    if provider not in WORKERS:
+        raise ValueError('未知云图来源')
+    if provider != 'himawari':
+        return selection(date, slot)[0]
+    from himawari import selection as select_scan
+    return select_scan(date, slot).timestamp()
+
+
 class HistoryService:
     def __init__(self, cache=None, job_name='download-job'):
         # Explicit storage for the desktop service; isolated storage for test instances.
@@ -22,7 +34,7 @@ class HistoryService:
         try:
             saved = json.loads(self.state_path.read_text())
             if saved.get('state') in ('running', 'cancelling', 'ready', 'error', 'cancelled'):
-                selection(saved['date'], saved['hour'])
+                frame_stamp(saved.get('provider', 'satcorps'), saved['date'], saved['hour'])
                 if not re.fullmatch(r'[a-f0-9]{32}', saved['id']):
                     raise ValueError('invalid job')
                 self.state = saved
@@ -58,23 +70,28 @@ class HistoryService:
         except OSError:
             return None
 
-    def start(self, date, hour, request_id=None):
-        stamp, _ = selection(date, hour)
+    def start(self, date, hour, request_id=None, provider="satcorps", revision=None):
+        if revision is not None:
+            if provider not in ('gmgsi','himawari') or not re.fullmatch(r'[0-9]{13}', str(revision)):
+                raise ValueError('云图修订时间无效')
+            revision = int(revision)
+        stamp = frame_stamp(provider, date, hour)
         if request_id and not re.fullmatch(r'[a-f0-9]{32}', request_id):
             raise ValueError('下载请求标识无效')
         with self.lock:
+            same_frame = (provider, date, hour) == (self.state.get('provider', 'satcorps'), self.state.get('date'), self.state.get('hour'))
             if request_id in self.cancelled:
-                return {'state': 'cancelled', 'id': request_id, 'date': date, 'hour': hour}
+                return {'state': 'cancelled', 'id': request_id, 'provider': provider, 'revision': revision, 'date': date, 'hour': hour}
             if self.state['state'] in ('running', 'cancelling'):
-                if (date, hour) != (self.state['date'], self.state['hour']):
+                if not same_frame or revision and revision > (self.state.get('revision') or 0):
                     raise ValueError('另一份云图正在下载，请先取消或等待完成')
                 return dict(self.state)
-            if self.state['state'] == 'ready' and (date, hour) == (self.state['date'], self.state['hour']) and self._image(self.state.get('result', {})) is not None:
+            if self.state['state'] == 'ready' and same_frame and (not revision or self.state['result'].get('createdAt', 0) >= revision) and self._image(self.state.get('result', {})) is not None:
                 return dict(self.state)
             from cloud_versions import library
-            for meta in library(self.cache):
-                if meta.get('time') == int(stamp*1000) and self._image(meta) is not None:
-                    self.state = {'state': 'ready', 'id': request_id or uuid.uuid4().hex, 'date': date, 'hour': hour,
+            for meta in sorted(library(self.cache), key=lambda item: item.get('createdAt', 0), reverse=True):
+                if meta.get('provider') == provider and meta.get('time') == int(stamp*1000) and (not revision or meta.get('createdAt', 0) >= revision) and self._image(meta) is not None:
+                    self.state = {'state': 'ready', 'id': request_id or uuid.uuid4().hex, 'provider': provider, 'revision': revision, 'date': date, 'hour': hour,
                                   'result': meta, 'status': '此版本已保存在本机图库，无需重复下载'}
                     self._persist()
                     return dict(self.state)
@@ -84,11 +101,12 @@ class HistoryService:
             # A different viewer address may explicitly clear the shared map
             # library. Its cleanup must not remove this job's scientific fields.
             self.temp = tempfile.TemporaryDirectory(prefix='starorbit-download-')
-            self.state = {'state': 'running', 'id': request_id or uuid.uuid4().hex, 'date': date, 'hour': hour,
+            self.state = {'state': 'running', 'id': request_id or uuid.uuid4().hex, 'provider': provider, 'revision': revision, 'date': date, 'hour': hour,
                           'status': '正在连接所选时次…', 'startedAt': int(time.time()*1000)}
             self._persist()
             try:
-                self.process = subprocess.Popen([sys.executable, str(Path(__file__).with_name('cloud_history.py')), date, hour, self.temp.name],
+                worker = WORKERS[provider]
+                self.process = subprocess.Popen([sys.executable, str(Path(__file__).with_name(worker)), date, hour, self.temp.name],
                                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, start_new_session=os.name == 'posix')
                 threading.Thread(target=self.run, args=(self.process, self.state['id']), daemon=True).start()
             except OSError:
@@ -99,12 +117,15 @@ class HistoryService:
     def _publish(self, meta):
         data = (Path(self.temp.name)/'image.png').read_bytes()
         sha = hashlib.sha256(data).hexdigest()
-        if meta.get('provider') != 'satcorps' or sha != meta.get('sha256'):
+        if meta.get('provider') != self.state.get('provider', 'satcorps') or sha != meta.get('sha256'):
             raise ValueError('下载文件完整性校验失败')
-        stamp, _ = selection(self.state['date'], self.state['hour'])
+        stamp = frame_stamp(meta['provider'], self.state['date'], self.state['hour'])
         if meta.get('time') != int(stamp*1000):
             raise ValueError('下载文件观测时次不符')
-        name = time.strftime('%Y%m%dT%H00', time.gmtime(stamp))+'-'+sha[:16]
+        if self.state.get('revision') and meta.get('createdAt', 0) < self.state['revision']:
+            raise ValueError('返回的云图早于所选修订')
+        prefix = '' if meta['provider'] == 'satcorps' else meta['provider']+'-'
+        name = prefix+time.strftime('%Y%m%dT%H%M', time.gmtime(stamp))+'-'+sha[:16]
         image = self.cache/(name+'.png')
         pending = image.with_suffix('.'+self.state['id']+'.tmp')
         shutil.copyfile(Path(self.temp.name)/'image.png', pending)

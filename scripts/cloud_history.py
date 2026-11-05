@@ -1,7 +1,7 @@
 """Convert one exact SATCORPS frame; the service saves it in the shared library."""
 import datetime, hashlib, json, tempfile, time
 from pathlib import Path
-from satcorps import BASE, request, fetch_resuming, phase_coverage, acceptable, convert
+from satcorps import BASE, request, fetch_resuming, phase_coverage, acceptable, convert, write_cloud_png
 from cloud_quality import inspect_image, quality_ok, describe_reasons
 from http_download import DownloadError
 
@@ -29,7 +29,7 @@ def query(date, hour):
         raise ValueError('图源文件头无效')
     return {'available': True, 'time': int(reference*1000), 'source': url,
             'release': 'GCC V2A', 'rawBytes': size,
-            'message': '时次文件存在；下载后仍需检查覆盖和图像质量。只读取必要字段，不下载整个原始文件。必要字段下载预算 220 MB，最终 PNG 大小以实际结果为准。'}
+            'message': '时次文件存在，下载后检查覆盖和图像质量。科学字段最多下载 220 MB，最终云图以 30 MB 为目标，上限 50 MB。'}
 
 def build(date, hour, output, progress=lambda message: None):
     reference, url = selection(date, hour)
@@ -45,20 +45,22 @@ def build(date, hour, output, progress=lambda message: None):
         progress('正在转换 8K 云图…');image, mask, meta = convert(path, reference)
     if not 0 < meta.get('coverage',0) <= 1:
         raise ValueError('该时次没有有效云层数据，不能加载')
-    progress('正在检查图像并保存…');quality = inspect_image(image)
-    warnings=[]
+    progress('正在检查图像并保存…')
+    from PIL import Image
+    target = output/'image.png'; pending = output/'image.tmp'
+    try:
+        encoding = write_cloud_png(pending, image, mask)
+        with Image.open(pending) as texture:quality = inspect_image(texture)
+        pending.replace(target)
+    finally:
+        pending.unlink(missing_ok=True)
+    warnings=list(encoding.get('warnings', []))
     if not acceptable(meta):warnings.append('局部或极区缺测；缺测位置显示内置静态云图')
     if not quality_ok(quality):warnings.append(describe_reasons(quality['reasons']))
-    target = output/'image.png'; pending = output/'image.tmp'
-    # Retain the true validity mask. Missing retrievals must not look like clear sky.
-    from PIL import Image,ImageChops
-    validity=mask.point(lambda x:255 if x else 0);image=ImageChops.multiply(image,validity)
-    image=Image.merge('RGBA',(image,image,image,validity))
-    image.save(pending, 'PNG', compress_level=4); pending.replace(target)
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     return {**meta, 'source': url, 'release': 'GCC V2A', 'downloadBytes': downloaded,
-            'sha256': digest, 'quality': {**quality, 'sha256': digest}, 'size': target.stat().st_size,
-            'channel':'validity','warnings':warnings,'manualEligible':True}
+            **encoding, 'sha256': digest, 'quality': {**quality, 'sha256': digest},
+            'warnings':warnings,'manualEligible':True}
 
 if __name__ == '__main__':
     import sys

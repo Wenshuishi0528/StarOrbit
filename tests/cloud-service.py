@@ -51,19 +51,23 @@ with tempfile.TemporaryDirectory() as temp:
  assert first['result']['sha256']==frame['sha256']
  print('NASA successful-check TTL, truthful timestamps, helper cache usage and running-job deduplication passed')
 
- class Image:
-  def save(self,path,*args,**kwargs):Path(path).write_bytes(b'converted cloud')
+ from PIL import Image
+ opacity=Image.new('L',(16,8),174)
+ mask=Image.new('L',opacity.size,1);mask.putpixel((15,7),0)
  clock=1800000000;rows=list(candidates(clock))[:2]
  def good(reference):return {k:v for k,v in {**meta,'time':reference*1000}.items() if k!='sha256'}
  # Fresh successful release: phase bytes are included, later clicks skip transfer.
  folder=Path(temp)/'updated'
- with patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])),patch('satcorps.fetch_frame',return_value=10) as fetch,patch('satcorps.phase_coverage',return_value=good(rows[0][0])),patch('satcorps.convert',return_value=(Image(),None,good(rows[0][0]))):
+ with patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])),patch('satcorps.fetch_frame',return_value=10) as fetch,patch('satcorps.phase_coverage',return_value=good(rows[0][0])),patch('satcorps.convert',return_value=(opacity,mask,good(rows[0][0]))):
   changed=build(folder,now=clock);assert changed['updateStatus']=='updated' and changed['checkComplete'] and changed['downloadBytes']==20
+  assert changed['channel']=='validity' and changed['size']==Path(changed['file']).stat().st_size
+  with Image.open(changed['file']) as published:
+   rgba=published.convert('RGBA');assert rgba.getpixel((0,0))==(174,174,174,255) and rgba.getpixel((15,7))==(0,0,0,0)
   same=build(folder,now=clock+1);assert same['updateStatus']=='unchanged' and same['cachedCheck'] and same['checkedAt']==changed['checkedAt'];assert fetch.call_count==2
   later=build(folder,now=clock+CHECK_TTL+1);assert later['updateStatus']=='unchanged' and not later['cachedCheck'] and later['checkedAt']==(clock+CHECK_TTL+1)*1000;assert fetch.call_count==2
  # If a more recent candidate failed, a usable older replacement is only a partial check.
  folder=Path(temp)/'partial';previous=fixture(folder,clock-3*DAY)
- with patch('satcorps.candidates',side_effect=lambda now:iter(rows)),patch('satcorps.fetch_frame',side_effect=[RuntimeError('offline'),10,10]),patch('satcorps.phase_coverage',return_value=good(rows[1][0])),patch('satcorps.convert',return_value=(Image(),None,good(rows[1][0]))):
+ with patch('satcorps.candidates',side_effect=lambda now:iter(rows)),patch('satcorps.fetch_frame',side_effect=[RuntimeError('offline'),10,10]),patch('satcorps.phase_coverage',return_value=good(rows[1][0])),patch('satcorps.convert',return_value=(opacity,mask,good(rows[1][0]))):
   result=build(folder,now=clock)
  assert result['updateStatus']=='partial' and not result['checkComplete'] and result['time']==rows[1][0]*1000
  assert Path(previous['file']).exists() and len(list(folder.glob('*.png')))==2
@@ -78,7 +82,7 @@ with tempfile.TemporaryDirectory() as temp:
  # A complete, recent but visibly defective candidate never displaces the good frame.
  folder=Path(temp)/'bad-quality';previous=fixture(folder,clock-3*DAY)
  bad={'schema':1,'status':'rejected','reasons':['high-opacity-plateau'],'metrics':{'plateauFraction':.02}}
- with patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])),patch('satcorps.fetch_frame',return_value=10),patch('satcorps.phase_coverage',return_value=good(rows[0][0])),patch('satcorps.convert',return_value=(Image(),None,good(rows[0][0]))),patch('satcorps.inspect_image',return_value=bad):
+ with patch('satcorps.candidates',side_effect=lambda now:iter(rows[:1])),patch('satcorps.fetch_frame',return_value=10),patch('satcorps.phase_coverage',return_value=good(rows[0][0])),patch('satcorps.convert',return_value=(opacity,mask,good(rows[0][0]))),patch('satcorps.inspect_image',return_value=bad):
   result=build(folder,now=clock)
  assert result['sha256']==previous['sha256'] and result['updateStatus']=='unchanged'
  assert '质量检查未通过' in result['updateMessage'] and not result['retryable']

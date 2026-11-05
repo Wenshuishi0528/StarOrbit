@@ -1,10 +1,10 @@
 import {selectSnapshot} from './weather-math.js';
 import {manualCloudUsable} from './cloud-manual.js';
-export function cloudProvider(record){return record?.provider==='satcorps'?'satcorps':'github';}
+export function cloudProvider(record){return ['satcorps','gmgsi','himawari','gdps'].includes(record?.provider)?record.provider:'github';}
 export const CLOUD_QUALITY_SCHEMA=1;
-export const GITHUB_CLOUD_UNAVAILABLE='GitHub 云图源包含不可逆的显示增强和极区镜像，不能可靠还原真实云量，已停用；历史文件仍可预览、导出和删除';
+export const GITHUB_CLOUD_UNAVAILABLE='请在云图库下载去极区镜像的 GitHub 云图，再选择使用';
 export function acceptedCloudQuality(record){return record?.quality?.schema===CLOUD_QUALITY_SCHEMA&&record.quality.status==='accepted'&&Array.isArray(record.quality.reasons)&&record.quality.reasons.length===0;}
-export function cloudUnavailableReason(record){if(record?.provider==='viirs')return 'VIIRS 扫描预览不是完整全球合成云图，请选择 NASA 全球版本';return cloudProvider(record)==='github'?GITHUB_CLOUD_UNAVAILABLE:record?.quality?.status==='rejected'?'此云图未通过质量检查，不能应用；已保留历史文件':'此 NASA 云图尚未通过新版质量检查，请检查 NASA 更新；历史文件已保留';}
+export function cloudUnavailableReason(record){if(['himawari','gdps'].includes(record?.provider))return '此云图未通过文件校验，请重新下载';if(record?.provider==='gmgsi')return '此 NOAA 云图未通过文件校验，请重新下载';if(record?.provider==='viirs')return 'VIIRS 扫描预览不是完整全球合成云图，请选择 NASA 全球版本';return cloudProvider(record)==='github'?GITHUB_CLOUD_UNAVAILABLE:record?.quality?.status==='rejected'?'此云图未通过质量检查，不能应用；已保留历史文件':'此 NASA 云图尚未通过新版质量检查，请检查 NASA 更新；历史文件已保留';}
 export function protectedCloudIds(items){return ['satcorps','github'].flatMap(provider=>items.filter(r=>r.kind==='cloud'&&!r.integrityFailed&&cloudProvider(r)===provider&&acceptedCloudQuality(r)).sort((a,b)=>(b.time||b.downloaded)-(a.time||a.downloaded)).slice(0,2).map(r=>r.id));}
 export function retiredNASA(record){return record?.kind==='cloud'&&cloudProvider(record)==='satcorps'&&record.time===1719748800000;}
 export async function retireNASA(cache){return (await cache.all()).filter(row=>retiredNASA(row)&&!manualCloudUsable(row)).map(row=>row.id);}

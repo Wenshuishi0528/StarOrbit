@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v0.94 — 2026-11-05
+
+**中文：** 修复 WebKit 切换已保存云图时旧图片引用失效的问题；优先读取当前副本，必要时按相同来源、时次和 SHA 从本机图库恢复。新增向日葵-9 亚太十分钟云分类和加拿大 GDPS 全球总云量预报。向日葵的观测范围外及缺测位置留空，GDPS 分别标明起报和有效时刻。[云图库使用说明](使用说明.md#云图与极光)。
+
+**English:** Fixed intermittent WebKit errors when switching saved cloud maps. StarOrbit reads the current copy and can recover matching bytes from the local library. Added Himawari-9 regional cloud classifications and Canadian GDPS global cloud forecasts. Unobserved Himawari areas remain empty, and forecasts distinguish model initialization from valid time.
+
+## v0.93 — 2026-11-05
+
+**中文：** 云图库恢复可从浏览器直接下载的 Live Cloud Maps 8K 增强图，去除镜像极区；新增 NOAA GMGSI 每小时 4K 长波红外图（桌面本机服务）。NASA 新生成图使用紧凑的灰度与有效性编码。单张生成文件目标 30 MB，上限 50 MB，保留旧图库与快照兼容性。[五种图源及实际大小](docs/v0.93-cloud-sources.md)。
+
+**English:** Download polar-masked Live Cloud Maps in the browser or hourly NOAA GMGSI infrared mosaics through the local service. New NASA images use compact grayscale and validity encoding. Generated textures target 30 MB with a 50 MB ceiling. Existing snapshots remain compatible.
+
 ## v0.92 — 2026-11-04
 
 **中文：** 修复 Safari 恢复 NASA 有效性云图时长时间停留在启动页的问题。8K 云图由逐行读回改为 64 行条带，读回次数从 4096 降至 64；保留原始数据与有效性通道。启动先恢复模型、轨道和画质，首帧后后台恢复已选云图，避免云图解码阻塞主界面或按未确定画质重复处理。增加真实分阶段启动状态；保留 v0.91 的全部小地图功能与轻量底图。

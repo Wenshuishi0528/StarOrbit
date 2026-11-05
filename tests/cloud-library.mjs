@@ -16,6 +16,13 @@ const b={...meta,id:'revision',sha256:'b'.repeat(64)},remote={provider:'satcorps
 const first=mergeCloudVersions([remote],[meta,b],[{...meta,disk:'saved.png'}]);
 const second=mergeCloudVersions([remote],[b,meta],[{...meta,disk:'saved.png'}]);
 assert.equal(first.length,2);assert.deepEqual(first.map(r=>r.key).sort(),second.map(r=>r.key).sort(),'revision identity is stable across cache reorder');assert(first.find(r=>r.record.id==='saved').diskRecord);
+const noaa={...meta,provider:'gmgsi',id:'noaa',resolution:'4096×2048',sha256:'c'.repeat(64)};
+summary.w.items=[meta,noaa];summary.disk=[{...noaa,sha256:'d'.repeat(64),disk:'old-revision.png'}];
+assert.equal(summary.saved.length,3);
+summary.task={state:'ready',recordId:noaa.id};
+assert.equal(summary.completedRow?.record.id,noaa.id);
+summary.task={state:'ready',result:{...noaa,sha256:'d'.repeat(64)}};
+assert.equal(summary.completedRow?.diskRecord.disk,'old-revision.png');
 let releaseCatalog;const started=[];
 const all=Object.create(Weather.prototype);Object.assign(all,{settings:{},sim:{missionId:'tiangong'},resourcePanel:{refreshCloudVersions:()=>new Promise(resolve=>releaseCatalog=resolve)},updateResource:async kind=>started.push(kind),render(){}});
 const updating=all.updateAll();await Promise.resolve();assert.deepEqual(started,['aurora','orbit'],'other updates start before the cloud catalog responds');releaseCatalog();await updating;

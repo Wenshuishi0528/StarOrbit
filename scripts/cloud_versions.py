@@ -72,7 +72,7 @@ def library(cache):
     for path in Path(cache).glob('*.json'):
         try:
             meta=json.loads(path.read_text()); image=path.with_suffix('.png')
-            if meta.get('provider')!='satcorps' or not image.is_file():continue
+            if meta.get('provider') not in ('satcorps','gmgsi','himawari') or not image.is_file():continue
             timestamp=meta.get('time')
             if not isinstance(timestamp,(int,float)) or not 0<timestamp<8640000000000000 or not math.isfinite(timestamp):continue
             if not isinstance(meta.get('sha256'),str) or not re.fullmatch(r'[a-f0-9]{64}',meta['sha256']):continue
@@ -100,7 +100,7 @@ def local_image(cache,name,sha,thumbnail=False):
     root=Path(cache);path=root/name
     try:
         meta=json.loads(path.with_suffix('.json').read_text());data=path.read_bytes()
-        if meta.get('provider')!='satcorps' or sha!=meta.get('sha256') or hashlib.sha256(data).hexdigest()!=sha:return None
+        if meta.get('provider') not in ('satcorps','gmgsi','himawari') or sha!=meta.get('sha256') or hashlib.sha256(data).hexdigest()!=sha:return None
         if thumbnail:
             from PIL import Image
             with Image.open(io.BytesIO(data)) as im:

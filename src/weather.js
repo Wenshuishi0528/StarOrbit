@@ -10,14 +10,14 @@ import {validateRotation} from './spacecraft-attitude.js';
 import {inspectCloudBitmap,requireCloudQuality} from './cloud-quality.js';
 import {prepareGithubCloud} from './cloud-mask-repair.js';
 import {cloudProvider,selectCloud,validateNASA,completeNASA,retireNASA,protectedCloudIds,cloudUnavailableReason,GITHUB_CLOUD_UNAVAILABLE} from './cloud-source.js';
-import {CLOUD_PNG,CLOUD_MAX_BYTES,CLOUD_SNAPSHOT_MAX_BYTES,cloudChannel,cloudDecodeSize,cloudTone} from './cloud-texture.js';
+import {CLOUD_PNG,LIVE_CLOUD_PROCESSING,CLOUD_MAX_BYTES,CLOUD_SNAPSHOT_MAX_BYTES,cloudChannel,cloudDecodeSize,cloudTone,fixedCloudField,textureChannel} from './cloud-texture.js';
 import {OrbitRepository,orbitSource} from './orbit-repository.js';
 import * as THREE from 'three';
 import {t,errorText,onLanguageChange} from './i18n.js';
 import {WeatherCache} from './weather-cache.js';
 import {manualCloudUsable,cloudWarnings} from './cloud-manual.js';
 import {versionKey} from './cloud-history-data.js';
-import {CloudLibrary} from './cloud-library.js';
+import {CloudLibrary,cloudTitle} from './cloud-library.js';
 import {validateAurora,auroraPixels,selectSnapshot,seedNumber,clamp} from './weather-math.js';
 import {DEFAULT_MISSION,mission,bindOrbit,validatePose} from './missions.js';
 import {validateOrbit} from './orbit.js';
@@ -94,8 +94,11 @@ export class Weather{
  async store(kind,blob,extra={}){
   const hash=extra.contentHash||await blobHash(blob);delete extra.contentHash;
   const id=kind+'-'+(kind==='orbit'?(extra.missionId||this.sim.missionId)+'-':'')+(extra.archiveKey?extra.archiveKey+'-':'')+(extra.provider==='satcorps'?'satcorps-'+extra.time+'-':'')+hash;
-  const existing=this.items.find(x=>x.id===id||extra.archiveKey&&x.kind===kind&&x.sha256===hash&&x.provider===extra.provider&&x.time===extra.time&&(extra.provider!=='viirs'||x.period===extra.period));
-  if(existing){const favorite=existing.favorite;Object.assign(existing,extra,{blob,size:blob.size,sha256:hash,favorite:favorite||extra.favorite===true});await this.cache.put(existing);this.messages[kind]='已是最新可用数据';return existing;}
+  const existing=this.items.find(x=>x.id===id||extra.archiveKey&&x.kind===kind&&x.sha256===hash&&x.provider===extra.provider&&x.time===extra.time&&(extra.provider!=='viirs'||x.period===extra.period)&&(extra.provider!=='gdps'||x.forecastRun===extra.forecastRun));
+  if(existing){
+   const updated={...existing,...extra,blob,size:blob.size,sha256:hash,favorite:existing.favorite||extra.favorite===true};
+   await this.cache.put(updated);Object.assign(existing,updated);this.messages[kind]='已是最新可用数据';return existing;
+  }
   const record={id,kind,...(kind==='orbit'?{missionId:extra.missionId||this.sim.missionId}:{}),blob,size:blob.size,sha256:hash,downloaded:Date.now(),time:null,favorite:false,source:SOURCE[kind],...extra};
   this.pendingRecords.add(id);
   try{await this.cache.put(record);}catch(error){
@@ -295,11 +298,11 @@ export class Weather{
   throw Object.assign(Error(GITHUB_CLOUD_UNAVAILABLE),{retryable:false});
  }
  async validateCloud(blob,alpha=false){if(alpha){const header=new Uint8Array(await blob.slice(0,8).arrayBuffer());if(![137,80,78,71,13,10,26,10].every((v,i)=>header[i]===v))throw Error('云图格式无效');}const image=await createImageBitmap(blob);try{if(image.width!==8192||image.height!==4096)throw Error('云图尺寸无效');return requireCloudQuality(await inspectCloudBitmap(image));}finally{image.close();}}
- bindCloud(){this.env.uniforms.cloudTone.value=this.cloudTexture?(this.cloudTexture.userData.cloudTone??cloudTone(this.cloudRecord)):0;this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;this.env.uniforms.cloudChannel.value=this.cloudTexture?(this.cloudTexture.userData.cloudChannel??(cloudChannel(this.cloudRecord)==='validity'?2:cloudChannel(this.cloudRecord)==='alpha'?1:0)):0;}
+ bindCloud(){this.env.uniforms.cloudTone.value=this.cloudTexture?(this.cloudTexture.userData.cloudTone??cloudTone(this.cloudRecord)):0;this.env.uniforms.cloudMap.value=this.cloudTexture||this.env.builtinCloud||this.env.fallback;this.env.uniforms.cloudChannel.value=this.cloudTexture?(this.cloudTexture.userData.cloudChannel??textureChannel(this.cloudRecord)):0;}
  async texture(record,isStale=()=>false){if(record.kind==='aurora'){const d=auroraPixels(JSON.parse(await record.blob.text()));const tex=new THREE.DataTexture(d,360,181,THREE.RedFormat);tex.minFilter=tex.magFilter=THREE.LinearFilter;tex.wrapS=THREE.RepeatWrapping;tex.needsUpdate=true;return tex;}
   const decode=async()=>{
    if(isStale())return null;
-   if(record.sha256&&await this.checkedCloudHash(record.blob)!==record.sha256)throw Error('云图缓存完整性校验失败，请重新下载');
+   if(record.sha256&&await this.checkedCloudHash(record.blob)!==record.sha256)throw Object.assign(Error('云图缓存完整性校验失败，请重新下载'),{code:'CLOUD_CACHE_INTEGRITY'});
    let bitmap=await createImageBitmap(record.blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
    try{const size=cloudDecodeSize(bitmap.width,bitmap.height,this.env.quality,this.env.api.renderer.capabilities.maxTextureSize);let tex;
     if(cloudTone(record)===1){
@@ -317,7 +320,7 @@ export class Weather{
        for(let x=0;x<row.length;x+=4){const i=y*width*4+x,a=row[x+3];output[i]=output[i+1]=output[i+2]=Math.round(row[x]*a/255);output[i+3]=a;}
        await new Promise(resolve=>setTimeout(resolve,0));
       }
-      bitmap.close();canvas.width=1;tex=new THREE.DataTexture(output,width,height,THREE.RGBAFormat);tex.generateMipmaps=true;tex.minFilter=THREE.LinearMipmapLinearFilter;tex.magFilter=THREE.LinearFilter;tex.userData.cloudChannel=2;
+      bitmap.close();canvas.width=1;tex=new THREE.DataTexture(output,width,height,THREE.RGBAFormat);tex.generateMipmaps=true;tex.minFilter=THREE.LinearMipmapLinearFilter;tex.magFilter=THREE.LinearFilter;tex.userData.cloudChannel=textureChannel(record);
      }else tex=new THREE.Texture(bitmap);
     }
     tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(this.env.quality==='high'?16:4,this.env.api.renderer.capabilities.getMaxAnisotropy());tex.needsUpdate=true;return tex;
@@ -334,7 +337,29 @@ export class Weather{
   if(this.pendingApply[k]?.key===key&&this.pendingApply[k].token===this.tokens[k])return this.pendingApply[k].promise;
   const token=++this.tokens[k],run=async()=>{
   if(record&&this.active[k]===record.id&&!(k==='cloud'&&this.cloudTier!==this.env.quality)){if(k==='cloud')this.bindCloud();this.status(k);return;}
-  if(record){const tex=await this.texture(record,()=>token!==this.tokens[k]);if(!tex)return;if(token!==this.tokens[k]){tex.dispose();tex.image?.close?.();return;}this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;if(k==='cloud')this.cloudRecord=record;}
+  if(record){
+   const stale=()=>token!==this.tokens[k];
+   let tex;
+   try{tex=await this.texture(record,stale);}
+   catch(error){
+    // A disk-backed IDB handle can also expire while restoring the saved
+    // selection or changing quality. Only this optional texture waits for repair.
+    const fileError=['NotFoundError','NotReadableError'].includes(error.name)||error.code==='CLOUD_CACHE_INTEGRITY';
+    if(k!=='cloud'||!fileError||!this.cloudLibrary)throw error;
+    if(stale())return;
+    await this.nasaRestore?.catch(()=>{});
+    if(stale())return;
+    const row=this.cloudLibrary.saved.find(item=>item.record?.id===record.id);
+    if(!row)throw error;
+    record=await this.cloudLibrary.ensureRecord(row);
+    if(stale())return;
+    tex=await this.texture(record,stale);
+   }
+   if(!tex)return;
+   if(stale()){tex.dispose();tex.image?.close?.();return;}
+   this.release(k);this[k+'Texture']=tex;this.active[k]=record.id;this.cloudTier=this.env.quality;
+   if(k==='cloud')this.cloudRecord=record;
+  }
   else {const had=!!this.active[k];this.release(k);if(!had&&this.appliedMode?.[k]===mode){this.status(k);return;}}
   this.appliedMode??={};this.appliedMode[k]=mode;this.historyDirty=true;
   if(k==='cloud')this.bindCloud();
@@ -344,19 +369,48 @@ export class Weather{
   const promise=run(),request={key,promise,token,recordId:record?.id};this.pendingApply[k]=request;
   try{return await promise;}finally{if(this.pendingApply[k]===request)delete this.pendingApply[k];}
  }
- async validateManualCloud(record){
+ async validateManualCloud(record,{fromLocalLibrary=false}={}){
   if(record.provider==='viirs'||record.kind==='cloud-preview')throw Error('VIIRS 扫描预览不是完整全球合成云图，请选择 NASA 全球版本');
   const blob=record.blob;if(!blob||blob.size>CLOUD_MAX_BYTES)throw Error('云图文件无效或过大');
-  const digest=await this.checkedCloudHash(blob);if(record.sha256&&digest!==record.sha256){const stored=this.items.find(r=>r.id===record.id);if(stored)stored.integrityFailed=true;throw Error('云图文件校验失败，请重新下载');}
-  if(record.provider==='satcorps'&&(!Number.isFinite(record.time)||record.time<=0||record.time>Date.now()+300000||!(record.coverage>0)))throw Error('此版本没有有效观测数据或日期无效');
+  const digest=await this.checkedCloudHash(blob);if(record.sha256&&digest!==record.sha256){const stored=this.items.find(r=>r.id===record.id);if(stored?.blob===blob)stored.integrityFailed=true;throw Error('云图文件校验失败，请重新下载');}
+  if(['satcorps','gmgsi','himawari'].includes(record.provider)&&(!Number.isFinite(record.time)||record.time<=0||record.time>Date.now()+300000||!(record.coverage>0&&record.coverage<=1)))throw Error('此版本没有有效观测数据或日期无效');
+  if(record.provider==='gdps'&&(!Number.isFinite(record.forecastRun)||record.forecastRun<=0||record.forecastRun>Date.now()+300000
+    ||!Number.isFinite(record.time)||record.time<record.forecastRun||record.time-record.forecastRun>10*86400000))throw Error('预报起报或有效时间无效');
   const image=await createImageBitmap(blob,{colorSpaceConversion:'none'});
   try{
    if(image.width>8192||image.width<1024||image.height*2!==image.width)throw Error('云图格式或尺寸不支持');
    const width=256,height=width/2,c=new OffscreenCanvas(width,height),ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,width,height);
    const pixels=ctx.getImageData(0,0,width,height).data;let validPixels=0;
    for(let i=3;i<pixels.length;i+=4)if(pixels[i]>0)validPixels++;
+   const noaa=record.provider==='gmgsi',cropped=record.processing===LIVE_CLOUD_PROCESSING;
+   if(noaa||cropped){
+    if(record.channel!=='validity'||cropped&&record.provider!=='github')throw Error('云图通道无效');
+    if(noaa&&(image.width!==4096||image.height!==2048))throw Error('云图尺寸无效');
+    // Allow one downsampled cell at the edge of the valid latitude band.
+    const polarRows=Math.floor(height*(90-(noaa?60:67.5))/180)-1,edge=polarRows*width*4;
+    for(let i=3;i<edge;i+=4)if(pixels[i]||pixels[pixels.length-edge+i])throw Error('云图极区校验失败');
+   }
+   if(fixedCloudField(record)){
+    const isRegional=record.provider==='himawari';
+    if(record.channel!=='validity'||image.width!==(isRegional?4096:2400))throw Error('云图格式或尺寸不支持');
+    if(isRegional){
+     // The back of the globe cannot be observed from Himawari at 140.7°E.
+     // Use a conservative margin at the limb of the downsampled validation mask.
+     const rad=Math.PI/180;
+     for(let y=0;y<height;y++){
+      const cosLat=Math.cos((90-180*(y+.5)/height)*rad);
+      for(let x=0;x<width;x++){
+       const fromSatellite=cosLat*Math.cos((360*(x+.5)/width-180-140.7)*rad);
+       if(fromSatellite<.10&&pixels[(y*width+x)*4+3])throw Error('向日葵云图覆盖范围无效');
+      }
+     }
+    }
+   }
    if(!validPixels)throw Error('此版本没有可加载的数据');
-   const quality=record.provider==='satcorps'?await inspectCloudBitmap(image):record.quality;
+   // Desktop sidecars bind the converter's QA to these exact PNG bytes.
+   // Import still screens the actual pixels independently of snapshot metadata.
+   const certified=fromLocalLibrary&&record.quality?.schema===1&&record.quality.sha256===digest;
+   const quality=record.provider==='satcorps'&&!certified?await inspectCloudBitmap(image):record.quality;
    return {sha256:digest,quality,manualValidation:{schema:1,sha256:digest,validPixels},warnings:cloudWarnings({...record,quality})};
   }finally{image.close();}
  }
@@ -365,7 +419,14 @@ export class Weather{
   if(['cloud','cloud-preview'].includes(record.kind)){
    this.pendingRecords.add(record.id);
    try{
-    Object.assign(record,await this.validateManualCloud(record));await this.cache.put(record);await this.reload();
+    // Selecting a verified image is a read. Rewriting the same IDB Blob here
+    // can invalidate its file handle while another canvas is still using it.
+    if(!manualCloudUsable(record)){
+     Object.assign(record,await this.validateManualCloud(record));await this.cache.put(record);
+    }
+    const index=this.items.findIndex(item=>item.id===record.id);
+    if(index>=0)this.items[index]=record;
+    else await this.reload();
     await this.setSource('cloud','history',record.id);
    }finally{this.pendingRecords.delete(record.id);}
   }else if(record.kind==='orbit'){const id=record.missionId||DEFAULT_MISSION;if(id!==this.sim.missionId)throw Error('请先切换到此轨道所属任务');this.acceptOrbit(validateOrbit(JSON.parse(await record.blob.text())),record.id,id);}
@@ -412,9 +473,10 @@ export class Weather{
    // Imported acceptance flags are not authority: check the actual pixels again.
    nasa={...x.meta,...await this.validateManualCloud({...x.meta,blob})};
   }
-  const record=await this.store(k,blob,{...(k==='orbit'?{missionId}:{}),time,observed,source:'导入快照',favorite:true,...(k==='cloud'?{channel:cloudChannel(x.meta),provider:cloudProvider(x.meta)}:{}),...Object.fromEntries(Object.entries(nasa).filter(([key])=>['provider','time','observedStart','observedEnd','resolution','nativeResolution','channel','coverage','polarCoverage','footprint','release','source','sources','sha256','quality','manualValidation','warnings','date','period'].includes(key))),...(['cloud','cloud-preview'].includes(k)?{archiveKey:versionKey(nasa),archiveOnly:false}:{})});
+  const record=await this.store(k,blob,{...(k==='orbit'?{missionId}:{}),time,observed,source:'导入快照',favorite:true,...(k==='cloud'?{integrityFailed:false,channel:cloudChannel(x.meta),provider:cloudProvider(x.meta)}:{}),...Object.fromEntries(Object.entries(nasa).filter(([key])=>['provider','time','observedStart','observedEnd','resolution','nativeResolution','channel','coverage','polarCoverage','footprint','release','source','sources','sha256','quality','manualValidation','warnings','date','period','processing','attribution','publishedAt','createdAt','sceneEnd','latitudeLimit','featherDegrees','pngEncoding','maxOpacityError','rawBytes','downloadBytes','forecastRun','productType','slot','licenseURL'].includes(key))),...(['cloud','cloud-preview'].includes(k)?{archiveKey:versionKey(nasa),archiveOnly:false}:{})});
   try{
-   record.favorite=true;await this.cache.put(record);
+   // store() already persisted favorite. A second write would replace the
+   // backing file just read by reload() before setSource() can decode it.
    if(k!=='orbit')await this.setSource(k==='cloud-preview'?'cloud':k,'history',record.id);
    else this.acceptOrbit(validateOrbit(JSON.parse(await blob.text())),record.id,missionId);
    await this.trim();this.render();
@@ -442,7 +504,7 @@ export class Weather{
  }
  renderChoices(){
   this.choicesDirty=false;
-  for(const k of ['cloud','aurora']){const sel=$(k+'History');sel.replaceChildren(new Option(t('跟随模拟时间（±6小时）'),'auto'));for(const r of this.items.filter(x=>x.kind===k&&x.provider!=='viirs').sort((a,b)=>b.downloaded-a.downloaded)){const option=new Option((k==='cloud'?(cloudProvider(r)==='satcorps'?'NASA · ':'github · '):'')+fmt(r.time)+(r.time?'':' · '+t('下载')+' '+fmt(r.downloaded))+(k==='cloud'&&!completeNASA(r)&&!manualCloudUsable(r)?' · '+t('未通过质量检查'):''),r.id);option.disabled=k==='cloud'&&!completeNASA(r)&&!manualCloudUsable(r);sel.add(option);}sel.value=this.settings[k+'History'];if(sel.selectedIndex<0){const missing=new Option(t('快照已删除'),this.settings[k+'History']);missing.disabled=true;sel.add(missing);sel.value=this.settings[k+'History'];}sel.disabled=this.settings[k]!=='history';this.status(k);}
+  for(const k of ['cloud','aurora']){const sel=$(k+'History');sel.replaceChildren(new Option(t('跟随模拟时间（±6小时）'),'auto'));for(const r of this.items.filter(x=>x.kind===k&&x.provider!=='viirs').sort((a,b)=>b.downloaded-a.downloaded)){const option=new Option((k==='cloud'?(cloudProvider(r)==='satcorps'?'NASA · ':cloudProvider(r)==='gmgsi'?'NOAA · ':cloudProvider(r)==='himawari'?t('向日葵-9')+' · ':cloudProvider(r)==='gdps'?'GDPS · ':'Live Cloud Maps · '):'')+fmt(r.time)+(r.time?'':' · '+t('下载')+' '+fmt(r.downloaded))+(k==='cloud'&&!completeNASA(r)&&!manualCloudUsable(r)?' · '+t('未通过质量检查'):''),r.id);option.disabled=k==='cloud'&&!completeNASA(r)&&!manualCloudUsable(r);sel.add(option);}sel.value=this.settings[k+'History'];if(sel.selectedIndex<0){const missing=new Option(t('快照已删除'),this.settings[k+'History']);missing.disabled=true;sel.add(missing);sel.value=this.settings[k+'History'];}sel.disabled=this.settings[k]!=='history';this.status(k);}
  }
  renderHistory(){
   if(!this.historyDirty)return;this.historyDirty=false;this.previewURLs??=new Set();for(const url of this.previewURLs)URL.revokeObjectURL(url);this.previewURLs.clear();
@@ -451,8 +513,13 @@ export class Weather{
    if(['cloud','cloud-preview'].includes(r.kind)){if(r.kind==='cloud'&&!completeNASA(r))text.textContent+='\n'+cloudUnavailableReason(r);const image=document.createElement('img');image.alt=t('云图预览');image.loading='lazy';image.width=512;image.height=256;card.append(image);this.preview(image,r);}
    const buttons=document.createElement('div');buttons.className='angle-actions';for(const [label,fn] of [['使用此版本',()=>this.useRecord(r)],[r.favorite?'取消收藏':'收藏',async()=>{r.favorite=!r.favorite;await this.cache.put(r);await this.reload();}],['导出',()=>this.exportRecord(r)],['删除',()=>this.remove(r.id)]]){const b=document.createElement('button');b.textContent=t(label);b.disabled=(label==='使用此版本'&&r.kind==='cloud-preview')||(label==='删除'&&r.favorite)||(label==='使用此版本'&&r.kind==='cloud'&&!completeNASA(r))||(label==='使用此版本'&&r.kind==='orbit'&&(r.missionId||DEFAULT_MISSION)!==this.sim.missionId);if(label==='使用此版本'&&Object.values(this.active).includes(r.id)){b.textContent=t('正在使用');b.disabled=true;}b.onclick=()=>Promise.resolve(fn()).catch(e=>this.fail('cache',e));buttons.append(b);}card.append(buttons);list.append(card);}
  }
- status(k){const mode=this.settings[k],r=this.items.find(x=>x.id===this.active[k]);let s=t(mode==='local'?'本地生成':mode==='off'?'已关闭':mode==='builtin'?'内置静态云图':r?(k==='aurora'?'NOAA 极光预测':'卫星合成云图'):'没有匹配快照，使用内置云图／关闭极光');if(r)s+='\n'+t(k==='aurora'?'预测有效时间':'观测时间')+': '+fmt(r.time)+'\n'+t('下载')+': '+fmt(r.downloaded)+(r.time?'\n'+t('与模拟时间相差 {hours} 小时',{hours:(Math.abs(this.sim.time-r.time)/3600e3).toFixed(1)}):'');if(k==='cloud'&&mode==='satcorps'&&!r)s=t('尚无通过质量检查的 NASA 云图，当前显示内置云图');if(k==='cloud'&&mode==='latest'&&!r)s=GITHUB_CLOUD_UNAVAILABLE+'；当前显示内置云图';if(k==='cloud'&&r&&cloudProvider(r)==='satcorps')s+='\nNASA · '+r.resolution+'\n'+t('观测范围')+': '+fmt(r.observedStart)+' — '+fmt(r.observedEnd)+'\n'+t('有效反演像素')+': '+(100*r.coverage).toFixed(2)+'%';$(k+'DataStatus').textContent=s;}
- update(q){const e=this.env,s=this.settings,u=e.uniforms,a=e.auroraUniforms,timestamp=q?.t??this.sim.time;u.weatherTime.value=a.weatherTime.value=(timestamp-Date.UTC(2026,0,1))/3600e3;u.seed.value=a.seed.value=seedNumber(s.seed);u.cloudMode.value=s.cloud==='local'?1:0;u.cloudMotion.value=e.quality==='high'&&s.motion?1:0;const cloudRecord=this.items.find(x=>x.id===this.active.cloud);u.motionTime.value=cloudRecord?clamp((timestamp-(cloudRecord.time??cloudRecord.downloaded))/3600e3,-6,6):6.*Math.sin(u.weatherTime.value*.04);if(s.cloud==='off')u.cloudAmount.value=0;this.env.volumeClouds.visible=this.env.volumeClouds.visible&&s.cloud!=='off';
+ status(k){const mode=this.settings[k],r=this.items.find(x=>x.id===this.active[k]);let s=t(mode==='local'?'本地生成':mode==='off'?'已关闭':mode==='builtin'?'内置静态云图':r?(k==='aurora'?'NOAA 极光预测':r.provider==='gdps'?'模式云量预报':'卫星合成云图'):'没有匹配快照，使用内置云图／关闭极光');if(r)s+='\n'+t(k==='aurora'||r.provider==='gdps'?'预测有效时间':'观测时间')+': '+fmt(r.time)+'\n'+t('下载')+': '+fmt(r.downloaded)+(r.time?'\n'+t('与模拟时间相差 {hours} 小时',{hours:(Math.abs(this.sim.time-r.time)/3600e3).toFixed(1)}):'');if(k==='cloud'&&mode==='satcorps'&&!r)s=t('尚无通过质量检查的 NASA 云图，当前显示内置云图');if(k==='cloud'&&mode==='latest'&&!r)s=GITHUB_CLOUD_UNAVAILABLE+'；当前显示内置云图';if(k==='cloud'&&r&&cloudProvider(r)==='satcorps')s+='\nNASA · '+r.resolution+'\n'+t('观测范围')+': '+fmt(r.observedStart)+' — '+fmt(r.observedEnd)+'\n'+t('有效反演像素')+': '+(100*r.coverage).toFixed(2)+'%';if(k==='cloud'&&r)s=cloudTitle(r)+'\n'+s;$(k+'DataStatus').textContent=s;}
+ get waitingForRegionalCloud(){
+  return !this.active.cloud&&this.settings.cloud==='history'&&this.items.some(r=>r.id===this.settings.cloudHistory&&r.provider==='himawari');
+ }
+ update(q){const e=this.env,s=this.settings,u=e.uniforms,a=e.auroraUniforms,timestamp=q?.t??this.sim.time;u.weatherTime.value=a.weatherTime.value=(timestamp-Date.UTC(2026,0,1))/3600e3;u.seed.value=a.seed.value=seedNumber(s.seed);u.cloudMode.value=s.cloud==='local'?1:0;const cloudRecord=this.items.find(x=>x.id===this.active.cloud);u.cloudMotion.value=e.quality==='high'&&s.motion&&!fixedCloudField(cloudRecord)?1:0;u.motionTime.value=cloudRecord?clamp((timestamp-(cloudRecord.time??cloudRecord.downloaded))/3600e3,-6,6):6.*Math.sin(u.weatherTime.value*.04);const hideClouds=s.cloud==='off'||this.waitingForRegionalCloud;
+  if(hideClouds)u.cloudAmount.value=0;
+  e.volumeClouds.visible=e.volumeClouds.visible&&!hideClouds;
   e.aurora.visible=s.aurora==='local'||(['latest','history'].includes(s.aurora)&&!!this.auroraTexture);a.useData.value=s.aurora==='local'?0:1;a.strength.value=s.auroraStrength;e.aurora.quaternion.copy(e.earth.quaternion);
   const now=performance.now();this.frames++;if(now-this.fpsStart>2500){this.fps=this.frames*1000/(now-this.fpsStart);this.frames=0;this.fpsStart=now;
    if(!s.adaptive){this.lowEffects=false;this.fastWindows=0;}else if(this.fps<24){this.lowEffects=true;this.fastWindows=0;}else if(this.fps>38){this.fastWindows=(this.fastWindows||0)+1;if(this.fastWindows>=2)this.lowEffects=false;}else this.fastWindows=0;

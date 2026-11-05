@@ -14,7 +14,7 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v0.92 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v0.94 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 > This page describes the current source. The online edition deploys from `main`; its header identifies the deployed version. Check the portable release's tag and release notes for the features included in that download.
 
@@ -128,7 +128,7 @@ Environment settings persist across spacecraft switches.
 | --- | --- |
 | Earth and Moon | Four Earth quality levels; day/night, twilight, atmosphere, ocean reflections and city lights; time-dependent Moon position and phase with a look-at/return view |
 | Surface detail | In 8K mode, view-dependent NASA surface and night-light tiles add detail for close observation |
-| Clouds | One cloud library for bundled imagery, saved NASA frames and local generation; archived GitHub maps remain available for manual comparison; optional 8K volumetric and evolving clouds |
+| Clouds | One cloud library for global imagery, regional Himawari-9 observations, and Canadian cloud forecasts; optional 8K volumetric and evolving clouds |
 | Night-side clouds | Cloud coverage can obscure city lights, with stronger occlusion under thicker clouds |
 | Aurora | NOAA OVATION snapshots or local distribution; volumetric curtains in 8K and the classic effect in 4K |
 | Stars and constellations | 41,411 catalogue stars and native 16K NASA Milky Way source imagery; star labels and names, lines and boundaries for 88 constellations |
@@ -179,10 +179,10 @@ The contact-speed limit defaults to **0.15 m/s**, is adjustable, and applies to 
 | --- | --- | --- |
 | Station orbit | China Manned Space Engineering Office / BACC OEM | Interpolation within records; Kepler continuation outside coverage |
 | Modern DFH-1 orbit | CelesTrak, NORAD 4382 | SGP4 propagation from GP/OMM elements |
-| Global clouds | NASA SATCORPS; archived GitHub maps for manual comparison | Apply saved maps directly; downloads leave the view unchanged; coverage and visual warnings remain visible; corrupt files are blocked |
+| Global clouds | Live Cloud Maps, NOAA GMGSI, NASA SatCORPS, regional Himawari-9 cloud masks, and Canadian GDPS forecasts | Apply saved maps directly; downloads leave the view unchanged; coverage and visual warnings remain visible; corrupt files are blocked |
 | Aurora distribution | NOAA SWPC OVATION | Forecast distribution controls geographical activity and intensity |
 
-Online NASA cloud processing needs the local service; web users can import processed snapshots. Connection or source failures preserve existing data and appear as failed checks.
+Live Cloud Maps and GDPS download directly in the browser. NOAA GMGSI, NASA SatCORPS and Himawari-9 use the local service. Web users can import processed snapshots. Connection or source failures preserve existing data and appear as failed checks.
 
 History supports favorites, export, import and cleanup by type. Automatic cache cleanup protects active data, favorites and settings references. Orbits are stored per mission; environment resources are reused. See the [resource guide](使用说明.md#数据更新与缓存).
 

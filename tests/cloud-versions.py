@@ -38,7 +38,35 @@ class VersionsTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as tmp,patch.object(h,'fetch_resuming',return_value=10),patch.object(h,'phase_coverage',return_value={'coverage':.98}),patch.object(h,'convert',return_value=(image,mask,meta)),patch.object(h,'inspect_image',return_value={'schema':1,'status':'rejected','reasons':['internal-seam']}):
    result=h.build('2026-10-23','12',tmp)
    self.assertTrue(result['warnings']);self.assertEqual(result['channel'],'validity')
-   with Image.open(Path(tmp)/'image.png') as im:self.assertEqual(im.getpixel((0,0)),(0,0,0,0));self.assertEqual(im.getpixel((1,0))[3],255)
+   with Image.open(Path(tmp)/'image.png') as im:
+    rgba=im.convert('RGBA')
+    self.assertEqual(rgba.getpixel((0,0)),(0,0,0,0));self.assertEqual(rgba.getpixel((1,0)),(206,206,206,255))
+   # An impossible budget fails before replacing a previously usable image.
+   previous=(Path(tmp)/'image.png').read_bytes()
+   with patch('satcorps.TEXTURE_TARGET_BYTES',1),patch('satcorps.TEXTURE_MAX_BYTES',1),self.assertRaisesRegex(ValueError,'50 MB'):
+    h.build('2026-10-23','12',tmp)
+   self.assertEqual((Path(tmp)/'image.png').read_bytes(),previous)
+   self.assertEqual({p.name for p in Path(tmp).iterdir()},{'image.png'})
+ def test_budget_preserves_footprint_and_opacity(self):
+  import numpy as np
+  from PIL import Image
+  from satcorps import write_cloud_png
+  rng=np.random.default_rng(23)
+  opacity=rng.integers(0,256,(256,512),dtype=np.uint8)
+  mask=rng.integers(0,16,opacity.shape)!=0
+  hard_limit=opacity.size+4096
+  with tempfile.TemporaryDirectory() as tmp,patch('satcorps.TEXTURE_TARGET_BYTES',512),patch('satcorps.TEXTURE_MAX_BYTES',hard_limit):
+   # With a spare gray code the indexed PNG is exact; with all 256 and gaps the
+   # compact fallback may change an opaque sample by at most one gray level.
+   for shades,error in ((np.minimum(opacity,254),0),(opacity,1)):
+    path=Path(tmp)/'texture.png'
+    info=write_cloud_png(path,Image.fromarray(shades),Image.fromarray(mask.astype(np.uint8)))
+    self.assertEqual(info['maxOpacityError'],error)
+    self.assertLessEqual(path.stat().st_size,hard_limit)
+    with Image.open(path) as png:rgba=np.asarray(png.convert('RGBA'))
+    np.testing.assert_array_equal(rgba[:,:,3],mask.astype(np.uint8)*255)
+    self.assertTrue((rgba[~mask,:3]==0).all())
+    self.assertEqual(np.max(np.abs(rgba[:,:,0][mask].astype(int)-shades[mask])),error)
  def test_cancel_cannot_be_overwritten_by_late_result(self):
   service=HistoryService()
   class Process:

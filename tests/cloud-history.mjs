@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {historySelection,listedDate,viirsURL} from '../src/cloud-history-data.js';
+import {historySelection,listedDate,viirsURL,versionKey} from '../src/cloud-history-data.js';
 import {selectCloud,protectedCloudIds} from '../src/cloud-source.js';
 const now=Date.UTC(2026,9,30),s=historySelection('satcorps','2024-02-29','23',now);
 assert.equal(s.time,Date.UTC(2024,1,29,23));
@@ -16,3 +16,8 @@ assert.equal(selectCloud([latest,archive],'history',now,'auto').id,'archive','le
 assert.equal(selectCloud([latest,archive],'history',now,'archive').id,'archive','explicit use can select a historical frame');
 assert.deepEqual(protectedCloudIds([latest,archive]),['archive','latest'],'protect the two newest accepted maps across legacy and new downloads');
 console.log('Historical date validation, catalog gaps, exact request and automatic-selection isolation passed');
+
+const h=historySelection('himawari','2026-10-29','23:50',now);
+assert.equal(h.time,Date.UTC(2026,9,29,23,50));
+assert.equal(h.key,versionKey(h));assert.notEqual(h.key,versionKey({...h,provider:'gmgsi'}));
+for(const slot of ['23','23:51','24:00'])assert.throws(()=>historySelection('himawari','2026-10-29',slot,now));

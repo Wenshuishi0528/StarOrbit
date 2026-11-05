@@ -10,6 +10,55 @@ from cloud_quality import inspect_image, quality_ok, SCHEMA, describe_reasons
 BASE='https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/'
 DAY=86400
 FIELDS=('cloud_phase','cloud_optical_depth','relative_time','lat','lon')
+TEXTURE_TARGET_BYTES = 30_000_000
+TEXTURE_MAX_BYTES = 50_000_000
+QUANTIZATION_NOTE = '为满足文件上限，最少见的云图灰度调整了 1 级（共 256 级），有效覆盖掩膜保持原样'
+
+def write_cloud_png(path, opacity, mask):
+    """Encode the 8-bit opacity and binary footprint. Caller publishes the temporary file."""
+    from PIL import Image, ImageChops
+    validity = mask.point(lambda v: 255 if v else 0)
+    gaps = validity.getextrema()[0] == 0
+    grey = ImageChops.multiply(opacity, validity) if gaps else opacity
+    # LA decodes to the same RGBA texels; storing three identical channels wastes space.
+    encoded = Image.merge('LA', (grey, validity)) if gaps else grey
+    encoded.save(path, 'PNG', compress_level=6)
+    size = path.stat().st_size
+    mode = 'grayscale-alpha' if gaps else 'grayscale'
+    max_error = 0
+    if gaps and size > TEXTURE_TARGET_BYTES:
+        # One indexed pixel can encode 255 opaque levels and one missing value.
+        counts = grey.histogram(mask=validity)
+        missing_code = next((i for i in range(256) if counts[i] == 0), None)
+        if missing_code is None and size > TEXTURE_MAX_BYTES:
+            # Preserve exact clear sky and fully opaque cloud even on fallback.
+            missing_code = min(range(1,255), key=counts.__getitem__)
+        if missing_code is not None:
+            # Prefer *exact* LA under the hard cap. Only an over-budget image with
+            # all 256 levels needs the rarest opaque level moved one step.
+            remap = list(range(256))
+            remap[missing_code] = missing_code-1 if missing_code > 1 else missing_code+1
+            indices = grey.point(remap)
+            indices.paste(missing_code, mask=ImageChops.invert(validity))
+            palette = []
+            for value in range(256):
+                palette.extend([0 if value == missing_code else value] * 3)
+            indices.putpalette(palette)
+            alternative = path.with_suffix('.indexed.tmp')
+            try:
+                indices.save(alternative, 'PNG', transparency=missing_code, compress_level=6)
+                if alternative.stat().st_size < size:
+                    size = alternative.stat().st_size
+                    alternative.replace(path)
+                    mode = 'indexed'
+                    max_error = int(counts[missing_code] > 0)
+            finally:
+                alternative.unlink(missing_ok=True)
+    if size > TEXTURE_MAX_BYTES:
+        raise ValueError('云图处理后仍超过 50 MB，未保存')
+    info = {'size': size, 'channel': 'validity', 'pngEncoding': mode, 'maxOpacityError': max_error}
+    if max_error:info['warnings'] = [QUANTIZATION_NOTE]
+    return info
 
 def request(url, byte_range=None, limit=2000000, deadline=None):
     budget=min(180,deadline-time.monotonic()) if deadline is not None else 180
@@ -271,16 +320,22 @@ def build(output,progress=lambda s:None,now=None):
                 im,mask,info=convert(path,reference,now)
             if not acceptable(info):
                 summary['rejected']+=1;checks[url]={'checked':now,'reason':'retrieval coverage'};checkfile.write_text(json.dumps(checks));continue
-            quality=inspect_image(im)
-            if not quality_ok(quality):
-                summary['rejected']+=1;quality_rejected+=1;quality_reason=describe_reasons(quality['reasons'])
-                checks[url]={'checked':now,'reason':'image quality','schema':SCHEMA,'details':quality['reasons'],'metrics':quality['metrics']};checkfile.write_text(json.dumps(checks))
-                progress('云图质量检查未通过，保留已有版本 · '+date+' · '+quality_reason)
-                continue
             # A candidate must still be within the window when conversion finishes.
             if not now-MAX_AGE<=info['time']/1000<=now:raise ValueError('NASA 云图不在最近 30 天内')
             target=output/(datetime.datetime.fromtimestamp(reference,datetime.timezone.utc).strftime('%Y%m%dT1200-v2a.png'))
-            temp=target.with_suffix('.tmp');im.save(temp,'PNG',compress_level=4);temp.replace(target)
+            temp=target.with_suffix('.tmp')
+            try:
+                from PIL import Image
+                info.update(write_cloud_png(temp, im, mask))
+                with Image.open(temp) as texture:quality=inspect_image(texture)
+                if not quality_ok(quality):
+                    summary['rejected']+=1;quality_rejected+=1;quality_reason=describe_reasons(quality['reasons'])
+                    checks[url]={'checked':now,'reason':'image quality','schema':SCHEMA,'details':quality['reasons'],'metrics':quality['metrics']};checkfile.write_text(json.dumps(checks))
+                    progress('云图质量检查未通过，保留已有版本 · '+date+' · '+quality_reason)
+                    continue
+                temp.replace(target)
+            finally:
+                temp.unlink(missing_ok=True)
             info.update(source=url,release='GCC V2A',downloadBytes=downloaded)
             info['sha256']=hashlib.sha256(target.read_bytes()).hexdigest()
             info['quality']={**quality,'sha256':info['sha256']}

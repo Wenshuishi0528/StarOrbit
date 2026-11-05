@@ -138,7 +138,7 @@ export function mountResourcePanel(weather){
   const removed=report.removedIds?.length||0;cacheResult.hidden=!removed&&!report.overBudget;
   cacheResult.textContent=removed?t('已自动清理 {count} 份旧数据，释放 {size} MB。',{count:removed,size:megabytes(report.removedBytes)}):'';
   if(report.overBudget)cacheResult.textContent+=(removed?'\n':'')+t(w.settings.autoClean===false?'自动清理已关闭，不会按容量删除下载数据。':'受保护的数据已超过容量，已保留；可手动检查下载历史。');
-  serverCache.hidden=!w.serverCache;serverCache.textContent=w.serverCache?t('本机 NASA 共享文件：{size} MB · {count} 份；与当前浏览器的下载缓存分别保存。',{size:megabytes(w.serverCache.bytes),count:w.serverCache.count}):'';
+  serverCache.hidden=!w.serverCache;serverCache.textContent=w.serverCache?t('本机云图文件：{size} MB · {count} 份，与浏览器缓存分别保存。',{size:megabytes(w.serverCache.bytes),count:w.serverCache.count}):'';
  }
  function open(kind){
   if(disposed)return;

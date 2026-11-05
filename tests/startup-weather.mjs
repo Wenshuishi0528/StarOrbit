@@ -34,3 +34,8 @@ let staleChecks=0;const previousReads=reads;
 assert.equal(await decode.texture(record,()=>++staleChecks>2),null);
 assert.equal(reads,previousReads+1,'superseded selection stops at the next strip');
 console.log('Startup independent of pending cloud decode; NASA strip pixels, readback count, alpha and cancellation passed');
+
+const regional=await decode.texture({...record,provider:'himawari'});
+assert.equal(regional.userData.cloudChannel,0,'GPU and CPU use observed intensity alone, without blending the static map');
+assert.equal(regional.image.data[0],0,'unobserved pixel is fully empty');
+assert.deepEqual(regional.image.data,out,'validity is applied to all intensities, including partially covered edge cells');

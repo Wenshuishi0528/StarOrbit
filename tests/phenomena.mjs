@@ -12,7 +12,7 @@ let fast=eventClock(c,1e9+16000,1016,1000);assert(!fast.reset);assert(Math.abs(f
 assert(eventClock(c,1e9-1,1016).reset);assert(eventClock(c,1e9+10000,1016,1).reset);
 assert(eventClock(c,1e9+5000,6000,1).reset);
 console.log('Phenomena: deterministic randomness, geography, Earth occlusion, pulse, pause, seek and bounded fast-time clock passed');
-import {cloudCoverage,maskSample} from '../src/phenomena-cloud.js';
+import {cloudCoverage,maskSample,sampleDataTexture} from '../src/phenomena-cloud.js';
 const base={cloudMode:0,cloudMotion:0,motionTime:0,cloudChannel:0,cloudTone:0,cloudSeason:0,weatherTime:20,seed:123};
 assert.equal(cloudCoverage([1,0,0],base,()=>.7),.7);
 assert.equal(cloudCoverage([1,0,0],{...base,cloudMode:1},()=>0),0);
@@ -21,3 +21,9 @@ assert(local>=0&&local<=1);assert(requests.some(x=>x.name==='template'));assert(
 const mask={width:2,height:2,data:new Uint8Array([0,0,0,255,255,0,0,255,0,0,0,255,255,0,0,255])};
 assert(Math.abs(maskSample(mask,direction(179.999,0))-maskSample(mask,direction(-179.999,0)))<.001);
 console.log('Phenomena cloud selection: source channels, local template/motion and date-line bilinear continuity passed');
+
+const rawMask=sampleDataTexture({width:1,height:2,data:Uint8Array.of(0,0,0,0,128,128,128,255)},false);
+assert.equal(rawMask.data[0],128,'first data texture row is the southern edge');
+assert.equal(rawMask.data[7],0);
+const partial=cloudCoverage([1,0,0],{...base,cloudChannel:2},(name,n,ch)=>name==='template'?.8:ch===3?.5:.2);
+assert(Math.abs(partial-.6)<1e-10,'missing coverage blends the template with the premultiplied cloud value');

@@ -88,6 +88,17 @@ console.log('PASS: real cloud-history mount closes, receives background progress
 // State notifications and translation updates must preserve nested filter controls.
 library.refreshCatalog=async(month)=>{library.catalog={state:'ready',month,date:'',items:[],dates:['2026-10-23']};library.notify();};
 document.getElementById('cloudDownloadTab').onclick();
+const provider=document.getElementById('cloudDownloadSource'),quick=document.getElementById('cloudQuickDownload');
+assert.equal(provider.value,'github');
+library.task={state:'idle'};library.notify();
+assert.equal(quick.disabled,false,'GitHub works without the local service');
+provider.value='gmgsi';provider.onchange();
+assert.equal(quick.disabled,true,'the NOAA processor needs the local service');
+provider.value='himawari';provider.onchange();
+assert.equal(quick.disabled,true,'Himawari conversion is offered through the desktop service');
+provider.value='gdps';provider.onchange();
+assert.equal(quick.disabled,false,'GDPS downloads through the browser');
+provider.value='satcorps';provider.onchange();
 const month=document.getElementById('historyMonth'),day=document.getElementById('historyDate');
 assert(month.parentElement.children.includes(month),'render must preserve the month input inside its label');
 assert(day.parentElement.children.includes(day),'render must preserve the date select inside its label');

@@ -5,6 +5,7 @@ export class WeatherCache{
  });}
  async run(mode,fn){await this.ready;if(!this.db)return fn(null);return new Promise((resolve,reject)=>{const tx=this.db.transaction('snapshots',mode),req=fn(tx.objectStore('snapshots'));tx.oncomplete=()=>resolve(req?.result);tx.onerror=()=>reject(tx.error||Error('缓存写入失败'));tx.onabort=()=>reject(tx.error||Error('缓存写入失败'));});}
  async all(){return this.run('readonly',s=>s?s.getAll():[...this.memory.values()]);}
+ async get(id){return this.run('readonly',s=>s?s.get(id):this.memory.get(id));}
  async put(x){return this.run('readwrite',s=>s?s.put(x):this.memory.set(x.id,x));}
  async remove(id){return this.run('readwrite',s=>s?s.delete(id):this.memory.delete(id));}
  async trim(limit,protectedIds=[],automatic=true){
