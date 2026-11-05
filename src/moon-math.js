@@ -21,3 +21,6 @@ export function moonBehindEarth(position,observer,radius=6371){
  const ray=sub(position,observer),t=-dot(observer,ray)/dot(ray,ray);
  return t>0&&t<1&&norm(observer.map((v,i)=>v+t*ray[i]))<radius;
 }
+
+// Both observers see the same geocentric Moon; only their sightlines differ.
+export const sharedLunarEphemeris=new LunarEphemeris();

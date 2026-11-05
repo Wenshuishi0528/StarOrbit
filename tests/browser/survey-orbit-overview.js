@@ -19,7 +19,7 @@ export async function inspectSurveyOrbitOverview(page){
  await map.locator('[data-orbit-view=equatorial]').click();
  if(await map.locator('[data-orbit-view=equatorial]').getAttribute('aria-pressed')!=='true'||await map.locator('[data-orbit-view=oblique]').getAttribute('aria-pressed')!=='false')throw Error('Equatorial view was not independently selected');
  await canvas.screenshot({path:'output/playwright/lab-survey-equatorial-plane.png'});
- await page.mouse.click(cx+earthRadius*6771/6371,cy);
+ await page.mouse.click(cx+earthRadius*6771/6371*Math.cos(35*Math.PI/180),cy);
  const ascending=Number(await clock.inputValue());
  await canvas.press('ArrowRight');if(Number(await clock.inputValue())!==Math.min(Number(await clock.getAttribute('max')),ascending+60))throw Error('Equatorial map lost clock navigation');
  const window=map.locator('.survey-ov-window-list button').first();

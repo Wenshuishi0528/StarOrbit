@@ -6,7 +6,7 @@ function publish(file,bytes=fs.readFileSync(file),suffix=path.extname(file)){
  const hash=crypto.createHash('sha256').update(bytes).digest('hex').slice(0,16),name=path.basename(file,path.extname(file))+'-'+hash+suffix,url='assets/'+name;
  if(!emitted.has(url)){fs.writeFileSync(out+'/'+url,bytes);emitted.set(url,bytes.length);}return url;
 }
-const image=file=>split?publish(file):'data:image/jpeg;base64,'+fs.readFileSync(file).toString('base64');
+const image=file=>split?publish(file):'data:image/'+(file.endsWith('.png')?'png':'jpeg')+';base64,'+fs.readFileSync(file).toString('base64');
 const packed=file=>{const bytes=zlib.gzipSync(fs.readFileSync(file),{level:9});return split?{url:publish(file,bytes,'.glb.gz')}:bytes.toString('base64');};
 import {SPACECRAFT,MISSIONS} from './src/missions.js';
 const spacecraftModels=Object.fromEntries(Object.entries(SPACECRAFT).filter(([,x])=>x.asset).map(([id,x])=>[id,packed(x.asset)]));
@@ -35,6 +35,10 @@ environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
  environmentAssets.daySources['2026-q2-1km']={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
 }
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
+environmentAssets.planets=Object.fromEntries(['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','SaturnRing'].map(body=>{
+ const extension=body==='SaturnRing'?'png':'jpg';
+ return [body,image('assets/planets/'+body+'.'+extension)];
+}));
 environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py','ny','pz','nz'].map(face=>image(`assets/sky/milkyway-${size}k-${face}.jpg`))]));
 let html=fs.readFileSync('src/layout.html','utf8').replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8')).replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8')).replace('__WORKSPACE_CSS__',()=>['workspace.css','xuntian-scope.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n')).replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8')).replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8')).replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8')).replace('__MUSIC_CSS__',()=>fs.readFileSync('src/music.css','utf8')).replace('__MUSIC_UI__',()=>fs.readFileSync('src/music-widget.html','utf8')).replace('__MUSIC_DATA__',()=>JSON.stringify(music).replaceAll('</script','<\\/script')).replace('__APP_VERSION__',app.displayVersion||app.version).replace('__APP_AUTHOR__',app.author).replace('__ENV_ASSETS__',()=>JSON.stringify(environmentAssets)).replace('__SPACECRAFT_MODELS__',()=>JSON.stringify(spacecraftModels)).replace('__MISSION_ORBITS__',()=>JSON.stringify(split?{url:publish('orbits.json',Buffer.from(JSON.stringify(missionOrbits)))}:missionOrbits).replaceAll('</script','<\\/script')).replace('__META__',fs.readFileSync('assets/model.json','utf8')).replace('__MODEL__',split?JSON.stringify(packed('assets/station.glb')):packed('assets/station.glb')).replace('<script>__JS__</script>',()=>split?'<script defer src="'+publish('assets/app.bundle.js')+'"></script>':'<script>'+fs.readFileSync('assets/app.bundle.js','utf8').replaceAll('</script','<\\/script')+'</script>');
 html=html.replace('</head>','<!-- satellite.js MIT license\n'+fs.readFileSync('node_modules/satellite.js/LICENSE.md','utf8')+' -->\n</head>');

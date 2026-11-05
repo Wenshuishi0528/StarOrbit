@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {setText} from './i18n.js';
-import {LunarEphemeris,MOON_RADIUS,lunarAppearance,moonBehindEarth} from './moon-math.js';
+import {sharedLunarEphemeris,MOON_RADIUS,lunarAppearance,moonBehindEarth} from './moon-math.js';
 const V=a=>new THREE.Vector3(...a);
 const vertex=`varying vec2 texUV;varying vec3 point,normalWorld;
 void main(){texUV=uv;point=(modelMatrix*vec4(position,1.)).xyz;normalWorld=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*vec4(point,1.);}`;
@@ -21,7 +21,7 @@ gl_FragColor=vec4(albedo*reflection*sunlight(s),1.);
 }`;
 export class Moon{
  constructor(environment){
-  this.env=environment;this.ephemeris=new LunarEphemeris();this.uniforms={surfaceMap:{value:environment.fallback},textured:{value:false},sun:{value:new THREE.Vector3()}};
+  this.env=environment;this.ephemeris=sharedLunarEphemeris;this.uniforms={surfaceMap:{value:environment.fallback},textured:{value:false},sun:{value:new THREE.Vector3()}};
   const geometry=new THREE.SphereGeometry(MOON_RADIUS,64,32);geometry.rotateX(Math.PI/2);
   this.mesh=new THREE.Mesh(geometry,new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:fragment}));this.mesh.name='Moon';environment.sim.sky.add(this.mesh);
   this.ready=new THREE.TextureLoader().loadAsync(environment.assets.moon).then(tex=>{tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(4,environment.api.renderer.capabilities.getMaxAnisotropy());this.texture=tex;this.uniforms.surfaceMap.value=tex;this.uniforms.textured.value=true;}).catch(()=>environment.api.toast('月面纹理未能加载'));

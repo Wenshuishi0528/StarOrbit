@@ -32,6 +32,7 @@ const api={model,groups,stage:{getBoundingClientRect:()=>stage},camera,controls}
 const t0=orbit.rows[100][0],qAt=t=>groundTrackAttitude(snapshot(orbit,t));
 const q0=qAt(t0),sim={api,missionId:'tiangong',current:q0,setView(){}};
 const f=installXuntianFormation(sim),orientation=aimAxes({forward:[.2,.7,.5],up:[0,0,1]});
+same(f.getOffset(),[30,0,0]);f.restoreSuggested();
 let optics=f.update(q0,orientation);
 same(f.getOffset(),FORMATION_DEFAULT);check(norm(f.getOffset()),140);assert(f.getState().extent<140);
 const world=()=>xt.localToWorld(m.reference.clone()).toArray();
@@ -53,7 +54,7 @@ const stationTarget=f.stationTarget(1.6);assert(stationTarget&&stationTarget.ful
 assert(stationTarget.range>100&&stationTarget.range<180);check(norm(stationTarget.direction),1);
 const start=f.getOffset();const blocked=f.setOffset(start.map(x=>-x));assert(blocked.constrained);assert(blocked.offset[0]<0);
 f.restoreSuggested();f.setOffset([-125,120,55]);assert(!f.getState().constrained);same(f.getOffset(),[-125,120,55]);
-const persisted=JSON.parse(storage.get('starorbit-xuntian-formation-v1'));same(persisted.offset,[-125,120,55]);
+f.restoreInitial();same(f.getOffset(),[30,0,0]);f.restoreSuggested();f.setOffset([-125,120,55]);
 const custom=f.getOffset();model.rotation.set(-.3,.15,.4);f.update(sim.current,orientation);same(f.getOffset(),custom);
 const blocker=new THREE.Group();blocker.add(new THREE.Mesh(new THREE.BoxGeometry(80,80,80),new THREE.MeshBasicMaterial()));
 model.add(blocker);blocker.position.copy(model.worldToLocal(new THREE.Vector3(...world())));groups.newModule=blocker;

@@ -43,8 +43,7 @@ function line(ctx,points,color,width,dashes=[]){
 }
 function paintEquatorialPlane(ctx,layout){
  const {x,y,radius}=layout;
- ctx.fillStyle='rgba(200,168,107,.055)';ctx.strokeStyle='#bca776';ctx.lineWidth=1;ctx.setLineDash([4,5]);
- ctx.beginPath();ctx.arc(x,y,radius*1.22,0,TAU);ctx.fill();ctx.stroke();ctx.setLineDash([]);
+ line(ctx,[[x-radius*1.22,y],[x+radius*1.22,y]],'#c5ad80',1,[4,4]);
 }
 function paintNodes(ctx,layout,view){
  if(!view.ascending)return;
@@ -134,10 +133,10 @@ export function createSurveyMapPainter(canvas,{sim,earthImage,onAsset}){
   const dpr=Math.min(2,window.devicePixelRatio||1),cw=Math.round(w*dpr),ch=Math.round(h*dpr);
   if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;}
   ctx.setTransform(cw/w,0,0,ch/h,0,0);ctx.clearRect(0,0,w,h);ctx.globalAlpha=1;ctx.setLineDash([]);
-  if(equatorial&&(equatorOrbit!==model.orbit||equator?.roll!==yaw)){equatorOrbit=model.orbit;equator=surveyEquatorialView(model.orbit,yaw);}
+  if(equatorial&&(equatorOrbit!==model.orbit||equator?.azimuth!==yaw)){equatorOrbit=model.orbit;equator=surveyEquatorialView(model.orbit,yaw);}
   const layout=mapLayout(w,h),view=equatorial?equator:surveyMapView(model.orbit,yaw,tilt),{radius,x,y}=layout;
   const bg=ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h)*.67);bg.addColorStop(0,'#10283a');bg.addColorStop(1,'#05101b');
-  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);if(equatorial)paintEquatorialPlane(ctx,layout);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
   const dayImage=sim?.environment?.uniforms?.dayMap?.value?.image;
   const day=imagePixels(earthImage)||imagePixels(dayImage)||imagePixels(sim?.minimap?.image);
   const night=imagePixels(sim?.environment?.uniforms?.nightMap?.value?.image);
@@ -146,6 +145,7 @@ export function createSurveyMapPainter(canvas,{sim,earthImage,onAsset}){
   ctx.fillStyle=air;ctx.beginPath();ctx.arc(x,y,radius*1.075,0,TAU);ctx.fill();
   ctx.drawImage(earth,x-radius,y-radius,2*radius,2*radius);
   ctx.lineWidth=1;ctx.strokeStyle='#71a1b388';ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
+  if(equatorial)paintEquatorialPlane(ctx,layout);
   const arcs=surveyWindowArcs(model.visibility);
   for(const a of arcs)paintOrbitArc(ctx,layout,view,model.orbit,a.start,a.end,1,arcColors[a.kind],4.5);
   for(const j of model.jobs){

@@ -3,16 +3,16 @@ import {VIEW_UNITS_PER_METRE} from './missions.js';
 import {FORMATION_DEFAULT,aimAxes,attitudeQuaternion,validOffset,suggestedOffset,orbitalAxes,fromBasis,intoBasis,stationShapes,opticalModel,sweptReach,constrainedTravel} from './xuntian-formation-math.js';
 export {mountXuntianFormationPanel} from './xuntian-formation-panel.js';
 
-const STORE='starorbit-xuntian-formation-v1',SCALE=VIEW_UNITS_PER_METRE,IDENTITY=[[1,0,0],[0,1,0],[0,0,1]],margin=2;
+const INITIAL_OFFSET=Object.freeze([30,0,0]);
+const SCALE=VIEW_UNITS_PER_METRE,IDENTITY=[[1,0,0],[0,1,0],[0,0,1]],margin=2;
 const vec=a=>new THREE.Vector3(...a);
 const defaultAim=()=>({right:[0,-1,0],up:[0,0,1],forward:[1,0,0]});
 
 export function installXuntianFormation(sim){
  const api=sim.api,listeners=new Set();
- let offset=[...FORMATION_DEFAULT],automatic=true,active=null,measured=null,shapes=[],recommended=[...FORMATION_DEFAULT],extent=0,padding=0;
+ let offset=[...INITIAL_OFFSET],automatic=false,active=null,measured=null,shapes=[],recommended=[...FORMATION_DEFAULT],extent=0,padding=0;
+ let initialPlacement=true;
  let command=null,last=null,lastFrame={orbital:IDENTITY,scene:IDENTITY},constrained=false,disposed=false,lastReason='initial';
- try{const saved=JSON.parse(localStorage.getItem(STORE));if(saved?.automatic===false&&validOffset(saved.offset)){offset=[...saved.offset];automatic=false;}}catch{}
- function save(){try{localStorage.setItem(STORE,JSON.stringify({offset,automatic}));}catch{}}
  function getState(){return {offset:[...offset],suggested:[...recommended],extent,automatic,available:!!(sim.missionId==='tiangong'&&active?.visible&&measured),constrained,reason:lastReason};}
  function notify(reason){lastReason=reason;const state=getState();for(const listener of listeners)listener(state);}
  function dataFrame(q){
@@ -32,8 +32,8 @@ export function installXuntianFormation(sim){
   return center.length()<=extent*SCALE&&constrainedTravel(center,center,shapes,padding)<1;
  }
  function ensureClear(frame){
-  if(!measured||!protectedAt(centerLocal(offset,frame)))return false;
-  offset=[...recommended];automatic=true;constrained=true;save();return true;
+  if(initialPlacement||!measured||!protectedAt(centerLocal(offset,frame)))return false;
+  offset=[...recommended];automatic=true;constrained=true;return true;
  }
  function update(q=sim.current,axes){
   if(disposed)return null;
@@ -67,16 +67,21 @@ export function installXuntianFormation(sim){
   const nearest=Math.max(0,Math.min(1,-from.dot(delta)/(length*length)));
   let fraction=1;
   if(from.clone().addScaledVector(delta,nearest).length()<=extent*SCALE){
-   fraction=constrainedTravel(from,to,shapes,padding);
-   if(fraction<1||protectedAt(to))fraction=Math.max(0,fraction-.01*SCALE/length);
+   fraction=constrainedTravel(from,to,shapes,padding,initialPlacement);
+   if(fraction<1||(!initialPlacement&&protectedAt(to)))fraction=Math.max(0,fraction-.01*SCALE/length);
   }
   constrained=fraction<1;automatic=false;offset=next.map((value,i)=>offset[i]+(value-offset[i])*fraction);
-  update(sim.current);save();notify(constrained?'clearance':'offset');return getState();
+  initialPlacement=initialPlacement&&protectedAt(centerLocal(offset,frame));
+  update(sim.current);notify(constrained?'clearance':'offset');return getState();
+ }
+ function restoreInitial(){
+  initialPlacement=true;offset=[...INITIAL_OFFSET];automatic=false;constrained=false;
+  update(sim.current);notify(constrained?'clearance':'offset');
  }
  function restoreSuggested(){
   if(disposed)return getState();
   // This explicitly restores placement; manual drags always use swept collision tests.
-  offset=[...recommended];automatic=true;constrained=false;update(sim.current);save();notify('suggested');return getState();
+  initialPlacement=false;offset=[...recommended];automatic=true;constrained=false;update(sim.current);notify('suggested');return getState();
  }
  function stationBounds(){
   const box=new THREE.Box3();
@@ -177,7 +182,7 @@ export function installXuntianFormation(sim){
   });
  }
  const formation={update,refresh,frameBoth:panel=>frameExternal(panel,false),frameTelescope:panel=>frameExternal(panel,true),
-  stationTarget,setOffset,restoreSuggested,mapShapes,getState,getOffset:()=>[...offset],
+  stationTarget,setOffset,restoreInitial,restoreSuggested,mapShapes,getState,getOffset:()=>[...offset],
   getOptics:()=>disposed||!sim.current||sim.missionId!=='tiangong'||!api.groups.freeXT?.visible?null:last,
   subscribe(fn){listeners.add(fn);return ()=>listeners.delete(fn);},
   dispose(){disposed=true;listeners.clear();last=null;shapes=[];active=null;measured=null;}};

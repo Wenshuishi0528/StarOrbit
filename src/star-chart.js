@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import {computeBoundsTree} from 'three-mesh-bvh';
 import data from '../assets/star-chart.json';
 import {equatorial,QUALITY} from './environment-math.js';
+import {solarApparent} from './solar-system.js';
+import {solarLabel} from './solar-targets.js';
 import {getLanguage} from './i18n.js';
 import {placeSkyLabels,sphereHidesDirection} from './star-chart-math.js';
 
@@ -48,6 +50,9 @@ export class StarChart{
  ensureAtlas(language){
   if(this.language===language)return;
   const labels=[...this.stars,...this.constellations,...this.classic],chars=[...new Set(labels.flatMap(s=>[...(s[language]||s.en||s.zh)]))];
+  for(const id of ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune']){
+   for(const c of solarLabel(id,language))if(!chars.includes(c))chars.push(c);
+  }
   const side=2**Math.ceil(Math.log2(Math.ceil(Math.sqrt(chars.length))*CELL)),canvas=document.createElement('canvas');canvas.width=canvas.height=side;
   const ctx=canvas.getContext('2d');ctx.font=`500 ${FONT}px sans-serif`;ctx.textBaseline='alphabetic';ctx.fillStyle='white';this.glyphs.clear();
   chars.forEach((char,i)=>{const x=(i%(side/CELL))*CELL,y=Math.floor(i/(side/CELL))*CELL;ctx.fillText(char,x+3,y+25);this.glyphs.set(char,{x,y,advance:ctx.measureText(char).width});});
@@ -97,12 +102,28 @@ export class StarChart{
   const key=[language,width,height,camera.fov,camera.zoom,s.starLabels,s.starLabelScope,s.constellationNames,s.starLabelDensity,this.env.quality,s.exposure,hasMoon,follow].join('|');
   const changed=key!==this.lastKey;
   const moved=1-Math.abs(camera.quaternion.dot(this.lastQuaternion))>1e-12||camera.position.distanceToSquared(this.lastPosition)>1e-6||(hasMoon&&this.env.moon.mesh.position.distanceToSquared(this.lastMoon)>1e-6);
-  if(!changed&&(!(moved||modelMoved)||now-this.lastLayout<.2))return;
+  const epoch=sim.current?.t,skyMoved=s.starLabels&&epoch!==this.labelEpoch;
+  if(!changed&&(!(moved||modelMoved||skyMoved)||now-this.lastLayout<.2))return;
   if(follow&&(modelMoved||!this.occluders))this.prepareOccluders();
   if(follow){this.modelSource=records;this.modelRecords=records.map(r=>({object:r.object,matrix:r.object.matrixWorld.clone()}));}
-  this.lastLayout=now;this.lastKey=key;this.lastQuaternion.copy(camera.quaternion);this.lastPosition.copy(camera.position);this.lastMoon.copy(this.env.moon.mesh.position);this.stats.layouts++;
+  this.labelEpoch=epoch;this.lastLayout=now;this.lastKey=key;this.lastQuaternion.copy(camera.quaternion);this.lastPosition.copy(camera.position);this.lastMoon.copy(this.env.moon.mesh.position);this.stats.layouts++;
   const inverse=camera.quaternion.clone().invert(),halfV=Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/camera.zoom,halfH=halfV*camera.aspect,limit=s.exposure==='cinematic'?8:QUALITY[this.env.quality||'medium'].limit;
-  const candidates=[],source=s.starLabels?(classic?this.classic:this.stars.filter(star=>(s.starLabelScope==='all'||star.major)&&star.mag<=limit)):[];
+  const candidates=[],source=s.starLabels?(classic?[...this.classic]:this.stars.filter(star=>(s.starLabelScope==='all'||star.major)&&star.mag<=limit)):[];
+  if(s.starLabels&&sim.current){
+   const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+   for(const body of solarApparent(sim.current,camera.position.toArray())){
+    if(body.behindEarth||(body.id==='Moon'&&!hasMoon)||body.mag>limit)continue;
+    const dir=new THREE.Vector3(...body.direction);
+    if(this.hiddenBySpacecraft(dir))continue;
+    // Anchor the Sun and Moon labels just outside the disc so the foreground
+    // surface does not paint over its own name.
+    if(body.id==='Sun'||body.id==='Moon'){
+     const tangent=right.clone().addScaledVector(dir,-right.dot(dir)).normalize();
+     dir.addScaledVector(tangent,Math.tan(body.radiusRad+halfH*4/width)).normalize();
+    }
+    source.push({key:'solar-'+body.id,kind:'solar',dir,mag:body.mag,[language]:solarLabel(body.id,language)});
+   }
+  }
   if(!classic&&s.constellationNames)source.push(...this.constellations);
   for(const item of source){
    const projected=item.dir.clone().applyQuaternion(inverse);if(projected.z>=0)continue;
@@ -110,19 +131,19 @@ export class StarChart{
    if(sphereHidesDirection(item.dir.toArray(),earth.toArray(),EARTH)||hasMoon&&sphereHidesDirection(item.dir.toArray(),moon.toArray(),MOON))continue;
    const text=item[language]||item.en||item.zh,font=item.kind==='constellation'?14:13,scale=font/FONT;
    const w=[...text].reduce((n,c)=>n+this.glyphs.get(c).advance*scale,0);
-   candidates.push({...item,text,font,w:w+4,h:font+7,x:(x+1)*width/2,y:(1-y)*height/2,centered:item.kind==='constellation',priority:item.kind==='constellation'?1.7:item.mag??1});
+   candidates.push({...item,text,font,w:w+4,h:font+7,x:(x+1)*width/2,y:(1-y)*height/2,centered:item.kind==='constellation',priority:item.kind==='solar'?Math.min(-2,item.mag):item.kind==='constellation'?1.7:item.mag??1});
   }
   candidates.sort((a,b)=>a.priority-b.priority||a.key.localeCompare(b.key));this.stats.candidates=candidates.length;
   const placed=placeSkyLabels(candidates,width,height,s.starLabelDensity).filter(p=>!this.hiddenBySpacecraft(p.dir));this.stats.visible=placed.length;
   const next=new Map(placed.map(p=>[p.key,{...p,born:this.shown.get(p.key)?.out===undefined?this.shown.get(p.key)?.born??now:now}]));
   for(const [key,previous]of this.shown)if(!next.has(key)){const out=previous.out??now;if(now-out<.18)next.set(key,{...previous,out});}
-  const signature=[...next.values()].map(p=>[p.key,p.dx,p.dy,p.out??'',p.born].join(',')).join(';');
+  const signature=[...next.values()].map(p=>[p.key,p.text,p.kind==='solar'?p.dir.toArray().join(','):'',p.dx,p.dy,p.out??'',p.born].join(',')).join(';');
   this.shown=next;if(signature===this.geometryKey)return;this.geometryKey=signature;this.upload();
  }
  upload(){
   const positions=[],offsets=[],uvs=[],colors=[],lifetimes=[],indices=[0,1,2,0,2,3];
   for(const label of this.shown.values()){
-   let pen=label.dx;const scale=label.font/FONT,color=new THREE.Color(label.kind==='constellation'?'#d0c09a':'#c8dce8');
+   let pen=label.dx;const scale=label.font/FONT,color=new THREE.Color(label.kind==='constellation'?'#d0c09a':label.kind==='solar'?'#ffdcab':'#c8dce8');
    for(const char of label.text){
     const g=this.glyphs.get(char),x0=pen-3*scale,x1=x0+CELL*scale,y0=-label.dy-25*scale,y1=y0+CELL*scale;
     const xy=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],uv=[[g.x/this.atlasSide,1-(g.y+CELL)/this.atlasSide],[(g.x+CELL)/this.atlasSide,1-(g.y+CELL)/this.atlasSide],[(g.x+CELL)/this.atlasSide,1-g.y/this.atlasSide],[g.x/this.atlasSide,1-g.y/this.atlasSide]];

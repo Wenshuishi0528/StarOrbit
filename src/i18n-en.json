@@ -1,4 +1,5 @@
 {
+  "恢复初始位置": "Restore initial position",
   "夜面也显示云层": "Show clouds on the night side",
   "月球": "Moon",
   "望向月球": "Look at Moon",
@@ -1848,10 +1849,10 @@
   "拍摄 {seconds} 秒": "Expose for {seconds} s",
   "软件图形模式采用全球底图与简化云层、大气。": "Software rendering uses the global maps with simplified clouds and atmosphere.",
   "候选窗口按该地点的天际线、航天器受照与暮光条件计算。云层、烟霾和实际亮度仍影响肉眼观测。": "Candidate windows use the site’s skyline, spacecraft illumination and local twilight. Cloud, haze and actual brightness affect what you can see.",
-  "俯视地球赤道面": "Earth’s equatorial plane",
+  "赤道正视": "Equator front view",
   "升交点": "Ascending node",
   "降交点": "Descending node",
-  "从地球北极上方看赤道面。升交点向北越过赤道，降交点向南。点轨道可定位时刻，水平拖动可转动视图。": "Looking down on the equator from above the North Pole. The ascending node crosses the equator northward, the descending node southward. Click the orbit to set the time, or drag horizontally to rotate the view.",
+  "沿赤道面正视地球，北方朝上，水平虚线是赤道。点轨道定位时刻，水平拖动可绕地球转动。": "View Earth from the equatorial plane, north up. The horizontal dashed line marks the equator. Click the orbit to set the time or drag horizontally to circle Earth.",
   "外景视锥比例": "Exterior guide scale",
   "以镜口为起点缩放外景辅助线。取景和照片使用镜头的实际视场。": "Scale the exterior guide from the telescope aperture. The viewfinder and photos use the lens’s actual field of view.",
   "城市": "City",
@@ -1876,5 +1877,11 @@
   "固定当前十字线": "Pin this sightline",
   "看地面": "Look at the ground",
   "快捷键 F": "Shortcut F",
-  "拖动或 W A S D 转向，Q / E 旋转，F 切换固定与随轨转动，滚轮或双指变焦。": "Drag or use W A S D to aim, Q / E to roll, F to switch between locking and moving with the orbit. Scroll or pinch to zoom."
+  "拖动或 W A S D 转向，Q / E 旋转，F 切换固定与随轨转动，滚轮或双指变焦。": "Drag or use W A S D to aim, Q / E to roll, F to switch between locking and moving with the orbit. Scroll or pinch to zoom.",
+  "天然卫星": "Natural satellite",
+  "行星": "Planet",
+  "火星、织女星、Orion、北京": "Mars, Vega, Orion, Beijing",
+  "视直径 {diam}″ · 亮面 {lit}%": "Apparent diameter {diam}″ · {lit}% illuminated",
+  "主画面看目标": "View in main scene",
+  "恒星与太阳系天体名称": "Star and Solar System names"
 }

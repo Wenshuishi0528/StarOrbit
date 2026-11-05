@@ -31,7 +31,7 @@ export function mountSurveyOrbitOverview(host,{sim,onSeek,earthImage}={}){
  const node=(tag,parent,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;parent.append(el);return el;};
  const sheet=node('style',root);sheet.textContent=style;
  const head=node('div',root,'survey-ov-head'),title=node('h4',head),tools=node('div',head,'survey-ov-controls');
- const angleButtons=[['normal','俯视轨道面'],['oblique','斜视轨道'],['equatorial','俯视地球赤道面']].map(([mode,key])=>{
+ const angleButtons=[['normal','俯视轨道面'],['oblique','斜视轨道'],['equatorial','赤道正视']].map(([mode,key])=>{
   const button=node('button',tools);button.type='button';button.dataset.orbitView=mode;
   button.onclick=()=>{equatorial=mode==='equatorial';yaw=0;tilt=mode==='oblique'?52:0;refresh();};return {button,key};
  });
@@ -68,7 +68,7 @@ export function mountSurveyOrbitOverview(host,{sim,onSeek,earthImage}={}){
   root.dataset.windowState=state;root.dataset.orbitTime=String(Math.floor(elapsed));
   const activeView=equatorial?'equatorial':Math.abs(tilt)<.1?'normal':'oblique';
   for(const {button} of angleButtons)button.setAttribute('aria-pressed',String(button.dataset.orbitView===activeView));
-  help.textContent=t(equatorial?'从地球北极上方看赤道面。升交点向北越过赤道，降交点向南。点轨道可定位时刻，水平拖动可转动视图。':'点轨道定位时刻，拖动空白处旋转。整次曝光须落在同一可用弧段内。轨道半径按比例绘制，图标和箭头作示意，背面轨迹用虚线。');
+  help.textContent=t(equatorial?'沿赤道面正视地球，北方朝上，水平虚线是赤道。点轨道定位时刻，水平拖动可绕地球转动。':'点轨道定位时刻，拖动空白处旋转。整次曝光须落在同一可用弧段内。轨道半径按比例绘制，图标和箭头作示意，背面轨迹用虚线。');
   const windowsKey=getLanguage()+'|'+visibility.windows.map(pair=>pair.join(':')).join(',');const buttons=windowList.children;
   if(winKey!==windowsKey){
    winKey=windowsKey;windowList.replaceChildren();

@@ -34,9 +34,9 @@ for(const degrees of [0,41.5,89.99,90,130,180]){
  const inc=degrees*Math.PI/180,phase=.63,transverse=east.map((v,i)=>v*Math.cos(inc)+pole[i]*Math.sin(inc));
  const inclined={epoch:equatorEpoch,radial:node.map((v,i)=>v*Math.cos(phase)+transverse[i]*Math.sin(phase)),
   along:node.map((v,i)=>-v*Math.sin(phase)+transverse[i]*Math.cos(phase))};
- for(const turn of [0,54,-126]){
-  const view=surveyEquatorialView(inclined,turn);near(dot(view.front,pole),1);
-  near(dot(view.up,pole),0);near(dot(view.right,pole),0);
+ for(const turn of [0,-35,54,-126]){
+  const view=surveyEquatorialView(inclined,turn);near(dot(view.front,pole),0);
+  near(dot(view.up,pole),1);near(dot(view.right,pole),0);
   if(degrees===0||degrees===180)assert.equal(view.ascending,null);
   else{near(dot(view.ascending,pole),0);near(dot(view.ascending,node),1);near(dot(view.ascending,inclined.radial),Math.cos(phase));}
   for(const sec of [0,13,572,1490,2687,3893,SURVEY_END]){

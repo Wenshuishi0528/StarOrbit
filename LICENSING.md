@@ -14,6 +14,8 @@ Copyright © 2026 wenshuishi0528
 
 第三方代码库、音乐、地球与星空贴图、星表、地理及轨道数据继续适用各自的许可或使用条件；本项目的 CC BY-NC 4.0 不重新许可这些内容。具体来源和已有许可见 [素材与迁移说明](素材与迁移说明.md)、[README 署名](README.md#素材与署名--credits) 及各素材附带的声明。
 
+太阳系天体纹理由 Solar System Scope 提供，按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 使用。原图与本项目的尺寸和色彩调整详见[太阳系天体纹理署名](素材与迁移说明.md#太阳系天体纹理--solar-system-textures)。
+
 内置六首音乐（`assets/music/` 中的音频）来自第三方作品，版权归相应权利人；本许可不授予这些音乐的使用或再分发权。第三方素材的署名、许可和使用条件在分享项目时继续保留。
 
 ## English

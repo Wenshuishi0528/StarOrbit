@@ -12,11 +12,11 @@ async page=>{
  const settle=(id,mode='sky')=>page.waitForFunction(({id,mode})=>{const p=viewer.sim.xuntian.pointing;return p.locked&&p.mode===mode&&(!id||p.target===id);},{id,mode},{timeout:25000});
  const stamp=Date.UTC(2026,9,28,8);
  if(!await root.isVisible())await page.locator('#openXuntianMap').click();await ready();
- const first=await state();check(first.p.mode==='sky'&&first.p.target&&first.starCount>0,'No star field at the initial observation epoch');
+ const first=await state();check(first.p.mode==='free'&&!first.p.target&&first.p.roll===0,'Finder did not open in its along-track pose');
  await page.evaluate(stamp=>viewer.sim.seek(stamp),stamp);
  if(await root.isVisible())await page.locator('#xtClose').click();
  await page.locator('#openXuntianMap').click();await ready();
- // Reopening preserves the first pointing, which may be behind Earth at the new epoch.
+ // The recommendation is an explicit choice after reopening at the initial pose.
  await page.locator('#xtRecommend').click();
  await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky');
  await page.locator('#xtAperture').evaluate(el=>{el.value=Math.round(Math.log(600/25)/Math.log(80)*1000);el.dispatchEvent(new Event('input',{bubbles:true}));});

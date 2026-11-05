@@ -31,18 +31,18 @@ export function surveyMapView(orbit,yaw=0,tilt=0){
  const front=tangent.map((v,i)=>v*Math.sin(b)+normal[i]*Math.cos(b));
  return {right,up,front,yaw,tilt:clamp(tilt,-67,67)};
 }
-// North-pole orthographic view of the geographic equator at the teaching
-// orbit's epoch. The ascending node is the reference axis, so orbit inclination
-// is visible as foreshortening rather than an arbitrary camera tilt.
-export function surveyEquatorialView(orbit,roll=0){
+export function surveyEquatorialView(orbit,azimuth=0){
  const pole=earthAxes(orbit.epoch)[2],normal=unit(cross(orbit.radial,orbit.along));
  const line=cross(pole,normal),hasNodes=norm(line)>1e-7;
  const axis=hasNodes?unit(line):unit(orbit.radial.map((v,i)=>v-pole[i]*dot(orbit.radial,pole)));
- const tangent=cross(pole,axis),r=roll*DEG;
+ const tangent=cross(pole,axis),r=(35+azimuth)*DEG;
  const right=axis.map((v,i)=>v*Math.cos(r)+tangent[i]*Math.sin(r));
- const up=tangent.map((v,i)=>v*Math.cos(r)-axis[i]*Math.sin(r));
- const yaw=Math.atan2(dot(axis,orbit.along),dot(axis,orbit.radial))/DEG;
- return {right,up,front:pole,yaw,tilt:Math.acos(clamp(dot(normal,pole),-1,1))/DEG,roll,
+ const up=pole,front=unit(cross(right,up));
+ // Rotate map clicks into the projected orbit's major/minor axes.
+ const common=cross(normal,front),major=norm(common)>1e-10?unit(common):orbit.radial;
+ const yaw=Math.atan2(dot(major,orbit.along),dot(major,orbit.radial))/DEG;
+ const roll=-Math.atan2(dot(major,up),dot(major,right))/DEG;
+ return {right,up,front,yaw,tilt:Math.acos(clamp(dot(normal,front),-1,1))/DEG,roll,azimuth,
   equatorial:true,ascending:hasNodes?axis:null};
 }
 export function surveyProjectedPoint(v,view){
@@ -53,7 +53,7 @@ export function surveyOrbitPosition(orbit,elapsed){
  return surveyRadius(orbit,elapsed).map(x=>x*SURVEY_RADIUS_RATIO);
 }
 export function surveyTimeAtMapPoint(x,y,view,tolerance,elapsed=0){
- // Express the click along/across the line of nodes, including an in-plane rotation of the polar view.
+ // Express the click along/across the line of nodes, accounting for the projected orbit orientation.
  if(!Number.isFinite(x)||!Number.isFinite(y))return null;
  const roll=(view.roll||0)*DEG,nx=x*Math.cos(roll)-y*Math.sin(roll),ny=x*Math.sin(roll)+y*Math.cos(roll);
  const cos=Math.cos(view.tilt*DEG),radius=SURVEY_RADIUS_RATIO;

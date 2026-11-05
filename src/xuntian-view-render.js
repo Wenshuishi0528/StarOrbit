@@ -3,6 +3,7 @@ import {dot} from './orbit.js';
 import {inspectStationRay} from './xuntian-station-pin.js';
 import {equatorial} from './environment-math.js';
 import {createSurveyProbe} from './survey-live-probe.js';
+import {createSolarView} from './xuntian-solar-view.js';
 import {createXuntianEarthView} from './xuntian-earth-view.js';
 import {queryXuntianStars} from './xuntian-catalog.js';
 import {CATALOG_SIGNAL,coneHalfAngle,groundHit,sensorOptics,starColour,starInSky,toLocal,VIEW_MAX_RATE} from './xuntian-view-math.js';
@@ -156,7 +157,7 @@ export function createXuntianViewRenderer(sim,canvas){
   const u={...shared,cameraToInertial:mat(),galaxy:uniform(null),galaxyMode:uniform(0),skyGain:uniform(1),mainSkyHDR:uniform(0),opticalGain:uniform(1),toneMappingExposure:uniform(1)};
   const sensor={image:uniform(null),gain:uniform(1),earthImage:uniform(null),earthOn:uniform(0),earthExposure:uniform(1)};
   const background=screenPass(geometry,backgroundFragment,u),film=screenPass(geometry,sensorFragment,sensor);
-  const earthView=createXuntianEarthView(env,geometry);
+  const earthView=createXuntianEarthView(env,geometry),solarView=createSolarView(env,geometry,shared);
   const stars=makeStarLayer(renderer,shared),guide=constellationGuide(env,shared),station=stationView(sim);
   let surveyProbe=null,preview=null,previewImage=null,previewPending=false,capturePending=false,disposed=false,lastRender=-Infinity,lastStatus=unavailable(),previewCount=0;
   function valid(frame){return !!(frame?.q?.basis&&frame?.q?.earthAxes&&frame?.axes?.forward&&frame?.axes?.right&&frame?.axes?.up&&frame.eyeKm&&frame.eyeLocal&&frame.fovY>0&&frame.fovY<179&&frame.apertureMm>0);}
@@ -180,6 +181,7 @@ export function createXuntianViewRenderer(sim,canvas){
       renderer.setRenderTarget(target.scene);renderer.clear(true,true,false);renderer.render(background.scene,screenCamera);
       if(annotations)guide.draw(renderer,screenCamera,frame.constellationId,axes,optics.areaGain);
       renderer.render(stars.scene,screenCamera);
+      solarView.draw(renderer,screenCamera,frame,size,optics);
       if(local.visible)station.draw(renderer,!!frame.fillLight);
       renderer.setRenderTarget(target.film);renderer.clear(true,false,false);renderer.render(film.scene,screenCamera);
       if([background.material,stars.material,film.material].some(material=>renderer.properties.get(material).currentProgram?.diagnostics?.runnable===false))throw Error('巡天取景图像生成失败');
@@ -192,7 +194,7 @@ export function createXuntianViewRenderer(sim,canvas){
     if(!target.bytes[3])throw Error('巡天取景图像生成失败');
   }
   return {
-    earthSource:earthView.source,earthAppearanceKey:earthView.appearanceKey,
+    earthSource:earthView.source,earthAppearanceKey:earthView.appearanceKey,solarAppearanceKey:solarView.key,
     render(frame){
       if(disposed||!valid(frame))return unavailable();
       const now=performance.now();
@@ -210,7 +212,7 @@ export function createXuntianViewRenderer(sim,canvas){
       capturePending=true;let target;
       try{
         const bounded=Math.max(32,Math.min(3840,renderer.capabilities.maxTextureSize,Math.round(width)||1440)),size=frameSize(canvas,frame,bounded,renderer.capabilities.maxTextureSize);
-        await earthView.preparePhoto(frame,size);if(disposed)throw Error('巡天取景器已关闭');
+        await Promise.all([earthView.preparePhoto(frame,size),solarView.preparePhoto(frame,size)]);if(disposed)throw Error('巡天取景器已关闭');
         // The terrain prefetch may yield. Snapshot the live model time and
         // entrance together immediately before drawing a survey shutter.
         const actual=atShutter?atShutter():frame;
@@ -228,7 +230,7 @@ export function createXuntianViewRenderer(sim,canvas){
     },
     dispose(){
       if(disposed)return;disposed=true;if(!previewPending)preview?.dispose();preview=null;previewImage=null;
-      surveyProbe?.dispose();earthView.dispose();geometry.dispose();background.material.dispose();film.material.dispose();stars.dispose();guide.dispose();
+      surveyProbe?.dispose();solarView.dispose();earthView.dispose();geometry.dispose();background.material.dispose();film.material.dispose();stars.dispose();guide.dispose();
     }
   };
 }

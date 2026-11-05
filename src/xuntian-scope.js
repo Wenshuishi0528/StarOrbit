@@ -8,6 +8,9 @@ import {cityAnchor,createCityFinder,groundAttitude,opticalPose,orbitCarriedPose,
 import {sampleStationPin,stationPinDirection} from './xuntian-station-pin.js';
 import {cameraAxes,clamp,earthInFront,focalLength,fovAtZoom,groundDirection,groundSunAltitude,sunlitGroundDirection,lookDirection,MAX_FOV,MIN_FOV,skyCoordinates,zoomAtFov} from './xuntian-pointing.js';
 import {installXuntianFormation,mountXuntianFormationPanel} from './xuntian-formation.js';
+import {attitudeQuaternion} from './xuntian-formation-math.js';
+import {solarApparent} from './solar-system.js';
+import {solarLabel} from './solar-targets.js';
 import {getXuntianTarget} from './xuntian-catalog.js';
 import {createXuntianViewRenderer} from './xuntian-view-render.js';
 import {earthMapSizes,PHOTO_WIDTHS,resolutionTag} from './xuntian-image-quality.js';
@@ -29,8 +32,8 @@ export function installXuntianScope(sim){
  let capturing=false,unavailable=false,needsFrame=false,stationRefresh=false,nightCap=false,selectedAt=0,locked=false,exterior='both';
  const stats={frames:0,lastRenderMs:0};let surveyMission,anchor=null,tracked=null,freePose=null,releaseNote='',roll=0,rollTimer=0;
  const cities=createCityFinder(sim.environment.geography.items);
- try{const prefs=JSON.parse(localStorage.getItem(KEY))||{};if(Number.isFinite(prefs.aperture))aperture=clamp(prefs.aperture,25,2000);if(Number.isFinite(prefs.ev))ev=clamp(prefs.ev,-3,3);if(Number.isFinite(prefs.roll))roll=wrapRoll(prefs.roll);if(PHOTO_WIDTHS.includes(prefs.photoWidth))photoWidth=prefs.photoWidth;$('xtShowGuide').checked=prefs.guide!==false;$('xtSkyCompass').checked=prefs.compass!==false;}catch{}
- const prefs=()=>{try{localStorage.setItem(KEY,JSON.stringify({aperture,ev,roll,photoWidth,guide:$('xtShowGuide').checked,compass:$('xtSkyCompass').checked}));}catch{}};
+ try{const prefs=JSON.parse(localStorage.getItem(KEY))||{};if(Number.isFinite(prefs.aperture))aperture=clamp(prefs.aperture,25,2000);if(Number.isFinite(prefs.ev))ev=clamp(prefs.ev,-3,3);if(PHOTO_WIDTHS.includes(prefs.photoWidth))photoWidth=prefs.photoWidth;$('xtShowGuide').checked=prefs.guide!==false;$('xtSkyCompass').checked=prefs.compass!==false;}catch{}
+ const prefs=()=>{try{localStorage.setItem(KEY,JSON.stringify({aperture,ev,photoWidth,guide:$('xtShowGuide').checked,compass:$('xtSkyCompass').checked}));}catch{}};
  const setLens=f=>{field=clamp(f,MIN_FOV,MAX_FOV);$('xtFocal').value=String(Math.round(zoomAtFov(field)*1000));setText($('xtFocalLabel'),Math.round(focalLength(field))+' mm');lastDraw=-Infinity;};
  const setAperture=a=>{aperture=clamp(a,25,2000);$('xtAperture').value=String(Math.round(Math.log(aperture/25)/Math.log(80)*1000));setText($('xtApertureLabel'),Math.round(aperture)+' mm');lastDraw=-Infinity;};
  const setEV=value=>{ev=clamp(value,-3,3);$('xtEV').value=ev;setText($('xtEVLabel'),(ev>0?'+':'')+Number(ev.toFixed(2))+' EV');lastDraw=-Infinity;};
@@ -43,7 +46,7 @@ export function installXuntianScope(sim){
  }
  function setRoll(value,remember=true){
   if(mode==='free'&&sim.current)updateFree(sim.current);
-  roll=wrapRoll(value);if(mode==='free')rememberFree();$('xtRoll').value=String(Math.round(roll));setText($('xtRollLabel'),(roll>0?'+':'')+Math.round(roll)+'°');
+  roll=wrapRoll(value);if(mode==='free'&&sim.current)rememberFree();$('xtRoll').value=String(Math.round(roll));setText($('xtRollLabel'),(roll>0?'+':'')+Math.round(roll)+'°');
   axes=actualAxes();if(formation&&sim.current)optics=formation.update(sim.current,axes);
   lastDraw=-Infinity;pausedFrame='';if(remember){clearTimeout(rollTimer);rollTimer=setTimeout(prefs,180);}if(active)hud();
  }
@@ -54,7 +57,20 @@ export function installXuntianScope(sim){
  function saveSky(){
   if(mode==='sky')bookmark={pose:(desired||pose).clone(),named,fieldId,field};
  }
+ function bodyNow(body){
+  const eye=optics?.eyeKm||sim.current?.position;
+  if(!eye||!sim.current)return null;
+  return solarApparent(sim.current,eye).find(entry=>entry.id===body);
+ }
  function selectStar(target){
+  if(target.type==='solar'){
+   if(target.body==='Earth'){observe('nadir');return;}
+   const body=bodyNow(target.body);if(!body)return;
+   saveSky();surveyMission?.clear();discardAnchor();mode='solar';named=target;fieldId=null;
+   const diameter=2*body.radiusRad/D;
+   setLens(Math.max(MIN_FOV,diameter*(target.body==='Saturn'?4.8:2.5)));
+   aim(body.direction);selectedAt=performance.now();hud();canvas.focus({preventScroll:true});return;
+  }
   if(target.type==='city'){selectCity(target);return;}
   surveyMission?.clear();discardAnchor();mode='sky';named=target;fieldId=null;setLens(target.fov);aim(target.direction);selectedAt=performance.now();hud();canvas.focus({preventScroll:true});
  }
@@ -93,9 +109,11 @@ export function installXuntianScope(sim){
  }
  const input=mountScopeInput(canvas,{nudge:manual,zoom:d=>setLens(fovAtZoom(zoomAtFov(field)+d)),roll:delta=>setRoll(roll+delta),togglePin,field:()=>field});
  const search=mountScopeSearch($('xtSearch'),$('xtResults'),{choose:selectStar,cityFinder:cities,isBlocked:d=>earthInFront(optics?.eyeKm||sim.current?.position,d),
+  solarVisible:id=>{const b=bodyNow(id);return b?!earthInFront(optics?.eyeKm||sim.current.position,b.direction):null;},
   cityVisible:city=>sim.current&&(optics?.eyeKm||sim.current.position)?trackGround(cityAnchor(city),optics?.eyeKm||sim.current.position,sim.current)?.visible:null});
  function targetForMode(){
   if(!optics||!sim.current)return null;
+  if(mode==='solar'){tracked=bodyNow(named.body);return tracked;}
   if(anchor?.kind==='ground'){tracked=trackGround(anchor,optics.eyeKm,sim.current);return tracked;}
   if(anchor?.kind==='station'){
    const direction=stationPinDirection(sim,optics,anchor.point);
@@ -119,20 +137,21 @@ export function installXuntianScope(sim){
   mode='sky';named=bookmark.named;fieldId=bookmark.fieldId;setLens(bookmark.field);desired=bookmark.pose.clone();locked=false;$('xtSearch').value=named?.name||'';hud();
  }
  function hud(){
-  const sky=mode==='sky'||mode==='sky-pin'||mode==='free',center=lastResult?.center,city=anchor?.cityId?cities.get(anchor.cityId,getLanguage()):null;
+  const sky=mode==='solar'||mode==='sky'||mode==='sky-pin'||mode==='free',center=lastResult?.center,city=anchor?.cityId?cities.get(anchor.cityId,getLanguage()):null;
   if(active&&surveyMission)surveyMission.paint(axes,field,sky,!unavailable&&!capturing);
-  const targetName=city?.name||(mode==='sky'?(named?.name||(fieldId?t(SURVEY_FIELDS.find(f=>f.id===fieldId).name):t('手动星野'))):t(modes[mode]));
+  const targetName=(mode==='solar'?solarLabel(named.body,getLanguage()):null)||city?.name||(mode==='sky'?(named?.name||(fieldId?t(SURVEY_FIELDS.find(f=>f.id===fieldId).name):t('手动星野'))):t(modes[mode]));
   setText($('xtTarget'),targetName);$('xtReturn').hidden=mode==='sky'||mode==='free';$('xtRecommend').hidden=!sky;
   const below=anchor?.kind==='ground'&&tracked?.visible===false;
   const blocked=!!(below||(locked&&(sky&&['earth','station'].includes(center?.kind)||anchor?.kind==='ground'&&center?.kind==='station')));
   const status=unavailable?t('无轨道位置'):mode==='sunlit'&&nightCap?t('当前可见地表均在夜侧'):below?t('目标在地平线下'):!locked&&desired?t('正在转向…'):
-   blocked?t(center.kind==='earth'?'地球遮挡':'站体遮挡'):anchor?t('固定跟踪中'):mode==='free'?t('随轨道转动'):locked?t('已对准'):t('自由指向');
+   blocked?t(center?.kind==='earth'||below?'地球遮挡':'站体遮挡'):anchor?t('固定跟踪中'):mode==='free'?t('随轨道转动'):locked?t('已对准'):t('自由指向');
   setText($('xtStatus'),status);$('xtStatus').dataset.blocked=String(blocked);
   const tracking=$('xtTrackingInfo'),detail=anchor?.kind==='ground'?t('目标 {lat}°, {lon}° · 斜距 {range} km',{
-   lat:anchor.latitude.toFixed(3),lon:anchor.longitude.toFixed(3),range:tracked?Math.round(tracked.range):'—'}):releaseNote?t(releaseNote):'';
+   lat:anchor.latitude.toFixed(3),lon:anchor.longitude.toFixed(3),range:tracked?Math.round(tracked.range):'—'}):mode==='solar'&&tracked?t('视直径 {diam}″ · 亮面 {lit}%',{diam:(tracked.radiusRad*2/D*3600).toFixed(1),lit:Math.round(tracked.illuminatedFraction*100)}):releaseNote?t(releaseNote):'';
   tracking.hidden=!detail;setText(tracking,detail);
   const free=mode==='free',pinButton=$('xtPin');pinButton.disabled=unavailable&&free;
   pinButton.dataset.action=free?'pin':'free';setText(pinButton,t(free?'固定十字线':'随轨道转动'));
+  $('xtLookBody').hidden=mode!=='solar';$('xtLookBody').disabled=unavailable;
   $('xtPinHere').hidden=free||!!anchor;$('xtPinHere').disabled=unavailable;$('xtGroundQuick').disabled=unavailable;
   const coords=center?.kind==='earth'&&Number.isFinite(center.latitude)?center.latitude.toFixed(2)+'°, '+center.longitude.toFixed(2)+'°':skyCoordinates(axes.forward);
   const sunAltitude=groundSunAltitude(center,sim.current),ground=$('xtIllumination');ground.hidden=unavailable||sunAltitude===null;
@@ -142,7 +161,7 @@ export function installXuntianScope(sim){
   let skyTag=skySource.status==='panorama'?t('银河 {size}',{size:skySource.level?skySource.level+'K':resolutionTag(skySource.sourceWidth)}):t(({loading:'银河加载中',failed:'银河底图不可用',unsupported:'程序银河',ordinary:skySource.presentation==='photo'?'摄影弱星空':'程序银河',catalog:'星表',off:'星空背景关闭'})[skySource.status]||'星表');
   if(skySource.showStars&&skySource.gain===0)skyTag+=' · '+t('星空亮度为零');
   setText($('xtSources'),[earth,skyTag,canvas.dataset.xuntianFrame&&canvas.dataset.xuntianFrame!=='error'?canvas.width+' × '+canvas.height:null].filter(Boolean).join(' · '));
-  setText($('xtClock'),unavailable?'':shortClock(sim.time)+' UTC+8');setText($('xtDepth'),!unavailable&&Number.isFinite(lastResult?.limitMagnitude)?t('极限 {mag} 等',{mag:lastResult.limitMagnitude.toFixed(1)}):'');setText($('xtCoordinates'),coords);setText($('xtField'),t('视场 {fov}°',{fov:field.toFixed(field<1?2:1)}));
+  setText($('xtClock'),unavailable?'':shortClock(sim.time)+' UTC+8');setText($('xtDepth'),!unavailable&&Number.isFinite(lastResult?.limitMagnitude)?t('极限 {mag} 等',{mag:lastResult.limitMagnitude.toFixed(1)}):'');setText($('xtCoordinates'),coords);setText($('xtField'),t('视场 {fov}°',{fov:field.toFixed(field<.1?3:field<1?2:1)}));
   $('xtUnavailable').hidden=!unavailable;$('xtCapture').disabled=capturing||unavailable||!!surveyMission?.busy;
   ocular.dataset.center=unavailable?'':center?.kind||'';panel.dataset.mode=mode;panel.dataset.target=anchor?.cityId||(anchor?mode:null)||named?.id||fieldId||'';
  }
@@ -157,6 +176,13 @@ export function installXuntianScope(sim){
    if(active&&sim.current)formation.update(sim.current,axes);
   });
  }
+ function restoreInitial(){
+  surveyMission?.clear();discardAnchor();input.clear();search.close();bookmark=null;
+  mode='free';named=null;fieldId=null;desired=null;locked=false;$('xtSearch').value='';
+  // In along-track, orbit-normal, radial coordinates, look along +X with +Z up.
+  freePose=attitudeQuaternion({right:[0,-1,0],up:[0,0,1],forward:[1,0,0]},true);
+  roll=0;setRoll(0,false);formation.restoreInitial();lastDraw=-Infinity;
+ }
  function open(){
   if(sim.missionId!=='tiangong')return;
   if(!sim.api.state.showXT){$('showXT').click();return;}
@@ -165,7 +191,7 @@ export function installXuntianScope(sim){
   active=true;panel.hidden=false;document.body.classList.add('xt-scope-open');
   $('openXuntian').setAttribute('aria-expanded','true');$('openXuntianMap').setAttribute('aria-expanded','true');
   lastWall=null;lastDraw=-Infinity;lastResult=null;unavailable=!sim.current;
-  if(!opened){recommend(true);opened=true;} completedFrame='';pausedFrame='';delete canvas.dataset.xuntianFrame;
+  restoreInitial();opened=true; completedFrame='';pausedFrame='';delete canvas.dataset.xuntianFrame;
   formation.refresh();update(sim.current,performance.now());sim.rebuild({poseOnly:true});needsFrame=true;hud();canvas.focus({preventScroll:true});
  }
  function close(){
@@ -175,9 +201,11 @@ export function installXuntianScope(sim){
   renderer?.dispose();renderer=null;lastResult=null;needsFrame=false;lastWall=null;
   if(location.hash==='#xuntian')history.replaceState(null,'',location.pathname+location.search);
  }
+ let wasVisible=false;
  function assemblyChanged(){
   const stationMission=sim.missionId==='tiangong';$('openXuntianMap').hidden=!stationMission;$('openXuntian').disabled=!stationMission;
   if(!visible(sim))close();if(formation)formation.refresh();else if(visible(sim))ensureFormation();
+  const nowVisible=visible(sim);if(nowVisible&&!wasVisible){restoreInitial();opened=true;}wasVisible=nowVisible;
   if(formation&&visible(sim)&&sim.current)optics=formation.update(sim.current,opened?axes:undefined);
  }
  function update(q,wall){
@@ -231,7 +259,7 @@ export function installXuntianScope(sim){
   const f=frame(),env=sim.environment,u=env.uniforms;
   // At a paused epoch the same photons need no second exposure. Invalidate for
   // pointing, focus, a moving panel, cloud/texture replacement and local illumination.
-  const signature=sim.paused&&sim.mode!=='real'?[sim.current.t,assemblyRevision,mode,f.constellationId,field,aperture,ev,canvas.clientWidth,devicePixelRatio,f.showStars,f.skyExposure,f.skyBrightness,env.skyLoading,env.galaxyTexture?.version,renderer?.earthAppearanceKey?.(),
+  const signature=sim.paused&&sim.mode!=='real'?[sim.current.t,assemblyRevision,mode,f.constellationId,field,aperture,ev,canvas.clientWidth,devicePixelRatio,f.showStars,f.skyExposure,f.skyBrightness,env.skyLoading,env.galaxyTexture?.version,renderer?.earthAppearanceKey?.(),renderer?.solarAppearanceKey?.(),
    ...pose.toArray(),...optics.eyeLocal,...sim.api.model.quaternion.toArray(),f.fillLight,f.showGalaxy,env.galaxyTexture?.id,
    ...['dayMap','nightMap','cloudMap','oceanMap'].map(k=>u[k].value?.id),u.cloudAmount.value,env.settings.cloudNightVisible,
    ...Object.values(sim.api.rig).flatMap(r=>[r.roll?.rotation.x,r.left?.rotation.y,r.right?.rotation.y])].join('|'):'';
@@ -247,7 +275,7 @@ export function installXuntianScope(sim){
   const atShutter=()=>{
    if(!active||!sim.current||!optics)return null;
    stamp=new Date(sim.current.t).toISOString().replace(/[:.]/g,'-');
-   subject=(anchor?.cityId||(mode==='sky'?(named?.id||fieldId||mode):mode)).replace(/[^a-zA-Z0-9_-]/g,'_');
+   subject=(anchor?.cityId||(mode==='solar'?named.body:mode==='sky'?(named?.id||fieldId||mode):mode)).replace(/[^a-zA-Z0-9_-]/g,'_');
    return {...frame(),constellationId:null};
   };
   try{
@@ -263,6 +291,17 @@ export function installXuntianScope(sim){
   if(location.hash==='#xuntian')open();
  };window.addEventListener('hashchange',route);
  $('openXuntian').onclick=open;$('openXuntianMap').onclick=open;
+ $('xtLookBody').onclick=()=>{
+  if(mode!=='solar'||!sim.current)return;
+  const overview=sim.view==='orbit',camera=overview?sim.spaceCamera:sim.api.camera;
+  const controls=overview?sim.orbitControls:sim.api.controls;
+  const body=solarApparent(sim.current,sim.spaceCamera.position.toArray()).find(b=>b.id===named.body);
+  if(!body)return;
+  const direction=overview?body.direction:sim.current.basis.map(axis=>dot(axis,body.direction));
+  const distance=camera.position.distanceTo(controls.target);
+  controls.stopMotion();controls.target.copy(camera.position).addScaledVector(camera.position.clone().fromArray(direction),distance);controls.update();
+ };
+ $('xtInitial').onclick=()=>{restoreInitial();canvas.focus({preventScroll:true});};
  $('xtClose').onclick=()=>{close();const button=$('openXuntianMap');if(button.offsetWidth)button.focus({preventScroll:true});};
  $('xtExpand').onclick=()=>{const large=panel.classList.toggle('expanded');$('xtExpand').setAttribute('aria-pressed',String(large));if(optics)frameExternal(exterior);lastDraw=-Infinity;};
  $('xtMapTab').onclick=()=>{close();sim.minimap.setVisible(true);if(matchMedia('(max-width:760px)').matches&&!$('orbitMinimap').classList.contains('compact-expanded'))$('toggleMinimap').click();};
@@ -277,8 +316,8 @@ export function installXuntianScope(sim){
  $('xtShowGuide').onchange=prefs;$('xtCapture').onclick=capture;$('xtRecommend').onclick=()=>recommend(false);$('xtReturn').onclick=restoreSky;
  panel.querySelectorAll('[data-xt-mode]').forEach(b=>b.onclick=()=>observe(b.dataset.xtMode));$('xtFrameBoth').onclick=()=>frameExternal('both');
  $('xtMore').addEventListener('toggle',()=>{if($('xtMore').open)$('xtMore').scrollIntoView({block:'nearest'});});
- onLanguageChange(()=>{if(named)named=getXuntianTarget(named.id,getLanguage())||named;if(bookmark?.named)bookmark.named=getXuntianTarget(bookmark.named.id,getLanguage())||bookmark.named;search.refresh();if(active){if(anchor?.cityId)$('xtSearch').value=cities.get(anchor.cityId,getLanguage())?.name||'';else if(named&&mode==='sky')$('xtSearch').value=named.name;hud();}});
- $('xtSearch').placeholder=t('北京、织女星、Orion、HIP 91262');onLanguageChange(()=>{$('xtSearch').placeholder=t('北京、织女星、Orion、HIP 91262');});
+ onLanguageChange(()=>{if(named?.type==='solar'){named.name=solarLabel(named.body,getLanguage());$('xtSearch').value=named.name;}else if(named)named=getXuntianTarget(named.id,getLanguage())||named;if(bookmark?.named)bookmark.named=getXuntianTarget(bookmark.named.id,getLanguage())||bookmark.named;search.refresh();if(active){if(anchor?.cityId)$('xtSearch').value=cities.get(anchor.cityId,getLanguage())?.name||'';else if(named&&mode==='sky')$('xtSearch').value=named.name;hud();}});
+ $('xtSearch').placeholder=t('火星、织女星、Orion、北京');onLanguageChange(()=>{$('xtSearch').placeholder=t('火星、织女星、Orion、北京');});
  setLens(field);setAperture(aperture);setEV(ev);setRoll(roll,false);assemblyChanged();if(formation)sim.rebuild({poseOnly:true});
  return {open,close,openSurveyTile,update,draw,assemblyChanged,restoreRoute:route,get active(){return active;},get formation(){return formation;},get optics(){return optics;},get pointing(){return {mode,target:anchor?.cityId||(anchor?mode:null)||named?.id||fieldId,axes,locked,field,aperture,ev,roll,pinned:anchor?.kind||null,ground:anchor?.kind==='ground'?{latitude:anchor.latitude,longitude:anchor.longitude,visible:tracked?.visible??null}:null,selectedAt};},get result(){return lastResult;},stats};
 }

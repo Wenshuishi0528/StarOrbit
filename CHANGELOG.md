@@ -1,5 +1,29 @@
 # Changelog / 更新记录
 
+## v1.05 — 2026-11-05 · 正式版 / Release
+
+启用主画面的星图标注后，会同时显示视野内的恒星、行星、太阳和月球名称。太阳系标签随天体移动，并避让遮挡和其它标签。
+
+Enabling the main sky chart displays star and Solar System names. Labels follow moving bodies and respect occlusion and label spacing.
+
+## v1.04 — 2026-11-05 · 本机版 / Local build
+
+主场景星空加入七颗行星，巡天可按名称搜索、跟踪和拍摄太阳、月球与行星，并可用长焦观察相位、云带与土星环。
+
+Seven planets now move through the main sky. Search the finder for the Sun, Moon and planets, track them over time, and zoom in to photograph phases, cloud bands and Saturn’s rings.
+
+## v1.03 — 2026-11-05 · 本机版 / Local build
+
+巡天启动和重新打开时位于空间站沿轨前方 30 米，镜头朝前，滚转归零。取景窗可一键恢复初始位置与朝向。
+
+Xuntian starts 30 m ahead of the station, facing along the orbit with zero roll. Reopen the finder or use Restore initial position to return to this pose.
+
+## v1.02 — 2026-11-05 · 本机版 / Local build
+
+巡天拍摄计划的轨道总览改为从赤道高度正视地球。水平拖动时赤道保持水平，可点选倾斜轨道定位曝光时刻。
+
+The survey planner now shows Earth from the equator with north up. Drag horizontally to rotate around Earth, or click the inclined orbit to select a time.
+
 ## v1.01 — 2026-11-05 · 正式版 / Release
 
 巡天取景可搜索城市、固定十字线瞄准的天球方向、地面或空间站部件，并绕镜头光轴旋转构图。解除自动跟踪后可随轨道转动，让星野随时间扫过画面。「放大取景」按大窗实际尺寸绘制。外景视锥可单独缩放，默认 1×。装配模型更新至巡天 V28。阳台半球默认朝向天顶。「巡天拍摄计划」默认使用 16K 银河图源，轨道总览新增赤道面视角和升降交点。[使用手册](使用说明.md#主页面的巡天望远镜)

@@ -96,7 +96,7 @@ export function opticalModel(group){
  const radius=Math.max(...shapes.map(s=>sweptReach(s,referenceWorld)))/VIEW_UNITS_PER_METRE;
  return {reference,entrance:center,axis,radius};
 }
-export function constrainedTravel(from,to,shapes,padding){
+export function constrainedTravel(from,to,shapes,padding,allowExit=false){
  const a=new THREE.Vector3(),b=new THREE.Vector3(),scale=new THREE.Vector3(),inv=new THREE.Matrix4();
  let limit=1;
  for(const shape of shapes){
@@ -104,6 +104,17 @@ export function constrainedTravel(from,to,shapes,padding){
   const e=inv.elements;
   scale.set(Math.hypot(e[0],e[4],e[8]),Math.hypot(e[1],e[5],e[9]),Math.hypot(e[2],e[6],e[10])).multiplyScalar(padding);
   const t=boxTravelFraction(a.copy(from).applyMatrix4(inv),b.copy(to).applyMatrix4(inv),shape.box,scale);
+  // At the authored close formation a conservative clearance box may already
+  // surround the centre. Permit travel out through its nearest face only.
+  if(t===0&&allowExit){
+   let gap=Infinity,outward=0;
+   for(const k of ['x','y','z']){
+    const low=a[k]-shape.box.min[k]+scale[k],high=shape.box.max[k]+scale[k]-a[k];
+    if(low<gap){gap=low;outward=a[k]-b[k];}
+    if(high<gap){gap=high;outward=b[k]-a[k];}
+   }
+   if(outward>0)continue;
+  }
   if(t!=null)limit=Math.min(limit,t);
  }
  return limit;

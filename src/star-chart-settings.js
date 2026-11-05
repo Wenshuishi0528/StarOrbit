@@ -35,7 +35,7 @@ export function syncStarChartControls(settings){
 
 export function bindStarChartControls(settings,onChange){
  const $=id=>document.getElementById(id),changed=()=>{syncStarChartControls(settings);onChange();};
- for(const [key,id] of Object.entries(checkboxIds))$(id).onchange=()=>{settings[key]=$(id).checked;changed();};
+ for(const [key,id] of Object.entries(checkboxIds))$(id).onchange=()=>{settings[key]=$(id).checked;if(key==='starChartEnabled'&&settings[key])settings.starLabels=true;changed();};
  $('starLabelScope').onchange=()=>{settings.starLabelScope=$('starLabelScope').value;changed();};
  $('starLabelDensity').oninput=()=>{settings.starLabelDensity=Number($('starLabelDensity').value);changed();};
  syncStarChartControls(settings);

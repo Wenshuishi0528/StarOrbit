@@ -12,6 +12,7 @@ import {climatePixels} from './cloud-geography.js';
 import {Weather} from './weather.js';
 import {Phenomena,flashUniforms} from './phenomena.js';
 import {Moon} from './moon.js';
+import {MainPlanets} from './main-planets.js';
 import {EarthDetail} from './earth-detail.js';
 import {t,setText,onLanguageChange} from './i18n.js';
 import * as THREE from 'three';
@@ -55,7 +56,7 @@ export class Environment{
 
   this.backdrop=new THREE.Scene();this.backdrop.background=new THREE.Color('#000104');
   this.starCamera=new THREE.PerspectiveCamera(38,1,.1,2000);
-  this.buildStars();this.buildMilkyWay();this.moon=new Moon(this);this.starChart=new StarChart(this);this.geography=new Geography(this);
+  this.buildStars();this.planets=new MainPlanets(this);this.buildMilkyWay();this.moon=new Moon(this);this.starChart=new StarChart(this);this.geography=new Geography(this);
   this.track=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
   this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.skyStatus();});
@@ -212,6 +213,7 @@ export class Environment{
  update(q,camera){
   this.moon.update(q,camera);
   const detailed=this.quality&&this.quality!=='simple',s=this.settings;
+  this.planets.update(q,camera,s.stars,s.exposure==='cinematic'?Infinity:QUALITY[this.quality||s.quality].limit);
   this.uniforms.cloudMoonLight.value=0;
   if(q&&s.cloudNightVisible&&s.clouds&&detailed){
    const position=this.moon.ephemeris.at(q.t).position;

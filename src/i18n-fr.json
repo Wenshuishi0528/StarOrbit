@@ -1,4 +1,5 @@
 {
+  "恢复初始位置": "Rétablir la position initiale",
   "夜面也显示云层": "Afficher les nuages côté nuit",
   "月球": "Lune",
   "望向月球": "Voir la Lune",
@@ -1848,10 +1849,10 @@
   "拍摄 {seconds} 秒": "Exposer {seconds} s",
   "软件图形模式采用全球底图与简化云层、大气。": "Le rendu logiciel utilise les cartes mondiales avec des nuages et une atmosphère simplifiés.",
   "候选窗口按该地点的天际线、航天器受照与暮光条件计算。云层、烟霾和实际亮度仍影响肉眼观测。": "Le calcul tient compte de l’horizon du site, de l’éclairage de l’engin et du crépuscule. Les nuages, la brume et la luminosité réelle influent sur la visibilité.",
-  "俯视地球赤道面": "Vue du plan équatorial terrestre",
+  "赤道正视": "Vue de face de l’équateur",
   "升交点": "Nœud ascendant",
   "降交点": "Nœud descendant",
-  "从地球北极上方看赤道面。升交点向北越过赤道，降交点向南。点轨道可定位时刻，水平拖动可转动视图。": "Le plan équatorial est vu du pôle Nord. Au nœud ascendant, l’engin franchit l’équateur vers le nord, au nœud descendant vers le sud. Cliquez sur l’orbite pour choisir l’instant ou faites glisser horizontalement pour pivoter.",
+  "沿赤道面正视地球，北方朝上，水平虚线是赤道。点轨道定位时刻，水平拖动可绕地球转动。": "Vue depuis le plan équatorial, nord en haut. Les pointillés horizontaux marquent l’équateur. Cliquez sur l’orbite pour choisir l’instant ou faites glisser horizontalement pour tourner autour de la Terre.",
   "外景视锥比例": "Échelle du cône extérieur",
   "以镜口为起点缩放外景辅助线。取景和照片使用镜头的实际视场。": "Les lignes extérieures sont redimensionnées depuis l’ouverture. Le viseur et les photos utilisent le champ réel de l’objectif.",
   "城市": "Ville",
@@ -1876,5 +1877,11 @@
   "固定当前十字线": "Fixer cette ligne de visée",
   "看地面": "Viser le sol",
   "快捷键 F": "Raccourci F",
-  "拖动或 W A S D 转向，Q / E 旋转，F 切换固定与随轨转动，滚轮或双指变焦。": "Visez par glissement ou avec W A S D, pivotez avec Q / E. F alterne entre le verrouillage et le repère orbital. Zoomez à la molette ou à deux doigts."
+  "拖动或 W A S D 转向，Q / E 旋转，F 切换固定与随轨转动，滚轮或双指变焦。": "Visez par glissement ou avec W A S D, pivotez avec Q / E. F alterne entre le verrouillage et le repère orbital. Zoomez à la molette ou à deux doigts.",
+  "天然卫星": "Satellite naturel",
+  "行星": "Planète",
+  "火星、织女星、Orion、北京": "Mars, Véga, Orion, Pékin",
+  "视直径 {diam}″ · 亮面 {lit}%": "Diamètre apparent {diam}″ · éclairé à {lit} %",
+  "主画面看目标": "Voir dans la scène principale",
+  "恒星与太阳系天体名称": "Noms des étoiles et des astres du Système solaire"
 }

@@ -36,7 +36,7 @@ export function mountScopeInput(canvas,{nudge,zoom,field,roll=()=>{},togglePin=(
   // A quick tap can begin and end between two animation frames, especially
   // when rendering Earth. Only supply a discrete step if no frame handled it.
   if(held.get(e.code)===false&&document.activeElement===canvas){
-   if(direction){const step=Math.max(.015,Math.min(2,field()*.045));nudge(direction[0]*step,direction[1]*step);}
+   if(direction){const step=Math.min(2,field()*.045);nudge(direction[0]*step,direction[1]*step);}
    else roll(rotation*5);
   }
   held.delete(e.code);e.stopPropagation();
@@ -47,6 +47,6 @@ export function mountScopeInput(canvas,{nudge,zoom,field,roll=()=>{},togglePin=(
   const [x,y,r]=Array.from(held.keys()).reduce(([a,b,c],k)=>[a+(directions[k]?.[0]||0),b+(directions[k]?.[1]||0),c+(rolls[k]||0)],[0,0,0]);
   for(const key of held.keys())held.set(key,true);
   if(r)roll(r*60*dt);
-  if(x||y){const s=Math.max(.18,field()*.65)*dt/Math.hypot(x,y);nudge(x*s,y*s);}
+  if(x||y){const s=(field()*.65)*dt/Math.hypot(x,y);nudge(x*s,y*s);}
  }};
 }

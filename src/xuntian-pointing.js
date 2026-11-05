@@ -3,7 +3,7 @@ import {EARTH_RADIUS,dot,unit} from './orbit.js';
 
 const D=Math.PI/180, V=a=>new Vector3(...a);
 export const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
-export const MIN_FOV=.35,MAX_FOV=110;
+export const MIN_FOV=.006,MAX_FOV=110;
 // Virtual instrument with a 24 mm high sensor. Field of view always means vertical field.
 export const focalLength=fov=>12/Math.tan(fov*D/2);
 export const fovAtZoom=z=>MAX_FOV*Math.pow(MIN_FOV/MAX_FOV,clamp(z,0,1));
