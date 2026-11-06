@@ -74,7 +74,8 @@ export class Environment {
       skyDetailSource: 'auto',
       cityTerrain: true,
       cityAutoLoad: false,
-      earthElevation: false,
+      earthElevation: true,
+      earthElevationDefaultVersion: 1,
       moon: true,
       ...normalizeStarChartSettings(),
       ...normalizeGeographySettings(),
@@ -107,6 +108,8 @@ export class Environment {
         'groundTrack',
       ])
         if (typeof old?.[k] === 'boolean') this.settings[k] = old[k];
+      // Adopt the new default once; later explicit on/off choices persist.
+      if (old?.earthElevationDefaultVersion !== 1) this.settings.earthElevation = true;
       if (this.assets.daySources?.[old?.daySource]) this.settings.daySource = old.daySource;
       if (this.assets.nightSources?.[old?.nightSource]) this.settings.nightSource = old.nightSource;
       if (QUALITY[old?.quality]) this.settings.quality = old.quality;
@@ -789,7 +792,9 @@ export class Environment {
         this.api.renderer.domElement.height
       )
     );
-    this.earth.visible = !this.elevationLayer.update(this.earth.quaternion);
+    // Geographic labels, boundaries and ground tracks inherit this object's
+    // Earth-fixed transform. Replace only its surface, not the whole subtree.
+    this.earth.material.visible = !this.elevationLayer.update(this.earth.quaternion);
     this.elevationControls.update();
     this.uniforms.cloudNightVisible.value = s.cloudNightVisible ? 1 : 0;
     this.uniforms.cloudAmount.value = detailed && s.clouds ? s.cloudOpacity : 0;

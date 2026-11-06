@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.18 — 2026-11-07 · 正式版 / Release
+
+真实地形改为默认开启，旧设置升级时迁移一次，此后保留用户手动开关。修复开启真实地形后地名、国境线、河湖线与地面轨迹一起消失：切换地形只隐藏原球面材质，保留地理叠加层及地球自转关系；各标注开关继续独立生效。
+
+**English:** Real terrain now defaults on, with a one-time migration for older preferences and subsequent manual choices preserved. Fixed geographic labels, borders, rivers/lakes and ground tracks disappearing when real terrain is enabled. Terrain switching now hides only the original surface material, preserving Earth-fixed overlays and their independent controls.
+
+Chrome/WebKit 实际渲染验证通过，覆盖反复切换地形及标注独立开关。 / Chrome/WebKit rendering regressions passed for repeated terrain switching and independent annotation controls.
+
 ## v1.17 — 2026-11-07 · 正式版 / Release
 
 「地球与星空」新增默认关闭的真实地形模式，以 1× 实际高程生成山川网格；主画面、巡天、固定地面瞄准与照片共用数据，并保留现有城市高清影像。内置约 1.03 MiB 的 ETOPO 2022 全球底座，放大后按需读取 Copernicus GLO-30，采用平滑衔接与有界缓存；提供来源、年代、重试、清缓存及照片署名。关闭后释放地形运行资源，已缓存区域可离线复用。本模式不改变飞行碰撞或着陆物理。

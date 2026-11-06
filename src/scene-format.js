@@ -151,7 +151,7 @@ export function validateScene(x) {
   environment.skyDetail = environment.skyDetailSource !== 'galaxy';
   environment.cityTerrain = e.cityTerrain === undefined ? true : bool(e.cityTerrain);
   environment.cityAutoLoad = e.cityAutoLoad === undefined ? false : bool(e.cityAutoLoad);
-  environment.earthElevation = e.earthElevation === undefined ? false : bool(e.earthElevation);
+  environment.earthElevation = e.earthElevation === undefined ? true : bool(e.earthElevation);
   Object.assign(
     environment,
     normalizeStarChartSettings(e, { strict: true }),
