@@ -14,9 +14,15 @@
 
 *中国空间站场景：舱体组合、太阳翼、地球云层、星图、轨道读数与事件时间轴。*
 
-**作者：wenshuishi0528 · 当前源码：v1.06 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
+**作者：wenshuishi0528 · 当前源码：v1.12 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
-> 版本说明：本页按 **v1.06 正式版** 整理。在线版与便携版请以各自页面顶部的版本号为准。
+巡天取景与轨道地图可从右侧工具列独立打开并同时显示；导航球支持紧凑版与完整版。
+
+> 版本说明：本页按 **v1.12** 整理。在线版与便携版请以各自页面顶部的版本号为准。
+
+主页面在「航天器姿态」打开导航球，点击球面即可用 KSP 风格键位操纵当前对象：转向带惯性，RCS 提供平移，SAS 辅助稳姿。右上角「自由飞行」可驾驶神舟、天舟离站并回接，使用独立存档。巡天取景可识别十字线所指，星图新增完整梅西耶目录与精选 NGC 目标。[导航球操作](使用说明.md#导航球与近轨操纵) · [自由飞行](使用说明.md#自由飞行) · [本批功能说明](docs/v1.09-pilot-star-chart.md)
+
+巡天「太阳观测」可查看真实 SDO 黑子、日冕与日珥影像，支持 1K／2K、更新当前波段和带观测时间的 PNG。数据页与取景共用影像；桌面版在线更新，网页版导入太阳快照。[太阳观测操作](使用说明.md#太阳观测)
 
 ## 目录
 
@@ -41,7 +47,7 @@
 4. 展开“轨道与时间”，切换航天器跟随与地球轨道总览，尝试暂停、改变时间或加速播放。
 5. 进入“任务实验室”查看过境预报、练习交会对接，或选择轨道长曝光、阳台观测、巡天拍摄计划。
 
-6. 在主页面点击「巡天取景」，输入「织女星」、`Orion`、HIP 编号或「北京」自动对准。点「看地面」朝向星下点，点「随轨道转动」让星野随时间扫过镜口。也可以固定十字线、旋转构图，或点「放大取景」查看星点细节。[巡天取景操作](使用说明.md#主页面的巡天望远镜)
+6. 在主页面点击「巡天取景」，输入「织女星」、`Orion`、HIP 编号、`M31`、星云名称或「北京」自动对准。点「看地面」朝向星下点，点「随轨道转动」让星野随时间扫过镜口。也可以固定十字线、旋转构图，或点「放大取景」查看星点细节。[巡天取景操作](使用说明.md#主页面的巡天望远镜)
 
 首次使用默认采用精细 8K 整体画质和观赏增强 16K 银河。画面卡顿时，可将整体画质降至 2K，并切换到普通星空。高画质效果和高清纹理按需加载，首次切换可能需要等待。
 
@@ -49,7 +55,7 @@
 | --- | --- | --- |
 | 在线版 | 直接访问在线入口 | 首次加载需要网络；内置轨道与云图可直接使用，支持文件导入；部分数据处理依赖本机服务 |
 | 便携版 | 下载发布包并解压，打开包内 `StarOrbit.html` | 内嵌资源可离线使用；版本以发布包为准 |
-| 本机服务版 | 使用发布包附带的启动器，或从源码启动本机服务 | 为 NOAA、NASA 云图处理和官方轨道更新提供本机接口；更新仍需网络 |
+| 本机服务版 | 使用发布包附带的启动器，或从源码启动本机服务 | 为 NOAA、NASA 云图处理、SDO 太阳影像和官方轨道更新提供本机接口；更新仍需网络 |
 | 源码开发版 | 安装依赖、构建并运行 | 使用当前源码，可修改功能与接入自己的素材 |
 
 完整启动步骤见[使用手册](使用说明.md#开始使用)。
@@ -124,6 +130,8 @@
 
 在“航天器姿态”中调节滚转、俯仰和偏航，范围 ±180°，输入与滑条同步。姿态以当前任务的参考方向为基础：空间站沿地面轨迹定向，卫星可选择航向跟随或惯性定轴。“姿态归零”清除手动偏移，保持轨道与模拟时刻。
 
+打开导航球并点击球面，可用 W/S、A/D、Q/E 转向，R 打开 RCS 后用 H/N、J/L、I/K 平移，T 切换 SAS。松键保留惯性；SAS 只稳定姿态，平移需反向推力或「相对制动」。主页面采用 1×、10 km 范围的近轨演练，随时可「恢复观测」，公共轨道数据保持原样。[完整键位与模式区别](使用说明.md#导航球与近轨操纵)
+
 ## 地球、星空与空间环境
 
 环境设置由所有航天器共用，切换任务后仍保留当前选择。
@@ -135,7 +143,7 @@
 | 云层 | 统一云图库提供全球与亚太卫星图、加拿大云量预报及内置图；向日葵仅显示卫星视野内的观测；8K 可开启体积云和动态云层 |
 | 夜面云层 | 开启后按云层遮挡城市灯光，表现厚云遮蔽和薄云透光 |
 | 极光 | NOAA OVATION 快照或本地生成分布；8K 使用有厚度的光幕，4K 使用经典效果 |
-| 星空与星图 | 41,411 颗星表星点，原生 16K NASA 银河来源；恒星名称、88 星座名称、连线与边界可独立控制 |
+| 星空与星图 | 41,411 颗星表星点，原生 16K NASA 银河来源；统一 57,431 颗标注目录、965 条已收录星名及随缩放显示的星表编号；88 星座和 127 个深空目标分层标注 |
 | 地理标注 | 国家、首都、主要城市、国境线、海域、山脉、河流和湖泊，支持层级与密度调整 |
 | 天气与奇观 | 云内闪电、高空闪光、夜侧气辉和流星演示，可选择自然或观赏增强效果 |
 
@@ -195,6 +203,7 @@
 | 东方红一号现代轨道 | CelesTrak，NORAD 4382 | 根据 GP／OMM 根数使用 SGP4 计算 |
 | 全球云图 | Live Cloud Maps、NOAA GMGSI、NASA SatCORPS、向日葵-9 亚太云分类、加拿大 GDPS 全球预报 | 已保存版本一键使用，下载后手动切换；缺测与视觉警告明确显示，损坏文件禁止使用 |
 | 极光分布 | NOAA SWPC OVATION | 使用预报分布驱动极光地理范围与强度 |
+| 太阳观测 | NASA SDO，经 Helioviewer 提供 HMI／AIA | 巡天内按真实圆面投影；实际观测时刻与模拟时刻分别显示，更新或导入快照后使用 |
 
 Live Cloud Maps 和加拿大 GDPS 可在浏览器直接下载。NOAA GMGSI、NASA SatCORPS、向日葵-9 通过桌面服务转换，网页可导入成品快照。网络或来源异常时保留已有数据，检查失败会显示独立状态。[五种云图来源实测](docs/v0.93-cloud-sources.md)
 
@@ -282,6 +291,7 @@ python3 -m pip install -r scripts/cloud-requirements.txt
 | 高清地表与夜光 | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/)、[Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/)，NASA Earth Observatory；夜光来源 Suomi NPP / VIIRS |
 | 银河 | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/)，NASA/Goddard Space Flight Center Scientific Visualization Studio、Ernie Wright；Gaia DR2：ESA/Gaia/DPAC |
 | 月面 | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/)，NASA SVS / Ernie Wright；LRO / LROC |
+| 太阳观测 | NASA/SDO 与 AIA、EVE、HMI 科学团队，经 [Helioviewer](https://api.helioviewer.org/docs/v2/) 按需取得；[SDO 使用规则](https://sdo.gsfc.nasa.gov/data/rules.php) |
 | 星表与星野 | [d3-celestial / XHIP](https://github.com/ofrohn/d3-celestial)，BSD 3-Clause；部分星野风格源自 [StarSky Studio](https://github.com/Wenshuishi0528/StarSkyStudio)，CC BY 4.0 |
 | 云图 | [Live Cloud Maps](https://github.com/matteason/live-cloud-maps)，Contains modified EUMETSAT data；[NASA Langley Cloud and Radiation Research Group](https://satcorps.larc.nasa.gov/) |
 | 极光 | [NOAA SWPC OVATION](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) |

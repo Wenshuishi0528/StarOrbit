@@ -75,10 +75,10 @@ async page=>{
  await page.locator('#xtClose').click();const offFrames=(await state()).frames;
  await page.waitForTimeout(350);check((await state()).frames===offFrames,'Closed eyepiece continued rendering');
  await page.setViewportSize({width:390,height:844});
- await page.locator('#openXuntianMap').click();await ready();
+ await page.locator('#toolsToggle').click();await page.locator('#openXuntianMap').click();await ready();
  const layout=await page.evaluate(()=>{const b=document.querySelector('#xuntianScope').getBoundingClientRect(),c=document.querySelector('#xtCanvas').getBoundingClientRect(),m=document.querySelector('#orbitMinimap');return {width:innerWidth,bottom:b.bottom,top:b.top,left:b.left,right:b.right,canvasWidth:c.width,map:getComputedStyle(m).display,scroll:document.documentElement.scrollWidth};});
- check(layout.left>=-.5&&layout.right<=390.5&&layout.bottom<=845&&layout.top>300&&layout.canvasWidth>175&&layout.map==='none'&&layout.scroll<=390,'Mobile layout does not leave the spacecraft visible '+JSON.stringify(layout));
- await page.locator('#xtMapTab').click();check(await page.locator('#orbitMinimap').isVisible()&&!await root.isVisible(),'Map/scope switch failed on mobile');
+ check(layout.left>=-.5&&layout.right<=390.5&&layout.bottom<=845&&layout.top>300&&layout.canvasWidth>175&&layout.map!=='none'&&layout.scroll<=390,'Mobile layout does not leave the spacecraft visible '+JSON.stringify(layout));
+ await page.locator('#closeMinimap').click();check(!await page.locator('#orbitMinimap').isVisible()&&await root.isVisible(),'Closing map also closed finder');await page.locator('#xtClose').click();
  await page.setViewportSize({width:1440,height:880});await page.locator('#openXuntianMap').click();await ready();
  await page.evaluate(({t,mode,paused})=>{viewer.sim.seek(t);viewer.sim.mode=mode;viewer.sim.paused=paused;viewer.sim.timeUI();},sim);
  await page.locator('#xtRecommend').click();await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked);

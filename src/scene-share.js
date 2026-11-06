@@ -15,8 +15,9 @@ export function installSceneShare(sim,replaceAssembly){
  const recordRef=kind=>{const r=weather.items.find(x=>x.id===weather.active[kind]);return r?{id:r.id,source:r.source||'',provider:r.provider||'',time:r.time??null}:null;};
  const capture=()=>{
   if(sim.missions.busy||sim.sceneBusy)throw Error('正在恢复场景…');
+  sim.mainFlight?.stop();
   const home=env.moon.savedView;
-  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'StarOrbit',appVersion:document.querySelector('.app-version').textContent,mission:{id:sim.missionId,pose:{...sim.missions.state.pose},rotation:{...sim.missions.state.rotation}},assembly:sim.capabilities.assembly?structuredClone(api.state):null,simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},phenomena:{...env.phenomena.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:sim.data?{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}:null});
+  return validateScene({format:SCENE_FORMAT,name:$('sceneName').value.trim().slice(0,60)||'StarOrbit',appVersion:document.querySelector('.app-version').textContent,mission:{id:sim.missionId,pose:{...sim.missions.state.pose},rotation:{...sim.missions.state.rotation}},assembly:sim.capabilities.assembly?structuredClone(api.state):null,simulation:{time:sim.time,speed:sim.speed,auto:sim.auto,view:sim.view},environment:{...env.settings},phenomena:{...env.phenomena.settings},weather:{...weather.settings,cloudRecord:recordRef('cloud'),auroraRecord:recordRef('aurora')},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,$(k).checked])),cameras:{focus:sim.cameraFocus?.selected||'mission',follow:cameraState(api.camera,api.controls),overview:cameraState(sim.spaceCamera,sim.orbitControls),home:home?{...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()}:null},orbit:sim.data?{...structuredClone(sim.data),source:String(sim.data.source||''),created:String(sim.data.created||'')}:null});
  };
  async function importScene(input){
   if(busy||sim.missions.busy)throw Error('正在恢复场景…');
@@ -49,6 +50,7 @@ export function installSceneShare(sim,replaceAssembly){
    for(const key of DISPLAY_KEYS)$(key).checked=scene.display[key];
    $('showTelemetry').onchange();sim.minimap.setVisible(scene.display.showMinimap);
    sim.seek(scene.simulation.time);sim.speed=scene.simulation.speed;sim.setView(scene.simulation.view);
+   sim.cameraFocus?.restore(scene.cameras.focus);
    restoreCamera(api.camera,api.controls,scene.cameras.follow);restoreCamera(sim.spaceCamera,sim.orbitControls,scene.cameras.overview);
    const home=scene.cameras.home;env.moon.savedView=home?{position:api.camera.position.clone().fromArray(home.position),target:api.controls.target.clone().fromArray(home.target),up:api.camera.up.clone().fromArray(home.up),fov:home.fov,zoom:home.zoom}:null;
    setText('lookMoon',home?'返回航天器':'望向月球');

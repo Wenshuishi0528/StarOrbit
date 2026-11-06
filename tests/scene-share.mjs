@@ -31,7 +31,8 @@ const chartScene=structuredClone(fixture);Object.assign(chartScene.environment,n
 assert.deepEqual(validateScene(chartScene).environment,{...chartScene.environment,...normalizeGeographySettings()});
 assert.equal(validateScene(fixture).environment.starChartEnabled,false);
 const legacyStars=structuredClone(fixture);legacyStars.environment.starLabels=true;
-assert.equal(validateScene(legacyStars).environment.starLabelScope,'classic');
+assert.equal(validateScene(legacyStars).environment.catalogStarLabels,false);
+assert(!Object.hasOwn(validateScene(legacyStars).environment,'starLabelScope'));
 assert.equal(validateScene(legacyStars).environment.starChartEnabled,true);
 for(const [key,value] of [['starChartEnabled','true'],['starLabelScope','unknown'],['starLabelDensity',1.1],['constellationLines',0],['constellationNames',null],['constellationBoundaries',[]]]){
  const invalid=structuredClone(chartScene);invalid.environment[key]=value;assert.throws(()=>validateScene(invalid));
@@ -42,3 +43,5 @@ const geoScene=structuredClone(chartScene);Object.assign(geoScene.environment,no
 assert.deepEqual(validateScene(geoScene).environment,geoScene.environment);
 for(const [key,value] of [['geographyEnabled','yes'],['geoDensity',NaN],['geoCountries',1]]){const invalid=structuredClone(geoScene);invalid.environment[key]=value;assert.throws(()=>validateScene(invalid));}
 console.log('Geography scene round trip, old-scene defaults and strict validation passed');
+
+const focused=structuredClone(fixture);focused.cameras.focus='xuntian';assert.equal(validateScene(focused).cameras.focus,'xuntian');focused.cameras.focus=12;assert.throws(()=>validateScene(focused));

@@ -185,12 +185,13 @@ function controls(input){
  return {rotation:commandVector(input?.rotation),translation:commandVector(input?.translation),fine:!!input?.fine,brake:!!input?.brake,angularDamping:input?.angularDamping!==false};
 }
 function integrate(state,input,dt){
- // A bounded rate actuator: omega is relative to the target port frame and
- // expressed in body axes, rad/s. Damping arrests rate; it does not level attitude.
+ // Omega is relative to the target port frame, in body axes, rad/s. Without
+ // damping, bounded torque accumulates freely; assisted control commands a
+ // bounded rate and brakes with finite acceleration, without leveling attitude.
  const free=state.rules?.assistanceEnabled===false;
  const angularVelocity=state.angularVelocity.map((rate,i)=>{
-  if(free)return rate+input.rotation[i]*DOCKING_LIMITS.maxAngularAcceleration*dt;
-  const demand=input.rotation[i]!==0||input.angularDamping?input.rotation[i]*DOCKING_LIMITS.maxAngularRate:rate;
+  if(free||!input.angularDamping)return rate+input.rotation[i]*DOCKING_LIMITS.maxAngularAcceleration*dt;
+  const demand=input.rotation[i]*DOCKING_LIMITS.maxAngularRate;
   const acceleration=clamp((demand-rate)/DOCKING_LIMITS.angularResponseTime,-DOCKING_LIMITS.maxAngularAcceleration,DOCKING_LIMITS.maxAngularAcceleration);
   return rate+acceleration*dt;
  });

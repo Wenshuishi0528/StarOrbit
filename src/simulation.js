@@ -41,6 +41,7 @@ export class Simulation{
  get orbitStatus(){return orbitState(this.data,this.time);}
  get capabilities(){return spacecraft(this.missionId).capabilities;}
  setOrbit(data){
+  this.mainFlight?.stop();
   this.data=data===null?null:bindOrbit(validateOrbit(data),this.missionId);this.inertialReference=this.data?interpolate(this.data.rows,Math.max(this.data.rows[0][0],Math.min(this.data.rows.at(-1)[0],Date.parse(this.data.gpEpoch)||(this.data.rows[0][0]+this.data.rows.at(-1)[0])/2))):null;this.modernReference=this.inertialReference;this.lastOrbitSegment=null;this.current=null;this.lastOrbit=0;this.dirty=this.snap=true;
   this.minimap.lastTrack=this.minimap.lastDraw=-Infinity;this.minimap.points=[];this.minimap.dragging=false;this.minimap.pendingTime=null;cancelAnimationFrame(this.minimap.dragFrame);this.minimap.canvas.classList.remove('dragging');
   this.environment.trackData=null;this.environment.track.visible=this.environment.groundMarker.visible=false;
@@ -68,6 +69,7 @@ export class Simulation{
   }
  }
  stepTime(direction){
+  this.mainFlight?.stop();
   const target=this.time+direction*this.timeStep;
   this.timeline.jump(target);
   this.timeline.selected=null;this.timeline.renderSelection();this.timeline.update(performance.now(),true);this.missions?.syncUI();this.sessionMemory?.save();
@@ -88,8 +90,8 @@ export class Simulation{
   $('occlusion').onchange=()=>{this.dirty=true;this.snap=true;};
   $('importOrbit').onchange=async e=>{const id=this.missionId;try{if(this.sceneBusy||this.missions?.busy)throw Error('正在恢复场景…');const f=e.target.files[0];if(!f)return;if(f.size>30e6)throw Error('文件超过 30 MB');const data=parseMissionOrbit(await f.text(),id),weather=this.environment.weather;await weather.ready;const record=await weather.store('orbit',new Blob([JSON.stringify(data)],{type:'application/json'}),{missionId:id,time:Date.parse(data.created)||data.rows[0][0],source:'导入轨道',favorite:true});weather.acceptOrbit(data,record.id,id);weather.pendingRecords.delete(record.id);await weather.trim();setText('dataMessage','轨道数据已保存，下次打开会恢复。');this.api.toast('轨道数据已载入');}catch(err){this.api.toast('导入失败：{error}',{error:t(err.message)});}finally{e.target.value='';}};
  }
- realTime(){const now=Date.now();this.inputDirty=false;this.time=now;this.mode='real';this.paused=false;this.dirty=true;this.snap=true;this.timeUI();}
- seek(t){if(!validTime(t))return;this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();this.missions?.syncUI();}
+ realTime(){this.mainFlight?.stop();const now=Date.now();this.inputDirty=false;this.time=now;this.mode='real';this.paused=false;this.dirty=true;this.snap=true;this.timeUI();}
+ seek(t){if(!validTime(t))return;this.mainFlight?.stop();this.inputDirty=false;this.time=t;this.mode='custom';this.paused=true;this.dirty=true;this.snap=true;this.timeUI();this.missions?.syncUI();}
  manual(){this.auto=false;this.lastSolveTime=null;$('autoTrack').checked=false;this.controlUI();}
  controlUI(){if(!this.capabilities.solarArrays)return;$('trackingStatus').textContent=this.auto?t('全舱自动追日 · 计算姿态'):t('手动控制 · 角度保持');$('linkLabs').disabled=this.auto||!(this.api.labs().length>1&&['WT','MT'].includes(this.api.types[this.api.state.target]));$('rotationControls').classList.toggle('auto-controls',this.auto);}
  rebuild({poseOnly=false}={}){if(!poseOnly)this.xuntian?.assemblyChanged();if(this.capabilities.solarArrays){if(poseOnly)this.tracker.refreshPose();else this.tracker.rebuild();}if(poseOnly)this.poseDirty=true;else this.dirty=true;this.snap=true;const b=new THREE.Box3(),active=Object.entries(this.missions?.activeGroups()||this.api.groups).filter(([,g])=>g?.visible);active.forEach(([,g])=>b.union(new THREE.Box3().setFromObject(g)));this.center=b.getCenter(new THREE.Vector3());this.shadowDistance=fitSpacecraftShadow(this.api.sunLight,b);this.shadowCache.reset(active.flatMap(([id,g])=>{const r=this.api.rig[id];return [g,...(this.capabilities.solarArrays&&r?[r.roll,r.left,r.right]:[])];}));this.localSunArrow.position.copy(this.center);this.controlUI();}
@@ -105,11 +107,11 @@ export class Simulation{
   this.orbitLine.geometry.dispose();this.orbitLine.geometry=new THREE.BufferGeometry();this.orbitLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));this.orbitLine.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
  }
  update(wall){
-  const elapsed=Math.max(0,(wall-this.lastWall)/1000);this.lastWall=wall;const old=this.time;
+  const elapsed=Math.max(0,Math.min(this.mainFlight?.active?.2:Infinity,(wall-this.lastWall)/1000));this.lastWall=wall;const old=this.time;
   // Scrubbing owns the selected time while held; playback state stays intact.
   if(!this.minimap.dragging&&!this.timeline.dragging){if(this.mode==='real'){this.time=this.timeline.limitAdvance(old,Date.now());if(this.paused)this.timeUI();}else if(!this.paused){this.time=this.timeline.limitAdvance(old,clampTime(this.time+elapsed*this.speed*1000));if(this.paused)this.timeUI();}}
   this.syncOrbitEra();const status=this.orbitStatus;if(status!==this.lastOrbitStatus){this.lastOrbitStatus=status;if(status!=='ready')this.setView('follow');this.timeUI();this.missions?.syncUI();}
-  const raw=snapshot(this.data,this.time),q=raw&&(mission(this.missionId).attitude==='ground-track'?groundTrackAttitude(raw):spacecraftAttitude(raw,this.missions?.state.rotation.mode==='inertial'?(this.inertialReference||raw):raw));this.current=q;this.missions?.updateRotation();this.xuntian?.update(q,wall);this.api.music?.updateSimulation(this,wall);this.minimap.update(q,wall);this.timeline.update(wall);
+  const raw=snapshot(this.data,this.time),reference=raw&&(mission(this.missionId).attitude==='ground-track'?groundTrackAttitude(raw):spacecraftAttitude(raw,this.missions?.state.rotation.mode==='inertial'?(this.inertialReference||raw):raw));const q=this.mainFlight?.update(reference,wall)??reference;this.current=q;this.missions?.updateRotation();this.xuntian?.update(q,wall);this.navball?.update(wall);this.api.music?.updateSimulation(this,wall);this.minimap.update(q,wall);this.timeline.update(wall);
   if(!q){
    this.api.modelRoot.visible=true;this.api.sunLight.position.copy(this.center).addScaledVector(new THREE.Vector3(120,-180,240).normalize(),this.shadowDistance);
    $('simClock').textContent=clockText(this.time);$('clockMode').textContent=t('模型查看 · 无轨道位置');
@@ -136,14 +138,14 @@ export class Simulation{
   $('arrayYield').textContent=this.capabilities.solarArrays?(this.tracker.total*100||0).toFixed(1)+'%':'—';const reading=this.tracker.readings[this.api.state.target];$('selectedYield').textContent=reading?t('所选实例有效受光：{percent}%',{percent:(reading.effective*100).toFixed(1)}):t('受光面积计算中');
   if(this.minimap.dragging||this.timeline.dragging)$('arrayYield').textContent='—';
   if(!this.inputDirty&&!this.timeInput.focused)this.timeInput.set(q.t);
-  $('simNotice').textContent='';
+  $('simNotice').textContent=this.mainFlight?.active?t('近轨操纵 · 轨道线为原始参考轨道'):'';
  }
  render(){
   const {renderer,camera,scene,stage}=this.api,q=this.current,overview=this.view==='orbit';
   if(this.environment.devicePixelRatio!==devicePixelRatio)this.environment.updatePixelRatio();
   this.lighting.update(q,$('fillLight').checked);
   if(!q){this.environment.geography.update(null,this.spaceCamera);this.shadowCache.update();scene.background=new THREE.Color('#101b2b');renderer.autoClear=true;renderer.render(scene,camera);scene.background=null;return;}this.spaceCamera.aspect=camera.aspect;this.spaceCamera.fov=camera.fov;
-  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.position)));}else if(overview)this.orbitControls.update();
+  if(!overview&&q){const rot=basis(q.basis),pos=camera.position.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.sceneOrigin||q.position));this.spaceCamera.position.copy(pos);this.spaceCamera.up.copy(camera.up).transformDirection(rot);this.spaceCamera.lookAt(this.api.controls.target.clone().divideScalar(VIEW_UNITS_PER_METRE*1000).applyMatrix4(rot).add(V(q.sceneOrigin||q.position)));}else if(overview)this.orbitControls.update();
   this.marker.visible=overview&&!!q;this.orbitLine.visible=overview&&$('orbitPath').checked;this.sunArrow.visible=overview&&$('sunVector').checked;this.localSunArrow.visible=!overview&&$('sunVector').checked&&!!q;
   const bounds=overview?[{center:[0,0,0],radius:EARTH_EFFECTS_RADIUS},{center:q.position,radius:65}]:[];
   if(overview)bounds.push({center:this.spaceCamera.position.toArray().map((v,i)=>v+q.sunDir[i]*800000),radius:6000});
@@ -152,10 +154,24 @@ export class Simulation{
   this.spaceCamera.updateMatrixWorld(true);
   const clipping=spaceCameraClipping({overview,viewMatrix:this.spaceCamera.matrixWorldInverse.elements,fov:this.spaceCamera.fov,aspect:this.spaceCamera.aspect,zoom:this.spaceCamera.zoom,spheres:bounds,orbitPositions:this.orbitLine.visible?this.orbitLine.geometry.getAttribute('position')?.array:null});
   this.spaceCamera.near=clipping.near;this.spaceCamera.far=clipping.far;this.spaceCamera.updateProjectionMatrix();
-  if(q){this.sunArrow.setDirection(V(q.sunDir));this.sunDisc.position.copy(this.spaceCamera.position).addScaledVector(V(q.sunDir),800000);this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));}
-  this.environment.update(q,this.spaceCamera);const linear=this.environment.beginFrame();this.sunDisc.visible=!linear&&!!q;this.sunView.update(q,this.spaceCamera,linear);this.environment.renderBackground(renderer);renderer.render(this.sky,this.spaceCamera);this.environment.auroraCurtains.render(this.spaceCamera);if(linear)this.environment.finishFrame();
+  this.renderOrbitalSky(q,this.spaceCamera);
   if(!overview){this.shadowCache.update();renderer.autoClear=false;renderer.state.buffers.depth.setMask(true);renderer.clearDepth();renderer.render(scene,camera);renderer.autoClear=true;}
   renderer.autoClear=true;
   for(const {el}of Object.values(this.api.tags))if(overview)el.style.display='none';
  }
+ renderOrbitalSky(q,camera,flight=false){
+  const renderer=this.api.renderer;
+  this.sunArrow.setDirection(V(q.sunDir));
+  this.sunDisc.position.copy(camera.position).addScaledVector(V(q.sunDir),800000);
+  this.sunDisc.scale.setScalar(800000*695700/Math.hypot(...q.sun));
+  this.environment.update(q,camera,flight);
+  const linear=this.environment.beginFrame();
+  this.sunDisc.visible=!linear;
+  this.sunView.update(q,camera,linear);
+  this.environment.renderBackground(renderer);
+  renderer.render(this.sky,camera);
+  this.environment.auroraCurtains.render(camera);
+  if(linear)this.environment.finishFrame();
+ }
+
 }

@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import {computeBoundsTree} from 'three-mesh-bvh';
 import data from '../assets/star-chart.json';
-import {equatorial,QUALITY} from './environment-math.js';
-import {solarApparent} from './solar-system.js';
+import {equatorial} from './environment-math.js';
 import {solarLabel} from './solar-targets.js';
 import {getLanguage} from './i18n.js';
-import {placeSkyLabels,sphereHidesDirection} from './star-chart-math.js';
+import {buildSkyAnnotationLayout} from './sky-annotation-layout.js';
+import {DEEP_SKY_OBJECTS} from './deep-sky-catalog.js';
+import {deepSkyLabel} from './star-chart-symbols.js';
+import {starChartGlyphText} from './star-label-catalog.js';
 
 const RADIUS=1000,EARTH=6371,MOON=1737.4,CELL=32,FONT=24;
 const vector=(ra,dec)=>new THREE.Vector3(...equatorial(ra,dec));
@@ -17,6 +19,31 @@ alpha=hidden?0.:smoothstep(lifetime.x,lifetime.x+.18,clock)*(1.-smoothstep(lifet
 color=tint;texUV=uv;vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.);p.xy+=offset*2./viewport*p.w;gl_Position=p;}`;
 const fragment=`uniform sampler2D atlas;uniform float brightness;varying vec2 texUV;varying vec3 color;varying float alpha;
 void main(){float a=texture2D(atlas,texUV).a*alpha*brightness;if(a<.005)discard;gl_FragColor=vec4(color,a);
+#include <colorspace_fragment>
+}`;
+const labelVertex=`attribute vec3 anchor;attribute vec2 glyphOffset;attribute vec4 glyphRect;attribute float glyphScale;attribute vec2 lifetime;attribute vec3 tint;
+uniform vec2 viewport;uniform float clock;uniform vec4 earthDisc,moonDisc;
+varying vec2 texUV;varying vec3 color;varying float alpha;
+void main(){vec3 dir=normalize(anchor);bool hidden=dot(dir,earthDisc.xyz)>earthDisc.w||dot(dir,moonDisc.xyz)>moonDisc.w;
+alpha=hidden?0.:smoothstep(lifetime.x,lifetime.x+.18,clock)*(1.-smoothstep(lifetime.y,lifetime.y+.18,clock));
+color=tint;texUV=glyphRect.xy+uv*glyphRect.zw;vec4 p=projectionMatrix*modelViewMatrix*vec4(anchor,1.);
+p.xy+=(glyphOffset+position.xy*32.*glyphScale)*2./viewport*p.w;gl_Position=p;}`;
+const glyphAttributes={anchor:3,glyphOffset:2,glyphRect:4,glyphScale:1,tint:3,lifetime:2};
+function labelGeometry(capacity=0){
+ const geometry=new THREE.InstancedBufferGeometry();geometry.setIndex([0,1,2,0,2,3]);
+ geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,1,1,0,0,1,0],3));
+ geometry.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,1,0,1],2));
+ for(const [name,size] of Object.entries(glyphAttributes))geometry.setAttribute(name,new THREE.InstancedBufferAttribute(new Float32Array(capacity*size),size).setUsage(THREE.DynamicDrawUsage));
+ geometry.instanceCount=0;return geometry;
+}
+const symbolVertex=vertex.replace('attribute vec2 offset;', 'attribute float symbolType;attribute vec2 symbolSize;varying float kind;varying vec2 size;attribute vec2 offset;').replace('void main(){','void main(){kind=symbolType;size=symbolSize;');
+const symbolFragment=`uniform float brightness;varying vec2 texUV;varying vec3 color;varying float alpha;varying float kind;varying vec2 size;
+void main(){vec2 p=texUV*2.-1.;float radius=length(p),edge=abs(radius-.82);
+if(kind>0.5&&kind<1.5)edge=abs(max(abs(p.x),abs(p.y))-.82);
+float thickness=1.4/max(7.,min(size.x,size.y));float aa=max(.012,fwidth(edge));
+float ink=1.-smoothstep(thickness,thickness+aa,edge);
+if(kind>1.5){float crossLine=min(abs(p.x),abs(p.y));ink=max(ink,(1.-smoothstep(thickness,thickness+aa,crossLine))*step(radius,.82));}
+float a=ink*alpha*brightness*.72;if(a<.005)discard;gl_FragColor=vec4(color,a);
 #include <colorspace_fragment>
 }`;
 function lineGeometry(paths,trim){
@@ -34,22 +61,23 @@ export class StarChart{
   this.env=env;this.group=new THREE.Group();this.group.visible=false;env.backdrop.add(this.group);
   this.stars=data.stars.map(s=>({...s,key:'star-'+s.id,dir:vector(s.ra,s.dec)}));
   this.constellations=data.constellations.flatMap(c=>(c.labelPositions||[[c.ra,c.dec]]).map(([ra,dec],i)=>({...c,key:'const-'+c.id+'-'+i,dir:vector(ra,dec),kind:'constellation'})));
-  this.classic=this.stars.filter(s=>[91262,97649,11767].includes(s.id));
+  this.deepSky=DEEP_SKY_OBJECTS.map(object=>({...object,key:'deep-'+object.id,dir:new THREE.Vector3(...object.direction),kind:'deep'}));
   this.uniforms={atlas:{value:null},viewport:{value:new THREE.Vector2(1,1)},clock:{value:0},brightness:{value:1},earthDisc:{value:new THREE.Vector4(0,0,0,2)},moonDisc:{value:new THREE.Vector4(0,0,0,2)}};
   this.glyphs=new Map();this.shown=new Map();this.lastQuaternion=new THREE.Quaternion();this.lastPosition=new THREE.Vector3(Infinity,0,0);this.lastMoon=new THREE.Vector3(Infinity,0,0);this.lastLayout=-Infinity;this.lastKey='';
   this.modelRecords=[];this.occluderCache=new WeakMap();this.raycaster=new THREE.Raycaster();this.raycaster.firstHitOnly=true;this.hits=[];
-  this.stats={layouts:0,uploads:0,atlasBuilds:0,candidates:0,visible:0};
+  this.stats={layouts:0,uploads:0,atlasBuilds:0,candidates:0,visible:0,deepSky:0};
  }
  ensureGeometry(){
   if(this.labels)return;
   this.lines=new THREE.LineSegments(lineGeometry(data.constellations.flatMap(c=>c.lines),THREE.MathUtils.degToRad(.08)),new THREE.LineBasicMaterial({color:'#7fabc3',transparent:true,opacity:.35,depthTest:false,depthWrite:false,toneMapped:false}));
   this.boundaries=new THREE.LineSegments(lineGeometry(data.boundaries,0),new THREE.LineDashedMaterial({color:'#b2a0ce',transparent:true,opacity:.24,dashSize:1.5,gapSize:1,depthTest:false,depthWrite:false,toneMapped:false}));this.boundaries.computeLineDistances();
-  this.labels=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:fragment,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));this.labels.frustumCulled=false;this.labels.renderOrder=3;
-  this.lines.renderOrder=this.boundaries.renderOrder=1.5;this.group.add(this.lines,this.boundaries,this.labels);
+  this.labels=new THREE.Mesh(labelGeometry(),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:labelVertex,fragmentShader:fragment,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));this.labels.frustumCulled=false;this.labels.renderOrder=3;
+  this.symbols=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:symbolVertex,fragmentShader:symbolFragment,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));this.symbols.frustumCulled=false;this.symbols.renderOrder=2;
+  this.lines.renderOrder=this.boundaries.renderOrder=1.5;this.group.add(this.lines,this.boundaries,this.symbols,this.labels);
  }
  ensureAtlas(language){
   if(this.language===language)return;
-  const labels=[...this.stars,...this.constellations,...this.classic],chars=[...new Set(labels.flatMap(s=>[...(s[language]||s.en||s.zh)]))];
+  const labels=this.constellations,chars=[...new Set([...labels.flatMap(s=>[...(s[language]||s.en||s.zh)]),...starChartGlyphText(language),...this.deepSky.flatMap(s=>[...deepSkyLabel(s,language)])])];
   for(const id of ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune']){
    for(const c of solarLabel(id,language))if(!chars.includes(c))chars.push(c);
   }
@@ -89,68 +117,77 @@ export class StarChart{
   this.group.visible=active;
   if((!active||this.env.sim.view!=='follow')&&this.modelSource){this.modelSource=null;this.modelRecords=[];this.occluders=null;}
   if(!active)return;
-  this.ensureGeometry();const classic=s.starLabelScope==='classic';
-  this.lines.visible=!classic&&s.constellationLines;this.boundaries.visible=!classic&&s.constellationBoundaries;this.labels.visible=s.starLabels||(!classic&&s.constellationNames);
+  this.ensureGeometry();
+  this.lines.visible=s.constellationLines;this.boundaries.visible=s.constellationBoundaries;
+  this.symbols.visible=s.deepSkyObjects;this.labels.visible=s.starLabels||s.catalogStarLabels||s.solarSystemLabels||s.constellationNames||this.symbols.visible;
   const brightness=Math.min(1,s.starBrightness);this.lines.material.opacity=.35*brightness;this.boundaries.material.opacity=.24*brightness;
   if(!this.labels.visible)return;
   const language=getLanguage(),now=performance.now()/1000,width=this.env.api.stage.clientWidth,height=this.env.api.stage.clientHeight;
+  // Retire completed fades even when the camera and time are paused. This
+  // reuses the layout and releases invisible glyphs without a catalogue query.
+  if(now>=this.retireAt){
+   for(const [key,label] of this.shown)if(label.out!==undefined&&now-label.out>=.18)this.shown.delete(key);
+   this.retireAt=Infinity;this.geometryKey='';this.upload();
+  }
   this.ensureAtlas(language);this.uniforms.viewport.value.set(width,height);this.uniforms.clock.value=now;this.uniforms.brightness.value=brightness;
   const earth=camera.position.clone().negate(),moon=this.env.moon.mesh.position.clone().sub(camera.position),hasMoon=this.env.moon.mesh.visible;
   this.setDisc(this.uniforms.earthDisc.value,earth,EARTH);if(hasMoon)this.setDisc(this.uniforms.moonDisc.value,moon,MOON);else this.uniforms.moonDisc.value.set(0,0,0,2);
   const sim=this.env.sim,records=sim.shadowCache.records,follow=sim.view==='follow';
   const modelMoved=follow&&(this.modelSource!==records||this.modelRecords.some(r=>!r.matrix.equals(r.object.matrixWorld)));
-  const key=[language,width,height,camera.fov,camera.zoom,s.starLabels,s.starLabelScope,s.constellationNames,s.starLabelDensity,this.env.quality,s.exposure,hasMoon,follow].join('|');
+  const key=[language,width,height,camera.fov,camera.zoom,s.starLabels,s.catalogStarLabels,s.solarSystemLabels,s.constellationNames,s.deepSkyObjects,s.deepSkyScope,s.starLabelDensity,this.env.quality,s.exposure,hasMoon,follow].join('|');
   const changed=key!==this.lastKey;
   const moved=1-Math.abs(camera.quaternion.dot(this.lastQuaternion))>1e-12||camera.position.distanceToSquared(this.lastPosition)>1e-6||(hasMoon&&this.env.moon.mesh.position.distanceToSquared(this.lastMoon)>1e-6);
-  const epoch=sim.current?.t,skyMoved=s.starLabels&&epoch!==this.labelEpoch;
+  const epoch=sim.current?.t,skyMoved=s.solarSystemLabels&&epoch!==this.labelEpoch;
   if(!changed&&(!(moved||modelMoved||skyMoved)||now-this.lastLayout<.2))return;
   if(follow&&(modelMoved||!this.occluders))this.prepareOccluders();
   if(follow){this.modelSource=records;this.modelRecords=records.map(r=>({object:r.object,matrix:r.object.matrixWorld.clone()}));}
   this.labelEpoch=epoch;this.lastLayout=now;this.lastKey=key;this.lastQuaternion.copy(camera.quaternion);this.lastPosition.copy(camera.position);this.lastMoon.copy(this.env.moon.mesh.position);this.stats.layouts++;
-  const inverse=camera.quaternion.clone().invert(),halfV=Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/camera.zoom,halfH=halfV*camera.aspect,limit=s.exposure==='cinematic'?8:QUALITY[this.env.quality||'medium'].limit;
-  const candidates=[],source=s.starLabels?(classic?[...this.classic]:this.stars.filter(star=>(s.starLabelScope==='all'||star.major)&&star.mag<=limit)):[];
-  if(s.starLabels&&sim.current){
-   const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
-   for(const body of solarApparent(sim.current,camera.position.toArray())){
-    if(body.behindEarth||(body.id==='Moon'&&!hasMoon)||body.mag>limit)continue;
-    const dir=new THREE.Vector3(...body.direction);
-    if(this.hiddenBySpacecraft(dir))continue;
-    // Anchor the Sun and Moon labels just outside the disc so the foreground
-    // surface does not paint over its own name.
-    if(body.id==='Sun'||body.id==='Moon'){
-     const tangent=right.clone().addScaledVector(dir,-right.dot(dir)).normalize();
-     dir.addScaledVector(tangent,Math.tan(body.radiusRad+halfH*4/width)).normalize();
-    }
-    source.push({key:'solar-'+body.id,kind:'solar',dir,mag:body.mag,[language]:solarLabel(body.id,language)});
-   }
-  }
-  if(!classic&&s.constellationNames)source.push(...this.constellations);
-  for(const item of source){
-   const projected=item.dir.clone().applyQuaternion(inverse);if(projected.z>=0)continue;
-   const x=projected.x/-projected.z/halfH,y=projected.y/-projected.z/halfV;if(Math.abs(x)>1||Math.abs(y)>1)continue;
-   if(sphereHidesDirection(item.dir.toArray(),earth.toArray(),EARTH)||hasMoon&&sphereHidesDirection(item.dir.toArray(),moon.toArray(),MOON))continue;
-   const text=item[language]||item.en||item.zh,font=item.kind==='constellation'?14:13,scale=font/FONT;
-   const w=[...text].reduce((n,c)=>n+this.glyphs.get(c).advance*scale,0);
-   candidates.push({...item,text,font,w:w+4,h:font+7,x:(x+1)*width/2,y:(1-y)*height/2,centered:item.kind==='constellation',priority:item.kind==='solar'?Math.min(-2,item.mag):item.kind==='constellation'?1.7:item.mag??1});
-  }
-  candidates.sort((a,b)=>a.priority-b.priority||a.key.localeCompare(b.key));this.stats.candidates=candidates.length;
-  const placed=placeSkyLabels(candidates,width,height,s.starLabelDensity).filter(p=>!this.hiddenBySpacecraft(p.dir));this.stats.visible=placed.length;
+  const axes={right:new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion).toArray(),up:new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion).toArray(),forward:new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).toArray()};
+  const fov=THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/camera.zoom));
+  const layout=buildSkyAnnotationLayout({settings:s,axes,eyeKm:camera.position.toArray(),q:sim.current,fovY:fov,width,height,language,showMoon:hasMoon,
+   blocked:direction=>this.hiddenBySpacecraft(new THREE.Vector3(...direction))});
+  const placed=layout.labels.map(label=>({...label,dir:new THREE.Vector3(...label.direction)}));
+  this.stats.candidates=layout.candidates;this.stats.visible=layout.total;this.stats.deepSky=layout.stats.deepSky;this.stats.scanned=layout.stats.scanned;this.stats.unfiltered=layout.unfiltered;
   const next=new Map(placed.map(p=>[p.key,{...p,born:this.shown.get(p.key)?.out===undefined?this.shown.get(p.key)?.born??now:now}]));
-  for(const [key,previous]of this.shown)if(!next.has(key)){const out=previous.out??now;if(now-out<.18)next.set(key,{...previous,out});}
-  const signature=[...next.values()].map(p=>[p.key,p.text,p.kind==='solar'?p.dir.toArray().join(','):'',p.dx,p.dy,p.out??'',p.born].join(',')).join(';');
+  this.retireAt=Infinity;
+  for(const [key,previous]of this.shown)if(!next.has(key)){const out=previous.out??now;if(now-out<.18){next.set(key,{...previous,out});this.retireAt=Math.min(this.retireAt,out+.18);}}
+  const signature=[...next.values()].map(p=>[p.key,p.text,p.kind==='solar'?p.dir.toArray().join(','):'',p.dx,p.dy,p.symbol?.width,p.symbol?.height,p.out??'',p.born].join(',')).join(';');
   this.shown=next;if(signature===this.geometryKey)return;this.geometryKey=signature;this.upload();
  }
  upload(){
-  const positions=[],offsets=[],uvs=[],colors=[],lifetimes=[],indices=[0,1,2,0,2,3];
+  const indices=[0,1,2,0,2,3],count=[...this.shown.values()].reduce((sum,label)=>sum+[...label.text].length,0);
+  if(!this.glyphCapacity||count>this.glyphCapacity){
+   this.glyphCapacity=2**Math.ceil(Math.log2(Math.max(32,count)));
+   this.labels.geometry.dispose();this.labels.geometry=labelGeometry(this.glyphCapacity);
+  }
+  const geometry=this.labels.geometry,attributes=geometry.attributes;let glyphIndex=0;
+  const symbols={position:[],offset:[],uv:[],tint:[],lifetime:[],symbolType:[],symbolSize:[]};
   for(const label of this.shown.values()){
-   let pen=label.dx;const scale=label.font/FONT,color=new THREE.Color(label.kind==='constellation'?'#d0c09a':label.kind==='solar'?'#ffdcab':'#c8dce8');
+   let pen=label.dx;const scale=label.font/FONT,color=new THREE.Color(label.kind==='constellation'?'#d0c09a':label.kind==='solar'?'#ffdcab':label.symbol?.labelColor||'#c8dce8');
+   const anchor=label.dir.clone().multiplyScalar(RADIUS);
+   if(label.symbol){
+    const symbol=label.symbol,symbolColor=new THREE.Color(symbol.color),w=symbol.width/2,h=symbol.height/2;
+    const corners=[[-w,-h],[w,-h],[w,h],[-w,h]],uv=[[0,0],[1,0],[1,1],[0,1]];
+    const kind=symbol.shape==='box'?1:symbol.shape==='cross-circle'?2:0;
+    for(const index of indices){
+     symbols.position.push(...label.dir.clone().multiplyScalar(RADIUS).toArray());symbols.offset.push(...corners[index]);symbols.uv.push(...uv[index]);symbols.tint.push(symbolColor.r,symbolColor.g,symbolColor.b);symbols.lifetime.push(label.born,label.out??1e12);symbols.symbolType.push(kind);symbols.symbolSize.push(symbol.width,symbol.height);
+    }
+   }
    for(const char of label.text){
-    const g=this.glyphs.get(char),x0=pen-3*scale,x1=x0+CELL*scale,y0=-label.dy-25*scale,y1=y0+CELL*scale;
-    const xy=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],uv=[[g.x/this.atlasSide,1-(g.y+CELL)/this.atlasSide],[(g.x+CELL)/this.atlasSide,1-(g.y+CELL)/this.atlasSide],[(g.x+CELL)/this.atlasSide,1-g.y/this.atlasSide],[g.x/this.atlasSide,1-g.y/this.atlasSide]];
-    for(const i of indices){positions.push(...label.dir.clone().multiplyScalar(RADIUS).toArray());offsets.push(...xy[i]);uvs.push(...uv[i]);colors.push(color.r,color.g,color.b);lifetimes.push(label.born,label.out??1e12);}pen+=g.advance*scale;
+    const g=this.glyphs.get(char);if(!g)continue;
+    attributes.anchor.setXYZ(glyphIndex,anchor.x,anchor.y,anchor.z);
+    attributes.glyphOffset.setXY(glyphIndex,pen-3*scale,-label.dy-25*scale);
+    attributes.glyphRect.setXYZW(glyphIndex,g.x/this.atlasSide,1-(g.y+CELL)/this.atlasSide,CELL/this.atlasSide,CELL/this.atlasSide);
+    attributes.glyphScale.setX(glyphIndex,scale);attributes.tint.setXYZ(glyphIndex,color.r,color.g,color.b);
+    attributes.lifetime.setXY(glyphIndex,label.born,label.out??1e12);glyphIndex++;pen+=g.advance*scale;
    }
   }
-  const geometry=new THREE.BufferGeometry();for(const [name,array,size]of [['position',positions,3],['offset',offsets,2],['uv',uvs,2],['tint',colors,3],['lifetime',lifetimes,2]])geometry.setAttribute(name,new THREE.Float32BufferAttribute(array,size));
-  this.labels.geometry.dispose();this.labels.geometry=geometry;this.stats.uploads++;
+  geometry.instanceCount=glyphIndex;
+  for(const [name,size] of Object.entries(glyphAttributes)){
+   attributes[name].clearUpdateRanges();attributes[name].addUpdateRange(0,glyphIndex*size);attributes[name].needsUpdate=true;
+  }
+  this.stats.uploads++;this.stats.glyphs=glyphIndex;
+  const symbolGeometry=new THREE.BufferGeometry();for(const [name,size] of [['position',3],['offset',2],['uv',2],['tint',3],['lifetime',2],['symbolType',1],['symbolSize',2]])symbolGeometry.setAttribute(name,new THREE.Float32BufferAttribute(symbols[name],size));
+  this.symbols.geometry.dispose();this.symbols.geometry=symbolGeometry;
  }
 }

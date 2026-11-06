@@ -20,9 +20,10 @@ import catalogue from '../assets/stars.json';
 import {Geography} from './geography.js';
 import {normalizeGeographySettings,bindGeographyControls} from './geography-settings.js';
 import {StarChart} from './star-chart.js';
-import {normalizeStarChartSettings,bindStarChartControls} from './star-chart-settings.js';
+import {normalizeStarChartSettings,bindStarChartControls,migrateStarDensityDefault} from './star-chart-settings.js';
 import {QUALITY,equatorial,qualityFor} from './environment-math.js';
 import {EARTH_RADIUS,stateAt,earthAxes} from './orbit.js';
+import {SolarObservations} from './solar-data.js';
 
 const $=id=>document.getElementById(id),V=a=>new THREE.Vector3(...a);
 export class Environment{
@@ -38,6 +39,7 @@ export class Environment{
    if(QUALITY[old?.quality])this.settings.quality=old.quality;if(['view','photo','cinematic'].includes(old?.exposure))this.settings.exposure=old.exposure;
    for(const k of ['cloudOpacity','starBrightness'])if(Number.isFinite(old?.[k]))this.settings[k]=THREE.MathUtils.clamp(old[k],0,k==='cloudOpacity'?1:2);
   }catch{}
+  try{migrateStarDensityDefault(this.settings,localStorage);}catch{}
   this.fallback=new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1);this.fallback.needsUpdate=true;
   this.climateMap=new THREE.DataTexture(climatePixels(),512,256,THREE.RGBAFormat);this.climateMap.wrapS=THREE.RepeatWrapping;this.climateMap.minFilter=this.climateMap.magFilter=THREE.LinearFilter;this.climateMap.needsUpdate=true;
   this.uniforms={...flashUniforms(),linearOutput:{value:0},solarDepth:{value:this.fallback},climateMap:{value:this.climateMap},cloudTemplateMap:{value:this.fallback},cloudSeason:{value:0},dayMap:{value:this.fallback},nightMap:{value:this.fallback},cloudMap:{value:this.fallback},oceanMap:{value:this.fallback},sun:{value:V([1,0,0])},detailed:{value:0},cloudAmount:{value:0},cloudNightVisible:{value:0},cloudMoonPosition:{value:new THREE.Vector3(0,0,384400)},cloudMoonLight:{value:0},gloss:{value:40},localSun:{value:new THREE.Vector3(1,0,0)},enhanced:{value:0},cloudChannel:{value:0},cloudTone:{value:0},cloudMode:{value:0},weatherTime:{value:0},seed:{value:0},cloudMotion:{value:0},motionTime:{value:0},earthInverse:{value:new THREE.Matrix3()},cloudSteps:{value:28}};
@@ -59,6 +61,7 @@ export class Environment{
   this.buildStars();this.planets=new MainPlanets(this);this.buildMilkyWay();this.moon=new Moon(this);this.starChart=new StarChart(this);this.geography=new Geography(this);
   this.track=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#ffc978',transparent:true,opacity:.85}));this.track.renderOrder=1;this.earth.add(this.track);
   this.groundMarker=new THREE.Mesh(new THREE.SphereGeometry(25,12,8),new THREE.MeshBasicMaterial({color:'#ffce80'}));this.earth.add(this.groundMarker);
+  this.solarObservations=new SolarObservations();
   this.bind();this.setSkyStyle();this.ready=this.setQuality(this.settings.quality);this.bindImmersive();this.weather=new Weather(this);this.phenomena=new Phenomena(this);onLanguageChange(()=>{this.skyStatus();});
  }
  buildStars(){
@@ -210,7 +213,7 @@ export class Environment{
    finally{if(ticket===this.ticket)this.loading=false;}
   });return this.ready;
  }
- update(q,camera){
+ update(q,camera,flight=false){
   this.moon.update(q,camera);
   const detailed=this.quality&&this.quality!=='simple',s=this.settings;
   this.planets.update(q,camera,s.stars,s.exposure==='cinematic'?Infinity:QUALITY[this.quality||s.quality].limit);
@@ -229,8 +232,13 @@ export class Environment{
   const cinematic=s.exposure==='cinematic';this.milky.material.uniforms.textured.value=cinematic&&this.galaxyTexture?1:0;
   if(this.lastSkyStyle!==s.exposure||this.lastStarTier!==this.quality){this.stars.geometry.setDrawRange(0,cinematic?catalogue.length:this.starCount||0);this.lastSkyStyle=s.exposure;this.lastStarTier=this.quality;if(this.quality&&!this.loading)setText('qualityStatus','');}
   const boost=s.exposure==='photo'?.025:1;this.starUniforms.brightness.value=s.starBrightness*boost;this.milky.material.uniforms.brightness.value=s.starBrightness*boost;
-  this.starCamera.quaternion.copy(camera.quaternion);this.starCamera.fov=camera.fov;this.starCamera.aspect=camera.aspect;this.starCamera.zoom=camera.zoom;this.starCamera.updateProjectionMatrix();this.starChart.update(camera);this.geography.update(q,camera);
-  this.track.visible=this.groundMarker.visible=s.groundTrack&&this.sim.view==='orbit'&&!!q;
+  this.starCamera.quaternion.copy(camera.quaternion);this.starCamera.fov=camera.fov;this.starCamera.aspect=camera.aspect;this.starCamera.zoom=camera.zoom;this.starCamera.updateProjectionMatrix();
+  if(flight){
+   this.starChart.group.visible=false;this.geography.group.visible=false;
+  }else{
+   this.starChart.update(camera);this.geography.update(q,camera);
+  }
+  this.track.visible=this.groundMarker.visible=!flight&&s.groundTrack&&this.sim.view==='orbit'&&!!q;
   if(!q)return;
   const p=V(q.position).normalize().multiplyScalar(EARTH_RADIUS+28).applyQuaternion(this.earth.quaternion.clone().invert());this.groundMarker.position.copy(p);
   if(this.track.visible&&(this.trackData!==this.sim.data||Math.abs(q.t-this.lastTrack)>60000)){

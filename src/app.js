@@ -1,4 +1,10 @@
+import {installCameraFocus} from './camera-focus.js';
+import {installFloatingWindows} from './floating-windows.js';
+import {installAttitudeNavball} from './attitude-navball.js';
+import {installMainFlight} from './main-flight.js';
+import {flightVessel} from './free-flight-vessels.js';
 import {startupStatus} from './startup-status.js';
+import {installFreeFlight} from './free-flight.js';
 import {installXuntianScope} from './xuntian-scope.js';
 import {installFlightLab} from './flight-lab.js';
 import {installVisitorCounter} from './visitor-widget.js';
@@ -58,6 +64,11 @@ function renderPorts(){
   const row=document.createElement('div');row.className='row';const lab=document.createElement('label');lab.htmlFor=id;lab.textContent=t(slotNames[port]);
   const sel=document.createElement('select');sel.id=id;sel.setAttribute('aria-label',`${coreName(coreId)} · ${t(slotNames[port])}`);
   sel.replaceChildren(new Option(t('空置'),''),...Object.keys(names).map(k=>new Option(moduleName(k),k)));sel.value=state.slots[id];row.append(lab,sel);cards.get(coreId).append(row);
+  if(flightVessel(state.slots[id])){
+   const fly=document.createElement('button');fly.type='button';fly.className='port-fly';fly.dataset.flyPort=id;
+   fly.textContent=t('驾驶');fly.setAttribute('aria-label',t('驾驶{name}',{name:instanceName(id)}));
+   fly.onclick=()=>sim?.freeFlight?.open(id);row.append(fly);
+  }
   sel.onchange=()=>{state.slots=replaceAttachment(state.slots,id,sel.value);state.angles[id]=zeroAngles();applyConfig();fit();save();};
  }
 }
@@ -84,10 +95,10 @@ function syncControls(){const k=state.target,shown=!!groups[k],lab=['WT','MT'].i
 function linkSign(a,from,to){model.updateMatrixWorld(true);const u=new THREE.Vector3(a==='roll'?1:0,a==='roll'?0:1,0),v=u.clone();u.transformDirection((a==='roll'?groups[from]:rig[from].left.parent).matrixWorld);v.transformDirection((a==='roll'?groups[to]:rig[to].left.parent).matrixWorld);return u.dot(v)<-.5?-1:1;}
 function changeAngle(a,value){sim?.manual();const k=state.target;if(!groups[k].visible)return;const v=THREE.MathUtils.clamp(Number(value)||0,-180,180),ks=state.linked&&['WT','MT'].includes(types[k])?labs():[k];for(const n of ks){const nv=n===k?v:v*linkSign(a,k,n);state.angles[n][a]=nv;if(state.pair&&a!=='roll')state.angles[n].left=state.angles[n].right=nv;}applyAngles();syncControls();save();}
 for(const a of ['roll','left','right']){ $(a).oninput=e=>changeAngle(a,e.target.value);$(a+'N').onchange=e=>changeAngle(a,e.target.value);}
-$('target').onchange=()=>{playing=false;$('animate').textContent=t('▶ 演示自转');state.target=$('target').value;syncControls();save();};$('pairWings').onchange=()=>{state.pair=$('pairWings').checked;if(state.pair)changeAngle('left',state.angles[state.target].left);syncControls();save();};$('linkLabs').onchange=()=>{state.linked=$('linkLabs').checked;if(state.linked){for(const a of ['roll','left','right'])changeAngle(a,state.angles[state.target][a]);toast('已同步所有问天、梦天实例');}syncControls();save();};$('showXT').onchange=()=>{state.showXT=$('showXT').checked;applyConfig();if(state.showXT&&sim?.xuntian)sim.xuntian.open();else fit();save();};
+$('target').onchange=()=>{playing=false;$('animate').textContent=t('▶ 演示自转');state.target=$('target').value;sim?.mainFlight?.selectTarget(state.target==='freeXT'?'xuntian':'mission');syncControls();save();};$('pairWings').onchange=()=>{state.pair=$('pairWings').checked;if(state.pair)changeAngle('left',state.angles[state.target].left);syncControls();save();};$('linkLabs').onchange=()=>{state.linked=$('linkLabs').checked;if(state.linked){for(const a of ['roll','left','right'])changeAngle(a,state.angles[state.target][a]);toast('已同步所有问天、梦天实例');}syncControls();save();};$('showXT').onchange=()=>{state.showXT=$('showXT').checked;applyConfig();if(state.showXT&&sim?.xuntian)sim.xuntian.open();else fit();save();};
 $('zero').onclick=()=>{for(const a of ['roll','left','right'])changeAngle(a,0);playing=false;$('animate').textContent=t('▶ 演示自转');};$('animate').onclick=()=>{if(!groups[state.target].visible)return;playing=!playing;$('animate').textContent=playing?t('Ⅱ 暂停演示'):t('▶ 演示自转');};
 const activeGroups=()=>sim?.missions?.activeGroups()||groups;
-function bounds(key){const b=new THREE.Box3();for(const [k,g]of Object.entries(activeGroups()))if(g.visible&&(!key||k===key))b.union(new THREE.Box3().setFromObject(g));return b;}
+function bounds(key){const b=new THREE.Box3();for(const [k,g]of Object.entries(activeGroups()))if(g.visible&&(!key||k===key||key==='mission'&&k!=='freeXT'))b.union(new THREE.Box3().setFromObject(g));return b;}
 // Keep model depth precision independent of the much larger Earth scene.
 // A tiny fixed near plane made nearby CAD surfaces fight when zooming out.
 function updateModelClipping(){
@@ -95,7 +106,39 @@ function updateModelClipping(){
  const near=Math.max(.000001,distance/100),far=Math.max(distance*4,sim?.capabilities.assembly!==false?3000:distance*20);
  if(camera.near!==near||camera.far!==far){camera.near=near;camera.far=far;camera.updateProjectionMatrix();}
 }
-function fit(key,dir){if(!ready)return;if(sim?.view==='orbit'&&!key&&!dir){sim.fit();return;}if(sim?.view==='orbit')sim.setView('follow');const b=bounds(key);if(b.isEmpty())return;const center=b.getCenter(new THREE.Vector3()),radius=b.getSize(new THREE.Vector3()).length()/2;const d=dir?new THREE.Vector3(...dir).normalize():camera.position.clone().sub(controls.target).normalize();if(d.length()<.1)d.set(1,-1,1);const fov=THREE.MathUtils.degToRad(camera.fov),effective=Math.min(fov,2*Math.atan(Math.tan(fov/2)*camera.aspect)),initial=radius/Math.sin(effective/2),right=new THREE.Vector3().crossVectors(camera.up,d).normalize(),up=new THREE.Vector3().crossVectors(d,right).normalize();let dist=sim?.capabilities.assembly!==false?10:.00001;const tanV=Math.tan(fov/2),tanH=tanV*camera.aspect;for(const [k,g] of Object.entries(activeGroups())){if(!g?.visible||(key&&k!==key))continue;g.updateMatrixWorld(true);g.traverse(o=>{if(!o.isMesh)return;o.geometry.computeBoundingBox();const box=o.geometry.boundingBox;for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const p=new THREE.Vector3(x,y,z).applyMatrix4(o.matrixWorld).sub(center);dist=Math.max(dist,p.dot(d)+Math.abs(p.dot(right))/tanH,p.dot(d)+Math.abs(p.dot(up))/tanV);}});}dist*=1.14;controls.stopMotion();controls.target.copy(center);camera.position.copy(center).addScaledVector(d,dist);updateModelClipping();controls.update();}
+function frameModels(key,dir,objects){
+ if(!ready)return;
+ if(sim?.view==='orbit'&&!key&&!dir){sim.fit();return;}
+ if(sim?.view==='orbit')sim.setView('follow');
+ const framed=objects||Object.entries(activeGroups()).filter(([k])=>!key||k===key||key==='mission'&&k!=='freeXT').map(([,g])=>g);
+ const box=new THREE.Box3();for(const group of framed)if(group.visible)box.union(new THREE.Box3().setFromObject(group));
+ if(box.isEmpty())return;
+ const center=box.getCenter(new THREE.Vector3());
+ const direction=dir?new THREE.Vector3(...dir).normalize():camera.position.clone().sub(controls.target).normalize();
+ if(direction.length()<.1)direction.set(1,-1,1).normalize();
+ const right=new THREE.Vector3().crossVectors(camera.up,direction);
+ if(right.lengthSq()<1e-12)right.crossVectors(Math.abs(direction.z)<.9?new THREE.Vector3(0,0,1):new THREE.Vector3(0,1,0),direction);
+ right.normalize();const up=new THREE.Vector3().crossVectors(direction,right).normalize();
+ const tanV=Math.tan(THREE.MathUtils.degToRad(camera.getEffectiveFOV())/2),tanH=tanV*camera.aspect;
+ let distance=sim?.capabilities.assembly!==false?10:.00001;
+ for(const group of framed){
+  if(!group.visible)continue;group.updateMatrixWorld(true);
+  group.traverse(object=>{
+   if(!object.isMesh)return;if(!object.geometry.boundingBox)object.geometry.computeBoundingBox();
+   const b=object.geometry.boundingBox;
+   for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z]){
+    const p=new THREE.Vector3(x,y,z).applyMatrix4(object.matrixWorld).sub(center);
+    distance=Math.max(distance,p.dot(direction)+Math.abs(p.dot(right))/tanH,p.dot(direction)+Math.abs(p.dot(up))/tanV);
+   }
+  });
+ }
+ distance*=1.14;controls.maxDistance=Math.max(controls.maxDistance,distance*1.05);
+ controls.stopMotion();controls.target.copy(center);camera.position.copy(center).addScaledVector(direction,distance);updateModelClipping();controls.update();
+}
+function fit(key,dir){
+ if(sim?.cameraFocus){if(sim.view==='orbit'&&!key&&!dir)return sim.fit();return sim.cameraFocus.focus(key==='freeXT'?'xuntian':key&&key!=='mission'?'module:'+key:key||sim.cameraFocus.selected,dir);}
+ return frameModels(key??'mission',dir);
+}
 function horizonDirection(){
  const q=sim?.current;if(!q)return [1,-1,.35];
  const radius=new THREE.Vector3(...q.position).normalize(),up=new THREE.Vector3(...q.basis.map(axis=>radius.dot(new THREE.Vector3(...axis))));
@@ -103,7 +146,7 @@ function horizonDirection(){
  if(tangent.lengthSq()<1e-8)tangent.crossVectors(up,Math.abs(up.z)<.9?new THREE.Vector3(0,0,1):new THREE.Vector3(1,0,0));
  camera.up.copy(up);const dip=Math.sqrt(Math.max(0,Math.pow(Math.hypot(...q.position)/EARTH_RADIUS,2)-1));return tangent.normalize().addScaledVector(up,dip).toArray();
 }
-$('fit').onclick=()=>fit();$('focus').onclick=()=>{if(groups[state.target].visible)fit(state.target);else toast('所选舱体不在当前组合中');};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const view=b.dataset.view;if(view!=='horizon')camera.up.set(0,0,1);fit(null,view==='horizon'?horizonDirection():{top:[0,.001,1],bottom:[0,-.001,-1],side:[0,-1,.001],iso:[1,-1,1.25]}[view]);});
+$('fit').onclick=()=>sim?.cameraFocus?.focus('all');$('focus').onclick=()=>{if(groups[state.target].visible)fit(state.target);else toast('所选舱体不在当前组合中');};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const view=b.dataset.view;if(view!=='horizon')camera.up.set(0,0,1);fit(null,view==='horizon'?horizonDirection():{top:[0,.001,1],bottom:[0,-.001,-1],side:[0,-1,.001],iso:[1,-1,1.25]}[view]);});
 document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state.slots={...defaults};state.showXT=b.dataset.preset==='full';if(b.dataset.preset==='labs'){state.slots.TH_FORWARD='';state.slots.TH_AFT='';}if(b.dataset.preset==='core'){Object.keys(state.slots).forEach(k=>state.slots[k]='');state.target='TH';}else state.target='TH_WENTIAN';applyConfig();fit(null,[1,-1,1.25]);save();});$('reset').onclick=()=>{state.slots={...defaults};state.showXT=true;state.target='TH_WENTIAN';state.linked=false;state.pair=true;state.angles={};applyConfig();fit(null,[1,-1,1.25]);save();toast('已恢复默认组合、角度与视角');};$('saveImage').onclick=()=>{if(sim)sim.render();else renderer.render(scene,camera);const a=document.createElement('a');a.download='StarOrbit_'+(sim?.missionId||'tiangong')+'_preview.png';a.href=renderer.domElement.toDataURL('image/png');a.click();};
 const renderSize=new THREE.Vector2();
 function resize(){
@@ -114,10 +157,10 @@ function resize(){
  if(renderSize.x!==w||renderSize.y!==h)renderer.setSize(w,h,false);
  if(camera.aspect!==w/h){camera.aspect=w/h;camera.updateProjectionMatrix();}
 }
-function tick(t){requestAnimationFrame(tick);if(document.hidden)return;resize();if(sim?.flightLab?.active||sim?.environment?.weather?.resourcePanel?.active){last=t;sim.lastWall=t;return;}const dt=Math.min((t-last)/1000,.1);last=t;if(sim?.initialized)sim.update(t);if(sim?.initialized&&playing&&model.visible)changeAngle('left',((state.angles[state.target].left+dt*15+180)%360)-180);controls.update();updateModelClipping();if(ready){for(const [k,tag]of Object.entries(tags)){const p=tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);tag.el.style.display=model.visible&&groups[k].visible&&$('labels').checked&&p.z<1&&p.z>-1&&Math.abs(p.x)<1&&Math.abs(p.y)<1?'block':'none';tag.el.style.left=((p.x+1)*stage.clientWidth/2)+'px';tag.el.style.top=((-p.y+1)*stage.clientHeight/2)+'px';}}if(sim){sim.render();sim.xuntian?.draw(t);}else renderer.render(scene,camera);}requestAnimationFrame(tick);
+function tick(t){requestAnimationFrame(tick);if(document.hidden)return;resize();if(sim?.freeFlight?.active){last=t;sim.lastWall=t;sim.freeFlight.tick(t);return;}if(sim?.flightLab?.active||sim?.environment?.weather?.resourcePanel?.active){last=t;sim.lastWall=t;return;}const dt=Math.min((t-last)/1000,.1);last=t;if(sim?.initialized)sim.update(t);if(sim?.initialized&&playing&&model.visible)changeAngle('left',((state.angles[state.target].left+dt*15+180)%360)-180);sim?.cameraFocus?.update();controls.update();updateModelClipping();if(ready){for(const [k,tag]of Object.entries(tags)){const p=tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);tag.el.style.display=model.visible&&groups[k].visible&&$('labels').checked&&p.z<1&&p.z>-1&&Math.abs(p.x)<1&&Math.abs(p.y)<1?'block':'none';tag.el.style.left=((p.x+1)*stage.clientWidth/2)+'px';tag.el.style.top=((-p.y+1)*stage.clientHeight/2)+'px';}}if(sim){sim.render();sim.xuntian?.draw(t);}else renderer.render(scene,camera);}requestAnimationFrame(tick);
 async function boot(){try{const encoded=$('modelData').textContent.trim();setText('loadText','正在展开模型并建立太阳翼转轴…');const [buffer]=await Promise.all([readPackedModel(encoded),hydrateOrbitData()]);startupStatus('boot','GLB model');const gltf=await new GLTFLoader().parseAsync(buffer,'');model=gltf.scene;modelRoot.add(model);
 for(const k of Object.keys(names)){templates[k]=model.getObjectByName('module_'+k);if(!templates[k])throw Error(t('缺少模型 {module}',{module:k}));}
-model.traverse(o=>{if(o.isMesh){o.frustumCulled=true;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){m.roughness=Math.max(m.roughness,.4);m.metalness=Math.min(m.metalness,.6);}}});for(const t of Object.values(templates))t.removeFromParent();loadState();ready=true;resize();applyConfig();fit(null,[1,-1,1.25]);startupStatus('boot','Mission cache');await missionLibrary.restore();startupStatus('boot','Scene setup');sim=new Simulation({music,groups,rig,state,types,model,modelRoot,scene,camera,renderer,stage,controls,sunLight,fillLight,tags,resize,syncControls,labs,toast,bounds,fit,stopAnimation:()=>{playing=false;$('animate').textContent=t('▶ 演示自转');}});fit(null,[1,-1,.35]);sim.missions=new MissionController(sim);startupStatus('boot','Weather / mission restore');await sim.missions.restore();startupStatus('boot','Environment / session restore');await installSessionMemory(sim,{saveAssembly:()=>{clearTimeout(saveTimer);localStorage.setItem('tiangong-viewer-v3',JSON.stringify(state));},getPlaying:()=>playing,setPlaying:v=>{playing=v;$('animate').textContent=t(v?'Ⅱ 暂停演示':'▶ 演示自转');}});installSceneShare(sim,next=>{Object.assign(state,next);applyConfig();save();});startupStatus('boot','First frame');sim.initialized=true;sim.lastWall=performance.now();sim.update(performance.now());$('loading').classList.add('hidden');document.body.dataset.ready='true';setTimeout(()=>sim.environment.weather.restoreTextures(),0);window.viewer={music,state,groups,rig,scene,camera,controls,fit,applyConfig,changeAngle,renderer,meta,types,sim};installFlightLab(sim,{templates,meta});sim.xuntian=installXuntianScope(sim);await sim.xuntian.restoreRoute();installHelp(music);installVisitorCounter();}catch(e){console.error(e);$('loading').querySelector('.spinner').style.display='none';setText('loadingTitle','模型未能载入');setText('loadText','请使用新版 Chrome、Edge 或 Safari 打开本文件。错误：{error}',{error:e.message});setText('status','载入失败');}}
+model.traverse(o=>{if(o.isMesh){o.frustumCulled=true;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){m.roughness=Math.max(m.roughness,.4);m.metalness=Math.min(m.metalness,.6);}}});for(const t of Object.values(templates))t.removeFromParent();loadState();ready=true;resize();applyConfig();fit(null,[1,-1,1.25]);startupStatus('boot','Mission cache');await missionLibrary.restore();startupStatus('boot','Scene setup');sim=new Simulation({music,groups,rig,state,types,model,modelRoot,scene,camera,renderer,stage,controls,sunLight,fillLight,tags,resize,syncControls,labs,toast,bounds,fit,frameModels,instanceName,stopAnimation:()=>{playing=false;$('animate').textContent=t('▶ 演示自转');}});fit(null,[1,-1,.35]);sim.missions=new MissionController(sim);startupStatus('boot','Weather / mission restore');await sim.missions.restore();startupStatus('boot','Environment / session restore');await installSessionMemory(sim,{saveAssembly:()=>{clearTimeout(saveTimer);localStorage.setItem('tiangong-viewer-v3',JSON.stringify(state));},getPlaying:()=>playing,setPlaying:v=>{playing=v;$('animate').textContent=t(v?'Ⅱ 暂停演示':'▶ 演示自转');}});installSceneShare(sim,next=>{Object.assign(state,next);applyConfig();save();});sim.mainFlight=installMainFlight(sim);sim.navball=installAttitudeNavball(sim);startupStatus('boot','First frame');sim.initialized=true;sim.lastWall=performance.now();sim.update(performance.now());$('loading').classList.add('hidden');document.body.dataset.ready='true';setTimeout(()=>sim.environment.weather.restoreTextures(),0);window.viewer={music,state,groups,rig,scene,camera,controls,fit,applyConfig,changeAngle,renderer,meta,types,sim};installFlightLab(sim,{templates,meta});sim.xuntian=installXuntianScope(sim);sim.cameraFocus=installCameraFocus(sim);await sim.xuntian.restoreRoute();sim.cameraFocus.resetAnchor();sim.freeFlight=installFreeFlight(sim,{templates,meta});sim.floatingWindows=installFloatingWindows();installHelp(music);installVisitorCounter();}catch(e){console.error(e);$('loading').querySelector('.spinner').style.display='none';setText('loadingTitle','模型未能载入');setText('loadText','请使用新版 Chrome、Edge 或 Safari 打开本文件。错误：{error}',{error:e.message});setText('status','载入失败');}}
 onLanguageChange(()=>{
  if(ready){renderPorts();for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
   $('target').replaceChildren(...Object.keys(groups).map(id=>new Option(instanceName(id),id)));$('target').value=state.target;

@@ -38,6 +38,9 @@ function ellipse(row){
  const E=Math.atan2(dot(r,y)/b,dot(r,x)/a+e),n=Math.sqrt(MU/a**3);
  return {epoch:row[0],a,b,e,x,y,n,M:E-e*Math.sin(E),period:2*Math.PI/n};
 }
+export function ellipseFromState({position,velocity,t}){
+ return ellipse([t,...position,...velocity]);
+}
 function endpoint(data,last){
  let pair=ellipses.get(data);if(!pair){pair=[ellipse(data.rows[0]),ellipse(data.rows.at(-1))];ellipses.set(data,pair);}return pair[last?1:0];
 }
@@ -77,7 +80,7 @@ export function stateAt(data,t,segmentTime=t){
  if(mode==='interpolation')return interpolate(data.rows,t);
  return ellipseState(endpoint(data,t>data.rows.at(-1)[0]),t);
 }
-function ellipseState(q,t){
+export function ellipseState(q,t){
  const {a,b,e,x,y,n}=q;
  const elapsed=q.periodMs?((t-q.epoch)%q.periodMs)/1000:(t-q.epoch)/1000%q.period;
  const M=((q.M+n*elapsed)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
@@ -105,7 +108,9 @@ export function earthAxes(t){
 }
 export function snapshot(data,t){
  if(!data)return null;
- const pv=stateAt(data,t);if(!pv)return null;
+ const pv=stateAt(data,t);return pv?snapshotFromState(pv,t):null;
+}
+export function snapshotFromState(pv,t){
  const r=pv.position,z=unit(r),x=unit(sub(pv.velocity,z.map(v=>v*dot(pv.velocity,z)))),y=unit(cross(z,x)),basis=[x,y,z];
  const sun=sunPosition(t),sunDir=unit(sub(sun,r)),fixed=earthAxes(t),ecef=fixed.map(a=>dot(r,a)),rho=norm(r);
  return {...pv,t,basis,earthAxes:fixed,sun,sunDir,sunLocal:basis.map(a=>dot(a,sunDir)),illumination:sunlightFraction(r,sun),altitude:rho-EARTH_RADIUS,speed:norm(pv.velocity),latitude:Math.asin(ecef[2]/rho)*180/Math.PI,longitude:Math.atan2(ecef[1],ecef[0])*180/Math.PI};

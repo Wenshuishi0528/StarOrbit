@@ -26,17 +26,17 @@ export class MissionController{
   $('missionSelect').onchange=()=>this.switchTo($('missionSelect').value).catch(e=>{this.syncUI();this.api.toast('切换失败：{error}',{error:t(e.message)});});
   for(const key of ['roll','pitch','yaw']){
    const number=$('craft'+key),range=$('craft'+key+'Range');
-   const input=source=>{if(source.value.trim()==='')return;const value=Number(source.value);if(!Number.isFinite(value))return;
-    this.state.pose[key]=Math.round(Math.max(-180,Math.min(180,value))*10)/10;range.value=this.state.pose[key];if(source===range)number.value=this.state.pose[key];
+   const input=source=>{if(source.value.trim()==='')return;const value=Number(source.value);if(!Number.isFinite(value))return;if(sim.mainFlight?.editPose(key,value)){number.value=range.value=value;return;}const wasFlying=sim.mainFlight?.active;sim.mainFlight?.stop();
+    this.state.pose[key]=Math.round(Math.max(-180,Math.min(180,value))*10)/10;range.value=this.state.pose[key];if(source===range||wasFlying)number.value=this.state.pose[key];
     // Coalesce pointer events; persist only when the edit is committed.
     if(!this.poseFrame)this.poseFrame=requestAnimationFrame(()=>{this.poseFrame=0;this.applyPose();});
    };
    number.oninput=()=>input(number);range.oninput=()=>input(range);
-   for(const control of [number,range])control.onchange=()=>{input(control);number.value=range.value=this.state.pose[key];this.applyPose();this.save();};
+   for(const control of [number,range])control.onchange=()=>{input(control);if(sim.mainFlight?.targetId==='xuntian'){sim.mainFlight.syncPoseUI();return;}number.value=range.value=this.state.pose[key];this.applyPose();this.save();};
   }
-  $('craftAttitudeMode').onchange=()=>{this.state.rotation.mode=$('craftAttitudeMode').value;sim.dirty=true;sim.update(performance.now());this.syncUI();this.save();};
-  $('craftSpin').onchange=()=>{this.state.rotation=toggleSpin(this.state.rotation,$('craftSpin').checked,sim.time,mission(sim.missionId).spinRpm||0);this.applyPose();this.save();};
-  $('resetCraftPose').onclick=()=>{this.state.pose=validatePose();this.applyPose();this.syncUI();this.save();};
+  $('craftAttitudeMode').onchange=()=>{const mode=$('craftAttitudeMode').value;sim.mainFlight?.stop();this.state.rotation.mode=mode;sim.dirty=true;sim.update(performance.now());this.syncUI();this.save();};
+  $('craftSpin').onchange=()=>{const enabled=$('craftSpin').checked;sim.mainFlight?.stop();this.state.rotation=toggleSpin(this.state.rotation,enabled,sim.time,mission(sim.missionId).spinRpm||0);this.applyPose();this.save();};
+  $('resetCraftPose').onclick=()=>{if(sim.mainFlight?.editPose(null,0))return;sim.mainFlight?.stop();this.state.pose=validatePose();this.applyPose();this.syncUI();this.save();};
   $('validOrbitTime').onclick=()=>{if(sim.data){sim.seek((sim.start+sim.end)/2);sim.update(performance.now());this.syncUI();}};
   $('importMission').onclick=()=>$('missionFiles').click();
   $('missionFiles').onchange=async e=>{try{await this.importPackage([...e.target.files]);}catch(error){$('missionImportStatus').textContent=t('导入失败：{error}',{error:error.message});}finally{e.target.value='';}};
@@ -47,11 +47,11 @@ export class MissionController{
  get state(){return this.states[this.sim.missionId]??=( {pose:validatePose(),rotation:validateRotation({},this.sim.time,{enabled:!!mission(this.sim.missionId).spinRpm}),auto:true,view:'follow'} );}
  activeGroups(){return spacecraft(this.sim.missionId).capabilities.assembly?this.api.groups:{spacecraft:this.models.get(this.sim.missionId)};}
  capture(){
-  const s=this.state,sim=this.sim,api=this.api;Object.assign(s,{auto:sim.auto,view:sim.view,camera:captureCamera(api.camera,api.controls),overview:captureCamera(sim.spaceCamera,sim.orbitControls)});
+  const s=this.state,sim=this.sim,api=this.api;Object.assign(s,{auto:sim.auto,view:sim.view,cameraTarget:sim.cameraFocus?.selected??s.cameraTarget??'mission',camera:captureCamera(api.camera,api.controls),overview:captureCamera(sim.spaceCamera,sim.orbitControls)});
   // Return from Moon before storing the task's normal follow camera.
   const home=sim.environment.moon.savedView;if(home)s.camera={...home,position:home.position.toArray(),target:home.target.toArray(),up:home.up.toArray()};
  }
- save(){if(this.busy)return;this.capture();try{localStorage.setItem(MISSION_MEMORY_KEY,JSON.stringify({active:this.sim.missionId,states:this.states}));}catch{setText('memoryStatus','浏览器未允许保存设置，本次修改可能无法在下次打开时恢复。');}}
+ save(){if(this.busy||this.sim.mainFlight?.active)return;this.capture();try{localStorage.setItem(MISSION_MEMORY_KEY,JSON.stringify({active:this.sim.missionId,states:this.states}));}catch{setText('memoryStatus','浏览器未允许保存设置，本次修改可能无法在下次打开时恢复。');}}
  async restore(){await this.sim.environment.weather.ready;await this.switchTo(this.savedId||DEFAULT_MISSION,{restoring:true});}
  async load(id){
   if(spacecraft(id).capabilities.assembly||this.models.has(id))return;
@@ -68,6 +68,7 @@ export class MissionController{
  bodyRoot(){return spacecraft(this.sim.missionId).capabilities.assembly?this.api.model:this.models.get(this.sim.missionId);}
  applyPose(){cancelAnimationFrame(this.poseFrame);this.poseFrame=0;if(this.bodyRoot()){this.updateRotation();this.sim.rebuild({poseOnly:true});}}
  updateRotation(){
+  if(this.sim.mainFlight?.missionActive)return;
   const root=this.bodyRoot();if(!root)return;const p=this.state.pose,spin=spinAngle(this.state.rotation,this.sim.time,mission(this.sim.missionId).spinRpm||0),last=this.lastBodyPose;
   if(last&&last.root===root&&last.roll===p.roll&&last.pitch===p.pitch&&last.yaw===p.yaw&&last.spin===spin)return;
   applyBodyPose(root,p,spin);this.lastBodyPose={root,...p,spin};
@@ -88,7 +89,7 @@ export class MissionController{
   if(!cap.assembly){$('status').textContent=t(craft.name);$('selection').textContent=t(craft.name)+' · '+t('航向与自旋');}
   else{this.api.syncControls();setText('status','{count} 个舱体',{count:Object.keys(this.api.groups).length});}
   const status=sim.orbitStatus;$('missionOrbitStatus').textContent=t(status==='missing'?'轨道待配置 · 当前仅查看模型':status==='out-of-range'?'轨道演算不可用':'已载入此任务的独立轨道');
-  $('validOrbitTime').hidden=status!=='out-of-range';
+  $('validOrbitTime').hidden=status!=='out-of-range';sim.mainFlight?.syncPoseUI();
  }
  async importPackage(files){
   if(this.busy||this.sim.sceneBusy||this.importing)throw Error('正在恢复场景…');
@@ -102,6 +103,7 @@ export class MissionController{
  }
  async switchTo(id,{restoring=false,fromScene=false}={}){
   mission(id);if(this.busy||this.sim.sceneBusy&&!fromScene)throw Error('正在恢复场景…');
+  this.sim.mainFlight?.stop();
   if(this.poseFrame)this.applyPose();
   const sim=this.sim,weather=sim.environment.weather;this.busy=true;this.syncUI();
   try{
@@ -114,6 +116,7 @@ export class MissionController{
    sim.setOrbit(data);this.applyPose();sim.rebuild();sim.current=null;sim.lastWall=performance.now();
    const size=this.api.bounds().getSize(new THREE.Vector3()).length();this.api.controls.minDistance=spacecraft(id).capabilities.assembly?15:Math.max(.00001,size*.01);this.api.controls.maxDistance=Math.max(spacecraft(id).capabilities.assembly?1600:1,size*20);
    sim.setView('follow');this.api.camera.up.set(0,0,1);this.api.camera.fov=38;this.api.camera.zoom=1;this.api.camera.updateProjectionMatrix();
+   sim.cameraFocus?.restore(this.state.cameraTarget);
    if(!restoreCamera(this.api.camera,this.api.controls,this.state.camera))this.api.fit(null,[1,-1,.6]);
    restoreCamera(sim.spaceCamera,sim.orbitControls,this.state.overview);
    if(this.state.view==='orbit'&&sim.orbitStatus==='ready'){sim.setView('orbit');restoreCamera(sim.spaceCamera,sim.orbitControls,this.state.overview);}

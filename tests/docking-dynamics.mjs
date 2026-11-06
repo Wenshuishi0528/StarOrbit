@@ -53,6 +53,25 @@ near(free.angularVelocity[0],ramp.angularVelocity[0]);near(free.attitude[0]-ramp
 let saturated=start();for(let i=0;i<500;i++)saturated=stepDocking(saturated,{rotation:[10,-10,10]});
 saturated.angularVelocity.forEach((v,i)=>near(v,(i===1?-1:1)*DOCKING_LIMITS.maxAngularRate,1e-12));
 
+// Switching only SAS/damping off must also select torque control, even while
+// the rest of the lesson's guides and capture checks remain enabled.
+for(const assistanceEnabled of [true,false]){
+ let manual=start({rules:{assistanceEnabled,contactSpeed:.15}});
+ const command={rotation:[1,0,0],angularDamping:false};
+ for(let i=0;i<1000;i++)manual=stepDocking(manual,command);
+ const spin=20*DOCKING_LIMITS.maxAngularAcceleration;
+ near(manual.angularVelocity[0],spin);assert(spin>DOCKING_LIMITS.maxAngularRate*6);
+ for(let i=0;i<100;i++)manual=stepDocking(manual,{angularDamping:false});
+ near(manual.angularVelocity[0],spin);
+ for(let i=0;i<1200;i++)manual=stepDocking(manual,{rotation:[-1,0,0],angularDamping:false});
+ near(manual.angularVelocity[0],-4*DOCKING_LIMITS.maxAngularAcceleration);
+ if(assistanceEnabled){
+  const braked=stepDocking(manual,{angularDamping:true});
+  near(braked.angularVelocity[0],manual.angularVelocity[0]+DOCKING_LIMITS.maxAngularAcceleration*DOCKING_STEP);
+  assert(Math.abs(braked.angularVelocity[0])>DOCKING_LIMITS.maxAngularRate,'reenabling SAS uses finite braking above its rate setting');
+ }
+}
+
 // Compound-axis body rotation is checked against an independent vector/matrix
 // Rodrigues solution, rather than reconstructing orientation from Euler angles.
 const omega=[.017,-.013,.021],rate=Math.hypot(...omega),axis=omega.map(v=>v/rate),duration=20;

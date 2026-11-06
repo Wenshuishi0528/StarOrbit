@@ -63,7 +63,7 @@ export function createCityFinder(labels){
  let entries,byId;
  function index(){
   if(entries)return;
-  entries=labels.filter(p=>(p.kind==='city'||p.kind==='capital')&&Number.isFinite(p.lat)&&Number.isFinite(p.lon)).map(p=>({p,forms:[...new Set([p.zh,p.en,p.ru,p.fr].filter(Boolean).map(fold))]}));
+  entries=labels.filter(p=>(p.kind==='city'||p.kind==='capital')&&Number.isFinite(p.lat)&&Number.isFinite(p.lon)).map(p=>({p,normal:geographicVector(p.lon,p.lat,1),forms:[...new Set([p.zh,p.en,p.ru,p.fr].filter(Boolean).map(fold))]}));
   byId=new Map(entries.map(entry=>['city:'+entry.p.id,entry]));
  }
  function result(entry,language,score=0){
@@ -71,6 +71,16 @@ export function createCityFinder(labels){
   out.identifier=degreePair(out);return out;
  }
  return {get(id,language){index();const entry=byId.get(id);return entry?result(entry,language):null;},
+  nearest(latitude,longitude,language='zh',{maxDistanceKm=100}={}){
+   if(!Number.isFinite(latitude)||Math.abs(latitude)>90||!Number.isFinite(longitude)||!Number.isFinite(maxDistanceKm)||maxDistanceKm<0)return null;
+   index();const normal=geographicVector(longitude,latitude,1);let best=null,bestDot=Math.cos(Math.min(Math.PI,maxDistanceKm/EARTH_RADIUS))-1e-14;
+   for(const entry of entries){const alignment=dot(normal,entry.normal);if(alignment>bestDot){best=entry;bestDot=alignment;}}
+   if(!best)return null;
+   // Chord length remains accurate at city centres and across the date line.
+   const chord=Math.hypot(...normal.map((v,i)=>v-best.normal[i]));
+   const distanceKm=2*EARTH_RADIUS*Math.asin(Math.min(1,chord/2));
+   return distanceKm<=maxDistanceKm+1e-8?{...result(best,language),distanceKm}:null;
+  },
   search(text,language,limit=7){
    const q=fold(text).replace(/市$/u,'');if(!q)return [];index();
    const hits=[];

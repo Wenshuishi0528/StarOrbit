@@ -131,13 +131,21 @@ export class DockingTraining{
   if(!Number.isFinite(seconds)||seconds<0||seconds>2)throw new RangeError('Invalid docking elapsed time');
   if(this.finished)return this.state;
   if(this.state.status!=='flying'){this.finish(this.state.status);return this.state;}
-  const manual=manualCommand(manualInput);
-  if(!this.assistanceEnabled){manual.angularDamping=false;manual.brake=false;}
-  if(hasManualCommand(manual))this.setMode('manual',{reason:'manual-input'});
+  const resolveManual=input=>{
+   const manual=manualCommand(input);
+   if(!this.assistanceEnabled){manual.angularDamping=false;manual.brake=false;}
+   if(hasManualCommand(manual))this.setMode('manual',{reason:'manual-input'});
+   return manual;
+  };
+  const readInput=typeof manualInput==='function'?manualInput:null;
+  // Object commands retain immediate takeover, including advance(0). A buffered
+  // input source is only consumed when a full physics step is actually run.
+  const manual=readInput?null:resolveManual(manualInput);
   this.remainder+=seconds;
   while(this.remainder>=DOCKING_STEP-1e-12&&!this.finished){
    // Recompute every physics step, never once per animation frame.
-   const command=this.mode==='manual'?manual:this._assistedCommand();
+   const stepInput=readInput?resolveManual(readInput()):manual;
+   const command=this.mode==='manual'?stepInput:this._assistedCommand();
    this.state=stepDocking(this.state,command,DOCKING_STEP);
    this.remainder=Math.max(0,this.remainder-DOCKING_STEP);
    this._updateGate();this._updateRetreat();

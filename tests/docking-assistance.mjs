@@ -2,9 +2,26 @@ import assert from 'node:assert/strict';
 import {DockingTraining} from '../src/docking-training.js';
 import {DOCKING_LIMITS,DOCKING_STEP,stepDocking,dockingMetrics,setDockingAttitude} from '../src/docking-physics.js';
 import {DockingRecorder} from '../src/docking-instruments.js';
+import {pilotSas} from '../src/pilot-controls.js';
 const near=(a,b)=>assert(Math.abs(a-b)<1e-10,`${a} != ${b}`);
 const free=(speed=.15)=>new DockingTraining('alignment',{assistanceEnabled:false,contactSpeed:speed});
 const state=(position,velocity,speed=.15)=>({...free(speed).state,position,velocity});
+
+// The panel resolves F through the same shared switch as both flight modes.
+// Check actual rotation rather than just the displayed toggle value.
+{
+ const on=new DockingTraining('alignment');on.state.angularVelocity=[.01,0,0];
+ on.advance(.1,{angularDamping:pilotSas(true,true)});near(on.state.angularVelocity[0],.01);
+ on.advance(DOCKING_STEP,{angularDamping:pilotSas(true,false)});
+ assert(on.state.angularVelocity[0]>0&&on.state.angularVelocity[0]<.01,'release restores bounded damping after temporary SAS-off');
+ const off=new DockingTraining('alignment');off.state.angularVelocity=[.01,0,0];
+ off.advance(DOCKING_STEP,{angularDamping:pilotSas(false,true)});
+ assert(off.state.angularVelocity[0]>0&&off.state.angularVelocity[0]<.01,'F temporarily enables finite damping when the stored switch is off');
+ const rate=off.state.angularVelocity[0];off.advance(.1,{angularDamping:pilotSas(false,false)});near(off.state.angularVelocity[0],rate);
+ const unassisted=free();unassisted.state.angularVelocity=[.01,0,0];
+ for(const base of [true,false])for(const held of [true,false])unassisted.advance(.1,{angularDamping:pilotSas(base,held)});
+ near(unassisted.state.angularVelocity[0],.01,'F cannot bypass disabled training assistance');
+}
 
 // Off is a real controller switch, preserving the physical state and time.
 {

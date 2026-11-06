@@ -9,6 +9,7 @@ from cloud_versions import catalog as cloud_catalog, library as cloud_library, l
 import threading
 from http_download import download_bytes, DownloadError
 from balcony_motion import orientation_stream
+from solar_service import service as solar_observations
 ROOT=Path(__file__).resolve().parents[1]
 URL='https://en.cmse.gov.cn/news/202107/t20210722_48418.html'
 cloud_job_lock=threading.Lock()
@@ -68,6 +69,21 @@ class Handler(SimpleHTTPRequestHandler):
     self.send_json({'cleared':history.clear() and clouds.clear()});return
   self.send_error(404)
  def do_GET(self):
+  if self.path.startswith('/api/solar/'):
+   hosts={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
+   if self.headers.get('Host') not in hosts or not self.cloud_origin_ok() or self.headers.get('Sec-Fetch-Site')=='cross-site':self.send_error(403);return
+   parsed=urllib.parse.urlparse(self.path);args=urllib.parse.parse_qs(parsed.query)
+   try:
+    if parsed.path=='/api/solar/metadata' and set(args)<= {'channel','resolution'} and all(len(v)==1 for v in args.values()):
+     self.send_json(solar_observations.latest(args.get('channel',[''])[0],args.get('resolution',['2048'])[0]));return
+    if parsed.path=='/api/solar/image' and set(args)=={'token'} and len(args['token'])==1:
+     data=solar_observations.image(args['token'][0]);self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data);return
+    self.send_error(400)
+   except ValueError as error:self.send_json({'error':str(error)},400)
+   except DownloadError as error:self.send_json({'error':{'code':'SOLAR_'+error.code.upper(),'message':'太阳观测更新失败：'+str(error)+'。已有影像已保留。','retryable':error.retryable}},502)
+   except (BrokenPipeError,ConnectionResetError):pass
+   except Exception:self.send_json({'error':'太阳观测源暂不可用；已有影像已保留'},502)
+   return
   if self.path.startswith('/api/cloud/'):
    if not self.cloud_origin_ok():self.send_error(403);return
    if self.path=='/api/cloud/satcorps/status':self.send_json(clouds.snapshot());return

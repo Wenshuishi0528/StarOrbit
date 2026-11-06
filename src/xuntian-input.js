@@ -1,8 +1,10 @@
+import {PILOT_KEY_AXES} from './pilot-controls.js';
+
 // The telescope owns steering only while its eyepiece is focused.
-export function mountScopeInput(canvas,{nudge,zoom,field,roll=()=>{},togglePin=()=>{}}){
+export function mountScopeInput(canvas,{nudge,zoom,field,roll=()=>{}}){
  const held=new Map(),points=new Map();
- const rolls={KeyQ:-1,KeyE:1};
- const directions={KeyW:[0,1],KeyS:[0,-1],KeyA:[-1,0],KeyD:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+ const rolls=Object.fromEntries(Object.entries(PILOT_KEY_AXES).filter(([,axis])=>axis[0]==='roll').map(([key,[,sign]])=>[key,sign]));
+ const directions={...Object.fromEntries(Object.entries(PILOT_KEY_AXES).filter(([,axis])=>['pitch','yaw'].includes(axis[0])).map(([key,[axis,sign]])=>[key,axis==='pitch'?[0,sign]:[-sign,0]])),ArrowUp:[0,1],ArrowDown:[0,-1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
  const clear=()=>{held.clear();points.clear();canvas.classList.remove('dragging');};
  canvas.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
@@ -27,11 +29,9 @@ export function mountScopeInput(canvas,{nudge,zoom,field,roll=()=>{},togglePin=(
  canvas.addEventListener('keydown',e=>{
   if(e.isComposing||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.key==='Escape'){canvas.blur();return;}
-  if(e.code==='KeyF'){e.preventDefault();e.stopPropagation();if(!e.repeat)togglePin();return;}
   if(directions[e.code]||rolls[e.code]){e.preventDefault();e.stopPropagation();if(!held.has(e.code))held.set(e.code,false);}
  });
  canvas.addEventListener('keyup',e=>{
-  if(e.code==='KeyF'){e.stopPropagation();return;}
   const direction=directions[e.code],rotation=rolls[e.code];if(!direction&&!rotation)return;
   // A quick tap can begin and end between two animation frames, especially
   // when rendering Earth. Only supply a discrete step if no frame handled it.

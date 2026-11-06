@@ -81,5 +81,5 @@ export function installHelp(music){
  window.addEventListener('resize',schedule);document.addEventListener('scroll',schedule,true);document.addEventListener('click',schedule);document.addEventListener('toggle',schedule,true);
  onLanguageChange(()=>{if(!panel.hidden){render();schedule();}});
  let seen=false;try{seen=localStorage.getItem(KEY)==='seen';}catch{}
- if(!seen&&!$('flightLab')?.open&&!document.body.classList.contains('xt-scope-open'))welcome.showModal();
+ if(!seen&&!$('flightLab')?.open&&!$('freeFlightLauncher')?.open&&!document.body.classList.contains('xt-scope-open'))welcome.showModal();
 }

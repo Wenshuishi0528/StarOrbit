@@ -1,5 +1,6 @@
 import {createSkyPainter} from './balcony-sky-view-drawing.js';
 import {skyProjection3D,skyRay,skyAngles,skyPose,dragSkyPose} from './balcony-sky-view-math.js';
+import {PILOT_KEY_AXES} from './pilot-controls.js';
 
 const modes=['flat','hemisphere','sphere'];
 const clampZoom=value=>Math.max(1,Math.min(3.2,value));
@@ -99,7 +100,15 @@ export function createBalconySkyView(canvas,{onManual,onPick,onChange}={}){
   zoom(state().zoom*Math.exp(-delta*.0018));
  },{passive:false});
  listen('keydown',e=>{
-  if(mode==='flat'||disposed)return;const p=poseInfo(),step=e.shiftKey?15:5;
+  if(mode==='flat'||disposed||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;const p=poseInfo(),step=e.shiftKey?15:5;
+  const binding=PILOT_KEY_AXES[e.code];
+  if(binding&&['pitch','yaw','roll'].includes(binding[0])){
+   e.preventDefault();e.stopPropagation();onManual?.();
+   if(binding[0]==='pitch')p.elevation+=binding[1]*step;
+   if(binding[0]==='yaw')p.azimuth-=binding[1]*step;
+   if(binding[0]==='roll')p.roll+=binding[1]*step;
+   orientation(p.azimuth,p.elevation,p.roll);return;
+  }
   if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','+','=','-','_'].includes(e.key))return;
   e.preventDefault();onManual?.();
   if(e.key==='Home'){aimAtZenith();return;}

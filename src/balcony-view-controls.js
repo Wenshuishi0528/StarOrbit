@@ -37,7 +37,8 @@ export function mountBalconyViewControls({host,view,onMode,onManual,redraw}){
  function refresh(){
   group.setAttribute('aria-label',t('天空投影'));for(const b of root.querySelectorAll('button'))b.textContent=t(b.dataset.key);
   for(const [key,b] of Object.entries(buttons))b.setAttribute('aria-pressed',String(key===mode));
-  horizon.hidden=mode!=='hemisphere';zenith.hidden=target.hidden=mode==='flat';syncTarget();north.hidden=!last;hint.textContent=t(hints[mode]);
+  horizon.hidden=mode!=='hemisphere';zenith.hidden=target.hidden=mode==='flat';syncTarget();north.hidden=!last;
+  hint.textContent=t(hints[mode])+' '+t(mode==='flat'?'点击图后，A/D 或左右方向键改变朝向。':'点击图后，W/S 低头与抬头，A/D 左右转向，Q/E 滚转；方向键也可浏览。');
   nadir.hidden=below.hidden=mode!=='sphere';below.setAttribute('aria-pressed',String(view.belowHorizon));
   enable.textContent=t(job?'关闭设备跟随':'启用设备跟随');enable.setAttribute('aria-pressed',String(!!job));
   status.textContent=message?t(message):'';

@@ -16,8 +16,10 @@ export class OrbitMinimap{
   this.dragging=false;this.dragFrame=0;this.visible=true;this.lastDraw=-Infinity;this.lastTrack=-Infinity;this.points=[];
   try{this.visible=localStorage.getItem('tiangong-minimap-v1')!=='off';}catch{}
   $('showMinimap').checked=this.visible;this.panel.hidden=!this.visible;
+  $('openOrbitMap').setAttribute('aria-expanded',String(this.visible));
+  $('openOrbitMap').onclick=()=>{this.setVisible(!this.visible);if(this.visible&&matchMedia('(max-width:760px)').matches&&!this.panel.classList.contains('compact-expanded'))$('toggleMinimap').click();};
   $('showMinimap').onchange=()=>this.setVisible($('showMinimap').checked);
-  $('closeMinimap').onclick=()=>{this.setVisible(false);restoreControlFocus($('showMinimap'));};
+  $('closeMinimap').onclick=()=>{this.setVisible(false);restoreControlFocus($('openOrbitMap'));};
   onLanguageChange(()=>{this.lastDraw=-Infinity;});
   this.image=new Image();this.image.onload=()=>{this.lastDraw=-Infinity;};
   this.image.src=sim.environment.assets.minimap||sim.environment.assets.simple.day;
@@ -41,7 +43,7 @@ export class OrbitMinimap{
   canvas.addEventListener('pointerdown',e=>{
    if(!e.isPrimary||e.button!==0||!this.sim.current||this.points.length<2)return;
    e.preventDefault();e.stopPropagation();canvas.focus({preventScroll:true});
-   this.dragging=true;this.pointerId=e.pointerId;this.dragPoints=this.points.map(p=>[...p]);this.pendingTime=null;
+   this.sim.mainFlight?.stop();this.dragging=true;this.pointerId=e.pointerId;this.dragPoints=this.points.map(p=>[...p]);this.pendingTime=null;
    canvas.classList.add('dragging');canvas.setPointerCapture(e.pointerId);pick(e);apply();
   });
   canvas.addEventListener('pointermove',e=>{if(!this.dragging||e.pointerId!==this.pointerId)return;e.preventDefault();pick(e);if(!this.dragFrame)this.dragFrame=requestAnimationFrame(apply);});
@@ -49,7 +51,7 @@ export class OrbitMinimap{
   canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key)||!this.sim.current)return;e.preventDefault();this.sim.seek(this.sim.time+(e.key==='ArrowLeft'?-60000:60000));this.lastDraw=-Infinity;this.sim.sessionMemory?.save();});
  }
  setVisible(on){
-  this.visible=on;this.panel.hidden=!on;$('showMinimap').checked=on;this.lastDraw=-Infinity;
+  this.visible=on;this.panel.hidden=!on;$('showMinimap').checked=on;this.lastDraw=-Infinity;$('openOrbitMap').setAttribute('aria-expanded',String(on));
   try{localStorage.setItem('tiangong-minimap-v1',on?'on':'off');}catch{}
  }
  rebuild(q){

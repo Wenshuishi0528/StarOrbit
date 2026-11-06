@@ -79,7 +79,9 @@ export const sensorFragment=`precision highp float;varying vec2 film;uniform sam
 
 export const guideVertex=`uniform mat3 inertialToCamera;uniform vec2 lens;
  void main(){vec3 d=inertialToCamera*position;gl_Position=vec4(d.xy/lens,0.,d.z);}`;
-export const guideFragment=`precision highp float;uniform vec2 screen,lens;uniform mat3 cameraToFixed;uniform vec3 fixedEye;uniform float inverseGain;
+export const guideFragment=`precision highp float;uniform vec2 screen,lens;uniform mat3 cameraToFixed;uniform vec3 fixedEye,guideTint;uniform float inverseGain,guideDashed;
  ${earthHit}
  void main(){vec2 pixel=2.*gl_FragCoord.xy/screen-1.;vec3 ray=cameraToFixed*normalize(vec3(pixel*lens,1.));
-  if(groundDistance(fixedEye,ray)>=0.)discard;gl_FragColor=vec4(vec3(.024,.068,.094)*inverseGain,1.);}`;
+  if(groundDistance(fixedEye,ray)>=0.)discard;
+  if(guideDashed>.5&&fract((gl_FragCoord.x+gl_FragCoord.y)*.09)>.58)discard;
+  gl_FragColor=vec4(guideTint*inverseGain,1.);}`;

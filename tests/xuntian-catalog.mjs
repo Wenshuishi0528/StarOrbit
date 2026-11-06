@@ -6,6 +6,7 @@ import {equatorial} from '../src/environment-math.js';
 import {SURVEY_FIELDS} from '../src/survey-lab-math.js';
 import {decodeTycho,fieldRay,projectStar} from '../src/survey-sky-product-math.js';
 import {tychoCutouts} from '../src/survey-sky-product-tycho.js';
+import {DEEP_SKY_OBJECTS} from '../src/deep-sky-catalog.js';
 
 // Use the production JSON import convention so the same bundled stars/chart
 // are shared by the main scene and Xuntian. This test writes no build files.
@@ -41,6 +42,15 @@ for(const [id,queries] of [
 }
 assert.equal(get('HIP:91262','zh').name,'织女星');assert.equal(get('hip:91262','en').name,'Vega');
 assert.equal(get('hip:27989','fr').name,'Bételgeuse');assert.equal(get('constellation:Cyg','ru').name,'Лебедь');
+for(const object of DEEP_SKY_OBJECTS){
+ const id='deep-sky:'+object.id.toLowerCase(),target=get(object.id);
+ assert.equal(target.id,id);assert.equal(target.type,'deep-sky');assert.equal(target.objectType,object.type);
+ assert(target.fov>0&&target.fov<=80);near(dot(target.direction,object.direction),1);
+ assert.equal(get(id).id,id);assert.equal(search(object.id)[0].id,id,'catalogue search '+object.id);
+}
+for(const query of ['仙女座星系','Andromeda Galaxy','NGC 224','Messier 31','M31'])assert.equal(search(query)[0].id,'deep-sky:m31');
+assert.equal(search('猎户座大星云')[0]?.type,'deep-sky');
+assert.equal(search('NGC 7000')[0]?.id,'deep-sky:ngc7000');
 assert.equal(search('HIP 1011')[0].identifier,'HIP 1011'); // unnamed entries of the full catalogue are searchable
 for(const q of ['',null,'HIP 999999','从未存在的星','tycho:orion:999999'])assert.deepEqual(search(q),[]);
 assert.equal(search('星','en',2).length,2);assert.equal(get('constellation:invalid'),null);

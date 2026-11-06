@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {DockingTraining,DOCKING_SCENARIOS,DOCKING_GATE_RULES} from '../src/docking-training.js';
 import {DOCKING_STEP,DOCKING_THRUST,DOCKING_LIMITS,dockingMetrics,setDockingAttitude,stepDocking} from '../src/docking-physics.js';
+import {createFlightInputBuffer} from '../src/main-flight-input.js';
 
 const copy=value=>structuredClone(value);
 const norm=vector=>Math.hypot(...vector);
@@ -113,6 +114,48 @@ for(const scenario of DOCKING_SCENARIOS){
  const state=copy(session.state),guidance=copy(session.guidance()),remainder=session.remainder;
  for(let i=0;i<100;i++)session.guidance();
  assert.deepEqual(session.state,state);assert.deepEqual(session.guidance(),guidance);assert.equal(session.remainder,remainder);
+}
+
+// Press/release between render frames reaches exactly one real physics step.
+// Sub-step frames do not consume it; catch-up frames do not multiply its thrust.
+{
+ const session=new DockingTraining('approach'),buffer=createFlightInputBuffer();
+ const pulse={translation:[0,1,0],rotation:[1,0,0],angularDamping:false};
+ const neutral={angularDamping:false};let reads=0;
+ const read=()=>{reads++;return {...buffer.take(),angularDamping:false};};
+ session.setMode('approach');const before=copy(session.state);
+ buffer.set(pulse);buffer.set({});
+ session.advance(0,read);session.advance(DOCKING_STEP*.4,read);
+ assert.equal(reads,0,'No fixed step means no input consumption');
+ assert.deepEqual(session.state,before);assert.equal(session.mode,'approach');
+ session.advance(DOCKING_STEP*2.6,read);
+ let expected=stepDocking(before,pulse,DOCKING_STEP);
+ expected=stepDocking(expected,neutral,DOCKING_STEP);expected=stepDocking(expected,neutral,DOCKING_STEP);
+ assert.equal(reads,3);assert.deepEqual(session.state,expected);
+ assert.equal(session.mode,'manual','The retained pulse takes over before applying any automatic thrust');
+ assert.ok(Math.abs(session.state.deltaV-DOCKING_THRUST*DOCKING_STEP)<1e-12,'A brief tap applies one finite thrust impulse');
+ assert.ok(norm(session.state.angularVelocity)>0,'The same brief tap also reaches attitude dynamics');
+ session.finish();session.advance(DOCKING_STEP,read);assert.equal(reads,3,'Finished training does not consume a pending command');
+}
+
+// Held commands keep applying; blur/pause/tab cancellation discards pending taps.
+{
+ const session=new DockingTraining('approach'),buffer=createFlightInputBuffer();
+ const pulse={translation:[1,0,0],rotation:[0,1,0]},read=()=>({...buffer.take(),angularDamping:false});
+ const before=copy(session.state);buffer.set(pulse);
+ session.advance(DOCKING_STEP*3,read);
+ let expected=before;
+ for(let i=0;i<3;i++)expected=stepDocking(expected,{...pulse,angularDamping:false},DOCKING_STEP);
+ assert.deepEqual(session.state,expected);
+ assert.ok(Math.abs(session.state.deltaV-3*DOCKING_THRUST*DOCKING_STEP)<1e-12,'A held key applies thrust on every actual step');
+ const cancelled=new DockingTraining('approach'),cancelBuffer=createFlightInputBuffer();
+ const readCancelled=()=>({...cancelBuffer.take(),angularDamping:false});
+ cancelBuffer.set({...pulse,brake:true,temporarySas:true});cancelBuffer.set({});
+ cancelled.advance(DOCKING_STEP/2,readCancelled);cancelBuffer.clear();
+ const coast=stepDocking(copy(cancelled.state),{angularDamping:false},DOCKING_STEP);
+ cancelled.advance(DOCKING_STEP/2,readCancelled);
+ assert.deepEqual(cancelled.state,coast,'Clearing a sub-step pending tap cannot fire after focus or pause changes');
+ assert.equal(cancelled.state.deltaV,0);assert.equal(norm(cancelled.state.angularVelocity),0);
 }
 
 // Unapproved pilot crossings are procedural violations, not invented physical collisions.

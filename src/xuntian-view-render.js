@@ -2,7 +2,6 @@ import {finderLabels,paintFinderLabels} from './xuntian-labels.js';
 import * as THREE from 'three';
 import {dot} from './orbit.js';
 import {inspectStationRay} from './xuntian-station-pin.js';
-import {equatorial} from './environment-math.js';
 import {createSurveyProbe} from './survey-live-probe.js';
 import {createSolarView} from './xuntian-solar-view.js';
 import {createXuntianEarthView} from './xuntian-earth-view.js';
@@ -11,6 +10,11 @@ import {CATALOG_SIGNAL,coneHalfAngle,groundHit,sensorOptics,starColour,starInSky
 import {detectorSize} from './xuntian-image-quality.js';
 import {backgroundFragment,guideFragment,guideVertex,quadVertex,sensorFragment,starFragment,starVertex} from './xuntian-view-shaders.js';
 import {xuntianSkySource,xuntianStarPSF} from './xuntian-view-sky.js';
+import {identifyXuntianCrosshair} from './xuntian-crosshair.js';
+import {createCityFinder} from './xuntian-ground-target.js';
+import {SKY_CONSTELLATION_LINES,SKY_CONSTELLATION_BOUNDARIES} from './sky-annotation-layout.js';
+import {normalizeStarChartSettings} from './star-chart-settings.js';
+import {paintSolarPhotoCaption} from './solar-photo-caption.js';
 
 const axesArray=axes=>[axes.right,axes.up,axes.forward];
 const matrix=columns=>new THREE.Matrix3().fromArray(columns.flat());
@@ -90,25 +94,25 @@ function makeStarLayer(renderer,shared){
   return {scene,material,update,get records(){return records;},dispose(){geometry.dispose();material.dispose();}};
 }
 
-// Reuse the chart's measured J2000 constellation polylines. A great-circle arc
-// projects to a straight line in this camera's tangent plane. Capture omits guides.
-function constellationGuide(environment,shared){
-  const u={...shared,inertialToCamera:mat(),inverseGain:uniform(1)},geometry=new THREE.BufferGeometry();
+// All chart lines use the same J2000 paths as the main star chart. They are
+// rendered before physical foregrounds, and the shader clips Earth per pixel.
+function constellationGuide(shared){
+  const u={...shared,inertialToCamera:mat(),inverseGain:uniform(1),guideTint:v3(),guideDashed:uniform(0)};
   const material=new THREE.ShaderMaterial({uniforms:u,vertexShader:guideVertex,fragmentShader:guideFragment,
     transparent:true,...celestialBlend,toneMapped:false,depthTest:false,depthWrite:false});
-  const scene=new THREE.Scene(),lines=new THREE.LineSegments(geometry,material);lines.frustumCulled=false;scene.add(lines);
-  let previous=null,count=0;
-  function draw(renderer,camera,id,axes,gain){
-    if(!id)return;
-    if(previous!==id){
-      previous=id;const source=environment.starChart?.constellations.find(c=>c.id===id),positions=[];
-      for(const path of source?.lines||[])for(let i=1;i<path.length;i++)positions.push(...equatorial(...path[i-1]),...equatorial(...path[i]));
-      count=positions.length/3;geometry.dispose();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setDrawRange(0,count);
+  const layers=[['constellationLines',SKY_CONSTELLATION_LINES,[.024,.068,.094],false],['constellationBoundaries',SKY_CONSTELLATION_BOUNDARIES,[.063,.040,.083],true]].map(([setting,paths,tint,dashed])=>{
+    const positions=[];for(const path of paths)for(let i=1;i<path.length;i++)positions.push(...path[i-1],...path[i]);
+    const geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    const scene=new THREE.Scene(),lines=new THREE.LineSegments(geometry,material);lines.frustumCulled=false;scene.add(lines);
+    return {setting,tint,dashed,geometry,scene};
+  });
+  function draw(renderer,camera,settings,axes,gain){
+    u.inertialToCamera.value.copy(matrix(axes)).transpose();u.inverseGain.value=1/Math.max(.0001,gain);
+    for(const layer of layers)if(settings[layer.setting]){
+      u.guideTint.value.fromArray(layer.tint);u.guideDashed.value=Number(layer.dashed);renderer.render(layer.scene,camera);
     }
-    if(!count)return;
-    u.inertialToCamera.value.copy(matrix(axes)).transpose();u.inverseGain.value=1/Math.max(.0001,gain);renderer.render(scene,camera);
   }
-  return {draw,dispose(){geometry.dispose();material.dispose();}};
+  return {draw,dispose(){for(const layer of layers)layer.geometry.dispose();material.dispose();}};
 }
 
 function stationView(sim){
@@ -156,23 +160,38 @@ function writeCanvas(canvas,image,bytes,w,h){
   ctx.putImageData(pixels,0,0);return pixels;
 }
 
-export function createXuntianViewRenderer(sim,canvas){
+export function createXuntianViewRenderer(sim,canvas,{cityFinder=createCityFinder(sim.environment.geography?.items||[])}={}){
   const renderer=sim.api.renderer,env=sim.environment,geometry=new THREE.PlaneGeometry(2,2),screenCamera=new THREE.Camera();
   const shared={lens:v2(),screen:v2(),cameraToFixed:mat(),fixedEye:v3()};
   const u={...shared,cameraToInertial:mat(),galaxy:uniform(null),galaxyMode:uniform(0),skyGain:uniform(1),mainSkyHDR:uniform(0),opticalGain:uniform(1),toneMappingExposure:uniform(1)};
   const sensor={image:uniform(null),gain:uniform(1),earthImage:uniform(null),earthOn:uniform(0),earthExposure:uniform(1)};
   const background=screenPass(geometry,backgroundFragment,u),film=screenPass(geometry,sensorFragment,sensor);
   const earthView=createXuntianEarthView(env,geometry),solarView=createSolarView(env,geometry,shared);
-  const stars=makeStarLayer(renderer,shared),guide=constellationGuide(env,shared),station=stationView(sim);
+  const stars=makeStarLayer(renderer,shared),guide=constellationGuide(shared),station=stationView(sim);
   let surveyProbe=null,preview=null,previewImage=null,previewPending=false,capturePending=false,disposed=false,lastRender=-Infinity,lastStatus=unavailable(),previewCount=0;
+  let identification=null,lastIdentification=-Infinity,identificationKey='',identificationKind='',identificationLanguage='';
   function valid(frame){return !!(frame?.q?.basis&&frame?.q?.earthAxes&&frame?.axes?.forward&&frame?.axes?.right&&frame?.axes?.up&&frame.eyeKm&&frame.eyeLocal&&frame.fovY>0&&frame.fovY<179&&frame.apertureMm>0);}
+  function readIdentification(frame,surface,limit){
+    const height=canvas.clientHeight||canvas.height||300,now=performance.now();
+    const key=[frame.q.t,frame.language,frame.fovY,frame.showStars,height,limit,...frame.eyeKm,...frame.axes.forward,...frame.q.earthAxes.flat(),surface?.kind,surface?.moduleId,surface?.distanceKm].join('|');
+    if(key===identificationKey)return identification;
+    if(now-lastIdentification<160&&identificationKind===surface?.kind&&identificationLanguage===frame.language)return identification;
+    identification=identifyXuntianCrosshair(frame,{surface,displayHeight:height,cityFinder,limitMagnitude:limit,blocked:dir=>frame.showStation!==false&&station.hides(frame,dir)});
+    lastIdentification=now;identificationKey=key;identificationKind=surface?.kind;identificationLanguage=frame.language;
+    return identification;
+  }
   function draw(frame,size,target,annotations=false){
     const {w,h,aspect}=size,optics=sensorOptics(frame.fovY,frame.apertureMm,frame.exposure??1),axes=axesArray(frame.axes),ground=groundHit(frame.eyeKm,frame.axes.forward,frame.q.earthAxes);
+    const solarImaging=!!frame.solarChannel&&frame.solarChannel!=='none';
+    const wantNames=annotations?frame.previewNames:frame.photoNames,chartSettings=normalizeStarChartSettings(frame.chartSettings??env.settings);
+    // Solar instrument channels do not record the optical Milky Way. Keep the
+    // physical foreground/occlusion, without magnifying a panorama behind SDO.
+    if(solarImaging)Object.assign(chartSettings,{starLabels:false,catalogStarLabels:false,constellationNames:false,constellationLines:false,constellationBoundaries:false,deepSkyObjects:false});
     station.prepare(frame,aspect);const local=station.inspect(frame,ground);
     u.cameraToInertial.value.copy(matrix(axes));u.cameraToFixed.value.copy(matrix(axes.map(axis=>toLocal(frame.q.earthAxes,axis))));
     u.fixedEye.value.fromArray(toLocal(frame.q.earthAxes,frame.eyeKm));
     u.lens.value.set(optics.tangent*aspect,optics.tangent);u.screen.value.set(w,h);
-    const sky=xuntianSkySource(env,frame),panorama=sky.status==='panorama';
+    const sky=solarImaging?{status:'off',gain:0,showStars:false}:xuntianSkySource(env,frame),panorama=sky.status==='panorama';
     u.galaxy.value=panorama?env.galaxyTexture:null;
     u.galaxyMode.value=panorama?2:['off','catalog'].includes(sky.status)?0:1;u.skyGain.value=sky.gain;
     u.mainSkyHDR.value=env.quality==='high'&&renderer.extensions.has('EXT_color_buffer_float')&&!env.hdr.failed?1:0;
@@ -180,21 +199,23 @@ export function createXuntianViewRenderer(sim,canvas){
     sensor.image.value=target.scene.texture;sensor.gain.value=optics.areaGain;
     const limit=sky.showStars&&sky.gain>0?optics.limitMagnitude+2.5*Math.log10(sky.gain):null;
     const count=stars.update(frame,optics,aspect,h,sky,limit);
+    let solarObservation=null;
     withSharedRenderer(renderer,()=>{
       sensor.earthImage.value=earthView.render(renderer,frame,size,target);
       sensor.earthOn.value=sensor.earthImage.value?1:0;sensor.earthExposure.value=frame.exposure??1;
       renderer.setRenderTarget(target.scene);renderer.clear(true,true,false);renderer.render(background.scene,screenCamera);
-      if(annotations)guide.draw(renderer,screenCamera,frame.constellationId,axes,optics.areaGain);
+      if(wantNames)guide.draw(renderer,screenCamera,chartSettings,axes,optics.areaGain);
       renderer.render(stars.scene,screenCamera);
       solarView.draw(renderer,screenCamera,frame,size,optics);
       if(local.visible)station.draw(renderer,!!frame.fillLight);
       renderer.setRenderTarget(target.film);renderer.clear(true,false,false);renderer.render(film.scene,screenCamera);
+      solarObservation=solarView.drawObservation(renderer,screenCamera,frame,size,target.scene.texture);
       if([background.material,stars.material,film.material].some(material=>renderer.properties.get(material).currentProgram?.diagnostics?.runnable===false))throw Error('巡天取景图像生成失败');
     });
-    const wantNames=annotations?frame.previewNames:frame.photoNames;
-    const labels=wantNames?finderLabels(frame,size,annotations?size.w/Math.max(1,canvas.clientWidth):Math.max(1,size.w/800),
-      stars.records,limit,dir=>local.visible&&station.hides(frame,dir),annotations):null;
-    return {labels,available:true,center:local.center,starCount:count,limitMagnitude:limit,busy:false};
+    const labels=wantNames?finderLabels({...frame,chartSettings},size,annotations?size.w/Math.max(1,canvas.clientWidth):Math.max(1,size.w/800),
+      dir=>local.visible&&station.hides(frame,dir)):null;
+    if(annotations)readIdentification(frame,local.center,limit);
+    return {labels,solarObservation,available:true,center:local.center,identification,starCount:count,limitMagnitude:limit,busy:false};
   }
   async function read(target){
     if(renderer.readRenderTargetPixelsAsync)await renderer.readRenderTargetPixelsAsync(target.film,0,0,target.w,target.h,target.bytes);
@@ -203,6 +224,7 @@ export function createXuntianViewRenderer(sim,canvas){
   }
   return {
     earthSource:earthView.source,earthAppearanceKey:earthView.appearanceKey,solarAppearanceKey:solarView.key,
+    identify(frame){return valid(frame)?readIdentification(frame,lastStatus.center,lastStatus.limitMagnitude):{kind:'unavailable'};},
     render(frame){
       if(disposed||!valid(frame))return unavailable();
       const now=performance.now();
@@ -232,7 +254,7 @@ export function createXuntianViewRenderer(sim,canvas){
           onExposure(actual,{center:result.center,coverage,width:size.w,height:size.h});
         }
         await read(target);if(disposed)throw Error('巡天取景器已关闭');
-        const out=document.createElement('canvas');writeCanvas(out,null,target.bytes,size.w,size.h);paintFinderLabels(out,result.labels);
+        const out=document.createElement('canvas');writeCanvas(out,null,target.bytes,size.w,size.h);paintFinderLabels(out,result.labels);paintSolarPhotoCaption(out,result.solarObservation,actual.q.t);
         const blob=await new Promise(resolve=>out.toBlob(resolve,'image/png'));if(!blob||disposed)throw Error('巡天取景图像生成失败');return blob;
       }finally{target?.dispose();capturePending=false;}
     },

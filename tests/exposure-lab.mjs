@@ -78,6 +78,8 @@ for(const id of Object.keys(CAMERA_PRESETS)){
   assert(dot(up,rolled[1])>.13&&dot(left,rolled[0])<-.13,'turns follow the tilted viewfinder axes');
   const translated=moveExposureCamera(clockwise,{forward:5,lift:3}),offset=['x','y','z'].map(k=>translated[k]-s[k]);
   near(offset,rolled[2].map((x,i)=>5*x+3*rolled[1][i]));
+  const side=moveExposureCamera(clockwise,{right:4});
+  near(['x','y','z'].map(k=>side[k]-s[k]),rolled[0].map(v=>v*4));
   const back=moveExposureCamera(translated,{forward:-5,lift:-3});near(['x','y','z'].map(k=>back[k]),[0,0,0]);
   const extreme=moveExposureCamera(s,{forward:10000}),end=['x','y','z'].map(k=>extreme[k]);
   assert(Math.abs(Math.max(...end.map(Math.abs))-CAMERA_OFFSET_LIMIT)<1e-8);near(unit(end),axes[2]);

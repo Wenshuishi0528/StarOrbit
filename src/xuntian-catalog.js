@@ -5,6 +5,7 @@ import {equatorial} from './environment-math.js';
 import {SURVEY_FIELDS} from './survey-lab-math.js';
 import {decodeTycho,fieldRay} from './survey-sky-product-math.js';
 import {tychoCutouts} from './survey-sky-product-tycho.js';
+import {DEEP_SKY_OBJECTS,deepSkyName,deepSkyTypeName} from './deep-sky-catalog.js';
 
 const DEG=Math.PI/180,BIN=5,COLS=360/BIN,ROWS=180/BIN;
 const MATCH_RADIUS=2/3600;
@@ -117,13 +118,20 @@ function constellationFrame(c){
 
 function searchCatalog(){
  if(search)return search;
- const {byId}=starSky(),records=new Map(),constellations=new Map(),supplement=new Map();
+ const {byId}=starSky(),records=new Map(),constellations=new Map(),supplement=new Map(),deepSky=new Map();
  function entry(id,type,names,identifier,direction,fov,radius,extra,mag=Infinity){
   const [ra,dec]=coordinates(direction);
   const principal=new Set(Object.values(names).filter(Boolean).map(fold));
   const terms=new Set([...Object.values(names),...extra].filter(Boolean).flatMap(nameForms).map(fold).filter(Boolean));
   const r={id,type,names,identifier,direction,ra,dec,fov,radius,mag,principal,terms};
   records.set(id,r);return r;
+ }
+ for(const object of DEEP_SKY_OBJECTS){
+  const diameter=object.angularSizeArcmin?.[0]/60||.2;
+  const r=entry('deep-sky:'+object.id.toLowerCase(),'deep-sky',{zh:deepSkyName(object,'zh'),en:deepSkyName(object,'en')},object.id,
+   object.direction,Math.min(80,Math.max(.08,diameter*1.6)),diameter/2,[object.id,...object.aliases],object.mag??Infinity);
+  r.category=deepSkyTypeName(object.type);r.objectType=object.type;
+  for(const alias of [object.id,...object.aliases])if(!deepSky.has(fold(alias)))deepSky.set(fold(alias),r);
  }
  for(const field of chart.constellations){
   const supplement=aliases.constellations[field.id],frame=constellationFrame(field);
@@ -151,16 +159,17 @@ function searchCatalog(){
   const names={zh:n?.zh||fallback,en:n?.en||fallback,ru:n?.ru,fr:n?.fr};
   entry(point.id,'star',names,identifier,point.direction,8,0,[...(aliases.starNames[hip]??[]),...(d?.extra??[])],point.mag);
  }
- search={records,constellations};return search;
+ search={records,constellations,deepSky};return search;
 }
 function localTarget(r,language){
  return {id:r.id,type:r.type,name:r.names[language]||r.names.en||r.identifier,identifier:r.identifier,direction:r.direction,
-  ra:r.ra,dec:r.dec,fov:r.fov,radius:r.radius};
+  ra:r.ra,dec:r.dec,fov:r.fov,radius:r.radius,...(r.category?{category:r.category,objectType:r.objectType}:{})};
 }
 export function getXuntianTarget(id,language='zh'){
  if(typeof id!=='string')return null;
  const text=id.trim(),hip=/^hip[\s:#-]*(\d+)$/i.exec(text),con=/^constellation[\s:#-]+([a-z]{3})$/i.exec(text);
  const index=searchCatalog();
+ const deep=index.deepSky.get(fold(text.replace(/^deep-sky[:\s]*/i,'')));if(deep)return localTarget(deep,language);
  if(con){
   const r=index.constellations.get(con[1].toLowerCase());return r?localTarget(r,language):null;
  }
@@ -175,7 +184,7 @@ export function searchXuntianTargets(text,language='zh',limit=12){
  if(typeof text!=='string'||!Number.isFinite(limit)||limit<1)return [];
  const raw=text.trim(),q=fold(raw);
  if(!q)return [];
- if(/^(?:hip)?\d+$/.test(q)||/^(?:constellation|tycho):/i.test(raw)){
+ if(/^(?:hip)?\d+$/.test(q)||/^(?:constellation|tycho|deep-sky):/i.test(raw)){
   const id=/^(?:hip)?\d+$/.test(q)?'hip:'+q.replace(/^hip/,''):raw;
   const target=getXuntianTarget(id,language);return target?[target]:[];
  }

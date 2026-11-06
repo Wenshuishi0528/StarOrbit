@@ -6,7 +6,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {describeAssembly,matingTransforms,placementMatrices} from '../src/assembly.js';
 import {snapshot,dot,norm} from '../src/orbit.js';
 import {groundTrackAttitude} from '../src/attitude.js';
-import {FORMATION_DEFAULT,aimAxes,orbitalAxes,fromBasis,intoBasis,opticalModel,boxTravelFraction} from '../src/xuntian-formation-math.js';
+import {FORMATION_DEFAULT,aimAxes,orbitalAxes,fromBasis,intoBasis,opticalModel,boxTravelFraction,stationShapes,constrainedTravel} from '../src/xuntian-formation-math.js';
 
 const storage=new Map();Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)}});
 const result=await build({stdin:{contents:"export {installXuntianFormation} from './src/xuntian-formation.js'; export {makeScopeGuide} from './src/xuntian-guide.js';",resolveDir:process.cwd()},bundle:true,format:'esm',platform:'node',write:false});
@@ -32,7 +32,27 @@ const api={model,groups,stage:{getBoundingClientRect:()=>stage},camera,controls}
 const t0=orbit.rows[100][0],qAt=t=>groundTrackAttitude(snapshot(orbit,t));
 const q0=qAt(t0),sim={api,missionId:'tiangong',current:q0,setView(){}};
 const f=installXuntianFormation(sim),orientation=aimAxes({forward:[.2,.7,.5],up:[0,0,1]});
-same(f.getOffset(),[30,0,0]);f.restoreSuggested();
+same(f.getOffset(),[52,0,0]);assert.equal(f.getState().constrained,false);
+// 52 m is a desired station, not a promise of clearance at every possible
+// attitude. Only actual inflated module/wing boxes can move it farther away.
+f.restoreInitial();const initialSafe=f.getOffset();let protectedRotations=0;
+const assertClear=()=>{
+ const center=xt.localToWorld(m.reference.clone()),shapes=Object.values(groups).filter(group=>group!==xt).flatMap(stationShapes);
+ assert.equal(constrainedTravel(center,center,shapes,(m.radius+2)*5),1,'telescope protection envelope intersects station geometry');
+};
+assertClear();
+for(let i=0;i<72;i++){
+ model.rotation.set(i*.37,i*.61,i*.83);
+ for(const group of Object.values(groups))if(group!==xt)group.traverse(o=>{if(/^(pitch_|roll_)/.test(o.name))o.rotation.y=i*.43;});
+ f.restoreInitial();f.update(q0,orientation);
+ if(f.getState().constrained)protectedRotations++;else same(f.getOffset(),[52,0,0]);
+ assertClear();
+}
+assert(protectedRotations>0,'sampled rotations exercise collision-triggered relocation');
+model.rotation.set(0,0,0);
+for(const group of Object.values(groups))if(group!==xt)group.traverse(o=>{if(/^(pitch_|roll_)/.test(o.name))o.rotation.y=0;});
+f.restoreSuggested();
+console.log('Initial forward offset (metres):',initialSafe[0],'; protected sampled rotations:',protectedRotations);
 let optics=f.update(q0,orientation);
 same(f.getOffset(),FORMATION_DEFAULT);check(norm(f.getOffset()),140);assert(f.getState().extent<140);
 const world=()=>xt.localToWorld(m.reference.clone()).toArray();
@@ -54,7 +74,7 @@ const stationTarget=f.stationTarget(1.6);assert(stationTarget&&stationTarget.ful
 assert(stationTarget.range>100&&stationTarget.range<180);check(norm(stationTarget.direction),1);
 const start=f.getOffset();const blocked=f.setOffset(start.map(x=>-x));assert(blocked.constrained);assert(blocked.offset[0]<0);
 f.restoreSuggested();f.setOffset([-125,120,55]);assert(!f.getState().constrained);same(f.getOffset(),[-125,120,55]);
-f.restoreInitial();same(f.getOffset(),[30,0,0]);f.restoreSuggested();f.setOffset([-125,120,55]);
+f.restoreInitial();same(f.getOffset(),[52,0,0]);assertClear();f.restoreSuggested();f.setOffset([-125,120,55]);
 const custom=f.getOffset();model.rotation.set(-.3,.15,.4);f.update(sim.current,orientation);same(f.getOffset(),custom);
 const blocker=new THREE.Group();blocker.add(new THREE.Mesh(new THREE.BoxGeometry(80,80,80),new THREE.MeshBasicMaterial()));
 model.add(blocker);blocker.position.copy(model.worldToLocal(new THREE.Vector3(...world())));groups.newModule=blocker;
@@ -64,6 +84,13 @@ assert(Math.hypot(...f.getOffset())>140,'adding station geometry at the companio
 unlisten();model.remove(blocker);delete groups.newModule;f.refresh();same(f.getOffset(),FORMATION_DEFAULT);f.setOffset(custom);
 const far=template.TH.clone(true);far.position.set(1700,0,0);model.add(far);groups.far=far;f.refresh();
 same(f.getOffset(),custom);assert(norm(f.getState().suggested)>340);
+f.restoreInitial();same(f.getOffset(),[52,0,0]);assertClear();
+// A distant extra module increases the broad envelope but cannot displace a
+// clear 52 m start. Geometry actually occupying that position must displace it.
+const forwardBlocker=new THREE.Group();forwardBlocker.add(new THREE.Mesh(new THREE.BoxGeometry(80,80,80),new THREE.MeshBasicMaterial()));
+model.add(forwardBlocker);forwardBlocker.position.copy(model.worldToLocal(new THREE.Vector3(...world())));groups.forwardBlocker=forwardBlocker;
+f.restoreInitial();assert(f.getState().constrained&&f.getState().automatic);assert(norm(f.getOffset())>340);assertClear();
+model.remove(forwardBlocker);delete groups.forwardBlocker;
 f.restoreSuggested();assert(norm(f.getOffset())>340);model.remove(far);delete groups.far;f.refresh();same(f.getOffset(),FORMATION_DEFAULT);
 const overlay={getBoundingClientRect:()=>({left:915,right:1250,top:320,bottom:715,width:335,height:395})};
 assert(f.frameBoth(overlay));camera.updateMatrixWorld(true);

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 const source=await build({entryPoints:['src/minimap.js'],bundle:true,platform:'node',format:'esm',write:false});
 const elements=new Map();
-globalThis.document={getElementById(id){assert.notEqual(id,'environmentAssets');if(!elements.has(id))elements.set(id,{getContext:()=>({}),addEventListener(){},focus(){}});return elements.get(id);}};
+globalThis.document={getElementById(id){assert.notEqual(id,'environmentAssets');if(!elements.has(id))elements.set(id,{getContext:()=>({}),addEventListener(){},focus(){},setAttribute(key,value){this[key]=value;}});return elements.get(id);}};
 globalThis.localStorage={getItem:()=>null};
 globalThis.Image=class{};
 globalThis.ResizeObserver=class{observe(){}};
@@ -11,6 +11,7 @@ const {OrbitMinimap}=await import('data:text/javascript;base64,'+Buffer.from(sou
 const sim={environment:{assets:{minimap:'display-map.jpg',simple:{day:'reflectance-map.jpg'}}}};
 const minimap=new OrbitMinimap(sim);
 assert.equal(minimap.image.src,'display-map.jpg');assert.ok(minimap.visible);
+minimap.setVisible(false);assert.equal(elements.get('openOrbitMap')['aria-expanded'],'false');assert.equal(elements.get('showMinimap').checked,false);minimap.setVisible(true);assert.equal(elements.get('openOrbitMap')['aria-expanded'],'true');
 delete sim.environment.assets.minimap;
 assert.equal(new OrbitMinimap(sim).image.src,'reflectance-map.jpg');
 console.log({minimapIndependentAsset:'pass',legacyFallback:'pass',inlineJSONNotRead:true});

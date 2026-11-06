@@ -71,7 +71,7 @@ export const dockingMarkup=`
    <div class="dock-box dock-alignment"><div data-role="alignment"></div><div class="dock-vector"><div><small ${text('飞船偏右 / 偏左')}></small><b data-read="right"></b></div><div><small ${text('飞船偏上 / 偏下')}></small><b data-read="up"></b></div><div><small ${text('右向漂移速度')}></small><b data-read="right-velocity"></b></div><div><small ${text('上向漂移速度')}></small><b data-read="up-velocity"></b></div></div><p class="dock-signed-help" ${text('圆心是目标接口，点是飞船；正值向右 / 向上。坐标固定在目标上，转动飞船后推力方向会改变。')}></p></div>
    <div class="dock-box dock-telemetry"><div class="dock-submetrics"><div><span ${text('姿态夹角 / 合成角速率')}></span><b data-read="angle"></b></div><div><span ${text('横向偏差 / 横向速度')}></span><b data-read="lateral"></b></div><div><span ${text('累计平移 Δv')}></span><b data-read="deltaV"></b></div><div><span ${text('训练时间')}></span><b data-read="time"></b></div></div><div class="dock-attitude" data-role="attitude"></div></div>
    <div class="dock-box dock-manual">
-    <div class="dock-control-head"><label><input type="checkbox" data-role="fine"><span ${text('精细推力')}></span></label><label><input type="checkbox" data-role="damping" checked><span ${text('角速率阻尼')}></span></label><span ${text('仅用于人工控制')}></span></div>
+    <div class="dock-control-head"><label><input type="checkbox" data-role="fine"><span ${text('精细推力 · Caps Lock')}></span></label><label><input type="checkbox" data-role="damping" checked><span ${text('姿态稳定 · T')}></span></label><span ${text('仅用于人工控制')}></span></div>
     <div class="dock-bottom"><div class="dock-control-box"><h3 ${text('机体系平移 · 按住施力')}></h3><div class="dock-thrusters" data-controls="translation"></div></div><div class="dock-control-box"><h3 data-role="rotation-label" ${text('姿态角速率 · 按住控制')}></h3><div class="dock-thrusters" data-controls="rotation"></div></div></div>
     <p data-role="thrust"></p>
    </div>
@@ -79,7 +79,7 @@ export const dockingMarkup=`
     <p ${text('新手辅助默认开启。关闭后仅手动推力与转动，不自动制动或阻尼，不设停靠点、走廊和距离边界。')}></p>
     <p ${text('对接限速检查接触瞬间的总相对速度，超过设定值判失败。纯手动只检查接口接触与速度；不模拟整艘空间站的网格碰撞。')}></p>
     <p ${text('先选场景，再选人工或辅助接近，按开始。辅助接近在 30 m 与 5 m 停靠点减速稳定，检查就绪后按 GO；任何手动推力会接管为人工模式。')}></p>
-    <p ${text('暂停会冻结时间；保持位置会消耗推力抑制漂移；撤离会沿接口外侧退开。松开平移键仍有惯性，Space 按住相对制动。')}></p>
+    <p ${text('W/S 低头与抬头，A/D 左右偏航，Q/E 左右滚转；H/N 前后，J/L 左右，I/K 下上平移。Caps Lock 精调；开启新手辅助时，T 切换姿态稳定，F 按住临时切换 SAS。相对制动使用屏幕按钮。')}></p>
     <p ${text('开启角速率阻尼时，松开姿态键会逐渐停止转动；关闭后保留角速率。相机固定在机体上，金框仅是已知目标位置的辅助标记。')}></p>
     <p ${text('无推力预测：未来 60 秒 HCW 自由漂移，不含后续控制、碰撞或捕获。蓝色细线是已经飞过的轨迹。')}></p>
     <p ${text('400 km 圆参考轨道的 HCW 相对运动、四元数姿态与受限角速率控制。使用理想导航与简化接口接触，不模拟传感器、接触机构或完整刚体动力学。门限是教学设置，并非神舟真实飞行参数。')}></p>

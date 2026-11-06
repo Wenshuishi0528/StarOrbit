@@ -1,4 +1,48 @@
-# Changelog / 更新记录
+# Changelog / 更新2，记录
+
+按开发版本倒序记录，每版保留简短中英总结；每次完成更新继续在顶部追加。早期缺少独立证据的版本逐条标为“记录待核实”，不将后续累计功能倒填。
+
+Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
+
+## v1.12 — 2026-11-06 · 正式版 / Release
+
+巡天取景与轨道地图改为独立窗口，右侧工具列提供各自入口、打开状态和开关；桌面分开放置，窄屏上下排列，保留手动布局，关闭一个不影响另一个。修复导航球紧凑／完整版切换卡顿和漏点：过滤读数引发的无效窗口发现与布局，避免重复文字更新，切换只调整当前窗口并保留标题位置，取消几何动画造成的按钮漂移。包含 v1.07–v1.11 的自由飞行、导航球、共享星图、太阳观测、镜头目标和巡天 52 米初始位置等累计更新。
+
+**English:** The Xuntian finder and orbit map are now independent windows with separate toolbar toggles, visible open states, responsive placement and preserved custom layouts. Fixed slow or missed compact/full navball switches by filtering text-only discovery updates, avoiding unchanged DOM writes and resizing only the affected window while keeping its header anchored without animated geometry drift. Includes the accumulated v1.07–v1.11 flight, navball, shared sky-chart, solar observing, camera-target and 52 m Xuntian placement updates.
+
+## v1.11 — 2026-11-06 · 本机版 / Local build
+
+新增独立镜头目标：可分别居中并跟随当前任务航天器、巡天或全部航天器，双击模型快速切换；统一主视角、导航球、巡天取景及自由飞行的镜头语义，观察不改变驾驶对象，保存镜头目标并处理目标隐藏、任务切换和返回视角。修复已有操纵暂停后点逆行不转向，自动指向显示剩余角度。导航球补齐径向、法向和目标标记，增加可记忆的紧凑图标版，保留完整版。巡天默认改为沿轨前方 52 米，启动、重开和复位一致；实际碰撞保护仍有效。
+
+**English:** Added independent camera targets for the active mission spacecraft, Xuntian and the whole formation, with double-click focus and translation following. Main-view, navball, finder and free-flight controls now distinguish observation from piloting; camera targets persist and recover across hidden targets, mission changes and view returns. Fixed retrograde guidance remaining paused in an existing pilot session and added remaining-angle feedback. Navballs gain radial, normal and target markers plus a persistent compact icon layout. Xuntian now starts and resets 52 m ahead, retaining actual collision protection.
+
+## v1.10 — 2026-11-06 · 本机版 / Local build
+
+取消主导航球、自由飞行和对接训练在关闭稳定辅助时的人为角速度上限；持续施力继续加速，松手保持惯性，SAS 以有限力矩制动。高转速飞行可正常存取，RCS 设置明确区分辅助转速上限。巡天默认移到沿轨前方 100 米，按完整装配、太阳翼旋转包络和巡天尺寸自动增加大装配的初始距离，启动、重开与恢复初始位置保持一致。导航球侧边新增轨道方向、朝天／朝地与目标定向，点击后由 SAS 渐进转向；姿态说明默认折叠。星图默认次高密度并启用避让，旧最高档设置升级时下调一档。
+
+**English:** Removed artificial angular-rate caps during unassisted steering in the main navball, free flight and docking training. Sustained torque keeps accelerating the craft; release preserves inertia and SAS brakes with finite torque. High-rate saves remain valid and assisted-rate settings are clearly named. Xuntian starts 100 m ahead, extending that distance for larger assemblies using the station/solar-wing sweep and telescope envelope; startup, reopening and reset share this placement. Navball-side SAS buttons turn toward orbital directions, zenith/nadir and the companion target. Attitude guidance is collapsed by default; chart density defaults one step below maximum, with a one-time migration of old maximum settings.
+
+## v1.09 — 2026-11-06 · 本机版 / Local build
+
+主导航球增加惯性转向、RCS 平移与 SAS 稳姿，可切换操纵任务航天器和巡天，并与取景方向联动；各模块统一 KSP 键位。巡天新增准星识别、随机搜索推荐和深空目标；主画面、取景和照片共用星图分类及密度，最高密度显示视野内全部符合选项且未被遮挡的目录标注。新增四波段 SDO 太阳观测、共享更新缓存、快照导入导出及带观测时刻的照片；桌面可更新，网页版可导入快照。修复短按漏响应、切船惯性、输入框残留推力和太阳成像亮度，补齐可核实的历版记录；本批尚未发布 GitHub。
+
+**English:** Added inertial steering, RCS translation and SAS stabilization for the selected mission spacecraft or Xuntian, synchronized finder pointing and consistent KSP keys. Finder crosshair identification, randomized search suggestions and deep-sky targets share chart categories and density with the main view and photos; maximum density includes all eligible, unoccluded labels. Four-band SDO observations add shared caching, desktop updates, portable web snapshots and dated photos. Fixed missed short inputs, switched-craft coasting, residual thrust after focusing inputs and solar-image brightness; consolidated verifiable release history. This batch has not been published to GitHub.
+
+[操作、取舍与验证](docs/v1.09-pilot-star-chart.md) · [太阳观测与来源](docs/solar-observations.md)
+
+## v1.08 — 2026-11-06 · 本机版 / Local build
+
+新增自由飞行导航球、姿态辅助、对接相机与捕获条件读数，RCS 按飞船设置，对接容差按任务保存。修复切船后的键盘焦点，碰撞显示具体原因，并提供历史轨迹开关。主页面可开启导航球；小窗口支持拖动、锁定、保存及恢复布局。
+
+**English:** Added a free-flight navball, attitude assistance, a docking camera and capture-limit readings, with per-vessel RCS and saved per-mission docking tolerances. Fixed keyboard focus after craft switches, explained collision causes and added a trail toggle. The main view gains an optional navball and movable windows with saved layouts, locking and reset.
+
+[操作与验证](docs/v1.08-flight-instruments.md)
+
+## v1.07 — 2026-11-06 · 本机版 / Local build
+
+新增自由飞行。神舟和天舟可从当前装配的各自接口解锁、独立绕飞，再手动或辅助回接。支持切换驾驶、近站碰撞、对接相机、拍照、检查点和独立飞行存档。
+
+Free flight lets you undock Shenzhou and Tianzhou from the current station assembly, pilot either ship while both keep moving, and dock again at their original ports. It includes proximity collisions, docking cameras, photos, checkpoints and separate flight saves.
 
 ## v1.06 — 2026-11-05 · 正式版 / Release
 
@@ -32,67 +76,83 @@ The survey planner now shows Earth from the equator with north up. Drag horizont
 
 ## v1.01 — 2026-11-05 · 正式版 / Release
 
-巡天取景可搜索城市、固定十字线瞄准的天球方向、地面或空间站部件，并绕镜头光轴旋转构图。解除自动跟踪后可随轨道转动，让星野随时间扫过画面。「放大取景」按大窗实际尺寸绘制。外景视锥可单独缩放，默认 1×。装配模型更新至巡天 V28。阳台半球默认朝向天顶。「巡天拍摄计划」默认使用 16K 银河图源，轨道总览新增赤道面视角和升降交点。[使用手册](使用说明.md#主页面的巡天望远镜)
+巡天新增城市搜索、天球／地面／站体瞄准锁定、滚转、随轨道扫视、大取景窗和可调外景视锥，并更新至 V28 模型。取景与照片复用主场景银河图源，改善星点清晰度；首次运行默认精细 8K。阳台半球默认朝向天顶，巡天拍摄计划默认 16K 银河，并新增赤道视角与升降交点。
 
-首次运行默认选择精细 8K 整体画质。取景窗和 PNG 直接采样主场景载入的银河图源，按星点在每个像素内的落点计算亮度，缩小宽视场中亮星的光晕，同时保留小口径、长焦距下的衍射效果。
+**English:** Xuntian gains city search, sky/ground/station pointing locks, roll, orbital scanning, a larger finder and an adjustable exterior field guide, with the V28 model. Finder and photos reuse the main sky imagery with sharper star sampling, and new installations default to detailed 8K. The balcony hemisphere opens at the zenith; the survey planner defaults to the 16K Milky Way and adds an equatorial view and orbit nodes.
 
-The Xuntian finder can track cities, lock the crosshair to the sky, ground or a station surface, and roll the camera. Releasing tracking lets the sky drift through the frame with orbital motion. New installations default to detailed 8K overall quality. Both live view and PNG capture sample the main scene’s sky map and integrate starlight over individual pixels, preserving aperture-dependent diffraction. The enlarged finder renders at its displayed size. The exterior field guide has its own scale, with 1× as the default. The scene now uses Xuntian V28. The balcony hemisphere opens at the zenith. The survey imaging planner opens with the 16K Milky Way layer and offers an equatorial view with ascending and descending nodes.
+[使用手册](使用说明.md#主页面的巡天望远镜)
 
 ## v1.00 — 2026-11-05 · 本机实验版 / Local preview
 
-**中文：** 阳台成为多航天器地面观测器，能独立选择天宫、东方红一号和导入的任务，按各自星历预测，使用同一地点和天际线预演或实时守候。天宫长曝光新增同快门跟踪对照和地面点追拍。巡天排程可把选中的格子交给主场景补拍，查看带遮挡信息的四格成果。新增可按原星历和参数重开的本机观测记录。东方红一号的随包根数更新至 11 月 4 日 20:58 UTC。已验证第三方任务导入、实际守候、成片分割、巡天遮挡及记录重开。[任务实验室指南](docs/v1.00-observing.md)
+阳台观测扩展到天宫、东方红一号和导入任务，按各自星历与同一地点天际线预演或实时守候。长曝光新增跟踪对照和地面追拍，巡天排程可交给主场景补拍并查看带遮挡信息的四格成果。新增可携原星历、时刻和参数重开的本机观测记录，并更新东方红一号随包根数；观测、导入与记录恢复检查通过。
 
-**English:** Balcony observing now selects spacecraft independently and computes each target's passes from its own orbit and the site's skyline. Added live watching, paired long exposures with ground tracking, survey follow-up frames in the main telescope and a local observation log with archived ephemerides. The bundled DFH-1 elements have a November 4 epoch. Checks cover imported targets, live watching, image comparisons, telescope occultations and reopening records.
+**English:** Balcony observing now supports Tiangong, DFH-1 and imported missions using each target’s orbit and the selected site skyline. Added paired and ground-tracking long exposures, survey follow-up in the main telescope and four-frame results with occultation information. Local observation records preserve their ephemerides and settings, bundled DFH-1 elements were refreshed, and observation/import/reopening checks passed.
+
+[任务实验室指南](docs/v1.00-observing.md)
 
 ## v0.99 — 2026-11-05 · 本机实验版 / Local preview
 
-**中文：** 巡天取景跟随实际载入的地表、云与银河设置，修复日面过暗和银河细节丢失，按屏幕实际像素绘制。新增大取景窗、曝光补偿、最高 3840 × 2400 的 PNG、日照地表指向和巡天外景近镜头；短按方向键也可微调。验证覆盖日夜地表、动态云、银河像素、模型光轴与照片尺寸。[取景画质与操作](docs/v0.99-xuntian-image.md)。
+巡天取景跟随主场景地表、云与银河设置，修复日面过暗和银河细节丢失，并按屏幕实际像素绘制。新增大取景窗、曝光补偿、最高 3840 × 2400 PNG、日照地表指向和巡天外景近镜头，短按方向键可微调。验证日夜地表、云、星空、模型光轴与照片尺寸。
 
-**English:** The telescope now uses the active surface imagery, clouds and sky presentation at its physical display resolution. Fixed overly dark daytime terrain and lost Milky Way detail. Added a larger finder, exposure compensation, PNGs up to 3840 × 2400, a shortcut to visible sunlit terrain and a close-up exterior camera. Verified day and night imagery, clouds, sky pixels, model pointing and image dimensions.
+**English:** The finder now reuses the active surface, clouds and sky at display resolution, fixing dark daytime terrain and lost Milky Way detail. Added a larger view, exposure compensation, PNGs up to 3840 × 2400, sunlit-ground pointing, an exterior close-up and short-key fine steering. Checks cover terrain, clouds, sky pixels, model pointing and image dimensions.
+
+[取景画质与操作](docs/v0.99-xuntian-image.md)
 
 ## v0.98 — 2026-11-05
 
-**中文：** 主页面增加实时巡天望远镜。搜索恒星、HIP 编号或星座可让独立巡天转向目标；支持手动取景、等效焦距、有效口径和 PNG。外景可同时看到巡天与空间站，伴飞位置可调整，地球和站体会按各自实际方向遮住星空。已验证自动对准、暗星随口径变化、局部遮挡和 PNG 导出。[操作与数据](docs/v0.98-xuntian.md)。
+主页面新增实时巡天望远镜，可搜索恒星、HIP 编号或星座并自动转向，支持手动取景、焦距、口径和 PNG 拍摄。巡天与空间站同屏伴飞，位置可调，地球和站体按实际方向遮挡星空。验证自动对准、口径响应、局部遮挡与照片导出。
 
-**English:** Added a live Xuntian telescope to the main station scene. Slew to a star, HIP identifier or constellation; steer by hand, change focal length and aperture, or save a PNG. Both craft share an exterior view with adjustable formation and physical Earth and station occultations. Verified pointing, aperture response, partial occultation and PNG capture.
+**English:** Added a live main-view Xuntian telescope with star/HIP/constellation search, automatic pointing, manual steering, focal length, aperture and PNG capture. Both craft share an adjustable formation view with Earth and station occultations. Pointing, aperture response, partial occlusion and photo export were checked.
+
+[操作与数据](docs/v0.98-xuntian.md)
 
 ## v0.97 — 2026-11-05 · 本机实验版 / Local preview
 
-**中文：** 长曝光可打开“自由取景”，点进取景框后用鼠标转向、键盘滚转和移动相机。巡天切换天区时同步四格排程；可切换星点密度、叠加 16K 来源的银河背景，查看和导出本圈已拍的拼图。地球轨道图联动排程，标出可曝光弧段、地球遮挡和太阳避让。阳台半球默认平视西南地平线，全球默认显示地平线下的星空。[操作说明](使用说明.md#长曝光阳台观测与巡天排程) · [巡天数据与几何](docs/v0.97-survey.md)
+长曝光新增自由取景，支持鼠标转向及键盘滚转、移动相机。巡天天区选择同步四格排程，可切换星点与 16K 银河图层、导出本圈拼图，轨道图联动曝光弧段、地球遮挡和太阳避让。阳台半球默认平视西南地平线，全球视图默认显示地平线下星空。
 
-**English:** Long exposures gain an opt-in viewfinder with mouse aiming and keyboard camera movement and roll. Changing survey fields retargets all four exposures. The planner offers a denser star catalogue and a Milky Way layer from a 16K source, with previews and PNG export of completed exposures. Its orbit map links exposure intervals to the telescope’s pointing, Earth occultation and Sun avoidance. The balcony dome opens facing the southwest horizon; the full sphere also shows stars below the horizon by default.
+**English:** Long exposures gain mouse aiming and keyboard camera movement and roll. Survey fields now retarget all four exposures, with selectable star/Milky Way layers, mosaic export and orbit-map visualization of exposure windows, Earth occultation and Sun avoidance. The balcony dome opens at the southwest horizon, while the full sphere shows below-horizon stars by default.
+
+[操作说明](使用说明.md#长曝光阳台观测与巡天排程) · [巡天数据与几何](docs/v0.97-survey.md)
 
 ## v0.96 — 2026-11-05 · 本机实验版 / Local preview
 
-**中文：** 长曝光恢复天宫表面与太阳翼的材质，新增四个机位、位置和角度调节、单帧取景及可选补光。阳台改用共享轨道库，从现在和已选地点计算；可更新轨道、查看覆盖日期、用近期历史数据短期估算或回放真实星历。新增半球和全天球、经纬度和海拔管理、设备跟随与北向校准。随附空间站星历更新至 11 月 4 日发布的数据。[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
+长曝光恢复天宫材质，新增四个机位、位置与角度调节、单帧取景和可选补光。阳台使用共享轨道库，从当前时刻和所选地点计算，区分有效星历、近期历史估算与回放；增加半球／全天球、经纬度与海拔、设备跟随和北向校准。随包空间站星历更新至 11 月 4 日发布的数据。
 
-**English:** Orbital photography gains the station’s surface materials, four camera mounts, adjustable position and lens, an instant viewfinder and optional fill lighting. Balcony observing uses the shared orbit library, starts from the current time and distinguishes ephemeris coverage, short estimates and historical replay. Sites now have editable coordinates and altitude, with hemispherical and full-sphere sky views, optional device tracking and north alignment. The bundled station ephemeris was refreshed to the November 4 issue.
+**English:** Orbital photography restores station materials and adds four camera mounts, position/angle controls, an instant finder and optional fill light. Balcony observing uses the shared orbit library and selected site, distinguishes valid ephemerides from historical estimates/replay, and adds hemisphere/full-sphere views, coordinates, altitude and calibrated device tracking. The bundled station ephemeris was refreshed to the November 4 issue.
+
+[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
 
 ## v0.95 — 2026-11-05 · 本机实验版 / Local preview
 
-**中文：** 任务实验室新增三个与过境预报、交会对接平级的标签。轨道长曝光支持舱体固定与恒星锁定，可导出 1080p PNG。阳台观测可带入选中的过境、绘制地点天际线，并同步回放地面星空与航天器俯视图。巡天观测排程支持拖动曝光、检查遮挡和转向冲突、执行一圈并查看四格覆盖。已验证曝光几何与 PNG 输出、有效星历内的北京过境、巡天曝光约束和切换标签暂停。[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
+任务实验室新增与过境预报、交会对接平级的长曝光、阳台观测和巡天排程。长曝光可舱体固定或恒星锁定并导出 1080p PNG；阳台可回放过境与天际线，巡天可拖动四格曝光并检查遮挡、转向冲突。验证曝光几何、有效星历内的北京过境、排程约束和切页暂停。
 
-**English:** Three peer tabs join pass forecasts and docking in the Mission Lab. Orbital long exposure exports 1080p PNGs in station-fixed and star-tracking modes. Balcony observing replays a selected pass against a saved site skyline with a simultaneous view from orbit. The Xuntian planner checks exposure timing, occultations and slewing, then plays back a four-tile survey. Checks cover camera frames and PNG output, Beijing pass geometry, survey constraints and tab switching.
+**English:** Three peer Mission Lab tabs add orbital long exposures, balcony observing and survey planning. They provide station/star tracking with 1080p PNG export, pass replay against a site skyline, and four-tile exposure scheduling with occultation and slew checks. Validation covers camera geometry, Beijing passes within ephemeris coverage, scheduling constraints and tab-switch pauses.
+
+[操作说明](使用说明.md#长曝光阳台观测与巡天排程)
 
 ## v0.94 — 2026-11-05
 
-**中文：** 修复 WebKit 切换已保存云图时旧图片引用失效的问题；优先读取当前副本，必要时按相同来源、时次和 SHA 从本机图库恢复。新增向日葵-9 亚太十分钟云分类和加拿大 GDPS 全球总云量预报。向日葵的观测范围外及缺测位置留空，GDPS 分别标明起报和有效时刻。[云图库使用说明](使用说明.md#云图与极光)。
+修复 WebKit 切换已保存云图时的失效图片引用，优先读取当前副本并可从本机图库恢复匹配数据。新增向日葵-9 亚太十分钟云分类和加拿大 GDPS 全球云量预报；保留区域图的缺测范围，并区分预报起报与有效时刻。
 
-**English:** Fixed intermittent WebKit errors when switching saved cloud maps. StarOrbit reads the current copy and can recover matching bytes from the local library. Added Himawari-9 regional cloud classifications and Canadian GDPS global cloud forecasts. Unobserved Himawari areas remain empty, and forecasts distinguish model initialization from valid time.
+**English:** Fixed invalid image references when WebKit switches saved cloud maps, with recovery from matching local-library data. Added ten-minute Himawari-9 regional cloud classifications and Canadian GDPS global cloud forecasts, preserving missing coverage and distinguishing forecast initialization from valid time.
+
+[云图库使用说明](使用说明.md#云图与极光)
 
 ## v0.93 — 2026-11-05
 
-**中文：** 云图库恢复可从浏览器直接下载的 Live Cloud Maps 8K 增强图，去除镜像极区；新增 NOAA GMGSI 每小时 4K 长波红外图（桌面本机服务）。NASA 新生成图使用紧凑的灰度与有效性编码。单张生成文件目标 30 MB，上限 50 MB，保留旧图库与快照兼容性。[五种图源及实际大小](docs/v0.93-cloud-sources.md)。
+恢复浏览器可直接下载的 Live Cloud Maps 8K 图源并去除镜像极区，新增通过本机服务下载的 NOAA GMGSI 每小时 4K 红外图。NASA 新图使用紧凑灰度与有效性编码，目标 30 MB、上限 50 MB，并保留旧图库与快照兼容性。
 
-**English:** Download polar-masked Live Cloud Maps in the browser or hourly NOAA GMGSI infrared mosaics through the local service. New NASA images use compact grayscale and validity encoding. Generated textures target 30 MB with a 50 MB ceiling. Existing snapshots remain compatible.
+**English:** Restored direct-browser Live Cloud Maps 8K downloads with mirrored polar areas removed, and added hourly NOAA GMGSI 4K infrared maps through the local service. New NASA maps use compact grayscale/validity encoding, targeting 30 MB with a 50 MB ceiling while retaining old-library compatibility.
+
+[五种图源及实际大小](docs/v0.93-cloud-sources.md)
 
 ## v0.92 — 2026-11-04
 
-**中文：** 修复 Safari 恢复 NASA 有效性云图时长时间停留在启动页的问题。8K 云图由逐行读回改为 64 行条带，读回次数从 4096 降至 64；保留原始数据与有效性通道。启动先恢复模型、轨道和画质，首帧后后台恢复已选云图，避免云图解码阻塞主界面或按未确定画质重复处理。增加真实分阶段启动状态；保留 v0.91 的全部小地图功能与轻量底图。
+修复 Safari 恢复 NASA 云图时长时间停留启动页的问题：8K 读回由逐行改为 64 行条带，保留原始数据及有效性通道。启动先恢复模型、轨道和画质，首帧后再加载已选云图，并显示分阶段状态。保留 v0.91 的小地图功能与轻量底图。
 
-**English:** Fixed prolonged Safari startup while restoring NASA validity-mask clouds. Reading 64-row strips reduces 8K readbacks from 4096 to 64 while preserving source data and validity alpha. Selected weather textures restore after the first scene update instead of blocking startup or decoding twice before quality is known. Added startup stage reporting; all v0.91 minimap features remain intact.
+**English:** Fixed prolonged Safari startup during NASA cloud restoration by reading 64-row strips instead of individual rows, preserving the data and validity channel. Models, orbit and quality restore before the first frame; selected clouds load afterward with clear startup stages. All v0.91 minimap features remain intact.
 
-复现与验证：[Safari 启动修复](docs/v0.92-startup.md)。
+[Safari 启动修复](docs/v0.92-startup.md)
 
 ## v0.91 — 2026-11-04
 
@@ -118,19 +178,19 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.88 — 2026-11-04
 
-**中文：** 云图入口统一为云图库，已保存图一键使用，明确显示当前版本、保存位置、下载进度与错误。新下载独立于当前画面；完成文件持久保存在本机，页面重开可接续运行中的任务。修复来源／快照不同步、旧最新模式遗漏新下载、目录阻塞其他更新及错误说明丢失，保留已有图与旧快照。
+云图入口统一为云图库，可查看版本、保存位置、下载进度和错误，并一键使用已保存图片。下载与当前画面独立，完成文件持久保存，重开可接续任务。修复来源／快照不同步、遗漏新图、目录阻塞和错误说明丢失，保留旧图库。
 
-**English:** Unified cloud selection, preview, downloads and active state in one library. Saved maps apply directly; downloads leave the view unchanged and completed files persist locally. Reopening reconnects to running downloads. Fixed stale selection controls, excluded new frames, catalog-blocked resource updates and lost diagnostics while preserving existing maps and snapshots.
+**English:** Unified cloud selection, previews and downloads in one library with version, location, progress and error feedback. Downloads leave the active view unchanged, completed files persist, and reopened pages reconnect to running tasks. Fixed stale selections, omitted new frames, blocking catalogue requests and lost diagnostics while preserving existing maps.
 
-操作与验证：[云图库](docs/v0.88-cloud-library.md)。
+[云图库](docs/v0.88-cloud-library.md)
 
 ## v0.87 — 2026-10-30
 
-**中文：** 云图统一为版本列表，合并官方已发布时次、浏览器缓存和本机 NASA 旧图；刷新只查目录，移除旧自动逐日回查。下载仅处理选定时次并可取消，接缝/局部缺测改为提示且允许手动加载。NASA 部分覆盖保留有效性通道；撤下有分区缺测且清晰度不足的 VIIRS 试验来源与地球加载入口，原始试验缓存保留。保留收藏、导出、切回内置图和当前版本保护。
+云图统一为官方时次、浏览器缓存和本机 NASA 历史图的版本列表，刷新只查目录，下载精确到所选时次并可取消。接缝和局部缺测改为提示，NASA 保留有效性通道与明确静态回退；撤下覆盖和清晰度不足的 VIIRS 试验入口。保留收藏、导出、当前版本保护及原始试验缓存。
 
-**English:** Unified published cloud versions and browser/server archives in one list. Refresh reads catalogs only; downloads are explicit, exact-time and cancellable. Visual artifacts and partial coverage are warnings for manual loading. NASA validity masks retain an explicit static fallback. Removed the incomplete, low-resolution VIIRS experiment from normal cloud selection and Earth loading, preserving its archived data.
+**English:** Unified published cloud times, browser caches and local NASA history into one version list, with catalogue-only refresh and cancellable downloads for a selected time. Seams and partial coverage become warnings; NASA retains validity data and an explicit static fallback, while the incomplete VIIRS experiment is removed from normal selection. Favorites, export, active-version protection and archived experiment data remain available.
 
-说明与验证：[统一云图版本](docs/v0.87-cloud-versions.md)。
+[统一云图版本](docs/v0.87-cloud-versions.md)
 
 ## v0.86 — 2026-10-30
 
@@ -150,19 +210,19 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.84 — 2026-10-30
 
-**中文：** NASA 云图增加异常亮度平台、日期线及内部长直线接缝检查；不合格候选不覆盖已通过检查的版本，旧缓存和导入文件也需核验。自动清理保护两代合格云图。暂停无法可靠还原云层的 GitHub 增强图源，保留历史预览和导出；无合格下载时明确回退内置静态云图。
+NASA 云图增加异常亮度平台、日期线及长直线接缝检查，不合格下载、旧缓存或导入文件不能覆盖合格版本，自动清理保护两代合格图。暂停无法可靠还原云层的 GitHub 增强图源，保留历史预览与导出，无合格下载时明确回退内置云图。
 
-**English:** Added NASA cloud artifact checks for broad quantized bright plateaus and long dateline/internal seams. Rejected candidates cannot replace accepted data; legacy caches and imports are screened too. Automatic cleanup protects two accepted generations. Paused the irreversibly enhanced GitHub source while retaining history preview/export and clearly labeling the static fallback.
+**English:** NASA maps now screen broad brightness plateaus and long seams; rejected downloads, caches and imports cannot replace accepted maps, and cleanup protects two accepted generations. Paused the unrecoverable enhanced GitHub source while retaining historical previews/exports and clearly labeling the bundled fallback.
 
-依据、限制与验证：[云图质量与回退](docs/v0.84-cloud-quality.md)。
+[云图质量与回退](docs/v0.84-cloud-quality.md)
 
 ## v0.83 — 2026-10-30
 
-**中文：** 2026 Q2 地表改用质量筛选的 NASA MODIS NBAR 季度合成，减少源观测条带；修正反射率与 sRGB 转换，统一地表/大气光照标度。修复细节块、日期变更线与部分加载交点的硬边，保留 2004 地表和已有夜景选项。缺测及低一级质量后备明确记录，未通过局部调色抹除差异。
+2026 Q2 地表改用质量筛选的 NASA MODIS NBAR 季度合成，减少源观测条带，并校正反射率、sRGB 与大气光照标度。改善细节块、日期线和部分加载交点的硬边，保留 2004 地表与夜景选项，明确缺测及质量后备。
 
-**English:** Replaced the 2026 Q2 surface with a QA-filtered NASA MODIS NBAR composite to reduce observation-strip artifacts. Corrected reflectance/sRGB encoding and normalized ground/atmospheric illumination. Smoothed exposed detail edges, partial-load junctions and the date line while retaining the 2004 surface and existing night maps. Missing data and lower-quality fallback remain documented; no regional recoloring is applied.
+**English:** Replaced the 2026 Q2 surface with a quality-screened NASA MODIS NBAR composite and corrected reflectance, sRGB and atmospheric-lighting scales. Smoothed tile edges, the date line and partial-load junctions while preserving the 2004 surface, night maps and explicit missing-data/quality fallback.
 
-依据与验证：[地表反射率与大气](docs/v0.83-surface-radiometry.md)。
+[地表反射率与大气](docs/v0.83-surface-radiometry.md)
 
 ## v0.82 — 2026-10-29
 
@@ -174,21 +234,17 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.81 — 2026-10-29
 
-**中文：** 新增 2024 年 NASA Black Marble 1 公里夜景，与 2016 原版一键切换并记住选择。新增资源约 40.4 MB，不打包 500 米版；近看时按视野载入最多四块夜景细节，切换年份只替换夜景。标明 2024 覆盖范围及极区的 2016 底图补充。
+新增 2024 年 NASA Black Marble 1 公里夜景，与 2016 原版一键切换并记住选择。新增资源约 40.4 MB，近看时最多载入四块夜景细节，不打包 500 米版；注明 2024 覆盖范围及极区旧图补充。
 
-**English:** Added a 2024 NASA Black Marble 1 km night map alongside the preserved 2016 option, with persistent selection. Adds about 40.4 MB of display assets and no 500 m atlas. Up to four view-dependent night tiles are resident; changing year replaces only night textures. The 2024 coverage and 2016 polar fallback are disclosed.
+**English:** Added a remembered choice between 2024 NASA Black Marble 1 km night imagery and the original 2016 map. About 40.4 MB of new assets use up to four view-dependent detail tiles without a 500 m atlas, with coverage and polar fallback documented.
 
-来源、处理方法及验证：[2024 夜景说明](docs/v0.81-night-lights.md)。
+[2024 夜景说明](docs/v0.81-night-lights.md)
 
 ## v0.80 — 2026-10-29
 
-**中文：** 顶栏新增 GitHub / Star 仓库入口，新标签页打开；手机端使用紧凑布局，支持键盘焦点和多语言说明，不新增网络请求或 Star 数量轮询。
+顶栏新增 GitHub / Star 仓库入口，支持窄屏、键盘与多语言。按功能整理中英文项目介绍、使用手册及技术索引，便携包附带文档与插图。
 
-**English:** Added a GitHub / Star link to the header, opening the repository in a new tab. Includes a compact mobile layout, keyboard focus styling and localized descriptions, without additional requests or star-count polling.
-
-**文档与发布：** 按功能重写中文项目介绍，提供独立英文介绍、完整使用手册和技术资料索引；便携包附带文档与插图，统一说明运行方式和数据模型。
-
-**Documentation and distribution:** Reorganized the project overview by feature, with a separate English overview, a complete Chinese user manual and a technical reference index. Portable packages include documentation and illustrations, with consistent runtime and model guidance.
+**English:** Added a header GitHub / Star link with mobile, keyboard and language support. Reorganized Chinese/English overviews, the user manual and technical index, and included documentation and illustrations in portable packages.
 
 ## v0.79 — 2026-10-29
 
@@ -198,15 +254,17 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.78 — 2026-10-29
 
-**中文：** 修正东方红一号历史轨道的朝向与相位，以报载参数、酒泉发射面近似约束及多日过境时间重建，恢复上午北行、晚间向东南飞行。加入轨道面与近地点的缓慢漂移，轨道线、位置和速度保持一致。保留 2000 年切换规则，明确历史重建的精度边界；新增 47 条报载时间、方向和现代轨道不变性检查。[资料与验证](docs/v0.78-details.md)
+修正东方红一号历史轨道的朝向与相位，以公开参数、酒泉发射面近似及多日过境时间重建，恢复上午北行、晚间东南向飞行。加入轨道面与近地点漂移，保留 2000 年切换规则并明确重建精度；新增 47 条报载时刻、方向和现代轨道不变性检查。
 
-**English:** Corrected DFH-1's historical plane and phase using reported geometry, an approximate Jiuquan launch-plane prior and multi-day pass times. Morning passes ascend northward and evening passes travel southeast. Secular plane/perigee drift keeps the orbit outline, position and velocity consistent. Retained the year-2000 switch and labeled reconstruction limits; added 47 newspaper timing/direction checks and modern-orbit invariance checks. [Sources and validation](docs/v0.78-details.md)
+**English:** Corrected DFH-1’s historical plane and phase using reported geometry, a Jiuquan launch-plane approximation and multi-day pass times, restoring northbound mornings and southeastbound evenings. Added secular drift, retained the year-2000 switch and documented reconstruction limits, with 47 newspaper timing/direction and modern-orbit invariance checks.
+
+[资料与验证](docs/v0.78-details.md) · [Sources and validation](docs/v0.78-details.md)
 
 ## v0.77 — 2026-10-29
 
-**中文：** 新增默认开启的新手辅助开关与可调对接限速。关闭辅助后进入纯手动推力/转动，取消自动控制、阻尼、教学走廊和距离边界；使用有限接口接触区，按总相对撞击速度判定失败。记录保留开关及阈值变化，回放和报告使用接触时的设置。验证切换连续性、自由飞行、高速穿越接触与低速辅助捕获。
+新增默认开启的新手辅助和可调对接限速，关闭辅助即可纯手动推力／转动，不再自动阻尼或限制训练走廊与范围。有限接口体积按总相对撞击速度判定接触，记录和回放保留当时设置；验证切换、自由飞行、高速穿越与低速辅助捕获。
 
-**English:** Added default-on beginner assistance and an adjustable contact-speed threshold. Disabling assistance enables manual thrust/torque without automatic control, damping, teaching corridors or range boundaries. A finite port volume detects contact and rejects excessive total impact speed. Records retain setting changes for replay and contact reports; tested mode transitions, free flight, fast swept contact and assisted capture at a reduced threshold.
+**English:** Added default-on beginner assistance and adjustable docking contact speed; disabling assistance removes automatic control, damping and training boundaries. Finite port volumes check total impact speed, replay retains contact-time settings, and tests cover mode changes, free flight, swept high-speed contact and assisted capture.
 
 ## v0.76 — 2026-10-29
 
@@ -234,9 +292,11 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.72 — 2026-10-29
 
-**中文：** 修复 NASA 云图与轨道下载的连接重试、超时衔接和错误信息丢失；区分未发布、覆盖不足与网络失败。新增有限次数的自动恢复、断网后接续及重试时间提示，保留已有数据与显示选择。新增约 126 KB 的本机轻量入口，修正 Safari 自动重试兼容性。[原因、恢复规则与验证](docs/v0.72-details.md)。
+修复 NASA 云图与轨道更新的连接重试、超时衔接及错误信息，区分未发布、覆盖不足和网络失败。增加有限自动恢复、断网接续与重试时间提示，并提供约 126 KB 的本机轻量入口及 Safari 兼容修复。
 
-**English:** Fixed connection retries, timeout coordination and lost diagnostics in NASA cloud and orbit updates. Unpublished files, insufficient coverage and network failures are distinguished. Added bounded automatic recovery, reconnection handling and retry-time feedback while preserving existing data and display choices. Added a roughly 126 KB local entry page and fixed Safari timer compatibility. [Causes, recovery rules and validation](docs/v0.72-details.md).
+**English:** Fixed cloud/orbit connection retries, timeout coordination and diagnostics, distinguishing unpublished data, insufficient coverage and network failures. Added bounded recovery, reconnection and retry feedback, a roughly 126 KB local entry page and Safari timer compatibility.
+
+[原因、恢复规则与验证](docs/v0.72-details.md) · [Causes, recovery rules and validation](docs/v0.72-details.md)
 
 ## v0.71 — 2026-10-29
 
@@ -270,13 +330,11 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.66 — 2026-10-28
 
-**中文：** 新增“任务实验室”：按地点预报过境、绘制天空轨迹与导出日历；独立交会对接训练包含相对运动、推力与姿态控制、固定舰载相机和捕获判定。加入轨道时效限制、暂停隔离与四语界面，通过独立轨道对照、模型几何及浏览器流程检查。[使用与验证](docs/v0.66-flight-lab.md)。
+新增任务实验室：按地点预报过境、绘制天空轨迹与导出日历，并提供独立交会对接训练、舰载相机和捕获判定。轨道时效、暂停隔离、四语界面及轨道／几何／浏览器检查一并完善。东方红一号铭牌分离红底材质和浮雕，修复反光色斑、重复金边，并连接阶梯外框。
 
-**English:** Added the Mission Lab with site-based pass forecasts, sky tracks and calendar export, plus independent docking training with relative motion, thrust/attitude controls, a body-fixed camera and capture checks. Includes orbit-age limits, pause isolation and four languages, validated against an independent orbit implementation, model geometry and browser workflows. [Usage and validation](docs/v0.66-flight-lab.md).
+**English:** Added the Mission Lab with site-based pass forecasts, sky tracks, calendar export and independent docking training with a body-fixed camera and capture checks. Orbit-age limits, pause isolation and four-language workflows were checked against orbital, geometry and browser references. The DFH-1 plaque separates enamel from relief, removing painted highlights and duplicated gold borders and joining its stepped frame.
 
-**中文：** 修复东方红一号铭牌整圈红底的反光色斑与贴图金边残留，将底板材质和浮雕图案分开；金边连为外低内高的阶梯框，保留字形和面数。[说明与验证](docs/v0.66-details.md)。
-
-**English:** Removed painted highlights and redundant border colour around the DFH-1 plaque by separating its enamel base from the relief artwork. Joined the gold rings into one continuous frame rising toward the inside; retained lettering and triangle counts. [Details and validation](docs/v0.66-details.md).
+[使用与验证](docs/v0.66-flight-lab.md) · [Usage and validation](docs/v0.66-flight-lab.md) · [说明与验证](docs/v0.66-details.md) · [Details and validation](docs/v0.66-details.md)
 
 ## v0.65 — 2026-10-28
 
@@ -340,9 +398,11 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.55 — 2026-10-27
 
-**中文：** 新增东方红一号实时遥测：太阳与红外参考探头生成连续调频声音，支持单路收听、10 秒实验路序和电压波形；跟随模拟轨道、姿态与自旋，暂停、跳时和倍速变化同步处理。保留历史录音与四语界面。通过探头几何、PCM 鉴频、音频状态及回归检查。[说明](docs/v0.55-details.md)。
+新增东方红一号实时遥测：太阳与红外参考探头产生连续调频声音，支持单路、10 秒实验路序和电压波形。音频跟随轨道、姿态、自旋及时间操作，保留历史录音与四语界面；探头几何、PCM 鉴频和音频状态检查通过。
 
-**English:** Added live DFH-1 telemetry from reference Sun and infrared horizon probes, with continuous FM audio, individual channels, a 10-second experimental sequence and voltage traces. Playback follows simulation orbit, attitude and spin, handling pauses, seeks and speed changes. Historical audio and four-language UI remain available. Validated geometry, PCM demodulation, audio lifecycle and regressions. [Details](docs/v0.55-details.md).
+**English:** Added live DFH-1 telemetry with continuous FM audio from reference Sun/IR probes, individual channels, a ten-second experimental sequence and voltage traces. Audio follows orbit, attitude, spin and time controls while retaining historical recordings and four languages; geometry, PCM demodulation and lifecycle checks passed.
+
+[说明](docs/v0.55-details.md) · [Details](docs/v0.55-details.md)
 
 ## v0.54 — 2026-10-27
 
@@ -436,249 +496,275 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 
 ## v0.39 — 2026-10-26
 
-**中文：** 新增俄语和法语界面，语言选择自动保存。时间步进可连续跨天、跨年，轨迹、小地图和事件时间轴同步延续；跳转保留播放状态。轨道区间外复用缓存的开普勒椭圆参数，计算和缓存大小不随时间跨度增长。全套自动测试、27 项浏览器检查及 subagent 审查通过。详见[更新说明](docs/v0.39-details.md)。
+新增俄语和法语并记住语言选择；时间步进可跨天、跨年，轨迹、小地图和事件同步延续且保留播放状态。星历区间外复用开普勒轨道估算，计算与缓存不随跨度增长；全套测试和 27 项浏览器检查通过。
 
-**English:** Added Russian and French with a persistent language selector. Time steps continue across days and years, with synchronized tracks, minimap and event timeline while preserving playback state. Outside sampled ephemerides, cached Kepler ellipses provide constant-cost propagation without growing stored history. See [details](docs/v0.39-details.md).
+**English:** Added persistent Russian and French interfaces and continuous time stepping across days and years, keeping tracks, minimap and events synchronized with playback. Cached Kepler approximations support times outside ephemeris coverage at bounded cost; the full test suite and 27 browser checks passed.
+
+[更新说明](docs/v0.39-details.md) · [details](docs/v0.39-details.md)
 
 ## v0.38 — 2026-10-26
 
-- 时间步进新增 1s／1m／10m／1h 四档，默认 1m；采用两行紧凑布局，选中时长以青色突出，前后按钮同步显示 ± 时长，中间暂停／继续保持单行。
-- 步进保留播放状态与倍速，实时模式转为 1× 自定义播放；到达轨道起点或终点时暂停。时长选择跨任务、跨重启保存，支持完整中英文悬停提示和键盘选择。
-- 复用已有时间定位和会话记忆；运行 HTML 增加约 3.3 KB。全套测试及 32 项浏览器检查通过，桌面运行版与启动器同步至 v0.38。详见 [时间步进说明](docs/v0.38-details.md)及[验证记录](docs/v0.38-validation.json)。
+新增 1 秒／1 分／10 分／1 小时时间步进，默认 1 分，时长选择跨任务和重启保存。步进保留播放与倍速，现实时间转为 1× 自定义播放，到轨道边界暂停；支持中英文提示与键盘操作。全套测试、32 项浏览器检查及本机启动器核验通过。
 
-**English:** Added a compact two-row 1s/1m/10m/1h selector, defaulting to 1m, with a highlighted selection, matching backward/forward labels and a single-line pause control. Steps preserve playback and speed, convert real-time playback to custom 1×, and pause at either ephemeris boundary. Preferences persist across missions and restarts; tooltips and keyboard controls support both languages. Reused existing navigation and session storage, adding about 3.3 KB to the runtime HTML. The full test suite, 32 browser checks and installed-app verification passed.
+**English:** Added persistent 1-second, 1-minute, 10-minute and 1-hour time steps, defaulting to 1 minute. Steps preserve playback/speed, transition real time to custom 1× and pause at ephemeris boundaries, with bilingual keyboard-accessible controls. The full test suite, 32 browser checks and launcher verification passed.
+
+[时间步进说明](docs/v0.38-details.md) · [验证记录](docs/v0.38-validation.json)
 
 ## v0.37 — 2026-10-26
 
-- 新增公共轨道事件时间轴，显示日照／半影／全影色带、近远地点及高度、赤道升降交点；提供 3／12／24 小时范围、类别筛选、前后事件导航与紧凑折叠，收起后保留下一事件倒计时。
-- 地影事件区分开始进入地影、进入全影、开始离开全影、恢复完全日照四个时刻；邻近标记合并显示，可在详情中选择。拖动与事件定位保留播放状态，支持提前 30 秒以 1× 观看；到事件暂停默认关闭，开启后在首个跨越的已选类别事件停时。
-- 复用轨道和天体计算，按需分批扫描、局部细化并复用单个内存缓存；处理短暂掠影、窗口边缘、近圆轨道与任务切换取消。24 小时时段实测约 125 个事件、结果约 7 KB，运行 HTML 增加约 19 KB。
-- 全套测试、74 项浏览器检查及独立 subagent 审查完成，覆盖播放状态、自动暂停、小地图回归、持久化和界面避让。见 [时间轴说明](docs/v0.37-details.md)及[验证记录](docs/v0.37-validation.json)。
+新增公共轨道事件时间轴，显示日照／半影／全影、近远地点与赤道交点，支持时间范围、类别筛选、定位和折叠。拖动保留播放，可提前 30 秒观看或到事件自动暂停；复用分批计算和缓存，处理掠影与任务切换。全套测试和 74 项浏览器检查通过。
 
-**English:** Added a shared, collapsible timeline with sunlight/penumbra/umbra bands, four eclipse contacts, apsis altitudes, equator crossings, 3/12/24-hour windows, filters and event navigation. Collapsing retains the next-event countdown. Scrubbing preserves playback; watch mode starts 30 seconds earlier at 1×, and optional automatic pause stops at the first selected event crossed. Batched calculations and one transient cache handle grazing events, window edges, near-circular orbits and cancellation on mission changes. A measured 24-hour result contained about 125 events and 7 KB; runtime HTML grew by about 19 KB. The full test suite, 74 browser checks and independent subagent review passed.
+**English:** Added a shared orbit-event timeline for sunlight/eclipses, apsides and equator crossings, with range/category filters, seeking and collapse. Scrubbing preserves playback, with a thirty-second lead-in and optional event pause; batched cached calculations handle grazing events and mission changes. The full test suite and 74 browser checks passed.
+
+[时间轴说明](docs/v0.37-details.md) · [验证记录](docs/v0.37-validation.json)
 
 ## v0.36 — 2026-10-26
 
-- 新增“地理与星图”一级组，地球地点标识与原有星图标注并列为二级菜单。
-- 新增国家、首都、国境线、海域、山脉地貌、河流和湖泊标注；北京使用红色五角星，中国轮廓与海上线段采用天地图官方矢量数据。
-- 小地图显示航天器当前上空的国家／地貌／海域；地理设置随任务共用，并支持本地记忆、环境收藏与场景分享。
-- 通过字图缓存、批量绘制、两档线数据、空间索引及低频排版控制计算量，避让名称和信息面板。完成数据、浏览器与原有星图／小地图回归验证，见 [地理与星图](docs/v0.36-details.md)。
+新增“地理与星图”分组和国家、首都、边界、海域、地貌、河湖标注；北京使用红星，中国轮廓采用天地图官方数据。小地图可识别航天器下方区域，地理设置跨任务共用并支持记忆、预设和场景分享。批量绘制与缓存控制开销，数据和浏览器回归检查通过。
 
-**English:** Added a Geography & star chart group with two second-level panels. Earth labels cover countries, capitals, boundaries, seas, landforms, rivers and lakes. Beijing uses a red five-pointed star, and China’s geometry comes directly from official Tianditu vectors. The minimap identifies the region below the spacecraft. Shared settings support persistence, presets and scenes; cached glyphs, batched lines, two geometry levels and indexed/throttled updates bound the work. Validated data, browser flows, existing star charts and minimap dragging.
+**English:** Added a Geography & star chart group with country, capital, boundary, sea, landform, river and lake labels, including a Beijing star and official Tianditu China geometry. The minimap identifies the region beneath the craft, and shared settings support persistence, presets and scenes. Batched cached drawing bounds resource use; data and browser regressions passed.
+
+[地理与星图](docs/v0.36-details.md)
 
 ## v0.35 — 2026-10-26
 
-- 新增公共星图标注三级菜单：361 颗主要恒星、965 条已收录星名，以及仅显示牛郎星／织女星／北极星的精选三项预设；支持 88 星座名称、连线和边界分别开关。
-- 标注自动避让、亮星优先，提供密度控制与中英文名称；地球、月球和航天器遮挡标注，切换任务共用资源和偏好。
-- 单张字图缓存、批量绘制、静止排版复用和低频可见性更新；兼容旧开关、环境收藏和场景文件，修正三级菜单插入后的折叠状态记忆。
-- 完成数据、浏览器与独立 subagent 审查，说明及验证见 [星图标注](docs/v0.35-details.md)。
+新增分层星图标注：361 颗主要恒星、965 条已收录星名、牛郎／织女／北极星精选，以及可独立开关的 88 星座名称、连线和边界。提供中英文、密度调节、遮挡和避让，跨任务共享资源与偏好。复用字图与排版缓存，兼容旧设置、收藏及场景，数据与浏览器检查通过。
 
-**English:** Added shared sky annotations with 361 major stars, 965 catalogued names, a preset containing only Altair/Vega/Polaris, and independently controlled names, lines and boundaries for 88 constellations. Labels avoid overlap, prioritize bright stars, support Chinese/English and respect celestial-body and spacecraft occlusion. A shared glyph atlas, batched drawing and cached/throttled layout keep resource use bounded. Preserved legacy preference migration, scene/preset round trips and stable sidebar expansion. Validated data and browser behavior with independent subagent review.
+**English:** Added layered sky labels for 361 major stars, 965 catalogue names, an Altair/Vega/Polaris preset and independent names, lines and boundaries for 88 constellations. Chinese/English labels support density, occlusion and spacing, sharing resources and preferences across missions. Cached glyph/layout work preserves old settings, presets and scenes; data and browser checks passed.
+
+[星图标注](docs/v0.35-details.md)
 
 ## v0.34 — 2026-10-26
 
-- 修复中国空间站舱体、端面和箱体上的条纹状自阴影；阴影偏移与覆盖范围按可见模型尺寸适配，所有航天器共用。
-- 统一使用优化阴影：静止与仅移动镜头时复用阴影图，太阳方向、太阳翼和自旋变化时刷新，全影时跳过；暂停期间复用太阳翼遮挡计算，手动调整后更新读数。
-- 在最高画质、阳光区、辅助照明关闭的条件下检查空间站与东方红一号；完成 GPU 条纹回归、阴影刷新与既有光照／清晰度验证。详见 [修复与验证](docs/v0.34-details.md)。
+修复航天器表面的条纹状自阴影，阴影偏移与范围按模型尺寸适配。静止或仅移动镜头时复用阴影与遮挡计算，太阳、自旋和太阳翼变化时更新，全影时跳过无效绘制。完成最高画质下空间站与东方红一号的 GPU 阴影、光照和清晰度回归。
 
-**English:** Fixed striped self-shadow artifacts on spacecraft surfaces with scale-aware shadow bias and coverage. One shared optimized implementation reuses shadow maps for static scenes and camera-only movement, refreshes for solar direction, array motion and spin, and skips unlit maps during eclipse. Paused solar-array occlusion results are reused and manual changes refresh readings. Verified at the highest quality in direct sunlight with auxiliary lighting off, plus GPU artifact, cache and existing rendering regressions.
+**English:** Fixed striped spacecraft self-shadows with model-scale-aware bias and coverage. Cached shadows and occlusion refresh for Sun, spin and array changes instead of camera-only movement, skipping unlit work in eclipse. Highest-quality station/DFH-1 GPU shadow, lighting and clarity regressions passed.
+
+[修复与验证](docs/v0.34-details.md)
 
 ## v0.33 — 2026-10-26
 
-- 小地图拖动／点击定位保留播放状态：运行时松手按原倍速继续，暂停时保持暂停；现实时间拖动后从所选时刻以 1 倍速运行。
-- 拖动期间由鼠标控制时刻，松手后从选中位置继续计时；指针取消或失去捕获时也正常结束拖动。
-- 验证东方红一号、中国空间站的运行／暂停、倍速、实时模式和状态保存。验证记录：[小地图播放状态](docs/v0.33-validation.json)。
+小地图点击或拖动定位保留运行／暂停状态和原倍速，现实时间拖动后从选中时刻以 1× 继续。修复指针取消与失去捕获后的拖动结束，验证天宫、东方红一号和设置恢复。
 
-**English:** Minimap scrubbing and track clicks now preserve playback state and speed. Running simulations continue after release; paused simulations remain paused. Scrubbing from real time continues at 1× from the selected time. Pointer cancellation and capture loss also finish scrubbing cleanly. Verified both spacecraft, playback speeds, real-time transition and saved state.
+**English:** Minimap seeking now preserves playback/pause and speed, with real-time scrubbing continuing at 1× from the selected time. Pointer cancellation and lost capture finish cleanly; both missions and saved-state recovery were checked.
+
+[小地图播放状态](docs/v0.33-validation.json)
 
 ## v0.32 — 2026-10-26
 
-- 修复东方红一号在全影中仍被固定室内反射照亮的问题；移除模型私有展示环境，所有航天器共用辅助照明开关，关闭时同时关闭补光和展示反射。
-- 精细档 HDR 合成启用最高 4× MSAA，按浮点颜色与深度格式共同支持的采样数分配；保持完整画布分辨率，并在浏览器缩放、窗口跨屏及模型查看时同步设备像素比。
-- 验证四档地影表面、辅助照明、空间站切换、纯模型预览、像素比变化、GPU 边缘抗锯齿及原有大气效果。详见 [光照与清晰度修复](docs/v0.32-details.md)。
+修复东方红一号全影中的固定展示反光，所有航天器统一使用辅助照明开关。精细档 HDR 增加最高 4× MSAA，并随浏览器缩放、跨屏和模型预览更新像素比。验证四档地影、补光、任务切换与 GPU 抗锯齿。
 
-**English:** Fixed persistent studio reflections on Dongfanghong-1 during eclipse. All spacecraft now share one auxiliary-light switch that controls both ambient fill and display reflections. Enabled up to 4× MSAA for full-resolution HDR compositing using compatible color/depth sample counts, and refresh pixel density after display or browser-zoom changes, including model-only previews. Verified eclipse lighting across all four quality tiers, auxiliary lighting, mission switches, preview transitions, pixel-density changes, GPU edge coverage and atmospheric rendering.
+**English:** Fixed DFH-1’s persistent studio reflections in eclipse and unified spacecraft auxiliary lighting. Detailed HDR gains up to 4× MSAA and refreshed pixel density after browser zoom, display changes and model previews. Checks cover eclipse lighting, fill light, mission switching and GPU antialiasing.
+
+[光照与清晰度修复](docs/v0.32-details.md)
 
 ## v0.31 — 2026-10-26
 
-- 增加软件通用音乐系统，内置用户选定的六首 AAC 曲目，启动随机首曲、按列表顺序循环；切换模型、恢复场景与调整模拟时间时连续播放。
-- 左下角默认圆形音符，播放时旋转、暂停时静止；悬停展开，移出整个操作范围后延迟收起，支持键盘与触屏。
-- 支持批量导入、去重、移除、恢复内置曲目、拖动及按钮排序、音量、静音与进度控制；音乐库和偏好独立保存。
-- 校验真实音频播放、离线使用、列表恢复、删除续播、失败回滚、多个标签页及收起交互。详见 [全局音乐与验证](docs/v0.31-details.md)。
+新增全局音乐播放器，内置六首 AAC，随机首曲并按列表循环，切任务或调时间不打断播放。支持导入去重、移除恢复、排序、音量与进度，圆形音符可展开操作，曲库和偏好独立保存。真实播放、离线、恢复、失败回滚和多标签页检查通过。
 
-**English:** Added shared background music with six bundled AAC tracks, a random opening track and an ordered playlist loop. Playback remains independent of spacecraft, scenes and simulation time. A rotating circular note expands on hover and collapses after leaving the complete control area, with keyboard and touch support. Added batch imports, content deduplication, removal, built-in restoration, drag/button ordering, volume, mute and seeking, with an independent persistent library. Validated actual playback, offline use, reloads, deletion handoff, failure rollback, multiple tabs and dock interactions.
+**English:** Added global music with six AAC tracks, a random first track and playlist looping independent of mission/time changes. The expandable note control supports deduplicated imports, removal/restoration, ordering, volume and seeking, with separate library/settings storage. Playback, offline use, recovery, rollback and multi-tab checks passed.
+
+[全局音乐与验证](docs/v0.31-details.md)
 
 ## v0.30 — 2026-10-26
 
-- 修复 NASA 云图在软件重启后未恢复的问题；公共资源持久保存，更新或失败期间继续提供上次完整云图，网页可接续后台更新。
-- 新增界面导入航天器：配置 JSON、GLB 模型与轨道文件组合接入，保存后重开自动恢复；名称、比例、轴向、自旋和轨道更新源均由配置提供。
-- 分离公共环境资源与任务轨道管理，在线 GP 更新按配置读取 NORAD 编号；内置任务转为数据清单。
-- 相机适配模型大小，导入与场景恢复统一协调；验证模型朝向、导入回滚、刷新、场景往返及跨任务 NASA 纹理复用，并完成两位 subagent 审查。
-- 使用方法与验证：[模块化任务与公共资源](docs/v0.30-details.md)。
+修复 NASA 云图重启恢复，更新期间继续使用上次完整图片。新增配置 JSON、GLB 与轨道文件的航天器导入和持久化，模型比例、轴向、自旋与更新源可配置，公共环境和任务轨道分开管理。验证导入回滚、模型方向、刷新、场景往返及跨任务资源复用。
 
-**English:** Fixed NASA cloud restoration after restart with a persistent shared library and continued access to the last complete image during updates. Added UI import of spacecraft configuration, self-contained GLB and orbit files, with persistent missions, configurable scale/axes/spin and catalog-driven GP updates. Separated mission orbit selections from shared environmental resources. Adapted camera controls to model size and coordinated package import with scene restoration. Verified recovery, import rollback, axis mappings, reloads, scene round-trips and shared NASA textures, with two independent subagent reviews.
+**English:** Fixed NASA cloud restoration and retained the last complete image during updates. Added persistent spacecraft import from configuration, GLB and orbit files, with configurable scale/axes/spin/update sources and separate shared-environment/mission-orbit storage. Import rollback, axis mappings, reloads, scene round-trips and resource reuse were checked.
+
+[模块化任务与公共资源](docs/v0.30-details.md)
 
 ## v0.29 — 2026-10-26
 
-- 任务命名统一为“星球：类别：名称”，东方红一号归类为卫星。
-- 建立航天器与任务注册表，支持独立模型、轨道、姿态策略、功能开关及镜头记忆；加入东方红一号米制 GLB。
-- 接入东方红一号 CelesTrak GP / SGP4 轨道，保留来源、历元与展示窗口；支持在线更新及 GP JSON 导入，缺失或越界时只显示模型。
-- 校正模型 Y-up → Z-up、真实比例和姿态旋转顺序；东方红一号默认顶部天线朝轨道前进方向，可切换惯性定轴；按历史资料加入可开关的 120 转/分自旋。天宫保留地面轨迹定向与追日。
-- 场景格式升级并兼容旧文件；任务轨道缓存隔离，修复切换／收藏恢复竞态和刷新时手动翼角被覆盖的问题。
-- 姿态参考与控制移至下方通用模块，轴向、转速和来源由配置提供；统一相机控制修复变更参考轴后左键拖动异常。
-- 全量测试、浏览器切换／刷新／文件往返、独立 Skyfield 对照与 subagent 审查完成。详见 [任务框架与验证](docs/v0.29-details.md)。
+新增通用航天器／任务框架和东方红一号，独立管理模型、轨道、姿态、功能及镜头记忆。东方红一号使用 CelesTrak GP／SGP4，支持在线更新、轨道导入、惯性定轴和可关闭的 120 转／分历史自旋，并校正模型比例与轴向。升级场景兼容与缓存隔离，修复恢复竞态、手动翼角记忆和鼠标旋转；自动、浏览器及独立 Skyfield 对照检查通过。
 
-**English:** Added a spacecraft/mission registry with separate models, orbits, attitude policies, capabilities, and camera memory, plus Dong Fang Hong 1. Its CelesTrak GP elements are propagated using SGP4 with explicit epoch and display-window metadata. Corrected asset axes, real scale, and rotation order; default prograde pointing, an inertial-axis illustration, and toggleable historical 120 rpm spin remain separate from Tiangong ground-track alignment. Moved attitude controls into a shared lower-sidebar module and fixed mouse rotation after camera-up changes. Upgraded scene files with legacy compatibility and isolated orbit caches; fixed restoration races and manual-array reload persistence. Validated with the full test suite, browser switching/reloads/file round-trips, independent Skyfield references, and subagent review.
+**English:** Added a shared spacecraft/mission framework and DFH-1 with independent models, orbits, attitudes, capabilities and camera memory. DFH-1 uses CelesTrak GP/SGP4 with updates/imports, inertial pointing, optional historical 120 rpm spin and corrected scale/axes. Scene compatibility and isolated caches fix restoration races, array-angle persistence and mouse rotation; automated, browser and independent Skyfield checks passed.
+
+[任务框架与验证](docs/v0.29-details.md)
 
 ## v0.28 — 2026-10-25
 
-- 新增“天气与奇观”：云内闪电、红色精灵与蓝色喷流、夜侧气辉开关、流星；支持自然和观赏增强模式。
-- 云内闪电受实际显示云层约束，支持普通云与体积云；高空闪光与雷暴关联，流星和闪光遵循地球遮挡与大气透射。
-- 限制事件数量、倍速播放节奏和资源用量；支持暂停、时间跳转、设置记忆、环境预设、场景分享与恢复默认。
-- 说明与参考资料：[天气与奇观](docs/weather-phenomena.md)。事件为程序模拟，不代表实时雷电或流星观测。
+新增天气与奇观：云内闪电、红色精灵、蓝色喷流、夜侧气辉和流星，可选自然或增强模式。效果遵循云层、地球遮挡与大气透射，限制事件与资源开销，支持时间控制、记忆、预设和分享。现象为程序模拟，不代表实时观测。
 
-**English:** Added in-cloud lightning, sprites and blue jets, a night-airglow toggle, and meteors, with Natural and Enhanced modes. Cloud lighting follows the displayed coverage, including volumetric clouds; upper-atmosphere events respect Earth occlusion and atmospheric transmission. Bounded event pools and time scaling keep effects lightweight. Settings integrate with persistence, presets, scene sharing and factory reset. Events are illustrative simulations, not live observations.
+**English:** Added lightning, sprites, blue jets, night airglow and meteors with Natural/Enhanced modes. Effects follow clouds, Earth occlusion and atmospheric transmission, with bounded resources and support for time controls, persistence, presets and scenes. These are simulated phenomena, not live observations.
+
+[天气与奇观](docs/weather-phenomena.md)
 
 ## v0.27 — 2026-10-24
 
-- 启动图标改用三舱构型手绘版，校准天和、问天、梦天及太阳翼位置；方形舱段采用直角箱体与侧面阴影。
-- 更新图标绘制源文件、1024 px 原图及本机 macOS 启动器，提供完整尺寸的图标资源。
+启动图标改为手绘三舱构型，校准天和、问天、梦天与太阳翼位置，方形舱段使用直角箱体和侧面阴影。同步绘图源、1024 px 原图、完整图标尺寸及 macOS 启动器。
 
-**English:** Replaced the launcher icon with the illustrated three-module configuration, correcting module and solar-array placement and using angular box sections with shaded side faces. Updated the drawing source, 1024 px artwork and local macOS launcher with a complete icon-size set.
+**English:** Replaced the launcher icon with an illustrated three-module station, correcting module/array placement and angular box sections. Updated the drawing source, 1024 px artwork, icon sizes and macOS launcher.
 
 ## v0.26 — 2026-10-24
 
-- 新增可折叠的“场景分享”，通过 JSON 导出／导入完整舱体组合、太阳翼角度与联动、模拟时间、镜头及环境显示设置。
-- 文件自带轨道数据，导入后暂停在分享时刻；云图与极光匹配本地同一快照，缺失时提示并使用内置云图／关闭极光。
-- 导入前校验格式、舱体层级、轨道、时间、镜头和数值范围；中英文界面同步支持。
-- 已验证多层组合与重复飞船往返恢复、文件导入／导出、刷新记忆、缺失天气快照和无效输入处理。
+新增场景分享，通过 JSON 保存组合、太阳翼、时间、镜头和环境设置，并自带轨道数据。导入暂停在分享时刻，匹配本机天气快照，缺失时明确回退；导入前检查格式、层级和数值。验证递归组合、文件往返、刷新恢复、缺失资源和无效输入。
 
-**English:** Added collapsible Scene sharing with JSON export/import for assemblies, solar arrays, time, cameras, environment and display settings. Files embed orbit data and restore to a paused shared time. Downloaded clouds and aurora match exact local snapshots, with explicit fallback when missing. Validates scene structure, hierarchy, orbit, time, cameras and value ranges before applying. Bilingual interface included. Verified recursive/repeated assemblies, file round-trips, reload persistence, missing-weather fallback and invalid input rejection.
+**English:** Added JSON scene sharing for assemblies, arrays, time, cameras and environment settings, including orbit data. Imports pause at the shared time, match local weather snapshots or provide an explicit fallback, and validate structure and numeric ranges. Recursive assemblies, file round-trips, reloads, missing resources and invalid inputs were checked.
 
 ## v0.25 — 2026-10-24
 
-- 左侧六个设置模块支持独立展开／收起，点击标题或右侧箭头即可切换；收起仅保留标题，不改变功能开关与控件数值。
-- 自动记忆各模块状态，恢复出厂设置时重置；支持中英文、键盘和窄屏操作。
-- 已检查折叠独立性、刷新恢复、控件值保留及完整软件加载。
+左侧六个设置模块可独立展开／收起，保留控件数值并记忆折叠状态，恢复默认可重置。支持中英文、键盘与窄屏，验证独立性和重开恢复。
 
-**English:** Added independent collapsible sections to all six sidebar modules. Click a heading or its chevron to toggle; collapsing preserves controls and active features. Section states persist across visits and reset with factory settings. Supports both languages, keyboard navigation and narrow screens.
+**English:** Six sidebar modules now expand/collapse independently while preserving values and remembering their state, with factory reset support. Bilingual, keyboard and narrow-screen behavior plus reload recovery were checked.
 
 ## v0.24 — 2026-10-23
 
-- GitHub 云图增加全图自适应遮罩断层处理，减轻碎片和阶梯边缘；历史 PNG／JPEG 同步适用，原始下载缓存保留。大尺度上游误分类仍不能由该处理恢复。
-- 云图在独立 Worker 中一次性处理，复用单通道纹理并限制并发；普通云、体积云、云影使用同一遮罩。
-- 轨道数据框增加开关和关闭按钮，记忆显示状态；右上视角按钮改为点击展开，选择视角、点击外部或按 Esc 收起，支持中英文。
+GitHub 云图新增自适应遮罩重建，减轻碎片和阶梯边缘，保留原始缓存；无法恢复上游大范围误分类。独立 Worker 一次处理并由普通云、体积云和云影共享遮罩。轨道数据框增加开关和关闭按钮，视角菜单支持点击展开、外点和 Esc 收起。
 
-**English:** Added source-wide adaptive mask reconstruction for GitHub cloud snapshots, reducing fragmentation without changing archived PNG/JPEG data. Large-scale source misclassification remains unresolved. One-shot worker processing uses a single-channel texture shared by clouds and shadows, with serialized loads. Added a persistent orbit-readout toggle and a click-to-open camera menu with outside-click/Escape dismissal and bilingual labels.
+**English:** Added adaptive GitHub cloud-mask reconstruction to reduce fragments and stepped edges while preserving raw caches; large upstream classification errors remain unresolved. A one-shot worker shares the processed mask across regular/volume clouds and shadows. Orbit readouts gain visibility controls, and the view menu supports click, outside-click and Escape dismissal.
 
 [处理依据与验证 / Method and validation](docs/v0.24-details.md)
 
 ## v0.23 — 2026-10-23
 
-- 修正体积云分支取样时的纹理梯度，减少不稳定的细节选择；移除低密度硬截断，保留连续的弱云过渡。
-- 对比原始 Alpha、普通云与体积云，确认 GitHub 图源自身包含灰色连块和阶梯缺口；本次未恢复上游云分类，也未以模糊或随机云掩盖缺失数据。
-- 原始缓存和其他图源保留，不新增纹理或渲染通道。自动测试及生产着色器 GPU 场景检查通过。
+稳定体积云纹理梯度并移除低密度硬截断，保留弱云过渡。对照原始 Alpha 确认灰块和阶梯缺口来自 GitHub 图源，保留原缓存和其他来源，不以模糊掩盖缺失信息。自动测试和生产着色器 GPU 检查通过。
 
-**English:** Stabilized texture gradients in volume-cloud sampling and removed the low-density cutoff. Raw-alpha, shell and volume comparisons traced large grey blocks to the GitHub source itself. This update does not reconstruct upstream cloud classification or hide missing information with blur or synthetic clouds. Original caches and other sources are retained; no extra textures or render passes. Automated tests and production-shader GPU checks passed.
+**English:** Stabilized volume-cloud texture gradients and removed the low-density cutoff. Raw-alpha comparisons traced grey blocks and stepped gaps to the GitHub source; caches and alternative sources remain intact without blur hiding missing information. Automated and production-shader GPU checks passed.
 
 [诊断、修正范围与参考 / Diagnosis, scope and references](docs/v0.23-details.md)
 
 ## v0.22 — 2026-10-23
 
-- 8K 太阳十字星芒改为仅在视线掠过大气边缘时渐入，白昼关闭；光晕随光谱消光与遮挡连续减弱。
-- 改善晨昏太阳高亮的颜色保留，显现从亮白、金橙到暗红的变化；补充地球／月球遮挡范围，避免局部显示处理污染遮挡物。
-- 复用现有 HDR 缓冲；自动测试、GPU 太阳／遮挡检查及单个 subagent 审查完成。
+8K 太阳星芒仅在视线掠过大气边缘时渐入，白昼关闭，光晕随消光和遮挡连续变化。修正晨昏高亮色彩及地球／月球遮挡，复用 HDR 缓冲。自动测试与 GPU 太阳／遮挡检查通过。
 
-**English:** In 8K mode, solar starbursts now fade in only for atmosphere-grazing views. Local hue-preserving highlight mapping reveals spectral twilight colours while retaining daylight white. Earth/Moon masks protect occulting surfaces; glare fades with transmitted sunlight. Reuses the existing HDR buffer. Automated tests, GPU solar/occlusion checks and one subagent review completed.
+**English:** In 8K, solar starbursts fade in only near the atmospheric limb, with extinction and occlusion controlling glare. Corrected twilight highlight colors and Earth/Moon masks while reusing HDR buffers. Automated and GPU Sun/occlusion checks passed.
 
 [实现、验证与参考 / Implementation, validation and references](docs/v0.22-details.md)
 
 ## v0.21 — 2026-10-23
 
-- 修正 GitHub 云图灰底过度遮挡海洋：针对上游增强灰度加入连续透明度校正，普通云、体积云、云影与夜光遮蔽一致使用。
-- 已下载的 PNG/JPEG 历史快照自动应用；保留原始缓存，NASA 科学云图与内置云图沿用各自处理。未增加纹理或渲染通道。
-- 自动测试与生产着色器 GPU 检查通过；本项是显示校正，不能从合成灰度恢复严格的晴空／薄云分类。
+针对 GitHub 增强灰度云图加入连续透明度校正，减轻灰底遮挡海洋，普通云、体积云、云影和夜光共用。兼容历史 PNG／JPEG 并保留原始缓存；这是显示校正，不能恢复严格晴空／薄云分类。自动测试与 GPU 检查通过。
 
-**English:** Reduced the GitHub source's grey veil with a continuous, provider-specific opacity transfer shared by cloud shells, volume clouds, shadows and night-light attenuation. Existing PNG/JPEG snapshots benefit without changing their cached pixels; NASA and bundled maps retain their own processing. No new textures or render passes. Automated and production-shader GPU checks passed. This display correction does not recover a scientific clear-sky classification.
+**English:** Added a continuous opacity correction for enhanced GitHub cloud maps, reducing the grey veil consistently across clouds, shadows and city lights. Legacy PNG/JPEG caches remain intact; the display correction cannot recover scientific clear-sky/thin-cloud classification. Automated and GPU checks passed.
 
 [图源含义、处理与验证 / Source interpretation, processing and validation](docs/v0.21-details.md)
 
 ## v0.20 — 2026-10-23
 
-- 8K 大气改用六波长光谱转换，修正白昼低层紫边，保留晨昏金橙过渡和夜侧弱气辉。
-- 增加随大气光程变色的太阳圆面与光晕，处理地球、月球遮挡，并随云层遮蔽减弱；空间站直射光同步变化。
-- 复用现有 HDR 缓冲，仅新增 6 KiB 散射表；自动测试、生产着色器 GPU 场景检查及单个 subagent 审查完成。
+8K 大气改用六波长光谱，修正白昼紫边并保留晨昏过渡与弱气辉。太阳圆面、光晕和空间站照明随大气光程变色，并处理地球、月球及云层遮挡。复用 HDR，仅增加 6 KiB 查找表，自动与 GPU 检查通过。
 
-**English:** Six-sample spectral transport fixes the daytime purple bias while retaining golden twilight and faint night airglow. Added an atmosphere-aware solar disk and glare with Earth/Moon occultation and cloud visibility, plus matching station sunlight. Reuses the HDR buffer with one extra 6 KiB lookup. Automated/GPU checks and one subagent review completed.
+**English:** Six-wavelength atmospheric transport fixes daytime purple edges while retaining twilight and faint airglow. The Sun, glare and station lighting follow atmospheric color and Earth/Moon/cloud occultation. Existing HDR is reused with a 6 KiB lookup; automated and GPU checks passed.
 
 [实现、验证范围与参考资料 / Implementation, validation and references](docs/v0.20-details.md)
 
 ## v0.19 — 2026-10-23
 
-- 修正 8K 白昼大气低层偏暖：加入轻量多次散射，按 RGB 透射合成后统一映射颜色；晨昏暖色随太阳、地球与视线关系变化。
-- 增加独立的夜侧弱气辉；修正云顶及体积云的前方大气路径，减少掠视时额外消光。
-- 新增查找表仅 6 KiB；HDR 缓冲跟随窗口、低档释放、失败自动降级，晴空像素跳过云散射。
-- 自动测试、浏览器 GPU 场景检查与单个 subagent 审查通过；轨道和自由组合算法保持不变。
+加入轻量多次散射和线性 RGB 合成，修正白昼大气低层偏暖，保留自然晨昏变化。新增微弱夜侧气辉，修正云层前方的大气光程，并按画面尺寸复用 HDR、失败时降级。新增查找表 6 KiB，自动与 GPU 检查通过。
 
-**English:** Corrected the warm daytime limb with compact multiple scattering and linear RGB compositing. Added faint independent night airglow and cloud-height-aware aerial perspective. The extra lookup uses 6 KiB; HDR follows the viewport, releases at lower tiers and falls back on failure. Automated/GPU checks and one subagent review passed.
+**English:** Added compact multiple scattering and linear RGB compositing to correct warm daytime limbs while preserving twilight. Faint night airglow and cloud-aware atmospheric paths reuse viewport-sized HDR with fallback on failure. The extra lookup uses 6 KiB; automated and GPU checks passed.
 
 [实现、验证范围与参考资料 / Implementation, validation and references](docs/v0.19-details.md)
 
 ## v0.18 — 2026-10-23
 
-- 优化 8K 大气边缘、晨昏过渡与云层受光，改善球体轮廓并减少内存占用。
-- 新增 NASA 8K 全球云图：每次更新筛选最近 30 天每日 12:00 UTC 的合成图，核验全球及南北极覆盖；不合格则继续查找，无新图则保留合格缓存。
-- 保留「github最新已下载」图源；移除旧的 2024 年 NASA 云图，支持历史快照、统一更新与缓存清理。
-- 本次自动选中 2026-10-20 云图；已验证 8K 加载、缓存迁移、图源隔离与重复更新，自动测试及构建通过。
+改善 8K 大气边缘、晨昏和云层受光，减少内存使用。新增 NASA 8K 全球云图，按最近 30 天每日时次筛选并验证全球及极区覆盖，失败保留合格缓存，兼容历史和统一更新。移除旧 2024 NASA 图，保留 GitHub 来源；加载、缓存迁移及构建检查通过。
 
-**English:** Improved 8K atmosphere, twilight, cloud lighting and memory use. Added coverage-validated NASA 8K composites with a rolling 30-day daily search and cache fallback. Retired the 2024 NASA map while preserving GitHub downloads. Tests, build and browser cache checks passed.
+**English:** Improved 8K atmosphere, twilight, cloud lighting and memory use. Added NASA 8K global cloud composites with rolling thirty-day coverage checks and cache fallback, integrated with history and unified updates. Retired the 2024 NASA map while preserving GitHub data; loading, cache migration and build checks passed.
 
 [修改详情与参考资料 / Details and references](docs/v0.18-details.md) · [云图处理与更新规则 / Cloud processing](docs/cloud-sources.md)
 
-## v0.17
+## v0.17 — 2026-10-23
 
-- 优先下载无损 PNG 云层遮罩，兼容 JPEG 历史快照；保留 8K 源尺寸及快照通道信息。
-- 保留厚云内部浓淡与体积密度差别；修正重复选择画质后云图绑定退回内置图的问题。
-- Prefer lossless PNG cloud masks while retaining legacy JPEG history; preserve native 8K size and mask-channel metadata.
-- Preserve bright-cloud shading and density variation; keep downloaded cloud textures bound when reselecting a quality tier.
+云图优先无损 PNG，兼容历史 JPEG，保留 8K 尺寸、遮罩通道及厚云浓淡，并修复重选画质后退回内置图。新增带图标的 macOS 启动应用，支持 Intel／Apple Silicon 和后台服务复用。
 
-- 新增带封面图标的 macOS 启动应用，支持 Intel / Apple Silicon；本地服务后台运行并复用现有实例。
-- Added a macOS launcher with a custom Earth/station icon, Intel / Apple Silicon support, and a persistent background server.
+**English:** Prefer lossless PNG clouds while retaining legacy JPEG, 8K dimensions, mask metadata and cloud-density variation; reselecting quality no longer loses the downloaded map. Added an illustrated macOS launcher for Intel/Apple Silicon with a reusable background service.
 
-## v0.16
+## v0.16 — 2026-10-23
 
-### 中文
+整合 8K 地表与城市夜光细节、随时间变化的月球与月相、16K 银河、四档画质、动态／体积云及云图／极光更新。新增设置记忆、恢复默认和环境收藏，小地图可拖动站点或点轨迹定位时间。发布离线便携版，保留递归组合、太阳翼追日、中英文及全屏适配。
 
-- 增强 8K 地表和真实城市夜光，按需加载本地切片；修正海洋颜色和晨昏条带。
-- 增加按模拟时间计算的月球、月相与光照；支持望月后返回原空间站视角。
-- 新增原生 16K 银河背景、四档地球、动态与体积云、云图和极光来源选择、统一更新和历史缓存管理。
-- 记忆组合、时间、显示和环境设置；提供恢复出厂设置与环境收藏。
-- 小地图支持点击轨迹、拖动站点来跳转到有效轨道时间。
-- 保留递归核心舱组合、太阳翼追日、地面轨迹定向、中英文与全屏适配。
-- 单文件运行体积约 211 MB；便携包提供于 GitHub Releases。
+**English:** Integrated detailed 8K Earth/city lights, time-based Moon phases, a 16K Milky Way, four quality levels, dynamic/volume clouds and cloud/aurora updates. Added saved settings, factory reset, environment presets and minimap time seeking. Released an offline portable build retaining recursive assembly, solar tracking, bilingual UI and fullscreen adaptation.
 
-### English
+## v0.15 — 记录待核实 / Record pending verification
 
-- Improved 8K Earth and real city lights with on-demand offline tiles; corrected ocean reflectance and twilight banding.
-- Added time-based lunar position, apparent size, phase, and illumination, with return to the saved station view.
-- Added native 16K Milky Way, four Earth tiers, dynamic and volumetric clouds, cloud/aurora sources, unified updates, and history-cache management.
-- Remember assembly, time, display, and environment settings; restore factory defaults and save environment presets.
-- Seek a valid orbital time by clicking the minimap track or dragging the station marker.
-- Retained recursive Tianhe assembly, solar tracking, ground-track attitude, bilingual UI, and fullscreen adaptation.
-- Standalone runtime: approximately 211 MB. The portable package is distributed through GitHub Releases.
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
 
-## v0.10
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
 
-- 修正空间站相对地面轨迹斜着移动的朝向问题，并包含全屏与窗口尺寸适配。
-- 支持通过后端对接口递归添加天和核心舱；新增核心舱的节点接口可继续连接其他舱段，并显示在左侧列表。
-- Corrected ground-track-relative attitude and fullscreen/window resizing. Added recursive Tianhe assembly through aft ports, with further attachments available on each new core.
+## v0.14 — 记录待核实 / Record pending verification
 
-## v0.7
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
 
-- 建立可离线运行的三维空间站软件：支持重复部署同型飞船、自由组合、单轴/双轴太阳翼控制和联动。
-- 接入公开轨道记录、现实/自定义时间、地球昼夜和自动追日；太阳翼在地影内继续转动。
-- 提供三档地球、星表星空、可开关轨道小地图、截图、中英文界面、版本与作者信息。
-- Established the offline viewer with repeatable spacecraft instances, free assembly, solar-array control, published orbital records, time controls, eclipse-aware solar tracking, Earth quality tiers, catalogue stars, a minimap and bilingual UI.
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.13 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.12 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.11 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.10 — 2026-10-21
+
+修正空间站相对地面轨迹的朝向和全屏／窗口尺寸适配。支持通过尾口递归添加天和核心舱，新节点可继续连接其他舱段并列入左侧组合列表。
+
+**English:** Corrected ground-track-relative station attitude and fullscreen/window resizing. Added recursive Tianhe assembly through aft ports, with further attachments available at each new core and listed in the sidebar.
+
+## v0.9 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.8 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.7 — 2026-10-21
+
+首个完整留存的软件版本：离线三维空间站支持重复部署飞船、自由组合及单轴／双轴太阳翼控制。整合公开轨道、现实／自定义时间、昼夜和自动追日，地影内太阳翼继续转动。提供三档地球、星表星空、小地图、截图和中英文界面。
+
+**English:** The earliest fully preserved software version combines an offline 3D station, repeatable spacecraft, free assembly and single-/dual-axis solar-array control. Published orbits, real/custom time, day/night lighting and eclipse-aware solar tracking share one simulation. Includes three Earth tiers, catalogue stars, a minimap, screenshots and bilingual UI.
+
+## v0.6 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.5 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.4 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.3 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.2 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
+
+## v0.1 — 记录待核实 / Record pending verification
+
+尚未找到本版独立的提交、发布说明或版本文档，具体改动与日期待核实。
+
+**English:** No separate commit, release note or version document has been located for this version; its changes and date remain unverified.
 
 ## 既有数据与素材来源 / Earlier data and asset sources
 
@@ -695,4 +781,4 @@ The Xuntian finder can track cities, lock the crosshair to the sky, ground or a 
 | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/) | 原生 16K 银河背景；NASA/Goddard SVS、Ernie Wright、ESA/Gaia/DPAC / Enhanced Milky Way |
 | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/)、[Astronomy Engine](https://github.com/cosinekitty/astronomy) | 月面素材与太阳/月球位置计算 / Lunar texture and astronomical calculations |
 
-素材处理、署名、授权与精度说明见 [素材与迁移说明](素材与迁移说明.md)。以上历史条目依据已有版本提交与项目记录整理；本轮只补充更新日志。
+素材处理、署名、授权与精度说明见 [素材与迁移说明](素材与迁移说明.md)。历史条目依据本仓库 Git 提交、版本文档及 [GitHub Releases](https://github.com/Wenshuishi0528/StarOrbit/releases) 整理；最早完整源码为 v0.7，最早现存软件 Release 为 v0.16。已核对主模型项目和桌面运行目录的文档；v0.1–v0.6、v0.8–v0.9、v0.11–v0.15 尚无可逐版确认的独立记录，未以模型版本或后续累计功能代替。

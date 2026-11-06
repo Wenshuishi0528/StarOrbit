@@ -7,9 +7,12 @@ import {DockingRecorder,deriveDockingInstruments,predictDockingCoast} from './do
 import {createDockingModels,createDockingCamera} from './docking-models.js';
 import {dockingCSS,dockingMarkup,alignmentSVG,trendSVG,reportHTML,escapeHTML,signed} from './docking-workbench.js';
 import {installDockingDisplay} from './docking-display.js';
+import {PILOT_CODES,pilotSas} from './pilot-controls.js';
+import {createFlightInputBuffer} from './main-flight-input.js';
 
-const labels={f:'前进 W',b:'后退 S',l:'左移 A',r:'右移 D',u:'上移 R',d:'下移 F',rollL:'左滚转 Q',rollR:'右滚转 E',pitchU:'抬头 ↑',pitchD:'低头 ↓',yawL:'左偏航 ←',yawR:'右偏航 →',brake:'按住相对制动 Space'};
-const keys={KeyW:'f',KeyS:'b',KeyA:'l',KeyD:'r',KeyR:'u',KeyF:'d',KeyQ:'rollL',KeyE:'rollR',ArrowUp:'pitchU',ArrowDown:'pitchD',ArrowLeft:'yawL',ArrowRight:'yawR',Space:'brake'};
+const labels={f:'前进 H',b:'后退 N',l:'左移 J',r:'右移 L',u:'上移 K',d:'下移 I',rollL:'左滚转 Q',rollR:'右滚转 E',pitchU:'抬头 S',pitchD:'低头 W',yawL:'左偏航 A',yawR:'右偏航 D',brake:'按住相对制动'};
+const names={forward:'f',back:'b',left:'l',right:'r',up:'u',down:'d',rollLeft:'rollL',rollRight:'rollR',pitchUp:'pitchU',pitchDown:'pitchD',yawLeft:'yawL',yawRight:'yawR'};
+const keys={...Object.fromEntries(Object.entries(names).map(([name,control])=>[PILOT_CODES[name],control])),ArrowUp:'pitchU',ArrowDown:'pitchD',ArrowLeft:'yawL',ArrowRight:'yawR'};
 const statusNames={docked:'对接捕获成功',collision:'接触条件不满足 · 训练停止',corridor:'偏离安全接近走廊 · 训练停止',lost:'超出 2 km 训练范围'};
 const endStatus=state=>state.status==='collision'&&state.contactMetrics?.captureChecks?.speed===false?'接口撞击超速 · 对接失败':statusNames[state.status]||'训练已结束';
 const modeHelp={manual:'人工控制：推力与姿态由你操作；停靠点只给出提醒。',hold:'位置保持：用有限推力制动并保持当前参考位置，仍在计时与消耗 Δv。',approach:'辅助接近：自动修正姿态与横向偏差，在停靠点等待你的 GO。',retreat:'主动撤离：先抑制横向漂移，再沿接口外侧退到保持点。'};
@@ -68,12 +71,12 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   onStep(state,context){recorder.sample(state,context);if(state.status!=='flying')recorder.finish(state,context);},
   onEvent(event){if(event.type==='reset')recorder.reset({...event.detail.definition,limits:DOCKING_LIMITS,flightSpeedLimited:false});recorder.event(event);},
  });
- const held=new Set(),keyboard=new Set(),pointerControls=new Map();
+ const held=new Set(),keyboard=new Set(),pointerControls=new Map(),inputBuffer=createFlightInputBuffer();
  let paused=true,view='external',analysis='trend',disposed=false,frameId=0,previousWall=null,lastRead=0,lastChart=0,lastTrajectory=0,lastTrajectoryTime=-1,lastStatus='',lastWidth=0,lastHeight=0;
  let replay=false,replayPlaying=false,replayTime=0,replayIndex=0,replaySamples=[],cachedSamples=recorder.samples,manualPreferences=null,lastReadKey='',lastAnalysisKey='';
  const displayState=()=>replay?replaySamples[replayIndex]||training.state:training.state;
  const assistanceActive=()=>replay?(displayState().context?.assistanceEnabled??displayState().rules?.assistanceEnabled??true):training.assistanceEnabled;
- const clearInput=()=>{held.clear();keyboard.clear();pointerControls.clear();panel.querySelectorAll('.held').forEach(x=>x.classList.remove('held'));};
+ const clearInput=()=>{held.clear();keyboard.clear();pointerControls.clear();inputBuffer.clear();panel.querySelectorAll('.held').forEach(x=>x.classList.remove('held'));};
  const isVisible=()=>!document.hidden&&container.isConnected&&!!container.getClientRects().length&&getComputedStyle(container).visibility!=='hidden';
  function pause(){
   if(!paused&&!training.finished)recorder.event({type:'pause',time:training.state.time,messageKey:'训练已暂停'});
@@ -88,6 +91,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
  }
  function setCamera(mode){view=mode==='onboard'?'onboard':'external';controls.stopMotion();controls.enabled=view==='external';for(const button of panel.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));$('.dock-crosshair').hidden=view!=='onboard';updateReadouts();}
  function selectAnalysis(name){
+  clearInput();
   analysis=name;for(const button of panel.querySelectorAll('[data-analysis]')){const selected=button.dataset.analysis===name;button.setAttribute('aria-selected',String(selected));button.setAttribute('aria-pressed',String(selected));button.tabIndex=selected?0:-1;}
   for(const body of panel.querySelectorAll('[data-analysis-panel]'))body.hidden=body.dataset.analysisPanel!==name;
   $('.dock-analysis-body').scrollTop=0;updateAnalysis();
@@ -112,7 +116,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   if(!force&&signature===lastReadKey)return;lastReadKey=signature;
   if(replay){get('fine').checked=!!state.context?.command?.fine;get('damping').checked=state.context?.command?.angularDamping!==false;}
   const assisted=assistanceActive();
-  get('rotation-label').textContent=t(assisted?'姿态角速率 · 按住控制':'转动力矩 · 按住施加');
+  get('rotation-label').textContent=t(assisted&&pilotSas(get('damping').checked,inputBuffer.temporarySas)?'姿态角速率 · 按住控制':'转动力矩 · 按住施加');
   get('assistance').checked=assisted;get('assistance').disabled=replay||training.finished;
   get('contact-speed').disabled=replay||training.finished;
   if(document.activeElement!==get('contact-speed'))get('contact-speed').value=replay?(state.context?.contactSpeed??state.rules?.contactSpeed??DOCKING_LIMITS.captureSpeed):training.contactSpeed;
@@ -158,15 +162,23 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   get('brief').textContent=t(selected?.descriptionKey||'从指定距离开始进行近距离对接训练。');
   lastTrajectoryTime=-1;cachedSamples=recorder.samples;syncPose();fit();lastStatus='';selectAnalysis('trend');updateReadouts();
  }
- const input=()=>{const active=new Set([...held,...keyboard]);return {translation:[Number(active.has('f'))-Number(active.has('b')),Number(active.has('r'))-Number(active.has('l')),Number(active.has('u'))-Number(active.has('d'))],rotation:[Number(active.has('rollL'))-Number(active.has('rollR')),Number(active.has('pitchU'))-Number(active.has('pitchD')),Number(active.has('yawL'))-Number(active.has('yawR'))],fine:get('fine').checked,angularDamping:get('damping').checked,brake:active.has('brake')};};
+ function updateInput(){const active=new Set([...held,...keyboard]);inputBuffer.set({translation:[Number(active.has('f'))-Number(active.has('b')),Number(active.has('r'))-Number(active.has('l')),Number(active.has('u'))-Number(active.has('d'))],rotation:[Number(active.has('rollL'))-Number(active.has('rollR')),Number(active.has('pitchU'))-Number(active.has('pitchD')),Number(active.has('yawL'))-Number(active.has('yawR'))],temporarySas:active.has('temporarySas'),brake:active.has('brake')});}
+ const input=()=>{const command=inputBuffer.take();return {...command,fine:get('fine').checked,angularDamping:training.assistanceEnabled&&pilotSas(get('damping').checked,command.temporarySas)};};
  function pointerDown(event){
   const button=event.target.closest('[data-control]');if(!button||paused||training.finished||replay)return;
-  event.preventDefault();renderer.domElement.focus({preventScroll:true});pointerControls.set(event.pointerId,button.dataset.control);held.add(button.dataset.control);button.classList.add('held');button.setPointerCapture(event.pointerId);
+  event.preventDefault();renderer.domElement.focus({preventScroll:true});pointerControls.set(event.pointerId,button.dataset.control);held.add(button.dataset.control);button.classList.add('held');button.setPointerCapture(event.pointerId);updateInput();
  }
- function pointerUp(event){const name=pointerControls.get(event.pointerId);pointerControls.delete(event.pointerId);if(name&&![...pointerControls.values()].includes(name)){held.delete(name);if(!keyboard.has(name))$(`[data-control="${name}"]`).classList.remove('held');}}
- function keyDown(event){if(!isVisible()||paused||training.finished||replay||document.activeElement!==renderer.domElement)return;const control=keys[event.code];if(!control||control==='brake'&&!training.assistanceEnabled)return;event.preventDefault();keyboard.add(control);$(`[data-control="${control}"]`).classList.add('held');}
- function keyUp(event){const control=keys[event.code];if(!control)return;keyboard.delete(control);if(!held.has(control))$(`[data-control="${control}"]`).classList.remove('held');}
- panel.addEventListener('pointerdown',pointerDown);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerUp);panel.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);renderer.domElement.addEventListener('blur',clearInput);
+ function pointerUp(event){const name=pointerControls.get(event.pointerId);pointerControls.delete(event.pointerId);if(name&&![...pointerControls.values()].includes(name)){held.delete(name);if(!keyboard.has(name))$(`[data-control="${name}"]`).classList.remove('held');updateInput();}}
+ function pointerCancel(event){if(pointerControls.has(event.pointerId))clearInput();}
+ function keyDown(event){
+  if(!isVisible()||paused||training.finished||replay||document.activeElement!==renderer.domElement||event.isComposing||event.ctrlKey||event.metaKey||event.altKey)return;
+  const option=event.code==='CapsLock'?'fine':event.code==='KeyT'&&training.assistanceEnabled?'damping':null;
+  if(option){event.preventDefault();event.stopPropagation();if(!event.repeat){get(option).checked=!get(option).checked;get(option).dispatchEvent(new Event('change',{bubbles:true}));}return;}
+  const control=event.code==='KeyF'&&training.assistanceEnabled?'temporarySas':keys[event.code];if(!control)return;
+  event.preventDefault();event.stopPropagation();keyboard.add(control);$(`[data-control="${control}"]`)?.classList.add('held');updateInput();
+ }
+ function keyUp(event){const control=event.code==='KeyF'?'temporarySas':keys[event.code];if(!control||!keyboard.delete(control))return;event.preventDefault();event.stopPropagation();if(!held.has(control))$(`[data-control="${control}"]`)?.classList.remove('held');updateInput();}
+ panel.addEventListener('pointerdown',pointerDown);window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerCancel);panel.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);renderer.domElement.addEventListener('blur',clearInput);
  const blur=()=>pause(),visibility=()=>{if(document.hidden)pause();};window.addEventListener('blur',blur);document.addEventListener('visibilitychange',visibility);
  get('start').onclick=()=>{
   if(training.finished||replay)return;if(!paused){pause();return;}
@@ -234,7 +246,7 @@ export function mountDockingPanel(container,sim,{templates,meta}){
   if(disposed)return;frameId=requestAnimationFrame(frame);if(!isVisible()){if(!paused||replayPlaying)pause();previousWall=null;return;}
   const dt=previousWall===null?0:Math.min(.1,Math.max(0,(wall-previousWall)/1000));previousWall=wall;
   if(replay&&replayPlaying){replayTime+=dt*Number(get('speed').value);while(replayIndex<replaySamples.length-1&&replaySamples[replayIndex+1].time<=replayTime)replayIndex++;if(replayIndex===replaySamples.length-1)replayPlaying=false;}
-  else if(!paused&&!training.finished){training.advance(dt*Number(get('speed').value),input());if(training.finished){finishRecord();pause();selectAnalysis('review');}}
+  else if(!paused&&!training.finished){training.advance(dt*Number(get('speed').value),input);if(training.finished){finishRecord();pause();selectAnalysis('review');}}
   if(wall-lastRead>100){updateReadouts(false);lastRead=wall;}if(wall-lastChart>200){updateAnalysis(false);lastChart=wall;}
   updateTrajectories(wall);render();
  }
@@ -248,6 +260,6 @@ export function mountDockingPanel(container,sim,{templates,meta}){
  const unsubscribe=onLanguageChange(translate);translate();reset('alignment');setCamera('onboard');frameId=requestAnimationFrame(frame);
  return {pause,reset,setCamera,render,deactivate(){pause();display.reset();},get state(){return training.state;},get cameraMode(){return view;},get camera(){return view==='onboard'?onboard:external;},get renderer(){return renderer;},get simulation(){return training;},get recorder(){return recorder;},get paused(){return paused;},get modelRoots(){return {station,chaser};},
   step(seconds,command={}){training.advance(seconds,command);finishRecord();syncPose();updateReadouts();return training.state;},
-  dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();display.dispose();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerUp);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();},
+  dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(frameId);pause();display.dispose();resizeObserver.disconnect();unsubscribe();controls.dispose();panel.removeEventListener('pointerdown',pointerDown);window.removeEventListener('pointerup',pointerUp);window.removeEventListener('pointercancel',pointerCancel);panel.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);renderer.domElement.removeEventListener('blur',clearInput);for(const g of ownedGeometry)g.dispose();for(const m of ownedMaterials)m.dispose();renderer.dispose();renderer.forceContextLoss();panel.remove();style.remove();},
  };
 }

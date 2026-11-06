@@ -5,8 +5,8 @@ import {setText} from './i18n.js';
 const KEY='tiangong-session-v1';
 const $=id=>document.getElementById(id);
 const legacyDetailKeys=['orbit-data','sky-style','weather','photography','credits','downloads','attitude'];
-const switches=['occlusion','orbitPath','sunVector','fillLight','labels'];
-const settingsKeys=['starorbit-xuntian-instrument-v1','starorbit-xuntian-guide-scale-v1','starorbit-xuntian-formation-v1','starorbit-pass-observer-v1','starorbit-balcony-sites-v1','starorbit-balcony-target-v1','starorbit-hour-cycle-v1','tiangong-help-v1','tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
+const switches=['occlusion','orbitPath','sunVector','fillLight','labels','attitudeNavball','lockFloatingWindows'];
+const settingsKeys=['starorbit-navball-compact-v1','starorbit-star-density-default-v110','starorbit-floating-windows-v1','starorbit-free-flight-display-v1','starorbit-xuntian-instrument-v1','starorbit-xuntian-guide-scale-v1','starorbit-xuntian-formation-v1','starorbit-pass-observer-v1','starorbit-balcony-sites-v1','starorbit-balcony-target-v1','starorbit-hour-cycle-v1','tiangong-help-v1','tiangong-timeline-v1',KEY,MISSION_MEMORY_KEY,'tiangong-orbit-library-v1','tiangong-music-settings-v1','tiangong-phenomena-v1','tiangong-sidebar-v1','tiangong-viewer-v1','tiangong-viewer-v2','tiangong-viewer-v3','tiangong-environment-v1','tiangong-weather-settings-v1','tiangong-minimap-v1','tiangong-overlays-v1','tiangong-language-v1'];
 const vector=a=>Array.isArray(a)&&a.length===3&&a.every(v=>Number.isFinite(v)&&Math.abs(v)<1e7);
 function restoreCamera(camera,controls,s){
  if(!s||!vector(s.position)||!vector(s.target))return;
@@ -46,7 +46,7 @@ export async function installSessionMemory(sim,assembly){
  }
  sim.dirty=true;sim.snap=true;sim.lastWall=performance.now();sim.timeUI();sim.controlUI();sim.missions?.syncUI();api.resize();
  const persist=()=>{
-  if(resetting||sim.missions?.busy||sim.sceneBusy)return;
+  if(resetting||sim.freeFlight?.active||sim.mainFlight?.active||sim.missions?.busy||sim.sceneBusy)return;
   try{
    sim.missions?.save();
    const s={missionId:sim.missionId,timeStep:sim.timeStep,mode:sim.mode,time:sim.time,speed:sim.speed,paused:sim.paused,auto:sim.auto,view:sim.view,playing:assembly.getPlaying(),camera:cameraState(api.camera,api.controls),spaceCamera:sim.view==='orbit'?cameraState(sim.spaceCamera,sim.orbitControls):saved?.spaceCamera,switches:Object.fromEntries(switches.map(id=>[id,$(id).checked])),detailsByKey:Object.fromEntries([...document.querySelectorAll('aside details[data-memory-key]')].map(el=>[el.dataset.memoryKey,el.open])),telemetry:$('telemetry').classList.contains('expanded'),scroll:document.querySelector('aside').scrollTop,fields:Object.fromEntries(['environmentPresetName','environmentPresets','sceneName'].map(id=>[id,$(id).value])),immersive:document.body.classList.contains('immersive'),'photo-mode':document.body.classList.contains('photo-mode')};

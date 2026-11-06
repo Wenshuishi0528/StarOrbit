@@ -63,7 +63,7 @@ export function mountExposureLab(root,sim,assets){
     <label class="exposure-fill"><input type="checkbox" data-exposure="fill" checked><span data-i="摄影补光"></span></label>
     <button type="button" data-exposure="viewfinder" data-i="即时取景"></button>
    </div>
-   <p class="exposure-free-help" id="exposure-free-help" data-exposure="free-help" data-i="按住鼠标拖动转向。W/S 抬头或低头，A/D 左转或右转，Q/E 向左或向右滚转。R/F 沿视轴前进或后退，Shift/Ctrl 沿画幅向上或向下平移。按 Esc 或点击画面外释放。" hidden></p>
+   <p class="exposure-free-help" id="exposure-free-help" data-exposure="free-help" data-i="按住鼠标拖动转向。W/S 低头或抬头，A/D 左右转向，Q/E 左右滚转。H/N 前后，J/L 左右，I/K 向下或向上平移。按 Esc 或点击画面外释放。" hidden></p>
    <details><summary data-i="调整拍摄位置与镜头"></summary><div class="exposure-sliders">${cameraFields.map(([key,label,min,max])=>`<label><span data-i="${label}"></span><output data-reading="${key}" aria-hidden="true"></output><input type="range" min="${min}" max="${max}" step="${key==='fov'?1:.1}" data-camera="${key}"></label>`).join('')}</div>
     <p class="exposure-tip" data-i="位置以米计。方位从机身前方向左增加，仰角向上为正，正滚转使相机向右倾斜。"></p></details>
    <figure class="exposure-figure"><div class="exposure-film" data-exposure="film"><canvas class="exposure-photo" data-exposure="photo" width="768" height="432" role="img" aria-describedby="exposure-free-help"></canvas>

@@ -23,16 +23,18 @@ async page=>{
   await page.waitForFunction(()=>document.querySelector('#exposurePanel [data-exposure=photo]').dataset.freeState==='active');
   const dragged=await pose();verify(Math.abs(dragged.azimuth-original.azimuth)>1&&dragged.pitch>original.pitch,'first press-and-drag failed');
   await page.keyboard.down('w');await page.waitForTimeout(170);const middle=await pose();await page.waitForTimeout(150);const later=await pose();await page.keyboard.up('w');
-  verify(middle.pitch>dragged.pitch&&later.pitch>middle.pitch,'held key did not move smoothly over consecutive frames');
-  await press('s');const lowered=await pose();verify(lowered.pitch<later.pitch,'S did not tilt down');
+  verify(middle.pitch<dragged.pitch&&later.pitch<middle.pitch,'held key did not move smoothly over consecutive frames');
+  await press('s');const lowered=await pose();verify(lowered.pitch>later.pitch,'S did not pitch up');
   await press('a');const left=await pose();await press('d');const right=await pose();verify(left.azimuth>lowered.azimuth&&right.azimuth<left.azimuth,'A/D did not look left/right');
   await press('e');const rolled=await pose();await press('q');const unrolled=await pose();verify(rolled.roll>right.roll+2&&unrolled.roll<rolled.roll-2,'Q/E did not roll');
   const v=s=>[s.x,s.y,s.z],distance=(a,b)=>Math.hypot(...v(a).map((n,i)=>n-v(b)[i]));
   const along=(a,b,c)=>v(a).reduce((sum,x,i)=>sum+(v(b)[i]-x)*(v(c)[i]-v(b)[i]),0);
-  await press('r');const advance=await pose();await press('f');const retreat=await pose();
-  verify(distance(unrolled,advance)>.25&&along(unrolled,advance,retreat)<0,'R/F motion not opposite');
-  await press('Shift');const rise=await pose();await press('Control');const fall=await pose();
-  verify(distance(retreat,rise)>.25&&along(retreat,rise,fall)<0,'Shift/Ctrl motion not opposite');
+  await press('h');const advance=await pose();await press('n');const retreat=await pose();
+  verify(distance(unrolled,advance)>.25&&along(unrolled,advance,retreat)<0,'H/N motion not opposite');
+  await press('k');const rise=await pose();await press('i');const fall=await pose();
+  verify(distance(retreat,rise)>.25&&along(retreat,rise,fall)<0,'K/I motion not opposite');
+  await press('j');const strafeLeft=await pose();await press('l');const strafeRight=await pose();
+  verify(distance(fall,strafeLeft)>.25&&along(fall,strafeLeft,strafeRight)<0,'J/L strafe motion not opposite');
   await page.keyboard.press('Escape');verify(await page.locator('#flightLab').evaluate(el=>el.open)&&await photo.getAttribute('data-free-state')==='ready','first Escape closed the lab or retained controls');
   const idle=await pose();await press('w',90);verify(JSON.stringify(idle)===JSON.stringify(await pose()),'released controls still consumed W');
   const focusPoint=await point();await page.mouse.click(focusPoint.x,focusPoint.y);
@@ -60,7 +62,7 @@ async page=>{
   });
   verify(diff.rotated<diff.unrotated*.6,'actual viewfinder failed 90-degree optical roll: '+JSON.stringify(diff));
   await click('reset-camera');await shoot();if(await details.evaluate(e=>e.open))await details.locator('summary').click();
-  const frame=await point();await page.mouse.click(frame.x,frame.y);await press('e',130);await press('r',150);
+  const frame=await point();await page.mouse.click(frame.x,frame.y);await press('e',130);await press('h',150);
   await page.waitForFunction(()=>{const c=document.querySelector('#exposurePanel [data-exposure=photo]');return c.dataset.quality==='full'&&c.dataset.freeState==='active';});
   await root.evaluate(panel=>{
     const top=panel.querySelector('[data-exposure=free]').closest('label').getBoundingClientRect().top;

@@ -32,7 +32,7 @@ export class EventTimeline{
   return (direction>0?candidates.find(e=>e.time>time):candidates.findLast(e=>e.time<time-1))||null;
  }
  jump(time,{pause=false}={}){
-  const s=this.sim;if(!validTime(time))return;
+  const s=this.sim;if(!validTime(time))return;s.mainFlight?.stop();
   if(s.mode==='real'){s.speed=1;s.paused=false;}if(pause)s.paused=true;s.mode='custom';s.time=time;s.inputDirty=false;s.dirty=s.snap=true;s.lastWall=performance.now();s.timeUI();
  }
  // Stop exactly at the selected event. Continuing playback would make Previous

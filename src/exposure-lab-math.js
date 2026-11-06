@@ -55,9 +55,9 @@ export function cameraAtOpen(state,settings=presetCamera()) {
 
 // Apply increments in the current viewfinder axes. Store the result in the same
 // azimuth/elevation/roll fields the sliders, hull camera and exposure sampler use.
-export function moveExposureCamera(settings,{yaw=0,pitch=0,roll=0,forward=0,lift=0}={}) {
-  if(![yaw,pitch,roll,forward,lift].every(Number.isFinite))return settings;
-  if(!yaw&&!pitch&&!roll&&!forward&&!lift)return settings;
+export function moveExposureCamera(settings,{yaw=0,pitch=0,roll=0,forward=0,lift=0,right:strafe=0}={}) {
+  if(![yaw,pitch,roll,forward,lift,strafe].every(Number.isFinite))return settings;
+  if(!yaw&&!pitch&&!roll&&!forward&&!lift&&!strafe)return settings;
   let [right,up,sight]=localCamera(settings.azimuth,settings.pitch,settings.roll);
   const turn=(a,b,angle)=>{
     const c=Math.cos(angle*radians),s=Math.sin(angle*radians);
@@ -75,8 +75,8 @@ export function moveExposureCamera(settings,{yaw=0,pitch=0,roll=0,forward=0,lift
     next.azimuth=az;next.pitch=Math.atan2(sight[2],horizontal)/radians;
     next.roll=Math.atan2(dot(up,levelRight),dot(up,cross(levelRight,sight)))/radians;
   }
-  if(forward||lift){
-    const delta=sight.map((v,i)=>v*forward+up[i]*lift),axes=['x','y','z'];
+  if(forward||lift||strafe){
+    const delta=sight.map((v,i)=>v*forward+up[i]*lift+right[i]*strafe),axes=['x','y','z'];
     // Stop on the first mount limit without bending a straight view-axis move.
     let fraction=1;
     for(const [i,axis] of axes.entries())if(Math.abs(delta[i])>1e-12){

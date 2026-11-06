@@ -8,6 +8,7 @@ import {lastObserver,rememberObserver,sameObserver,observerOrbit,orbitSelection,
 import {orbitDescription,updateReport} from './observer-orbit-display.js';
 import {orbitSource} from './orbit-repository.js';
 import {createBalconySkyView} from './balcony-sky-view.js';
+import {PILOT_KEY_AXES} from './pilot-controls.js';
 import {mountBalconyViewControls} from './balcony-view-controls.js';
 import {BEIJING_BALCONY,balconyEvents,balconyTrack,normalizeHorizon,observationState,siteKey,wrapAzimuth} from './balcony-lab-geometry.js';
 import {drawBalconySky,drawOrbitDisk,earthTexture,skyProjection} from './balcony-lab-drawing.js';
@@ -456,7 +457,11 @@ export function mountBalconyLab(container,sim,assets){
   const r=el.sky.getBoundingClientRect();setFollow(false);centre=wrapAzimuth(drag.centre-dx/r.width*skyProjection(r.width,r.height,0).span);draw();
  };
  const endDrag=()=>{drag=null;};el.sky.onpointerup=endDrag;el.sky.onpointercancel=endDrag;el.sky.onlostpointercapture=endDrag;
- el.sky.onkeydown=e=>{if(viewMode!=='flat'||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();setFollow(false);centre=wrapAzimuth(centre+(e.key==='ArrowLeft'?-15:15));draw();};
+ el.sky.onkeydown=e=>{
+  if(viewMode!=='flat'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+  const axis=PILOT_KEY_AXES[e.code],turn=axis?.[0]==='yaw'?-axis[1]:e.key==='ArrowLeft'?-1:e.key==='ArrowRight'?1:0;
+  if(!turn)return;e.preventDefault();e.stopPropagation();setFollow(false);centre=wrapAzimuth(centre+turn*15);draw();
+ };
  const resize=new ResizeObserver(()=>draw());resize.observe(el.sky);resize.observe(el.disk);
  const visibility=()=>{if(document.hidden){stop();controls?.stopMotion();suspendLive();}else resumeLive();};document.addEventListener('visibilitychange',visibility);
  function translate(){

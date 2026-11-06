@@ -14,11 +14,17 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v1.06 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v1.12 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-> This guide describes the v1.06 release. The online and portable editions each show their version in the header.
+Open the Xuntian finder and orbit map independently from the right toolbar. The navball supports compact and full layouts.
 
-In the China Space Station scene, open **Xuntian viewfinder** beside the orbit map. Search for Vega, Orion, a HIP identifier or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
+> This guide describes the v1.12 release. The online and portable editions each show their version in the header.
+
+In the China Space Station scene, open **Xuntian viewfinder** beside the orbit map. Search for Vega, Orion, a HIP identifier, M31, a nebula name or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
+
+Enable the main navball under **Spacecraft attitude**, then click the ball to pilot the selected craft with KSP-style keys. Rotation has inertia; RCS enables translation and SAS stabilizes attitude. **Free flight** still provides separate Shenzhou/Tianzhou undocking, flight saves and port capture. The Xuntian finder identifies the current crosshair direction, and the sky chart adds all Messier objects plus selected NGC targets. [Controls and scope (Chinese)](docs/v1.09-pilot-star-chart.md). Drag floating-window headers to arrange a persistent layout.
+
+The finder's **Solar observations** mode displays real SDO sunspot, corona and prominence imagery at 1K or 2K, with updates for the selected channel and dated PNG exports. The resource page and finder share the same images. Online updates use the desktop service; the web edition imports solar snapshots. [Solar observing guide (Chinese)](使用说明.md#太阳观测).
 
 ## Contents
 
@@ -49,7 +55,7 @@ First use defaults to detailed 8K overall quality and the enhanced 16K Milky Way
 | --- | --- | --- |
 | Online | Visit the launch link | Initial loading needs a connection. Includes orbital and cloud snapshots and supports file import; some processing requires the local service |
 | Portable | Extract a release archive and open `StarOrbit.html` | Embedded assets support offline use. Features follow the release version |
-| Local service | Use a bundled launcher or start the service from source | Supplies endpoints for NASA cloud processing and official orbit updates; downloading needs a connection |
+| Local service | Use a bundled launcher or start the service from source | Supplies endpoints for NASA cloud processing, SDO imagery and official orbit updates; downloading needs a connection |
 | Source | Install dependencies, build and run | Uses the current code and allows changes to the application or assets |
 
 ## Interface and basic controls
@@ -122,6 +128,8 @@ The event timeline offers 3-, 12- and 24-hour windows with sunlight, penumbra an
 
 Roll, pitch and yaw controls provide ±180° manual offsets with synchronized numeric inputs and sliders. Offsets apply relative to the active mission reference: ground-track orientation for the station, or prograde/inertial orientation for satellites. Resetting attitude clears the offsets while retaining the orbit and time.
 
+Click the enabled navball for keyboard control: W/S pitch, A/D yaw, Q/E roll, R for RCS and T for SAS. With RCS enabled, H/N moves forward/back, J/L left/right and I/K down/up. Releasing a key preserves momentum. SAS brakes rotation and holds attitude; relative translation needs counterthrust or the separate brake. Main-page piloting is a 1× near-orbit exercise limited to a 10 km offset. Restore observation returns to the reference state without altering the shared orbital dataset.
+
 ## Earth, sky and environment
 
 Environment settings persist across spacecraft switches.
@@ -133,7 +141,7 @@ Environment settings persist across spacecraft switches.
 | Clouds | One cloud library for global imagery, regional Himawari-9 observations, and Canadian cloud forecasts; optional 8K volumetric and evolving clouds |
 | Night-side clouds | Cloud coverage can obscure city lights, with stronger occlusion under thicker clouds |
 | Aurora | NOAA OVATION snapshots or local distribution; volumetric curtains in 8K and the classic effect in 4K |
-| Stars and constellations | 41,411 catalogue stars and native 16K NASA Milky Way source imagery; star labels and names, lines and boundaries for 88 constellations |
+| Stars and constellations | 41,411 catalogue stars and native 16K NASA Milky Way source imagery; a shared 57,431-star label catalogue, 965 named-star entries and zoom-dependent catalogue identifiers; independent layers for 88 constellations and 127 deep-sky targets |
 | Geography | Countries, capitals, cities, borders, seas, mountains, rivers and lakes, with density and hierarchy controls |
 | Atmospheric phenomena | Simulated cloud lightning, high-altitude flashes, airglow and meteors; natural or enhanced presentation |
 
@@ -191,6 +199,7 @@ The contact-speed limit defaults to **0.15 m/s**, is adjustable, and applies to 
 | Modern DFH-1 orbit | CelesTrak, NORAD 4382 | SGP4 propagation from GP/OMM elements |
 | Global clouds | Live Cloud Maps, NOAA GMGSI, NASA SatCORPS, regional Himawari-9 cloud masks, and Canadian GDPS forecasts | Apply saved maps directly; downloads leave the view unchanged; coverage and visual warnings remain visible; corrupt files are blocked |
 | Aurora distribution | NOAA SWPC OVATION | Forecast distribution controls geographical activity and intensity |
+| Solar observations | NASA SDO HMI/AIA through Helioviewer | Projects actual images onto the apparent solar disc in the finder; observation time remains distinct from simulation time; update or import snapshots |
 
 Live Cloud Maps and GDPS download directly in the browser. NOAA GMGSI, NASA SatCORPS and Himawari-9 use the local service. Web users can import processed snapshots. Connection or source failures preserve existing data and appear as failed checks.
 
@@ -274,6 +283,7 @@ Application code is in `src/`, runtime assets in `assets/`, the build entry in `
 | Detailed surface and night lights | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/) and [Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/), NASA Earth Observatory; Suomi NPP / VIIRS for night lights |
 | Milky Way | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/), NASA/Goddard Space Flight Center Scientific Visualization Studio, Ernie Wright; Gaia DR2: ESA/Gaia/DPAC |
 | Moon | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/), NASA SVS / Ernie Wright; LRO / LROC |
+| Solar observations | NASA/SDO and the AIA, EVE and HMI science teams; obtained through [Helioviewer](https://api.helioviewer.org/docs/v2/) under [SDO data-use rules](https://sdo.gsfc.nasa.gov/data/rules.php) |
 | Catalogue and sky styling | [d3-celestial / XHIP](https://github.com/ofrohn/d3-celestial), BSD 3-Clause; styling adapted from [StarSky Studio](https://github.com/Wenshuishi0528/StarSkyStudio), CC BY 4.0 |
 | Clouds | [Live Cloud Maps](https://github.com/matteason/live-cloud-maps), Contains modified EUMETSAT data; [NASA Langley Cloud and Radiation Research Group](https://satcorps.larc.nasa.gov/) |
 | Aurora | [NOAA SWPC OVATION](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) |

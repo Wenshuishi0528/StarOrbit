@@ -1,7 +1,7 @@
 #openXuntian{margin:0 8px 8px 0;border-color:#38746e;color:#a6eee2}
-#openXuntianMap{padding:3px 7px;font-size:11px;white-space:nowrap}
+#openXuntianMap,#openOrbitMap{white-space:nowrap}
+#openXuntianMap[aria-expanded=true],#openOrbitMap[aria-expanded=true]{border-color:#44857b;color:#b7f3e4;background:#183c39}
 #openXuntianMap[hidden],#xuntianScope[hidden],#xuntianScope [hidden]{display:none!important}
-body.xt-scope-open #orbitMinimap{display:none!important}
 #xuntianScope{--xt-ink:#9beddf;position:absolute;right:20px;bottom:100px;z-index:4;width:min(352px,calc(100vw - 34px));max-height:calc(100dvh - 190px);display:flex;flex-direction:column;color:#deecf6;background:#0a1828f7;border:1px solid #38606f;border-radius:12px;box-shadow:0 12px 34px #0007;overflow:hidden;font-size:12px}
 .xt-heading{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:7px 10px;background:#102237;border-bottom:1px solid #2d4356}
 .xt-heading strong{color:var(--xt-ink);white-space:nowrap}
@@ -28,6 +28,9 @@ body.xt-scope-open #orbitMinimap{display:none!important}
 .xt-object{display:flex;gap:6px;align-items:baseline;justify-content:space-between;min-height:20px}
 .xt-object strong{color:var(--xt-ink)}.xt-object span{font-size:11px;color:#afc2d3;text-align:right}
 .xt-object span[data-blocked=true]{color:#f5c27c}
+.xt-crosshair-readout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 7px;padding:5px 7px;margin:3px 0 6px;border-left:2px solid #65b9a9;background:#11293580;border-radius:3px;font-size:11px;font-variant-numeric:tabular-nums}
+.xt-crosshair-readout>span{color:#93abbc}.xt-crosshair-readout>strong{color:#c4f4e8;overflow-wrap:anywhere}
+.xt-crosshair-readout>small{grid-column:1/-1;color:#b1c5d2;font-size:10px;line-height:1.4;overflow-wrap:anywhere}
 .xt-controls{display:grid;grid-template-columns:auto minmax(40px,1fr) auto;align-items:center;gap:4px 8px;margin:6px 0 8px;font-size:11px}
 .xt-controls input{width:100%;margin:0;accent-color:#85d7c9}
 .xt-controls output{text-align:right;font-variant-numeric:tabular-nums;min-width:54px}
@@ -64,7 +67,7 @@ body.xt-scope-open #telemetry,body.xt-scope-open .station-tag:not([data-instance
  #xuntianScope.expanded{width:min(95vw,calc(160dvh + 60px))}
  #xuntianScope.expanded .xt-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,300px);column-gap:14px;align-content:start}
  #xuntianScope.expanded .xt-body > :not(.xt-ocular){grid-column:2;min-width:0}
- #xuntianScope.expanded .xt-ocular{grid-column:1;grid-row:1/span 14;align-self:start;margin:0}
+ #xuntianScope.expanded .xt-ocular{grid-column:1;grid-row:1/span 17;align-self:start;margin:0}
  #xuntianScope.expanded #xtMore{margin:6px 0 0;padding-inline:0}
 }
 @media(max-width:760px){#xuntianScope.expanded{max-height:84dvh}#xuntianScope.expanded .xt-ocular{max-width:none}}
@@ -89,3 +92,37 @@ body.xt-scope-open #telemetry,body.xt-scope-open .station-tag:not([data-instance
 
 .xt-track-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:4px 0}
 #xuntianScope .xt-track-actions button{min-height:23px;font-size:11px;padding:2px 7px}
+.xt-solar-controls{border:1px solid #51472e;background:#28261980;border-radius:6px;margin:7px 0;padding:6px 7px}
+.xt-solar-controls summary{cursor:pointer;color:#f3d8a6;font-size:11px}
+#xtSolarMode{float:right;color:#bfb59f;font-size:10px}
+#xtSolarChannels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin:7px 0 5px}
+#xuntianScope #xtSolarChannels button{font-size:10px;min-width:0;padding:4px}
+.xt-solar-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+#xuntianScope .xt-solar-actions button{font-size:10px;padding:3px 5px}
+#xtSolarResolution{width:44px;min-width:0;background:#182637;border:1px solid #47576a;border-radius:5px;color:#dfebf4;font-size:10px;padding:3px}
+.xt-solar-controls button[aria-pressed=true]{background:#574227;border-color:#b39558;color:#ffe4ad}
+.xt-solar-controls p{font-size:10px;line-height:1.5;color:#b9c7cf;overflow-wrap:anywhere;margin:6px 0 0}
+#xtSolarRecord{color:#e2d5b4;font-variant-numeric:tabular-nums}
+#xtSolarStatus[data-error=true]{color:#efc18c}
+#xtSolarHint{color:#a2acb3}
+
+/* Independent instruments: keep the unmoved map clear of the finder. Saved
+   floating positions remain owned by the player and override these defaults. */
+@media(min-width:1351px){
+ #xuntianScope:not([data-floating-moved]){right:310px}
+ #xuntianScope.expanded:not([data-floating-moved]){width:min(calc(100vw - 680px),calc(146dvh - 110px))}
+ body.xt-scope-open #orbitMinimap:not([data-floating-moved]){left:350px;right:auto;top:110px;bottom:auto;width:300px}
+ body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope.expanded:not([data-floating-moved]){right:310px;width:min(calc(100vw - 1000px),calc(146dvh - 110px))}
+}
+@media(min-width:761px) and (max-width:1350px){
+ body.xt-scope-open #orbitMinimap:not([data-floating-moved]){left:350px;right:auto;top:100px;bottom:auto;width:min(260px,calc(100vw - 370px));max-height:200px;overflow:auto}
+ body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope:not([data-floating-moved]){top:454px;bottom:auto;right:20px;width:min(352px,calc(100vw - 370px));max-height:max(150px,calc(100dvh - 538px))}
+}
+@media(max-width:760px){
+ body.xt-scope-open #orbitMinimap:not([data-floating-moved]){top:122px;bottom:auto;left:10px;right:auto;width:min(260px,calc(100vw - 20px));max-height:calc(47dvh - 140px);overflow:auto}
+ body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope.expanded:not([data-floating-moved]){max-height:53dvh}
+}
+
+@media(min-width:1351px) and (max-width:1799px){
+ body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope.expanded .xt-body{display:block}
+}

@@ -26,7 +26,7 @@ export class Moon{
   this.mesh=new THREE.Mesh(geometry,new THREE.ShaderMaterial({uniforms:this.uniforms,vertexShader:vertex,fragmentShader:fragment}));this.mesh.name='Moon';environment.sim.sky.add(this.mesh);
   this.ready=new THREE.TextureLoader().loadAsync(environment.assets.moon).then(tex=>{tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=Math.min(4,environment.api.renderer.capabilities.getMaxAnisotropy());this.texture=tex;this.uniforms.surfaceMap.value=tex;this.uniforms.textured.value=true;}).catch(()=>environment.api.toast('月面纹理未能加载'));
   document.getElementById('lookMoon').onclick=()=>this.savedView?this.returnToStation():this.look();
-  document.getElementById('returnStation').onclick=()=>this.returnToStation();
+  document.getElementById('returnStation').onclick=()=>this.env.sim.cameraFocus?this.env.sim.cameraFocus.focus():this.returnToStation();
  }
  update(q,camera){
   this.mesh.visible=!!q&&this.env.settings.moon;if(!this.mesh.visible)return;
@@ -47,7 +47,8 @@ export class Moon{
  returnToStation(){
   const {sim,api}=this.env,{camera,controls}=api;sim.setView('follow');
   if(this.savedView){const v=this.savedView;camera.position.copy(v.position);camera.up.copy(v.up);camera.fov=v.fov;camera.zoom=v.zoom;controls.target.copy(v.target);}
-  else{const box=api.bounds(),center=box.getCenter(new THREE.Vector3()),radius=box.getSize(new THREE.Vector3()).length()/2;controls.target.copy(center);camera.up.set(0,0,1);camera.fov=38;camera.zoom=1;const fov=THREE.MathUtils.degToRad(camera.fov),half=Math.min(fov/2,Math.atan(Math.tan(fov/2)*camera.aspect));camera.position.copy(center).addScaledVector(new THREE.Vector3(1,-1,.6).normalize(),radius*1.15/Math.sin(half));}
+  else if(sim.cameraFocus){sim.cameraFocus.focus();}
+  else{const box=api.bounds('mission'),center=box.getCenter(new THREE.Vector3()),radius=box.getSize(new THREE.Vector3()).length()/2;controls.target.copy(center);camera.up.set(0,0,1);camera.fov=38;camera.zoom=1;const fov=THREE.MathUtils.degToRad(camera.fov),half=Math.min(fov/2,Math.atan(Math.tan(fov/2)*camera.aspect));camera.position.copy(center).addScaledVector(new THREE.Vector3(1,-1,.6).normalize(),radius*1.15/Math.sin(half));}
   camera.updateProjectionMatrix();controls.stopMotion();const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;this.savedView=null;setText('lookMoon','望向月球');api.resize();
  }
 }

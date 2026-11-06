@@ -1,0 +1,169 @@
+#freeFlightInstruments{position:fixed;inset:0;z-index:3;pointer-events:none;color:#dcebf3;font:12px/1.4 system-ui,-apple-system,sans-serif}
+#freeFlightInstruments[hidden],#freeFlightInstruments [hidden]{display:none!important}
+#freeFlightInstruments .ffi-stack{position:absolute;right:16px;top:16px;bottom:16px;width:252px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:10px;pointer-events:none}
+#freeFlightInstruments .ffi-card{pointer-events:auto;background:#0a1929ed;border:1px solid #3b596b;border-radius:12px;padding:10px 12px;box-shadow:0 5px 20px #0004;min-height:0;overflow:auto;scrollbar-width:thin}
+#freeFlightInstruments h3{font-size:13px;letter-spacing:.05em;margin:0 0 7px;color:#d7eaf0}
+#freeFlightInstruments .ffi-navigation{flex-shrink:0}
+#freeFlightInstruments .ffi-ball{display:block;width:194px;height:194px;max-width:100%;margin:-5px auto -3px}
+#freeFlightInstruments .ffi-nav-top{display:flex;align-items:baseline;justify-content:space-between;color:#b8ccd6;font-size:11px}
+#freeFlightInstruments .ffi-nav-top strong{font:600 18px ui-monospace,monospace;color:#c7eddf}
+#freeFlightInstruments .ffi-attitude{font-size:10px;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums;color:#ecdfc2}
+#freeFlightInstruments .ffi-legend{display:flex;justify-content:space-between;gap:5px;font-size:9px;margin:6px 0}
+#freeFlightInstruments .ffi-velocity{color:#c9ed79}#freeFlightInstruments .ffi-target{color:#eeb4ef}
+#freeFlightInstruments summary{cursor:pointer;color:#b8d0dc;font-size:11px;padding:4px 0}
+#freeFlightInstruments .ffi-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:3px}
+#freeFlightInstruments button{background:#112a3b;border:1px solid #365465;border-radius:4px;padding:5px 3px;font:11px/1.3 system-ui;color:#cee1e8;cursor:pointer}
+#freeFlightInstruments button:last-child{grid-column:span 2}
+#freeFlightInstruments button:disabled{opacity:.4;cursor:default}
+#freeFlightInstruments button[aria-pressed=true]{border-color:#76bba9;background:#1c413c;color:#c8f3e5}
+#freeFlightInstruments button:focus-visible{outline:2px solid #9bdccb;outline-offset:1px}
+#freeFlightInstruments .ffi-more{border-top:1px solid #294450;margin-top:6px;padding-top:3px}
+#freeFlightInstruments .ffi-reads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 10px;margin:6px 0}
+#freeFlightInstruments .ffi-reads div{min-width:0}
+#freeFlightInstruments dt{color:#9cb6c5;font-size:10px;margin:0}
+#freeFlightInstruments dd{margin:0;font:12px/1.5 ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+#freeFlightInstruments .ffi-dock-state{font-size:12px;color:#f0bd89;margin:3px 0 6px}
+#freeFlightInstruments .ffi-dock-state[data-ready=true]{color:#97e0cc}
+#freeFlightInstruments .ffi-align{font:10px/1.6 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#c8d9e2;margin:4px 0;text-wrap:balance}
+#freeFlightInstruments .ffi-capture{border-top:1px solid #294450;margin-top:7px}
+#freeFlightInstruments .ffi-capture ul{list-style:none;margin:3px 0 0;padding:0}
+#freeFlightInstruments .ffi-capture li{display:flex;justify-content:space-between;gap:5px;font-size:10px;line-height:1.8;color:#a8becc}
+#freeFlightInstruments .ffi-capture b{font:10px/1.8 ui-monospace,monospace;font-weight:500;text-align:right;color:#f0bd89}
+#freeFlightInstruments .ffi-capture [data-pass=true] b{color:#a5decb}
+#freeFlightInstruments .ffi-note{font-size:10px;color:#93aebd;margin:6px 0 0}
+#freeFlightInstruments .ffi-sight{position:absolute;width:64px;height:64px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 2px #04101a)}
+#freeFlightInstruments .ffi-sight::before,#freeFlightInstruments .ffi-sight::after{content:"";position:absolute;background:#a9e9d6}
+#freeFlightInstruments .ffi-sight::before{left:0;top:31px;width:64px;height:1px}
+#freeFlightInstruments .ffi-sight::after{left:31px;top:0;width:1px;height:64px}
+#freeFlightInstruments .ffi-sight i{position:absolute;inset:20px;border:1px solid #a9e9d6;border-radius:50%}
+#freeFlightInstruments .ffi-sight b{position:absolute;inset:5px;border:1px solid #b9ead247;border-radius:50%}
+#freeFlightInstruments .ffi-target-marker{position:absolute;transform:translate(-50%,-50%);width:20px;height:20px;color:#f3b6f4;filter:drop-shadow(0 0 2px #04101a)}
+#freeFlightInstruments .ffi-target-marker i{position:absolute;inset:3px;border:1.5px solid currentColor;transform:rotate(45deg)}
+#freeFlightInstruments .ffi-target-marker span{position:absolute;top:24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;background:#0b1429b5;padding:1px 4px;border-radius:2px}
+#freeFlightInstruments .ffi-target-marker[data-offscreen=true] i{border-style:dashed}
+#freeFlightInstruments .ffi-target-marker[data-behind=true]{color:#f3c492}
+@media (min-width:761px) and (max-height:760px){
+ #freeFlightInstruments .ffi-stack{top:8px;bottom:8px;right:8px;gap:6px;width:228px}
+ #freeFlightInstruments .ffi-card{padding:7px 10px}
+ #freeFlightInstruments .ffi-ball{width:154px;height:154px}
+ #freeFlightInstruments .ffi-navigation{flex-shrink:1}
+ #freeFlightInstruments.ffi-is-docking .ffi-more{display:none}
+ #freeFlightInstruments .ffi-reads{gap:3px 7px}
+}
+@media (max-width:760px){
+ #freeFlightInstruments .ffi-stack{top:8px;right:8px;bottom:auto;width:174px;max-height:calc(55dvh - 16px);justify-content:flex-start;gap:6px;overflow:auto;scrollbar-width:thin}
+ #freeFlightInstruments .ffi-card{padding:6px 8px;border-radius:8px;flex-shrink:0}
+ #freeFlightInstruments h3{font-size:11px;margin-bottom:3px}
+ #freeFlightInstruments .ffi-ball{width:122px;height:122px;margin:-5px auto}
+ #freeFlightInstruments .ffi-nav-top{font-size:9px}#freeFlightInstruments .ffi-nav-top strong{font-size:13px}
+ #freeFlightInstruments .ffi-attitude{white-space:normal;font-size:9px}
+ #freeFlightInstruments .ffi-legend{font-size:8px;flex-wrap:wrap;margin:3px 0}
+ #freeFlightInstruments .ffi-more{display:none}
+ #freeFlightInstruments button{font-size:10px;min-height:27px;padding:3px 1px}
+ #freeFlightInstruments .ffi-modes{gap:3px}
+ #freeFlightInstruments .ffi-docking{order:0}#freeFlightInstruments .ffi-navigation{order:1}
+ #freeFlightInstruments .ffi-dock-state{font-size:10px;margin:3px 0}
+ #freeFlightInstruments .ffi-reads{gap:2px 5px}#freeFlightInstruments dt{font-size:8px}#freeFlightInstruments dd{font-size:10px}
+ #freeFlightInstruments .ffi-align,#freeFlightInstruments .ffi-capture li,#freeFlightInstruments .ffi-capture b{font-size:9px}
+ #freeFlightInstruments .ffi-note{font-size:9px}
+ #freeFlightInstruments.ffi-is-docking .ffi-ball{width:100px;height:100px}
+}
+
+/* The observation mode shares the same lightweight ball, with its own body
+   reference and explicit pilot controls. Its default place leaves the map and
+   telescope on the right; the floating-window helper can move it freely. */
+#attitudeNavballPanel{position:absolute;left:14px;bottom:112px;width:320px;max-width:calc(100% - 28px);z-index:2;box-sizing:border-box;padding:8px 10px;border:1px solid #3b596b;border-radius:11px;background:#0a1929e8;box-shadow:0 5px 20px #0003;color:#dcebf3;font:11px/1.4 system-ui,-apple-system,sans-serif}
+#attitudeNavballPanel[hidden]{display:none!important}
+#attitudeNavballPanel[data-keyboard=true]{border-color:#91e4ca;box-shadow:0 0 0 2px #70d6bd4d,0 5px 20px #0003;outline:none}
+#attitudeNavballPanel[data-keyboard=true] .an-note{color:#b4f2d9}
+#attitudeNavballPanel .an-ball{cursor:pointer}
+#attitudeNavballPanel .an-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
+#attitudeNavballPanel h3{font:600 12px/1.4 system-ui;margin:0}
+#attitudeNavballPanel .an-close{border:0;background:transparent;padding:0 2px;font:17px/1.1 system-ui;color:#acbecb}
+#attitudeNavballPanel .an-craft{font-size:10px;color:#a7c1cd;margin:2px 0 0}
+#attitudeNavballPanel .an-ball{display:block;width:166px;height:166px;margin:-2px auto}
+#attitudeNavballPanel .an-instrument{display:grid;grid-template-columns:56px minmax(0,1fr) 56px;align-items:center;gap:5px;margin:6px 0}
+#attitudeNavballPanel .an-instrument .an-ball{max-width:100%;height:auto;aspect-ratio:1}
+#attitudeNavballPanel[data-sas-modes=false] .an-instrument{grid-template-columns:1fr}
+#attitudeNavballPanel .an-modes{display:flex;flex-direction:column;gap:4px;min-width:0}
+#attitudeNavballPanel .an-sas-state{display:grid;gap:2px;text-align:center;font-size:10px;line-height:1.4;margin:4px 0 5px;overflow-wrap:anywhere}
+#attitudeNavballPanel .an-mode-name{color:#b8f0d9;font-weight:600}
+#attitudeNavballPanel .an-target-name{color:#a4bdcb}
+#attitudeNavballPanel .an-attitude{font-size:10px;font-variant-numeric:tabular-nums;text-align:center;line-height:1.5;text-wrap:balance;color:#e7ddc9}
+#attitudeNavballPanel .an-orbit{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 5px;margin:7px 0 4px;font-size:9px;color:#abc5d1}
+#attitudeNavballPanel .an-speed{color:#c7eddf;font:600 11px ui-monospace,monospace}
+#attitudeNavballPanel .an-legend{color:#c9ed79;font-size:9px;margin:4px 0}
+#attitudeNavballPanel .an-note{color:#91aeba;font-size:9px;margin:3px 0 0}
+body.free-flight-active #attitudeNavballPanel,body.photo-mode #attitudeNavballPanel,body.immersive:not(.hud-visible) #attitudeNavballPanel{display:none!important}
+@media(min-width:761px) and (max-height:750px){
+ #attitudeNavballPanel{width:282px;bottom:110px;padding:6px 8px}
+ #attitudeNavballPanel .an-instrument{grid-template-columns:52px minmax(0,1fr) 52px;gap:4px}
+ #attitudeNavballPanel .an-ball{width:130px;height:130px}
+ #attitudeNavballPanel .an-note{display:none}
+}
+@media(max-width:760px){
+ #attitudeNavballPanel{left:auto;right:8px;top:54px;bottom:auto;width:270px;max-width:calc(100% - 16px);padding:6px 7px;border-radius:8px}
+ #attitudeNavballPanel .an-instrument{grid-template-columns:54px minmax(0,1fr) 54px;gap:4px;margin:4px 0}
+ #attitudeNavballPanel .an-ball{width:116px;height:116px}
+ #attitudeNavballPanel h3{font-size:10px}#attitudeNavballPanel .an-craft{font-size:8px}
+ #attitudeNavballPanel .an-attitude,#attitudeNavballPanel .an-legend{font-size:8px}
+ #attitudeNavballPanel .an-note{display:none}
+ #attitudeNavballPanel .an-orbit{font-size:8px;margin:4px 0 2px}
+ #attitudeNavballPanel .an-speed{font-size:9px}
+ body:has(#orbitMinimap.compact-expanded:not([hidden])) #attitudeNavballPanel,body:has(#xuntianScope.expanded:not([hidden])) #attitudeNavballPanel{display:none}
+}
+
+#attitudeNavballPanel{max-height:calc(100% - 130px);overflow:auto;scrollbar-width:thin}
+#attitudeNavballPanel .an-controls{display:grid;grid-template-columns:1fr 1fr .8fr;gap:4px;margin-top:7px}
+#attitudeNavballPanel .an-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px}
+#attitudeNavballPanel [data-pilot]{font:10px/1.3 system-ui,sans-serif;padding:5px 3px;min-height:26px;border-radius:5px;border:1px solid #39566a;background:#172d3d;color:#cfdee5}
+#attitudeNavballPanel [data-pilot][aria-pressed=true]{background:#20554f;border-color:#76c9b6;color:#b4f2d9}
+#attitudeNavballPanel [data-pilot]:disabled{opacity:.4}
+#attitudeNavballPanel [data-attitude-mode]{font-size:10px;line-height:1.2;min-height:29px;padding:5px 2px;white-space:normal;overflow-wrap:anywhere}
+#attitudeNavballPanel [data-attitude-mode]:disabled{opacity:.48}
+#attitudeNavballPanel .an-motion{font:10px/1.6 ui-monospace,monospace;color:#c8deda;margin-top:6px;text-wrap:balance}
+#attitudeNavballPanel .an-flight-state{font-size:9px;color:#c7d8ad;margin:5px 0}
+#attitudeNavballPanel[data-keyboard=true] .an-note{display:block}
+#attitudeNavballPanel [hidden]{display:none!important}
+@media(max-width:760px){#attitudeNavballPanel{max-height:calc(75dvh - 62px)}}
+
+#attitudeNavballPanel select.an-craft{display:block;width:100%;min-width:0;padding:3px 5px;margin:4px 0;border:1px solid #36586a;border-radius:5px;background:#122937;color:#bce6dd;font-size:11px}
+
+/* Compact pilot HUD retains craft selection, mode buttons and RCS/SAS. Readouts
+   remain available in full view instead of being squeezed into tiny type. */
+#attitudeNavballPanel .an-layout{margin-left:auto;padding:2px 5px;min-height:24px;font:10px/1.2 system-ui;border-radius:4px;background:#132d3c;color:#b8dcd7;border:1px solid #36586a;white-space:nowrap}
+#attitudeNavballPanel .an-mode-icon{display:none;color:var(--an-mode-color);font:21px/1 ui-monospace,monospace}
+#attitudeNavballPanel[data-compact=true]{width:244px;padding:6px;border-radius:10px}
+#attitudeNavballPanel[data-compact=true] .an-heading{gap:5px}
+#attitudeNavballPanel[data-compact=true] .an-heading h3{font-size:10px}
+#attitudeNavballPanel[data-compact=true] .an-instrument{grid-template-columns:28px minmax(0,1fr) 28px;gap:4px;margin:3px 0}
+#attitudeNavballPanel[data-compact=true] .an-ball{width:166px;height:auto}
+#attitudeNavballPanel[data-compact=true] .an-modes{gap:3px}
+#attitudeNavballPanel[data-compact=true] [data-attitude-mode]{width:28px;min-height:28px;padding:2px;display:grid;place-items:center}
+#attitudeNavballPanel[data-compact=true] .an-mode-icon{display:block}
+#attitudeNavballPanel[data-compact=true] .an-mode-label,
+#attitudeNavballPanel[data-compact=true] .an-target-name,
+#attitudeNavballPanel[data-compact=true] .an-attitude,
+#attitudeNavballPanel[data-compact=true] .an-orbit,
+#attitudeNavballPanel[data-compact=true] .an-legend,
+#attitudeNavballPanel[data-compact=true] .an-motion,
+#attitudeNavballPanel[data-compact=true] .an-actions,
+#attitudeNavballPanel[data-compact=true] .an-flight-state,
+#attitudeNavballPanel[data-compact=true] .an-note{display:none!important}
+#attitudeNavballPanel[data-compact=true] .an-sas-state{font-size:9px;margin:0 0 3px}
+#attitudeNavballPanel[data-compact=true] .an-controls{margin-top:3px}
+#attitudeNavballPanel[data-compact=true] [data-pilot=rcs],
+#attitudeNavballPanel[data-compact=true] [data-pilot=sas],
+#attitudeNavballPanel[data-compact=true] [data-pilot=fine]{padding:3px;font-size:10px;min-height:25px}
+@media(max-width:760px){
+ #attitudeNavballPanel[data-compact=true]{width:222px}
+ #attitudeNavballPanel[data-compact=true] .an-ball{width:144px}
+}
+#attitudeNavballPanel .an-compact-center{display:none;border-radius:5px;border:1px solid #39566a;background:#172d3d;color:#cfdee5;min-height:25px}
+#attitudeNavballPanel[data-compact=true] .an-compact-center{display:block;font-size:20px;padding:0;line-height:22px}
+#attitudeNavballPanel[data-compact=true] .an-controls{grid-template-columns:1fr 1fr 28px}
+#attitudeNavballPanel[data-compact=true] [data-pilot=fine]{display:none}
+/* Global button transitions must not animate the HUD's padding/min-height:
+   ResizeObserver would repeatedly reposition a saved floating window while
+   folding it, moving the layout toggle out from under a held pointer. */
+#attitudeNavballPanel button{transition:background-color .15s,border-color .15s,color .15s}

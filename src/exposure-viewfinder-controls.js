@@ -1,6 +1,7 @@
 import {PHOTO_ASPECT} from './exposure-lab-math.js';
+import {PILOT_KEY_AXES,pilotAxes} from './pilot-controls.js';
 
-const motionCodes=new Set(['KeyW','KeyS','KeyA','KeyD','KeyQ','KeyE','KeyR','KeyF','ShiftLeft','ShiftRight','ControlLeft','ControlRight']);
+const motionCodes=new Set(Object.keys(PILOT_KEY_AXES));
 const TURN_SPEED=40,ROLL_SPEED=50,MOVE_SPEED=9;
 
 // Only the opted-in, pointer-focused canvas owns movement keys. Releasing the
@@ -9,7 +10,6 @@ export function mountExposureViewfinderControls({canvas,toggle,available,readFov
   let captured=false,pointer=null,lastX=0,lastY=0,dx=0,dy=0,frame=0,lastWall=0,dirty=false,disposed=false;
   const keys=new Set(),unsampled=new Set(),listeners=[];
   const listen=(target,event,fn,options)=>{target.addEventListener(event,fn,options);listeners.push([target,event,fn,options]);};
-  const has=(...codes)=>codes.some(code=>keys.has(code));
   function publish(){
     const state=!toggle.checked?'off':captured?'active':'ready';
     canvas.dataset.freeState=state;canvas.dataset.freeDragging=String(pointer!==null);onState(state);
@@ -32,14 +32,12 @@ export function mountExposureViewfinderControls({canvas,toggle,available,readFov
     const dt=Math.min(.06,Math.max(0,now-lastWall)/1000);lastWall=now;
     const box=canvas.getBoundingClientRect(),fov=readFov();
     const horizontalFov=2*Math.atan(Math.tan(fov*Math.PI/360)*PHOTO_ASPECT)*180/Math.PI;
-    const yaw=(Number(has('KeyA'))-Number(has('KeyD')))*TURN_SPEED*dt-dx*horizontalFov/Math.max(1,box.width);
-    const pitch=(Number(has('KeyW'))-Number(has('KeyS')))*TURN_SPEED*dt-dy*fov/Math.max(1,box.height);
-    const roll=(Number(has('KeyE'))-Number(has('KeyQ')))*ROLL_SPEED*dt;
-    const f=Number(has('KeyR'))-Number(has('KeyF'));
-    const u=Number(has('ShiftLeft','ShiftRight'))-Number(has('ControlLeft','ControlRight'));
-    const metres=MOVE_SPEED*dt/Math.max(1,Math.hypot(f,u));
+    const axes=pilotAxes(keys),yaw=axes.yaw*TURN_SPEED*dt-dx*horizontalFov/Math.max(1,box.width);
+    const pitch=axes.pitch*TURN_SPEED*dt-dy*fov/Math.max(1,box.height),roll=axes.roll*ROLL_SPEED*dt;
+    const f=axes.forward,u=axes.up,r=axes.right;
+    const metres=MOVE_SPEED*dt/Math.max(1,Math.hypot(f,u,r));
     dx=dy=0;unsampled.clear();
-    if(yaw||pitch||roll||f||u){dirty=true;onMove({yaw,pitch,roll,forward:f*metres,lift:u*metres});}
+    if(yaw||pitch||roll||f||u||r){dirty=true;onMove({yaw,pitch,roll,forward:f*metres,lift:u*metres,right:r*metres});}
     if(keys.size)schedule();
     else{lastWall=0;if(pointer===null)idle();}
   }

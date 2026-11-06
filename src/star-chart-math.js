@@ -3,13 +3,18 @@ export function sphereHidesDirection(direction,center,radius){
  const along=direction[0]*center[0]+direction[1]*center[1]+direction[2]*center[2];
  return along>0&&center[0]**2+center[1]**2+center[2]**2-along*along<radius*radius;
 }
-export function placeSkyLabels(candidates,width,height,density,reserved=[]){
- const gap=4+(1-density)*9,limit=Math.round(18+density*78),cell=64,buckets=new Map(),placed=[];
+export function placeSkyLabels(candidates,width,height,density,reserved=[],{all=false,areaBudget=false}={}){
+ const gap=4+(1-density)*9,limit=all?Infinity:areaBudget?Math.max(8,Math.round(width*height/9000*(.15+4*density*density))):Math.round(18+density*78),cell=64,buckets=new Map(),placed=[];
  const cells=rect=>{const out=[];for(let x=Math.floor(rect.x/cell);x<=Math.floor((rect.x+rect.w)/cell);x++)for(let y=Math.floor(rect.y/cell);y<=Math.floor((rect.y+rect.h)/cell);y++)out.push(x+':'+y);return out;};
  const overlaps=(a,b)=>a.x<b.x+b.w+gap&&a.x+a.w+gap>b.x&&a.y<b.y+b.h+gap&&a.y+a.h+gap>b.y;
  for(const item of candidates){
   if(placed.length>=limit)break;
-  const positions=item.centered?[[ -item.w/2,-item.h/2]]:[[8,-item.h/2],[-item.w-8,-item.h/2],[8,-item.h-7],[8,7]];
+  const anchor=Math.max(8,Number.isFinite(item.anchorRadius)&&item.anchorRadius>0?item.anchorRadius+gap+2:8);
+  const positions=item.centered?[[ -item.w/2,-item.h/2]]:[[anchor,-item.h/2],[-item.w-anchor,-item.h/2],[anchor,-item.h-7],[anchor,7]];
+  if(all){
+   const [initialX,initialY]=positions[0],x=Math.max(0,Math.min(width-item.w,item.x+initialX)),y=Math.max(0,Math.min(height-item.h,item.y+initialY));
+   placed.push({...item,dx:x-item.x,dy:y-item.y,rect:{x,y,w:item.w,h:item.h}});continue;
+  }
   for(const [dx,dy] of positions){
    const rect={x:item.x+dx,y:item.y+dy,w:item.w,h:item.h};
    if(rect.x<5||rect.y<5||rect.x+rect.w>width-5||rect.y+rect.h>height-5)continue;

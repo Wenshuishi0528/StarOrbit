@@ -3,7 +3,7 @@ import {VIEW_UNITS_PER_METRE} from './missions.js';
 import {FORMATION_DEFAULT,aimAxes,attitudeQuaternion,validOffset,suggestedOffset,orbitalAxes,fromBasis,intoBasis,stationShapes,opticalModel,sweptReach,constrainedTravel} from './xuntian-formation-math.js';
 export {mountXuntianFormationPanel} from './xuntian-formation-panel.js';
 
-const INITIAL_OFFSET=Object.freeze([30,0,0]);
+const INITIAL_OFFSET=Object.freeze([52,0,0]);
 const SCALE=VIEW_UNITS_PER_METRE,IDENTITY=[[1,0,0],[0,1,0],[0,0,1]],margin=2;
 const vec=a=>new THREE.Vector3(...a);
 const defaultAim=()=>({right:[0,-1,0],up:[0,0,1],forward:[1,0,0]});
@@ -16,24 +16,27 @@ export function installXuntianFormation(sim){
  function getState(){return {offset:[...offset],suggested:[...recommended],extent,automatic,available:!!(sim.missionId==='tiangong'&&active?.visible&&measured),constrained,reason:lastReason};}
  function notify(reason){lastReason=reason;const state=getState();for(const listener of listeners)listener(state);}
  function dataFrame(q){
-  const orbital=orbitalAxes(q);if(orbital&&q?.basis)lastFrame={orbital,scene:q.basis};
+  const orbital=orbitalAxes(sim.mainFlight?.reference??q);if(orbital&&q?.basis)lastFrame={orbital,scene:q.basis};
   return lastFrame;
  }
  function centerLocal(v,frame){return vec(intoBasis(fromBasis(v,frame.orbital),frame.scene)).multiplyScalar(SCALE);}
  function collect(){
   active=api.groups.freeXT??null;measured=active?opticalModel(active):null;shapes=[];
   for(const [id,group] of Object.entries(api.groups))if(id!=='freeXT'&&group?.visible)shapes.push(...stationShapes(group));
-  const zero=new THREE.Vector3();padding=((measured?.radius||0)+margin)*SCALE;
-  const reach=Math.max(0,...shapes.map(s=>sweptReach(s,zero)))/SCALE;
+  const zero=new THREE.Vector3();
+  (api.modelRoot||api.model)?.getWorldPosition(zero);padding=((measured?.radius||0)+margin)*SCALE;
+  const reach=(zero.length()+Math.max(0,...shapes.map(s=>sweptReach(s,zero))))/SCALE;
   extent=reach+padding/SCALE;recommended=suggestedOffset(extent);
-  if(automatic)offset=[...recommended];
+  // A desired close formation is tested against current geometry below. The
+  // global all-attitude envelope is only for safe fallback/recommendations.
+  if(initialPlacement)offset=[...INITIAL_OFFSET];else if(automatic)offset=[...recommended];
  }
  function protectedAt(center){
   return center.length()<=extent*SCALE&&constrainedTravel(center,center,shapes,padding)<1;
  }
  function ensureClear(frame){
-  if(initialPlacement||!measured||!protectedAt(centerLocal(offset,frame)))return false;
-  offset=[...recommended];automatic=true;constrained=true;return true;
+  if(!measured||!protectedAt(centerLocal(offset,frame)))return false;
+  offset=[...recommended];initialPlacement=false;automatic=true;constrained=true;return true;
  }
  function update(q=sim.current,axes){
   if(disposed)return null;
@@ -51,7 +54,7 @@ export function installXuntianFormation(sim){
   if(!q){last=null;if(relocated)notify('clearance');return null;}
   const eyeLocal=active.localToWorld(measured.entrance.clone()).toArray();
   const displacement=fromBasis(eyeLocal.map(x=>x/(SCALE*1000)),q.basis);
-  last={eyeLocal,eyeKm:q.position.map((x,i)=>x+displacement[i]),axes:inertial,localAxes:sceneAxes,
+  last={eyeLocal,eyeKm:(q.sceneOrigin||q.position).map((x,i)=>x+displacement[i]),axes:inertial,localAxes:sceneAxes,
    cameraQuaternion:attitudeQuaternion(sceneAxes,true).toArray(),cameraQuaternionKm:attitudeQuaternion(inertial,true).toArray(),
    entranceModel:measured.entrance.toArray(),centerLocal:center.toArray(),time:q.t};
   if(relocated)notify('clearance');return last;
@@ -67,15 +70,15 @@ export function installXuntianFormation(sim){
   const nearest=Math.max(0,Math.min(1,-from.dot(delta)/(length*length)));
   let fraction=1;
   if(from.clone().addScaledVector(delta,nearest).length()<=extent*SCALE){
-   fraction=constrainedTravel(from,to,shapes,padding,initialPlacement);
-   if(fraction<1||(!initialPlacement&&protectedAt(to)))fraction=Math.max(0,fraction-.01*SCALE/length);
+   fraction=constrainedTravel(from,to,shapes,padding);
+   if(fraction<1||protectedAt(to))fraction=Math.max(0,fraction-.01*SCALE/length);
   }
   constrained=fraction<1;automatic=false;offset=next.map((value,i)=>offset[i]+(value-offset[i])*fraction);
-  initialPlacement=initialPlacement&&protectedAt(centerLocal(offset,frame));
+  initialPlacement=false;
   update(sim.current);notify(constrained?'clearance':'offset');return getState();
  }
  function restoreInitial(){
-  initialPlacement=true;offset=[...INITIAL_OFFSET];automatic=false;constrained=false;
+  initialPlacement=true;automatic=false;constrained=false;collect();offset=[...INITIAL_OFFSET];
   update(sim.current);notify(constrained?'clearance':'offset');
  }
  function restoreSuggested(){
@@ -171,6 +174,7 @@ export function installXuntianFormation(sim){
   controls.maxDistance=Math.max(controls.maxDistance,distance*1.05);controls.stopMotion();
   controls.target.copy(aim);camera.position.copy(aim).addScaledVector(d,distance);
   const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;
+  sim.cameraFocus?.adopt(closeUp?'xuntian':'all');
   return true;
  }
  function mapShapes(){
