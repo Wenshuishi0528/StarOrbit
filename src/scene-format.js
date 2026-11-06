@@ -1,4 +1,5 @@
 import { normalizeGeographySettings } from './geography-settings.js';
+import { SKY_DETAIL_SOURCES, resolveSkyDetailSource } from './sky-detail-plan.js';
 import { normalizeStarChartSettings } from './star-chart-settings.js';
 import { validateRotation } from './spacecraft-attitude.js';
 import { describeAssembly, MODULE_TYPES } from './assembly.js';
@@ -144,6 +145,12 @@ export function validateScene(x) {
     environment[key] = bool(e[key]);
   environment.cloudNightVisible =
     e.cloudNightVisible === undefined ? false : bool(e.cloudNightVisible);
+  environment.skyDetail = e.skyDetail === undefined ? true : bool(e.skyDetail);
+  if (e.skyDetailSource !== undefined && !SKY_DETAIL_SOURCES.includes(e.skyDetailSource)) bad();
+  environment.skyDetailSource = resolveSkyDetailSource(e);
+  environment.skyDetail = environment.skyDetailSource !== 'galaxy';
+  environment.cityTerrain = e.cityTerrain === undefined ? true : bool(e.cityTerrain);
+  environment.cityAutoLoad = e.cityAutoLoad === undefined ? false : bool(e.cityAutoLoad);
   Object.assign(
     environment,
     normalizeStarChartSettings(e, { strict: true }),

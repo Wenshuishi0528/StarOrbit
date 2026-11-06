@@ -11,7 +11,7 @@ export function placeSkyLabels(
   height,
   density,
   reserved = [],
-  { all = false, areaBudget = false } = {}
+  { all = false, areaBudget = false, verticalInset = 0 } = {}
 ) {
   const gap = 4 + (1 - density) * 9,
     limit = all
@@ -19,6 +19,7 @@ export function placeSkyLabels(
       : areaBudget
         ? Math.max(8, Math.round(((width * height) / 9000) * (0.15 + 4 * density * density)))
         : Math.round(18 + density * 78),
+    edgeY = Math.max(5, verticalInset),
     cell = 64,
     buckets = new Map(),
     placed = [];
@@ -40,6 +41,8 @@ export function placeSkyLabels(
       8,
       Number.isFinite(item.anchorRadius) && item.anchorRadius > 0 ? item.anchorRadius + gap + 2 : 8
     );
+    const verticalAnchor = Math.max(8, (item.symbol?.height || 0) / 2 + gap + 2);
+    const centeredX = Math.max(5 - item.x, Math.min(width - 5 - item.w - item.x, -item.w / 2));
     const positions = item.centered
       ? [[-item.w / 2, -item.h / 2]]
       : [
@@ -47,11 +50,15 @@ export function placeSkyLabels(
           [-item.w - anchor, -item.h / 2],
           [anchor, -item.h - 7],
           [anchor, 7],
+          [-item.w - anchor, -item.h - 7],
+          [-item.w - anchor, 7],
+          [centeredX, -item.h - verticalAnchor],
+          [centeredX, verticalAnchor],
         ];
     if (all) {
       const [initialX, initialY] = positions[0],
         x = Math.max(0, Math.min(width - item.w, item.x + initialX)),
-        y = Math.max(0, Math.min(height - item.h, item.y + initialY));
+        y = Math.max(verticalInset, Math.min(height - verticalInset - item.h, item.y + initialY));
       placed.push({
         ...item,
         dx: x - item.x,
@@ -62,7 +69,12 @@ export function placeSkyLabels(
     }
     for (const [dx, dy] of positions) {
       const rect = { x: item.x + dx, y: item.y + dy, w: item.w, h: item.h };
-      if (rect.x < 5 || rect.y < 5 || rect.x + rect.w > width - 5 || rect.y + rect.h > height - 5)
+      if (
+        rect.x < 5 ||
+        rect.y < edgeY ||
+        rect.x + rect.w > width - 5 ||
+        rect.y + rect.h > height - edgeY
+      )
         continue;
       if (reserved.some((other) => overlaps(rect, other))) continue;
       const keys = cells({

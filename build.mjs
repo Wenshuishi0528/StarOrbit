@@ -6,7 +6,7 @@ function publish(file,bytes=fs.readFileSync(file),suffix=path.extname(file)){
  const hash=crypto.createHash('sha256').update(bytes).digest('hex').slice(0,16),name=path.basename(file,path.extname(file))+'-'+hash+suffix,url='assets/'+name;
  if(!emitted.has(url)){fs.writeFileSync(out+'/'+url,bytes);emitted.set(url,bytes.length);}return url;
 }
-const image=file=>split?publish(file):'data:image/'+(file.endsWith('.png')?'png':'jpeg')+';base64,'+fs.readFileSync(file).toString('base64');
+const image=file=>split?publish(file):'data:image/'+({'.png':'png','.avif':'avif'}[path.extname(file)]||'jpeg')+';base64,'+fs.readFileSync(file).toString('base64');
 const packed=file=>{const bytes=zlib.gzipSync(fs.readFileSync(file),{level:9});return split?{url:publish(file,bytes,'.glb.gz')}:bytes.toString('base64');};
 import {SPACECRAFT,MISSIONS} from './src/missions.js';
 const spacecraftModels=Object.fromEntries(Object.entries(SPACECRAFT).filter(([,x])=>x.asset).map(([id,x])=>[id,packed(x.asset)]));
@@ -17,7 +17,8 @@ const app=JSON.parse(fs.readFileSync('package.json','utf8'));
 const trial=JSON.parse(fs.readFileSync('assets/cloud-trial/manifest.json','utf8'));
 trial.samples=Object.fromEntries(['day','night'].map(kind=>{const file='assets/cloud-trial/'+kind+'.png';return [kind,split?publish(file):'data:image/png;base64,'+fs.readFileSync(file).toString('base64')];}));
 const worklet=await build({entryPoints:['src/dfh1-telemetry-worklet.js'],bundle:true,format:'iife',minify:true,write:false,legalComments:'none'});
-await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
+const cityWorker=await build({entryPoints:['src/city-terrain-worker.js'],bundle:true,format:'iife',minify:true,write:false,platform:'browser',legalComments:'none'});
+await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__CITY_TERRAIN_WORKER__:JSON.stringify(cityWorker.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
 const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image(f==='day.jpg'&&tier!=='high'?'assets/earth/day-2004/'+tier+'.jpg':'assets/earth/'+tier+'/'+f)]))]));
 // The minimap is a readable display map, independent of 3D reflectance assets.
 environmentAssets.minimap=image('assets/earth/simple/day.jpg');
@@ -35,17 +36,41 @@ environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
  environmentAssets.daySources['2026-q2-1km']={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
 }
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
+{
+ const art=JSON.parse(fs.readFileSync('assets/constellation-art/manifest.json','utf8'));
+ environmentAssets.constellationArt={version:art.version,constellationImages:art.constellationImages,images:art.images.map(c=>({imageId:c.imageId,width:c.width,height:c.height,size:c.size,constellationIds:c.constellationIds,anchors:c.anchors,url:image(c.file)}))};
+ if(split){
+  const directory=out+'/assets/constellation-art';fs.mkdirSync(directory,{recursive:true});
+  for(const name of ['README.md','LICENSE-FAL-1.3.html','LICENSE-CC-BY-SA-4.0.txt','upstream-description.md'])fs.copyFileSync('assets/constellation-art/'+name,directory+'/'+name);
+  fs.writeFileSync(directory+'/manifest.json',JSON.stringify({...art,images:art.images.map((record,i)=>({...record,file:'../'+path.basename(environmentAssets.constellationArt.images[i].url)}))},null,2));
+ }
+}
+
+{
+ const manifest=JSON.parse(fs.readFileSync('assets/earth/cities/manifest.json','utf8'));
+ environmentAssets.cityTerrain={version:manifest.version,cities:manifest.cities.map(c=>({
+  ...Object.fromEntries(['id','names','center','bounds','extentKm','pixelSizeMeters','year','tileSize','gutter','maxLevel','bytes'].map(key=>[key,c[key]])),
+  source:Object.fromEntries(['id','title','url','license','licenseUrl','credit','observed'].map(key=>[key,c.source[key]])),
+  tiles:Object.fromEntries(Object.entries(c.tiles).map(([key,file])=>[key,image(file)]))
+ }))};
+}
 environmentAssets.planets=Object.fromEntries(['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','SaturnRing'].map(body=>{
  const extension=body==='SaturnRing'?'png':'jpg';
  return [body,image('assets/planets/'+body+'.'+extension)];
 }));
 environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py','ny','pz','nz'].map(face=>image(`assets/sky/milkyway-${size}k-${face}.jpg`))]));
+{
+ const {version,providers,local}=JSON.parse(fs.readFileSync('assets/sky-detail/manifest.json','utf8'));
+ environmentAssets.skyDetail={version,providers:providers.map(({coverage,...provider})=>provider),local:{providerId:local.providerId,tiles:Object.fromEntries(Object.entries(local.tiles).map(([key,file])=>[key,image(file)]))}};
+}
 let html=fs.readFileSync('src/layout.html','utf8').replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8')).replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8')).replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n')).replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8')).replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8')).replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8')).replace('__MUSIC_CSS__',()=>fs.readFileSync('src/music.css','utf8')).replace('__MUSIC_UI__',()=>fs.readFileSync('src/music-widget.html','utf8')).replace('__MUSIC_DATA__',()=>JSON.stringify(music).replaceAll('</script','<\\/script')).replace('__APP_VERSION__',app.displayVersion||app.version).replace('__APP_AUTHOR__',app.author).replace('__ENV_ASSETS__',()=>JSON.stringify(environmentAssets)).replace('__SPACECRAFT_MODELS__',()=>JSON.stringify(spacecraftModels)).replace('__MISSION_ORBITS__',()=>JSON.stringify(split?{url:publish('orbits.json',Buffer.from(JSON.stringify(missionOrbits)))}:missionOrbits).replaceAll('</script','<\\/script')).replace('__META__',fs.readFileSync('assets/model.json','utf8')).replace('__MODEL__',split?JSON.stringify(packed('assets/station.glb')):packed('assets/station.glb')).replace('<script>__JS__</script>',()=>split?'<script defer src="'+publish('assets/app.bundle.js')+'"></script>':'<script>'+fs.readFileSync('assets/app.bundle.js','utf8').replaceAll('</script','<\\/script')+'</script>');
 html=html.replace('</head>','<!-- satellite.js MIT license\n'+fs.readFileSync('node_modules/satellite.js/LICENSE.md','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Three.js license\n'+fs.readFileSync('node_modules/three/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Astronomy Engine MIT / three-mesh-bvh MIT licenses\n'+fs.readFileSync('node_modules/astronomy-engine/astronomy.js','utf8').split('*/')[0].slice(3)+'\n'+fs.readFileSync('node_modules/three-mesh-bvh/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Earth and star credits\n'+fs.readFileSync('素材与迁移说明.md','utf8')+'\n'+fs.readFileSync('assets/D3-CELESTIAL-LICENSE.txt','utf8')+' -->\n</head>');
+html=html.replace('</head>','<!-- Constellation art attribution and placement license\n'+fs.readFileSync('assets/constellation-art/README.md','utf8')+'\n'+fs.readFileSync('assets/constellation-art/LICENSE-CC-BY-SA-4.0.txt','utf8')+'\n'+fs.readFileSync('assets/constellation-art/LICENSE-FAL-1.3.html','utf8').replaceAll('<','&lt;').replaceAll('>','&gt;')+' -->\n</head>');
+html=html.replace('</head>','<!-- GeoTIFF decoder licenses\n'+fs.readFileSync('assets/GEOTIFF-DEPENDENCY-LICENSES.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.readFileSync('tests/reference/atmosphere-spectrum/LICENSE-Bruneton.txt','utf8')+' -->\n</head>');
 const bytes=Buffer.byteLength(html);
-if(bytes>400e6)throw new Error('Standalone app exceeds the 400 MB distribution budget');
+if(bytes>410e6)throw new Error('Standalone app exceeds the 410 MB distribution budget');
 if(split){fs.writeFileSync(out+'/index.html',html);fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('StarOrbit.html',html);fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}

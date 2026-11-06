@@ -1,8 +1,10 @@
 import { equatorial } from './environment-math.js';
 import { DEEP_SKY_SUPPLEMENT } from './deep-sky-supplement.js';
+import { canonicalDeepSkyId, openNGCObjects, SKY_IMAGE_FIELDS } from './deep-sky-openngc.js';
 
-// Compact observing catalogue: NASA/GSFC HEASARC Messier (109 published rows),
-// M102/NGC5866 following NASA/Hubble, and selected OpenNGC bright targets.
+// Shared observing catalogue: NASA/GSFC HEASARC Messier (109 published rows),
+// M102/NGC5866 following NASA/Hubble, OpenNGC's real extended objects, and
+// explicitly distinguished, WCS-calibrated image fields.
 // Coordinates are J2000 equatorial degrees; extents are arcminutes. A supplied
 // single diameter is repeated as a circular catalogue extent, not a measured
 // minor axis. Null photometry/extents are unknown and must not display as zero.
@@ -1440,7 +1442,13 @@ export const DEEP_SKY_TYPES = Object.freeze(
   Object.fromEntries(
     Object.entries({
       'galaxy': { zh: '星系', en: 'Galaxy' },
+      'galaxy-group': { zh: '星系组合', en: 'Galaxy group' },
       'nebula': { zh: '星云', en: 'Nebula' },
+      'reflection-nebula': { zh: '反射星云', en: 'Reflection nebula' },
+      'dark-nebula': { zh: '暗星云', en: 'Dark nebula' },
+      'cluster-nebula': { zh: '星团与星云', en: 'Cluster and nebula' },
+      'stellar-association': { zh: '星协', en: 'Stellar association' },
+      'image-field': { zh: '影像天区', en: 'Image field' },
       'open-cluster': { zh: '疏散星团', en: 'Open cluster' },
       'globular-cluster': { zh: '球状星团', en: 'Globular cluster' },
       'planetary-nebula': { zh: '行星状星云', en: 'Planetary nebula' },
@@ -1452,24 +1460,65 @@ export const DEEP_SKY_TYPES = Object.freeze(
   )
 );
 
-const number = (id) => Number(id.replace(/^\D+/, ''));
+function sharedObjects() {
+  const base = [...messier, ...DEEP_SKY_SUPPLEMENT],
+    extended = openNGCObjects(),
+    indexed = new Map(extended.map((object) => [object.id, object])),
+    claimed = new Set();
+  const retained = base.map((object) => {
+    const identifiers = [object.id, ...object.aliases].map(canonicalDeepSkyId);
+    for (const id of identifiers) claimed.add(id);
+    // Preserve established Messier names, positions and photometry, but retain
+    // the published PA and cross-identifications where the primary NGC agrees.
+    const primary = identifiers.map((id) => indexed.get(id)).find(Boolean);
+    return {
+      ...object,
+      positionAngleDeg: primary?.positionAngleDeg ?? null,
+      aliases: [...new Set([...object.aliases, ...(primary?.aliases || [])])],
+    };
+  });
+  return [
+    ...retained,
+    ...extended.filter((object) => !claimed.has(object.id)),
+    ...SKY_IMAGE_FIELDS,
+  ];
+}
+const DEG = Math.PI / 180;
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
+const separation = (a, b) => Math.atan2(Math.hypot(...cross(a, b)), dot(a, b));
 export const DEEP_SKY_OBJECTS = Object.freeze(
-  [...messier, ...DEEP_SKY_SUPPLEMENT]
+  sharedObjects()
     .sort((a, b) => {
-      const am = a.id.startsWith('M'),
-        bm = b.id.startsWith('M');
-      return Number(bm) - Number(am) || number(a.id) - number(b.id);
+      const am = /^M\d+$/.test(a.id),
+        bm = /^M\d+$/.test(b.id);
+      return (
+        Number(bm) - Number(am) ||
+        (am && bm ? Number(a.id.slice(1)) - Number(b.id.slice(1)) : a.id.localeCompare(b.id))
+      );
     })
-    .map((object) =>
-      Object.freeze({
+    .map((object) => {
+      const direction = Object.freeze(equatorial(object.ra, object.dec));
+      const footprint = object.footprint?.map((p) => Object.freeze(equatorial(...p)));
+      const regionRadiusRad = footprint
+        ? Math.max(...footprint.map((p) => separation(direction, p)))
+        : ((object.angularSizeArcmin?.[0] || 0) * DEG) / 120;
+      return Object.freeze({
         ...object,
         aliases: Object.freeze([...object.aliases]),
         angularSizeArcmin: object.angularSizeArcmin
           ? Object.freeze([...object.angularSizeArcmin])
           : null,
-        direction: Object.freeze(equatorial(object.ra, object.dec)),
-      })
-    )
+        direction,
+        footprintDirections: footprint ? Object.freeze(footprint) : null,
+        regionRadiusRad,
+        regionCos: Math.cos(regionRadiusRad),
+      });
+    })
 );
 export function deepSkyName(object, language = 'zh') {
   return language === 'zh' ? object.name : object.englishName || object.id;
@@ -1477,6 +1526,60 @@ export function deepSkyName(object, language = 'zh') {
 export function deepSkyTypeName(type, language = 'zh') {
   const names = DEEP_SKY_TYPES[type];
   return names?.[language] || names?.en || type;
+}
+
+/** Approximate catalogue region, not a segmentation of the photograph. Axes
+ * are angular diameters and PA is measured north through east. Without PA,
+ * only the inscribed minor-axis circle is claimed; no orientation is invented.
+ * Image fields instead use their actual convex spherical WCS footprint. */
+export function deepSkyRegionMatch(object, direction, toleranceDeg = 0) {
+  const alignment = dot(object.direction, direction),
+    tolerance = Math.max(0, toleranceDeg) * DEG,
+    cap = object.regionRadiusRad || 0;
+  if (alignment < (tolerance ? Math.cos(cap + tolerance) : object.regionCos)) return null;
+  const angle = separation(object.direction, direction),
+    nearCenter = angle <= tolerance + 1e-12;
+  let withinRegion = false;
+  if (object.footprintDirections) {
+    const vertices = object.footprintDirections;
+    withinRegion = vertices.every((a, i) => {
+      const normal = cross(a, vertices[(i + 1) % vertices.length]);
+      const sign = Math.sign(dot(normal, object.direction));
+      return sign * dot(normal, direction) >= -1e-12;
+    });
+  } else if (object.angularSizeArcmin && alignment > 0) {
+    const [major, minor] = object.angularSizeArcmin;
+    if (object.positionAngleDeg === null || object.positionAngleDeg === undefined) {
+      withinRegion = angle <= (Math.min(major, minor) * DEG) / 120 + 1e-12;
+    } else {
+      const ra = object.ra * DEG,
+        dec = object.dec * DEG,
+        pa = object.positionAngleDeg * DEG;
+      const east = (-Math.sin(ra) * direction[0] + Math.cos(ra) * direction[1]) / alignment;
+      const north =
+        (-Math.sin(dec) * Math.cos(ra) * direction[0] -
+          Math.sin(dec) * Math.sin(ra) * direction[1] +
+          Math.cos(dec) * direction[2]) /
+        alignment;
+      const along = north * Math.cos(pa) + east * Math.sin(pa),
+        across = east * Math.cos(pa) - north * Math.sin(pa);
+      withinRegion =
+        (along / Math.tan((major * DEG) / 120)) ** 2 +
+          (across / Math.tan((minor * DEG) / 120)) ** 2 <=
+        1 + 1e-10;
+    }
+  }
+  return withinRegion || nearCenter
+    ? { angularDistanceDeg: angle / DEG, withinRegion, nearCenter }
+    : null;
+}
+
+export function deepSkyRegionLabel(object, language = 'zh') {
+  const name = typeof object === 'string' ? object : deepSkyName(object, language);
+  if (language === 'zh') return `位于${name}天区`;
+  if (language === 'fr') return `Dans le champ de ${name}`;
+  if (language === 'ru') return `В области ${name}`;
+  return `In the ${name} field`;
 }
 export const DEEP_SKY_COORDINATES = Object.freeze({
   frame: 'J2000',

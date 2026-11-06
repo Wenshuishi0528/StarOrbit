@@ -1,6 +1,30 @@
 import { deepSkyName } from './deep-sky-catalog.js';
 
 const featured = new Set([
+  'LMC',
+  'NGC292',
+  'B33',
+  'C9',
+  'C41',
+  'C99',
+  'Cl399',
+  'Mel111',
+  'HCG92',
+  'IC405',
+  'IC1805',
+  'IC1848',
+  'NGC1333',
+  'NGC1909',
+  'NGC1977',
+  'NGC2070',
+  'NGC2359',
+  'NGC3132',
+  'NGC3324',
+  'NGC6302',
+  'NGC6334',
+  'NGC6357',
+  'NGC7635',
+  'JWST-CARINA-2022',
   'M1',
   'M3',
   'M4',
@@ -60,6 +84,8 @@ const types = {
   'double-star': { shape: 'circle', color: '#c8dce8', labelColor: '#dce8ef' },
 };
 export function deepSkyStyle(object) {
+  if (object.type === 'galaxy-group') return types.galaxy;
+  if (object.type === 'stellar-association') return types['open-cluster'];
   return types[object.type] ?? types.nebula;
 }
 export function deepSkyLabel(object, language = 'zh') {

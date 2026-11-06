@@ -3,7 +3,13 @@ import { solarApparent } from './solar-system.js';
 import { solarLabel } from './solar-targets.js';
 import { getXuntianTarget, queryXuntianStars } from './xuntian-catalog.js';
 import { groundHit } from './xuntian-view-math.js';
-import { DEEP_SKY_OBJECTS, deepSkyName, deepSkyTypeName } from './deep-sky-catalog.js';
+import {
+  DEEP_SKY_OBJECTS,
+  deepSkyName,
+  deepSkyTypeName,
+  deepSkyRegionMatch,
+} from './deep-sky-catalog.js';
+import { deepSkyInScope } from './star-chart-symbols.js';
 
 const DEG = Math.PI / 180;
 const normalized = (v) =>
@@ -111,26 +117,44 @@ export function identifyXuntianCrosshair(
       bestDistance = angle;
     }
   }
-  for (const object of DEEP_SKY_OBJECTS) {
-    const angle = separation(direction, object.direction),
-      extent = ((object.angularSizeArcmin?.[0] || 0) * DEG) / 120;
-    if (
-      angle > extent + radius ||
-      angle >= bestDistance ||
-      groundHit(eye, object.direction, frame.q.earthAxes) ||
-      blocked(object.direction)
-    )
-      continue;
-    best = {
-      kind: 'deep-sky',
-      id: 'deep-sky:' + object.id.toLowerCase(),
-      identifier: object.id,
-      name: deepSkyName(object, language),
-      category: deepSkyTypeName(object.type, language),
-      angularDistanceDeg: angle / DEG,
-      withinRegion: angle <= extent,
-    };
-    bestDistance = angle;
-  }
-  return best ? { ...sky, ...best } : sky;
+  let region = null,
+    regionSize = Infinity;
+  const settings = frame.chartSettings;
+  const deepSkyEnabled = settings?.deepSkyObjects !== false && !blocked(direction);
+  if (deepSkyEnabled)
+    for (const object of DEEP_SKY_OBJECTS) {
+      if (settings && !deepSkyInScope(object, settings.deepSkyScope)) continue;
+      const match = deepSkyRegionMatch(object, direction, radius / DEG);
+      if (!match) continue;
+      const entry = {
+        kind: 'deep-sky',
+        id: 'deep-sky:' + object.id.toLowerCase(),
+        identifier: object.id,
+        name: deepSkyName(object, language),
+        category: deepSkyTypeName(object.type, language),
+        angularDistanceDeg: match.angularDistanceDeg,
+        withinRegion: match.withinRegion,
+        imageField: object.type === 'image-field',
+      };
+      if (match.withinRegion && object.regionRadiusRad < regionSize) {
+        region = entry;
+        regionSize = object.regionRadiusRad;
+      }
+      // A nearby star is still a star, even when projected inside a galaxy. Only
+      // compare POINT matches here; the extended-region context is kept below.
+      const angle = match.angularDistanceDeg * DEG;
+      if (
+        !match.nearCenter ||
+        angle >= bestDistance ||
+        object.type === 'image-field' ||
+        groundHit(eye, object.direction, frame.q.earthAxes) ||
+        bodies.some((body) => dot(object.direction, body.direction) > Math.cos(body.radiusRad)) ||
+        blocked(object.direction)
+      )
+        continue;
+      best = entry;
+      bestDistance = angle;
+    }
+  if (best) return { ...sky, ...best, ...(region && region.id !== best.id ? { region } : {}) };
+  return region ? { ...sky, ...region, regionOnly: true } : sky;
 }

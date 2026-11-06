@@ -58,7 +58,11 @@ function coordinates(v) {
   return [wrap(Math.atan2(v[1], v[0]) / DEG), Math.asin(clamp(v[2])) / DEG];
 }
 function fold(text) {
-  return [...String(text).normalize('NFKD').toLowerCase()]
+  const value = String(text);
+  // Most of the expanded catalogue consists of ASCII identifiers. They do
+  // not need Unicode decomposition or a per-character Greek/Chinese lookup.
+  if (/^[\x00-\x7f]*$/.test(value)) return value.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return [...value.normalize('NFKD').toLowerCase()]
     .map((c) => GREEK[c] || simplified.get(c) || c)
     .join('')
     .replace(/[^\p{L}\p{N}]/gu, '');
@@ -243,8 +247,7 @@ function searchCatalog() {
     const [ra, dec] = coordinates(direction);
     const principal = new Set(Object.values(names).filter(Boolean).map(fold));
     const terms = new Set(
-      [...Object.values(names), ...extra]
-        .filter(Boolean)
+      [...new Set([...Object.values(names), ...extra].filter(Boolean))]
         .flatMap(nameForms)
         .map(fold)
         .filter(Boolean)
@@ -281,6 +284,7 @@ function searchCatalog() {
     );
     r.category = deepSkyTypeName(object.type);
     r.objectType = object.type;
+    r.providerId = object.providerId;
     for (const alias of [object.id, ...object.aliases])
       if (!deepSky.has(fold(alias))) deepSky.set(fold(alias), r);
   }
@@ -359,7 +363,10 @@ function localTarget(r, language) {
     dec: r.dec,
     fov: r.fov,
     radius: r.radius,
-    ...(r.category ? { category: r.category, objectType: r.objectType } : {}),
+    ...(r.category
+      ? { category: deepSkyTypeName(r.objectType, language), objectType: r.objectType }
+      : {}),
+    ...(r.providerId ? { providerId: r.providerId } : {}),
   };
 }
 export function getXuntianTarget(id, language = 'zh') {
@@ -406,8 +413,19 @@ export function searchXuntianTargets(text, language = 'zh', limit = 12) {
     const target = getXuntianTarget(id, language);
     return target ? [target] : [];
   }
+  const index = searchCatalog(),
+    exactDeep = index.deepSky.get(q);
+  // A full NGC/IC identifier is unambiguous. Resolve it in O(1) instead of
+  // rescanning twelve thousand records after every completed catalogue query.
+  if (
+    exactDeep &&
+    (q === fold(exactDeep.identifier) ||
+      /^(?:ngc|ic|m|b|c|mel|cl|hcg|ugc|pgc|eso)\d/.test(q) ||
+      q === 'smc')
+  )
+    return [localTarget(exactDeep, language)];
   const results = [];
-  for (const r of searchCatalog().records.values()) {
+  for (const r of index.records.values()) {
     let rank = Infinity,
       shortest = Infinity;
     for (const name of r.terms) {

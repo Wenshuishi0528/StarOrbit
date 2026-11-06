@@ -14,17 +14,23 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v1.14 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v1.16 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 Open the Xuntian finder and orbit map independently from the right toolbar. The navball supports compact and full layouts. The Views menu combines camera targets, recentering and viewing directions.
 
-> This guide describes the v1.14 release. The online and portable editions each show their version in the header.
+> This guide describes the v1.16 source build. The online and portable editions each show their version in the header.
 
 In the China Space Station scene, open **Xuntian viewfinder** from the right toolbar. Search for Vega, Orion, a HIP identifier, M31, a nebula name or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
 
 Enable the main navball under **Spacecraft attitude**, then click the ball to pilot the selected craft with KSP-style keys. Rotation has inertia; RCS enables translation and SAS stabilizes attitude. **Free flight** still provides separate Shenzhou/Tianzhou undocking, flight saves and port capture. The Xuntian finder identifies the current crosshair direction, and the sky chart adds all Messier objects plus selected NGC targets. [Controls and scope (Chinese)](docs/v1.09-pilot-star-chart.md). Drag floating-window headers to arrange a persistent layout.
 
 The finder's **Solar observations** mode displays real SDO sunspot, corona and prominence imagery at 1K or 2K, with updates for the selected channel and dated PNG exports. The resource page and finder share the same images. Online updates use the desktop service; the web edition imports solar snapshots. [Solar observing guide (Chinese)](使用说明.md#太阳观测).
+
+On-demand HD sky imagery is shared by the main view, telescope and photos. A small offline AVIF pack adds Webb’s 2022 Cosmic Cliffs; search for `Cosmic Cliffs`. Steering a pinned reticle keeps the new point fixed. [Sources and cache policy](docs/v1.15-sky-detail.md)
+
+Includes 2025 Sentinel-2 10 m terrain for Beijing (40 × 40 km) and Seattle (20 × 20 km), totaling 5.75 MiB of AVIF tiles. Other cities support on-demand loading, offline downloads and deletion. Shared sky imagery gains a source selector and a 12,162-object deep-sky catalogue. [v1.16 details](docs/v1.16-city-sky.md)
+
+Sky annotations also include default-enabled teaching illustrations for all 88 constellations (about 0.99 MiB), registered to real stars. Unnamed catalogue labels now default off and can be enabled explicitly.
 
 ## Contents
 

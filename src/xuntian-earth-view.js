@@ -4,6 +4,9 @@ import { earthSurfaceRadiance } from './earth-shaders.js';
 import { EARTH_RADIUS, dot, norm } from './orbit.js';
 import { coneHalfAngle } from './xuntian-view-math.js';
 import { earthHit, quadVertex } from './xuntian-view-shaders.js';
+import { cityOpticalView } from './city-terrain-view.js';
+
+let cityViewSerial = 0;
 
 const u = (value) => ({ value });
 const surfaceFragment = `precision highp float;varying vec2 film;uniform mat3 cameraToInertial,earthInverse;
@@ -115,6 +118,8 @@ function sourceInfo(env) {
 }
 
 export function createXuntianEarthView(env, quad) {
+  const cityScopeId = 'city-scope-' + ++cityViewSerial,
+    cityPhotoId = 'city-photo-' + cityViewSerial;
   const camera = new THREE.PerspectiveCamera(),
     scene = new THREE.Scene(),
     rotation = new THREE.Matrix4();
@@ -200,15 +205,26 @@ export function createXuntianEarthView(env, quad) {
   let visible = false,
     disposed = false,
     previousFootprint = null;
-  function prepare(frame, size, force = false) {
+  function prepare(frame, size, force = false, photo = false) {
     visible = angularlyVisible(frame, size.aspect);
     if (!visible) {
+      env.cityTerrain?.setView(photo ? cityPhotoId : cityScopeId, null, photo ? 3 : 2, force);
       previousFootprint = null;
       for (const d of details) if (d.wanted.length || d.slots.some((slot) => slot.key)) d.clear();
       return;
     }
     const a = frame.axes,
       axes = frame.q.earthAxes;
+    if (env.cityTerrain) {
+      const id = photo ? cityPhotoId : cityScopeId;
+      env.cityTerrain.setView(
+        id,
+        env.quality !== 'simple' ? cityOpticalView(frame, size) : null,
+        photo ? 3 : 2,
+        force || photo
+      );
+      Object.assign(s, env.cityTerrain.uniforms(id, photo ? 3 : 2));
+    }
     s.cameraToInertial.value.fromArray([...a.right, ...a.up, ...a.forward]);
     s.earthInverse.value.fromArray(axes.flat()).transpose();
     s.fixedEye.value.fromArray(frame.eyeKm).applyMatrix3(s.earthInverse.value);
@@ -269,8 +285,8 @@ export function createXuntianEarthView(env, quad) {
     air.material.blendSrcAlpha = THREE.ZeroFactor;
     air.material.blendDstAlpha = THREE.OneFactor;
   }
-  function render(renderer, frame, size, target) {
-    prepare(frame, size);
+  function render(renderer, frame, size, target, photo = false) {
+    prepare(frame, size, false, photo);
     if (!visible) return null;
     if (!target.earth) {
       target.earth = new THREE.WebGLRenderTarget(size.w, size.h, {
@@ -289,7 +305,16 @@ export function createXuntianEarthView(env, quad) {
       throw Error('巡天取景图像生成失败');
     return target.earth.texture;
   }
+  async function prepareCityPhoto(frame, size, waitMs = 8000) {
+    if (!env.cityTerrain) return;
+    if (!angularlyVisible(frame, size.aspect) || env.quality === 'simple') {
+      env.cityTerrain.setView(cityPhotoId, null, 3, true);
+      return;
+    }
+    await env.cityTerrain.prepareView(cityPhotoId, cityOpticalView(frame, size), 3, waitMs);
+  }
   async function preparePhoto(frame, size) {
+    await prepareCityPhoto(frame, size);
     if (!angularlyVisible(frame, size.aspect)) return;
     while (env.loading && !disposed) {
       const ready = env.ready;
@@ -299,7 +324,7 @@ export function createXuntianEarthView(env, quad) {
     // Wait for this photograph's actual footprint, including the tiles near the
     // oblique limb. A failed tile keeps the selected global base as its fallback.
     for (let i = 0; i < 12 && !disposed; i++) {
-      prepare(frame, size, true);
+      prepare(frame, size, true, true);
       const pending = details.map((d) => d.work).filter(Boolean);
       if (!pending.length) break;
       await Promise.all(pending);
@@ -335,22 +360,29 @@ export function createXuntianEarthView(env, quad) {
       env.clouds.visible,
       env.volumeClouds.visible,
       env.atmosphere.visible,
+      env.cityTerrain?.key(cityScopeId),
       ...(visible ? details.map((d) => d.key(now)) : []),
     ].join('|');
   }
   return {
     render,
     preparePhoto,
+    prepareCityPhoto,
     appearanceKey,
+    cityStatus: (photo = false) => env.cityTerrain?.status(photo ? cityPhotoId : cityScopeId),
+    releasePhoto: () => env.cityTerrain?.release(cityPhotoId),
     source() {
       return {
         ...sourceInfo(env),
+        city: env.cityTerrain?.status(cityScopeId),
         dayTiles: day.slots.filter((s) => s.key).map((s) => s.key),
         nightTiles: night.slots.filter((s) => s.key).map((s) => s.key),
       };
     },
     dispose() {
       disposed = true;
+      env.cityTerrain?.release(cityScopeId);
+      env.cityTerrain?.release(cityPhotoId);
       for (const d of details) d.clear();
       for (const m of scene.children) m.material.dispose();
     },

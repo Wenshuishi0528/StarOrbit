@@ -17,7 +17,7 @@ export class MainPlanets {
     this.points = new THREE.Points(geometry, environment.stars.material);
     this.points.name = 'Solar system planets';
     this.points.frustumCulled = false;
-    this.points.renderOrder = 1;
+    this.points.renderOrder = 1.4;
     geometry.setDrawRange(0, 0);
     environment.backdrop.add(this.points);
   }

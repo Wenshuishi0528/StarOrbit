@@ -6,6 +6,8 @@ import { mission } from './missions.js';
 import { orbitSource } from './orbit-repository.js';
 import { mountCloudHistory } from './cloud-history.js';
 import { mountSolarResourceCard } from './solar-resource-card.js';
+import { mountSkyDetailResourceCard } from './sky-detail-controls.js';
+import { mountCityTerrainResourceCard } from './city-terrain-controls.js';
 
 const css = `
 .resource-dialog{box-sizing:border-box;width:min(1100px,95vw);height:min(900px,92dvh);max-width:none;max-height:none;padding:0;border:1px solid #355069;border-radius:16px;background:#091321;color:#e7effa;overflow:hidden}.resource-dialog::backdrop{background:#020610b8;backdrop-filter:blur(4px)}.resource-dialog[open]{display:flex;flex-direction:column}.resource-dialog [hidden]{display:none!important}.resource-dialog .resource-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:18px 22px;border-bottom:1px solid #27374b;flex-shrink:0}.resource-dialog .resource-header h2{font-size:19px;margin:0 0 7px}.resource-dialog .resource-header p{margin:0;max-width:740px;line-height:1.6;color:#9eb3c9;font-size:12px}.resource-dialog .resource-close{flex-shrink:0}.resource-dialog .resource-body{padding:18px 22px;overflow:auto;min-height:0}.resource-dialog .resource-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}.resource-dialog .resource-actions button{flex:initial;min-height:38px;font-size:13px}.resource-dialog button,.resource-dialog input,.resource-dialog select{font:inherit;touch-action:manipulation}.resource-dialog button{font-size:12px;padding:8px 11px}.resource-dialog button:focus-visible,.resource-dialog select:focus-visible,.resource-dialog input:focus-visible{outline:2px solid #74d9ef;outline-offset:3px}.resource-dialog .resource-feedback{white-space:pre-line;color:#ffbdac;line-height:1.6;font-size:12px}.resource-dialog .resource-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.resource-dialog .resource-card{padding:15px;background:#0f2032;border:1px solid #2c435a;border-radius:11px;min-width:0;display:flex;flex-direction:column;gap:10px;scroll-margin-top:12px}.resource-dialog .resource-card-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.resource-dialog .resource-card h3{font-size:15px;margin:0}.resource-dialog .resource-badge{display:inline-block;max-width:64%;font-size:11px;line-height:1.4;padding:4px 7px;border-radius:6px;background:#23394c;color:#bdcedb;text-align:right}.resource-dialog .resource-badge[data-phase=updated],.resource-dialog .resource-badge[data-phase=unchanged]{background:#153d3d;color:#a1e6d8}.resource-dialog .resource-badge[data-phase=error]{background:#4c292b;color:#ffbfb4}.resource-dialog .resource-badge[data-phase=partial]{background:#493c24;color:#f1d397}.resource-dialog .resource-badge[data-phase=checking],.resource-dialog .resource-badge[data-phase=downloading],.resource-dialog .resource-badge[data-phase=processing]{background:#16465c;color:#9be8f2}.resource-dialog .resource-source{display:flex;flex-direction:column;gap:6px;color:#a9bed1;font-size:12px}.resource-dialog .resource-source select{width:100%;min-width:0;max-width:none;background:#102b3d}.resource-dialog .resource-fact{margin:0;padding-top:9px;border-top:1px solid #263d51;line-height:1.55}.resource-dialog .resource-fact dt{font-size:11px;color:#89a4ba;margin-bottom:4px}.resource-dialog .resource-fact dd{margin:0;font-size:12px;white-space:pre-line;overflow-wrap:anywhere;color:#d6e6f2}.resource-dialog .resource-fact.resource-current dd{color:#a2e7ed}.resource-dialog .resource-message{white-space:pre-line;font-size:12px;line-height:1.6;color:#b4ccdf;overflow-wrap:anywhere;min-height:1.6em;margin:0}.resource-dialog .resource-progress{width:100%;height:5px;accent-color:#74d9ef;margin:0}.resource-dialog .resource-hint{color:#9bb1c5;font-size:11px;line-height:1.65;margin:0;overflow-wrap:anywhere}.resource-dialog .resource-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:0;padding-top:6px}.resource-dialog .resource-card-actions button:last-child:nth-child(3){grid-column:1/-1}.resource-dialog .resource-card-actions button{width:100%}.resource-dialog .resource-card-actions .resource-use{background:#173d47;border-color:#38646d}.resource-dialog .resource-bundled{margin:15px 0 18px;padding:14px 16px;border:1px solid #2c435a;border-radius:10px;background:#102030;display:flex;align-items:flex-start;gap:15px}.resource-dialog .resource-bundled h3{font-size:13px;margin:0;min-width:115px}.resource-dialog .resource-bundled p{font-size:12px;line-height:1.7;color:#a9bed1;margin:0}.resource-dialog .resource-section-title{font-size:15px;margin:20px 0 12px}.resource-dialog .resource-legacy{padding:0 16px 15px;border:1px solid #2c435a;border-radius:10px;background:#0d1c2d}.resource-dialog .resource-legacy>.small{font-size:12px}.resource-dialog .resource-legacy>.row{justify-content:flex-start;gap:14px}.resource-dialog .resource-legacy input[type=number]{width:100px;padding:7px;font-size:13px}.resource-dialog .resource-legacy>.check{margin-bottom:7px}.resource-dialog .resource-cache-note{font-size:12px;color:#9fb5c7;line-height:1.7;margin:8px 0}.resource-dialog .resource-cache-result{font-size:12px;color:#9ddccf;line-height:1.6;white-space:pre-line}.resource-dialog .resource-server-cache{color:#9eb3c9}.resource-dialog .resource-log{margin:0 0 14px}.resource-dialog .resource-log summary{font-size:12px;color:#9eb3c9}.resource-dialog .resource-log #dataUpdates{padding:0 10px 10px}.resource-dialog #weatherHistory{max-height:470px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.resource-dialog .snapshot-card{min-width:0;border:1px solid #2a4157;border-radius:9px;padding:10px}.resource-dialog .snapshot-card p{font-size:11px}.resource-dialog .snapshot-card img{max-height:145px;object-fit:contain;background:#08121f}.resource-dialog .snapshot-card .angle-actions{flex-wrap:wrap}.resource-dialog .snapshot-card button{font-size:11px}.resource-dialog #importSnapshot{display:block;max-width:100%;margin:10px 0 14px;font-size:12px}.resource-sidebar-summary{white-space:pre-line}.resource-sidebar-open{width:100%;margin-top:10px}
@@ -45,7 +47,11 @@ export function mountResourcePanel(weather) {
     side = document.getElementById('settings-data'),
     previous = [...side.childNodes];
   const sheet = node('style', '', document.head);
-  sheet.textContent = css;
+  sheet.textContent =
+    css +
+    `
+.resource-city-card{grid-column:1/-1}.resource-city-card>.check{display:flex;align-items:center;gap:8px;margin:0;font-size:13px}.resource-city-card>.small{margin:0}.resource-city-card .resource-card-actions{display:flex;flex-wrap:wrap}.resource-city-card .resource-card-actions button{flex:1;width:auto}.resource-city-card input[type=search]{padding:10px 12px;min-height:42px;border:1px solid #3a576d;border-radius:9px;background:#081724;color:#e6f2f8;font-size:14px}.resource-city-card .city-resource-row{display:flex;align-items:center;gap:8px;margin:6px 0}.city-resource-row>span{flex:1;min-width:0}.resource-city-card .city-resource-entry{border-top:1px solid #294359;padding:12px 0}.resource-city-card [data-city-list]{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 20px}.resource-city-card details{font-size:11px;color:#b4c9da;overflow-wrap:anywhere}.resource-city-card details p{white-space:pre-line}.resource-city-card input[type=search]{min-width:0;width:100%;box-sizing:border-box}@media(max-width:820px){.resource-dialog .resource-city-card{display:flex}.resource-city-card [data-city-list]{grid-template-columns:1fr}}
+`;
   const dialog = node('dialog', 'resource-dialog', document.body);
   dialog.id = 'resourceDialog';
   dialog.setAttribute('aria-labelledby', 'resourceTitle');
@@ -196,9 +202,25 @@ export function mountResourcePanel(weather) {
   let disposed = false,
     returnFocus = null,
     solarHandoff = false;
+  const skyDetail = mountSkyDetailResourceCard({
+    env: w.env,
+    parent: grid,
+    closeResources: () => {
+      solarHandoff = dialog.open;
+      if (dialog.open) dialog.close();
+    },
+  });
   const solar = mountSolarResourceCard({
     sim,
     store: w.env.solarObservations,
+    parent: grid,
+    closeResources: () => {
+      solarHandoff = dialog.open;
+      if (dialog.open) dialog.close();
+    },
+  });
+  const cityTerrain = mountCityTerrainResourceCard({
+    env: w.env,
     parent: grid,
     closeResources: () => {
       solarHandoff = dialog.open;
@@ -256,6 +278,8 @@ export function mountResourcePanel(weather) {
     archiveButton.textContent = t('打开云图库…');
     if (disposed) return;
     solar.render();
+    skyDetail.render();
+    cityTerrain.render();
     if (w.busy) feedback.hidden = true;
     if (!feedback.hidden) feedback.textContent = errorText(feedbackMessage);
     title.textContent = t('数据与资源');
@@ -480,6 +504,8 @@ export function mountResourcePanel(weather) {
     dispose() {
       disposed = true;
       solar.dispose();
+      skyDetail.dispose();
+      cityTerrain.dispose();
       archive.dispose();
       w.cloudLibrary.dispose();
       if (dialog.open) dialog.close();

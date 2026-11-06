@@ -32,8 +32,9 @@ function level(p,uv){
 export async function checkXuntianSkyDetail(sim){
  const env=sim.environment,canvas=document.createElement('canvas');canvas.style.cssText='width:384px;height:384px;position:absolute;left:-9999px';
  document.body.append(canvas);const view=createXuntianViewRenderer(sim,canvas);
- const lab=sim.flightLab,previous={stars:env.settings.stars,milky:env.settings.milky,exposure:env.settings.exposure,starBrightness:env.settings.starBrightness};
+ const lab=sim.flightLab,previous={skyDetail:env.settings.skyDetail,stars:env.settings.stars,milky:env.settings.milky,exposure:env.settings.exposure,starBrightness:env.settings.starBrightness};
  try{
+  env.settings.skyDetail=false;env.skyDetail?.setEnabled(false);if(env.skyDetailLayer)env.skyDetailLayer.group.visible=false;
   lab.open('pass');await env.skyLoad;
   if(!env.galaxyTexture){Object.assign(env.settings,{stars:true,milky:true,exposure:'cinematic'});await env.setSkyStyle();}
   env.settings.starBrightness=1;
@@ -80,7 +81,7 @@ export async function checkXuntianSkyDetail(sim){
   assert(env.galaxyTexture===texture&&source.level===xuntianSkySource(env).level,'Scope replaced the shared sky texture');
   return {status:source.status,level:source.level,faceSize:source.faceSize,compared:n,nativeError,reducedError,sourceLight,resultLight,offMax,coarse,fine,photo:map};
  }finally{
-  Object.assign(env.settings,previous);if(previous.exposure!=='cinematic'||!previous.milky||!previous.stars)await env.setSkyStyle();
+  Object.assign(env.settings,previous);env.skyDetail?.setEnabled(previous.skyDetail);if(env.skyDetailLayer)env.skyDetailLayer.group.visible=true;if(previous.exposure!=='cinematic'||!previous.milky||!previous.stars)await env.setSkyStyle();
   view.dispose();canvas.remove();if(lab.active)lab.close();
  }
 }

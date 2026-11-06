@@ -1,0 +1,661 @@
+{
+  "version": 1,
+  "cities": [
+    {
+      "id": "beijing",
+      "names": {
+        "zh": "北京",
+        "en": "Beijing"
+      },
+      "center": [
+        116.3974,
+        39.9093
+      ],
+      "extentKm": 40,
+      "maxLevel": 3,
+      "bounds": [
+        116.16350082216036,
+        39.72917038753909,
+        116.63129917783965,
+        40.08942400018028
+      ],
+      "pixelSizeMeters": 10,
+      "year": "2025",
+      "width": 4000,
+      "height": 4000,
+      "tileSize": 512,
+      "gutter": 4,
+      "tiles": {
+        "0/0/0": "assets/earth/cities/beijing/0-0-0.avif",
+        "1/0/0": "assets/earth/cities/beijing/1-0-0.avif",
+        "1/1/0": "assets/earth/cities/beijing/1-1-0.avif",
+        "1/0/1": "assets/earth/cities/beijing/1-0-1.avif",
+        "1/1/1": "assets/earth/cities/beijing/1-1-1.avif",
+        "2/0/0": "assets/earth/cities/beijing/2-0-0.avif",
+        "2/1/0": "assets/earth/cities/beijing/2-1-0.avif",
+        "2/2/0": "assets/earth/cities/beijing/2-2-0.avif",
+        "2/3/0": "assets/earth/cities/beijing/2-3-0.avif",
+        "2/0/1": "assets/earth/cities/beijing/2-0-1.avif",
+        "2/1/1": "assets/earth/cities/beijing/2-1-1.avif",
+        "2/2/1": "assets/earth/cities/beijing/2-2-1.avif",
+        "2/3/1": "assets/earth/cities/beijing/2-3-1.avif",
+        "2/0/2": "assets/earth/cities/beijing/2-0-2.avif",
+        "2/1/2": "assets/earth/cities/beijing/2-1-2.avif",
+        "2/2/2": "assets/earth/cities/beijing/2-2-2.avif",
+        "2/3/2": "assets/earth/cities/beijing/2-3-2.avif",
+        "2/0/3": "assets/earth/cities/beijing/2-0-3.avif",
+        "2/1/3": "assets/earth/cities/beijing/2-1-3.avif",
+        "2/2/3": "assets/earth/cities/beijing/2-2-3.avif",
+        "2/3/3": "assets/earth/cities/beijing/2-3-3.avif",
+        "3/0/0": "assets/earth/cities/beijing/3-0-0.avif",
+        "3/1/0": "assets/earth/cities/beijing/3-1-0.avif",
+        "3/2/0": "assets/earth/cities/beijing/3-2-0.avif",
+        "3/3/0": "assets/earth/cities/beijing/3-3-0.avif",
+        "3/4/0": "assets/earth/cities/beijing/3-4-0.avif",
+        "3/5/0": "assets/earth/cities/beijing/3-5-0.avif",
+        "3/6/0": "assets/earth/cities/beijing/3-6-0.avif",
+        "3/7/0": "assets/earth/cities/beijing/3-7-0.avif",
+        "3/0/1": "assets/earth/cities/beijing/3-0-1.avif",
+        "3/1/1": "assets/earth/cities/beijing/3-1-1.avif",
+        "3/2/1": "assets/earth/cities/beijing/3-2-1.avif",
+        "3/3/1": "assets/earth/cities/beijing/3-3-1.avif",
+        "3/4/1": "assets/earth/cities/beijing/3-4-1.avif",
+        "3/5/1": "assets/earth/cities/beijing/3-5-1.avif",
+        "3/6/1": "assets/earth/cities/beijing/3-6-1.avif",
+        "3/7/1": "assets/earth/cities/beijing/3-7-1.avif",
+        "3/0/2": "assets/earth/cities/beijing/3-0-2.avif",
+        "3/1/2": "assets/earth/cities/beijing/3-1-2.avif",
+        "3/2/2": "assets/earth/cities/beijing/3-2-2.avif",
+        "3/3/2": "assets/earth/cities/beijing/3-3-2.avif",
+        "3/4/2": "assets/earth/cities/beijing/3-4-2.avif",
+        "3/5/2": "assets/earth/cities/beijing/3-5-2.avif",
+        "3/6/2": "assets/earth/cities/beijing/3-6-2.avif",
+        "3/7/2": "assets/earth/cities/beijing/3-7-2.avif",
+        "3/0/3": "assets/earth/cities/beijing/3-0-3.avif",
+        "3/1/3": "assets/earth/cities/beijing/3-1-3.avif",
+        "3/2/3": "assets/earth/cities/beijing/3-2-3.avif",
+        "3/3/3": "assets/earth/cities/beijing/3-3-3.avif",
+        "3/4/3": "assets/earth/cities/beijing/3-4-3.avif",
+        "3/5/3": "assets/earth/cities/beijing/3-5-3.avif",
+        "3/6/3": "assets/earth/cities/beijing/3-6-3.avif",
+        "3/7/3": "assets/earth/cities/beijing/3-7-3.avif",
+        "3/0/4": "assets/earth/cities/beijing/3-0-4.avif",
+        "3/1/4": "assets/earth/cities/beijing/3-1-4.avif",
+        "3/2/4": "assets/earth/cities/beijing/3-2-4.avif",
+        "3/3/4": "assets/earth/cities/beijing/3-3-4.avif",
+        "3/4/4": "assets/earth/cities/beijing/3-4-4.avif",
+        "3/5/4": "assets/earth/cities/beijing/3-5-4.avif",
+        "3/6/4": "assets/earth/cities/beijing/3-6-4.avif",
+        "3/7/4": "assets/earth/cities/beijing/3-7-4.avif",
+        "3/0/5": "assets/earth/cities/beijing/3-0-5.avif",
+        "3/1/5": "assets/earth/cities/beijing/3-1-5.avif",
+        "3/2/5": "assets/earth/cities/beijing/3-2-5.avif",
+        "3/3/5": "assets/earth/cities/beijing/3-3-5.avif",
+        "3/4/5": "assets/earth/cities/beijing/3-4-5.avif",
+        "3/5/5": "assets/earth/cities/beijing/3-5-5.avif",
+        "3/6/5": "assets/earth/cities/beijing/3-6-5.avif",
+        "3/7/5": "assets/earth/cities/beijing/3-7-5.avif",
+        "3/0/6": "assets/earth/cities/beijing/3-0-6.avif",
+        "3/1/6": "assets/earth/cities/beijing/3-1-6.avif",
+        "3/2/6": "assets/earth/cities/beijing/3-2-6.avif",
+        "3/3/6": "assets/earth/cities/beijing/3-3-6.avif",
+        "3/4/6": "assets/earth/cities/beijing/3-4-6.avif",
+        "3/5/6": "assets/earth/cities/beijing/3-5-6.avif",
+        "3/6/6": "assets/earth/cities/beijing/3-6-6.avif",
+        "3/7/6": "assets/earth/cities/beijing/3-7-6.avif",
+        "3/0/7": "assets/earth/cities/beijing/3-0-7.avif",
+        "3/1/7": "assets/earth/cities/beijing/3-1-7.avif",
+        "3/2/7": "assets/earth/cities/beijing/3-2-7.avif",
+        "3/3/7": "assets/earth/cities/beijing/3-3-7.avif",
+        "3/4/7": "assets/earth/cities/beijing/3-4-7.avif",
+        "3/5/7": "assets/earth/cities/beijing/3-5-7.avif",
+        "3/6/7": "assets/earth/cities/beijing/3-6-7.avif",
+        "3/7/7": "assets/earth/cities/beijing/3-7-7.avif"
+      },
+      "tileSha256": {
+        "0/0/0": "eb3d972c31cdef242d537b2b43ffbe4bbd7483d0f9ea958ee2b264d089e84001",
+        "1/0/0": "36b9b205ecffe751728dfdba739322c1b7bc0a6e219370c0260d55e6089b09df",
+        "1/1/0": "9dd342ebfbb0eb192d08ab2b1b3675c93cc201626461862941e3a2e897bf3ee2",
+        "1/0/1": "3db436f8e2808425220e06ff1012504fa84fed1b6cfc4bba8bcff24d9d91c6ac",
+        "1/1/1": "a60e7fd12996d8e04236bcf941121a25cccd14ab25ba730479a65016041b3e53",
+        "2/0/0": "55daad08a1ed1d4dfd62eea48fa36529a18f38d2a5a8392ef9579de501293d51",
+        "2/1/0": "5a3bc6aa1397d0de6ee2c91c0cd3a13b2f9d3a81dc88337471cd061b713a4f70",
+        "2/2/0": "a992279d88982936690a87f9764b2560859e83eedfdb84aa6369ddf02d4c8d67",
+        "2/3/0": "818b714bfba389365f21212b5deeed972dcaaa5ec9da50ae3e4c941e81e62f03",
+        "2/0/1": "034979df4ce52a06fb84b92cd28578b54791712187064273d6edf298279a8402",
+        "2/1/1": "6eb194c2958d5989c2561359bb50650260a1ceef449b4f08b02975c757aa9423",
+        "2/2/1": "0353595b63622af7077757153541a91de9378210761efc2ffa72433b38499218",
+        "2/3/1": "8fad7c708ac4c5f1b222b1178e1b6c351c23597be2f0ce7ad7122be0c6faf834",
+        "2/0/2": "e8e88a20c90a356f2708320ffa98c5e7d86df27af6540da96042d26f2eecc2fd",
+        "2/1/2": "6954eb7cc990f905833bcb0d1cb43fbaf336d2bd0999174a714f36de72b01606",
+        "2/2/2": "68c53993e34abcacbc93449462858975a5cc8e4dbb76c4f1c1cbc0f31385d2bc",
+        "2/3/2": "57e7910eb4e9ce764fc35bedbc295e21b552d4b9ed6a44f12f6e44eb90f733bb",
+        "2/0/3": "33da9ab92fb90cf32e4f7473884c0128eb4576b8d077e944a5031392f57135bb",
+        "2/1/3": "3c55403f2092edba0983d43baca8124ce2dc24743dc00430efda99525513f8b4",
+        "2/2/3": "08a57fb4d49846f69e0a7dae8cde5b23a5465f1cf1c2dd79be151a91a05b012f",
+        "2/3/3": "ab53da27368936217dd4b858f701e75f60046f9cc9cf5094d9143955f5ac4720",
+        "3/0/0": "0a1411e5a6c35103a041d3f79174488acaeaa23e32f831669f75cbdf40d23433",
+        "3/1/0": "6f338ff0e64e5d81dda6175826d7b67a4697a26ebec65927e63a864e0b24c452",
+        "3/2/0": "2478d704eca95162e61dd590bcf98ba7ea9116fedace3229a13ab62210e84e3a",
+        "3/3/0": "072caaff63d1449753af96e87f92a2884b888c8183218459db740b7e4be8f618",
+        "3/4/0": "ddd0b67da575e5bff44b18d4c07af739a9d68bc482da66b5d24d16ab048f1937",
+        "3/5/0": "3feb0a1d8d9750fe7627b622111a01e255b305009fc4c4f9675fae1de693ba3a",
+        "3/6/0": "aa6b309112f2e5696abba9482e5d690783305238165c44ef4f60bcd2c213b038",
+        "3/7/0": "d248546529a15acc2b001e990a4ddb9eb4148c23eac8058bba3ebddd9e1522e4",
+        "3/0/1": "7ce59316a258701909f48cd0c86293972dae652e1f06c79f56b65564dc7f2fa7",
+        "3/1/1": "4b51000189bc09ae912d8d4412f12ce817260cd669d071519ad84fd723d0c77f",
+        "3/2/1": "5bc86f23dcce2feb93577502e20813437b7247a7dbc967062fc74687105008d6",
+        "3/3/1": "8851b7aa75ffcbd7d7365ec5ab4f04cf27d39ad497883178996f1511f53eafbb",
+        "3/4/1": "ac687a8d624545d97bf49848814efd3a09346b78f32f65a9d15710a08afce558",
+        "3/5/1": "2c78a7a1e552673ec4ece5d52b1e3c9551fdbbbe4f47e493f1a3cd7411805147",
+        "3/6/1": "7f430cc63b7e1d6d52b6d5e5d8609f779328ed733f42eed22ecb5dd2640a1aeb",
+        "3/7/1": "bf1b40ff7945ffe878b1d5f3dd9e338c85e7be7b3776e7ae41f4cafb6d81b483",
+        "3/0/2": "231e1ef777a4f02f9d59b995812a10fbfe0674607f01fd57134874debc69ce4e",
+        "3/1/2": "f44421f5e8ca74b6cf0d493d2b126662d2246709905f7b2798a566cabf66da02",
+        "3/2/2": "032078450a0dd6a05d60b818c7d36f3c28bc2871fa57e16263291f9350bd3ffa",
+        "3/3/2": "12e39e42201c67a5ccd5b7c432ae658dc7d06c5c39f949a1b7c278ee07753260",
+        "3/4/2": "d39adc41bed5ae203f1ae8901f3c533df47c9407006281a5b0eb0f8a2a4e066f",
+        "3/5/2": "4a287bb404045e9574bf22136c753f9aec3bb4d780faef8f19d8d2344274d3c7",
+        "3/6/2": "a9e7f22d31d41dd8013cb45e884fa5df88689ee88f32273c2e09bab50c2c8500",
+        "3/7/2": "3c9d8e902a0d753491fd83a36ad7d0cddbfb31a88c31f709c9b2a2316991b68d",
+        "3/0/3": "a962632f42d16e07917031b281f9c63f58ab25ac8b628af48571997536d90490",
+        "3/1/3": "9efd3b27685c741401a737ba7be833900cddf4a2624d4319cb06f114a7c74c60",
+        "3/2/3": "4f90e1301241358b4a21ce7d28910cdfb54e82d30991a5f298468cc1410d4b42",
+        "3/3/3": "dc63f23a7ea445fd2550c8a061b8bd2feb5ea33f5242e417c7f298ed2105ee93",
+        "3/4/3": "1c642809be8d94e3d418989bd89e20e66c25de752cbde1286c32778dc73c582d",
+        "3/5/3": "3748fe7333d592a9498bd9aa415fa6bc546ae4a7aa8ad5b5369822e5aa8154d0",
+        "3/6/3": "10292a68aa0c922b900605287957b6c541ce0e3a5b344f4794e5e9c5919ba332",
+        "3/7/3": "a7294524eef23fb9db4d29d7906551e1ae611ac6f2cfe290378c2eb48198dcff",
+        "3/0/4": "34f1d2630e96bdf0018251916697afc6d7eeae761aefcb9ca2f67e6a8f39608c",
+        "3/1/4": "36a6ad6a8345cf4d418ae377b2eeef9fb0eca56a9c3066bd61f6890b4ac98365",
+        "3/2/4": "9a935f17e87d5367ac39dbbd03028e34fec1561dc018a9758b2c21d5c2918cce",
+        "3/3/4": "99bd30b1cdfb2c98848820961db747a46b2e9c7dcf72f1938a671e1c3ab78750",
+        "3/4/4": "5570bafb745393b308124818729028b8140e079d78b6f90c2f411591da261b87",
+        "3/5/4": "11e09eb30f96b54c9c4f35b4d31482e09ece9332844c727dbb368c168fb18714",
+        "3/6/4": "5c6d5fd5903a7bcc6fbce1318eb4cd07df1eb2cea62fba9c265208f33dc850aa",
+        "3/7/4": "6522c21b9553faaa82ebbd507d7e758b09d0588ddd65ae2cdefe651c6b9c9703",
+        "3/0/5": "0ab956a0480db38dd7af140af54a444479ce0cbe4c3a7bc798a9dea8ac0ca727",
+        "3/1/5": "0cb69d1c50c47057091266a3d1795c81eab0180762528a9317c58b65fbf6f8aa",
+        "3/2/5": "6ab98d83dc5d847b2fe5d40152f25d807ff8cd0c1497795c4894e2747bae2253",
+        "3/3/5": "3a41945134509b068083b5d2f3e21a4d466ebf3c775a847f7641a667fc371ecd",
+        "3/4/5": "efcd9cfa6f11189e5e3a05c86761dbf19b6d20b8e5e0d1d74740c212977d1eec",
+        "3/5/5": "a5a6b2682019c57c0d863d4d74d35d6bf7103e5733a5566e16a98b11688cea5f",
+        "3/6/5": "2c57d82785bff326b00b6418009335b9dbd7b91ce6986643131373f9c88cf977",
+        "3/7/5": "25b07c5029ec1fcf095b951abcbf1681e6b88934e69b806173b4f95211bcee4f",
+        "3/0/6": "1e471924b360a374a27b1582b9fa142f8ccd5ab12580bd5de0a9ca508b99e9de",
+        "3/1/6": "92de2629448b863934ea068c535ee4c3ce2fa9ccfa11f73969db8fe3542242e4",
+        "3/2/6": "468e0f051728a91028e7ebe5a3b7de9c3e3e9e7dfe30eba83ad6b97cf0454c45",
+        "3/3/6": "2da3674cc9d6538b623adbc5413f03a6767d8bacc42a5ffd984b1f4654088ce7",
+        "3/4/6": "5bbd0be684e2581ad93cb992cdb0ff05281113a47170852c2f0cddff89056d4d",
+        "3/5/6": "da0feb0f27e81b202c2ea40df5b00145d2c4e163376fb5f488e0bd7dbcfa03c7",
+        "3/6/6": "c946efb81780e6a41ee245d84fd0616503489033a0d74e050141ec0778730070",
+        "3/7/6": "661e0e6015505e92edef986f365f698e0f3fd1338b0d43e4ad6b450fe3bd68ec",
+        "3/0/7": "2327d4cbdf38391cb6213b4062550eb761a50b50bc7e15d8b766dfd0f56d98d4",
+        "3/1/7": "eac3712e7912615240e95456c76ac1c290ee08e952f7c357b3725d3ab10bdb1c",
+        "3/2/7": "fa829597993476ad8e8dbfc3c482760eb50f6e6f1e17e8cd4acc5af2db8d110c",
+        "3/3/7": "0815e486335e4522705d086a545fce48efb23b641bfec3b3a90575644c05f2ad",
+        "3/4/7": "c3369a658cd6cbaea1e7d9667137ec348b6256b347f8591f9e05f93836e5b2da",
+        "3/5/7": "df1255125ff780906852e46b983e29b57ae74abffc84400110911fc302c0a18e",
+        "3/6/7": "1aa158bfe32f00c2a4cd1e253f609b21ebb97aae22dcfd75f63b95fd9f23a612",
+        "3/7/7": "bb4170a31e896b975f3e5fecbabf7412d140052289cda92f9f79dfdaf4d498cd"
+      },
+      "bytes": 5196163,
+      "validFraction": 1.0,
+      "encoding": {
+        "format": "AVIF",
+        "quality": 80,
+        "chroma": "4:4:4",
+        "colorSpace": "sRGB",
+        "alpha": "data coverage",
+        "radiometry": "L2A surface reflectance, standard sRGB OETF, no exposure gain or histogram stretch",
+        "levelFiltering": "area average of linear reflectance, weighted by validity"
+      },
+      "source": {
+        "id": "copernicus-sentinel2-c1-l2a-2025",
+        "title": "Sentinel-2 L2A · 2025 low-cloud scenes",
+        "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/",
+        "license": "Copernicus Sentinel Data Legal Notice",
+        "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+        "credit": "Contains modified Copernicus Sentinel data (2025). Source COGs: Element 84 / Earth Search. Crop, cloud-mask selection and sRGB conversion: StarOrbit.",
+        "observed": "2025-07-30 / 2025-11-04",
+        "observationDates": [
+          "2025-07-30",
+          "2025-11-04"
+        ],
+        "scenes": [
+          {
+            "id": "S2B_T50TMK_20250730T031615_L2A",
+            "url": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a/items/S2B_T50TMK_20250730T031615_L2A",
+            "observed": "2025-07-30T03:16:44.960000Z",
+            "sceneCloudPercent": 0.02072,
+            "contributedPixels": 15999611,
+            "license": "Copernicus Sentinel Data Legal Notice",
+            "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+            "assets": {
+              "red": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B04.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B04.tif",
+                "sha256Multihash": "1220a5d7202c778ebab1ceffe4b95c5b6f5b21c8eb66097806fe067e825a9a382621",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "green": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B03.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B03.tif",
+                "sha256Multihash": "122043de74435dfe8c988b6d1f52119750b1b6edfcf41dfeb4efea5e9df744e9b815",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "blue": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B02.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/B02.tif",
+                "sha256Multihash": "1220c95690445e3f5637fbb66ec671e171b39e2beb0111c760a34ec0f670f28e58e5",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "scl": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/SCL.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/7/S2B_T50TMK_20250730T031615_L2A/SCL.tif",
+                "sha256Multihash": "12205244d640ba7f704ab6475131a6d2a89327607dcd85a78cf79646961891cdfbce",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint8",
+                    "spatial_resolution": 20
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "S2A_T50TMK_20251104T031151_L2A",
+            "url": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a/items/S2A_T50TMK_20251104T031151_L2A",
+            "observed": "2025-11-04T03:17:00.983000Z",
+            "sceneCloudPercent": 0.046586,
+            "contributedPixels": 389,
+            "license": "Copernicus Sentinel Data Legal Notice",
+            "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+            "assets": {
+              "red": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B04.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B04.tif",
+                "sha256Multihash": "12206161aefb3b78b02e9551ee2eaef8cdf22e57ece2fe5fc622a93c8835445d1480",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "green": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B03.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B03.tif",
+                "sha256Multihash": "1220ef45bde45e539653eda93ab0763b356488debe9d2a4c2e62c370ab3f6c56bfb3",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "blue": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B02.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/B02.tif",
+                "sha256Multihash": "12207edeb5ec688ce593bb8f308f53e50ee224f2d27479b903f353b1bab0ab4475a6",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "scl": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/SCL.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/50/T/MK/2025/11/S2A_T50TMK_20251104T031151_L2A/SCL.tif",
+                "sha256Multihash": "1220e9381adcdefea4b2ec02a8c3df1a90ae1e655cc13263e9115670e7e88e168aa5",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint8",
+                    "spatial_resolution": 20
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "method": "2025 low-cloud primary scene, fill only SCL/cloud/nodata gaps from the listed same-year fallback. This is a StarOrbit selection, not an official annual mosaic. SCL allowed: 2,4,5,6,7; excluded: 0,1,3,8,9,10,11, with a 40 m exclusion margin. RGB bands come from the same scene for each pixel. Raw DN*0.0001-0.1; bilinear reprojection to WGS84.",
+        "nativeMetersPerPixel": 10,
+        "nominalCityMetersPerPixel": 10,
+        "projection": "North-up WGS84 rectangle; requested geodesic size through the city centre; ground sampling varies slightly across the rectangle."
+      }
+    },
+    {
+      "id": "seattle",
+      "names": {
+        "zh": "西雅图",
+        "en": "Seattle"
+      },
+      "center": [
+        -122.3321,
+        47.6062
+      ],
+      "extentKm": 20,
+      "maxLevel": 2,
+      "bounds": [
+        -122.46509362461187,
+        47.51625720664284,
+        -122.19910637538813,
+        47.69614137627991
+      ],
+      "pixelSizeMeters": 10,
+      "year": "2025",
+      "width": 2000,
+      "height": 2000,
+      "tileSize": 512,
+      "gutter": 4,
+      "tiles": {
+        "0/0/0": "assets/earth/cities/seattle/0-0-0.avif",
+        "1/0/0": "assets/earth/cities/seattle/1-0-0.avif",
+        "1/1/0": "assets/earth/cities/seattle/1-1-0.avif",
+        "1/0/1": "assets/earth/cities/seattle/1-0-1.avif",
+        "1/1/1": "assets/earth/cities/seattle/1-1-1.avif",
+        "2/0/0": "assets/earth/cities/seattle/2-0-0.avif",
+        "2/1/0": "assets/earth/cities/seattle/2-1-0.avif",
+        "2/2/0": "assets/earth/cities/seattle/2-2-0.avif",
+        "2/3/0": "assets/earth/cities/seattle/2-3-0.avif",
+        "2/0/1": "assets/earth/cities/seattle/2-0-1.avif",
+        "2/1/1": "assets/earth/cities/seattle/2-1-1.avif",
+        "2/2/1": "assets/earth/cities/seattle/2-2-1.avif",
+        "2/3/1": "assets/earth/cities/seattle/2-3-1.avif",
+        "2/0/2": "assets/earth/cities/seattle/2-0-2.avif",
+        "2/1/2": "assets/earth/cities/seattle/2-1-2.avif",
+        "2/2/2": "assets/earth/cities/seattle/2-2-2.avif",
+        "2/3/2": "assets/earth/cities/seattle/2-3-2.avif",
+        "2/0/3": "assets/earth/cities/seattle/2-0-3.avif",
+        "2/1/3": "assets/earth/cities/seattle/2-1-3.avif",
+        "2/2/3": "assets/earth/cities/seattle/2-2-3.avif",
+        "2/3/3": "assets/earth/cities/seattle/2-3-3.avif"
+      },
+      "tileSha256": {
+        "0/0/0": "677b84d018ebe7b80cdec3e8ebe9c12465cb40bac05925c7738aa7d86c339cb6",
+        "1/0/0": "5e9daa97cdd6d96298fe9993b5e47b2bde6254fc02528f251283587e5033246d",
+        "1/1/0": "f2c94a4591cade17f02ccab535d4752a806213833636ea68c2e3f6718cab14e4",
+        "1/0/1": "397e6a305a6b935c03c39a5b073355bb0d17ac3e3dc206977fcac2c04d9fa2b6",
+        "1/1/1": "f1e65a35f08369681f30fc2a369c325bcdb389ae76f3d91dfde6d2b2eea61d25",
+        "2/0/0": "8171b3235ba153497f214303efbcbb1b3a07362edb60155e0d0f5787c55ff2e4",
+        "2/1/0": "04f61116ecf74d5b5153622bde980bcabfb964274b27bccf5bc6e444d208f369",
+        "2/2/0": "4ec8cb2c110d55b405907d68c4691e3321605f4fa187cc63c59014ac344202f0",
+        "2/3/0": "858c6f7024f436bae985a9ca00b976413874dd2ce15f5eebeff18c85eb284bad",
+        "2/0/1": "77b169d1fe06dfe96ca96c43743bb0e9282e32b5fc81898a757652eae6acd2af",
+        "2/1/1": "3cff3823071824cad6b07eac4b21797bbfef44555ff47457f8bc1d7bfdacdeda",
+        "2/2/1": "30ed531990ac39b1e7eb85084f40b8dec9c12db54cabf020ae9af75043ded75a",
+        "2/3/1": "370ef4f5d4f7fa6b3145dc17e4432c4a2b9f234b13c74430ba5fbac1a70fef7c",
+        "2/0/2": "46a848efb834fe0fba4e916c90a021df5dcfa88a4db5283d2f03799e8510f52c",
+        "2/1/2": "638a4f567bc01273f4fe3b2f3f45118cad1327b9ea798e9ba94378178e585b63",
+        "2/2/2": "c857063194a6270c344d7f5a9d3ad4f924ad1b784a31a571cb679113ae9ffbbe",
+        "2/3/2": "6a237f00f6e2908cc48d323201ed1511d058ac72ec1bd2ebb321f7def7eacf95",
+        "2/0/3": "469c2f7db9461cf7e28bef135d758ef15954eb89610452af35628bd70ab854c9",
+        "2/1/3": "ed0e1c9cf13f7e1a74135d639f4e2fc8104ea972efcaaa124a06a633f48d7b9c",
+        "2/2/3": "99832b66087b3cc99cc2077104906d9f0e2fca527379d8939f30ac2b91775d4c",
+        "2/3/3": "06d166ef93b5b20d0a121054880ca0c3987780acb02c50e57ee4bd7a7eff0067"
+      },
+      "bytes": 831544,
+      "validFraction": 0.99999975,
+      "encoding": {
+        "format": "AVIF",
+        "quality": 80,
+        "chroma": "4:4:4",
+        "colorSpace": "sRGB",
+        "alpha": "data coverage",
+        "radiometry": "L2A surface reflectance, standard sRGB OETF, no exposure gain or histogram stretch",
+        "levelFiltering": "area average of linear reflectance, weighted by validity"
+      },
+      "source": {
+        "id": "copernicus-sentinel2-c1-l2a-2025",
+        "title": "Sentinel-2 L2A · 2025 low-cloud scenes",
+        "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/",
+        "license": "Copernicus Sentinel Data Legal Notice",
+        "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+        "credit": "Contains modified Copernicus Sentinel data (2025). Source COGs: Element 84 / Earth Search. Crop, cloud-mask selection and sRGB conversion: StarOrbit.",
+        "observed": "2025-07-08 / 2025-09-23 / 2025-01-19",
+        "observationDates": [
+          "2025-07-08",
+          "2025-09-23",
+          "2025-01-19"
+        ],
+        "scenes": [
+          {
+            "id": "S2B_T10TET_20250708T191951_L2A",
+            "url": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a/items/S2B_T10TET_20250708T191951_L2A",
+            "observed": "2025-07-08T19:21:26.809000Z",
+            "sceneCloudPercent": 0.000487,
+            "contributedPixels": 3997105,
+            "license": "Copernicus Sentinel Data Legal Notice",
+            "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+            "assets": {
+              "red": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B04.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B04.tif",
+                "sha256Multihash": "1220cb23c259e107a931b2234efecdfb389fcf7353126ddb64aa18da3137ccf5d74b",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "green": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B03.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B03.tif",
+                "sha256Multihash": "1220fd8bda6bd1be92e2a96c6e29a441cf4d21309ecde26517a839b96392ded82907",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "blue": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B02.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/B02.tif",
+                "sha256Multihash": "1220689a2856c317a840bc62bec0360fe5fdbb67f4698abd155e419c5eca89b207a8",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "scl": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/SCL.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/7/S2B_T10TET_20250708T191951_L2A/SCL.tif",
+                "sha256Multihash": "122014a7963eb42a27673fced072f50b6c29ee5af831243e87afc3436fcad10726de",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint8",
+                    "spatial_resolution": 20
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "S2B_T10TET_20250923T190651_L2A",
+            "url": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a/items/S2B_T10TET_20250923T190651_L2A",
+            "observed": "2025-09-23T19:11:26.158000Z",
+            "sceneCloudPercent": 3.068341,
+            "contributedPixels": 639,
+            "license": "Copernicus Sentinel Data Legal Notice",
+            "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+            "assets": {
+              "red": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B04.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B04.tif",
+                "sha256Multihash": "122089df754f5e97d1fb9d5acb1bf0b06f9a894c69f698bba32130dd032fcb833f57",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "green": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B03.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B03.tif",
+                "sha256Multihash": "1220a8320b67ae27534e78bcbc8d7320911b685787928e59243049a9f4125e056887",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "blue": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B02.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/B02.tif",
+                "sha256Multihash": "122013cdbf267f619cfb9dcd614d1042eb0d864dd77492a966619dbbb637bc9f8d01",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "scl": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/SCL.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/9/S2B_T10TET_20250923T190651_L2A/SCL.tif",
+                "sha256Multihash": "122093aa68c7f43cd0fc354336d75fce435443a4176e4c07e24f28d8babd582d61f4",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint8",
+                    "spatial_resolution": 20
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "S2B_T10TET_20250119T191626_L2A",
+            "url": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a/items/S2B_T10TET_20250119T191626_L2A",
+            "observed": "2025-01-19T19:21:23.258000Z",
+            "sceneCloudPercent": 2.794959,
+            "contributedPixels": 2255,
+            "license": "Copernicus Sentinel Data Legal Notice",
+            "licenseUrl": "https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice",
+            "assets": {
+              "red": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B04.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B04.tif",
+                "sha256Multihash": "12206a8bf7d3ecb96129384f70f3d90f6423221ee6a1f7b52875b7abcdc02eb8f832",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "green": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B03.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B03.tif",
+                "sha256Multihash": "12208a5d8809898a1e03dd4bb0673738aa3c920385ed8d54c48cd2dc031aa761a900",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "blue": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B02.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/B02.tif",
+                "sha256Multihash": "122087eaccdb69647073d58ffd5ef194a9aaa1af58433614d11969c7b042285fe42d",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint16",
+                    "spatial_resolution": 10,
+                    "scale": 0.0001,
+                    "offset": -0.1
+                  }
+                ]
+              },
+              "scl": {
+                "url": "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/SCL.tif",
+                "downloadUrl": "https://e84-earth-search-sentinel-data.s3.amazonaws.com/sentinel-2-c1-l2a/10/T/ET/2025/1/S2B_T10TET_20250119T191626_L2A/SCL.tif",
+                "sha256Multihash": "1220d2241409ad97ec95b54d7886e17dfe11d50e66212f0b1f126a5279fabf8738b5",
+                "scale": [
+                  {
+                    "nodata": 0,
+                    "data_type": "uint8",
+                    "spatial_resolution": 20
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "method": "2025 low-cloud primary scene, fill only SCL/cloud/nodata gaps from the listed same-year fallback. This is a StarOrbit selection, not an official annual mosaic. SCL allowed: 2,4,5,6,7; excluded: 0,1,3,8,9,10,11, with a 40 m exclusion margin. RGB bands come from the same scene for each pixel. Raw DN*0.0001-0.1; bilinear reprojection to WGS84.",
+        "nativeMetersPerPixel": 10,
+        "nominalCityMetersPerPixel": 10,
+        "projection": "North-up WGS84 rectangle; requested geodesic size through the city centre; ground sampling varies slightly across the rectangle."
+      }
+    }
+  ]
+}

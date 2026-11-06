@@ -9,7 +9,7 @@ const orbit=JSON.parse(fs.readFileSync(new URL('../assets/orbit.json',import.met
 delete orbit.url;orbit.missionId='tiangong';orbit.center='EARTH';
 const graph=describeAssembly({TH_FORWARD:'TH','TH_FORWARD/TH_FORWARD':'TZ','TH_FORWARD/TH_LOWER':'TZ',TH_AFT:'TZ'});
 const pose={position:[400,300,200],target:[0,0,0],up:[0,0,1],fov:38,zoom:1};
-const fixture={format:SCENE_FORMAT,mission:{id:'tiangong',pose:{roll:0,pitch:0,yaw:0},rotation:{mode:'prograde',enabled:false,phase:0,epoch:orbit.rows[12][0]}},name:'分享 / Test',appVersion:'v0.26',assembly:{slots:graph.slots,angles:Object.fromEntries([...graph.instances.map(i=>i.id),'freeXT'].map(id=>[id,{roll:12,left:-34,right:56}])),target:'TH_FORWARD/TH_LOWER',showXT:true,linked:true,pair:false},simulation:{time:orbit.rows[12][0],view:'orbit',speed:60,auto:false},environment:{quality:'medium',exposure:'view',cloudOpacity:.85,starBrightness:1,stars:true,milky:true,moon:true,starLabels:false,clouds:true,cloudNightVisible:false,groundTrack:true},weather:{cloud:'history',aurora:'off',seed:'Test',auroraStrength:1.4,exposure:1.15,volume:false,motion:true,adaptive:true,cloudRecord:{id:'cloud-abc',source:'Test',provider:'github',time:orbit.rows[12][0]},auroraRecord:null},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,true])),cameras:{follow:pose,overview:{...pose,position:[12000,20000,3000]},home:null},orbit};
+const fixture={format:SCENE_FORMAT,mission:{id:'tiangong',pose:{roll:0,pitch:0,yaw:0},rotation:{mode:'prograde',enabled:false,phase:0,epoch:orbit.rows[12][0]}},name:'分享 / Test',appVersion:'v0.26',assembly:{slots:graph.slots,angles:Object.fromEntries([...graph.instances.map(i=>i.id),'freeXT'].map(id=>[id,{roll:12,left:-34,right:56}])),target:'TH_FORWARD/TH_LOWER',showXT:true,linked:true,pair:false},simulation:{time:orbit.rows[12][0],view:'orbit',speed:60,auto:false},environment:{quality:'medium',exposure:'view',cloudOpacity:.85,starBrightness:1,stars:true,milky:true,skyDetail:true,skyDetailSource:'auto',cityTerrain:true,cityAutoLoad:false,moon:true,starLabels:false,clouds:true,cloudNightVisible:false,groundTrack:true},weather:{cloud:'history',aurora:'off',seed:'Test',auroraStrength:1.4,exposure:1.15,volume:false,motion:true,adaptive:true,cloudRecord:{id:'cloud-abc',source:'Test',provider:'github',time:orbit.rows[12][0]},auroraRecord:null},display:Object.fromEntries(DISPLAY_KEYS.map(k=>[k,true])),cameras:{follow:pose,overview:{...pose,position:[12000,20000,3000]},home:null},orbit};
 const checked=validateScene(JSON.parse(JSON.stringify(fixture)));
 assert.deepEqual(checked,{...fixture,environment:{...fixture.environment,...normalizeStarChartSettings(fixture.environment),...normalizeGeographySettings()},phenomena:{...PHENOMENA_DEFAULTS}});
 assert.ok(Buffer.byteLength(JSON.stringify(checked))<MAX_SCENE_BYTES);
@@ -27,14 +27,14 @@ console.log('Scene sharing: round-trip, recursive/repeated assemblies, invalid i
 
 const fx=structuredClone(fixture);fx.phenomena={...PHENOMENA_DEFAULTS,mode:'enhanced',meteors:false};assert.deepEqual(validateScene(fx).phenomena,fx.phenomena);fx.phenomena.lightning='yes';assert.throws(()=>validateScene(fx));
 
-const chartScene=structuredClone(fixture);Object.assign(chartScene.environment,normalizeStarChartSettings({starChartEnabled:true,starLabels:false,starLabelScope:'all',constellationBoundaries:true,starLabelDensity:.8}));
+const chartScene=structuredClone(fixture);Object.assign(chartScene.environment,normalizeStarChartSettings({starChartEnabled:true,starLabels:false,starLabelScope:'all',constellationArt:false,constellationBoundaries:true,starLabelDensity:.8}));
 assert.deepEqual(validateScene(chartScene).environment,{...chartScene.environment,...normalizeGeographySettings()});
 assert.equal(validateScene(fixture).environment.starChartEnabled,false);
 const legacyStars=structuredClone(fixture);legacyStars.environment.starLabels=true;
 assert.equal(validateScene(legacyStars).environment.catalogStarLabels,false);
 assert(!Object.hasOwn(validateScene(legacyStars).environment,'starLabelScope'));
 assert.equal(validateScene(legacyStars).environment.starChartEnabled,true);
-for(const [key,value] of [['starChartEnabled','true'],['starLabelScope','unknown'],['starLabelDensity',1.1],['constellationLines',0],['constellationNames',null],['constellationBoundaries',[]]]){
+for(const [key,value] of [['starChartEnabled','true'],['starLabelScope','unknown'],['starLabelDensity',1.1],['constellationArt','true'],['constellationLines',0],['constellationNames',null],['constellationBoundaries',[]]]){
  const invalid=structuredClone(chartScene);invalid.environment[key]=value;assert.throws(()=>validateScene(invalid));
 }
 console.log('Star chart scene settings, classic migration and strict validation passed');
@@ -45,3 +45,15 @@ for(const [key,value] of [['geographyEnabled','yes'],['geoDensity',NaN],['geoCou
 console.log('Geography scene round trip, old-scene defaults and strict validation passed');
 
 const focused=structuredClone(fixture);focused.cameras.focus='xuntian';assert.equal(validateScene(focused).cameras.focus,'xuntian');focused.cameras.focus=12;assert.throws(()=>validateScene(focused));
+
+const oldSkyScene=structuredClone(fixture);delete oldSkyScene.environment.skyDetail;assert.equal(validateScene(oldSkyScene).environment.skyDetail,true);
+oldSkyScene.environment.skyDetail=false;assert.equal(validateScene(oldSkyScene).environment.skyDetail,false);
+oldSkyScene.environment.skyDetail='true';assert.throws(()=>validateScene(oldSkyScene));
+const oldCityScene=structuredClone(fixture);delete oldCityScene.environment.cityTerrain;delete oldCityScene.environment.cityAutoLoad;
+assert.equal(validateScene(oldCityScene).environment.cityTerrain,true);assert.equal(validateScene(oldCityScene).environment.cityAutoLoad,false);
+for(const source of ['auto','galaxy','dss','panstarrs','recent']){
+ const scene=structuredClone(fixture);scene.environment.skyDetailSource=source;
+ const roundtrip=validateScene(scene);assert.equal(roundtrip.environment.skyDetailSource,source);assert.equal(roundtrip.environment.skyDetail,source!=='galaxy');
+}
+for(const [key,value]of [['skyDetailSource','unknown'],['cityTerrain','true'],['cityAutoLoad',1]]){const bad=structuredClone(fixture);bad.environment[key]=value;assert.throws(()=>validateScene(bad));}
+const oldSources=structuredClone(fixture);delete oldSources.environment.skyDetailSource;oldSources.environment.skyDetail=false;assert.equal(validateScene(oldSources).environment.skyDetailSource,'galaxy');

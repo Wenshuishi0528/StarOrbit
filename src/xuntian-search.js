@@ -45,7 +45,7 @@ export function createScopeExamples(random = Math.random) {
 export function mountScopeSearch(
   input,
   list,
-  { choose, isBlocked, cityFinder, cityVisible, solarVisible }
+  { choose, isBlocked, cityFinder, cityVisible, solarVisible, extraTargets = () => [] }
 ) {
   let results = [],
     index = 0;
@@ -82,6 +82,7 @@ export function mountScopeSearch(
       // searches, with space for city prefixes when both domains match.
       const cap = others.length ? 5 : 7;
       results = [
+        ...extraTargets(query),
         ...bodies.filter((b) => b.exact),
         ...exact,
         ...bodies.filter((b) => !b.exact).slice(0, 3),

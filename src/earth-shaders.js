@@ -4,6 +4,7 @@ import { scatteringGLSL } from './atmosphere-scattering.js';
 import { solarOpticsGLSL } from './atmosphere-glsl.js';
 import { cloudMoonGLSL } from './cloud-lighting.js';
 import { radiometryGLSL } from './earth-radiometry.js';
+import { cityTerrainGLSL } from './city-terrain.js';
 export const vertex = `varying vec3 localN;varying vec3 worldN;varying vec3 worldP;
 void main(){localN=normalize(position);worldN=normalize(mat3(modelMatrix)*localN);worldP=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(worldP,1.);}`;
 const mapUVCode = `vec2 mapUV(vec3 p){p=normalize(p);return vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);}`;
@@ -46,7 +47,7 @@ float coverage=mix(base,secondary,.15+.20*weather);
 return clamp(pow(max(coverage,0.),mix(2.8,.72,clamp(moisture,0.,1.)))*(.7+.3*moisture)*(.85+.3*weather),0.,1.);
 }`;
 
-const detail = `uniform sampler2D detailMap0,detailMap1,detailMap2,detailMap3;
+const detail = `${cityTerrainGLSL}uniform sampler2D detailMap0,detailMap1,detailMap2,detailMap3;
 uniform sampler2D nightDetailMap0,nightDetailMap1,nightDetailMap2,nightDetailMap3;
 uniform vec4 nightDetailRect0,nightDetailRect1,nightDetailRect2,nightDetailRect3;
 uniform float nightDetailFade0,nightDetailFade1,nightDetailFade2,nightDetailFade3;
@@ -99,7 +100,8 @@ vec3 groundColor(vec2 uv){
  c=sampleDetail(detailMap0,detailRect0,detailFade0,uv,dx,dy,c,false);
  c=sampleDetail(detailMap1,detailRect1,detailFade1,uv,dx,dy,c,false);
  c=sampleDetail(detailMap2,detailRect2,detailFade2,uv,dx,dy,c,false);
- return sampleDetail(detailMap3,detailRect3,detailFade3,uv,dx,dy,c,false);
+ c=sampleDetail(detailMap3,detailRect3,detailFade3,uv,dx,dy,c,false);
+ return cityTerrainColor(uv,dx,dy,c);
 }
 vec3 nightColor(vec2 uv){
  vec3 c=sampleMap(nightMap,uv).rgb;

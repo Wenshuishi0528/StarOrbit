@@ -45,6 +45,7 @@ __HELP_CSS__
 
 .minimap-light-legend{display:flex;align-items:center;gap:12px;padding:7px 10px 0;font-size:10px;color:#d3e3ef}.minimap-light-legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.minimap-light-legend i{display:inline-block;width:10px;height:8px;border:1px solid #a5bed08c;border-radius:2px}.minimap-light-legend .day{background:#3971ad}.minimap-light-legend .night{background:#091429}@media(max-width:760px){.minimap-light-legend{gap:10px;padding:5px 6px 0;font-size:9px}}
 __WORKSPACE_CSS__
+.sky-detail-row{display:flex;gap:8px;align-items:center;margin:7px 0}.sky-detail-row label{font-size:11px;white-space:nowrap;color:#b9cddd}.sky-detail-row select{flex:1;min-width:0;max-width:100%;padding:5px 7px;font-size:11px}.sky-detail-row select:disabled{opacity:.5}.sky-detail-info p{white-space:pre-line;overflow-wrap:anywhere}.sky-detail-info button{font-size:11px;padding:5px 8px}.sky-detail-info summary{cursor:pointer}
 .header-links{display:flex;align-items:center;gap:10px}.github-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;min-height:34px;padding:6px 10px;border:1px solid #355268;border-radius:8px;background:#14263a;color:var(--text);font-size:12px;text-decoration:none;white-space:nowrap}.github-star{color:var(--gold)}.github-link:hover{background:#29425d;border-color:var(--cyan)}.github-link:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}@media(max-width:760px){.header-links{gap:5px;max-width:140px}.header-links .badge{min-width:0;flex:1;padding:3px 5px}.github-link{min-height:24px;padding:3px 6px;font-size:10px;gap:4px}.github-star-label{display:none}}
 </style></head><body><header><div class="brand"><div class="mark"><span>✦</span></div><div><h1>星轨 · StarOrbit</h1><div class="app-meta"><span id="activeMission"></span><span class="app-version">v__APP_VERSION__</span><span aria-hidden="true">·</span><span class="app-author"><span class="author-label">作者：</span>__APP_AUTHOR__</span></div><div id="visitorCount" class="visitor-count" data-no-i18n hidden></div></div></div><div class="header-actions"><div class="header-links"><span class="badge" id="status">正在载入模型</span><a class="github-link" href="https://github.com/Wenshuishi0528/StarOrbit" target="_blank" rel="noopener noreferrer" aria-label="打开 GitHub 仓库，为星轨点 Star（新标签页）" title="打开 GitHub 仓库，为星轨点 Star（新标签页）"><span data-no-i18n>GitHub</span><span class="github-star" aria-hidden="true">☆<span class="github-star-label"> Star</span></span></a></div><div class="language-toggle" role="group" aria-label="界面语言"><button id="languageZh" type="button" lang="zh-CN" data-no-i18n aria-pressed="true">中文</button><button id="languageEn" type="button" lang="en" data-no-i18n aria-pressed="false" title="English">EN</button><button id="languageRu" type="button" lang="ru" data-no-i18n aria-pressed="false" title="Русский">RU</button><button id="languageFr" type="button" lang="fr" data-no-i18n aria-pressed="false" title="Français">FR</button></div></div></header>
 <div id="stage" aria-label="航天器三维预览，拖动旋转，滚轮缩放"></div>
@@ -54,6 +55,7 @@ __WORKSPACE_CSS__
 <div class="row"><label for="earthQuality">画质模式</label><select id="earthQuality"><option value="simple">简易 · 1K</option><option value="medium">中等 · 2K</option><option value="standard">标准 · 4K</option><option value="high" selected>精细 · 8K</option></select></div>
 <div class="row"><label for="daySource">白天地表</label><select id="daySource"><option value="2026-q2-1km" title="NASA MODIS 2026 Q2 地表反射率合成；海洋和缺测区域使用 2004 底图。">2026 Q2 · 1 公里</option><option value="2004">2004 · NASA 原版</option></select></div>
 <small>2026 为 4—6 月陆地合成；水域及无观测区域沿用 2004 底图。</small>
+<button id="openCityTerrain" type="button" class="wide">城市高清地景库…</button><p id="cityTerrainStatus" class="small" role="status"></p>
 <div class="row"><label for="nightSource">夜景数据</label><select id="nightSource"><option value="2024-1km">2024 · 1 公里</option><option value="2016">2016 · 原版 1 公里</option></select></div>
 <p class="small">近看时按视野加载夜景细节；简易画质不显示夜景。2024 数据覆盖北纬 75°至南纬 65°，极区保留 2016 底图。</p>
 <p class="small" id="qualityStatus" role="status">正在准备画质素材…</p>
@@ -65,6 +67,9 @@ __WORKSPACE_CSS__
 <div class="row"><label for="skyExposure">星空显示</label><select id="skyExposure"><option value="view">4K · 星表观赏</option><option value="cinematic" selected>观赏增强 · 16K 银河</option><option value="photo">摄影风格 · 弱星空</option></select></div>
 
 <p id="skyStatus" class="small" role="status"></p>
+<div class="sky-detail-row"><label for="skyDetailSource">星空影像</label><select id="skyDetailSource" title="主画面、巡天取景和照片共用此影像选择"><option value="auto">自动</option><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="recent">近期精选（JWST 红外）</option></select></div>
+<p id="skyDetailStatus" class="small" role="status"></p>
+<details id="skyDetailInfo" class="sky-detail-info small"><summary>影像来源与波段</summary><p id="skyDetailCredits"></p><label class="check"><input id="skyDetailEnabled" type="checkbox" checked>按需高清星空</label><button id="viewSkyDetail" type="button">查看宇宙悬崖</button></details>
 <label for="earthExposure" class="small">固定曝光</label><input id="earthExposure" type="range" min=".3" max="2.5" step=".05" value="1.15">
 
 <label class="small" for="starBrightness">星空亮度</label><input id="starBrightness" type="range" min="0" max="2" step=".05" value="1">
@@ -107,9 +112,10 @@ __WORKSPACE_CSS__
 <label class="check"><input id="starChartEnabled" type="checkbox">主画面显示星图标注</label>
 <p class="small">主画面、巡天取景与照片共用以下类别。</p>
 <label class="check"><input id="starNames" type="checkbox" checked>恒星名称与拜耳编号</label>
-<label class="check"><input id="catalogStarNames" type="checkbox" checked>无常用名恒星 · 星表标识</label>
+<label class="check"><input id="catalogStarNames" type="checkbox">无常用名恒星 · 星表标识</label>
 <label class="check"><input id="solarSystemNames" type="checkbox" checked>太阳系天体名称</label>
 <label class="check"><input id="constellationNames" type="checkbox" checked>星座名称</label>
+<label class="check" title="88 星座的传统图像示意，按恒星位置配准；不是天体真实外形或星座边界，深度放大后淡出。"><input id="constellationArt" type="checkbox" checked>星座图像 · 教学示意</label>
 <label class="check"><input id="constellationLines" type="checkbox" checked>星座连线</label>
 <label class="check"><input id="constellationBoundaries" type="checkbox">星座边界</label>
 <label class="check"><input id="deepSkyObjects" type="checkbox" checked>深空目标 · 星云、星系与星团</label>

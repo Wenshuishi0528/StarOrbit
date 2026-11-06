@@ -1,9 +1,10 @@
 export const STAR_CHART_DEFAULTS = Object.freeze({
   starChartEnabled: false,
   starLabels: true,
-  catalogStarLabels: true,
+  catalogStarLabels: false,
   solarSystemLabels: true,
   constellationNames: true,
+  constellationArt: true,
   constellationLines: true,
   constellationBoundaries: false,
   deepSkyObjects: true,
@@ -16,6 +17,7 @@ const checkboxIds = {
   catalogStarLabels: 'catalogStarNames',
   solarSystemLabels: 'solarSystemNames',
   constellationNames: 'constellationNames',
+  constellationArt: 'constellationArt',
   constellationLines: 'constellationLines',
   constellationBoundaries: 'constellationBoundaries',
   deepSkyObjects: 'deepSkyObjects',
@@ -129,4 +131,19 @@ export function migrateStarDensityDefault(settings, storage) {
     storage.setItem('tiangong-environment-v1', JSON.stringify(settings));
     storage.setItem(key, '1');
   } catch {}
+}
+
+// Older releases did not record whether catalogue labels were explicitly
+// chosen or inherited from their default. Apply this quieter default once;
+// keeping the marker in the same JSON as the setting makes the save atomic.
+// Later checkbox changes and imported scenes may freely enable the category.
+export function migrateCatalogStarDefault(settings, storage) {
+  if (settings.starChartCatalogDefaultVersion === 1) return;
+  settings.catalogStarLabels = STAR_CHART_DEFAULTS.catalogStarLabels;
+  settings.starChartCatalogDefaultVersion = 1;
+  try {
+    storage.setItem('tiangong-environment-v1', JSON.stringify(settings));
+  } catch {
+    // A later successful environment save still carries the migration marker.
+  }
 }

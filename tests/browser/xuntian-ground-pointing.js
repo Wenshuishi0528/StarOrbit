@@ -34,11 +34,17 @@ async page=>{
  await seek(initial);await settle('city');await ground(39.9042,116.4074);await page.locator('#xtRollReset').click();
  await pin.click();check((await state()).p.pinned===null,'Release kept the earth anchor');
  await page.locator('#xtGroundQuick').click();await settle('nadir');await canvas.focus();await page.keyboard.press('ArrowRight');
- await pin.click();await settle('ground-pin');const manual=await state();await seek(initial+30000);await settle('ground-pin');await ground(manual.p.ground.latitude,manual.p.ground.longitude);
+ await settle('ground-pin');const firstGroundPin=await state();await canvas.focus();await page.keyboard.press('d');await settle('ground-pin');
+ const keyedGround=await state();check(Math.hypot(keyedGround.p.ground.latitude-firstGroundPin.p.ground.latitude,keyedGround.p.ground.longitude-firstGroundPin.p.ground.longitude)>1e-5,'WASD did not update the fixed ground point');
+ await canvas.scrollIntoViewIfNeeded();const box=await canvas.boundingBox();await page.mouse.move(box.x+box.width*.5,box.y+box.height*.5);await page.mouse.down();await page.mouse.move(box.x+box.width*.5+14,box.y+box.height*.5+8,{steps:3});await page.mouse.up();await settle('ground-pin');
+ const manual=await state();check(manual.p.roll===firstGroundPin.p.roll&&Math.hypot(manual.p.ground.latitude-keyedGround.p.ground.latitude,manual.p.ground.longitude-keyedGround.p.ground.longitude)>1e-5,'Dragging did not retain and move the ground lock');
+ await seek(initial+30000);await settle('ground-pin');await ground(manual.p.ground.latitude,manual.p.ground.longitude);
  await pin.click();check(!(await state()).p.pinned,'Pin button did not unlock');
  await page.locator('#xtRecommend').click();await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky',{},{timeout:45000});
- await canvas.focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('e');await pin.click();
- await settle('sky-pin');const stars=await state();await seek(initial+120000);const inertial=await state();
+ await canvas.focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('e');await settle('sky-pin');
+ const firstSkyPin=await state();await canvas.focus();await page.keyboard.press('a');await settle('sky-pin');const stars=await state();
+ check(dot(firstSkyPin.p.axes.forward,stars.p.axes.forward)<.9999999&&stars.p.roll===firstSkyPin.p.roll,'WASD did not move the fixed sky direction without changing roll');
+ await seek(initial+120000);const inertial=await state();
  check(dot(stars.p.axes.forward,inertial.p.axes.forward)>.999999999&&stars.p.roll>0&&stars.p.roll===inertial.p.roll,'Inertial lock changed direction or roll over time '+JSON.stringify({stars:stars.p,inertial:inertial.p}));
  await canvas.focus();await page.keyboard.press('e');check((await state()).p.pinned==='sky','Rolling released the sky lock');
  await search.fill('HIP 91262');await search.press('Enter');await settle('sky');check((await state()).p.target==='hip:91262','City catalogue displaced HIP lookup');
@@ -47,6 +53,7 @@ async page=>{
  await page.locator('#xtRecommend').click();await settle('sky');await page.locator('#xtRoll').fill('37');
  const lockedPose=await state();await pin.click();let free=await state();
  check(free.p.mode==='free'&&!free.p.pinned&&['right','up','forward'].every(k=>dot(free.p.axes[k],lockedPose.p.axes[k])>1-1e-12),'Releasing an automatic target jumped or captured the sky');
+ await canvas.focus();await page.keyboard.press('d');free=await state();check(free.p.mode==='free'&&!free.p.pinned,'Steering in explicitly free mode unexpectedly captured a point');
  const reference=()=>page.evaluate(()=>{
   const sim=viewer.sim,q=sim.current,p=sim.xuntian.pointing,a=p.axes,dot=(l,r)=>l.reduce((n,x,i)=>n+x*r[i],0),unit=l=>l.map(v=>v/Math.hypot(...l));
   const r=unit(q.position),along=unit(q.velocity.map((x,i)=>x-r[i]*dot(q.velocity,r))),normal=[r[1]*along[2]-r[2]*along[1],r[2]*along[0]-r[0]*along[2],r[0]*along[1]-r[1]*along[0]];

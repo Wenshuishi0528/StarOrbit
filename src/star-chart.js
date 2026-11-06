@@ -5,7 +5,7 @@ import { equatorial } from './environment-math.js';
 import { solarLabel } from './solar-targets.js';
 import { getLanguage } from './i18n.js';
 import { buildSkyAnnotationLayout } from './sky-annotation-layout.js';
-import { DEEP_SKY_OBJECTS } from './deep-sky-catalog.js';
+import { DEEP_SKY_OBJECTS, deepSkyRegionLabel } from './deep-sky-catalog.js';
 import { deepSkyLabel } from './star-chart-symbols.js';
 import { starChartGlyphText } from './star-label-catalog.js';
 
@@ -217,6 +217,7 @@ export class StarChart {
           ...labels.flatMap((s) => [...(s[language] || s.en || s.zh)]),
           ...starChartGlyphText(language),
           ...this.deepSky.flatMap((s) => [...deepSkyLabel(s, language)]),
+          ...deepSkyRegionLabel('', language),
         ]),
       ];
     for (const id of [

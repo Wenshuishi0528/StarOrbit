@@ -32,10 +32,20 @@ import {
   normalizeStarChartSettings,
   bindStarChartControls,
   migrateStarDensityDefault,
+  migrateCatalogStarDefault,
 } from './star-chart-settings.js';
 import { QUALITY, equatorial, qualityFor } from './environment-math.js';
 import { EARTH_RADIUS, stateAt, earthAxes } from './orbit.js';
 import { SolarObservations } from './solar-data.js';
+import { SkyDetail } from './sky-detail.js';
+import { SkyDetailLayer } from './sky-detail-layer.js';
+import { mountSkyDetailControls } from './sky-detail-controls.js';
+import { resolveSkyDetailSource } from './sky-detail-plan.js';
+import { CityTerrain } from './city-terrain.js';
+import { ConstellationArt } from './constellation-art.js';
+import { ConstellationArtLayer } from './constellation-art-layer.js';
+import { cityCameraView } from './city-terrain-view.js';
+import { mountCityTerrainControls } from './city-terrain-controls.js';
 
 const $ = (id) => document.getElementById(id),
   V = (a) => new THREE.Vector3(...a);
@@ -57,6 +67,10 @@ export class Environment {
       nightSource: '2024-1km',
       stars: true,
       milky: true,
+      skyDetail: true,
+      skyDetailSource: 'auto',
+      cityTerrain: true,
+      cityAutoLoad: false,
       moon: true,
       ...normalizeStarChartSettings(),
       ...normalizeGeographySettings(),
@@ -74,7 +88,19 @@ export class Environment {
         normalizeStarChartSettings(old),
         normalizeGeographySettings(old)
       );
-      for (const k of ['stars', 'milky', 'moon', 'clouds', 'cloudNightVisible', 'groundTrack'])
+      if (old?.starChartCatalogDefaultVersion === 1)
+        this.settings.starChartCatalogDefaultVersion = 1;
+      for (const k of [
+        'stars',
+        'milky',
+        'skyDetail',
+        'cityTerrain',
+        'cityAutoLoad',
+        'moon',
+        'clouds',
+        'cloudNightVisible',
+        'groundTrack',
+      ])
         if (typeof old?.[k] === 'boolean') this.settings[k] = old[k];
       if (this.assets.daySources?.[old?.daySource]) this.settings.daySource = old.daySource;
       if (this.assets.nightSources?.[old?.nightSource]) this.settings.nightSource = old.nightSource;
@@ -84,9 +110,11 @@ export class Environment {
       for (const k of ['cloudOpacity', 'starBrightness'])
         if (Number.isFinite(old?.[k]))
           this.settings[k] = THREE.MathUtils.clamp(old[k], 0, k === 'cloudOpacity' ? 1 : 2);
+      this.settings.skyDetailSource = resolveSkyDetailSource(old || {});
     } catch {}
     try {
       migrateStarDensityDefault(this.settings, localStorage);
+      migrateCatalogStarDefault(this.settings, localStorage);
     } catch {}
     this.fallback = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
     this.fallback.needsUpdate = true;
@@ -126,6 +154,8 @@ export class Environment {
     };
     this.detail = new EarthDetail(this);
     this.nightDetail = new EarthDetail(this, true);
+    this.cityTerrain = new CityTerrain(this.assets.cityTerrain, { renderer: this.api.renderer });
+    Object.assign(this.uniforms, this.cityTerrain.uniforms('main'));
     this.earth = new THREE.Mesh(
       new THREE.SphereGeometry(EARTH_RADIUS, 160, 96),
       new THREE.ShaderMaterial({
@@ -253,9 +283,19 @@ export class Environment {
     this.buildStars();
     this.planets = new MainPlanets(this);
     this.buildMilkyWay();
+    this.skyDetail = new SkyDetail(this.assets.skyDetail);
+    this.skyDetail.setSource(resolveSkyDetailSource(this.settings));
+    this.skyDetail.setEnabled(this.settings.skyDetail);
+    this.skyDetailLayer = new SkyDetailLayer(this.skyDetail, 'main');
+    this.backdrop.add(this.skyDetailLayer.group);
+    this.constellationArt = new ConstellationArt(this.assets.constellationArt);
+    this.constellationArtLayer = new ConstellationArtLayer(this.constellationArt, 'main');
+    this.backdrop.add(this.constellationArtLayer.group);
+    this.skyDetailControls = mountSkyDetailControls(this);
     this.moon = new Moon(this);
     this.starChart = new StarChart(this);
     this.geography = new Geography(this);
+    this.cityTerrainControls = mountCityTerrainControls(this);
     this.track = new THREE.LineSegments(
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: '#ffc978', transparent: true, opacity: 0.85 })
@@ -717,6 +757,19 @@ export class Environment {
     this.clouds.visible = !!detailed && s.clouds && !volume;
     this.detail.update(camera);
     this.nightDetail.update(camera);
+    this.cityTerrain.setEnabled(s.cityTerrain);
+    this.cityTerrain.autoEnabled = s.cityAutoLoad;
+    this.cityTerrain.setView(
+      'main',
+      detailed
+        ? cityCameraView(
+            camera,
+            this.earth.quaternion,
+            this.api.renderer.domElement.width,
+            this.api.renderer.domElement.height
+          )
+        : null
+    );
     this.uniforms.cloudNightVisible.value = s.cloudNightVisible ? 1 : 0;
     this.uniforms.cloudAmount.value = detailed && s.clouds ? s.cloudOpacity : 0;
     this.atmosphere.visible = !!detailed || !!this.phenomena?.settings.airglow;
@@ -752,6 +805,24 @@ export class Environment {
     this.starCamera.aspect = camera.aspect;
     this.starCamera.zoom = camera.zoom;
     this.starCamera.updateProjectionMatrix();
+    const rotation = this.starCamera.quaternion;
+    this.skyDetail.setSource(resolveSkyDetailSource(s));
+    this.skyDetail.setEnabled(s.skyDetail && s.stars && s.milky && s.starBrightness > 0);
+    const celestialView = {
+      right: new THREE.Vector3(1, 0, 0).applyQuaternion(rotation).toArray(),
+      up: new THREE.Vector3(0, 1, 0).applyQuaternion(rotation).toArray(),
+      forward: new THREE.Vector3(0, 0, -1).applyQuaternion(rotation).toArray(),
+      fovY: this.starCamera.getEffectiveFOV(),
+      aspect: camera.aspect,
+      pixelHeight: this.api.renderer.domElement.height,
+    };
+    this.skyDetailLayer.update(celestialView, this.skyDetail.enabled);
+    this.constellationArtLayer.update(
+      celestialView,
+      !flight && s.stars && s.starChartEnabled && s.constellationArt
+    );
+    this.skyDetailControls.update();
+    this.cityTerrainControls.update();
     if (flight) {
       this.starChart.group.visible = false;
       this.geography.group.visible = false;
@@ -815,6 +886,7 @@ export class Environment {
       (linear ? 2 : 1);
     this.starUniforms.brightness.value = skyGain;
     this.milky.material.uniforms.brightness.value = skyGain;
+    this.skyDetailLayer.uniforms.skyGain.value = skyGain;
     return linear;
   }
   finishFrame() {

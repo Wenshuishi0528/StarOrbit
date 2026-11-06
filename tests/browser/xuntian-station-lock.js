@@ -19,7 +19,6 @@ const sim=()=>page.evaluate(()=>({p:viewer.sim.xuntian.pointing,center:viewer.si
   const c=page.locator('#xtCanvas');await c.scrollIntoViewIfNeeded();const b=await c.boundingBox(),x=b.x+b.width*.5,y=b.y+b.height*.5;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+delta[0],y+delta[1]);await page.mouse.up();
   await page.waitForFunction(()=>viewer.sim.xuntian.result?.center.kind==='station',null,{timeout:15000});
-  await page.locator('#xtPin').click();
  }else await page.locator('#xtPinHere').click();
  await page.waitForFunction(()=>viewer.sim.xuntian.pointing.mode==='station-pin',null,{timeout:25000});const locked=await sim();
  await page.evaluate(()=>{const s=viewer.sim;s.seek(s.time+45000);s.update(performance.now());});

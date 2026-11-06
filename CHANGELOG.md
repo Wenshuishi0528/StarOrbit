@@ -1,8 +1,32 @@
-# Changelog / 更新2，记录
+# Changelog / 更新记录
 
 按开发版本倒序记录，每版保留简短中英总结；每次完成更新继续在顶部追加。早期缺少独立证据的版本逐条标为“记录待核实”，不将后续累计功能倒填。
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
+
+## v1.16 — 2026-11-06 · 正式版 / Release
+
+新增北京、西雅图 2025 年 Sentinel-2 10 米离线地景（106 张 AVIF，5.75 MiB）和城市库，支持其它城市按需加载、离线保存、取消与删除；共享主画面、巡天与照片，连续缩放、有界缓存并保留日期和来源。星空影像改为共享的紧凑来源选择，保留原银河、DSS、Pan-STARRS 和近期 JWST，缺覆盖明确回退。深空目录补全至 12,162 个去重对象，修复大麦哲伦云等扩展天体的缺名和准星范围识别，区分目录中心与专题影像天区。
+
+**English:** Added offline 2025 Sentinel-2 10 m terrain for Beijing and Seattle (106 AVIF tiles, 5.75 MiB), plus a city library with on-demand loading, offline downloads, cancellation and per-city deletion. Main view, finder and photos share imagery with continuous zoom, bounded caches and dated attribution. A compact shared sky selector offers the original galaxy, DSS, Pan-STARRS and recent JWST imagery with explicit coverage fallback. Expanded the shared deep-sky catalogue to 12,162 deduplicated objects, fixing missing extended-object labels and region identification while distinguishing catalogue centres from image fields.
+
+新增默认开启的 88 星座教学插画，按真实恒星配准，主图、取景和照片共享并随深度放大淡出；图像约 0.99 MiB，保留独立自由许可。无常用名恒星改为默认关闭，旧设置迁移一次后保留手选。 / Added default-enabled teaching illustrations for all 88 constellations, registered to real stars and shared across main view, finder and photos, fading out at telescope magnifications. Artwork adds about 0.99 MiB under its independent free license. Unnamed catalogue-star labels now default off, with a one-time migration that preserves subsequent choices.
+
+默认测试、格式检查、三种构建、Chrome/WebKit 实际渲染及城市离线下载/删除验证通过；包含此前本机 v1.15 的高清星空更新。 / Default tests, formatting, all three builds, Chrome/WebKit rendering and city download/offline/deletion checks passed. This release also includes the previously local v1.15 HD-sky update.
+
+[操作、来源、限制与验证 / Details](docs/v1.16-city-sky.md)
+
+## v1.15 — 2026-11-06 · 本机版 / Local build
+
+新增共享的按需高清星空：主画面、巡天取景和拍照共用 HEALPix 分块、分级加载与有界缓存；新增 2022 年韦布「宇宙悬崖」AVIF 天区，联网使用原 JPEG 格式的 Pan-STARRS 与 DSS，显示真实观测年代、波段和来源。磁盘缓存上限 1 GB，新增常驻 GPU 纹理上限 64 MiB，关闭后释放；拍照按输出尺寸准备素材，未齐时明确注明回退。固定十字线后的拖动与按键微调继续固定新落点，只有主动选择随轨道转动才解除。
+
+**English:** Added shared on-demand HD sky tiles for the main view, Xuntian finder and photos, with HEALPix LOD and bounded caching. A small offline AVIF pack contains Webb’s 2022 Cosmic Cliffs; Pan-STARRS and DSS retain their original JPEG tiles with observation dates, bands and credits. Disk caching is capped at 1 GB and resident additional GPU textures at 64 MiB, released on close. Photos prepare imagery for their output size and explicitly report incomplete detail. Steering a pinned reticle now pins the new point; orbital motion resumes only through the explicit release control.
+
+修复西面纱等长名称在小取景窗居中时消失：共享标注增加上下排版、搜索与中央目标优先；强变焦定位框为名字留位，预览避开上下读数但不避开准星。类别开关、实体遮挡与照片独立标注开关仍有效。 / Fixed long target names disappearing at the center of compact finders. Shared labels gain vertical positions and selected/central-target priority; compact locators leave room for names at high zoom. Preview labels clear the readouts without a reticle exclusion zone, while category switches, physical occlusion and independent photo annotations remain effective.
+
+默认测试、格式检查、三种构建及 Chrome/WebKit 实际渲染与交互检查通过。 / Default tests, formatting checks, all three builds and Chrome/WebKit rendering and interaction checks passed.
+
+[操作、来源与验证 / Details](docs/v1.15-sky-detail.md)
 
 ## v1.14 — 2026-11-06 · 正式版 / Release
 

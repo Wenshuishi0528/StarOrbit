@@ -22,6 +22,8 @@ Copyright © 2026 wenshuishi0528
 
 内置六首音乐（`assets/music/` 中的音频）来自第三方作品，版权归相应权利人；本许可不授予这些音乐的使用或再分发权。第三方素材的署名、许可和使用条件在分享项目时继续保留。
 
+星座插画 Johan Meuris / Stellarium 及本项目透明 AVIF 转换采用 **Free Art License 1.3**，定位数据采用 **CC BY-SA 4.0**。它们可独立取得和再利用，不受上述应用非商业限制；[原作、转换与完整许可](assets/constellation-art/README.md)。
+
 ## English
 
 Original code, models, interface design and documentation authored by wenshuishi0528, to the extent the author holds the rights to license them, are licensed under **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**. Noncommercial use, sharing and adaptation are permitted under its terms. Credit wenshuishi0528, link to this repository and the license, and indicate modifications when sharing.

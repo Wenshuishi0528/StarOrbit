@@ -45,6 +45,8 @@ import { mountScopeSearch } from './xuntian-search.js';
 import { makeScopeGuide } from './xuntian-guide.js';
 import { normalizeStarChartSettings } from './star-chart-settings.js';
 import { mountXuntianSolarControls } from './xuntian-solar-controls.js';
+import { skyDetailTarget, skyDetailText, skyDetailCredits } from './sky-detail-controls.js';
+import { cityTerrainText } from './city-terrain-controls.js';
 
 const $ = (id) => document.getElementById(id),
   KEY = 'starorbit-xuntian-instrument-v1',
@@ -373,17 +375,13 @@ export function installXuntianScope(sim) {
     lastDraw = -Infinity;
     hud();
   }
-  function pinHere() {
-    if (!sim.current || !optics) return;
-    beginExternalSteering();
-    const now = formation.update(sim.current, actualAxes());
-    if (!now) return;
-    saveSky();
-    discardAnchor();
-    const station = sampleStationPin(sim, now);
+  function capturePin(now) {
+    const station = now && sim.current ? sampleStationPin(sim, now) : null;
     anchor = station
       ? { kind: 'station', point: station, up: cameraAxes(pose).up }
-      : pinCrosshair(now.eyeKm, now.axes, pose, sim.current);
+      : now && sim.current
+        ? pinCrosshair(now.eyeKm, now.axes, pose, sim.current)
+        : { kind: 'sky', direction: [...actualAxes().forward] };
     mode = { ground: 'ground-pin', sky: 'sky-pin', station: 'station-pin' }[anchor.kind];
     tracked = null;
     releaseNote = '';
@@ -391,6 +389,15 @@ export function installXuntianScope(sim) {
     fieldId = null;
     desired = null;
     locked = true;
+  }
+  function pinHere() {
+    if (!sim.current || !optics) return;
+    beginExternalSteering();
+    const now = formation.update(sim.current, actualAxes());
+    if (!now) return;
+    saveSky();
+    discardAnchor();
+    capturePin(now);
     lastDraw = -Infinity;
     $('xtSearch').value = '';
     hud();
@@ -401,17 +408,23 @@ export function installXuntianScope(sim) {
   }
   function manual(x, y) {
     beginExternalSteering();
-    if (mode === 'free' && sim.current) updateFree(sim.current);
+    const keepPinned = mode !== 'free';
+    if (!keepPinned && sim.current) updateFree(sim.current);
     discardAnchor();
-    mode = 'free';
     named = null;
     fieldId = null;
     desired = null;
     locked = false;
     steerDetector(pose, x, y, roll);
-    rememberFree();
     axes = actualAxes();
     if (formation && sim.current) optics = formation.update(sim.current, axes);
+    // Steering changes the fixed point, not the selected tracking behavior.
+    // Re-sample after moving so a station edge can become a ground or sky lock.
+    if (keepPinned) capturePin(optics);
+    else {
+      mode = 'free';
+      rememberFree();
+    }
     $('xtSearch').value = '';
     lastDraw = -Infinity;
     hud();
@@ -456,6 +469,26 @@ export function installXuntianScope(sim) {
     }
     hud();
     canvas.focus({ preventScroll: true });
+    return true;
+  }
+  function observeSkyDetail() {
+    if (sim.missionId !== 'tiangong') return false;
+    open();
+    if (!active) return false;
+    const target = skyDetailTarget(sim.environment);
+    if (!target) return false;
+    sim.environment.settings.skyDetail = true;
+    sim.environment.settings.skyDetailSource = 'recent';
+    sim.environment.settings.stars = true;
+    sim.environment.settings.milky = true;
+    for (const id of ['showStars', 'showMilky', 'skyDetailEnabled']) $(id).checked = true;
+    for (const id of ['skyDetailSource', 'xtSkyDetailSource']) if ($(id)) $(id).value = 'recent';
+    sim.environment.skyDetail.setSource('recent');
+    sim.environment.skyDetail.setEnabled(true);
+    sim.environment.save();
+    sim.environment.setSkyStyle();
+    selectStar(target);
+    $('xtSearch').value = target.name;
     return true;
   }
   function targetForMode() {
@@ -552,10 +585,12 @@ export function installXuntianScope(sim) {
       });
     } else if (kind === 'deep-sky') {
       name = hit.name === hit.identifier ? hit.name : hit.name + ' · ' + hit.identifier;
-      detail = t('{category}方向 · 距目录中心 {angle}', {
-        category: hit.category,
-        angle: angle(hit.angularDistanceDeg),
-      });
+      detail = hit.regionOnly
+        ? t('位于 {name} 天区', { name: hit.name })
+        : t('{category}方向 · 距目录中心 {angle}', {
+            category: hit.category,
+            angle: angle(hit.angularDistanceDeg),
+          });
     } else if (kind === 'solar') {
       name = hit.name;
       detail = hit.withinDisc
@@ -565,6 +600,8 @@ export function installXuntianScope(sim) {
       name = t('未匹配到天体');
       detail = skyCoordinates(hit.direction);
     }
+    if (hit?.region && kind !== 'deep-sky')
+      detail += ' · ' + t('位于 {name} 天区', { name: hit.region.name });
     setText($('xtCrosshairName'), name);
     setText($('xtCrosshairDetail'), detail);
     $('xtCrosshairReadout').dataset.kind = kind;
@@ -690,6 +727,13 @@ export function installXuntianScope(sim) {
             }[skySource.status] || '星表'
           );
     if (skySource.showStars && skySource.gain === 0) skyTag += ' · ' + t('星空亮度为零');
+    setText($('xtSkyDetailStatus'), skyDetailText(lastResult?.skyDetail));
+    $('xtSkyDetailStatus').hidden = solarControls.enabled;
+    if ($('xtSkyDetailControls')) $('xtSkyDetailControls').hidden = solarControls.enabled;
+    $('xtSkyDetailInfo').hidden = solarControls.enabled;
+    setText($('xtSkyDetailCredits'), skyDetailCredits(lastResult?.skyDetail));
+    $('xtCityTerrain').hidden = solarControls.enabled || center?.kind !== 'earth';
+    setText($('xtCityStatus'), cityTerrainText(lastResult?.cityTerrain));
     setText(
       $('xtSources'),
       solarControls.enabled
@@ -924,6 +968,7 @@ export function installXuntianScope(sim) {
     previewNames: $('xtNames').checked,
     photoNames: $('xtPhotoNames').checked,
     chartSettings: normalizeStarChartSettings(sim.environment.settings),
+    focusTargetId: named?.id || null,
     q: sim.current,
     eyeKm: optics.eyeKm,
     eyeLocal: optics.eyeLocal,
@@ -1017,6 +1062,7 @@ export function installXuntianScope(sim) {
             assemblyRevision,
             mode,
             f.constellationId,
+            f.focusTargetId,
             field,
             aperture,
             ev,
@@ -1029,6 +1075,8 @@ export function installXuntianScope(sim) {
             env.galaxyTexture?.version,
             renderer?.earthAppearanceKey?.(),
             renderer?.solarAppearanceKey?.(),
+            renderer?.skyAppearanceKey?.(),
+            env.settings.skyDetail,
             ...pose.toArray(),
             ...optics.eyeLocal,
             ...sim.api.model.quaternion.toArray(),
@@ -1092,6 +1140,12 @@ export function installXuntianScope(sim) {
       a.download = 'StarOrbit_Xuntian_' + subject + solarStamp + stamp + '.png';
       a.href = url;
       a.click();
+      const photoSky = renderer.photoSkyStatus();
+      if (photoSky?.requested && !photoSky.complete)
+        sim.api.toast(t('部分高清天区尚未就绪，照片已保留可用影像并注明。'));
+      const photoCity = renderer.photoCityStatus();
+      if (photoCity?.requested && !photoCity.complete)
+        sim.api.toast(t('部分城市细节尚未就绪，照片已保留可用底图并注明。'));
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (e) {
       sim.api.toast(t('巡天照片未能保存：{error}', { error: e.message }));
@@ -1220,6 +1274,11 @@ export function installXuntianScope(sim) {
     close,
     openSurveyTile,
     observeSolar,
+    observeSkyDetail,
+    observeCity(city) {
+      open();
+      if (active) selectCity(city);
+    },
     update,
     draw,
     assemblyChanged,

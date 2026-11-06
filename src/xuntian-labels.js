@@ -2,7 +2,7 @@ import { buildSkyAnnotationLayout } from './sky-annotation-layout.js';
 
 // Lay out in logical pixels. The preview and exported image each use their own
 // detector dimensions while the projection uses the same rolled optical axes.
-export function finderLabels(frame, size, scale, blocked) {
+export function finderLabels(frame, size, scale, blocked, { hud = false } = {}) {
   const { axes, language } = frame,
     width = size.w / scale,
     height = size.h / scale;
@@ -17,6 +17,10 @@ export function finderLabels(frame, size, scale, blocked) {
       width,
       height,
       language,
+      focusTargetId: frame.focusTargetId,
+      // Only the preview has clock/coordinate readouts. There is deliberately
+      // no reserved region around the reticle; photos use the whole detector.
+      verticalInset: hud ? 24 : 0,
       blocked,
     }),
   };

@@ -32,6 +32,13 @@ import { createCityFinder } from './xuntian-ground-target.js';
 import { SKY_CONSTELLATION_LINES, SKY_CONSTELLATION_BOUNDARIES } from './sky-annotation-layout.js';
 import { normalizeStarChartSettings } from './star-chart-settings.js';
 import { paintSolarPhotoCaption } from './solar-photo-caption.js';
+import { SkyDetailLayer } from './sky-detail-layer.js';
+import { skyDetailView } from './sky-detail-plan.js';
+import { paintSkyDetailCaption } from './sky-detail-controls.js';
+import { paintCityTerrainCaption } from './city-terrain-controls.js';
+import { ConstellationArtLayer, paintConstellationArtCaption } from './constellation-art-layer.js';
+
+let skyDetailSequence = 0;
 
 const axesArray = (axes) => [axes.right, axes.up, axes.forward];
 const matrix = (columns) => new THREE.Matrix3().fromArray(columns.flat());
@@ -384,6 +391,35 @@ export function createXuntianViewRenderer(
     env = sim.environment,
     geometry = new THREE.PlaneGeometry(2, 2),
     screenCamera = new THREE.Camera();
+  const skyViewId = `scope-${++skyDetailSequence}`,
+    skyPhotoId = `photo-${skyDetailSequence}`;
+  const skyDetailLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyViewId, true),
+    skyPhotoLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyPhotoId, true);
+  const artLayer =
+      env.constellationArt && new ConstellationArtLayer(env.constellationArt, skyViewId, true, 2),
+    artPhotoLayer =
+      env.constellationArt && new ConstellationArtLayer(env.constellationArt, skyPhotoId, true, 3);
+  const wantsArt = (frame, size, photo = false) =>
+    !!(photo ? frame.photoNames : frame.previewNames) &&
+    normalizeStarChartSettings(frame.chartSettings ?? env.settings).constellationArt &&
+    frame.showStars !== false &&
+    wantsSkyDetail({ ...frame, showGalaxy: true }, size, true);
+  function wantsSkyDetail(frame, size, includeBackground = false) {
+    if (
+      (!includeBackground && !env.skyDetail?.enabled) ||
+      frame.showStars === false ||
+      frame.showGalaxy === false ||
+      (frame.solarChannel && frame.solarChannel !== 'none')
+    )
+      return false;
+    const radius = Math.hypot(...frame.eyeKm),
+      earthAngle = Math.asin(Math.min(1, 6371 / radius)),
+      separation = Math.acos(
+        Math.max(-1, Math.min(1, -dot(frame.eyeKm, frame.axes.forward) / radius))
+      ),
+      half = Math.atan(Math.tan((frame.fovY * Math.PI) / 360) * Math.hypot(1, size.aspect));
+    return separation + half >= earthAngle;
+  }
   const shared = { lens: v2(), screen: v2(), cameraToFixed: mat(), fixedEye: v3() };
   const u = {
     ...shared,
@@ -417,6 +453,8 @@ export function createXuntianViewRenderer(
     disposed = false,
     lastRender = -Infinity,
     lastStatus = unavailable(),
+    lastPhotoStatus = null,
+    lastCityPhotoStatus = null,
     previewCount = 0;
   let identification = null,
     lastIdentification = -Infinity,
@@ -491,6 +529,7 @@ export function createXuntianViewRenderer(
         constellationNames: false,
         constellationLines: false,
         constellationBoundaries: false,
+        constellationArt: false,
         deepSkyObjects: false,
       });
     station.prepare(frame, aspect);
@@ -518,16 +557,38 @@ export function createXuntianViewRenderer(
     const limit =
       sky.showStars && sky.gain > 0 ? optics.limitMagnitude + 2.5 * Math.log10(sky.gain) : null;
     const count = stars.update(frame, optics, aspect, h, sky, limit);
+    const detailLayer = annotations ? skyDetailLayer : skyPhotoLayer;
+    const skyDetail = detailLayer?.update(skyDetailView(frame, size), wantsSkyDetail(frame, size), {
+      skyGain: sky.gain,
+      mainSkyHDR: u.mainSkyHDR.value,
+      opticalGain: optics.areaGain,
+      toneMappingExposure: renderer.toneMappingExposure,
+      cameraToFixed: u.cameraToFixed.value,
+      fixedEye: u.fixedEye.value,
+    });
+    if (skyDetail) skyDetail.skyVisible = wantsSkyDetail(frame, size, true) && sky.gain > 0;
+    const currentArtLayer = annotations ? artLayer : artPhotoLayer;
+    const constellationArt = currentArtLayer?.update(
+      skyDetailView(frame, size),
+      wantsArt(frame, size, !annotations),
+      {
+        inverseGain: 1 / Math.max(0.0001, optics.areaGain),
+        cameraToFixed: u.cameraToFixed.value,
+        fixedEye: u.fixedEye.value,
+      }
+    );
     let solarObservation = null;
     withSharedRenderer(renderer, () => {
-      sensor.earthImage.value = earthView.render(renderer, frame, size, target);
+      sensor.earthImage.value = earthView.render(renderer, frame, size, target, !annotations);
       sensor.earthOn.value = sensor.earthImage.value ? 1 : 0;
       sensor.earthExposure.value = frame.exposure ?? 1;
       renderer.setRenderTarget(target.scene);
       renderer.clear(true, true, false);
       renderer.render(background.scene, screenCamera);
-      if (wantNames) guide.draw(renderer, screenCamera, chartSettings, axes, optics.areaGain);
       renderer.render(stars.scene, screenCamera);
+      if (detailLayer) renderer.render(detailLayer.scene, screenCamera);
+      if (currentArtLayer) renderer.render(currentArtLayer.scene, screenCamera);
+      if (wantNames) guide.draw(renderer, screenCamera, chartSettings, axes, optics.areaGain);
       solarView.draw(renderer, screenCamera, frame, size, optics);
       if (local.visible) station.draw(renderer, !!frame.fillLight);
       renderer.setRenderTarget(target.film);
@@ -553,13 +614,17 @@ export function createXuntianViewRenderer(
           { ...frame, chartSettings },
           size,
           annotations ? size.w / Math.max(1, canvas.clientWidth) : Math.max(1, size.w / 800),
-          (dir) => local.visible && station.hides(frame, dir)
+          (dir) => local.visible && station.hides(frame, dir),
+          { hud: annotations }
         )
       : null;
     if (annotations) readIdentification(frame, local.center, limit);
     return {
       labels,
       solarObservation,
+      skyDetail,
+      cityTerrain: earthView.cityStatus(!annotations),
+      constellationArt,
       available: true,
       center: local.center,
       identification,
@@ -585,6 +650,9 @@ export function createXuntianViewRenderer(
     earthSource: earthView.source,
     earthAppearanceKey: earthView.appearanceKey,
     solarAppearanceKey: solarView.key,
+    skyAppearanceKey: () => `${env.skyDetail?.revision}:${env.constellationArt?.key()}`,
+    photoSkyStatus: () => lastPhotoStatus,
+    photoCityStatus: () => lastCityPhotoStatus,
     identify(frame) {
       return valid(frame)
         ? readIdentification(frame, lastStatus.center, lastStatus.limitMagnitude)
@@ -641,7 +709,40 @@ export function createXuntianViewRenderer(
         await Promise.all([
           earthView.preparePhoto(frame, size),
           solarView.preparePhoto(frame, size),
+          env.constellationArt?.prepare(
+            skyPhotoId,
+            skyDetailView(frame, size),
+            wantsArt(frame, size, true)
+          ),
+          env.skyDetail?.prepare(
+            skyPhotoId,
+            skyDetailView(frame, size),
+            wantsSkyDetail(frame, size)
+          ),
         ]);
+        if (disposed) throw Error('巡天取景器已关闭');
+        // One bounded refresh follows pointing changes during the first wait.
+        // The final shutter below still samples the live model and epoch
+        // together. A rapidly moving field is explicitly labelled incomplete,
+        // rather than waiting forever or mixing a stale pose with live meshes.
+        if (atShutter) {
+          const candidate = atShutter();
+          if (!valid(candidate)) throw Error('没有可用的巡天光学位置');
+          await Promise.all([
+            earthView.prepareCityPhoto(candidate, size, 4000),
+            env.constellationArt?.prepare(
+              skyPhotoId,
+              skyDetailView(candidate, size),
+              wantsArt(candidate, size, true)
+            ),
+            env.skyDetail?.prepare(
+              skyPhotoId,
+              skyDetailView(candidate, size),
+              wantsSkyDetail(candidate, size),
+              4000
+            ),
+          ]);
+        }
         if (disposed) throw Error('巡天取景器已关闭');
         // The terrain prefetch may yield. Snapshot the live model time and
         // entrance together immediately before drawing a survey shutter.
@@ -649,6 +750,8 @@ export function createXuntianViewRenderer(
         if (!valid(actual)) throw Error('没有可用的巡天光学位置');
         target = makeTargets(renderer, size.w, size.h);
         const result = draw(actual, size, target);
+        lastPhotoStatus = result.skyDetail;
+        lastCityPhotoStatus = result.cityTerrain;
         if (surveyTarget && onExposure) {
           surveyProbe ??= createSurveyProbe(geometry);
           const coverage = withSharedRenderer(renderer, () =>
@@ -662,11 +765,21 @@ export function createXuntianViewRenderer(
         writeCanvas(out, null, target.bytes, size.w, size.h);
         paintFinderLabels(out, result.labels);
         paintSolarPhotoCaption(out, result.solarObservation, actual.q.t);
+        const cityCaptionHeight = paintCityTerrainCaption(out, result.cityTerrain);
+        const skyCaptionHeight = paintSkyDetailCaption(out, result.skyDetail, cityCaptionHeight);
+        paintConstellationArtCaption(
+          out,
+          result.constellationArt,
+          cityCaptionHeight + skyCaptionHeight
+        );
         const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
         if (!blob || disposed) throw Error('巡天取景图像生成失败');
         return blob;
       } finally {
+        earthView.releasePhoto();
         target?.dispose();
+        skyPhotoLayer?.dispose();
+        artPhotoLayer?.dispose();
         capturePending = false;
       }
     },
@@ -679,6 +792,10 @@ export function createXuntianViewRenderer(
       surveyProbe?.dispose();
       solarView.dispose();
       earthView.dispose();
+      skyDetailLayer?.dispose();
+      skyPhotoLayer?.dispose();
+      artLayer?.dispose();
+      artPhotoLayer?.dispose();
       geometry.dispose();
       background.material.dispose();
       film.material.dispose();
