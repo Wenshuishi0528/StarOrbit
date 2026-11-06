@@ -46,6 +46,9 @@ import { ConstellationArt } from './constellation-art.js';
 import { ConstellationArtLayer } from './constellation-art-layer.js';
 import { cityCameraView } from './city-terrain-view.js';
 import { mountCityTerrainControls } from './city-terrain-controls.js';
+import { EarthElevation } from './earth-elevation.js';
+import { EarthElevationLayer } from './earth-elevation-layer.js';
+import { mountEarthElevationControls } from './earth-elevation-controls.js';
 
 const $ = (id) => document.getElementById(id),
   V = (a) => new THREE.Vector3(...a);
@@ -71,6 +74,7 @@ export class Environment {
       skyDetailSource: 'auto',
       cityTerrain: true,
       cityAutoLoad: false,
+      earthElevation: false,
       moon: true,
       ...normalizeStarChartSettings(),
       ...normalizeGeographySettings(),
@@ -96,6 +100,7 @@ export class Environment {
         'skyDetail',
         'cityTerrain',
         'cityAutoLoad',
+        'earthElevation',
         'moon',
         'clouds',
         'cloudNightVisible',
@@ -166,6 +171,9 @@ export class Environment {
     );
     sim.sky.add(this.earth);
     sim.earth = this.earth;
+    this.elevation = new EarthElevation(this.assets.elevation);
+    this.elevationLayer = new EarthElevationLayer(this.elevation, this.uniforms, 'main');
+    sim.sky.add(this.elevationLayer.group);
     this.clouds = new THREE.Mesh(
       new THREE.SphereGeometry(EARTH_RADIUS + 8, 160, 96),
       new THREE.ShaderMaterial({
@@ -296,6 +304,7 @@ export class Environment {
     this.starChart = new StarChart(this);
     this.geography = new Geography(this);
     this.cityTerrainControls = mountCityTerrainControls(this);
+    this.elevationControls = mountEarthElevationControls(this);
     this.track = new THREE.LineSegments(
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: '#ffc978', transparent: true, opacity: 0.85 })
@@ -770,6 +779,18 @@ export class Environment {
           )
         : null
     );
+    this.elevation.setEnabled(s.earthElevation);
+    this.elevation.setView(
+      'main',
+      cityCameraView(
+        camera,
+        this.earth.quaternion,
+        this.api.renderer.domElement.width,
+        this.api.renderer.domElement.height
+      )
+    );
+    this.earth.visible = !this.elevationLayer.update(this.earth.quaternion);
+    this.elevationControls.update();
     this.uniforms.cloudNightVisible.value = s.cloudNightVisible ? 1 : 0;
     this.uniforms.cloudAmount.value = detailed && s.clouds ? s.cloudOpacity : 0;
     this.atmosphere.visible = !!detailed || !!this.phenomena?.settings.airglow;

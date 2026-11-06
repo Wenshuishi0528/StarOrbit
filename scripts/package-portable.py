@@ -16,6 +16,8 @@ files = ['StarOrbit.html', '启动星轨.command',
 # Keep the manuals, technical references and their illustrations usable offline.
 # Keep freely licensed illustrations accessible separately from the application.
 files += [str(p.relative_to(root)) for p in sorted((root / 'assets/constellation-art').rglob('*')) if p.is_file()]
+# Elevation itself is embedded in the HTML; keep its linked provenance readable offline.
+files += ['assets/earth/elevation/README.md', 'assets/earth/elevation/manifest.json']
 files.append('scripts/balcony_motion.py')
 files.append('scripts/solar_service.py')
 files += [str(p.relative_to(root)) for p in sorted((root / 'docs').rglob('*'))

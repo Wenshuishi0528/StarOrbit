@@ -355,7 +355,12 @@ export function installXuntianScope(sim) {
     lastDraw = -Infinity;
     selectedAt = performance.now();
     if (optics && sim.current) {
-      tracked = trackGround(anchor, optics.eyeKm, sim.current);
+      tracked = trackGround(
+        anchor,
+        optics.eyeKm,
+        sim.current,
+        sim.environment.elevation?.heightAt(anchor.longitude, anchor.latitude) || 0
+      );
       if (tracked) desired = groundAttitude(tracked, pose);
     }
     hud();
@@ -380,7 +385,13 @@ export function installXuntianScope(sim) {
     anchor = station
       ? { kind: 'station', point: station, up: cameraAxes(pose).up }
       : now && sim.current
-        ? pinCrosshair(now.eyeKm, now.axes, pose, sim.current)
+        ? pinCrosshair(
+            now.eyeKm,
+            now.axes,
+            pose,
+            sim.current,
+            renderer?.groundPick?.(now.eyeKm, now.axes, sim.current)
+          )
         : { kind: 'sky', direction: [...actualAxes().forward] };
     mode = { ground: 'ground-pin', sky: 'sky-pin', station: 'station-pin' }[anchor.kind];
     tracked = null;
@@ -498,7 +509,12 @@ export function installXuntianScope(sim) {
       return tracked;
     }
     if (anchor?.kind === 'ground') {
-      tracked = trackGround(anchor, optics.eyeKm, sim.current);
+      tracked = trackGround(
+        anchor,
+        optics.eyeKm,
+        sim.current,
+        sim.environment.elevation?.heightAt(anchor.longitude, anchor.latitude) || 0
+      );
       return tracked;
     }
     if (anchor?.kind === 'station') {

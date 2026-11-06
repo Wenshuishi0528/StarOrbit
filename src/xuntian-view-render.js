@@ -36,6 +36,7 @@ import { SkyDetailLayer } from './sky-detail-layer.js';
 import { skyDetailView } from './sky-detail-plan.js';
 import { paintSkyDetailCaption } from './sky-detail-controls.js';
 import { paintCityTerrainCaption } from './city-terrain-controls.js';
+import { paintElevationCaption } from './earth-elevation-controls.js';
 import { ConstellationArtLayer, paintConstellationArtCaption } from './constellation-art-layer.js';
 
 let skyDetailSequence = 0;
@@ -475,7 +476,7 @@ export function createXuntianViewRenderer(
       frame.apertureMm > 0
     );
   }
-  function readIdentification(frame, surface, limit) {
+  function readIdentification(frame, surface, limit, groundSurface) {
     const height = canvas.clientHeight || canvas.height || 300,
       now = performance.now();
     const key = [
@@ -491,6 +492,7 @@ export function createXuntianViewRenderer(
       surface?.kind,
       surface?.moduleId,
       surface?.distanceKm,
+      groundSurface?.distanceKm,
     ].join('|');
     if (key === identificationKey) return identification;
     if (
@@ -501,10 +503,12 @@ export function createXuntianViewRenderer(
       return identification;
     identification = identifyXuntianCrosshair(frame, {
       surface,
+      groundSurface,
       displayHeight: height,
       cityFinder,
       limitMagnitude: limit,
-      blocked: (dir) => frame.showStation !== false && station.hides(frame, dir),
+      blocked: (dir) =>
+        earthView.hides(frame, dir) || (frame.showStation !== false && station.hides(frame, dir)),
     });
     lastIdentification = now;
     identificationKey = key;
@@ -516,7 +520,11 @@ export function createXuntianViewRenderer(
     const { w, h, aspect } = size,
       optics = sensorOptics(frame.fovY, frame.apertureMm, frame.exposure ?? 1),
       axes = axesArray(frame.axes),
-      ground = groundHit(frame.eyeKm, frame.axes.forward, frame.q.earthAxes);
+      terrainHit = earthView.pick(frame, !annotations),
+      ground =
+        terrainHit === undefined
+          ? groundHit(frame.eyeKm, frame.axes.forward, frame.q.earthAxes)
+          : terrainHit;
     const solarImaging = !!frame.solarChannel && frame.solarChannel !== 'none';
     const wantNames = annotations ? frame.previewNames : frame.photoNames,
       chartSettings = normalizeStarChartSettings(frame.chartSettings ?? env.settings);
@@ -614,16 +622,19 @@ export function createXuntianViewRenderer(
           { ...frame, chartSettings },
           size,
           annotations ? size.w / Math.max(1, canvas.clientWidth) : Math.max(1, size.w / 800),
-          (dir) => local.visible && station.hides(frame, dir),
+          (dir) =>
+            earthView.hides(frame, dir, !annotations) ||
+            (local.visible && station.hides(frame, dir)),
           { hud: annotations }
         )
       : null;
-    if (annotations) readIdentification(frame, local.center, limit);
+    if (annotations) readIdentification(frame, local.center, limit, ground);
     return {
       labels,
       solarObservation,
       skyDetail,
       cityTerrain: earthView.cityStatus(!annotations),
+      elevation: earthView.elevationStatus(!annotations),
       constellationArt,
       available: true,
       center: local.center,
@@ -648,15 +659,20 @@ export function createXuntianViewRenderer(
   }
   return {
     earthSource: earthView.source,
+    groundPick: (eye, axes, q) => earthView.pick({ eyeKm: eye, axes, q }),
     earthAppearanceKey: earthView.appearanceKey,
     solarAppearanceKey: solarView.key,
     skyAppearanceKey: () => `${env.skyDetail?.revision}:${env.constellationArt?.key()}`,
     photoSkyStatus: () => lastPhotoStatus,
     photoCityStatus: () => lastCityPhotoStatus,
     identify(frame) {
-      return valid(frame)
-        ? readIdentification(frame, lastStatus.center, lastStatus.limitMagnitude)
-        : { kind: 'unavailable' };
+      if (!valid(frame)) return { kind: 'unavailable' };
+      const terrainHit = earthView.pick(frame);
+      const ground =
+        terrainHit === undefined
+          ? groundHit(frame.eyeKm, frame.axes.forward, frame.q.earthAxes)
+          : terrainHit;
+      return readIdentification(frame, lastStatus.center, lastStatus.limitMagnitude, ground);
     },
     render(frame) {
       if (disposed || !valid(frame)) return unavailable();
@@ -766,11 +782,20 @@ export function createXuntianViewRenderer(
         paintFinderLabels(out, result.labels);
         paintSolarPhotoCaption(out, result.solarObservation, actual.q.t);
         const cityCaptionHeight = paintCityTerrainCaption(out, result.cityTerrain);
-        const skyCaptionHeight = paintSkyDetailCaption(out, result.skyDetail, cityCaptionHeight);
+        const elevationCaptionHeight = paintElevationCaption(
+          out,
+          result.elevation,
+          cityCaptionHeight
+        );
+        const skyCaptionHeight = paintSkyDetailCaption(
+          out,
+          result.skyDetail,
+          cityCaptionHeight + elevationCaptionHeight
+        );
         paintConstellationArtCaption(
           out,
           result.constellationArt,
-          cityCaptionHeight + skyCaptionHeight
+          cityCaptionHeight + elevationCaptionHeight + skyCaptionHeight
         );
         const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
         if (!blob || disposed) throw Error('巡天取景图像生成失败');

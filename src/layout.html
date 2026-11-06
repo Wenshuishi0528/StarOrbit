@@ -56,6 +56,16 @@ __WORKSPACE_CSS__
 <div class="row"><label for="daySource">白天地表</label><select id="daySource"><option value="2026-q2-1km" title="NASA MODIS 2026 Q2 地表反射率合成；海洋和缺测区域使用 2004 底图。">2026 Q2 · 1 公里</option><option value="2004">2004 · NASA 原版</option></select></div>
 <small>2026 为 4—6 月陆地合成；水域及无观测区域沿用 2004 底图。</small>
 <button id="openCityTerrain" type="button" class="wide">城市高清地景库…</button><p id="cityTerrainStatus" class="small" role="status"></p>
+<label class="check"><input id="earthElevation" type="checkbox">真实地形 · 高度 1×</label><p id="earthElevationStatus" class="small" role="status"></p>
+<details id="earthElevationInfo" data-memory-key="earth-elevation"><summary>地形数据与缓存</summary>
+<p class="small">主画面、巡天取景和照片共用真实高程网格，高度比例固定 1×。</p>
+<p class="small">内置 ETOPO 2022 全球粗地形，约 20 公里；放大后按需读取 GLO-30 局部高程。缺测或离线时保留可用地形。</p>
+<p class="small">GLO-30 2023_1 主要来自 2011—2015 年观测；包含地物表面，不是实时地形或建筑模型。</p>
+<p class="small"><a class="footer-link" href="https://www.ncei.noaa.gov/products/etopo-global-relief-model" target="_blank" rel="noreferrer">NOAA ETOPO 2022 ↗</a> · <a class="footer-link" href="https://portal.opentopography.org/raster?opentopoID=OTSDEM.032021.4326.3" target="_blank" rel="noreferrer">Copernicus GLO-30 ↗</a></p>
+<p class="small">地形磁盘缓存最多 128 MiB；局部网格预算 48 MiB，全球底座另约 8 MiB。</p><p id="earthElevationCache" class="small data-status"></p>
+<div class="row" style="flex-wrap:wrap"><button id="earthElevationRetry" type="button">重试高程</button><button id="earthElevationClearCache" type="button">清除地形缓存</button></div>
+<p class="small">清理已下载高程；开启地形时，当前视野会重新加载。</p><p id="earthElevationMessage" class="small data-status" role="status" hidden></p><p id="earthElevationError" class="small data-status" role="status" hidden></p>
+</details>
 <div class="row"><label for="nightSource">夜景数据</label><select id="nightSource"><option value="2024-1km">2024 · 1 公里</option><option value="2016">2016 · 原版 1 公里</option></select></div>
 <p class="small">近看时按视野加载夜景细节；简易画质不显示夜景。2024 数据覆盖北纬 75°至南纬 65°，极区保留 2016 底图。</p>
 <p class="small" id="qualityStatus" role="status">正在准备画质素材…</p>

@@ -39,6 +39,7 @@ export function identifyXuntianCrosshair(
   frame,
   {
     surface = null,
+    groundSurface,
     displayHeight = 300,
     cityFinder = null,
     limitMagnitude = Infinity,
@@ -56,7 +57,14 @@ export function identifyXuntianCrosshair(
     !frame?.q?.earthAxes
   )
     return { kind: 'unavailable' };
-  const ground = groundHit(eye, direction, frame.q.earthAxes);
+  // A terrain miss is authoritative too: a ray through a real depression or
+  // beside a mountain must not be replaced with a hit on the old sphere.
+  const ground =
+    groundSurface === undefined
+      ? surface?.kind === 'earth'
+        ? surface
+        : groundHit(eye, direction, frame.q.earthAxes)
+      : groundSurface;
   if (surface?.kind === 'station' && surface.distanceKm < (ground?.distanceKm ?? Infinity))
     return { ...surface };
   if (ground)

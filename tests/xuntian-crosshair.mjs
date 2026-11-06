@@ -52,6 +52,13 @@ near(ground.latitude, city.latitude);
 near(ground.longitude, city.longitude);
 near(ground.distanceKm, 405);
 assert.equal(ground.city.id, 'city:beijing');
+const raisedGround = { ...ground, distanceKm: 403, elevationMeters: 2000 };
+assert.equal(identify(frame(eye, cityRay), { groundSurface: raisedGround }).elevationMeters, 2000);
+assert.notEqual(identify(frame(eye, cityRay), { groundSurface: null }).kind, 'earth',
+  'an explicit terrain miss must not be replaced by the old sphere');
+assert.equal(identify(frame(eye, cityRay), {
+  surface: { kind: 'station', distanceKm: 0.03 }, groundSurface: null,
+}).kind, 'station');
 near(ground.city.distanceKm, 0, 1e-6);
 assert.equal(finder.nearest(city.latitude, city.longitude, 'fr').name, 'Pékin');
 assert.equal(

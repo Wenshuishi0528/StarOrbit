@@ -1,0 +1,361 @@
+{
+  "version": 1,
+  "id": "etopo-2022-ice-surface",
+  "base": {
+    "file": "assets/earth/elevation/base-surface-i16.bin.gz",
+    "width": 2048,
+    "height": 1024,
+    "compression": "gzip",
+    "dtype": "int16-le",
+    "rowOrder": "north-to-south",
+    "columnOrder": "west-to-east",
+    "unit": "metre",
+    "scale": 1,
+    "offset": 0,
+    "noData": null,
+    "crs": "EPSG:4326",
+    "verticalCrs": "EPSG:3855",
+    "verticalDatum": "EGM2008 geoid",
+    "bounds": [
+      -180,
+      -90,
+      180,
+      90
+    ],
+    "registration": "pixel-center",
+    "longitudeStep": 0.17578125,
+    "latitudeStep": -0.17578125,
+    "firstCenter": [
+      -179.912109375,
+      89.912109375
+    ],
+    "longitudeAtColumn": "-180 + (x + 0.5) * 360 / width",
+    "latitudeAtRow": "90 - (y + 0.5) * 180 / height",
+    "wrapLongitude": true,
+    "clampLatitude": true,
+    "duplicatedSeamColumn": false,
+    "bytes": 1083225,
+    "rawBytes": 4194304,
+    "sha256": "da34565261be305dbaf6cabc4d087d4ffc6fb34dc021b030ca0b31dd9fe8e426",
+    "rawSHA256": "be1d0653724121bf831bf7a5d0ac8b1c8dfcc4b7f8448a481cc7660ccf5ff44c"
+  },
+  "source": {
+    "provider": "NOAA NCEI",
+    "title": "ETOPO 2022 v1, ice surface, 60 arc-second",
+    "url": "https://www.ncei.noaa.gov/products/etopo-global-relief-model",
+    "credit": "NOAA National Centers for Environmental Information, ETOPO 2022; resampled by StarOrbit",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "licenseEvidenceUrl": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ngdc.mgg.dem:etopo_2022/html",
+    "citation": "NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model. NOAA National Centers for Environmental Information. https://doi.org/10.25921/fd45-gt74",
+    "datasetId": "ETOPO_2022_v1_60s",
+    "variable": "z",
+    "nativeGrid": [
+      21600,
+      10800
+    ],
+    "nativeSpacingArcSeconds": 60,
+    "sourceSubsetGrid": [
+      2700,
+      1350
+    ],
+    "sourceSubsetSpacingArcSeconds": 480,
+    "query": "z[4:8:10796][4:8:21596]",
+    "downloadUrl": "https://oceanwatch.pifsc.noaa.gov/erddap/griddap/ETOPO_2022_v1_60s.dods?z[4:8:10796][4:8:21596]",
+    "infoUrl": "https://oceanwatch.pifsc.noaa.gov/erddap/info/ETOPO_2022_v1_60s/index.json",
+    "productUrl": "https://www.ncei.noaa.gov/products/etopo-global-relief-model",
+    "metadataUrl": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ngdc.mgg.dem:etopo_2022/html",
+    "doi": "https://doi.org/10.25921/fd45-gt74",
+    "productPublicationDate": "2022-10-01",
+    "productYear": 2022,
+    "observationDate": null,
+    "metadataTimeCoverage": {
+      "start": "1998-01-01",
+      "end": "2022-09-01"
+    },
+    "dateNote": "A compilation of many source surveys; 2022 is the product release, not a uniform observation year. Coverage is the product metadata time period, not a per-pixel acquisition date.",
+    "accessedAt": "2026-11-06T15:50:03+00:00",
+    "downloadBytes": 14612635,
+    "downloadSHA256": "35cdc3fab7d87ca82b26deb5065dfab6efffcb7de64d2740e2b65eed721a294a"
+  },
+  "processing": {
+    "method": "Every eighth source sample, then periodic bilinear point resampling to output pixel centers; rounded to nearest integer metre (ties to even).",
+    "heightQuantizationMaxMeters": 0.5,
+    "quantizationNote": "Quantization bound excludes source error and spatial resampling; this base cannot preserve narrow peaks or city-scale elevations.",
+    "inlandNegativeElevationsPreserved": true,
+    "oceanDisplay": "Four-neighbour flood fill of height <= 0 m cells from the listed ocean/open-sea seeds, periodic longitude and nonperiodic latitude; only those connected cells become 0 m.",
+    "oceanSeeds": [
+      {
+        "name": "Pacific west seam",
+        "longitude": 179.8,
+        "latitude": 0,
+        "pixel": [
+          2046,
+          512
+        ],
+        "originalMeters": -5268
+      },
+      {
+        "name": "Pacific east seam",
+        "longitude": -179.8,
+        "latitude": 0,
+        "pixel": [
+          1,
+          512
+        ],
+        "originalMeters": -5390
+      },
+      {
+        "name": "North Atlantic",
+        "longitude": -30,
+        "latitude": 30,
+        "pixel": [
+          853,
+          341
+        ],
+        "originalMeters": -4470
+      },
+      {
+        "name": "South Atlantic",
+        "longitude": -20,
+        "latitude": -30,
+        "pixel": [
+          910,
+          682
+        ],
+        "originalMeters": -4443
+      },
+      {
+        "name": "Arctic Ocean",
+        "longitude": 0,
+        "latitude": 85,
+        "pixel": [
+          1024,
+          28
+        ],
+        "originalMeters": -3946
+      },
+      {
+        "name": "Indian Ocean",
+        "longitude": 80,
+        "latitude": -20,
+        "pixel": [
+          1479,
+          625
+        ],
+        "originalMeters": -4891
+      },
+      {
+        "name": "Southern Ocean",
+        "longitude": 0,
+        "latitude": -60,
+        "pixel": [
+          1024,
+          853
+        ],
+        "originalMeters": -5367
+      },
+      {
+        "name": "Mediterranean Sea",
+        "longitude": 18,
+        "latitude": 36,
+        "pixel": [
+          1126,
+          307
+        ],
+        "originalMeters": -4093
+      },
+      {
+        "name": "Black Sea",
+        "longitude": 34,
+        "latitude": 43,
+        "pixel": [
+          1217,
+          267
+        ],
+        "originalMeters": -2197
+      },
+      {
+        "name": "Red Sea",
+        "longitude": 38,
+        "latitude": 20,
+        "pixel": [
+          1240,
+          398
+        ],
+        "originalMeters": -761
+      },
+      {
+        "name": "Baltic Sea",
+        "longitude": 19,
+        "latitude": 56,
+        "pixel": [
+          1132,
+          193
+        ],
+        "originalMeters": -112
+      },
+      {
+        "name": "Persian Gulf",
+        "longitude": 51.5,
+        "latitude": 26.5,
+        "pixel": [
+          1316,
+          361
+        ],
+        "originalMeters": -29
+      },
+      {
+        "name": "Hudson Bay",
+        "longitude": -85,
+        "latitude": 60,
+        "pixel": [
+          540,
+          170
+        ],
+        "originalMeters": -149
+      },
+      {
+        "name": "Puget Sound",
+        "longitude": -122.5,
+        "latitude": 47.8,
+        "pixel": [
+          327,
+          240
+        ],
+        "originalMeters": -149
+      },
+      {
+        "name": "Gulf of Saint Lawrence",
+        "longitude": -62,
+        "latitude": 48,
+        "pixel": [
+          671,
+          238
+        ],
+        "originalMeters": -72
+      },
+      {
+        "name": "Gulf of Bothnia",
+        "longitude": 20,
+        "latitude": 61,
+        "pixel": [
+          1137,
+          164
+        ],
+        "originalMeters": -110
+      }
+    ],
+    "oceanSamples": 1378951,
+    "coastlineLimitation": "At roughly 20 km equatorial spacing, thin land barriers and straits can be lost. This flood mask is a display approximation, not a hydrographic shoreline or navigation dataset.",
+    "unmodifiedSampleSHA256": "e0387187aef99fb6721e16041a1525e0c09c9619ea7197fdbb5e881e45d24b65",
+    "unmodifiedSampleGzipBytes": 3366906,
+    "unmodifiedSampleLocation": "base-raw-i16.bin.gz in the preparation script's --work directory; not included in the application package"
+  },
+  "statistics": {
+    "minimumMeters": -1228,
+    "maximumMeters": 6328,
+    "negativeSamples": 3836,
+    "positiveSamples": 714234,
+    "zeroSamples": 1379082
+  },
+  "validation": {
+    "gzipRoundTrip": true,
+    "periodicLongitudeChecks": true,
+    "nativeSourceCells": [
+      {
+        "name": "tibet",
+        "query": "z[7316][5100]",
+        "longitude": 85.00833333333333,
+        "latitude": 31.941666666666663,
+        "native60sMeters": 4821.76513671875,
+        "exactMatchToSubset": true,
+        "downloadBytes": 243
+      },
+      {
+        "name": "greenland",
+        "query": "z[9716][19196]",
+        "longitude": 319.94166666666666,
+        "latitude": 71.94166666666666,
+        "native60sMeters": 3090.574462890625,
+        "exactMatchToSubset": true,
+        "downloadBytes": 243
+      },
+      {
+        "name": "pacific",
+        "query": "z[5396][12596]",
+        "longitude": 209.94166666666666,
+        "latitude": -0.05833333333333712,
+        "native60sMeters": -3758.5,
+        "exactMatchToSubset": true,
+        "downloadBytes": 243
+      }
+    ],
+    "samples": [
+      {
+        "name": "Tibetan Plateau",
+        "longitude": 85,
+        "latitude": 32,
+        "originalBilinearMeters": 4646.375,
+        "surfaceBilinearMeters": 4646.375
+      },
+      {
+        "name": "Andes",
+        "longitude": -68,
+        "latitude": -22,
+        "originalBilinearMeters": 4637.932,
+        "surfaceBilinearMeters": 4637.932
+      },
+      {
+        "name": "Greenland ice surface",
+        "longitude": -40,
+        "latitude": 72,
+        "originalBilinearMeters": 3098.394,
+        "surfaceBilinearMeters": 3098.394
+      },
+      {
+        "name": "Antarctic ice surface",
+        "longitude": 0,
+        "latitude": -89,
+        "originalBilinearMeters": 2732.194,
+        "surfaceBilinearMeters": 2732.194
+      },
+      {
+        "name": "Central Pacific seafloor",
+        "longitude": -150,
+        "latitude": 0,
+        "originalBilinearMeters": -4190.167,
+        "surfaceBilinearMeters": 0.0
+      },
+      {
+        "name": "Beijing",
+        "longitude": 116.3974,
+        "latitude": 39.9093,
+        "originalBilinearMeters": 40.797,
+        "surfaceBilinearMeters": 40.797
+      },
+      {
+        "name": "Seattle",
+        "longitude": -122.3321,
+        "latitude": 47.6062,
+        "originalBilinearMeters": -19.441,
+        "surfaceBilinearMeters": 27.362
+      },
+      {
+        "name": "Dead Sea depression",
+        "longitude": 35.5,
+        "latitude": 31.5,
+        "originalBilinearMeters": -211.08,
+        "surfaceBilinearMeters": -211.08
+      },
+      {
+        "name": "Caspian Sea inland water",
+        "longitude": 51,
+        "latitude": 42,
+        "originalBilinearMeters": -445.446,
+        "surfaceBilinearMeters": -445.446
+      }
+    ],
+    "sampleNote": "Interpolated values of this coarse display base, not survey measurements at the named landmark or mountain-summit heights."
+  }
+}

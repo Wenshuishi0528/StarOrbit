@@ -15,6 +15,12 @@ const city=finder.get('city:beijing','zh'),anchor=cityAnchor(city);
 eq(city.latitude,39.9042);eq(city.longitude,116.4074);assert.equal(finder.search('HIP 91262','zh').length,0);
 const unitAxes=[[1,0,0],[0,1,0],[0,0,1]],q={earthAxes:unitAxes},normal=geographicVector(city.longitude,city.latitude,1);
 const eye=normal.map(v=>v*(EARTH_RADIUS+405)),track=trackGround(anchor,eye,q);
+const raisedTrack=trackGround(anchor,eye,q,2400);
+eq(raisedTrack.range,402.6);
+const raisedPin=pinCrosshair(eye,cameraAxes(lookDirection(raisedTrack.direction)),new Quaternion(),q,
+ {kind:'earth',longitude:city.longitude+.05,latitude:city.latitude+.02,elevationMeters:2400});
+eq(raisedPin.longitude,city.longitude+.05);eq(raisedPin.latitude,city.latitude+.02);
+assert.equal(pinCrosshair(eye,cameraAxes(lookDirection(raisedTrack.direction)),new Quaternion(),q,null).kind,'sky');
 assert(track.visible);eq(track.range,405);const hit=groundHit(eye,track.direction,unitAxes);eq(hit.latitude,city.latitude);eq(hit.longitude,city.longitude);
 const a=2*Math.PI/180,advanced=[[Math.cos(a),Math.sin(a),0],[-Math.sin(a),Math.cos(a),0],[0,0,1]];
 const vt=trackGround(anchor,eye,{earthAxes:advanced}),h2=groundHit(eye,vt.direction,advanced);assert(vt.visible&&dot(vt.direction,track.direction)<.99);eq(h2.latitude,city.latitude);eq(h2.longitude,city.longitude);

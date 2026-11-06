@@ -15,7 +15,11 @@ for(const [id,source] of Object.entries(data('spacecraftModels'))){
 }
 const orbits=JSON.parse(resource(data('missionOrbits').url));assert(orbits.tiangong.rows.length>=8&&orbits.dfh1.rows.length>=8);
 const scan=value=>{if(typeof value==='string')resource(value);else if(value)Object.values(value).forEach(scan);};
-const {skyDetail,cityTerrain,constellationArt,...environment}=data('environmentAssets');scan(environment);
+const {skyDetail,cityTerrain,constellationArt,elevation,...environment}=data('environmentAssets');scan(environment);
+const elevationManifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));
+assert(resource(elevation.base.url).equals(fs.readFileSync(elevationManifest.base.file)));
+assert.equal(zlib.gunzipSync(resource(elevation.base.url)).byteLength,elevation.base.width*elevation.base.height*2);
+assert.equal(elevation.base.verticalDatum,'EGM2008 geoid');
 const artManifest=JSON.parse(fs.readFileSync('assets/constellation-art/manifest.json','utf8'));
 assert.equal(constellationArt.images.length,85);assert.equal(Object.keys(constellationArt.constellationImages).length,88);
 for(const art of constellationArt.images){const source=artManifest.images.find(c=>c.imageId===art.imageId);assert(resource(art.url).equals(fs.readFileSync(source.file)));assert.deepEqual(art.anchors,source.anchors);}

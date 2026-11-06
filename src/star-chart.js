@@ -394,6 +394,7 @@ export class StarChart {
       s.exposure,
       hasMoon,
       follow,
+      s.earthElevation,
     ].join('|');
     const changed = key !== this.lastKey;
     const moved =
@@ -402,7 +403,13 @@ export class StarChart {
       (hasMoon && this.env.moon.mesh.position.distanceToSquared(this.lastMoon) > 1e-6);
     const epoch = sim.current?.t,
       skyMoved = s.solarSystemLabels && epoch !== this.labelEpoch;
-    if (!changed && (!(moved || modelMoved || skyMoved) || now - this.lastLayout < 0.2)) return;
+    const terrainKey = this.env.elevation?.key('main'),
+      terrainMoved = terrainKey !== this.lastTerrainKey;
+    if (
+      !changed &&
+      (!(moved || modelMoved || skyMoved || terrainMoved) || now - this.lastLayout < 0.2)
+    )
+      return;
     if (follow && (modelMoved || !this.occluders)) this.prepareOccluders();
     if (follow) {
       this.modelSource = records;
@@ -412,6 +419,7 @@ export class StarChart {
       }));
     }
     this.labelEpoch = epoch;
+    this.lastTerrainKey = terrainKey;
     this.lastLayout = now;
     this.lastKey = key;
     this.lastQuaternion.copy(camera.quaternion);
@@ -426,6 +434,14 @@ export class StarChart {
     const fov = THREE.MathUtils.radToDeg(
       2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / camera.zoom)
     );
+    const earthFixed = (direction) =>
+      sim.current.earthAxes.map((axis) =>
+        axis.reduce((sum, value, i) => sum + value * direction[i], 0)
+      );
+    const terrainEye =
+      this.env.elevation?.enabled && sim.current?.earthAxes
+        ? earthFixed(camera.position.toArray())
+        : null;
     const layout = buildSkyAnnotationLayout({
       settings: s,
       axes,
@@ -436,7 +452,9 @@ export class StarChart {
       height,
       language,
       showMoon: hasMoon,
-      blocked: (direction) => this.hiddenBySpacecraft(new THREE.Vector3(...direction)),
+      blocked: (direction) =>
+        (terrainEye && this.env.elevation.skyOccluded(terrainEye, earthFixed(direction), 'main')) ||
+        this.hiddenBySpacecraft(new THREE.Vector3(...direction)),
     });
     const placed = layout.labels.map((label) => ({
       ...label,

@@ -17,9 +17,10 @@ vec4 sampleMap(sampler2D tex,vec2 uv){return textureGrad(tex,uv,cloudDx,cloudDy)
 vec4 sampleMap(sampler2D tex,vec2 uv){return textureGrad(tex,uv,wrapGradient(dFdx(uv)),wrapGradient(dFdy(uv)));}
 #endif
 `;
-const output = `\n#include <tonemapping_fragment>\n#include <colorspace_fragment>
+export const earthSurfaceOutput = `\n#include <tonemapping_fragment>\n#include <colorspace_fragment>
 // Static, sub-code-value dithering avoids 8-bit colour bands without temporal flicker.
 if(enhanced>.5&&linearOutput<.5){float grain=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715))))-.5;gl_FragColor.rgb+=grain/255.;}`;
+const output = earthSurfaceOutput;
 const noise = `float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.2,.3));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise3(p);p=p*2.03+7.1;a*=.5;}return v;}`;
@@ -119,12 +120,16 @@ vec3 earthSurfaceColour(vec3 localN,vec3 worldN,vec3 worldP){vec3 n=normalize(wo
 // to dark ocean texels; retain land/coast colours and the existing solar glint.
 float ocean=smoothstep(.2,.8,sampleMap(oceanMap,uv).r);
 if(enhanced>.5){float water=ocean*(1.-smoothstep(.015,.06,max(albedo.r,max(albedo.g,albedo.b))));albedo=mix(albedo,max(albedo,vec3(.008,.038,.12)),water);}
-vec3 directSun=enhanced>.5?sunlightAt(0.,mu):vec3(1.);
+float solarMu=mu,groundAltitude=0.;
+#ifdef EARTH_ELEVATION
+solarMu=dot(normalize(worldP),s);groundAltitude=max(0.,length(worldP)-6371.);
+#endif
+vec3 directSun=enhanced>.5?sunlightAt(groundAltitude,solarMu):vec3(1.);
 vec3 color=albedo*(.002+directSun*lambertDirect*day);
 if(detailed>.5){float c=cloudAt(localN)*cloudAmount;float shadow=c;
 if(enhanced>.5){float b=dot(normalize(localN)*6371.,normalize(localSun));float dist=-b+sqrt(max(0.,b*b+2.*6371.*8.+64.));shadow=cloudAt(normalize(localN)*6371.+normalize(localSun)*dist)*cloudAmount;}
 color*=1.-shadow*mix(.22,.48,enhanced)*smoothstep(-.01,.08,mu);
-vec3 night=nightColor(uv);color+=night*mix(2.3,1.2,enhanced)*(1.-smoothstep(-.15,.07,mu));
+vec3 night=nightColor(uv);color+=night*mix(2.3,1.2,enhanced)*(1.-smoothstep(-.15,.07,solarMu));
 float highlight=pow(max(0.,dot(reflect(-s,n),eye)),gloss);float fresnel=.04+.96*pow(1.-max(0.,dot(n,eye)),5.);
 color+=(enhanced>.5?directSun:vec3(1.,.91,.73))*ocean*highlight*day*mix(.6,.3+fresnel*2.,enhanced);
 }

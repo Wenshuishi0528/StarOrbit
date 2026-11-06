@@ -5,6 +5,7 @@ import { EARTH_RADIUS, dot, norm } from './orbit.js';
 import { coneHalfAngle } from './xuntian-view-math.js';
 import { earthHit, quadVertex } from './xuntian-view-shaders.js';
 import { cityOpticalView } from './city-terrain-view.js';
+import { EarthElevationLayer } from './earth-elevation-layer.js';
 
 let cityViewSerial = 0;
 
@@ -158,6 +159,11 @@ export function createXuntianEarthView(env, quad) {
   const ground = new THREE.Mesh(quad, groundMat);
   ground.frustumCulled = false;
   scene.add(ground);
+  const elevationLayer =
+    env.elevation && new EarthElevationLayer(env.elevation, s, cityScopeId, { optical: true });
+  const elevationPhotoLayer =
+    env.elevation && new EarthElevationLayer(env.elevation, s, cityPhotoId, { optical: true });
+  if (elevationLayer) scene.add(elevationLayer.group, elevationPhotoLayer.group);
   // Share geometry, GLSL and all active texture objects with the environment.
   // Dedicated material wrappers avoid touching main-camera render state.
   function shell(original, uniforms, rayPass = false) {
@@ -209,6 +215,7 @@ export function createXuntianEarthView(env, quad) {
     visible = angularlyVisible(frame, size.aspect);
     if (!visible) {
       env.cityTerrain?.setView(photo ? cityPhotoId : cityScopeId, null, photo ? 3 : 2, force);
+      env.elevation?.release(photo ? cityPhotoId : cityScopeId);
       previousFootprint = null;
       for (const d of details) if (d.wanted.length || d.slots.some((slot) => slot.key)) d.clear();
       return;
@@ -247,6 +254,14 @@ export function createXuntianEarthView(env, quad) {
     camera.updateMatrixWorld();
     rotation.makeBasis(vector.fromArray(axes[0]), up.fromArray(axes[1]), z.fromArray(axes[2]));
     local.earth.quaternion.setFromRotationMatrix(rotation);
+    if (env.elevation) {
+      const id = photo ? cityPhotoId : cityScopeId;
+      env.elevation.setView(id, cityOpticalView(frame, size), photo ? 3 : 2, force || photo);
+      const layer = photo ? elevationPhotoLayer : elevationLayer;
+      ground.visible = !layer.update(local.earth.quaternion);
+      (photo ? elevationLayer : elevationPhotoLayer).group.visible = false;
+      clouds.material.depthTest = volume.material.depthTest = !ground.visible;
+    }
     // A final pan can arrive inside the main cache's 250 ms interval. At a
     // paused epoch it must still select the new tiles before the view goes idle.
     const footprint = [
@@ -290,7 +305,7 @@ export function createXuntianEarthView(env, quad) {
     if (!visible) return null;
     if (!target.earth) {
       target.earth = new THREE.WebGLRenderTarget(size.w, size.h, {
-        depthBuffer: false,
+        depthBuffer: true,
         type: target.scene.texture.type,
         minFilter: THREE.NearestFilter,
         magFilter: THREE.NearestFilter,
@@ -299,13 +314,21 @@ export function createXuntianEarthView(env, quad) {
       target.earth.texture.colorSpace = THREE.LinearSRGBColorSpace;
     }
     renderer.setRenderTarget(target.earth);
-    renderer.clear(true, false, false);
+    // Relief writes depth; reuse of this target must not retain the previous
+    // pointing's depth and punch holes in the new view.
+    renderer.clear(true, true, false);
     renderer.render(scene, camera);
     if (renderer.properties.get(groundMat).currentProgram?.diagnostics?.runnable === false)
       throw Error('巡天取景图像生成失败');
     return target.earth.texture;
   }
   async function prepareCityPhoto(frame, size, waitMs = 8000) {
+    await env.elevation?.prepareView(
+      cityPhotoId,
+      angularlyVisible(frame, size.aspect) ? cityOpticalView(frame, size) : null,
+      3,
+      waitMs
+    );
     if (!env.cityTerrain) return;
     if (!angularlyVisible(frame, size.aspect) || env.quality === 'simple') {
       env.cityTerrain.setView(cityPhotoId, null, 3, true);
@@ -361,6 +384,7 @@ export function createXuntianEarthView(env, quad) {
       env.volumeClouds.visible,
       env.atmosphere.visible,
       env.cityTerrain?.key(cityScopeId),
+      env.elevation?.key(cityScopeId),
       ...(visible ? details.map((d) => d.key(now)) : []),
     ].join('|');
   }
@@ -369,12 +393,38 @@ export function createXuntianEarthView(env, quad) {
     preparePhoto,
     prepareCityPhoto,
     appearanceKey,
+    pick(frame, photo = false) {
+      if (!env.elevation?.enabled) return undefined;
+      const transform = (v) => frame.q.earthAxes.map((a) => dot(a, v));
+      return env.elevation.pick(
+        transform(frame.eyeKm),
+        transform(frame.axes.forward),
+        photo ? cityPhotoId : cityScopeId
+      );
+    },
+    hides(frame, direction, photo = false) {
+      if (!env.elevation?.enabled) return false;
+      const transform = (v) => frame.q.earthAxes.map((axis) => dot(axis, v));
+      return env.elevation.skyOccluded(
+        transform(frame.eyeKm),
+        transform(direction),
+        photo ? cityPhotoId : cityScopeId
+      );
+    },
     cityStatus: (photo = false) => env.cityTerrain?.status(photo ? cityPhotoId : cityScopeId),
-    releasePhoto: () => env.cityTerrain?.release(cityPhotoId),
+    elevationStatus: (photo = false) => ({
+      ...env.elevation?.status(photo ? cityPhotoId : cityScopeId),
+      visible,
+    }),
+    releasePhoto: () => {
+      env.cityTerrain?.release(cityPhotoId);
+      env.elevation?.release(cityPhotoId);
+    },
     source() {
       return {
         ...sourceInfo(env),
         city: env.cityTerrain?.status(cityScopeId),
+        elevation: env.elevation?.status(cityScopeId),
         dayTiles: day.slots.filter((s) => s.key).map((s) => s.key),
         nightTiles: night.slots.filter((s) => s.key).map((s) => s.key),
       };
@@ -383,8 +433,12 @@ export function createXuntianEarthView(env, quad) {
       disposed = true;
       env.cityTerrain?.release(cityScopeId);
       env.cityTerrain?.release(cityPhotoId);
+      env.elevation?.release(cityScopeId);
+      env.elevation?.release(cityPhotoId);
+      elevationLayer?.dispose();
+      elevationPhotoLayer?.dispose();
       for (const d of details) d.clear();
-      for (const m of scene.children) m.material.dispose();
+      for (const m of scene.children) m.material?.dispose();
     },
   };
 }

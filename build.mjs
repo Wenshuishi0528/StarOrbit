@@ -18,7 +18,8 @@ const trial=JSON.parse(fs.readFileSync('assets/cloud-trial/manifest.json','utf8'
 trial.samples=Object.fromEntries(['day','night'].map(kind=>{const file='assets/cloud-trial/'+kind+'.png';return [kind,split?publish(file):'data:image/png;base64,'+fs.readFileSync(file).toString('base64')];}));
 const worklet=await build({entryPoints:['src/dfh1-telemetry-worklet.js'],bundle:true,format:'iife',minify:true,write:false,legalComments:'none'});
 const cityWorker=await build({entryPoints:['src/city-terrain-worker.js'],bundle:true,format:'iife',minify:true,write:false,platform:'browser',legalComments:'none'});
-await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__CITY_TERRAIN_WORKER__:JSON.stringify(cityWorker.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
+const elevationWorker=await build({entryPoints:['src/earth-elevation-worker.js'],bundle:true,format:'iife',minify:true,write:false,platform:'browser',legalComments:'none'});
+await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__CITY_TERRAIN_WORKER__:JSON.stringify(cityWorker.outputFiles[0].text),__ELEVATION_WORKER__:JSON.stringify(elevationWorker.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
 const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image(f==='day.jpg'&&tier!=='high'?'assets/earth/day-2004/'+tier+'.jpg':'assets/earth/'+tier+'/'+f)]))]));
 // The minimap is a readable display map, independent of 3D reflectance assets.
 environmentAssets.minimap=image('assets/earth/simple/day.jpg');
@@ -35,6 +36,7 @@ environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
  const dir='assets/earth/day-2026-q2-1km',meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8'));
  environmentAssets.daySources['2026-q2-1km']={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
 }
+{const manifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));const {file,...base}=manifest.base;environmentAssets.elevation={version:manifest.version,base:{...base,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')},source:manifest.source};}
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
 {
  const art=JSON.parse(fs.readFileSync('assets/constellation-art/manifest.json','utf8'));

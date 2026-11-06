@@ -4,6 +4,16 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.17 — 2026-11-07 · 正式版 / Release
+
+「地球与星空」新增默认关闭的真实地形模式，以 1× 实际高程生成山川网格；主画面、巡天、固定地面瞄准与照片共用数据，并保留现有城市高清影像。内置约 1.03 MiB 的 ETOPO 2022 全球底座，放大后按需读取 Copernicus GLO-30，采用平滑衔接与有界缓存；提供来源、年代、重试、清缓存及照片署名。关闭后释放地形运行资源，已缓存区域可离线复用。本模式不改变飞行碰撞或着陆物理。
+
+**English:** Added an optional, default-off real terrain mode in Earth & Sky, generating true-height meshes at 1× scale. Main view, Xuntian finder, ground locks and photos share elevation data and existing HD city imagery. A roughly 1.03 MiB ETOPO 2022 global base is included; zooming loads Copernicus GLO-30 detail with smooth transitions and bounded caches. Source dates, retry/cache controls and photo credits are included. Disabling releases runtime terrain resources; cached regions remain usable offline. Flight collision and landing physics are unchanged.
+
+默认测试与格式检查通过；Chrome/WebKit 验证山脊、高清地景贴合、照片、离线缓存和资源释放，专项回归覆盖异步切换、接缝、真实地面拾取与城市纹理共享。 / Default tests and formatting passed. Chrome/WebKit checks cover relief, HD imagery draping, photos, cached offline reuse and resource release; focused regressions cover asynchronous transitions, seams, terrain picking and shared city imagery.
+
+[操作、数据、预算与验证 / Details](docs/v1.17-earth-elevation.md)
+
 ## v1.16 — 2026-11-06 · 正式版 / Release
 
 新增北京、西雅图 2025 年 Sentinel-2 10 米离线地景（106 张 AVIF，5.75 MiB）和城市库，支持其它城市按需加载、离线保存、取消与删除；共享主画面、巡天与照片，连续缩放、有界缓存并保留日期和来源。星空影像改为共享的紧凑来源选择，保留原银河、DSS、Pan-STARRS 和近期 JWST，缺覆盖明确回退。深空目录补全至 12,162 个去重对象，修复大麦哲伦云等扩展天体的缺名和准星范围识别，区分目录中心与专题影像天区。

@@ -55,8 +55,8 @@ export function cityAnchor(city) {
     localUp: [-Math.sin(lat) * Math.cos(lon), -Math.sin(lat) * Math.sin(lon), Math.cos(lat)],
   };
 }
-export function pinCrosshair(eye, axes, base, q) {
-  const hit = groundHit(eye, axes.forward, q.earthAxes);
+export function pinCrosshair(eye, axes, base, q, terrainHit) {
+  const hit = terrainHit === undefined ? groundHit(eye, axes.forward, q.earthAxes) : terrainHit;
   if (!hit) return { kind: 'sky', direction: [...axes.forward] };
   const up = cameraAxes(base).up;
   return {
@@ -66,10 +66,12 @@ export function pinCrosshair(eye, axes, base, q) {
     localUp: q.earthAxes.map((v) => dot(v, up)),
   };
 }
-export function trackGround(anchor, eye, q) {
+export function trackGround(anchor, eye, q, elevationMeters = 0) {
   const local = geographicVector(anchor.longitude, anchor.latitude, 1),
     normal = transform(q.earthAxes, local);
-  const ray = normal.map((x, i) => x * EARTH_RADIUS - eye[i]),
+  const surfaceRadius =
+    EARTH_RADIUS + (Number.isFinite(elevationMeters) ? elevationMeters : 0) / 1000;
+  const ray = normal.map((x, i) => x * surfaceRadius - eye[i]),
     range = Math.hypot(...ray);
   if (range < 1e-8) return null;
   return {
