@@ -1,171 +1,767 @@
-import {installCameraFocus} from './camera-focus.js';
-import {installFloatingWindows} from './floating-windows.js';
-import {installAttitudeNavball} from './attitude-navball.js';
-import {installMainFlight} from './main-flight.js';
-import {flightVessel} from './free-flight-vessels.js';
-import {startupStatus} from './startup-status.js';
-import {installFreeFlight} from './free-flight.js';
-import {installXuntianScope} from './xuntian-scope.js';
-import {installFlightLab} from './flight-lab.js';
-import {installVisitorCounter} from './visitor-widget.js';
-import {readPackedModel,hydrateOrbitData} from './runtime-assets.js';
-import {installHelp} from './help.js';
-import {MusicPlayer} from './music-player.js';
-import {missionLibrary} from './mission-library.js';
-import {t,initLanguage,onLanguageChange,setText,getLanguage} from './i18n.js';
-import {installSidebar} from './sidebar.js';
-import {installSceneShare} from './scene-share.js';
-import {installSessionMemory} from './session-memory.js';
-import {MissionController} from './mission-controller.js';
-import {EARTH_RADIUS} from './orbit.js';
+import { installCameraFocus } from './camera-focus.js';
+import { installFloatingWindows } from './floating-windows.js';
+import { installAttitudeNavball } from './attitude-navball.js';
+import { installMainFlight } from './main-flight.js';
+import { flightVessel } from './free-flight-vessels.js';
+import { startupStatus } from './startup-status.js';
+import { installFreeFlight } from './free-flight.js';
+import { installXuntianScope } from './xuntian-scope.js';
+import { installFlightLab } from './flight-lab.js';
+import { installVisitorCounter } from './visitor-widget.js';
+import { readPackedModel, hydrateOrbitData } from './runtime-assets.js';
+import { installHelp } from './help.js';
+import { MusicPlayer } from './music-player.js';
+import { missionLibrary } from './mission-library.js';
+import { t, initLanguage, onLanguageChange, setText, getLanguage } from './i18n.js';
+import { installSidebar } from './sidebar.js';
+import { installSceneShare } from './scene-share.js';
+import { installSessionMemory } from './session-memory.js';
+import { MissionController } from './mission-controller.js';
+import { EARTH_RADIUS } from './orbit.js';
 import { Simulation } from './simulation.js';
 import * as THREE from 'three';
-import {createOrbitControls} from './camera-controls.js';
+import { createOrbitControls } from './camera-controls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import {describeAssembly,replaceAttachment,matingTransforms,placementMatrices} from './assembly.js';
+import {
+  describeAssembly,
+  replaceAttachment,
+  matingTransforms,
+  placementMatrices,
+} from './assembly.js';
 installSidebar();
 initLanguage();
-const music=new MusicPlayer();
-const $=id=>document.getElementById(id),meta=JSON.parse($('modelMeta').textContent),names={TH:'天和',WT:'问天',MT:'梦天',TZ:'天舟',SZ:'神舟',XT:'巡天'},slotNames={TH_WENTIAN:'节点左侧',TH_MENGTIAN:'节点右侧',TH_FORWARD:'节点前端',TH_LOWER:'节点下方',TH_AFT:'天和尾端'},defaults={TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'},state={slots:{...defaults},showXT:true,target:'TH_WENTIAN',linked:false,pair:true,angles:{}};
-let assembly=describeAssembly(state.slots);
-const stage=$('stage'),scene=new THREE.Scene();scene.background=null;const camera=new THREE.PerspectiveCamera(38,1,.1,5000);camera.up.set(0,0,1);const renderer=(()=>{try{return new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});}catch(error){$('loading').querySelector('.spinner').style.display='none';setText('loadingTitle','三维图形暂不可用');setText('loadText','浏览器未能启动 WebGL 2。请重新打开页面，或换用支持三维图形的浏览器。现有设置和下载数据已保留。');setText('status','载入失败');throw error;}})();renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;stage.appendChild(renderer.domElement);
-const controls=createOrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.075;controls.minDistance=15;controls.maxDistance=1600;
-const fillLight=new THREE.AmbientLight(0xbccde5,0),sunLight=new THREE.DirectionalLight(0xfff8ef,3.4);scene.add(fillLight,sunLight,sunLight.target);sunLight.castShadow=true;sunLight.shadow.mapSize.set(4096,4096);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-let sim=null;
-const modelRoot=new THREE.Group();scene.add(modelRoot);let model,ready=false,playing=false,last=0,saveTimer;const groups={},rig={},tags={},mating=matingTransforms(meta),templates={},types={};const mats=m=>new THREE.Matrix4().set(...m.flat());const copyTo=(o,m)=>{m.decompose(o.position,o.quaternion,o.scale);o.updateMatrixWorld(true);};
-function toast(key,params={}){setText('toast',key,params);$('toast').style.opacity=1;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').style.opacity=0,3000);}
-const zeroAngles=()=>({roll:0,left:0,right:0});
-const coreName=id=>assembly.cores.length===1?t('天和核心舱'):t('天和核心舱 {number}',{number:assembly.byId.get(id).number});
-const instanceName=id=>{
- if(id==='freeXT')return t('巡天 · 独立飞行');
- const item=assembly.byId.get(id);if(!item)return '';
- if(item.type==='TH')return coreName(id);
- const name=t(names[item.type]),port=t(slotNames[item.hostPort]);
- return assembly.cores.length===1?`${name} · ${port}`:t('{module} · {core} · {port}',{module:name,core:coreName(item.parentId),port});
-};
-const moduleName=k=>t({TH:'天和核心舱',WT:'问天实验舱',MT:'梦天实验舱',SZ:'神舟飞船',TZ:'天舟货运飞船',XT:'巡天望远镜'}[k]);
-const labs=()=>Object.keys(groups).filter(id=>['WT','MT'].includes(types[id]));
-function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem('tiangong-viewer-v3',JSON.stringify(state));}catch{}},200);}
-function loadState(){try{
- const current=localStorage.getItem('tiangong-viewer-v3')||localStorage.getItem('tiangong-viewer-v2'),s=JSON.parse(current||localStorage.getItem('tiangong-viewer-v1'));if(!s)return;
- state.slots=describeAssembly(s.slots).slots;
- state.showXT=s.showXT!==false;state.target=current?s.target:(s.target==='TH'?'TH':Object.keys(state.slots).find(id=>state.slots[id]===s.target)||'freeXT');state.linked=!!s.linked;state.pair=s.pair!==false;
- for(const id of ['TH',...Object.keys(state.slots),'freeXT']){state.angles[id]=zeroAngles();const oldKey=id==='TH'?'TH':id==='freeXT'?'XT':state.slots[id];for(const a of ['roll','left','right']){const v=Number(s.angles?.[current?id:oldKey]?.[a]);state.angles[id][a]=Number.isFinite(v)?THREE.MathUtils.clamp(v,-180,180):0;}}
-}catch{}}
-function renderPorts(){
- const cards=new Map();$('ports').replaceChildren();
- for(const core of assembly.cores){
-  const card=document.createElement('fieldset');card.className='core-ports';card.dataset.core=core.id;
-  const title=document.createElement('legend');title.textContent=coreName(core.id);card.append(title);
-  if(core.parentId){const note=document.createElement('p');note.className='small core-connection';note.textContent=t('尾口已连接：{core} · {port}',{core:coreName(core.parentId),port:t(slotNames[core.hostPort])});card.append(note);}
-  cards.set(core.id,card);$('ports').append(card);
- }
- for(const {id,coreId,port} of assembly.ports){
-  const row=document.createElement('div');row.className='row';const lab=document.createElement('label');lab.htmlFor=id;lab.textContent=t(slotNames[port]);
-  const sel=document.createElement('select');sel.id=id;sel.setAttribute('aria-label',`${coreName(coreId)} · ${t(slotNames[port])}`);
-  sel.replaceChildren(new Option(t('空置'),''),...Object.keys(names).map(k=>new Option(moduleName(k),k)));sel.value=state.slots[id];row.append(lab,sel);cards.get(coreId).append(row);
-  if(flightVessel(state.slots[id])){
-   const fly=document.createElement('button');fly.type='button';fly.className='port-fly';fly.dataset.flyPort=id;
-   fly.textContent=t('驾驶');fly.setAttribute('aria-label',t('驾驶{name}',{name:instanceName(id)}));
-   fly.onclick=()=>sim?.freeFlight?.open(id);row.append(fly);
+const music = new MusicPlayer();
+const $ = (id) => document.getElementById(id),
+  meta = JSON.parse($('modelMeta').textContent),
+  names = { TH: '天和', WT: '问天', MT: '梦天', TZ: '天舟', SZ: '神舟', XT: '巡天' },
+  slotNames = {
+    TH_WENTIAN: '节点左侧',
+    TH_MENGTIAN: '节点右侧',
+    TH_FORWARD: '节点前端',
+    TH_LOWER: '节点下方',
+    TH_AFT: '天和尾端',
+  },
+  defaults = { TH_WENTIAN: 'WT', TH_MENGTIAN: 'MT', TH_FORWARD: 'SZ', TH_LOWER: '', TH_AFT: 'TZ' },
+  state = {
+    slots: { ...defaults },
+    showXT: true,
+    target: 'TH_WENTIAN',
+    linked: false,
+    pair: true,
+    angles: {},
+  };
+let assembly = describeAssembly(state.slots);
+const stage = $('stage'),
+  scene = new THREE.Scene();
+scene.background = null;
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 5000);
+camera.up.set(0, 0, 1);
+const renderer = (() => {
+  try {
+    return new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  } catch (error) {
+    $('loading').querySelector('.spinner').style.display = 'none';
+    setText('loadingTitle', '三维图形暂不可用');
+    setText(
+      'loadText',
+      '浏览器未能启动 WebGL 2。请重新打开页面，或换用支持三维图形的浏览器。现有设置和下载数据已保留。'
+    );
+    setText('status', '载入失败');
+    throw error;
   }
-  sel.onchange=()=>{state.slots=replaceAttachment(state.slots,id,sel.value);state.angles[id]=zeroAngles();applyConfig();fit();save();};
- }
+})();
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+stage.appendChild(renderer.domElement);
+const controls = createOrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.075;
+controls.minDistance = 15;
+controls.maxDistance = 1600;
+const fillLight = new THREE.AmbientLight(0xbccde5, 0),
+  sunLight = new THREE.DirectionalLight(0xfff8ef, 3.4);
+scene.add(fillLight, sunLight, sunLight.target);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(4096, 4096);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+let sim = null;
+const modelRoot = new THREE.Group();
+scene.add(modelRoot);
+let model,
+  ready = false,
+  playing = false,
+  last = 0,
+  saveTimer;
+const groups = {},
+  rig = {},
+  tags = {},
+  mating = matingTransforms(meta),
+  templates = {},
+  types = {};
+const mats = (m) => new THREE.Matrix4().set(...m.flat());
+const copyTo = (o, m) => {
+  m.decompose(o.position, o.quaternion, o.scale);
+  o.updateMatrixWorld(true);
+};
+function toast(key, params = {}) {
+  setText('toast', key, params);
+  $('toast').style.opacity = 1;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => ($('toast').style.opacity = 0), 3000);
 }
-function addInstance(id,type){
- const g=templates[type].clone(true);g.name='instance_'+id;model.add(g);groups[id]=g;types[id]=type;
- rig[id]={roll:g.getObjectByName('roll_'+type),left:g.getObjectByName('pitch_'+type+'_L'),right:g.getObjectByName('pitch_'+type+'_R')};
- state.angles[id]??=zeroAngles();
- const el=document.createElement('div');el.className='station-tag';el.dataset.instance=id;el.textContent=instanceName(id);Object.assign(el.style,{position:'absolute',padding:'4px 8px',border:'1px solid #355066',borderRadius:'5px',color:'#c8e0f0',background:'#0a1724bb',fontSize:'11px',whiteSpace:'nowrap',pointerEvents:'none',transform:'translate(-50%,-130%)'});stage.appendChild(el);tags[id]={el,anchor:new THREE.Vector3(type==='TH'?45:40,0,13)};
+const zeroAngles = () => ({ roll: 0, left: 0, right: 0 });
+const coreName = (id) =>
+  assembly.cores.length === 1
+    ? t('天和核心舱')
+    : t('天和核心舱 {number}', { number: assembly.byId.get(id).number });
+const instanceName = (id) => {
+  if (id === 'freeXT') return t('巡天 · 独立飞行');
+  const item = assembly.byId.get(id);
+  if (!item) return '';
+  if (item.type === 'TH') return coreName(id);
+  const name = t(names[item.type]),
+    port = t(slotNames[item.hostPort]);
+  return assembly.cores.length === 1
+    ? `${name} · ${port}`
+    : t('{module} · {core} · {port}', { module: name, core: coreName(item.parentId), port });
+};
+const moduleName = (k) =>
+  t(
+    {
+      TH: '天和核心舱',
+      WT: '问天实验舱',
+      MT: '梦天实验舱',
+      SZ: '神舟飞船',
+      TZ: '天舟货运飞船',
+      XT: '巡天望远镜',
+    }[k]
+  );
+const labs = () => Object.keys(groups).filter((id) => ['WT', 'MT'].includes(types[id]));
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('tiangong-viewer-v3', JSON.stringify(state));
+    } catch {}
+  }, 200);
 }
-function applyConfig(){if(!ready)return;playing=false;$('animate').textContent=t('▶ 演示自转');
- assembly=describeAssembly(state.slots);state.slots=assembly.slots;
- const wanted=Object.fromEntries(assembly.instances.map(item=>[item.id,item.type]));if(state.showXT)wanted.freeXT='XT';
- for(const id of Object.keys(state.angles))if(!wanted[id])delete state.angles[id];
- for(const id of Object.keys(groups))if(wanted[id]!==types[id]){groups[id].removeFromParent();tags[id].el.remove();delete groups[id];delete rig[id];delete tags[id];delete types[id];}
- for(const [id,k]of Object.entries(wanted)){state.angles[id]??=zeroAngles();if(!groups[id])addInstance(id,k);copyTo(groups[id],mats(meta.modules[k].matrix));}
- for(const [id,M] of placementMatrices(meta,assembly,mating))copyTo(groups[id],M);
- renderPorts();for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
- $('showXT').checked=state.showXT;$('showXT').disabled=false;
- if(!groups[state.target])state.target=Object.keys(groups).find(id=>id!=='TH')||'TH';
- $('target').replaceChildren(...Object.keys(groups).map(id=>new Option(instanceName(id),id)));$('target').value=state.target;$('linkLabs').checked=state.linked;$('pairWings').checked=state.pair;
- setText('status','{count} 个舱体',{count:Object.keys(groups).length});applyAngles();controls.maxDistance=Math.max(1600,bounds().getSize(new THREE.Vector3()).length()*4);syncControls();sim?.rebuild();}
-function applyAngles(){for(const k of Object.keys(groups)){const a=state.angles[k];if(rig[k].roll)rig[k].roll.rotation.x=THREE.MathUtils.degToRad(a.roll);rig[k].left.rotation.y=THREE.MathUtils.degToRad(a.left);rig[k].right.rotation.y=THREE.MathUtils.degToRad(a.right);}model.updateMatrixWorld(true);}
-function syncControls(){const k=state.target,shown=!!groups[k],lab=['WT','MT'].includes(types[k]);$('rotationControls').classList.toggle('disabled',!shown);$('rollControl').classList.toggle('hidden',!lab);$('rightControl').classList.toggle('hidden',state.pair);$('linkLabs').disabled=!(labs().length>1&&lab);for(const a of ['roll','left','right']){$(a).value=state.angles[k][a];$(a+'N').value=Math.round(state.angles[k][a]);}$('selection').textContent=t('{name}{linked}',{name:instanceName(k),linked:state.linked&&!sim?.auto&&lab&&!$('linkLabs').disabled?t(' · 实验舱联动'):''});$('motionHint').textContent='';}
-function linkSign(a,from,to){model.updateMatrixWorld(true);const u=new THREE.Vector3(a==='roll'?1:0,a==='roll'?0:1,0),v=u.clone();u.transformDirection((a==='roll'?groups[from]:rig[from].left.parent).matrixWorld);v.transformDirection((a==='roll'?groups[to]:rig[to].left.parent).matrixWorld);return u.dot(v)<-.5?-1:1;}
-function changeAngle(a,value){sim?.manual();const k=state.target;if(!groups[k].visible)return;const v=THREE.MathUtils.clamp(Number(value)||0,-180,180),ks=state.linked&&['WT','MT'].includes(types[k])?labs():[k];for(const n of ks){const nv=n===k?v:v*linkSign(a,k,n);state.angles[n][a]=nv;if(state.pair&&a!=='roll')state.angles[n].left=state.angles[n].right=nv;}applyAngles();syncControls();save();}
-for(const a of ['roll','left','right']){ $(a).oninput=e=>changeAngle(a,e.target.value);$(a+'N').onchange=e=>changeAngle(a,e.target.value);}
-$('target').onchange=()=>{playing=false;$('animate').textContent=t('▶ 演示自转');state.target=$('target').value;sim?.mainFlight?.selectTarget(state.target==='freeXT'?'xuntian':'mission');syncControls();save();};$('pairWings').onchange=()=>{state.pair=$('pairWings').checked;if(state.pair)changeAngle('left',state.angles[state.target].left);syncControls();save();};$('linkLabs').onchange=()=>{state.linked=$('linkLabs').checked;if(state.linked){for(const a of ['roll','left','right'])changeAngle(a,state.angles[state.target][a]);toast('已同步所有问天、梦天实例');}syncControls();save();};$('showXT').onchange=()=>{state.showXT=$('showXT').checked;applyConfig();if(state.showXT&&sim?.xuntian)sim.xuntian.open();else fit();save();};
-$('zero').onclick=()=>{for(const a of ['roll','left','right'])changeAngle(a,0);playing=false;$('animate').textContent=t('▶ 演示自转');};$('animate').onclick=()=>{if(!groups[state.target].visible)return;playing=!playing;$('animate').textContent=playing?t('Ⅱ 暂停演示'):t('▶ 演示自转');};
-const activeGroups=()=>sim?.missions?.activeGroups()||groups;
-function bounds(key){const b=new THREE.Box3();for(const [k,g]of Object.entries(activeGroups()))if(g.visible&&(!key||k===key||key==='mission'&&k!=='freeXT'))b.union(new THREE.Box3().setFromObject(g));return b;}
+function loadState() {
+  try {
+    const current =
+        localStorage.getItem('tiangong-viewer-v3') || localStorage.getItem('tiangong-viewer-v2'),
+      s = JSON.parse(current || localStorage.getItem('tiangong-viewer-v1'));
+    if (!s) return;
+    state.slots = describeAssembly(s.slots).slots;
+    state.showXT = s.showXT !== false;
+    state.target = current
+      ? s.target
+      : s.target === 'TH'
+        ? 'TH'
+        : Object.keys(state.slots).find((id) => state.slots[id] === s.target) || 'freeXT';
+    state.linked = !!s.linked;
+    state.pair = s.pair !== false;
+    for (const id of ['TH', ...Object.keys(state.slots), 'freeXT']) {
+      state.angles[id] = zeroAngles();
+      const oldKey = id === 'TH' ? 'TH' : id === 'freeXT' ? 'XT' : state.slots[id];
+      for (const a of ['roll', 'left', 'right']) {
+        const v = Number(s.angles?.[current ? id : oldKey]?.[a]);
+        state.angles[id][a] = Number.isFinite(v) ? THREE.MathUtils.clamp(v, -180, 180) : 0;
+      }
+    }
+  } catch {}
+}
+function renderPorts() {
+  const cards = new Map();
+  $('ports').replaceChildren();
+  for (const core of assembly.cores) {
+    const card = document.createElement('fieldset');
+    card.className = 'core-ports';
+    card.dataset.core = core.id;
+    const title = document.createElement('legend');
+    title.textContent = coreName(core.id);
+    card.append(title);
+    if (core.parentId) {
+      const note = document.createElement('p');
+      note.className = 'small core-connection';
+      note.textContent = t('尾口已连接：{core} · {port}', {
+        core: coreName(core.parentId),
+        port: t(slotNames[core.hostPort]),
+      });
+      card.append(note);
+    }
+    cards.set(core.id, card);
+    $('ports').append(card);
+  }
+  for (const { id, coreId, port } of assembly.ports) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const lab = document.createElement('label');
+    lab.htmlFor = id;
+    lab.textContent = t(slotNames[port]);
+    const sel = document.createElement('select');
+    sel.id = id;
+    sel.setAttribute('aria-label', `${coreName(coreId)} · ${t(slotNames[port])}`);
+    sel.replaceChildren(
+      new Option(t('空置'), ''),
+      ...Object.keys(names).map((k) => new Option(moduleName(k), k))
+    );
+    sel.value = state.slots[id];
+    row.append(lab, sel);
+    cards.get(coreId).append(row);
+    if (flightVessel(state.slots[id])) {
+      const fly = document.createElement('button');
+      fly.type = 'button';
+      fly.className = 'port-fly';
+      fly.dataset.flyPort = id;
+      fly.textContent = t('驾驶');
+      fly.setAttribute('aria-label', t('驾驶{name}', { name: instanceName(id) }));
+      fly.onclick = () => sim?.freeFlight?.open(id);
+      row.append(fly);
+    }
+    sel.onchange = () => {
+      state.slots = replaceAttachment(state.slots, id, sel.value);
+      state.angles[id] = zeroAngles();
+      applyConfig();
+      fit();
+      save();
+    };
+  }
+}
+function addInstance(id, type) {
+  const g = templates[type].clone(true);
+  g.name = 'instance_' + id;
+  model.add(g);
+  groups[id] = g;
+  types[id] = type;
+  rig[id] = {
+    roll: g.getObjectByName('roll_' + type),
+    left: g.getObjectByName('pitch_' + type + '_L'),
+    right: g.getObjectByName('pitch_' + type + '_R'),
+  };
+  state.angles[id] ??= zeroAngles();
+  const el = document.createElement('div');
+  el.className = 'station-tag';
+  el.dataset.instance = id;
+  el.textContent = instanceName(id);
+  Object.assign(el.style, {
+    position: 'absolute',
+    padding: '4px 8px',
+    border: '1px solid #355066',
+    borderRadius: '5px',
+    color: '#c8e0f0',
+    background: '#0a1724bb',
+    fontSize: '11px',
+    whiteSpace: 'nowrap',
+    pointerEvents: 'none',
+    transform: 'translate(-50%,-130%)',
+  });
+  stage.appendChild(el);
+  tags[id] = { el, anchor: new THREE.Vector3(type === 'TH' ? 45 : 40, 0, 13) };
+}
+function applyConfig() {
+  if (!ready) return;
+  playing = false;
+  $('animate').textContent = t('▶ 演示自转');
+  assembly = describeAssembly(state.slots);
+  state.slots = assembly.slots;
+  const wanted = Object.fromEntries(assembly.instances.map((item) => [item.id, item.type]));
+  if (state.showXT) wanted.freeXT = 'XT';
+  for (const id of Object.keys(state.angles)) if (!wanted[id]) delete state.angles[id];
+  for (const id of Object.keys(groups))
+    if (wanted[id] !== types[id]) {
+      groups[id].removeFromParent();
+      tags[id].el.remove();
+      delete groups[id];
+      delete rig[id];
+      delete tags[id];
+      delete types[id];
+    }
+  for (const [id, k] of Object.entries(wanted)) {
+    state.angles[id] ??= zeroAngles();
+    if (!groups[id]) addInstance(id, k);
+    copyTo(groups[id], mats(meta.modules[k].matrix));
+  }
+  for (const [id, M] of placementMatrices(meta, assembly, mating)) copyTo(groups[id], M);
+  renderPorts();
+  for (const [id, tag] of Object.entries(tags)) tag.el.textContent = instanceName(id);
+  $('showXT').checked = state.showXT;
+  $('showXT').disabled = false;
+  if (!groups[state.target]) state.target = Object.keys(groups).find((id) => id !== 'TH') || 'TH';
+  $('target').replaceChildren(...Object.keys(groups).map((id) => new Option(instanceName(id), id)));
+  $('target').value = state.target;
+  $('linkLabs').checked = state.linked;
+  $('pairWings').checked = state.pair;
+  setText('status', '{count} 个舱体', { count: Object.keys(groups).length });
+  applyAngles();
+  controls.maxDistance = Math.max(1600, bounds().getSize(new THREE.Vector3()).length() * 4);
+  syncControls();
+  sim?.rebuild();
+}
+function applyAngles() {
+  for (const k of Object.keys(groups)) {
+    const a = state.angles[k];
+    if (rig[k].roll) rig[k].roll.rotation.x = THREE.MathUtils.degToRad(a.roll);
+    rig[k].left.rotation.y = THREE.MathUtils.degToRad(a.left);
+    rig[k].right.rotation.y = THREE.MathUtils.degToRad(a.right);
+  }
+  model.updateMatrixWorld(true);
+}
+function syncControls() {
+  const k = state.target,
+    shown = !!groups[k],
+    lab = ['WT', 'MT'].includes(types[k]);
+  $('rotationControls').classList.toggle('disabled', !shown);
+  $('rollControl').classList.toggle('hidden', !lab);
+  $('rightControl').classList.toggle('hidden', state.pair);
+  $('linkLabs').disabled = !(labs().length > 1 && lab);
+  for (const a of ['roll', 'left', 'right']) {
+    $(a).value = state.angles[k][a];
+    $(a + 'N').value = Math.round(state.angles[k][a]);
+  }
+  $('selection').textContent = t('{name}{linked}', {
+    name: instanceName(k),
+    linked: state.linked && !sim?.auto && lab && !$('linkLabs').disabled ? t(' · 实验舱联动') : '',
+  });
+  $('motionHint').textContent = '';
+}
+function linkSign(a, from, to) {
+  model.updateMatrixWorld(true);
+  const u = new THREE.Vector3(a === 'roll' ? 1 : 0, a === 'roll' ? 0 : 1, 0),
+    v = u.clone();
+  u.transformDirection((a === 'roll' ? groups[from] : rig[from].left.parent).matrixWorld);
+  v.transformDirection((a === 'roll' ? groups[to] : rig[to].left.parent).matrixWorld);
+  return u.dot(v) < -0.5 ? -1 : 1;
+}
+function changeAngle(a, value) {
+  sim?.manual();
+  const k = state.target;
+  if (!groups[k].visible) return;
+  const v = THREE.MathUtils.clamp(Number(value) || 0, -180, 180),
+    ks = state.linked && ['WT', 'MT'].includes(types[k]) ? labs() : [k];
+  for (const n of ks) {
+    const nv = n === k ? v : v * linkSign(a, k, n);
+    state.angles[n][a] = nv;
+    if (state.pair && a !== 'roll') state.angles[n].left = state.angles[n].right = nv;
+  }
+  applyAngles();
+  syncControls();
+  save();
+}
+for (const a of ['roll', 'left', 'right']) {
+  $(a).oninput = (e) => changeAngle(a, e.target.value);
+  $(a + 'N').onchange = (e) => changeAngle(a, e.target.value);
+}
+$('target').onchange = () => {
+  playing = false;
+  $('animate').textContent = t('▶ 演示自转');
+  state.target = $('target').value;
+  sim?.mainFlight?.selectTarget(state.target === 'freeXT' ? 'xuntian' : 'mission');
+  syncControls();
+  save();
+};
+$('pairWings').onchange = () => {
+  state.pair = $('pairWings').checked;
+  if (state.pair) changeAngle('left', state.angles[state.target].left);
+  syncControls();
+  save();
+};
+$('linkLabs').onchange = () => {
+  state.linked = $('linkLabs').checked;
+  if (state.linked) {
+    for (const a of ['roll', 'left', 'right']) changeAngle(a, state.angles[state.target][a]);
+    toast('已同步所有问天、梦天实例');
+  }
+  syncControls();
+  save();
+};
+$('showXT').onchange = () => {
+  state.showXT = $('showXT').checked;
+  applyConfig();
+  if (state.showXT && sim?.xuntian) sim.xuntian.open();
+  else fit();
+  save();
+};
+$('zero').onclick = () => {
+  for (const a of ['roll', 'left', 'right']) changeAngle(a, 0);
+  playing = false;
+  $('animate').textContent = t('▶ 演示自转');
+};
+$('animate').onclick = () => {
+  if (!groups[state.target].visible) return;
+  playing = !playing;
+  $('animate').textContent = playing ? t('Ⅱ 暂停演示') : t('▶ 演示自转');
+};
+const activeGroups = () => sim?.missions?.activeGroups() || groups;
+function bounds(key) {
+  const b = new THREE.Box3();
+  for (const [k, g] of Object.entries(activeGroups()))
+    if (g.visible && (!key || k === key || (key === 'mission' && k !== 'freeXT')))
+      b.union(new THREE.Box3().setFromObject(g));
+  return b;
+}
 // Keep model depth precision independent of the much larger Earth scene.
 // A tiny fixed near plane made nearby CAD surfaces fight when zooming out.
-function updateModelClipping(){
- const distance=camera.position.distanceTo(controls.target);
- const near=Math.max(.000001,distance/100),far=Math.max(distance*4,sim?.capabilities.assembly!==false?3000:distance*20);
- if(camera.near!==near||camera.far!==far){camera.near=near;camera.far=far;camera.updateProjectionMatrix();}
+function updateModelClipping() {
+  const distance = camera.position.distanceTo(controls.target);
+  const near = Math.max(0.000001, distance / 100),
+    far = Math.max(distance * 4, sim?.capabilities.assembly !== false ? 3000 : distance * 20);
+  if (camera.near !== near || camera.far !== far) {
+    camera.near = near;
+    camera.far = far;
+    camera.updateProjectionMatrix();
+  }
 }
-function frameModels(key,dir,objects){
- if(!ready)return;
- if(sim?.view==='orbit'&&!key&&!dir){sim.fit();return;}
- if(sim?.view==='orbit')sim.setView('follow');
- const framed=objects||Object.entries(activeGroups()).filter(([k])=>!key||k===key||key==='mission'&&k!=='freeXT').map(([,g])=>g);
- const box=new THREE.Box3();for(const group of framed)if(group.visible)box.union(new THREE.Box3().setFromObject(group));
- if(box.isEmpty())return;
- const center=box.getCenter(new THREE.Vector3());
- const direction=dir?new THREE.Vector3(...dir).normalize():camera.position.clone().sub(controls.target).normalize();
- if(direction.length()<.1)direction.set(1,-1,1).normalize();
- const right=new THREE.Vector3().crossVectors(camera.up,direction);
- if(right.lengthSq()<1e-12)right.crossVectors(Math.abs(direction.z)<.9?new THREE.Vector3(0,0,1):new THREE.Vector3(0,1,0),direction);
- right.normalize();const up=new THREE.Vector3().crossVectors(direction,right).normalize();
- const tanV=Math.tan(THREE.MathUtils.degToRad(camera.getEffectiveFOV())/2),tanH=tanV*camera.aspect;
- let distance=sim?.capabilities.assembly!==false?10:.00001;
- for(const group of framed){
-  if(!group.visible)continue;group.updateMatrixWorld(true);
-  group.traverse(object=>{
-   if(!object.isMesh)return;if(!object.geometry.boundingBox)object.geometry.computeBoundingBox();
-   const b=object.geometry.boundingBox;
-   for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z]){
-    const p=new THREE.Vector3(x,y,z).applyMatrix4(object.matrixWorld).sub(center);
-    distance=Math.max(distance,p.dot(direction)+Math.abs(p.dot(right))/tanH,p.dot(direction)+Math.abs(p.dot(up))/tanV);
-   }
-  });
- }
- distance*=1.14;controls.maxDistance=Math.max(controls.maxDistance,distance*1.05);
- controls.stopMotion();controls.target.copy(center);camera.position.copy(center).addScaledVector(direction,distance);updateModelClipping();controls.update();
+function frameModels(key, dir, objects) {
+  if (!ready) return;
+  if (sim?.view === 'orbit' && !key && !dir) {
+    sim.fit();
+    return;
+  }
+  if (sim?.view === 'orbit') sim.setView('follow');
+  const framed =
+    objects ||
+    Object.entries(activeGroups())
+      .filter(([k]) => !key || k === key || (key === 'mission' && k !== 'freeXT'))
+      .map(([, g]) => g);
+  const box = new THREE.Box3();
+  for (const group of framed) if (group.visible) box.union(new THREE.Box3().setFromObject(group));
+  if (box.isEmpty()) return;
+  const center = box.getCenter(new THREE.Vector3());
+  const direction = dir
+    ? new THREE.Vector3(...dir).normalize()
+    : camera.position.clone().sub(controls.target).normalize();
+  if (direction.length() < 0.1) direction.set(1, -1, 1).normalize();
+  const right = new THREE.Vector3().crossVectors(camera.up, direction);
+  if (right.lengthSq() < 1e-12)
+    right.crossVectors(
+      Math.abs(direction.z) < 0.9 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0),
+      direction
+    );
+  right.normalize();
+  const up = new THREE.Vector3().crossVectors(direction, right).normalize();
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.getEffectiveFOV()) / 2),
+    tanH = tanV * camera.aspect;
+  let distance = sim?.capabilities.assembly !== false ? 10 : 0.00001;
+  for (const group of framed) {
+    if (!group.visible) continue;
+    group.updateMatrixWorld(true);
+    group.traverse((object) => {
+      if (!object.isMesh) return;
+      if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
+      const b = object.geometry.boundingBox;
+      for (const x of [b.min.x, b.max.x])
+        for (const y of [b.min.y, b.max.y])
+          for (const z of [b.min.z, b.max.z]) {
+            const p = new THREE.Vector3(x, y, z).applyMatrix4(object.matrixWorld).sub(center);
+            distance = Math.max(
+              distance,
+              p.dot(direction) + Math.abs(p.dot(right)) / tanH,
+              p.dot(direction) + Math.abs(p.dot(up)) / tanV
+            );
+          }
+    });
+  }
+  distance *= 1.14;
+  controls.maxDistance = Math.max(controls.maxDistance, distance * 1.05);
+  controls.stopMotion();
+  controls.target.copy(center);
+  camera.position.copy(center).addScaledVector(direction, distance);
+  updateModelClipping();
+  controls.update();
 }
-function fit(key,dir){
- if(sim?.cameraFocus){if(sim.view==='orbit'&&!key&&!dir)return sim.fit();return sim.cameraFocus.focus(key==='freeXT'?'xuntian':key&&key!=='mission'?'module:'+key:key||sim.cameraFocus.selected,dir);}
- return frameModels(key??'mission',dir);
+function fit(key, dir) {
+  if (sim?.cameraFocus) {
+    if (sim.view === 'orbit' && !key && !dir) return sim.fit();
+    return sim.cameraFocus.focus(
+      key === 'freeXT'
+        ? 'xuntian'
+        : key && key !== 'mission'
+          ? 'module:' + key
+          : key || sim.cameraFocus.selected,
+      dir
+    );
+  }
+  return frameModels(key ?? 'mission', dir);
 }
-function horizonDirection(){
- const q=sim?.current;if(!q)return [1,-1,.35];
- const radius=new THREE.Vector3(...q.position).normalize(),up=new THREE.Vector3(...q.basis.map(axis=>radius.dot(new THREE.Vector3(...axis))));
- const tangent=camera.position.clone().sub(controls.target).addScaledVector(up,-camera.position.clone().sub(controls.target).dot(up));
- if(tangent.lengthSq()<1e-8)tangent.crossVectors(up,Math.abs(up.z)<.9?new THREE.Vector3(0,0,1):new THREE.Vector3(1,0,0));
- camera.up.copy(up);const dip=Math.sqrt(Math.max(0,Math.pow(Math.hypot(...q.position)/EARTH_RADIUS,2)-1));return tangent.normalize().addScaledVector(up,dip).toArray();
+function horizonDirection() {
+  const q = sim?.current;
+  if (!q) return [1, -1, 0.35];
+  const radius = new THREE.Vector3(...q.position).normalize(),
+    up = new THREE.Vector3(...q.basis.map((axis) => radius.dot(new THREE.Vector3(...axis))));
+  const tangent = camera.position
+    .clone()
+    .sub(controls.target)
+    .addScaledVector(up, -camera.position.clone().sub(controls.target).dot(up));
+  if (tangent.lengthSq() < 1e-8)
+    tangent.crossVectors(
+      up,
+      Math.abs(up.z) < 0.9 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(1, 0, 0)
+    );
+  camera.up.copy(up);
+  const dip = Math.sqrt(Math.max(0, Math.pow(Math.hypot(...q.position) / EARTH_RADIUS, 2) - 1));
+  return tangent.normalize().addScaledVector(up, dip).toArray();
 }
-$('fit').onclick=()=>sim?.cameraFocus?.focus('all');$('focus').onclick=()=>{if(groups[state.target].visible)fit(state.target);else toast('所选舱体不在当前组合中');};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const view=b.dataset.view;if(view!=='horizon')camera.up.set(0,0,1);fit(null,view==='horizon'?horizonDirection():{top:[0,.001,1],bottom:[0,-.001,-1],side:[0,-1,.001],iso:[1,-1,1.25]}[view]);});
-document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state.slots={...defaults};state.showXT=b.dataset.preset==='full';if(b.dataset.preset==='labs'){state.slots.TH_FORWARD='';state.slots.TH_AFT='';}if(b.dataset.preset==='core'){Object.keys(state.slots).forEach(k=>state.slots[k]='');state.target='TH';}else state.target='TH_WENTIAN';applyConfig();fit(null,[1,-1,1.25]);save();});$('reset').onclick=()=>{state.slots={...defaults};state.showXT=true;state.target='TH_WENTIAN';state.linked=false;state.pair=true;state.angles={};applyConfig();fit(null,[1,-1,1.25]);save();toast('已恢复默认组合、角度与视角');};$('saveImage').onclick=()=>{if(sim)sim.render();else renderer.render(scene,camera);const a=document.createElement('a');a.download='StarOrbit_'+(sim?.missionId||'tiangong')+'_preview.png';a.href=renderer.domElement.toDataURL('image/png');a.click();};
-const renderSize=new THREE.Vector2();
-function resize(){
- const w=stage.clientWidth,h=stage.clientHeight;if(w<1||h<1)return;
- renderer.getSize(renderSize);
- // CSS fills the stage even while the browser's fullscreen animation is running.
- // Only reallocate the drawing buffer when its logical size actually changes.
- if(renderSize.x!==w||renderSize.y!==h)renderer.setSize(w,h,false);
- if(camera.aspect!==w/h){camera.aspect=w/h;camera.updateProjectionMatrix();}
+$('fit').onclick = () => sim?.cameraFocus?.focus('all');
+$('focus').onclick = () => {
+  if (groups[state.target].visible) fit(state.target);
+  else toast('所选舱体不在当前组合中');
+};
+document.querySelectorAll('[data-view]').forEach(
+  (b) =>
+    (b.onclick = () => {
+      const view = b.dataset.view;
+      if (view !== 'horizon') camera.up.set(0, 0, 1);
+      fit(
+        null,
+        view === 'horizon'
+          ? horizonDirection()
+          : {
+              top: [0, 0.001, 1],
+              bottom: [0, -0.001, -1],
+              side: [0, -1, 0.001],
+              iso: [1, -1, 1.25],
+            }[view]
+      );
+    })
+);
+document.querySelectorAll('[data-preset]').forEach(
+  (b) =>
+    (b.onclick = () => {
+      state.slots = { ...defaults };
+      state.showXT = b.dataset.preset === 'full';
+      if (b.dataset.preset === 'labs') {
+        state.slots.TH_FORWARD = '';
+        state.slots.TH_AFT = '';
+      }
+      if (b.dataset.preset === 'core') {
+        Object.keys(state.slots).forEach((k) => (state.slots[k] = ''));
+        state.target = 'TH';
+      } else state.target = 'TH_WENTIAN';
+      applyConfig();
+      fit(null, [1, -1, 1.25]);
+      save();
+    })
+);
+$('reset').onclick = () => {
+  state.slots = { ...defaults };
+  state.showXT = true;
+  state.target = 'TH_WENTIAN';
+  state.linked = false;
+  state.pair = true;
+  state.angles = {};
+  applyConfig();
+  fit(null, [1, -1, 1.25]);
+  save();
+  toast('已恢复默认组合、角度与视角');
+};
+$('saveImage').onclick = () => {
+  if (sim) sim.render();
+  else renderer.render(scene, camera);
+  const a = document.createElement('a');
+  a.download = 'StarOrbit_' + (sim?.missionId || 'tiangong') + '_preview.png';
+  a.href = renderer.domElement.toDataURL('image/png');
+  a.click();
+};
+const renderSize = new THREE.Vector2();
+function resize() {
+  const w = stage.clientWidth,
+    h = stage.clientHeight;
+  if (w < 1 || h < 1) return;
+  renderer.getSize(renderSize);
+  // CSS fills the stage even while the browser's fullscreen animation is running.
+  // Only reallocate the drawing buffer when its logical size actually changes.
+  if (renderSize.x !== w || renderSize.y !== h) renderer.setSize(w, h, false);
+  if (camera.aspect !== w / h) {
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
 }
-function tick(t){requestAnimationFrame(tick);if(document.hidden)return;resize();if(sim?.freeFlight?.active){last=t;sim.lastWall=t;sim.freeFlight.tick(t);return;}if(sim?.flightLab?.active||sim?.environment?.weather?.resourcePanel?.active){last=t;sim.lastWall=t;return;}const dt=Math.min((t-last)/1000,.1);last=t;if(sim?.initialized)sim.update(t);if(sim?.initialized&&playing&&model.visible)changeAngle('left',((state.angles[state.target].left+dt*15+180)%360)-180);sim?.cameraFocus?.update();controls.update();updateModelClipping();if(ready){for(const [k,tag]of Object.entries(tags)){const p=tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);tag.el.style.display=model.visible&&groups[k].visible&&$('labels').checked&&p.z<1&&p.z>-1&&Math.abs(p.x)<1&&Math.abs(p.y)<1?'block':'none';tag.el.style.left=((p.x+1)*stage.clientWidth/2)+'px';tag.el.style.top=((-p.y+1)*stage.clientHeight/2)+'px';}}if(sim){sim.render();sim.xuntian?.draw(t);}else renderer.render(scene,camera);}requestAnimationFrame(tick);
-async function boot(){try{const encoded=$('modelData').textContent.trim();setText('loadText','正在展开模型并建立太阳翼转轴…');const [buffer]=await Promise.all([readPackedModel(encoded),hydrateOrbitData()]);startupStatus('boot','GLB model');const gltf=await new GLTFLoader().parseAsync(buffer,'');model=gltf.scene;modelRoot.add(model);
-for(const k of Object.keys(names)){templates[k]=model.getObjectByName('module_'+k);if(!templates[k])throw Error(t('缺少模型 {module}',{module:k}));}
-model.traverse(o=>{if(o.isMesh){o.frustumCulled=true;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){m.roughness=Math.max(m.roughness,.4);m.metalness=Math.min(m.metalness,.6);}}});for(const t of Object.values(templates))t.removeFromParent();loadState();ready=true;resize();applyConfig();fit(null,[1,-1,1.25]);startupStatus('boot','Mission cache');await missionLibrary.restore();startupStatus('boot','Scene setup');sim=new Simulation({music,groups,rig,state,types,model,modelRoot,scene,camera,renderer,stage,controls,sunLight,fillLight,tags,resize,syncControls,labs,toast,bounds,fit,frameModels,instanceName,stopAnimation:()=>{playing=false;$('animate').textContent=t('▶ 演示自转');}});fit(null,[1,-1,.35]);sim.missions=new MissionController(sim);startupStatus('boot','Weather / mission restore');await sim.missions.restore();startupStatus('boot','Environment / session restore');await installSessionMemory(sim,{saveAssembly:()=>{clearTimeout(saveTimer);localStorage.setItem('tiangong-viewer-v3',JSON.stringify(state));},getPlaying:()=>playing,setPlaying:v=>{playing=v;$('animate').textContent=t(v?'Ⅱ 暂停演示':'▶ 演示自转');}});installSceneShare(sim,next=>{Object.assign(state,next);applyConfig();save();});sim.mainFlight=installMainFlight(sim);sim.navball=installAttitudeNavball(sim);startupStatus('boot','First frame');sim.initialized=true;sim.lastWall=performance.now();sim.update(performance.now());$('loading').classList.add('hidden');document.body.dataset.ready='true';setTimeout(()=>sim.environment.weather.restoreTextures(),0);window.viewer={music,state,groups,rig,scene,camera,controls,fit,applyConfig,changeAngle,renderer,meta,types,sim};installFlightLab(sim,{templates,meta});sim.xuntian=installXuntianScope(sim);sim.cameraFocus=installCameraFocus(sim);await sim.xuntian.restoreRoute();sim.cameraFocus.resetAnchor();sim.freeFlight=installFreeFlight(sim,{templates,meta});sim.floatingWindows=installFloatingWindows();installHelp(music);installVisitorCounter();}catch(e){console.error(e);$('loading').querySelector('.spinner').style.display='none';setText('loadingTitle','模型未能载入');setText('loadText','请使用新版 Chrome、Edge 或 Safari 打开本文件。错误：{error}',{error:e.message});setText('status','载入失败');}}
-onLanguageChange(()=>{
- if(ready){renderPorts();for(const [id,tag] of Object.entries(tags))tag.el.textContent=instanceName(id);
-  $('target').replaceChildren(...Object.keys(groups).map(id=>new Option(instanceName(id),id)));$('target').value=state.target;
-  syncControls();sim?.missions?.syncUI();
- }
- $('animate').textContent=t(playing?'Ⅱ 暂停演示':'▶ 演示自转');
+function tick(t) {
+  requestAnimationFrame(tick);
+  if (document.hidden) return;
+  resize();
+  if (sim?.freeFlight?.active) {
+    last = t;
+    sim.lastWall = t;
+    sim.freeFlight.tick(t);
+    return;
+  }
+  if (sim?.flightLab?.active || sim?.environment?.weather?.resourcePanel?.active) {
+    last = t;
+    sim.lastWall = t;
+    return;
+  }
+  const dt = Math.min((t - last) / 1000, 0.1);
+  last = t;
+  if (sim?.initialized) sim.update(t);
+  if (sim?.initialized && playing && model.visible)
+    changeAngle('left', ((state.angles[state.target].left + dt * 15 + 180) % 360) - 180);
+  sim?.cameraFocus?.update();
+  controls.update();
+  updateModelClipping();
+  if (ready) {
+    for (const [k, tag] of Object.entries(tags)) {
+      const p = tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);
+      tag.el.style.display =
+        model.visible &&
+        groups[k].visible &&
+        $('labels').checked &&
+        p.z < 1 &&
+        p.z > -1 &&
+        Math.abs(p.x) < 1 &&
+        Math.abs(p.y) < 1
+          ? 'block'
+          : 'none';
+      tag.el.style.left = ((p.x + 1) * stage.clientWidth) / 2 + 'px';
+      tag.el.style.top = ((-p.y + 1) * stage.clientHeight) / 2 + 'px';
+    }
+  }
+  if (sim) {
+    sim.render();
+    sim.xuntian?.draw(t);
+  } else renderer.render(scene, camera);
+}
+requestAnimationFrame(tick);
+async function boot() {
+  try {
+    const encoded = $('modelData').textContent.trim();
+    setText('loadText', '正在展开模型并建立太阳翼转轴…');
+    const [buffer] = await Promise.all([readPackedModel(encoded), hydrateOrbitData()]);
+    startupStatus('boot', 'GLB model');
+    const gltf = await new GLTFLoader().parseAsync(buffer, '');
+    model = gltf.scene;
+    modelRoot.add(model);
+    for (const k of Object.keys(names)) {
+      templates[k] = model.getObjectByName('module_' + k);
+      if (!templates[k]) throw Error(t('缺少模型 {module}', { module: k }));
+    }
+    model.traverse((o) => {
+      if (o.isMesh) {
+        o.frustumCulled = true;
+        const ms = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of ms) {
+          m.roughness = Math.max(m.roughness, 0.4);
+          m.metalness = Math.min(m.metalness, 0.6);
+        }
+      }
+    });
+    for (const t of Object.values(templates)) t.removeFromParent();
+    loadState();
+    ready = true;
+    resize();
+    applyConfig();
+    fit(null, [1, -1, 1.25]);
+    startupStatus('boot', 'Mission cache');
+    await missionLibrary.restore();
+    startupStatus('boot', 'Scene setup');
+    sim = new Simulation({
+      music,
+      groups,
+      rig,
+      state,
+      types,
+      model,
+      modelRoot,
+      scene,
+      camera,
+      renderer,
+      stage,
+      controls,
+      sunLight,
+      fillLight,
+      tags,
+      resize,
+      syncControls,
+      labs,
+      toast,
+      bounds,
+      fit,
+      frameModels,
+      instanceName,
+      stopAnimation: () => {
+        playing = false;
+        $('animate').textContent = t('▶ 演示自转');
+      },
+    });
+    fit(null, [1, -1, 0.35]);
+    sim.missions = new MissionController(sim);
+    startupStatus('boot', 'Weather / mission restore');
+    await sim.missions.restore();
+    startupStatus('boot', 'Environment / session restore');
+    await installSessionMemory(sim, {
+      saveAssembly: () => {
+        clearTimeout(saveTimer);
+        localStorage.setItem('tiangong-viewer-v3', JSON.stringify(state));
+      },
+      getPlaying: () => playing,
+      setPlaying: (v) => {
+        playing = v;
+        $('animate').textContent = t(v ? 'Ⅱ 暂停演示' : '▶ 演示自转');
+      },
+    });
+    installSceneShare(sim, (next) => {
+      Object.assign(state, next);
+      applyConfig();
+      save();
+    });
+    sim.mainFlight = installMainFlight(sim);
+    sim.navball = installAttitudeNavball(sim);
+    startupStatus('boot', 'First frame');
+    sim.initialized = true;
+    sim.lastWall = performance.now();
+    sim.update(performance.now());
+    $('loading').classList.add('hidden');
+    document.body.dataset.ready = 'true';
+    setTimeout(() => sim.environment.weather.restoreTextures(), 0);
+    window.viewer = {
+      music,
+      state,
+      groups,
+      rig,
+      scene,
+      camera,
+      controls,
+      fit,
+      applyConfig,
+      changeAngle,
+      renderer,
+      meta,
+      types,
+      sim,
+    };
+    installFlightLab(sim, { templates, meta });
+    sim.xuntian = installXuntianScope(sim);
+    sim.cameraFocus = installCameraFocus(sim);
+    await sim.xuntian.restoreRoute();
+    sim.cameraFocus.resetAnchor();
+    sim.freeFlight = installFreeFlight(sim, { templates, meta });
+    sim.floatingWindows = installFloatingWindows();
+    installHelp(music);
+    installVisitorCounter();
+  } catch (e) {
+    console.error(e);
+    $('loading').querySelector('.spinner').style.display = 'none';
+    setText('loadingTitle', '模型未能载入');
+    setText('loadText', '请使用新版 Chrome、Edge 或 Safari 打开本文件。错误：{error}', {
+      error: e.message,
+    });
+    setText('status', '载入失败');
+  }
+}
+onLanguageChange(() => {
+  if (ready) {
+    renderPorts();
+    for (const [id, tag] of Object.entries(tags)) tag.el.textContent = instanceName(id);
+    $('target').replaceChildren(
+      ...Object.keys(groups).map((id) => new Option(instanceName(id), id))
+    );
+    $('target').value = state.target;
+    syncControls();
+    sim?.missions?.syncUI();
+  }
+  $('animate').textContent = t(playing ? 'Ⅱ 暂停演示' : '▶ 演示自转');
 });
 boot();

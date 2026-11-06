@@ -1,18 +1,134 @@
-.obs-journal-actions{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
-.obs-journal-actions button{min-height:32px;padding:4px 9px;font-size:12px}
-.obs-save-status{font-size:11px;color:#9ee6d7}
-.obs-journal{width:min(590px,94vw);max-height:82dvh;background:#0d1c2b;color:#e5eff6;border:1px solid #486071;border-radius:12px;padding:0}
-.obs-journal::backdrop{background:#040b13b8}
-.obs-journal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #2c4154}
-.obs-journal-head h3{margin:0;font-size:16px}.obs-journal-head button{min-width:30px}
-.obs-journal-body{padding:12px 14px}.obs-journal-tools{display:flex;align-items:center;gap:8px}
-.obs-journal-tools span{font-size:12px;color:#b8ccda}.obs-journal select{max-width:58%}
-.obs-record{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid #2a3d4d}
-.obs-record img{width:75px;max-height:54px;object-fit:cover;border-radius:4px}
-.obs-record>div{min-width:0}.obs-record strong{font-size:13px}.obs-record p{margin:3px 0;overflow-wrap:anywhere}
-.obs-timing{font-size:12px;font-variant-numeric:tabular-nums}.obs-origin{color:#99b2c3;font-size:11px}
-.obs-record-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.obs-record-buttons button{font-size:11px;min-height:26px;padding:3px 7px}
-.obs-record-buttons button[data-confirm=yes]{color:#ffc4ac}
-.obs-journal figure{margin:10px 0}.obs-journal figure img{display:block;width:100%;max-height:46dvh;object-fit:contain;background:#070d15}
-.obs-journal figcaption{font-size:11px;margin-top:3px;color:#b0c5d2}
-@media(max-width:700px){.obs-journal-actions{gap:4px}.obs-journal-actions button{font-size:10px;min-height:27px;padding:3px 6px}.obs-save-status:not(:empty){max-width:90px}.flight-lab .flight-lab-head{gap:6px}}
+.obs-journal-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.obs-journal-actions button {
+  min-height: 32px;
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.obs-save-status {
+  font-size: 11px;
+  color: #9ee6d7;
+}
+.obs-journal {
+  width: min(590px, 94vw);
+  max-height: 82dvh;
+  background: #0d1c2b;
+  color: #e5eff6;
+  border: 1px solid #486071;
+  border-radius: 12px;
+  padding: 0;
+}
+.obs-journal::backdrop {
+  background: #040b13b8;
+}
+.obs-journal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2c4154;
+}
+.obs-journal-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.obs-journal-head button {
+  min-width: 30px;
+}
+.obs-journal-body {
+  padding: 12px 14px;
+}
+.obs-journal-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.obs-journal-tools span {
+  font-size: 12px;
+  color: #b8ccda;
+}
+.obs-journal select {
+  max-width: 58%;
+}
+.obs-record {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #2a3d4d;
+}
+.obs-record img {
+  width: 75px;
+  max-height: 54px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.obs-record > div {
+  min-width: 0;
+}
+.obs-record strong {
+  font-size: 13px;
+}
+.obs-record p {
+  margin: 3px 0;
+  overflow-wrap: anywhere;
+}
+.obs-timing {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.obs-origin {
+  color: #99b2c3;
+  font-size: 11px;
+}
+.obs-record-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.obs-record-buttons button {
+  font-size: 11px;
+  min-height: 26px;
+  padding: 3px 7px;
+}
+.obs-record-buttons button[data-confirm='yes'] {
+  color: #ffc4ac;
+}
+.obs-journal figure {
+  margin: 10px 0;
+}
+.obs-journal figure img {
+  display: block;
+  width: 100%;
+  max-height: 46dvh;
+  object-fit: contain;
+  background: #070d15;
+}
+.obs-journal figcaption {
+  font-size: 11px;
+  margin-top: 3px;
+  color: #b0c5d2;
+}
+@media (max-width: 700px) {
+  .obs-journal-actions {
+    gap: 4px;
+  }
+  .obs-journal-actions button {
+    font-size: 10px;
+    min-height: 27px;
+    padding: 3px 6px;
+  }
+  .obs-save-status:not(:empty) {
+    max-width: 90px;
+  }
+  .flight-lab .flight-lab-head {
+    gap: 6px;
+  }
+}

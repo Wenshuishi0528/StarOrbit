@@ -14,13 +14,13 @@ The application supports space exploration, educational demonstrations and scene
 
 *China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
 
-**Author: wenshuishi0528 · Current source: v1.12 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: wenshuishi0528 · Current source: v1.14 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-Open the Xuntian finder and orbit map independently from the right toolbar. The navball supports compact and full layouts.
+Open the Xuntian finder and orbit map independently from the right toolbar. The navball supports compact and full layouts. The Views menu combines camera targets, recentering and viewing directions.
 
-> This guide describes the v1.12 release. The online and portable editions each show their version in the header.
+> This guide describes the v1.14 release. The online and portable editions each show their version in the header.
 
-In the China Space Station scene, open **Xuntian viewfinder** beside the orbit map. Search for Vega, Orion, a HIP identifier, M31, a nebula name or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
+In the China Space Station scene, open **Xuntian viewfinder** from the right toolbar. Search for Vega, Orion, a HIP identifier, M31, a nebula name or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
 
 Enable the main navball under **Spacecraft attitude**, then click the ball to pilot the selected craft with KSP-style keys. Rotation has inertia; RCS enables translation and SAS stabilizes attitude. **Free flight** still provides separate Shenzhou/Tianzhou undocking, flight saves and port capture. The Xuntian finder identifies the current crosshair direction, and the sky chart adds all Messier objects plus selected NGC targets. [Controls and scope (Chinese)](docs/v1.09-pilot-star-chart.md). Drag floating-window headers to arrange a persistent layout.
 
@@ -292,3 +292,9 @@ Application code is in `src/`, runtime assets in `assets/`, the build entry in `
 | Libraries | Three.js, Astronomy Engine, satellite.js, three-mesh-bvh and other dependencies retain their notices |
 
 Original code, models, interface and documentation that the author has rights to license use **[CC BY-NC 4.0](LICENSE)**. Commercial use requires separate prior written permission. Third-party libraries, data, music and textures retain their respective terms. See the [licensing scope](LICENSING.md).
+
+### 源码格式 / Source formatting
+
+安装依赖后运行 `npm run format` 整理 `src/` 中手写 JavaScript 和 CSS；运行 `npm run format:check` 检查格式。规则固定在 `.prettierrc.json`，工具版本固定在开发依赖中。HTML 模板含构建期精确替换标记，和数据、依赖、生成产物一起排除。格式化不涉及函数拆分或逻辑重构。
+
+Run `npm run format` to format handwritten JavaScript/CSS in `src/`, or `npm run format:check` to check. Templates, data, dependencies and generated files are excluded. v1.13 contains formatting-only changes; v1.14 consolidates camera targets, recentering and viewing directions in the Views menu. Both are included in the v1.14 release.

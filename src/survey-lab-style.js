@@ -1,4 +1,4 @@
-export const surveyStyle=`
+export const surveyStyle = `
 .survey-live-launch{padding:0 8px 8px}.survey-live-launch button{border-color:#967447;color:#f0cc95}
 .survey-live-wall{margin:12px 0;padding:13px 15px;background:#0b1a29;border:1px solid #354c5a;border-radius:9px}
 .survey-live-head,.survey-live-info,.survey-live-footer{display:flex;align-items:center;gap:9px;flex-wrap:wrap}

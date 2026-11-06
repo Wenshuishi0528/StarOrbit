@@ -1,23 +1,23 @@
-import {restoreControlFocus} from './display-controls.js';
-import {t,onLanguageChange} from './i18n.js';
-import {mountPassPanel} from './pass-panel.js';
-import {mountDockingPanel} from './docking-panel.js';
-import {mountExposureLab} from './exposure-lab.js';
-import {mountBalconyLab} from './balcony-lab.js';
-import {mountSurveyLab} from './survey-lab.js';
-import {ObservationStore} from './observation-store.js';
-import {mountObservationJournal} from './observation-journal.js';
+import { restoreControlFocus } from './display-controls.js';
+import { t, onLanguageChange } from './i18n.js';
+import { mountPassPanel } from './pass-panel.js';
+import { mountDockingPanel } from './docking-panel.js';
+import { mountExposureLab } from './exposure-lab.js';
+import { mountBalconyLab } from './balcony-lab.js';
+import { mountSurveyLab } from './survey-lab.js';
+import { ObservationStore } from './observation-store.js';
+import { mountObservationJournal } from './observation-journal.js';
 
-const labTabs={
- pass:{label:'过境预报',mount:mountPassPanel},
- docking:{label:'交会对接',mount:mountDockingPanel},
- exposure:{label:'轨道长曝光',mount:mountExposureLab},
- balcony:{label:'阳台观测',mount:mountBalconyLab},
- survey:{label:'巡天拍摄计划',mount:mountSurveyLab},
+const labTabs = {
+  pass: { label: '过境预报', mount: mountPassPanel },
+  docking: { label: '交会对接', mount: mountDockingPanel },
+  exposure: { label: '轨道长曝光', mount: mountExposureLab },
+  balcony: { label: '阳台观测', mount: mountBalconyLab },
+  survey: { label: '巡天拍摄计划', mount: mountSurveyLab },
 };
-const tabNames=Object.keys(labTabs);
+const tabNames = Object.keys(labTabs);
 
-const style=`
+const style = `
 .flight-lab{box-sizing:border-box;width:min(1460px,96vw);height:92dvh;max-width:none;max-height:none;padding:0;border:1px solid #355069;border-radius:16px;background:#091321;color:#e7effa;overflow:hidden}
 .flight-lab::backdrop{background:#020610ba;backdrop-filter:blur(5px)}
 .flight-lab[open]{display:flex;flex-direction:column}.flight-lab *{box-sizing:border-box}
@@ -36,123 +36,252 @@ const style=`
 
 // The modal owns its views and simulation state. The main animation loop skips
 // work while open; closing resets wall time so custom playback never catches up.
-export function installFlightLab(sim,assets){
- const store=new ObservationStore();sim.observations=store;
- const sheet=document.createElement('style');sheet.textContent=style;document.head.append(sheet);
- const openButton=document.createElement('button');openButton.id='openFlightLab';openButton.type='button';document.getElementById('toolbarActions').prepend(openButton);
- const dialog=document.createElement('dialog');dialog.id='flightLab';dialog.className='flight-lab';dialog.setAttribute('aria-labelledby','flightLabTitle');
- dialog.innerHTML=`<div class="flight-lab-head"><div><h2 id="flightLabTitle"></h2></div><button type="button" id="closeFlightLab"></button></div><div class="flight-lab-tabs" role="tablist" aria-labelledby="flightLabTitle"></div><div class="flight-lab-content"></div>`;
- document.body.append(dialog);
- const $=id=>dialog.querySelector('#'+id),panels={};
- let activeTab='pass',visibleKey=null,journal=null,handoffPending=false;
- const bar=dialog.querySelector('.flight-lab-tabs'),body=dialog.querySelector('.flight-lab-content');
- for(const [index,key] of tabNames.entries()){
-  const button=document.createElement('button');
-  button.type='button';button.id=key+'Tab';button.setAttribute('role','tab');button.setAttribute('aria-controls',key+'Panel');bar.append(button);
-  const panel=document.createElement('div');
-  panel.id=key+'Panel';panel.className='flight-panel';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);body.append(panel);
-  button.onclick=()=>selectFromTabs(key);
-  button.onkeydown=event=>{
-   let next;
-   switch(event.key){
-    case 'Home': next=tabNames[0];break;
-    case 'End': next=tabNames.at(-1);break;
-    case 'ArrowLeft': next=tabNames[(index+tabNames.length-1)%tabNames.length];break;
-    case 'ArrowRight': next=tabNames[(index+1)%tabNames.length];break;
-    default: return;
-   }
-   event.preventDefault();selectFromTabs(next);$(next+'Tab').focus();
+export function installFlightLab(sim, assets) {
+  const store = new ObservationStore();
+  sim.observations = store;
+  const sheet = document.createElement('style');
+  sheet.textContent = style;
+  document.head.append(sheet);
+  const openButton = document.createElement('button');
+  openButton.id = 'openFlightLab';
+  openButton.type = 'button';
+  document.getElementById('toolbarActions').prepend(openButton);
+  const dialog = document.createElement('dialog');
+  dialog.id = 'flightLab';
+  dialog.className = 'flight-lab';
+  dialog.setAttribute('aria-labelledby', 'flightLabTitle');
+  dialog.innerHTML = `<div class="flight-lab-head"><div><h2 id="flightLabTitle"></h2></div><button type="button" id="closeFlightLab"></button></div><div class="flight-lab-tabs" role="tablist" aria-labelledby="flightLabTitle"></div><div class="flight-lab-content"></div>`;
+  document.body.append(dialog);
+  const $ = (id) => dialog.querySelector('#' + id),
+    panels = {};
+  let activeTab = 'pass',
+    visibleKey = null,
+    journal = null,
+    handoffPending = false;
+  const bar = dialog.querySelector('.flight-lab-tabs'),
+    body = dialog.querySelector('.flight-lab-content');
+  for (const [index, key] of tabNames.entries()) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.id = key + 'Tab';
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-controls', key + 'Panel');
+    bar.append(button);
+    const panel = document.createElement('div');
+    panel.id = key + 'Panel';
+    panel.className = 'flight-panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', button.id);
+    body.append(panel);
+    button.onclick = () => selectFromTabs(key);
+    button.onkeydown = (event) => {
+      let next;
+      switch (event.key) {
+        case 'Home':
+          next = tabNames[0];
+          break;
+        case 'End':
+          next = tabNames.at(-1);
+          break;
+        case 'ArrowLeft':
+          next = tabNames[(index + tabNames.length - 1) % tabNames.length];
+          break;
+        case 'ArrowRight':
+          next = tabNames[(index + 1) % tabNames.length];
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+      selectFromTabs(next);
+      $(next + 'Tab').focus();
+    };
+  }
+  const refresh = () => {
+    openButton.textContent = t('任务实验室');
+    $('flightLabTitle').textContent = t('任务实验室');
+    $('closeFlightLab').textContent = t('返回模拟器');
+    for (const key of tabNames) $(key + 'Tab').textContent = t(labTabs[key].label);
   };
- }
- const refresh=()=>{
-  openButton.textContent=t('任务实验室');$('flightLabTitle').textContent=t('任务实验室');$('closeFlightLab').textContent=t('返回模拟器');
-  for(const key of tabNames)$(key+'Tab').textContent=t(labTabs[key].label);
- };
- function markTabs(){
-  journal?.setTab(activeTab);
-  for(const key of tabNames){
-   const selected=key===activeTab;
-   $(key+'Panel').hidden=!selected;$(key+'Tab').setAttribute('aria-selected',String(selected));$(key+'Tab').tabIndex=selected?0:-1;
+  function markTabs() {
+    journal?.setTab(activeTab);
+    for (const key of tabNames) {
+      const selected = key === activeTab;
+      $(key + 'Panel').hidden = !selected;
+      $(key + 'Tab').setAttribute('aria-selected', String(selected));
+      $(key + 'Tab').tabIndex = selected ? 0 : -1;
+    }
   }
- }
- function selectFromTabs(key){
-  const panel=select(key);
-  if(location.hash.startsWith('#lab/')){
-   const target=key==='balcony'?$('balconyPanel').querySelector('[data-id=dataset]')?.value:'';
-   labRoute('#lab/'+key+(target?'/'+target:''));
+  function selectFromTabs(key) {
+    const panel = select(key);
+    if (location.hash.startsWith('#lab/')) {
+      const target =
+        key === 'balcony' ? $('balconyPanel').querySelector('[data-id=dataset]')?.value : '';
+      labRoute('#lab/' + key + (target ? '/' + target : ''));
+    }
+    return panel;
   }
-  return panel;
- }
- function suspend(){
-  const panel=panels[visibleKey];visibleKey=null;
-  if(panel?.deactivate)panel.deactivate();else panel?.pause?.();
- }
- function select(key){
-  if(!Object.hasOwn(labTabs,key))return;
-  if(visibleKey===key)return panels[key];
-  suspend();activeTab=key;markTabs();
-  panels[key]??=labTabs[key].mount($(key+'Panel'),sim,assets);
-  visibleKey=key;panels[key].resume?.();return panels[key];
- }
- const close=()=>{if(!dialog.open)return;journal?.close();suspend();sim.lastWall=performance.now();dialog.close();};
- const open=(name=activeTab)=>{
-  if(sim.sceneBusy||sim.missions?.busy)return;
-  if(!document.getElementById('helpPanel').hidden)document.getElementById('closeHelp').click();
-  if(!dialog.open)dialog.showModal();
-  return select(name);
- };
- function labRoute(hash){history.replaceState(null,'',location.pathname+location.search+hash);}
- async function observeSurveyTile(target){
-  if(handoffPending||sim.sceneBusy||sim.missions?.busy)return false;
-  handoffPending=true;
-  try{
-   // The teaching epoch belongs to the planner. The live telescope uses the active main clock.
-   if(sim.missionId!=='tiangong')await sim.missions.switchTo('tiangong');
-   if(!dialog.open||activeTab!=='survey')return false;
-   close();
-   if(!sim.xuntian?.openSurveyTile(target)){open('survey');return false;}
-   labRoute('#xuntian');return true;
-  }catch(error){
-   open('survey');sim.api.toast('切换失败：{error}',{error:t(error.message)});return false;
-  }finally{handoffPending=false;}
- }
- function openSurveyPhotos({fieldId,recordId}={}){
-  const panel=open('survey');if(!panel)return;
-  labRoute('#lab/survey');panel.showLivePhotos(fieldId,recordId);
- }
- async function openGroundCapture(payload){
-  if(payload?.missionId!=='tiangong'||!payload.observer)return false;
-  const panel=open('exposure');if(!panel)return false;
-  labRoute('#lab/exposure');
-  try{return await panel.openGroundCapture(payload);}
-  catch(error){sim.api.toast('切换失败：{error}',{error:t(error.message)});return false;}
- }
- async function restoreRecord(record,media){
-  if(record.kind==='survey-photo'){openSurveyPhotos({fieldId:record.fieldId,recordId:record.id});return;}
-  const panel=open(record.kind);
-  if(!panel?.restoreObservationRecord)throw Error('此观测类型暂不能重开');
-  await panel.restoreObservationRecord(record,media);
- }
- journal=mountObservationJournal(dialog,store,{
-  getRecipe:()=>panels[activeTab]?.getObservationRecord?.(),
-  restore:restoreRecord,onShow:suspend,onHide:()=>{if(dialog.open)select(activeTab);}
- });
- openButton.onclick=()=>open();$('closeFlightLab').onclick=close;
- dialog.addEventListener('keydown',event=>event.stopPropagation());
- dialog.addEventListener('close',()=>{if(dialog.open)return;suspend();sim.lastWall=performance.now();if(!sim.xuntian?.active)restoreControlFocus(openButton);});
- const unsubscribe=onLanguageChange(refresh);refresh();markTabs();
- const openLinkedExperiment=()=>{
-  const match=/^#lab\/([a-z]+)(?:\/([a-zA-Z0-9_-]+))?$/.exec(location.hash);
-  if(!match||!Object.hasOwn(labTabs,match[1]))return;
-  const [,key,id]=match,panel=open(key);
-  if(key==='balcony'&&id&&panel?.selectTarget)Promise.resolve(panel.selectTarget(id)).catch(error=>sim.api.toast('切换失败：{error}',{error:t(error.message)}));
-  $(key+'Tab').focus();
- };
- const lab={get active(){return dialog.open;},get panels(){return panels;},get tab(){return activeTab;},
-  open,close,observeSurveyTile,openSurveyPhotos,openGroundCapture,saveObservation:(record,media)=>store.save(record,media),
-  openBalcony(payload){const panel=open('balcony');if(panel){$('balconyTab').focus();return panel.openPass(payload);}},
-  previewPass(time){if(!Number.isFinite(time)||!sim.data||time<sim.start||time>sim.end){sim.api.toast('当前三维星历未覆盖此时刻，可查看天空轨迹图。');return;}close();sim.seek(time);sim.update(performance.now());sim.setView('orbit');sim.sessionMemory?.save();},
-  dispose(){window.removeEventListener('hashchange',openLinkedExperiment);suspend();for(const p of Object.values(panels))p.dispose?.();unsubscribe();journal.dispose();store.dispose();dialog.remove();openButton.remove();sheet.remove();}
- };
- sim.flightLab=lab;window.addEventListener('hashchange',openLinkedExperiment);openLinkedExperiment();return lab;
+  function suspend() {
+    const panel = panels[visibleKey];
+    visibleKey = null;
+    if (panel?.deactivate) panel.deactivate();
+    else panel?.pause?.();
+  }
+  function select(key) {
+    if (!Object.hasOwn(labTabs, key)) return;
+    if (visibleKey === key) return panels[key];
+    suspend();
+    activeTab = key;
+    markTabs();
+    panels[key] ??= labTabs[key].mount($(key + 'Panel'), sim, assets);
+    visibleKey = key;
+    panels[key].resume?.();
+    return panels[key];
+  }
+  const close = () => {
+    if (!dialog.open) return;
+    journal?.close();
+    suspend();
+    sim.lastWall = performance.now();
+    dialog.close();
+  };
+  const open = (name = activeTab) => {
+    if (sim.sceneBusy || sim.missions?.busy) return;
+    if (!document.getElementById('helpPanel').hidden) document.getElementById('closeHelp').click();
+    if (!dialog.open) dialog.showModal();
+    return select(name);
+  };
+  function labRoute(hash) {
+    history.replaceState(null, '', location.pathname + location.search + hash);
+  }
+  async function observeSurveyTile(target) {
+    if (handoffPending || sim.sceneBusy || sim.missions?.busy) return false;
+    handoffPending = true;
+    try {
+      // The teaching epoch belongs to the planner. The live telescope uses the active main clock.
+      if (sim.missionId !== 'tiangong') await sim.missions.switchTo('tiangong');
+      if (!dialog.open || activeTab !== 'survey') return false;
+      close();
+      if (!sim.xuntian?.openSurveyTile(target)) {
+        open('survey');
+        return false;
+      }
+      labRoute('#xuntian');
+      return true;
+    } catch (error) {
+      open('survey');
+      sim.api.toast('切换失败：{error}', { error: t(error.message) });
+      return false;
+    } finally {
+      handoffPending = false;
+    }
+  }
+  function openSurveyPhotos({ fieldId, recordId } = {}) {
+    const panel = open('survey');
+    if (!panel) return;
+    labRoute('#lab/survey');
+    panel.showLivePhotos(fieldId, recordId);
+  }
+  async function openGroundCapture(payload) {
+    if (payload?.missionId !== 'tiangong' || !payload.observer) return false;
+    const panel = open('exposure');
+    if (!panel) return false;
+    labRoute('#lab/exposure');
+    try {
+      return await panel.openGroundCapture(payload);
+    } catch (error) {
+      sim.api.toast('切换失败：{error}', { error: t(error.message) });
+      return false;
+    }
+  }
+  async function restoreRecord(record, media) {
+    if (record.kind === 'survey-photo') {
+      openSurveyPhotos({ fieldId: record.fieldId, recordId: record.id });
+      return;
+    }
+    const panel = open(record.kind);
+    if (!panel?.restoreObservationRecord) throw Error('此观测类型暂不能重开');
+    await panel.restoreObservationRecord(record, media);
+  }
+  journal = mountObservationJournal(dialog, store, {
+    getRecipe: () => panels[activeTab]?.getObservationRecord?.(),
+    restore: restoreRecord,
+    onShow: suspend,
+    onHide: () => {
+      if (dialog.open) select(activeTab);
+    },
+  });
+  openButton.onclick = () => open();
+  $('closeFlightLab').onclick = close;
+  dialog.addEventListener('keydown', (event) => event.stopPropagation());
+  dialog.addEventListener('close', () => {
+    if (dialog.open) return;
+    suspend();
+    sim.lastWall = performance.now();
+    if (!sim.xuntian?.active) restoreControlFocus(openButton);
+  });
+  const unsubscribe = onLanguageChange(refresh);
+  refresh();
+  markTabs();
+  const openLinkedExperiment = () => {
+    const match = /^#lab\/([a-z]+)(?:\/([a-zA-Z0-9_-]+))?$/.exec(location.hash);
+    if (!match || !Object.hasOwn(labTabs, match[1])) return;
+    const [, key, id] = match,
+      panel = open(key);
+    if (key === 'balcony' && id && panel?.selectTarget)
+      Promise.resolve(panel.selectTarget(id)).catch((error) =>
+        sim.api.toast('切换失败：{error}', { error: t(error.message) })
+      );
+    $(key + 'Tab').focus();
+  };
+  const lab = {
+    get active() {
+      return dialog.open;
+    },
+    get panels() {
+      return panels;
+    },
+    get tab() {
+      return activeTab;
+    },
+    open,
+    close,
+    observeSurveyTile,
+    openSurveyPhotos,
+    openGroundCapture,
+    saveObservation: (record, media) => store.save(record, media),
+    openBalcony(payload) {
+      const panel = open('balcony');
+      if (panel) {
+        $('balconyTab').focus();
+        return panel.openPass(payload);
+      }
+    },
+    previewPass(time) {
+      if (!Number.isFinite(time) || !sim.data || time < sim.start || time > sim.end) {
+        sim.api.toast('当前三维星历未覆盖此时刻，可查看天空轨迹图。');
+        return;
+      }
+      close();
+      sim.seek(time);
+      sim.update(performance.now());
+      sim.setView('orbit');
+      sim.sessionMemory?.save();
+    },
+    dispose() {
+      window.removeEventListener('hashchange', openLinkedExperiment);
+      suspend();
+      for (const p of Object.values(panels)) p.dispose?.();
+      unsubscribe();
+      journal.dispose();
+      store.dispose();
+      dialog.remove();
+      openButton.remove();
+      sheet.remove();
+    },
+  };
+  sim.flightLab = lab;
+  window.addEventListener('hashchange', openLinkedExperiment);
+  openLinkedExperiment();
+  return lab;
 }

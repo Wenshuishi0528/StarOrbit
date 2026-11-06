@@ -1,14 +1,86 @@
-body.free-flight-active #stage{position:absolute;inset:0;width:100%;height:100%}
-body.free-flight-active > :is(header,aside,.toolbar,.caption,#telemetry,#orbitMinimap,#eventTimeline,#orbitEventDetail,#simNotice,#xuntianScope,#musicWidget,#immersiveExit,#photoExit),
-body.free-flight-active #stage .station-tag{display:none!important}
-#freeFlightLauncher{width:min(420px,calc(100vw - 24px));max-height:80dvh;overflow:auto;background:#0e1d2b;color:#dbeaf1;border:1px solid #3b586c;border-radius:12px;padding:18px;box-shadow:0 12px 36px #0007}
-#freeFlightLauncher::backdrop{background:#030b13ac}
-.ff-launch-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.ff-launch-head h2{margin:0;font-size:19px}
-#freeFlightLauncher p{color:#a7c2cf;font-size:13px;line-height:1.6}
-#freeFlightLauncher label{display:grid;gap:6px;margin:12px 0 8px;color:#bdd6df;font-size:13px}
-#freeFlightLauncher select{background:#0b1822;color:#deebf2;border:1px solid #344f60;border-radius:5px;padding:6px;width:100%}
-#freeFlightLauncher [data-saves]{margin-top:15px;border-top:1px solid #2c4254}
-.core-ports .row:has(.port-fly){display:flex;align-items:center;gap:4px}
-.core-ports .row:has(.port-fly) select{min-width:0;flex:1}
-.port-fly{font-size:11px;padding:4px 7px}
+body.free-flight-active #stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+body.free-flight-active
+  > :is(
+    header,
+    aside,
+    .toolbar,
+    .caption,
+    #telemetry,
+    #orbitMinimap,
+    #eventTimeline,
+    #orbitEventDetail,
+    #simNotice,
+    #xuntianScope,
+    #musicWidget,
+    #immersiveExit,
+    #photoExit
+  ),
+body.free-flight-active #stage .station-tag {
+  display: none !important;
+}
+#freeFlightLauncher {
+  width: min(420px, calc(100vw - 24px));
+  max-height: 80dvh;
+  overflow: auto;
+  background: #0e1d2b;
+  color: #dbeaf1;
+  border: 1px solid #3b586c;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 12px 36px #0007;
+}
+#freeFlightLauncher::backdrop {
+  background: #030b13ac;
+}
+.ff-launch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ff-launch-head h2 {
+  margin: 0;
+  font-size: 19px;
+}
+#freeFlightLauncher p {
+  color: #a7c2cf;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#freeFlightLauncher label {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 8px;
+  color: #bdd6df;
+  font-size: 13px;
+}
+#freeFlightLauncher select {
+  background: #0b1822;
+  color: #deebf2;
+  border: 1px solid #344f60;
+  border-radius: 5px;
+  padding: 6px;
+  width: 100%;
+}
+#freeFlightLauncher [data-saves] {
+  margin-top: 15px;
+  border-top: 1px solid #2c4254;
+}
+.core-ports .row:has(.port-fly) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.core-ports .row:has(.port-fly) select {
+  min-width: 0;
+  flex: 1;
+}
+.port-fly {
+  font-size: 11px;
+  padding: 4px 7px;
+}

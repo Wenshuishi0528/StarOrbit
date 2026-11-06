@@ -1,16 +1,40 @@
 import * as THREE from 'three';
 // Color and depth must support the same sample count. MAX_SAMPLES alone does
 // not guarantee that floating-point HDR attachments support that count.
-export function hdrSamples(gl){
- const color=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.RGBA16F,gl.SAMPLES)||[]);
- const depth=Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.DEPTH_COMPONENT24,gl.SAMPLES)||[]);
- return Math.max(0,...color.filter(n=>n<=4&&depth.includes(n)));
+export function hdrSamples(gl) {
+  const color = Array.from(
+    gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES) || []
+  );
+  const depth = Array.from(
+    gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) || []
+  );
+  return Math.max(0, ...color.filter((n) => n <= 4 && depth.includes(n)));
 }
 // One viewport-sized HDR buffer, allocated only in the highest quality tier.
-export class AtmosphereRenderer{
- constructor(renderer){
-  this.renderer=renderer;this.size=new THREE.Vector2();this.camera=new THREE.Camera();this.scene=new THREE.Scene();
-  this.material=new THREE.ShaderMaterial({uniforms:{frame:{value:null},sunGlow:{value:new THREE.Vector3()},sunPosition:{value:new THREE.Vector2(.5,.5)},sunRadius:{value:.005},sunTwilight:{value:0},sunViewRays:{value:new THREE.Matrix3()},sunEarthDisc:{value:new THREE.Vector4(0,0,0,-1)},sunMoonDisc:{value:new THREE.Vector4(0,0,0,-1)},sunOcclusionProbe:{value:1},aspect:{value:1}},depthTest:false,depthWrite:false,vertexShader:'varying vec2 uvFrame;void main(){uvFrame=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`uniform sampler2D frame;uniform vec3 sunGlow;uniform vec2 sunPosition;
+export class AtmosphereRenderer {
+  constructor(renderer) {
+    this.renderer = renderer;
+    this.size = new THREE.Vector2();
+    this.camera = new THREE.Camera();
+    this.scene = new THREE.Scene();
+    this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        frame: { value: null },
+        sunGlow: { value: new THREE.Vector3() },
+        sunPosition: { value: new THREE.Vector2(0.5, 0.5) },
+        sunRadius: { value: 0.005 },
+        sunTwilight: { value: 0 },
+        sunViewRays: { value: new THREE.Matrix3() },
+        sunEarthDisc: { value: new THREE.Vector4(0, 0, 0, -1) },
+        sunMoonDisc: { value: new THREE.Vector4(0, 0, 0, -1) },
+        sunOcclusionProbe: { value: 1 },
+        aspect: { value: 1 },
+      },
+      depthTest: false,
+      depthWrite: false,
+      vertexShader:
+        'varying vec2 uvFrame;void main(){uvFrame=uv;gl_Position=vec4(position.xy,0.,1.);}',
+      fragmentShader: `uniform sampler2D frame;uniform vec3 sunGlow;uniform vec2 sunPosition;
 uniform float sunRadius,aspect,sunOcclusionProbe,sunTwilight;varying vec2 uvFrame;
 uniform mat3 sunViewRays;uniform vec4 sunEarthDisc,sunMoonDisc;
 float solarBodyClear(vec3 ray,vec4 body){
@@ -54,23 +78,63 @@ void main(){
  #include <colorspace_fragment>
  float grain=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715))))-.5;
  gl_FragColor.rgb+=grain/255.;
-}`});
-  this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),this.material));
- }
- begin(){
-  const r=this.renderer;if(this.failed||!r.extensions.has('EXT_color_buffer_float'))return false;
-  r.getDrawingBufferSize(this.size);const w=Math.max(1,this.size.x),h=Math.max(1,this.size.y);
-  this.material.uniforms.aspect.value=w/h;
-  const changed=!this.target||this.target.width!==w||this.target.height!==h;
-  try{
-   if(!this.target){this.samples??=hdrSamples(r.getContext());this.target=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false,samples:this.samples});this.target.texture.colorSpace=THREE.LinearSRGBColorSpace;this.material.uniforms.frame.value=this.target.texture;}
-   else if(changed)this.target.setSize(w,h);
-   r.setRenderTarget(this.target);
-   if(changed){const gl=r.getContext();if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('HDR framebuffer unavailable');}
-   return true;
-  }catch(error){r.setRenderTarget(null);this.release();if(this.samples>0){this.samples=0;return this.begin();}this.failed=true;console.warn('Atmosphere HDR fallback:',error.message);return false;}
- }
- finish(){const r=this.renderer;r.setRenderTarget(null);r.autoClear=true;r.render(this.scene,this.camera);}
- release(){this.target?.dispose();this.target=null;this.material.uniforms.frame.value=null;}
- dispose(){this.release();this.scene.children[0].geometry.dispose();this.material.dispose();}
+}`,
+    });
+    this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+  }
+  begin() {
+    const r = this.renderer;
+    if (this.failed || !r.extensions.has('EXT_color_buffer_float')) return false;
+    r.getDrawingBufferSize(this.size);
+    const w = Math.max(1, this.size.x),
+      h = Math.max(1, this.size.y);
+    this.material.uniforms.aspect.value = w / h;
+    const changed = !this.target || this.target.width !== w || this.target.height !== h;
+    try {
+      if (!this.target) {
+        this.samples ??= hdrSamples(r.getContext());
+        this.target = new THREE.WebGLRenderTarget(w, h, {
+          type: THREE.HalfFloatType,
+          depthBuffer: true,
+          stencilBuffer: false,
+          samples: this.samples,
+        });
+        this.target.texture.colorSpace = THREE.LinearSRGBColorSpace;
+        this.material.uniforms.frame.value = this.target.texture;
+      } else if (changed) this.target.setSize(w, h);
+      r.setRenderTarget(this.target);
+      if (changed) {
+        const gl = r.getContext();
+        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+          throw Error('HDR framebuffer unavailable');
+      }
+      return true;
+    } catch (error) {
+      r.setRenderTarget(null);
+      this.release();
+      if (this.samples > 0) {
+        this.samples = 0;
+        return this.begin();
+      }
+      this.failed = true;
+      console.warn('Atmosphere HDR fallback:', error.message);
+      return false;
+    }
+  }
+  finish() {
+    const r = this.renderer;
+    r.setRenderTarget(null);
+    r.autoClear = true;
+    r.render(this.scene, this.camera);
+  }
+  release() {
+    this.target?.dispose();
+    this.target = null;
+    this.material.uniforms.frame.value = null;
+  }
+  dispose() {
+    this.release();
+    this.scene.children[0].geometry.dispose();
+    this.material.dispose();
+  }
 }

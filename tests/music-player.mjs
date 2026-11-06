@@ -10,7 +10,7 @@ const sandbox={console,Blob,reconcileMusic,adjacentTrack,randomTrack:order=>rand
  URL:{revokeObjectURL(){}},t:key=>key,
  setTimeout:(callback,ms)=>{const id=++nextTimer;timers.set(id,{callback,ms});return id;},clearTimeout:id=>timers.delete(id)};
 const source=process.env.MUSIC_PLAYER_BASELINE?execFileSync('git',['show',process.env.MUSIC_PLAYER_BASELINE+':src/music-player.js'],{encoding:'utf8'}):fs.readFileSync(new URL('../src/music-player.js',import.meta.url),'utf8');
-vm.runInNewContext(source.replace(/^import .*;\n/gm,'').replace('export class MusicPlayer','class MusicPlayer')+'\nglobalThis.TestMusicPlayer=MusicPlayer;',sandbox);
+vm.runInNewContext(source.replace(/^import\s[\s\S]*?;\n/gm,'').replace('export class MusicPlayer','class MusicPlayer')+'\nglobalThis.TestMusicPlayer=MusicPlayer;',sandbox);
 class FakeAudio{
  constructor(){this.listeners=new Map();this.currentTime=0;this.paused=true;this.ended=false;this.readyState=4;this.plays=[];this.src='';this.currentSrc='';}
  addEventListener(type,callback){const list=this.listeners.get(type)||[];list.push(callback);this.listeners.set(type,list);}

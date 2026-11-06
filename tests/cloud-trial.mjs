@@ -19,5 +19,5 @@ for(const [name,file] of Object.entries(meta.files)){
 }
 assert.match(trialConfidence([255,247,236,255],meta.palette),/0.0,0.01/);assert.match(trialConfidence([127,0,0,255],meta.palette),/1.0/);
 const code=fs.readFileSync('src/cloud-trial.js','utf8');assert(!code.includes('localStorage')&&!code.includes('cache.put')&&!code.includes('setSource('));
-assert(code.includes('token!==serial')&&code.includes('bitmap.close()'));
+assert.match(code,/token\s*!==\s*serial/);assert.match(code,/bitmap\s*\.\s*close\s*\(\s*\)/);
 console.log('VIIRS trial: dateline wrapping, polar projection, no-data preservation, palette, immutable inputs, sample SHA and isolation passed');

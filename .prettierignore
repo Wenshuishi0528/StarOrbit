@@ -1,0 +1,13 @@
+node_modules/
+assets/
+dist/
+dist-local/
+output/
+.playwright-cli/
+tests/reference/
+*.app/
+StarOrbit.html
+天宫空间站交互预览.html
+src/*.json
+# Build templates contain exact replacement markers and significant whitespace.
+src/*.html

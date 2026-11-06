@@ -2224,5 +2224,7 @@
   "切换到紧凑导航球": "Afficher la boule compacte",
   "黄绿：顺逆行 · 蓝：径向 · 紫：法向 · 粉：目标；虚线为后方": "Vert : pro/rétrograde · Bleu : radial · Violet : normal · Rose : cible ; pointillés = derrière",
   "SAS 转向 · {angle}°": "SAS en rotation · {angle}°",
-  "SAS 正在转向 {mode} · 剩余 {angle}°": "SAS vers {mode} · reste {angle}°"
+  "SAS 正在转向 {mode} · 剩余 {angle}°": "SAS vers {mode} · reste {angle}°",
+  "重新居中": "Recentrer",
+  "观察方向": "Angle de vue"
 }

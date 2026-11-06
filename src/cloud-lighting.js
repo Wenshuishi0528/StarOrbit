@@ -1,17 +1,23 @@
-import {dot,norm,unit,sub,sunlightFraction} from './orbit.js';
-import {MOON_RADIUS} from './moon-math.js';
+import { dot, norm, unit, sub, sunlightFraction } from './orbit.js';
+import { MOON_RADIUS } from './moon-math.js';
 
 // Lambert-sphere phase and inverse-square dilution, relative to direct sunlight.
 // Keep lunar irradiance at its physical ratio; no visibility amplification.
-export function cloudMoonIrradiance(position,sun){
- const distance=norm(position);
- if(!Number.isFinite(distance)||distance<=MOON_RADIUS)return 0;
- const cosine=Math.max(-1,Math.min(1,dot(unit(sub(sun,position)),unit(position.map(v=>-v)))));
- const phase=Math.acos(cosine),fraction=(Math.sin(phase)+(Math.PI-phase)*cosine)/Math.PI;
- return .12*(MOON_RADIUS/distance)**2*Math.max(0,fraction)*sunlightFraction(position,sun);
+export function cloudMoonIrradiance(position, sun) {
+  const distance = norm(position);
+  if (!Number.isFinite(distance) || distance <= MOON_RADIUS) return 0;
+  const cosine = Math.max(
+    -1,
+    Math.min(1, dot(unit(sub(sun, position)), unit(position.map((v) => -v))))
+  );
+  const phase = Math.acos(cosine),
+    fraction = (Math.sin(phase) + (Math.PI - phase) * cosine) / Math.PI;
+  return (
+    0.12 * (MOON_RADIUS / distance) ** 2 * Math.max(0, fraction) * sunlightFraction(position, sun)
+  );
 }
 
-export const cloudMoonGLSL=`
+export const cloudMoonGLSL = `
 uniform vec3 cloudMoonPosition;
 uniform float cloudMoonLight;
 vec3 nightCloudLight(vec3 p,float solarMu){

@@ -1,24 +1,31 @@
 import * as THREE from 'three';
-import {auroraNoise} from './aurora-noise.js';
-import {solarOpticsGLSL} from './atmosphere-glsl.js';
-const quadVertex='varying vec2 uvFrame;void main(){uvFrame=uv;gl_Position=vec4(position.xy,0.,1.);}';
-export function auroraPhase(time){return ((time%86400000)+86400000)%86400000/86400000;}
-export function auroraBufferSize(width,height,low=false){
- const scale=Math.min(low?.35:.5,960/width,640/height);
- return [Math.max(1,Math.min(960,Math.ceil(width*scale))),Math.max(1,Math.min(640,Math.ceil(height*scale)))];
+import { auroraNoise } from './aurora-noise.js';
+import { solarOpticsGLSL } from './atmosphere-glsl.js';
+const quadVertex =
+  'varying vec2 uvFrame;void main(){uvFrame=uv;gl_Position=vec4(position.xy,0.,1.);}';
+export function auroraPhase(time) {
+  return (((time % 86400000) + 86400000) % 86400000) / 86400000;
 }
-export function auroraProfile(){
- const data=new Uint8Array(256*4);
- for(let i=0;i<256;i++){
-  const h=90+i*270/255,fade=Math.min(1,Math.max(0,(h-92)/12))*Math.min(1,Math.max(0,(360-h)/45));
-  data[i*4]=Math.round(255*Math.exp(-Math.pow((h-140)/55,2))*fade);
-  data[i*4+1]=Math.round(255*.08*Math.exp(-Math.pow((h-275)/70,2))*fade);
-  data[i*4+2]=Math.round(255*.12*Math.exp(-Math.pow((h-105)/10,2))*fade);
-  data[i*4+3]=255;
- }
- return data;
+export function auroraBufferSize(width, height, low = false) {
+  const scale = Math.min(low ? 0.35 : 0.5, 960 / width, 640 / height);
+  return [
+    Math.max(1, Math.min(960, Math.ceil(width * scale))),
+    Math.max(1, Math.min(640, Math.ceil(height * scale))),
+  ];
 }
-const fluxFragment=`varying vec2 uvFrame;uniform sampler2D noiseMap,auroraMap;uniform float phase,seed,useData;uniform mat3 magneticToEarth;
+export function auroraProfile() {
+  const data = new Uint8Array(256 * 4);
+  for (let i = 0; i < 256; i++) {
+    const h = 90 + (i * 270) / 255,
+      fade = Math.min(1, Math.max(0, (h - 92) / 12)) * Math.min(1, Math.max(0, (360 - h) / 45));
+    data[i * 4] = Math.round(255 * Math.exp(-Math.pow((h - 140) / 55, 2)) * fade);
+    data[i * 4 + 1] = Math.round(255 * 0.08 * Math.exp(-Math.pow((h - 275) / 70, 2)) * fade);
+    data[i * 4 + 2] = Math.round(255 * 0.12 * Math.exp(-Math.pow((h - 105) / 10, 2)) * fade);
+    data[i * 4 + 3] = 255;
+  }
+  return data;
+}
+const fluxFragment = `varying vec2 uvFrame;uniform sampler2D noiseMap,auroraMap;uniform float phase,seed,useData;uniform mat3 magneticToEarth;
 const float PI=3.14159265359;
 vec2 turn(vec2 p,float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c)*p;}
 vec2 swirl(vec2 p,vec2 centre,float radius,float angle){vec2 q=p-centre;return centre+turn(q,angle*exp(-dot(q,q)/(radius*radius)));}
@@ -51,7 +58,7 @@ void main(){
  }
  gl_FragColor=vec4(bright,diffuse,bright*smoothstep(.56,.78,n),mix(smoothstep(.25,.75,n),plume,.7));
 }`;
-const volumeFragment=`varying vec2 uvFrame;uniform sampler2D footprint,profile;
+const volumeFragment = `varying vec2 uvFrame;uniform sampler2D footprint,profile;
 uniform mat3 viewRays;uniform vec3 origin,sunLocal;uniform float sampleCount,strength,useData;
 ${solarOpticsGLSL}
 vec2 roots(vec3 o,vec3 d,float radius){float b=dot(o,d),disc=b*b-dot(o,o)+radius*radius;if(disc<0.)return vec2(1.e9,-1.e9);float v=sqrt(disc);return vec2(-b-v,-b+v);}
@@ -97,73 +104,259 @@ void main(){
  }
  gl_FragColor=vec4(sum*strength,1.);
 }`;
-const compositeFragment=`varying vec2 uvFrame;uniform sampler2D frame;
+const compositeFragment = `varying vec2 uvFrame;uniform sampler2D frame;
 void main(){gl_FragColor=vec4(texture2D(frame,uvFrame).rgb,1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`;
-export class AuroraVolume{
- constructor(env){
-  this.env=env;this.legacy=[...env.aurora.children];this.failed=false;this.source=null;this.stats={fluxUpdates:0,volumeRenders:0,steps:24,width:0,height:0};
-  this.size=new THREE.Vector2();this.camera=new THREE.Camera();this.rotation=new THREE.Matrix3();this.inverse=new THREE.Matrix3();this.rays=new THREE.Matrix3();this.cameraRotation=new THREE.Matrix3();this.earthRotation=new THREE.Matrix4();
-  const pole=new THREE.Vector3(.048,-.154,.987).normalize(),x=new THREE.Vector3(pole.z,0,-pole.x).normalize(),y=new THREE.Vector3().crossVectors(pole,x);
-  this.magneticToEarth=new THREE.Matrix3().set(x.x,y.x,pole.x,x.y,y.y,pole.y,x.z,y.z,pole.z);this.toMagnetic=this.magneticToEarth.clone().transpose();
- }
- release(){
-  for(const key of ['fluxTarget','target','noise','profile','geometry','fluxMaterial','volumeMaterial','compositeMaterial']){this[key]?.dispose();this[key]=null;}
-  this.fluxScene=this.volumeScene=this.compositeScene=null;this.source=null;this.frameInputs=null;this.stats.width=this.stats.height=0;
- }
- create(){
-  const e=this.env,r=e.api.renderer;
-  if(!r.extensions.has('EXT_color_buffer_float'))throw Error('Floating-point aurora buffer unavailable');
-  const noise=auroraNoise();this.noise=new THREE.DataTexture(noise.data,noise.width,noise.height,THREE.RedFormat);this.noise.wrapS=this.noise.wrapT=THREE.RepeatWrapping;this.noise.magFilter=this.noise.minFilter=THREE.LinearFilter;this.noise.needsUpdate=true;
-  this.profile=new THREE.DataTexture(auroraProfile(),256,1);this.profile.magFilter=this.profile.minFilter=THREE.LinearFilter;this.profile.needsUpdate=true;
-  this.fluxTarget=new THREE.WebGLRenderTarget(1024,512,{depthBuffer:false,minFilter:THREE.LinearMipmapLinearFilter,generateMipmaps:true});
-  this.geometry=new THREE.PlaneGeometry(2,2);
-  const make=(name,uniforms,fragment,composite=false)=>new THREE.ShaderMaterial({name,uniforms,vertexShader:quadVertex,fragmentShader:fragment,depthTest:false,depthWrite:false,toneMapped:composite,transparent:composite,blending:composite?THREE.AdditiveBlending:THREE.NoBlending});
-  this.fluxMaterial=make('StarOrbitAuroraFlux',{noiseMap:{value:this.noise},auroraMap:e.auroraUniforms.auroraMap,useData:e.auroraUniforms.useData,seed:e.auroraUniforms.seed,phase:{value:0},magneticToEarth:{value:this.magneticToEarth}},fluxFragment);
-  this.volumeMaterial=make('StarOrbitAuroraVolume',{footprint:{value:this.fluxTarget.texture},profile:{value:this.profile},viewRays:{value:this.rays},origin:{value:new THREE.Vector3()},sunLocal:{value:new THREE.Vector3()},sampleCount:{value:32},strength:e.auroraUniforms.strength,useData:e.auroraUniforms.useData,solarDepth:e.uniforms.solarDepth,linearOutput:e.uniforms.linearOutput},volumeFragment);
-  this.compositeMaterial=make('StarOrbitAuroraComposite',{frame:{value:null}},compositeFragment,true);
-  for(const [scene,material] of [['fluxScene','fluxMaterial'],['volumeScene','volumeMaterial'],['compositeScene','compositeMaterial']]){this[scene]=new THREE.Scene();this[scene].add(new THREE.Mesh(this.geometry,this[material]));}
- }
- update(time,lowEffects){
-  const e=this.env,enabled=e.quality==='high'&&e.aurora.visible;
-  if(e.quality!=='high')this.failed=false;
-  if(!enabled||this.failed){this.release();for(const m of this.legacy)m.visible=e.quality!=='high'||this.failed;return;}
-  for(const m of this.legacy)m.visible=false;
-  try{if(!this.fluxMaterial)this.create();}catch(error){this.failed=true;this.release();for(const m of this.legacy)m.visible=true;console.warn(error.message);return;}
-  this.time=time;this.lowEffects=!!lowEffects;
- }
- render(camera){
-  const e=this.env,r=e.api.renderer;if(!this.volumeMaterial||!e.aurora.visible||this.failed)return;
-  const previous=r.getRenderTarget(),autoClear=r.autoClear;
-  try{
-   r.getDrawingBufferSize(this.size);const [w,h]=auroraBufferSize(this.size.x,this.size.y,this.lowEffects);
-   const resized=!this.target||this.target.width!==w||this.target.height!==h;
-   if(!this.target){this.target=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:false});this.compositeMaterial.uniforms.frame.value=this.target.texture;}
-   else if(this.target.width!==w||this.target.height!==h)this.target.setSize(w,h);
-   const source=e.auroraUniforms.useData.value>.5?e.auroraUniforms.auroraMap.value:'local',phase=auroraPhase(this.time),seed=e.auroraUniforms.seed.value;
-   const now=performance.now(),changed=this.time!==this.lastFluxTime;
-   const expected=Math.abs(e.sim.mode==='real'?1:e.sim.speed||1)*(now-(this.lastWall??now));
-   const seek=this.lastTime!==undefined&&Math.abs(this.time-this.lastTime)>Math.max(2000,expected*3);this.lastWall=now;this.lastTime=this.time;r.autoClear=true;
-   if(source!==this.source||seed!==this.lastSeed||(changed&&(e.sim.paused||seek||now-(this.lastFluxWall??-Infinity)>=250))){
-    this.fluxMaterial.uniforms.phase.value=phase;r.setRenderTarget(this.fluxTarget);r.render(this.fluxScene,this.camera);this.source=source;this.lastSeed=seed;this.lastFluxTime=this.time;this.lastFluxWall=now;this.stats.fluxUpdates++;
-   }
-   this.rotation.setFromMatrix4(this.earthRotation.makeRotationFromQuaternion(e.earth.quaternion));this.inverse.copy(this.rotation).transpose().premultiply(this.toMagnetic);
-   const u=this.volumeMaterial.uniforms;u.origin.value.copy(camera.position).applyMatrix3(this.inverse);u.sunLocal.value.copy(e.uniforms.sun.value).applyMatrix3(this.inverse).normalize();
-   const halfY=Math.tan(camera.fov*Math.PI/360)/camera.zoom,halfX=halfY*camera.aspect,rotation=this.cameraRotation.setFromMatrix4(camera.matrixWorld);
-   this.rays.set(halfX,0,0,0,halfY,0,0,0,-1).premultiply(rotation).premultiply(this.inverse);
-   u.sampleCount.value=this.lowEffects?16:24;this.stats.steps=u.sampleCount.value;this.stats.width=w;this.stats.height=h;
-   const inputs=[...this.rays.elements,...u.origin.value,...u.sunLocal.value,u.sampleCount.value,u.strength.value,this.stats.fluxUpdates,e.uniforms.solarDepth.value,e.uniforms.solarDepth.value?.version];
-   const changedFrame=resized||!this.frameInputs||inputs.some((v,i)=>v!==this.frameInputs[i]);
-   if(changedFrame){
-   r.setRenderTarget(this.target);
-   if(resized){const gl=r.getContext();if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Aurora framebuffer unavailable');}
-   r.render(this.volumeScene,this.camera);this.stats.volumeRenders++;this.frameInputs=inputs;
-   }
-   if(r.info.programs.some(p=>p.name?.startsWith('StarOrbitAurora')&&p.diagnostics?.runnable===false))throw Error('Aurora volume shader unavailable');
-   r.setRenderTarget(previous);r.autoClear=false;r.render(this.compositeScene,this.camera);
-  }catch(error){this.failed=true;this.release();for(const m of this.legacy)m.visible=true;console.warn(error.message);}
-  finally{r.setRenderTarget(previous);r.autoClear=autoClear;}
- }
+export class AuroraVolume {
+  constructor(env) {
+    this.env = env;
+    this.legacy = [...env.aurora.children];
+    this.failed = false;
+    this.source = null;
+    this.stats = { fluxUpdates: 0, volumeRenders: 0, steps: 24, width: 0, height: 0 };
+    this.size = new THREE.Vector2();
+    this.camera = new THREE.Camera();
+    this.rotation = new THREE.Matrix3();
+    this.inverse = new THREE.Matrix3();
+    this.rays = new THREE.Matrix3();
+    this.cameraRotation = new THREE.Matrix3();
+    this.earthRotation = new THREE.Matrix4();
+    const pole = new THREE.Vector3(0.048, -0.154, 0.987).normalize(),
+      x = new THREE.Vector3(pole.z, 0, -pole.x).normalize(),
+      y = new THREE.Vector3().crossVectors(pole, x);
+    this.magneticToEarth = new THREE.Matrix3().set(
+      x.x,
+      y.x,
+      pole.x,
+      x.y,
+      y.y,
+      pole.y,
+      x.z,
+      y.z,
+      pole.z
+    );
+    this.toMagnetic = this.magneticToEarth.clone().transpose();
+  }
+  release() {
+    for (const key of [
+      'fluxTarget',
+      'target',
+      'noise',
+      'profile',
+      'geometry',
+      'fluxMaterial',
+      'volumeMaterial',
+      'compositeMaterial',
+    ]) {
+      this[key]?.dispose();
+      this[key] = null;
+    }
+    this.fluxScene = this.volumeScene = this.compositeScene = null;
+    this.source = null;
+    this.frameInputs = null;
+    this.stats.width = this.stats.height = 0;
+  }
+  create() {
+    const e = this.env,
+      r = e.api.renderer;
+    if (!r.extensions.has('EXT_color_buffer_float'))
+      throw Error('Floating-point aurora buffer unavailable');
+    const noise = auroraNoise();
+    this.noise = new THREE.DataTexture(noise.data, noise.width, noise.height, THREE.RedFormat);
+    this.noise.wrapS = this.noise.wrapT = THREE.RepeatWrapping;
+    this.noise.magFilter = this.noise.minFilter = THREE.LinearFilter;
+    this.noise.needsUpdate = true;
+    this.profile = new THREE.DataTexture(auroraProfile(), 256, 1);
+    this.profile.magFilter = this.profile.minFilter = THREE.LinearFilter;
+    this.profile.needsUpdate = true;
+    this.fluxTarget = new THREE.WebGLRenderTarget(1024, 512, {
+      depthBuffer: false,
+      minFilter: THREE.LinearMipmapLinearFilter,
+      generateMipmaps: true,
+    });
+    this.geometry = new THREE.PlaneGeometry(2, 2);
+    const make = (name, uniforms, fragment, composite = false) =>
+      new THREE.ShaderMaterial({
+        name,
+        uniforms,
+        vertexShader: quadVertex,
+        fragmentShader: fragment,
+        depthTest: false,
+        depthWrite: false,
+        toneMapped: composite,
+        transparent: composite,
+        blending: composite ? THREE.AdditiveBlending : THREE.NoBlending,
+      });
+    this.fluxMaterial = make(
+      'StarOrbitAuroraFlux',
+      {
+        noiseMap: { value: this.noise },
+        auroraMap: e.auroraUniforms.auroraMap,
+        useData: e.auroraUniforms.useData,
+        seed: e.auroraUniforms.seed,
+        phase: { value: 0 },
+        magneticToEarth: { value: this.magneticToEarth },
+      },
+      fluxFragment
+    );
+    this.volumeMaterial = make(
+      'StarOrbitAuroraVolume',
+      {
+        footprint: { value: this.fluxTarget.texture },
+        profile: { value: this.profile },
+        viewRays: { value: this.rays },
+        origin: { value: new THREE.Vector3() },
+        sunLocal: { value: new THREE.Vector3() },
+        sampleCount: { value: 32 },
+        strength: e.auroraUniforms.strength,
+        useData: e.auroraUniforms.useData,
+        solarDepth: e.uniforms.solarDepth,
+        linearOutput: e.uniforms.linearOutput,
+      },
+      volumeFragment
+    );
+    this.compositeMaterial = make(
+      'StarOrbitAuroraComposite',
+      { frame: { value: null } },
+      compositeFragment,
+      true
+    );
+    for (const [scene, material] of [
+      ['fluxScene', 'fluxMaterial'],
+      ['volumeScene', 'volumeMaterial'],
+      ['compositeScene', 'compositeMaterial'],
+    ]) {
+      this[scene] = new THREE.Scene();
+      this[scene].add(new THREE.Mesh(this.geometry, this[material]));
+    }
+  }
+  update(time, lowEffects) {
+    const e = this.env,
+      enabled = e.quality === 'high' && e.aurora.visible;
+    if (e.quality !== 'high') this.failed = false;
+    if (!enabled || this.failed) {
+      this.release();
+      for (const m of this.legacy) m.visible = e.quality !== 'high' || this.failed;
+      return;
+    }
+    for (const m of this.legacy) m.visible = false;
+    try {
+      if (!this.fluxMaterial) this.create();
+    } catch (error) {
+      this.failed = true;
+      this.release();
+      for (const m of this.legacy) m.visible = true;
+      console.warn(error.message);
+      return;
+    }
+    this.time = time;
+    this.lowEffects = !!lowEffects;
+  }
+  render(camera) {
+    const e = this.env,
+      r = e.api.renderer;
+    if (!this.volumeMaterial || !e.aurora.visible || this.failed) return;
+    const previous = r.getRenderTarget(),
+      autoClear = r.autoClear;
+    try {
+      r.getDrawingBufferSize(this.size);
+      const [w, h] = auroraBufferSize(this.size.x, this.size.y, this.lowEffects);
+      const resized = !this.target || this.target.width !== w || this.target.height !== h;
+      if (!this.target) {
+        this.target = new THREE.WebGLRenderTarget(w, h, {
+          type: THREE.HalfFloatType,
+          depthBuffer: false,
+        });
+        this.compositeMaterial.uniforms.frame.value = this.target.texture;
+      } else if (this.target.width !== w || this.target.height !== h) this.target.setSize(w, h);
+      const source =
+          e.auroraUniforms.useData.value > 0.5 ? e.auroraUniforms.auroraMap.value : 'local',
+        phase = auroraPhase(this.time),
+        seed = e.auroraUniforms.seed.value;
+      const now = performance.now(),
+        changed = this.time !== this.lastFluxTime;
+      const expected =
+        Math.abs(e.sim.mode === 'real' ? 1 : e.sim.speed || 1) * (now - (this.lastWall ?? now));
+      const seek =
+        this.lastTime !== undefined &&
+        Math.abs(this.time - this.lastTime) > Math.max(2000, expected * 3);
+      this.lastWall = now;
+      this.lastTime = this.time;
+      r.autoClear = true;
+      if (
+        source !== this.source ||
+        seed !== this.lastSeed ||
+        (changed && (e.sim.paused || seek || now - (this.lastFluxWall ?? -Infinity) >= 250))
+      ) {
+        this.fluxMaterial.uniforms.phase.value = phase;
+        r.setRenderTarget(this.fluxTarget);
+        r.render(this.fluxScene, this.camera);
+        this.source = source;
+        this.lastSeed = seed;
+        this.lastFluxTime = this.time;
+        this.lastFluxWall = now;
+        this.stats.fluxUpdates++;
+      }
+      this.rotation.setFromMatrix4(
+        this.earthRotation.makeRotationFromQuaternion(e.earth.quaternion)
+      );
+      this.inverse.copy(this.rotation).transpose().premultiply(this.toMagnetic);
+      const u = this.volumeMaterial.uniforms;
+      u.origin.value.copy(camera.position).applyMatrix3(this.inverse);
+      u.sunLocal.value.copy(e.uniforms.sun.value).applyMatrix3(this.inverse).normalize();
+      const halfY = Math.tan((camera.fov * Math.PI) / 360) / camera.zoom,
+        halfX = halfY * camera.aspect,
+        rotation = this.cameraRotation.setFromMatrix4(camera.matrixWorld);
+      this.rays
+        .set(halfX, 0, 0, 0, halfY, 0, 0, 0, -1)
+        .premultiply(rotation)
+        .premultiply(this.inverse);
+      u.sampleCount.value = this.lowEffects ? 16 : 24;
+      this.stats.steps = u.sampleCount.value;
+      this.stats.width = w;
+      this.stats.height = h;
+      const inputs = [
+        ...this.rays.elements,
+        ...u.origin.value,
+        ...u.sunLocal.value,
+        u.sampleCount.value,
+        u.strength.value,
+        this.stats.fluxUpdates,
+        e.uniforms.solarDepth.value,
+        e.uniforms.solarDepth.value?.version,
+      ];
+      const changedFrame =
+        resized || !this.frameInputs || inputs.some((v, i) => v !== this.frameInputs[i]);
+      if (changedFrame) {
+        r.setRenderTarget(this.target);
+        if (resized) {
+          const gl = r.getContext();
+          if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+            throw Error('Aurora framebuffer unavailable');
+        }
+        r.render(this.volumeScene, this.camera);
+        this.stats.volumeRenders++;
+        this.frameInputs = inputs;
+      }
+      if (
+        r.info.programs.some(
+          (p) => p.name?.startsWith('StarOrbitAurora') && p.diagnostics?.runnable === false
+        )
+      )
+        throw Error('Aurora volume shader unavailable');
+      r.setRenderTarget(previous);
+      r.autoClear = false;
+      r.render(this.compositeScene, this.camera);
+    } catch (error) {
+      this.failed = true;
+      this.release();
+      for (const m of this.legacy) m.visible = true;
+      console.warn(error.message);
+    } finally {
+      r.setRenderTarget(previous);
+      r.autoClear = autoClear;
+    }
+  }
 }

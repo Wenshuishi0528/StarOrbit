@@ -14,11 +14,11 @@
 
 *中国空间站场景：舱体组合、太阳翼、地球云层、星图、轨道读数与事件时间轴。*
 
-**作者：wenshuishi0528 · 当前源码：v1.12 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
+**作者：wenshuishi0528 · 当前源码：v1.14 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
-巡天取景与轨道地图可从右侧工具列独立打开并同时显示；导航球支持紧凑版与完整版。
+巡天取景与轨道地图可从右侧工具列独立打开并同时显示；导航球支持紧凑版与完整版。右侧「视角」统一选择镜头目标、重新居中和观察方向。
 
-> 版本说明：本页按 **v1.12** 整理。在线版与便携版请以各自页面顶部的版本号为准。
+> 版本说明：本页按 **v1.14** 整理。在线版与便携版请以各自页面顶部的版本号为准。
 
 主页面在「航天器姿态」打开导航球，点击球面即可用 KSP 风格键位操纵当前对象：转向带惯性，RCS 提供平移，SAS 辅助稳姿。右上角「自由飞行」可驾驶神舟、天舟离站并回接，使用独立存档。巡天取景可识别十字线所指，星图新增完整梅西耶目录与精选 NGC 目标。[导航球操作](使用说明.md#导航球与近轨操纵) · [自由飞行](使用说明.md#自由飞行) · [本批功能说明](docs/v1.09-pilot-star-chart.md)
 
@@ -300,3 +300,9 @@ python3 -m pip install -r scripts/cloud-requirements.txt
 | 计算与渲染依赖 | Three.js、Astronomy Engine、satellite.js、three-mesh-bvh 等，保留各自声明 |
 
 作者拥有授权权利的原创代码、模型、界面与文档采用 **[CC BY-NC 4.0](LICENSE)**，允许按许可署名并用于非商业用途；商业使用须事先获得作者书面许可。第三方库、数据、音乐与贴图继续适用各自条款。完整范围见[许可与商业授权](LICENSING.md)。
+
+### 源码格式 / Source formatting
+
+安装依赖后运行 `npm run format` 整理 `src/` 中手写 JavaScript 和 CSS；运行 `npm run format:check` 检查格式。规则固定在 `.prettierrc.json`，工具版本固定在开发依赖中。HTML 模板含构建期精确替换标记，和数据、依赖、生成产物一起排除。格式化不涉及函数拆分或逻辑重构。
+
+Run `npm run format` to format handwritten JavaScript/CSS in `src/`, or `npm run format:check` to check. Templates, data, dependencies and generated files are excluded. The v1.14 release includes the v1.13 formatting cleanup.

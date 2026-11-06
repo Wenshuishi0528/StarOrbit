@@ -1,11 +1,11 @@
-import {galaxyCoordinatesGLSL} from './sky-shaders.js';
+import { galaxyCoordinatesGLSL } from './sky-shaders.js';
 
 // Both the ground image and the star mask intersect the same sphere per sensor
 // pixel. A star sprite straddling the limb is clipped to its visible fraction.
-export const earthHit=`float groundDistance(vec3 p,vec3 ray){float along=-dot(p,ray);if(along<=0.)return -1.;
+export const earthHit = `float groundDistance(vec3 p,vec3 ray){float along=-dot(p,ray);if(along<=0.)return -1.;
  vec3 perpendicular=p+along*ray;float d=6371.*6371.-dot(perpendicular,perpendicular);return d>=0.?along-sqrt(d):-1.;}`;
-export const quadVertex=`varying vec2 film;void main(){film=position.xy;gl_Position=vec4(position.xy,0.,1.);}`;
-export const backgroundFragment=`precision highp float;varying vec2 film;
+export const quadVertex = `varying vec2 film;void main(){film=position.xy;gl_Position=vec4(position.xy,0.,1.);}`;
+export const backgroundFragment = `precision highp float;varying vec2 film;
  uniform mat3 cameraToInertial,cameraToFixed;uniform vec3 fixedEye;uniform vec2 lens;
  uniform samplerCube galaxy;
  uniform float galaxyMode,skyGain,mainSkyHDR,opticalGain;
@@ -40,7 +40,7 @@ export const backgroundFragment=`precision highp float;varying vec2 film;
   // is combined after the stellar aperture gain, at its own exposure.
   gl_FragColor=vec4(colour,0.);
  }`;
-export const starVertex=`precision highp float;attribute float magnitude,edgeWeight;attribute vec3 tint;varying vec3 starTint;varying float flux,core,wing;varying vec2 centrePixel;
+export const starVertex = `precision highp float;attribute float magnitude,edgeWeight;attribute vec3 tint;varying vec3 starTint;varying float flux,core,wing;varying vec2 centrePixel;
  uniform mat3 inertialToCamera;uniform vec2 screen,lens,pointSigma;uniform float starSignal,limitMagnitude,maxPointSize;
  void main(){vec3 d=inertialToCamera*position;float z=d.z;
   float visibleMagnitude=magnitude-2.5*log(max(edgeWeight,1.e-8))/log(10.);
@@ -50,7 +50,7 @@ export const starVertex=`precision highp float;attribute float magnitude,edgeWei
   centrePixel=(gl_Position.xy/gl_Position.w*.5+.5)*screen;
   gl_PointSize=clamp(ceil(2.*wing*clamp(3.8+.28*(8.-magnitude),3.8,7.)+3.),3.,maxPointSize);
  }`;
-export const starFragment=`precision highp float;varying vec3 starTint;varying float flux,core,wing;varying vec2 centrePixel;
+export const starFragment = `precision highp float;varying vec3 starTint;varying float flux,core,wing;varying vec2 centrePixel;
  uniform vec2 screen,lens;uniform mat3 cameraToFixed;uniform vec3 fixedEye;
  ${earthHit}
  // Integral of a Gaussian across pixel edges. Using the projected subpixel
@@ -68,7 +68,7 @@ export const starFragment=`precision highp float;varying vec3 starTint;varying f
   float psf=.94*c.x*c.y+.06*w.x*w.y;
   gl_FragColor=vec4(starTint*(flux*psf),1.);
  }`;
-export const sensorFragment=`precision highp float;varying vec2 film;uniform sampler2D image,earthImage;uniform float gain,earthOn,earthExposure;
+export const sensorFragment = `precision highp float;varying vec2 film;uniform sampler2D image,earthImage;uniform float gain,earthOn,earthExposure;
  void main(){vec2 uv=film*.5+.5;vec4 foreground=texture2D(image,uv);
   vec3 light=max(foreground.rgb*gain,vec3(0.));
   if(earthOn>.5){vec4 surface=texture2D(earthImage,uv);float gap=1.-clamp(foreground.a,0.,1.);
@@ -77,9 +77,9 @@ export const sensorFragment=`precision highp float;varying vec2 film;uniform sam
   gl_FragColor=vec4(rgb,1.);
  }`;
 
-export const guideVertex=`uniform mat3 inertialToCamera;uniform vec2 lens;
+export const guideVertex = `uniform mat3 inertialToCamera;uniform vec2 lens;
  void main(){vec3 d=inertialToCamera*position;gl_Position=vec4(d.xy/lens,0.,d.z);}`;
-export const guideFragment=`precision highp float;uniform vec2 screen,lens;uniform mat3 cameraToFixed;uniform vec3 fixedEye,guideTint;uniform float inverseGain,guideDashed;
+export const guideFragment = `precision highp float;uniform vec2 screen,lens;uniform mat3 cameraToFixed;uniform vec3 fixedEye,guideTint;uniform float inverseGain,guideDashed;
  ${earthHit}
  void main(){vec2 pixel=2.*gl_FragCoord.xy/screen-1.;vec3 ray=cameraToFixed*normalize(vec3(pixel*lens,1.));
   if(groundDistance(fixedEye,ray)>=0.)discard;

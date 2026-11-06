@@ -4,6 +4,18 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.14 — 2026-11-06 · 正式版 / Release
+
+将常驻的镜头目标栏并入「视角」菜单，按目标、居中／全貌、观察方向分组；合并重复的返回航天器操作，保留双击模型居中与独立镜头跟随，适配窄屏及四种语言；展开菜单不再被轨道地图等浮动窗口遮挡。默认测试、格式检查、三种构建和浏览器实际操作检查通过。
+
+**English:** Merged the persistent camera-target bar into the Views menu, grouping target selection, recenter/all-craft framing and viewing directions. Removed the duplicate return-to-craft action while retaining double-click focus and independent camera following, with compact-screen and four-language support. Open menus stay above floating panels. Default tests, formatting checks, all three builds and browser interaction checks passed.
+
+## v1.13 — 2026-11-06 · 本机版 / Local build
+
+仅整理手写 JavaScript 与 CSS 的换行、缩进、空格及括号排版，重点展开 app.js、weather.js 等长行；不改变函数划分、名称、执行顺序、异步等待或错误处理。新增固定版本 Prettier 配置及 format／format:check 命令；排除依赖、生成产物、数据与带精确替换标记的 HTML 模板。旧源码断言适配空白变化。此格式整理随 v1.14 一并发布。
+
+**English:** Formatting-only cleanup of handwritten JavaScript and CSS, expanding dense app.js/weather.js code without changing functions, names, execution order, async waits or error handling. Added pinned Prettier configuration and repeatable format/format:check commands; dependencies, generated artifacts, data and exact-marker HTML templates remain excluded. Source-based tests now tolerate formatting whitespace. These formatting changes are included in the v1.14 release.
+
 ## v1.12 — 2026-11-06 · 正式版 / Release
 
 巡天取景与轨道地图改为独立窗口，右侧工具列提供各自入口、打开状态和开关；桌面分开放置，窄屏上下排列，保留手动布局，关闭一个不影响另一个。修复导航球紧凑／完整版切换卡顿和漏点：过滤读数引发的无效窗口发现与布局，避免重复文字更新，切换只调整当前窗口并保留标题位置，取消几何动画造成的按钮漂移。包含 v1.07–v1.11 的自由飞行、导航球、共享星图、太阳观测、镜头目标和巡天 52 米初始位置等累计更新。

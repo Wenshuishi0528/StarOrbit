@@ -1,6 +1,6 @@
-import {radiometryGLSL} from './earth-radiometry.js';
+import { radiometryGLSL } from './earth-radiometry.js';
 // Shared finite-path atmosphere for ground, cloud tops and cloud representative depths.
-export const scatteringGLSL=`${radiometryGLSL}uniform int steps;uniform float linearComposite,airglowStrength,multipleStrength;uniform sampler2D multipleDepth,multipleDepthB;
+export const scatteringGLSL = `${radiometryGLSL}uniform int steps;uniform float linearComposite,airglowStrength,multipleStrength;uniform sampler2D multipleDepth,multipleDepthB;
 const float R=6371.;const float A=6471.;const vec3 betaR=vec3(.0058,.0135,.0331);const vec3 betaM=vec3(.004);
 vec2 hit(vec3 o,vec3 d,float r){float b=dot(o,d),h=b*b-dot(o,o)+r*r;if(h<0.)return vec2(1e9,-1e9);h=sqrt(h);return vec2(-b-h,-b+h);}
 vec3 multipleLight(sampler2D lut,float h,float mu){

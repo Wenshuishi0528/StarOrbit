@@ -1,15 +1,16 @@
-import {radiometryGLSL} from './earth-radiometry.js';
-import {cloudToneGLSL} from './cloud-texture.js';
+import { radiometryGLSL } from './earth-radiometry.js';
+import { cloudToneGLSL } from './cloud-texture.js';
 
 // CPU WebGL drivers can spend minutes compiling the full volumetric atmosphere.
 // Use the environment's selected global textures at their native resolution and
 // keep the same shutter, mount occlusion, inertial sky and ray/sphere geometry.
-export function softwareExposureRenderer(renderer){
- const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
- const name=String(gl.getParameter(debug?.UNMASKED_RENDERER_WEBGL||gl.RENDERER));
- return /swiftshader|llvmpipe|softpipe|software rasterizer|basic render driver/i.test(name);
+export function softwareExposureRenderer(renderer) {
+  const gl = renderer.getContext(),
+    debug = gl.getExtension('WEBGL_debug_renderer_info');
+  const name = String(gl.getParameter(debug?.UNMASKED_RENDERER_WEBGL || gl.RENDERER));
+  return /swiftshader|llvmpipe|softpipe|software rasterizer|basic render driver/i.test(name);
 }
-export const exposureEarthFastGLSL=`
+export const exposureEarthFastGLSL = `
 uniform sampler2D dayMap,nightMap,cloudMap,cloudTemplateMap,oceanMap;
 uniform float detailed,enhanced,cloudAmount,cloudNightVisible,cloudMode,cloudChannel,cloudMotion,motionTime,gloss,airOn;
 uniform vec3 fixedSun;

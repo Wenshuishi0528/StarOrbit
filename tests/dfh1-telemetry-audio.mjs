@@ -81,7 +81,7 @@ try{
  {
   const playerSource=fs.readFileSync(new URL('../src/music-player.js',import.meta.url),'utf8');
   const sandbox={clearTimeout,console};
-  vm.runInNewContext(playerSource.replace(/^import .*;\n/gm,'').replace('export class MusicPlayer','class MusicPlayer')+'\nglobalThis.TestMusicPlayer=MusicPlayer;',sandbox);
+  vm.runInNewContext(playerSource.replace(/^import\s[\s\S]*?;\n/gm,'').replace('export class MusicPlayer','class MusicPlayer')+'\nglobalThis.TestMusicPlayer=MusicPlayer;',sandbox);
   const module=deferred();configurations.push({module});const engine=new TelemetryAudio();engine.update(environment(),'','pose0');const pending=engine.start();
   const player=Object.create(sandbox.TestMusicPlayer.prototype);let recordingRequests=0;
   Object.assign(player,{broadcast:true,broadcastMode:'telemetry',wantPlayback:true,playToken:0,audio:{pause(){}},
@@ -216,7 +216,7 @@ let Processor;const processorMessages=[];
 class MockProcessorBase{constructor(){this.port={onmessage:null,postMessage:m=>processorMessages.push(structuredClone(m))};}}
 const workletScope={AudioWorkletProcessor:MockProcessorBase,createTelemetryState,renderTelemetry,currentTime:0,sampleRate:48000,
  registerProcessor(name,klass){assert.equal(name,'dfh1-telemetry');Processor=klass;}};
-vm.runInNewContext(processorSource.replace(/^import .*;\n/gm,''),workletScope,{filename:'actual-dfh1-telemetry-worklet.js'});
+vm.runInNewContext(processorSource.replace(/^import\s[\s\S]*?;\n/gm,''),workletScope,{filename:'actual-dfh1-telemetry-worklet.js'});
 const processor=new Processor();
 function message(generation,active,reset=false,extra={}){
  processor.port.onmessage({data:{generation,active,reset,environment:environment(workletScope.currentTime*1000),channel:'sequence',audioTime:workletScope.currentTime,

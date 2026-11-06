@@ -1,8 +1,8 @@
-import {spectralGLSL} from './atmosphere-spectrum.js';
+import { spectralGLSL } from './atmosphere-spectrum.js';
 // Shared direct-sun transport for air, terrain and clouds. Distances are km.
 // Bruneton (2008/2017): spectral transport, finite solar disk and phase functions.
 // A direction toward the Sun is distinct from the local solar zenith angle.
-export const solarOpticsGLSL=`${spectralGLSL}
+export const solarOpticsGLSL = `${spectralGLSL}
 uniform sampler2D solarDepth;uniform float linearOutput;
 const vec3 airRayleigh=vec3(.005802,.013558,.0331);
 const vec3 airMieExtinction=vec3(.00444);

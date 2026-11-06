@@ -1,7 +1,7 @@
-import {t} from './i18n.js';
-import {DOCKING_LIMITS} from './docking-physics.js';
+import { t } from './i18n.js';
+import { DOCKING_LIMITS } from './docking-physics.js';
 
-export const dockingCSS=`
+export const dockingCSS = `
 .dock-panel{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;color:#dce8f6;font-size:12px}
 .dock-panel button,.dock-panel select{font-size:12px}.dock-panel button{min-height:32px;padding:6px 10px}.dock-panel button:disabled{opacity:.42;cursor:not-allowed}
 .dock-panel [hidden]{display:none!important}.dock-panel button[aria-pressed=true]{background:#174e60;border-color:#76d7e5;color:#e4fcff}
@@ -28,8 +28,8 @@ export const dockingCSS=`
 @media(max-width:900px){.dock-expanded .dock-workspace{grid-template-columns:1fr;grid-template-rows:minmax(250px,3fr) minmax(180px,2fr)}}
 `;
 
-const text=key=>`data-dock-text="${key}"`;
-export const dockingMarkup=`
+const text = (key) => `data-dock-text="${key}"`;
+export const dockingMarkup = `
  <div class="dock-session">
   <label><span ${text('训练场景')}></span><select data-role="scenario"></select></label>
   <button type="button" class="dock-primary" data-role="start"></button>
@@ -88,53 +88,114 @@ export const dockingMarkup=`
   </div>
  </div>`;
 
-export const escapeHTML=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export const signed=(value,digits=2)=>(value>=0?'+':'')+value.toFixed(digits);
+export const escapeHTML = (value) =>
+  String(value).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+  );
+export const signed = (value, digits = 2) => (value >= 0 ? '+' : '') + value.toFixed(digits);
 
-export function alignmentSVG(m){
- const radius=Math.max(.5,m.lateralOffset*1.35),scale=43/radius,x=59+m.right*scale,y=59-m.up*scale;
- const bound=Math.min(43,DOCKING_LIMITS.captureLateral*scale);
- return `<svg viewBox="0 0 118 118" role="img" aria-label="${escapeHTML(t('目标接口坐标中的飞船横向位置'))}"><circle cx="59" cy="59" r="44" fill="#081420" stroke="#35536a"/><path d="M15 59H103M59 15V103" stroke="#284257"/><circle cx="59" cy="59" r="${bound.toFixed(2)}" fill="#396b6020" stroke="#70bea188" stroke-dasharray="3 3"/><path d="M54 59h10M59 54v10" stroke="#f7c579"/><circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3.5" fill="#91edfb"/><text x="59" y="114" text-anchor="middle" font-size="9" fill="#8daebf">±${radius.toFixed(1)} m</text><text x="107" y="62" fill="#8daebf" font-size="9">Y</text><text x="56" y="10" fill="#8daebf" font-size="9">Z</text></svg>`;
+export function alignmentSVG(m) {
+  const radius = Math.max(0.5, m.lateralOffset * 1.35),
+    scale = 43 / radius,
+    x = 59 + m.right * scale,
+    y = 59 - m.up * scale;
+  const bound = Math.min(43, DOCKING_LIMITS.captureLateral * scale);
+  return `<svg viewBox="0 0 118 118" role="img" aria-label="${escapeHTML(t('目标接口坐标中的飞船横向位置'))}"><circle cx="59" cy="59" r="44" fill="#081420" stroke="#35536a"/><path d="M15 59H103M59 15V103" stroke="#284257"/><circle cx="59" cy="59" r="${bound.toFixed(2)}" fill="#396b6020" stroke="#70bea188" stroke-dasharray="3 3"/><path d="M54 59h10M59 54v10" stroke="#f7c579"/><circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3.5" fill="#91edfb"/><text x="59" y="114" text-anchor="middle" font-size="9" fill="#8daebf">±${radius.toFixed(1)} m</text><text x="107" y="62" fill="#8daebf" font-size="9">Y</text><text x="56" y="10" fill="#8daebf" font-size="9">Z</text></svg>`;
 }
 
-export function trendSVG(samples,currentTime){
- const rows=samples.length?samples:[],w=620,h=100,pad=32,left=rows[0]?.time||0,right=Math.max(left+1,rows.at(-1)?.time||0);
- // Keep each bucket's extrema, not every Nth point: short burns and retreat
- // reversals must survive downsampling. First/last + 149 pairs <= 300 points.
- let points=rows;
- if(rows.length>300){
-  points=[rows[0]];const bucketSize=Math.ceil((rows.length-2)/149);
-  for(let start=1;start<rows.length-1;start+=bucketSize){
-   const end=Math.min(rows.length-1,start+bucketSize);let min=start,max=start;
-   for(let i=start+1;i<end;i++){if(rows[i].instruments.axialClosing<rows[min].instruments.axialClosing)min=i;if(rows[i].instruments.axialClosing>rows[max].instruments.axialClosing)max=i;}
-   for(const index of [...new Set([min,max])].sort((a,b)=>a-b))points.push(rows[index]);
+export function trendSVG(samples, currentTime) {
+  const rows = samples.length ? samples : [],
+    w = 620,
+    h = 100,
+    pad = 32,
+    left = rows[0]?.time || 0,
+    right = Math.max(left + 1, rows.at(-1)?.time || 0);
+  // Keep each bucket's extrema, not every Nth point: short burns and retreat
+  // reversals must survive downsampling. First/last + 149 pairs <= 300 points.
+  let points = rows;
+  if (rows.length > 300) {
+    points = [rows[0]];
+    const bucketSize = Math.ceil((rows.length - 2) / 149);
+    for (let start = 1; start < rows.length - 1; start += bucketSize) {
+      const end = Math.min(rows.length - 1, start + bucketSize);
+      let min = start,
+        max = start;
+      for (let i = start + 1; i < end; i++) {
+        if (rows[i].instruments.axialClosing < rows[min].instruments.axialClosing) min = i;
+        if (rows[i].instruments.axialClosing > rows[max].instruments.axialClosing) max = i;
+      }
+      for (const index of [...new Set([min, max])].sort((a, b) => a - b)) points.push(rows[index]);
+    }
+    points.push(rows.at(-1));
   }
-  points.push(rows.at(-1));
- }
- const speedLimit=p=>p.context?.recommendedClosing??p.context?.speedLimit??p.instruments.recommendedClosing;
- const low=Math.min(0,...rows.map(p=>p.instruments.axialClosing)),high=Math.max(.06,...rows.map(p=>Math.max(p.instruments.axialClosing,speedLimit(p))))*1.15;
- const x=time=>pad+(time-left)/(right-left)*(w-pad-12),y=v=>8+(high-v)/(high-low)*62;
- const path=get=>points.map((p,i)=>(i?'L':'M')+x(p.time).toFixed(1)+','+y(get(p)).toFixed(1)).join(' ');
- return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${escapeHTML(t('轴向闭合速度随训练时间变化'))}"><path d="M${pad} 8V72H608" fill="none" stroke="#31495c"/><path d="M${pad} ${y(0)}H608" stroke="#233c50"/><text x="1" y="13" class="dock-chart-title">${high.toFixed(2)}</text><text x="1" y="72" class="dock-chart-title">${low.toFixed(2)}</text><path d="${path(speedLimit)}" fill="none" stroke="#d5a960" stroke-width="1" stroke-dasharray="5 4"/><path d="${path(p=>p.instruments.axialClosing)}" fill="none" stroke="#83e1ed" stroke-width="1.6"/><path d="M${x(Math.min(right,Math.max(left,currentTime)))} 8V72" stroke="#9cd7e66e"/><text x="${pad}" y="91" class="dock-chart-title">${left.toFixed(0)} s</text><text x="608" y="91" text-anchor="end" class="dock-chart-title">${right.toFixed(0)} s</text></svg>`;
+  const speedLimit = (p) =>
+    p.context?.recommendedClosing ?? p.context?.speedLimit ?? p.instruments.recommendedClosing;
+  const low = Math.min(0, ...rows.map((p) => p.instruments.axialClosing)),
+    high =
+      Math.max(0.06, ...rows.map((p) => Math.max(p.instruments.axialClosing, speedLimit(p)))) *
+      1.15;
+  const x = (time) => pad + ((time - left) / (right - left)) * (w - pad - 12),
+    y = (v) => 8 + ((high - v) / (high - low)) * 62;
+  const path = (get) =>
+    points
+      .map((p, i) => (i ? 'L' : 'M') + x(p.time).toFixed(1) + ',' + y(get(p)).toFixed(1))
+      .join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${escapeHTML(t('轴向闭合速度随训练时间变化'))}"><path d="M${pad} 8V72H608" fill="none" stroke="#31495c"/><path d="M${pad} ${y(0)}H608" stroke="#233c50"/><text x="1" y="13" class="dock-chart-title">${high.toFixed(2)}</text><text x="1" y="72" class="dock-chart-title">${low.toFixed(2)}</text><path d="${path(speedLimit)}" fill="none" stroke="#d5a960" stroke-width="1" stroke-dasharray="5 4"/><path d="${path((p) => p.instruments.axialClosing)}" fill="none" stroke="#83e1ed" stroke-width="1.6"/><path d="M${x(Math.min(right, Math.max(left, currentTime)))} 8V72" stroke="#9cd7e66e"/><text x="${pad}" y="91" class="dock-chart-title">${left.toFixed(0)} s</text><text x="608" y="91" text-anchor="end" class="dock-chart-title">${right.toFixed(0)} s</text></svg>`;
 }
 
-export function captureRows(metrics){
- if(!metrics)return [];
- const limits=metrics.captureLimits||DOCKING_LIMITS;
- return [
-  ['接口距离',metrics.distance,limits.captureDistance,'m','distance'],
-  ['横向偏差',metrics.lateral,limits.captureLateral,'m','lateral'],
-  ['相对速度',metrics.speed,limits.captureSpeed,'m/s','speed'],
-  ['轴向闭合速度',metrics.axialClosing,limits.captureAxialClosing,'m/s','axialClosing'],
-  ['横向速度',metrics.lateralSpeed,limits.captureLateralSpeed,'m/s','lateralSpeed'],
-  ['姿态误差',metrics.angle,limits.captureAngle,'°','angle'],
-  ['合成角速率',metrics.angularSpeed*180/Math.PI,limits.captureAngularSpeed*180/Math.PI,'°/s','angularSpeed'],
- ].filter(row=>metrics.assistanceEnabled!==false||['distance','lateral','speed'].includes(row[4])).map(([key,value,limit,unit,check])=>({key,value,limit,unit,inclusive:metrics.speedInclusive&&['speed','axialClosing'].includes(check),min:check==='axialClosing'?0:null,pass:metrics.captureChecks?.[check]??(value<limit&&(check!=='axialClosing'||value>=0))}));
+export function captureRows(metrics) {
+  if (!metrics) return [];
+  const limits = metrics.captureLimits || DOCKING_LIMITS;
+  return [
+    ['接口距离', metrics.distance, limits.captureDistance, 'm', 'distance'],
+    ['横向偏差', metrics.lateral, limits.captureLateral, 'm', 'lateral'],
+    ['相对速度', metrics.speed, limits.captureSpeed, 'm/s', 'speed'],
+    ['轴向闭合速度', metrics.axialClosing, limits.captureAxialClosing, 'm/s', 'axialClosing'],
+    ['横向速度', metrics.lateralSpeed, limits.captureLateralSpeed, 'm/s', 'lateralSpeed'],
+    ['姿态误差', metrics.angle, limits.captureAngle, '°', 'angle'],
+    [
+      '合成角速率',
+      (metrics.angularSpeed * 180) / Math.PI,
+      (limits.captureAngularSpeed * 180) / Math.PI,
+      '°/s',
+      'angularSpeed',
+    ],
+  ]
+    .filter(
+      (row) =>
+        metrics.assistanceEnabled !== false || ['distance', 'lateral', 'speed'].includes(row[4])
+    )
+    .map(([key, value, limit, unit, check]) => ({
+      key,
+      value,
+      limit,
+      unit,
+      inclusive: metrics.speedInclusive && ['speed', 'axialClosing'].includes(check),
+      min: check === 'axialClosing' ? 0 : null,
+      pass:
+        metrics.captureChecks?.[check] ??
+        (value < limit && (check !== 'axialClosing' || value >= 0)),
+    }));
 }
 
-export function reportHTML(summary,violations=0){
- const esc=escapeHTML,m=summary.contactMetrics;
- const rows=captureRows(m).map(row=>`<tr><td>${esc(t(row.key))}</td><td data-pass="${row.pass}">${row.value.toFixed(3)} ${row.unit}</td><td>${row.min===0?'0 ≤ v ':''}${row.inclusive?'≤':'&lt;'} ${row.limit.toFixed(3)} ${row.unit}</td><td>${esc(t(row.pass?'通过':'未通过'))}</td></tr>`).join('');
- const speedSummary=summary.flightSpeedLimited===false?esc(t('最高闭合速度 {speed} m/s · 飞行不限速',{speed:summary.maxClosing.toFixed(3)})):esc(t('最高闭合速度 {speed} m/s · 超过建议速度 {time} s',{speed:summary.maxClosing.toFixed(3),time:summary.timeAboveSpeedLimit.toFixed(1)}));
- return `<p>${esc(t('本次训练：{time} s · 累计平移 Δv {dv} m/s',{time:summary.duration.toFixed(1),dv:summary.deltaV.toFixed(3)}))}</p><p>${speedSummary}</p><p>${esc(t('未放行越过停靠点：{count} 次',{count:violations}))}</p>${m?`<p>${esc(t('接触前瞬间的捕获检查'))}</p><table class="dock-review-table"><thead><tr><th>${esc(t('检查项'))}</th><th>${esc(t('实测'))}</th><th>${esc(t('教学门限'))}</th><th>${esc(t('结果'))}</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>${esc(t('尚未接触目标接口；曲线与事件保留实际操作过程。'))}</p>`}<p>${esc(t('保留 {samples} 个采样 · {events} 条事件',{samples:summary.sampleCount,events:summary.eventCount}))}${summary.droppedSamples?' · '+esc(t('较早轨迹已移出记录，汇总仍覆盖全程')):''}</p>`;
+export function reportHTML(summary, violations = 0) {
+  const esc = escapeHTML,
+    m = summary.contactMetrics;
+  const rows = captureRows(m)
+    .map(
+      (row) =>
+        `<tr><td>${esc(t(row.key))}</td><td data-pass="${row.pass}">${row.value.toFixed(3)} ${row.unit}</td><td>${row.min === 0 ? '0 ≤ v ' : ''}${row.inclusive ? '≤' : '&lt;'} ${row.limit.toFixed(3)} ${row.unit}</td><td>${esc(t(row.pass ? '通过' : '未通过'))}</td></tr>`
+    )
+    .join('');
+  const speedSummary =
+    summary.flightSpeedLimited === false
+      ? esc(t('最高闭合速度 {speed} m/s · 飞行不限速', { speed: summary.maxClosing.toFixed(3) }))
+      : esc(
+          t('最高闭合速度 {speed} m/s · 超过建议速度 {time} s', {
+            speed: summary.maxClosing.toFixed(3),
+            time: summary.timeAboveSpeedLimit.toFixed(1),
+          })
+        );
+  return `<p>${esc(t('本次训练：{time} s · 累计平移 Δv {dv} m/s', { time: summary.duration.toFixed(1), dv: summary.deltaV.toFixed(3) }))}</p><p>${speedSummary}</p><p>${esc(t('未放行越过停靠点：{count} 次', { count: violations }))}</p>${m ? `<p>${esc(t('接触前瞬间的捕获检查'))}</p><table class="dock-review-table"><thead><tr><th>${esc(t('检查项'))}</th><th>${esc(t('实测'))}</th><th>${esc(t('教学门限'))}</th><th>${esc(t('结果'))}</th></tr></thead><tbody>${rows}</tbody></table>` : `<p>${esc(t('尚未接触目标接口；曲线与事件保留实际操作过程。'))}</p>`}<p>${esc(t('保留 {samples} 个采样 · {events} 条事件', { samples: summary.sampleCount, events: summary.eventCount }))}${summary.droppedSamples ? ' · ' + esc(t('较早轨迹已移出记录，汇总仍覆盖全程')) : ''}</p>`;
 }
