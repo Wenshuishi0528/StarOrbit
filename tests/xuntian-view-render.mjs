@@ -47,3 +47,16 @@ locked.forEach((v,i)=>close(v,expected[i]));
 station.remove(pivot);assert.equal(stationPinDirection(sim,optics,pin),null);
 assert.equal(sampleStationPin(sim,optics),null);
 console.log('Reticle locks the exact station surface, excludes its own telescope, follows articulation and releases removed parts.');
+
+// Preserve near geometry while resolving thin station surfaces at telescope distances.
+const {Box3,Vector3,PerspectiveCamera}=await import('three');
+const {stationNearPlane}=await import('../src/xuntian-station-depth.js');
+const {depthStepAtDistance}=await import('../src/space-camera-depth.js');
+const camera=new PerspectiveCamera();camera.position.set(0,0,260);camera.lookAt(0,0,0);camera.updateMatrixWorld(true);
+const bounds=new Box3(new Vector3(-100,-100,-100),new Vector3(100,100,100));
+const near=stationNearPlane(camera,[bounds]);assert.equal(near,80);
+assert(depthStepAtDistance(260,near,10000)<depthStepAtDistance(260,.015,10000)/5000);
+assert.equal(stationNearPlane(camera,[new Box3(new Vector3(-1,-1,259.99),new Vector3(1,1,261))]),.015);
+assert.equal(stationNearPlane(camera,[]),.015);
+assert.equal(stationNearPlane(camera,[new Box3(new Vector3(-1,-1,300),new Vector3(1,1,310))]),.015);
+console.log('Telescope station depth precision and near/inside/behind clipping passed.');

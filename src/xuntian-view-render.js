@@ -1,6 +1,7 @@
 import { finderLabels, paintFinderLabels } from './xuntian-labels.js';
 import * as THREE from 'three';
 import { dot } from './orbit.js';
+import { stationNearPlane } from './xuntian-station-depth.js';
 import { inspectStationRay } from './xuntian-station-pin.js';
 import { createSurveyProbe } from './survey-live-probe.js';
 import { createSolarView } from './xuntian-solar-view.js';
@@ -313,7 +314,13 @@ function stationView(sim) {
     camera.lookAt(camera.position.clone().add(direction));
     camera.aspect = aspect;
     camera.fov = frame.fovY;
-    camera.near = 0.015;
+    camera.updateMatrixWorld(true);
+    camera.near = stationNearPlane(
+      camera,
+      Object.entries(api.groups)
+        .filter(([id, group]) => group !== api.groups.freeXT && group.visible)
+        .map(([id]) => sim.tracker?.occluders?.[id]?.box)
+    );
     camera.far = Math.max(10000, camera.position.length() * 2 + 5000);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld(true);

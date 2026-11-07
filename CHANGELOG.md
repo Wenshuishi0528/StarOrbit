@@ -4,6 +4,12 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.19 — 2026-11-07 · 正式版 / Release
+
+修复巡天望远镜近看空间站时表面出现黑色雪花、闪烁的问题：根据实际航天器边界调整近裁剪面，提高深度精度，保留近处部件。取景与照片导出共用修复，不改变模型、阴影与星空画质。
+
+**English:** Fixed black speckles and surface flicker when viewing the station through Xuntian. The near clipping plane now follows spacecraft bounds for improved depth precision while retaining nearby geometry. Preview and photo export share the fix without changing models, shadows or sky quality.
+
 ## v1.18 — 2026-11-07 · 正式版 / Release
 
 真实地形改为默认开启，旧设置升级时迁移一次，此后保留用户手动开关。修复开启真实地形后地名、国境线、河湖线与地面轨迹一起消失：切换地形只隐藏原球面材质，保留地理叠加层及地球自转关系；各标注开关继续独立生效。
