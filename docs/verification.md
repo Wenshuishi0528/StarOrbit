@@ -1,0 +1,128 @@
+# 验证与验收指南
+
+适用版本：v1.20。作者：Wenshuishi。本文说明如何验证当前能力和保存证据；实际通过范围以对应版本的执行记录为准。本页不是标准符合性认证。
+
+[能力与范围](product-scope.md) · [使用手册](../使用说明.md) · [技术资料索引](README.md) · [更新记录](../CHANGELOG.md)
+
+## 基线、结果与证据
+
+`product-scope.md` 的能力ID依据现行实现建立。本批结果由[本地 v1.20 执行记录](v1.20-validation.json)保存，区分已执行、失败、受阻和未运行；以下命令与步骤不预先表示通过。后续版本另建记录。
+
+本地 v1.20 已执行文档与格式示例检查、完整默认回归、格式检查、三种构建和两种拆分资产校验；Chrome 的帮助专项通过 107 项断言，涵盖四种语言、两种窗口及八步导览。本机运行目录、启动器和便携文档已检查，并经过独立 subagent 复核。该摘要不表示全部任务、浏览器或操作系统重新完成视觉和持久化验收；各项范围和未测项以上述执行记录为准。
+
+每条执行记录至少包括：
+
+- 能力标识和检查名称，执行命令或可复现步骤、输入数据及其版本。
+- 源码提交号；有未提交修改时增加工作区状态及受检文件/构建摘要。
+- 时间/时区、OS、浏览器/引擎与版本、Node/Python、窗口/画质；浏览器还记录地址、网络和冷热缓存。
+- 预期/实际结果、退出码或逐项断言，日志/JSON/截图/产物的相对位置及必要SHA-256。
+- 状态：`passed`、`failed`、`blocked`、`not-run`；历史结果另作引用。
+- 未完成范围、原因、关联问题和恢复步骤。截图不能替代交互、缓存或数值检查。
+
+开发日志和截图可在输出目录生成；正式引用的关键摘要随版本保留。大图不随包分发时，保存必要小图、指标和步骤，并注明原始证据范围。
+
+## 测试分层
+
+| 层级 | 主要检查 | 环境与边界 |
+| --- | --- | --- |
+| 文档和静态一致性 | 文档版本、入口路径、相对文件链接/标题锚点、参数和默认值、公开身份、打包清单 | 仓库与最终分发包分别检查；“链接目标存在”不证明锚点、网页内容或操作正确 |
+| 数值与模块回归 | 轨道、坐标、HCW、姿态、缓存事务、取消、配额、数据校验和状态切换 | `npm test`中的Node/Python检查；不少使用内存、模拟服务或固定参考，不能代替真实浏览器和在线源验收 |
+| 构建与资产 | 单文件、本机拆分、静态网页的版本、模型、星历、资源路径、哈希、许可和包体约束 | 使用当前源码和实际产物；三种构建各自记录，不由网页版成功推断单文件成功 |
+| 真实浏览器和输入 | WebGL实际渲染、Worker、IndexedDB、失焦/键盘/触摸、导入导出、窗口和照片 | 记录实际Chrome/WebKit等版本；模块fixture、完整应用页面和生产入口是不同测试对象 |
+| 离线与恢复 | 内置资源断网启动、缓存重开、下载取消/删除竞态、来源失败、存储不可用 | 同一来源和新来源分别测试；至少一次重开页面，单页仍驻留内存不等于持久保存 |
+| 本机运行与发布 | 启动器路径、HTTP实际文件、端口、进程恢复、包内文档、线上及Release状态 | 本机、远端部署和下载包独立核对；本地构建通过不改变远端发布状态 |
+
+## 默认回归和构建入口
+
+在源码仓库根目录执行，依赖按开发/发布说明准备。运行本机数据处理服务和部分Python回归需要 `scripts/cloud-requirements.txt` 中的依赖。
+
+```sh
+npm ci
+npm run test:docs
+npm test
+npm run format:check
+npm run build
+npm run build:web
+node tests/web-build.mjs
+node tests/web-build.mjs dist-local
+git diff --check
+```
+
+`npm run build` 生成单文件及本机拆分产物；`build:web` 生成静态网页。`tests/web-build.mjs` 默认检查 `dist/`，传 `dist-local` 检查本机拆分目录；它核对资源内容和结构，不执行实际浏览器渲染。打包后还应检查ZIP完整性、运行文件、文档/插图/许可清单和版本，记录实际大小与SHA-256。
+
+文档修改检查准确性、链接/锚点和包内可用性；同批改变帮助、构建或分发时补做相应验证。发现新问题再扩大回归，无需无区别重复全部外部来源下载。
+
+## 持续集成的实际覆盖
+
+当前 `.github/workflows/pages.yml` 在main推送或手动触发时使用Ubuntu、Node.js 22和Python 3.12，安装依赖后运行 `npm run test:docs`、`npm test`、`npm run build:web` 和 `node tests/web-build.mjs`，成功后部署Pages。`test:docs`运行 `scripts/check-docs.py`、`tests/docs-examples.mjs` 和 `tests/documentation.py`。
+
+该工作流未自动执行全部 `tests/browser/`、`format:check`、单文件/本机构建、macOS启动器、ZIP和各语言视觉检查。CI成功只覆盖列出的步骤；记录对应run ID、提交和结果。
+
+## 能力到测试的映射
+
+以下是重点入口，完整默认清单以 `package.json` 的 `scripts.test` 为准。代码路径对应源码仓库；执行结果关联本批JSON中的同名ID。
+
+| 能力ID | 自动或浏览器检查入口 | 操作与通过判定 | 环境与证据 |
+| --- | --- | --- | --- |
+| SO-CRAFT-01 | `tests/assembly.mjs`、`tests/missions.mjs`、`tests/mission-packages.mjs`；`tests/browser/missions.js` | 切任务、改组合、合法/非法导入、快速切换和恢复；模型/轨道独立，失败保留原场景 | 模块+完整页面重开；保存输入/素材摘要、断言和截图 |
+| SO-ORBIT-01 | `tests/physics.mjs`、`tests/pass-reference.mjs`、`tests/dfh1-history.mjs`、`tests/orbit-events.mjs` | 有效期内外、暂停/倍速/跳时、事件与过境；坐标/单位一致，外推和无效数据说明正确 | 固定参考+完整页面；记录星历、历元、时刻和误差口径 |
+| SO-PILOT-01 | `tests/main-flight-physics.mjs`、`tests/main-flight-input.mjs`、`tests/main-flight-controller.mjs`；`tests/browser/main-flight.js`、`flight-input.js` | 短按/松开、RCS/SAS/制动、失焦/切船、范围限制和退出；无遗留指令，不改参考星历 | 模块+输入fixture+完整应用；保存对象、开关、位移和焦点转换 |
+| SO-FLIGHT-01 | `tests/free-flight-physics.mjs`、`tests/free-flight-assembly.mjs`、`tests/free-flight-instruments.mjs`；`tests/browser/free-flight.js` | 两船离站/切换、原口回接/碰撞、参数更改和保存重开；两船独立，加载先暂停 | 实际GLB+同源重开；保留存档、失败原因和仪表读数 |
+| SO-DOCK-01 | `tests/docking-training.mjs`、`tests/docking-assistance.mjs`、`tests/docking-workbench.mjs`；`tests/browser/flight-lab.js` | 起点、辅助/纯手动、停靠点、接触和导出；判定符合设置，快捷键不绕过限制 | 模块+训练页；记录场景、容差、辅助、接触值和JSON/CSV |
+| SO-OBSERVE-01 | `tests/pass-prediction.mjs`、`tests/exposure-lab.mjs`、`tests/balcony-lab.mjs`、`tests/survey-lab.mjs`；`tests/browser/observation-archive.js`、`survey-live.js` | 切目标、地点/时段、曝光对照、排程/补拍、保存重开；正确星历/时间，缺格明确 | 固定星历+完整实验；保存输入、窗口、成片和重开结果 |
+| SO-TELESCOPE-01 | `tests/xuntian-pointing.mjs`、`tests/xuntian-crosshair.mjs`、`tests/xuntian-view-render.mjs`、`tests/solar-data.mjs`；`tests/browser/xuntian-view-render.js` | 搜索/固定/手动/导航球接管、遮挡、近站深度、照片；四波段/两分辨率/坏快照；时刻与来源正确 | 模块+WebGL+下载PNG；记录构图、快照、像素/几何结果 |
+| SO-EARTH-01 | `tests/city-terrain-cache.mjs`、`tests/city-terrain.mjs`、`tests/earth-elevation-math.mjs`、`tests/earth-elevation.mjs`；`tests/browser/earth-elevation.js`、`earth-elevation-geography.js` | 城市离线/下载/取消/删除/重开，高程/照片、地理开关、缺源与释放；影像/高程来源分开 | 模块+Chrome/WebKit/IndexedDB；保存视野、块数、预算、PNG和网络/重开结果 |
+| SO-SKY-01 | `tests/deep-sky-catalog.mjs`、`tests/sky-detail-cache.mjs`、`tests/constellation-art.mjs`；`tests/browser/sky-detail.js`、`sky-source-switch.js` | 三种目录范围、五种影像来源、回退、共享照片、关闭释放；目录/影像天区与年代正确 | 模块+完整渲染/重开/窄屏；保存来源、视场、目录口径和PNG |
+| SO-RESOURCE-01 | `tests/resource-fetch.mjs`、`tests/resource-cache.mjs`、`tests/resource-recovery.mjs`、`tests/cloud-switch.mjs`、Python服务测试；`tests/browser/cloud-versions.js` | 重复下载、配额、断网、重启、收藏、取消/删除迟到响应；保留有效数据和独立错误 | 模拟服务与真实浏览器分开，使用隔离缓存；保存事务、请求和状态 |
+| SO-SAVE-01 | `tests/scene-share.mjs`、`tests/environment-presets.mjs`、`tests/free-flight-instruments.mjs`；`tests/browser/missions-reload.js`、`observation-archive.js` | 场景往返、缺快照、偏好独立、飞行读取、同源重开和存储失败；临时副本明确 | 正常/受限存储及不同源对照；保存测试文件和步骤 |
+| SO-DELIVERY-01 | `scripts/check-docs.py`、`tests/docs-examples.mjs`、`tests/documentation.py`、`tests/web-build.mjs`；`tests/browser/help-current.js`、`floating-windows.js`，ZIP/启动器核验 | 版本、帮助、三构建资源与包内文档一致；四语言关键入口窄屏可达；启动器目录正确 | 文档检查+三构建+解压包+实际入口；保存版本、SHA-256、签名/启动及链接检查范围 |
+
+## 浏览器脚本如何使用
+
+`tests/browser/` 中包含不同年代的三类入口：供Playwright CLI执行的 `async(page)=>{...}` 函数、导出检查函数的Node模块，以及需要esbuild打包后注入页面的浏览器模块。先读对应文件的说明、导出和路径；不能把所有 `.js` 逐一当作 `node file.js` 执行。
+
+帮助目录共16个主题，首次导览保持八步。`tests/browser/help-current.js`用于核对主题目录、目标控件和退出恢复；实际执行状态由本批记录决定。
+
+历史脚本可能固定旧文件、URL、控件或版本断言。运行前适配受检目标并记录；脚本失配与产品失败分开，跳过的断言不得记为通过。
+
+独立真实来源检查有两个明确的Node入口，需要可用Playwright模块、相应浏览器和网络：
+
+```sh
+node tests/city-terrain-source-browser.mjs
+CITY_TEST_ENGINE=webkit node tests/city-terrain-source-browser.mjs
+node tests/earth-elevation-source-browser.mjs
+DEM_ENGINE=webkit node tests/earth-elevation-source-browser.mjs
+```
+
+若Playwright不是源码项目的本地依赖，可按脚本说明将 `PLAYWRIGHT_MODULE` 指向实际已安装模块。Chromium路径使用 `channel: 'chrome'`，需要相应Chrome；WebKit是自动化引擎检查，不能直接代称原生Safari启动器验收。上述脚本访问真实来源并输出开发证据，不在当前默认CI中自动执行。
+
+浏览器检查记录控制台异常和未处理拒绝，等页面/纹理就绪并查看实际画面。写设置、清缓存的测试使用独立profile/来源和服务目录。
+
+## 离线与存储验收步骤
+
+1. **内置离线**：在未预热的测试profile中，用已解压的单文件或本机包断开外网启动；检查两任务、内置城市、JWST和全球高程底座。网页首次加载无法等同此步骤。
+2. **持久下载**：联网主动下载一个非内置城市或指定资源，等到完成状态；关闭页面，屏蔽外网，在同一来源重开，核对实际纹理/高程和目录状态。只在原页切离线不能证明跨启动保存。
+3. **失败与竞态**：在请求/解码时切任务、换来源、取消或删除；延迟响应完成后确认旧数据未重新写回/应用；中断服务后恢复并确认状态可继续。
+4. **清理范围**：分别检查浏览器副本、手动城市包、自动天空/高程缓存和本机云图库。验证活动/收藏保护及明确的删除提示；不对用户真实库执行破坏性验收。
+5. **存储受限**：模拟IndexedDB/localStorage不可写、配额不足和事务失败，检查错误提示、内存回退与现有记录；重开后不将临时副本说成永久存档。
+6. **来源隔离**：在另一个浏览器/主机名/端口打开，验证文档未承诺自动共享。场景和快照转移后分别核对配置、模型库、天气、太阳图与飞行存档，缺失资源应明确提示。
+
+## 数据、数值与性能结论的范围
+
+`tests/reference/`保存Skyfield轨道/过境、大气光谱等参考。记录来源、版本、输入、单位和误差定义；区分实现一致性、插值/拟合误差和真实测量精度。地形源采样核对仍需另做画面、遮挡、地理叠加和释放检查。
+
+性能记录应注明设备、浏览器、窗口像素、DPR、画质、视野、驻留块数、网络与缓存状态、测量时长及方法。GPU预算、CPU类型数组、压缩磁盘缓存和浏览器进程RSS分别记录；历史视场的内存或帧率样本不作为全设备承诺。不存在已定义的统一FPS/启动秒数门槛时，不补造一个“达标”结果。
+
+## 当前覆盖边界与证据索引
+
+| 类别 | 可查资料或入口 | 使用边界 |
+| --- | --- | --- |
+| 当前能力基线 | [产品范围](product-scope.md)及本页能力映射 | 当前实现整理，不是追补的历史需求审批记录 |
+| 本批执行 | `docs/v1.20-validation.json` | 由实际运行填写；每种未运行的浏览器、构建或来源必须保留相应状态 |
+| 历版验证 | `docs/v*-validation.json`、[v0.55记录](v0.55-validation.md)、各版本专题“验证”章节 | 对应版本、样本和环境的历史证据，不能证明当前源码全部通过 |
+| 高程与城市 | [地形数据和检查](v1.17-earth-elevation.md)、[城市与星空](v1.16-city-sky.md)、相关source-browser脚本 | 第三方源可能变化；完整联网检查、合成故障和离线重开分别记录 |
+| 星空与太阳 | [高清星空](v1.15-sky-detail.md)、[深空目录](deep-sky-catalog.md)、[太阳数据](solar-observations.md) | 历史目录/影像年代与软件时刻分开；来源/颜色和回退按实际使用写入 |
+| 自动集成 | `.github/workflows/pages.yml`与对应GitHub run | 仅证明该次列出的步骤；不等于所有浏览器、便携包和本机入口 |
+| 发布与安装 | 实际构建/包摘要、入口版本和启动器配置，发布渠道的版本/URL/run/release ID | 不能用CHANGELOG中的“正式版”标签代替远端当前状态核验 |
+
+尚无全OS/浏览器/设备支持矩阵和统一性能门槛，默认CI未聚合全部浏览器脚本。历史报告和忽略目录截图需确认仍可取得；执行记录应明确这些覆盖边界及其使用影响。

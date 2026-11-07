@@ -2329,5 +2329,20 @@
   "地形显示预算已满，保留可用地形": "Budget d’affichage du relief atteint ; le relief disponible est conservé",
   "地形构建内存已满，保留可用地形": "Budget mémoire de construction du relief atteint ; le relief disponible est conservé",
   "高程处理失败，请重试": "Échec du traitement des altitudes ; veuillez réessayer",
-  "高程请求超时，可稍后重试": "La requête d’altitude a expiré ; réessayez plus tard"
+  "高程请求超时，可稍后重试": "La requête d’altitude a expiré ; réessayez plus tard",
+  "观测与操纵": "Observation et pilotage",
+  "地球与星空数据": "Données de la Terre et du ciel",
+  "数据与保存": "Données et sauvegarde",
+  "巡天取景与太阳观测": "Télescope et observation solaire",
+  "主页面近轨操纵": "Pilotage à proximité dans la vue principale",
+  "自由飞行与对接": "Vol libre et amarrage",
+  "城市影像与真实地形": "Images urbaines et relief réel",
+  "高清星空与星座": "Ciel détaillé et constellations",
+  "缓存与离线保存": "Caches et téléchargements hors ligne",
+  "打开「巡天取景」，搜索天体或城市并拍照；太阳观测提供带观测日期的 SDO 实拍。改变模拟时间不会生成其它日期的太阳影像。": "Ouvrez le télescope pour rechercher des objets ou des villes et prendre des photos. Les observations solaires affichent des images SDO réelles et datées. Modifier le temps simulé ne produit pas d’images du Soleil pour d’autres dates.",
+  "在「航天器姿态」打开导航球，点击球面取得操纵焦点。W/S、A/D、Q/E 转向；R 切换 RCS，H/N、J/L、I/K 平移，T 切换 SAS。镜头目标与驾驶对象分别选择。": "Activez la sphère de navigation dans l’orientation du véhicule, puis cliquez dessus pour piloter au clavier. W/S, A/D et Q/E tournent ; R active le RCS, H/N, J/L et I/K déplacent, T active le SAS. La cible de caméra et le véhicule piloté sont choisis séparément.",
+  "从当前空间站组合选择神舟或天舟开始独立飞行，可保存后继续。任务实验室的交会对接训练使用独立教学场景；普通场景导出不包含自由飞行存档。": "Lancez un vol indépendant avec un Shenzhou ou un Tianzhou de l’assemblage actuel, puis sauvegardez et reprenez. L’entraînement à l’amarrage du laboratoire utilise un scénario pédagogique séparé. L’export de scène ordinaire ne contient pas les sauvegardes de vol libre.",
+  "从城市库查看或下载影像，已内置北京和西雅图。真实地形默认开启，以实际海拔显示山川；影像与高程各有分辨率和年代，地形显示不增加着陆或碰撞模型。": "Consultez ou téléchargez les images dans la bibliothèque des villes ; Pékin et Seattle sont inclus. Le relief réel est activé par défaut et utilise les altitudes réelles. Images et élévations ont leurs propres résolutions et dates. Le relief affiché n’ajoute aucun modèle d’atterrissage ou de collision.",
+  "放大天区后按需加载所选星空影像，主画面、巡天和照片共用。内置宇宙悬崖来自 2022 年 JWST 红外观测；联网图源在覆盖之外会回退。星座插画和星名可在「地理与星图」分别开关。": "Zoomez pour charger les images du ciel à la demande, partagées entre la vue principale, le télescope et les photos. Les Falaises cosmiques intégrées proviennent d’observations infrarouges JWST de 2022 ; les sources en ligne utilisent un fond de repli hors couverture. Illustrations des constellations et noms d’étoiles ont des options séparées dans la carte du ciel.",
+  "在「数据与资源」查看来源、日期与缓存。城市的完整离线下载不自动淘汰，天空与高程采用有上限的缓存；清除网站数据会影响本地保存。场景文件不包含用户模型、音乐和下载缓存。": "Consultez les sources, dates et caches dans Données et ressources. Les téléchargements urbains complets hors ligne ne sont pas évincés automatiquement ; les caches du ciel et du relief sont limités. Effacer les données du site affecte les sauvegardes locales. Les scènes ne contiennent ni modèles importés, ni musique, ni caches téléchargés."
 }

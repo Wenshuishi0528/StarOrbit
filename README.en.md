@@ -1,308 +1,121 @@
 # StarOrbit · 星轨
 
-**Space & Orbit Simulator · Observe, assemble and fly spacecraft above Earth**
+**Space & Orbit Simulator · Observe, assemble, pilot and photograph spacecraft**
 
 [中文](README.md) | English
 
-[**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Technical references](docs/README.md) · [Changelog](CHANGELOG.md)
+[**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-StarOrbit brings spacecraft models, orbital motion, Earth's environment and interactive controls into a shared 3D scene. Assemble the China Space Station, watch its solar arrays track the Sun, and follow its orbit through day and night. Switch to Dong Fang Hong 1 to explore historical orbit reconstruction, spin and simulated telemetry, or import your own spacecraft. The Mission Lab adds site-based pass forecasts and a rendezvous and docking workbench.
+**Author: Wenshuishi · Current source: v1.20 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-The application supports space exploration, educational demonstrations and scene photography. Public orbital records, astronomical calculations and historical sources provide the basis for the simulation; interactive models make the resulting motion and geometry visible.
+StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
-![China Space Station, independent Xuntian, orbital readings and ground track in StarOrbit](docs/hero.jpg)
+It is intended for space enthusiasts, educational demonstrations and scene creation. Start by watching the station move through day and night, then assemble modules, undock a ship, find a pass or compose an image with the Xuntian telescope. Public orbital and astronomical sources support the calculations; historical reconstructions, training models and visual effects have explicit limits.
 
-*China Space Station scene with configurable modules, solar arrays, clouds, sky labels, orbital readings and an event timeline.*
+![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-**Author: wenshuishi0528 · Current source: v1.19 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+> v1.20 updates the documentation and help based on the v1.19 implementation. See the [verification overview](docs/verification.md) for documentation and build acceptance status. Online and portable editions show their own version in the interface; the download link always points to a published release.
 
-Open the Xuntian finder and orbit map independently from the right toolbar. The navball supports compact and full layouts. The Views menu combines camera targets, recentering and viewing directions.
-
-> This guide describes the v1.19 source build. The online and portable editions each show their version in the header.
-
-In the China Space Station scene, open **Xuntian viewfinder** from the right toolbar. Search for Vega, Orion, a HIP identifier, M31, a nebula name or a city such as Beijing. Center the crosshair and lock a point on the sky or Earth, roll the telescope to compose the shot, then adjust the optics and save the view. The finder follows the active Earth and sky imagery. [Telescope and image quality (Chinese)](docs/v0.99-xuntian-image.md).
-
-Enable the main navball under **Spacecraft attitude**, then click the ball to pilot the selected craft with KSP-style keys. Rotation has inertia; RCS enables translation and SAS stabilizes attitude. **Free flight** still provides separate Shenzhou/Tianzhou undocking, flight saves and port capture. The Xuntian finder identifies the current crosshair direction, and the sky chart adds all Messier objects plus selected NGC targets. [Controls and scope (Chinese)](docs/v1.09-pilot-star-chart.md). Drag floating-window headers to arrange a persistent layout.
-
-The finder's **Solar observations** mode displays real SDO sunspot, corona and prominence imagery at 1K or 2K, with updates for the selected channel and dated PNG exports. The resource page and finder share the same images. Online updates use the desktop service; the web edition imports solar snapshots. [Solar observing guide (Chinese)](使用说明.md#太阳观测).
-
-On-demand HD sky imagery is shared by the main view, telescope and photos. A small offline AVIF pack adds Webb’s 2022 Cosmic Cliffs; search for `Cosmic Cliffs`. Steering a pinned reticle keeps the new point fixed. [Sources and cache policy](docs/v1.15-sky-detail.md)
-
-Includes 2025 Sentinel-2 10 m terrain for Beijing (40 × 40 km) and Seattle (20 × 20 km), totaling 5.75 MiB of AVIF tiles. Other cities support on-demand loading, offline downloads and deletion. Shared sky imagery gains a source selector and a 12,162-object deep-sky catalogue. [v1.16 details](docs/v1.16-city-sky.md)
-
-Sky annotations also include default-enabled teaching illustrations for all 88 constellations (about 0.99 MiB), registered to real stars. Unnamed catalogue labels now default off and can be enabled explicitly.
-
-Earth & Sky includes optional true-height terrain meshes, using a small ETOPO 2022 global base and on-demand Copernicus GLO-30 detail. Main view, finder and photos share elevations and existing HD ground imagery. [Terrain guide and limits](docs/v1.17-earth-elevation.md)
-
-## Contents
-
-- [Get started](#get-started)
-- [Interface and basic controls](#interface-and-basic-controls)
-- [Spacecraft and missions](#spacecraft-and-missions)
-- [Station assembly and solar arrays](#station-assembly-and-solar-arrays)
-- [Orbits, time and attitude](#orbits-time-and-attitude)
-- [Earth, sky and environment](#earth-sky-and-environment)
-- [Mission Lab](#mission-lab)
-- [Data and resources](#data-and-resources)
-- [Photography, scenes and preferences](#photography-scenes-and-preferences)
-- [Data and simulation models](#data-and-simulation-models)
-- [Local use and development](#local-use-and-development)
-- [Documentation, credits and licensing](#documentation-credits-and-licensing)
+<a id="interface-and-basic-controls"></a>
 
 ## Get started
 
-1. Open the [online simulator](https://wenshuishi0528.github.io/StarOrbit/) and wait for its models and environment to load.
-2. Choose the introductory tour, or use **Help** at the upper right to find controls and replay the tour later.
-3. Select the China Space Station or Dong Fang Hong 1 in the mission selector. Drag to rotate and use the wheel to zoom.
-4. Open the orbit and time panel. Try spacecraft follow or Earth orbit overview, pause the simulation, change the date or accelerate playback.
-5. Open **Mission Lab** for pass forecasts and docking practice. The same tab bar opens orbital long exposures, balcony observing and the Xuntian survey planner.
+1. Open the [online edition](https://wenshuishi0528.github.io/StarOrbit/). Take the introductory tour or choose an item in **Help** at the upper right.
+2. Select the China Space Station or Dong Fang Hong 1 in the left sidebar. Drag with the left mouse button to rotate and use the wheel to zoom.
+3. In the orbit and time panel, pause, change the date or adjust playback speed. Compare the readings, ground track and event timeline.
+4. Open the **Xuntian viewfinder** from the right toolbar. Search for a star, deep-sky target or city, compose the view and save a photo. On narrow screens, open **Tools** first.
+5. Use the feature links below for flight and observation experiments. Full procedures are in the [Chinese user manual](使用说明.md).
 
-First use defaults to detailed 8K overall quality and the enhanced 16K Milky Way. For lower rendering load, choose 2K overall quality and the ordinary sky mode. Detailed textures and effects load on demand, so the first switch may take a moment.
+First use defaults to detailed 8K overall quality, the enhanced 16K Milky Way and real terrain enabled. If rendering is too demanding, reduce overall quality, disable volumetric clouds or use the ordinary sky mode. The interface reports the imagery level actually loaded.
 
-| Edition | How to open it | Resources and updates |
+| Edition | How to open it | Data and network conditions |
 | --- | --- | --- |
-| Online | Visit the launch link | Initial loading needs a connection. Includes orbital and cloud snapshots and supports file import; some processing requires the local service |
-| Portable | Extract a release archive and open `StarOrbit.html` | Embedded assets support offline use. Features follow the release version |
-| Local service | Use a bundled launcher or start the service from source | Supplies endpoints for NASA cloud processing, SDO imagery and official orbit updates; downloading needs a connection |
-| Source | Install dependencies, build and run | Uses the current code and allows changes to the application or assets |
+| Online | Open the website | Bundled resources load from the site on demand; uncached areas and updates need network access, and some conversions require the local service |
+| Portable single file | Extract a release and open `StarOrbit.html` | Base runtime assets are embedded; external detail imagery, local elevation and updates still depend on network or cached data |
+| Local service | Use the included launcher or `python3 scripts/serve.py --open` | The browser displays the app; the service supplies resources and data conversion. Online updates still need an available source |
+| Source checkout | Install dependencies and build | Supports development; build dependencies and raw-data preparation are separate from ordinary use |
 
-## Interface and basic controls
+<a id="spacecraft-and-missions"></a>
+<a id="station-assembly-and-solar-arrays"></a>
+<a id="orbits-time-and-attitude"></a>
+<a id="earth-sky-and-environment"></a>
+<a id="mission-lab"></a>
+<a id="photography-scenes-and-preferences"></a>
 
-| Area | Purpose |
-| --- | --- |
-| Left sidebar | Mission, time, environment, assembly, solar arrays, attitude and scene files; sections collapse independently |
-| 3D viewport | Left-drag rotates, right-drag pans, wheel zooms. Touch supports one-finger rotation and two-finger zoom/pan |
-| Orbital readout | Simulation time, spherical altitude, orbital speed, illumination, effective solar exposure and coordinates |
-| Ground-track map | Current position, past and future tracks, and the region below the spacecraft |
-| Event timeline | Sunlight, penumbra, umbra, apsides and equator crossings; select events or move through time |
-| Upper-right tools | Mission Lab, Data & resources, Help and preset views; some entries move into Tools on narrow screens |
-| Lower-left player | Background music, or DFH-1 recordings and simulated telemetry |
+## What you can do
 
-The interface supports Chinese, English, Russian and French. Date/time input uses **UTC+8**; UTC epochs from orbital files are identified separately.
-
-## Spacecraft and missions
-
-### China Space Station
-
-Explore Tianhe, Wentian, Mengtian, Shenzhou, Tianzhou and Xuntian models. Select a complete assembly, the three-module station or Tianhe alone, then configure docking ports and solar arrays individually.
-
-The station uses published OEM position and velocity records. Spacecraft follow is useful for close observation; Earth orbit overview shows the orbit, spacecraft position and ground track together.
-
-### Dong Fang Hong 1
-
-DFH-1 has its own model, orbit, attitude and audio experience:
-
-- **Historical and modern orbits:** Before 2000, the scene uses a reconstruction constrained by reported orbital parameters and historical pass times. From 2000-01-01 00:00 UTC+8, it uses the selected modern orbital data.
-- **Spin and orientation:** Choose prograde-follow or inertially fixed orientation, enable the historical nominal 120 rpm spin, and add manual three-axis attitude offsets.
-- **Broadcast and telemetry:** Play the bundled historical recording, or listen to modeled Sun-sensor, infrared horizon-sensor and experimental sequence signals while watching their response to illumination and attitude.
-
-The historical orbit is a source-constrained reconstruction. Live telemetry is generated by reference sensor models. See the [historical orbit notes](docs/v0.78-details.md) and [telemetry model](docs/v0.55-details.md) for their sources and assumptions.
-
-### Custom spacecraft
-
-Download the configuration template, prepare a JSON configuration, a GLB with embedded geometry/textures and its configured orbit file, then select them together with **Import spacecraft**. A model-only mission is also supported.
-
-Each mission retains its own orbit, attitude, spin and camera. Earth, clouds, aurora, sky and simulation time are shared. See the [import instructions](使用说明.md#导入航天器) and [configuration format](docs/v0.30-details.md).
-
-## Station assembly and solar arrays
-
-### Configurable assemblies
-
-Choose a preset or assign modules to individual ports. Multiple instances of a spacecraft type are allowed. Added Tianhe cores attach through their aft ports and expose their own node ports for further expansion; the sidebar groups controls by core.
-
-Focus the selected module for inspection. Independent Xuntian is a companion model for a co-orbital scene. Replacing a parent core removes its attached branch, so export a scene first if you want to keep that assembly.
-
-### Automatic and manual array control
-
-Automatic tracking uses each array's mounting orientation and rotational constraints. Optional body/array occlusion allows the exposure calculation to account for shadows cast by the assembly.
-
-Manual controls provide module selection, assembly and panel angles, linked or independent left/right panels, and Wentian/Mengtian linking. A manual adjustment exits global automatic tracking; enable tracking again to resume it.
-
-**Total effective solar exposure is an area-weighted geometric fraction** for the blue front faces of the panels, combining incidence angle, occlusion and the visible fraction of the Sun. Arrays continue tracking through eclipse while direct exposure falls to zero. See the [solar-array model](使用说明.md#太阳翼与受光).
-
-## Orbits, time and attitude
-
-### Time
-
-Use real time, a custom date, pause, or playback up to 1000×. The combined input follows year, month, day, hour, minute and second order: left/right arrows select a field; up/down arrows adjust it. Both 12-hour and 24-hour display are supported. Step by one second, one minute, ten minutes or one hour across dates.
-
-### Tracks and events
-
-Orbit overview shows the path around Earth, while the minimap shows its ground track. Click the displayed track or drag its current position to seek a valid time along it, preserving the existing play/pause state.
-
-The event timeline offers 3-, 12- and 24-hour windows with sunlight, penumbra and umbra bands, apsides and equator crossings. Filter event types, move to previous/next events, preview shortly before an event, or pause when reaching it.
-
-### Attitude
-
-Roll, pitch and yaw controls provide ±180° manual offsets with synchronized numeric inputs and sliders. Offsets apply relative to the active mission reference: ground-track orientation for the station, or prograde/inertial orientation for satellites. Resetting attitude clears the offsets while retaining the orbit and time.
-
-Click the enabled navball for keyboard control: W/S pitch, A/D yaw, Q/E roll, R for RCS and T for SAS. With RCS enabled, H/N moves forward/back, J/L left/right and I/K down/up. Releasing a key preserves momentum. SAS brakes rotation and holds attitude; relative translation needs counterthrust or the separate brake. Main-page piloting is a 1× near-orbit exercise limited to a 10 km offset. Restore observation returns to the reference state without altering the shared orbital dataset.
-
-## Earth, sky and environment
-
-Environment settings persist across spacecraft switches.
-
-| Component | Features |
-| --- | --- |
-| Earth and Moon | Four Earth quality levels; day/night, twilight, atmosphere, ocean reflections and city lights; time-dependent Moon position and phase with a look-at/return view |
-| Surface detail | In 8K mode, view-dependent NASA surface and night-light tiles add detail for close observation |
-| Clouds | One cloud library for global imagery, regional Himawari-9 observations, and Canadian cloud forecasts; optional 8K volumetric and evolving clouds |
-| Night-side clouds | Cloud coverage can obscure city lights, with stronger occlusion under thicker clouds |
-| Aurora | NOAA OVATION snapshots or local distribution; volumetric curtains in 8K and the classic effect in 4K |
-| Stars and constellations | 41,411 catalogue stars and native 16K NASA Milky Way source imagery; a shared 57,431-star label catalogue, 965 named-star entries and zoom-dependent catalogue identifiers; independent layers for 88 constellations and 127 deep-sky targets |
-| Geography | Countries, capitals, cities, borders, seas, mountains, rivers and lakes, with density and hierarchy controls |
-| Atmospheric phenomena | Simulated cloud lightning, high-altitude flashes, airglow and meteors; natural or enhanced presentation |
-
-Overall quality and sky quality are independent. Automatic performance protection adjusts sampling for some effects. Cloud shapes, atmospheric events and enhanced exposure are visual representations; see the [environment guide](使用说明.md#地球星空与环境) for source dates and resolution details.
-
-## Mission Lab
-
-Open **Mission Lab** at the upper right. The main scene stops advancing while the lab is open and resumes on return. Docking has an independent training clock.
-
-### Long exposures, balcony observing and Xuntian scheduling
-
-- **Orbital long exposure** captures two tracking modes from the same opening direction and exposure interval. Compare the frames with a wipe, or send a ground site and time from a station pass to try ground tracking.
-- **Balcony observing** can follow the China Space Station, Dong Fang Hong 1 or an imported Earth-orbit mission from the same saved site. Each target has its own orbital data. The pass card accounts for the site's skyline and shows when and where to look. Choose a rehearsal or watch with the current clock.
-- **Xuntian survey planning** can send a planned tile to the live telescope. The main scene captures a real frame within the simulation at its current time. A four-tile contact sheet shows individual images and missing tiles. Teaching exposures use their independent orbit.
-
-The local observation log saves the epoch, orbital data, settings and available pictures for reopening. [Mission Lab guide (Chinese)](docs/v1.00-observing.md)
-
-### Pass forecasts
-
-Calculate when and where to look for the selected spacecraft from a specified location.
-
-1. Select a spacecraft in the main scene, then open the pass forecast tab.
-2. Enter location, coordinates, altitude, start time, duration and minimum elevation.
-3. Select a pass to see when it enters the elevation threshold, reaches its maximum elevation and leaves the threshold, with directions for each stage.
-4. Inspect the elevation-over-time curve and slider. Export an ICS calendar, or jump to the main scene when the orbit coverage supports it.
-
-Candidate viewing windows combine spacecraft sunlight and ground twilight conditions. Forecasting requires valid OEM coverage or SGP4 elements within the allowed epoch interval. Weather, terrain obstruction and apparent brightness require separate assessment. Refresh expired orbital data or choose a covered time interval.
-
-### Rendezvous and docking
-
-Practice relative motion, thrust and attitude control while approaching a station port.
-
-| Scenario | Starting conditions |
-| --- | --- |
-| Final alignment | About 12 m from the port, for final alignment and capture |
-| Standard approach | 200 m, for staged approach and hold-point clearance |
-| Offset recovery | 50 m with lateral and attitude offsets |
-| Random position | Random position and attitude 50–500 m in front of the port; restarting draws a new setup |
-
-**First exercise:** Choose final alignment, leave beginner assistance enabled, select assisted approach and start. When applicable hold checks remain stable, use GO to continue.
-
-With assistance enabled, use manual control, assisted approach, position hold or retreat, with teaching hold points. Disabling assistance enables manual thrust and rotation while removing automatic control, damping, relative braking, hold points and teaching range restrictions. Motion continues after releasing the controls.
-
-Use the external camera for an overall view or the port-aligned docking camera for alignment. Instruments show distance, closing speed, lateral offsets, attitude and angular rate. Large view and Fill window provide more space for the viewport. Review the recorded flight and export JSON or CSV after training.
-
-The contact-speed limit defaults to **0.15 m/s**, is adjustable, and applies to total relative speed at contact. The workbench uses an educational relative-motion and port-contact model. See the [docking manual](使用说明.md#交会对接训练) for keyboard controls, mode differences and capture criteria.
-
-## Data and resources
-
-**Open cloud library** in Earth settings opens the same library as the cloud card in **Data & resources**. Choose and preview saved maps, download a published frame, and explicitly apply it. The active map stays visible at the top; matching disk and browser copies share one row. Catalog checks run independently of aurora and orbit updates.
-
-| Data | Main source | Use |
+| Goal | Main capabilities | Procedures |
 | --- | --- | --- |
-| Station orbit | China Manned Space Engineering Office / BACC OEM | Interpolation within records; Kepler continuation outside coverage |
-| Modern DFH-1 orbit | CelesTrak, NORAD 4382 | SGP4 propagation from GP/OMM elements |
-| Global clouds | Live Cloud Maps, NOAA GMGSI, NASA SatCORPS, regional Himawari-9 cloud masks, and Canadian GDPS forecasts | Apply saved maps directly; downloads leave the view unchanged; coverage and visual warnings remain visible; corrupt files are blocked |
-| Aurora distribution | NOAA SWPC OVATION | Forecast distribution controls geographical activity and intensity |
-| Solar observations | NASA SDO HMI/AIA through Helioviewer | Projects actual images onto the apparent solar disc in the finder; observation time remains distinct from simulation time; update or import snapshots |
+| Observe spacecraft | China Space Station, Dong Fang Hong 1, per-mission orbits and attitude, custom GLB spacecraft | [Missions and spacecraft](使用说明.md#任务与航天器) |
+| Assemble the station | Port-based assemblies, repeated modules, constrained array axes and geometric illumination with occlusion | [Assembly](使用说明.md#空间站组合), [solar arrays](使用说明.md#太阳翼与受光) |
+| Explore orbits | Time control, ground tracks, sunlight and eclipses, apsides and equator crossings | [Time and events](使用说明.md#时间轨迹与事件) |
+| Pilot and fly | Main navball RCS/SAS, Shenzhou and Tianzhou undocking and return, separate docking workbench | [Three piloting modes](#three-piloting-modes) |
+| Explore Earth and sky | Dated surface/night-light choices, cloud library, sunrise and sunset, aurora, sky chart, city imagery and real terrain | [Earth, sky and environment](使用说明.md#地球星空与环境) |
+| Use Xuntian | Target search, pinned pointing, formation composition, Solar System targets, real SDO imagery and PNG exports | [Viewfinder](使用说明.md#主页面的巡天望远镜), [solar observations](使用说明.md#太阳观测) |
+| Plan observations | Pass forecasts, orbital long exposures, balcony observing, four-tile surveys and observation records | [Passes](使用说明.md#过境预报), [observation experiments](使用说明.md#长曝光阳台观测与巡天排程) |
+| Save and share | Screenshots, environment presets, scene JSON, resource snapshots and separate flight saves | [Photography and scenes](使用说明.md#摄影收藏与场景分享), [save scope](使用说明.md#设置保存与恢复) |
 
-Live Cloud Maps and GDPS download directly in the browser. NOAA GMGSI, NASA SatCORPS and Himawari-9 use the local service. Web users can import processed snapshots. Connection or source failures preserve existing data and appear as failed checks.
+The main view, Xuntian finder and photos share Earth and sky resources. Bundled 2025 Sentinel-2 10 m imagery covers Beijing (40 × 40 km) and Seattle (20 × 20 km); other cities support on-demand viewing and downloads. The chart includes teaching illustrations for 88 constellations and 12,162 deep-sky display entries. Catalogue labels and image coverage are separate. See the [manual](使用说明.md#地球星空与环境) for dates, bands, effective resolution and coverage fallback.
 
-History supports favorites, export, import and cleanup by type. Automatic cache cleanup protects active data, favorites and settings references. Orbits are stored per mission; environment resources are reused. See the [resource guide](使用说明.md#数据更新与缓存).
+## Three piloting modes
 
-## Photography, scenes and preferences
+| Mode | Purpose and limits | Persistence |
+| --- | --- | --- |
+| [Main-scene navball](使用说明.md#导航球与近轨操纵) | Pilot the mission spacecraft or independent Xuntian with inertial rotation, RCS and SAS; adds near-orbit motion around a reference orbit | Piloting state belongs to the current page session, rather than a complete flight save |
+| [Free flight](使用说明.md#自由飞行) | Copy the current station assembly, undock Shenzhou/Tianzhou and return to the original port, with proximity collisions and checkpoints | Separate mission saves, resumable in the same browser and origin |
+| [Docking training](使用说明.md#交会对接训练) | Fixed training scenarios, hold points, assisted/manual controls, instruments and replay reports | Current-session training record; export JSON/CSV to retain it |
 
-### Capture and share
+The modes share the main attitude and translation keys, but have different dynamics, assistance rules and save scope. Camera targets and piloted objects are also selected separately. Check the active object before taking control.
 
-Photography mode hides the interface for framing a scene. Save a screen capture or a 4K-wide PNG, use fixed exposure, or store an environment/camera favorite with its time and view.
-
-Export a `.starorbit.json` scene to preserve the mission, assembly, arrays, attitude, time, cameras and environment. Orbital data is embedded; downloaded weather is referenced by snapshot identifier. Transfer matching weather snapshots separately when reproducing an exact scene.
-
-### Music and languages
-
-Ordinary missions have six bundled tracks, with import, ordering, removal, volume and seeking controls. Playback starts with a random track and repeats the playlist. Hover over the lower-left note to open the player; click Play if the browser blocks autoplay.
-
-DFH-1 uses its dedicated recording or modeled telemetry. Returning to another mission restores the ordinary playlist position. Chinese, English, Russian and French are available, with the language preference saved independently.
-
-### Saved settings
-
-Assembly, attitude, time mode, cameras, environment and panel state are stored for the current browser and address. Use scene files to transfer settings between browsers or online/local addresses.
-
-Factory reset clears preferences and the assembly while retaining downloaded snapshots and favorites. The public visit counter reports visits to the official web edition; the local edition reads the same number. See the [counter notes](docs/v0.53-details.md).
+<a id="data-and-resources"></a>
 
 ## Data and simulation models
 
-| Component | Basis | Interpretation |
-| --- | --- | --- |
-| Station orbit | OEM positions/velocities and interpolation | Kepler continuation outside coverage; pass forecasts enforce their own validity checks |
-| Modern satellite orbit | Public elements and SGP4 | Accuracy depends on epoch and propagation interval; source and time are shown in the interface |
-| Historical DFH-1 orbit | Reported geometry, approximate launch-plane prior and multiple historical pass times | A historical reconstruction with illustrative extrapolation outside its fitted period |
-| Sun, Earth rotation and eclipse | Astronomy calculations, frame transformations and apparent-disc overlap | Earth is a 6371 km sphere; altitude and coordinates use spherical/geocentric conventions |
-| Attitude and arrays | Mission reference directions, manual offsets, axis constraints and sampled occlusion | Exposure is a geometric fraction; electrical power also depends on cell efficiency, temperature and other factors |
-| Docking | HCW motion around a 400 km circular reference orbit, quaternion attitude and finite thrust | An educational model with finite port contact and optional assistance rules |
-| Clouds, aurora and phenomena | Source maps or forecast distributions combined with procedural rendering | Volume and evolution are visual approximations; atmospheric events are simulated |
-| Surface, night lights and sky | NASA historical composites, a stellar catalogue and Milky Way imagery | Source dates remain relevant; sky brightness uses a display mapping |
+- **Orbits and time:** OEM records are interpolated inside their interval and continued using the supported model outside it. Modern satellites use public elements and SGP4. Pass forecasts apply separate validity checks. Interface date/time inputs use UTC+8; UTC observation times are labelled separately.
+- **History and training:** The historical DFH-1 orbit is a source-constrained reconstruction, and telemetry uses reference sensor models. Near-orbit flight and docking are educational/gameplay approximations.
+- **Illumination and terrain:** Array output is a geometric illumination fraction. Real terrain affects meshes and ground pointing, rather than adding terrain collisions or landing physics. Orbital altitude readings retain the existing spherical-Earth reference.
+- **Imagery and environment:** Surface imagery, night lights, clouds, elevations, sky images and SDO observations keep independent sources and dates. Moving simulation time does not generate real imagery for that date. Aurora and atmospheric phenomena include procedural visual models.
+- **Network and storage:** Settings, imported models, music and most caches belong to the current browser and origin; the local cloud library also uses disk storage. Scene files do not contain every downloaded resource or separate flight records. See [resource management](使用说明.md#数据更新与缓存) and [formats and compatibility](docs/formats.md).
 
-Source documents, assumptions and validation records are linked from the [technical reference index](docs/README.md).
+See the [product baseline](docs/product-scope.md) for scope and limits, [architecture](docs/architecture.md) for module relationships, and the [documentation index](docs/README.md) for numerical methods and historical evidence.
+
+<a id="源码格式--source-formatting"></a>
 
 ## Local use and development
 
-Build with **Node.js 18+**. **Python 3** is used by the local service and some tests. CI uses Node.js 22.
+For source development, use **Node.js 22 and Python 3.12**, the CI configuration. Other environments actually checked are listed in the validation record; some scripts require additional Python packages. From the source directory, run:
 
 ```sh
-git clone https://github.com/Wenshuishi0528/StarOrbit.git
-cd StarOrbit
 npm ci
 npm run build
 python3 scripts/serve.py --open
 ```
 
-The build generates portable `StarOrbit.html` and a lightweight local entry with resources. The service supplies local resource and update endpoints. macOS users can also use `启动星轨.command`. For optional NASA cloud processing, install:
+`npm run build` produces portable HTML and a lightweight local entry; `npm run build:web` creates the static `dist/` site. Some cloud conversions additionally require the optional Python packages in `scripts/cloud-requirements.txt`. Ordinary use does not require regenerating raw Earth imagery, EXR files or catalogues.
 
-```sh
-python3 -m pip install -r scripts/cloud-requirements.txt
-```
+See [development and release](docs/development-release.md) for setup, source layout, formatting, builds and publication, and [verification](docs/verification.md) for commands, coverage and current evidence. Source ZIPs and portable release archives serve different purposes.
 
-| Command | Purpose |
+<a id="documentation-credits-and-licensing"></a>
+
+## Documentation and maintenance
+
+| Document | Purpose |
 | --- | --- |
-| `npm test` | Orbital, environmental, assembly, attitude, data and Mission Lab checks |
-| `npm run build` | Portable and local builds |
-| `npm run build:local` | Lightweight local entry and resources |
-| `npm run build:web` | Static web build in `dist/` |
+| [User manual (Chinese)](使用说明.md) | Current procedures, keys, readings, saves, offline use and troubleshooting |
+| [Product baseline](docs/product-scope.md) | Current scope, constraints, acceptance targets and unsupported behavior |
+| [Architecture](docs/architecture.md) | Module responsibilities, data flows and runtime editions |
+| [Formats and compatibility](docs/formats.md) | Imports/exports, fields, units and storage boundaries |
+| [Development and release](docs/development-release.md) | Setup, checks, builds, distribution and recovery |
+| [Verification](docs/verification.md) | Coverage, current acceptance status, evidence and untested items |
+| [Technical/history index](docs/README.md), [changelog](CHANGELOG.md) | Reference material and version-specific evidence |
+| [Maintenance handoff](HANDOFF.md) | Current status entry points and historical handoffs |
 
-Application code is in `src/`, runtime assets in `assets/`, the build entry in `build.mjs`, and service/update scripts in `scripts/`. Raw asset preparation is needed when replacing the corresponding resources. Repository ZIPs contain source; portable HTML is distributed through release assets.
+Version-named technical documents may contain the design, procedures and measurements of a past version. Use the manual and current engineering documents for present behavior, then consult history to trace changes. Historical results apply only to their recorded version and conditions.
 
-## Documentation, credits and licensing
+## Credits
 
-- [User manual (Chinese)](使用说明.md): procedures, shortcuts, settings and troubleshooting.
-- [Technical reference index](docs/README.md): orbit, assembly, environment, telemetry, training and resource processing.
-- [Changelog](CHANGELOG.md): version changes and validation references.
-- [Asset notes](素材与迁移说明.md): sources, processing and third-party notices.
+Earth, sky, cloud, orbit, solar, constellation and music resources retain their own attribution and terms. Sources, preparation, resolution, dates, licences and derived processing are collected in the [asset notes](素材与迁移说明.md), with notices also retained beside the relevant assets.
 
-### Credits
+## Licensing
 
-| Content | Source and attribution |
-| --- | --- |
-| Base Earth textures | [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/), CC BY 4.0 |
-| 2026 daytime surface | NASA MODIS MCD43A4.061 2026 Q2 NBAR, QA-filtered approximately 1 km composite; [public mirror](https://planetarycomputer.microsoft.com/dataset/modis-43A4-061), [radiometry and limitations](docs/v0.83-surface-radiometry.md) |
-| Detailed surface and night lights | [NASA Blue Marble Next Generation](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/) and [Black Marble 2016](https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/), NASA Earth Observatory; Suomi NPP / VIIRS for night lights |
-| Milky Way | [NASA SVS Deep Star Maps 2020](https://svs.gsfc.nasa.gov/4851/), NASA/Goddard Space Flight Center Scientific Visualization Studio, Ernie Wright; Gaia DR2: ESA/Gaia/DPAC |
-| Moon | [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/), NASA SVS / Ernie Wright; LRO / LROC |
-| Solar observations | NASA/SDO and the AIA, EVE and HMI science teams; obtained through [Helioviewer](https://api.helioviewer.org/docs/v2/) under [SDO data-use rules](https://sdo.gsfc.nasa.gov/data/rules.php) |
-| Catalogue and sky styling | [d3-celestial / XHIP](https://github.com/ofrohn/d3-celestial), BSD 3-Clause; styling adapted from [StarSky Studio](https://github.com/Wenshuishi0528/StarSkyStudio), CC BY 4.0 |
-| Clouds | [Live Cloud Maps](https://github.com/matteason/live-cloud-maps), Contains modified EUMETSAT data; [NASA Langley Cloud and Radiation Research Group](https://satcorps.larc.nasa.gov/) |
-| Aurora | [NOAA SWPC OVATION](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) |
-| Orbits | [CMSEO / BACC](https://en.cmse.gov.cn/news/202107/t20210722_48418.html), [CelesTrak](https://celestrak.org/NORAD/elements/gp.php?CATNR=4382&FORMAT=JSON) |
-| Geography and music | Dataset and recording sources in the [asset notes](素材与迁移说明.md); China outlines use public Tianditu vector data |
-| Libraries | Three.js, Astronomy Engine, satellite.js, three-mesh-bvh and other dependencies retain their notices |
-
-Original code, models, interface and documentation that the author has rights to license use **[CC BY-NC 4.0](LICENSE)**. Commercial use requires separate prior written permission. Third-party libraries, data, music and textures retain their respective terms. See the [licensing scope](LICENSING.md).
-
-### 源码格式 / Source formatting
-
-安装依赖后运行 `npm run format` 整理 `src/` 中手写 JavaScript 和 CSS；运行 `npm run format:check` 检查格式。规则固定在 `.prettierrc.json`，工具版本固定在开发依赖中。HTML 模板含构建期精确替换标记，和数据、依赖、生成产物一起排除。格式化不涉及函数拆分或逻辑重构。
-
-Run `npm run format` to format handwritten JavaScript/CSS in `src/`, or `npm run format:check` to check. Templates, data, dependencies and generated files are excluded. v1.13 contains formatting-only changes; v1.14 consolidates camera targets, recentering and viewing directions in the Views menu. Both are included in the v1.14 release.
+Original code, models, interface and documentation that the author has rights to license use **[CC BY-NC 4.0](LICENSE)**. Commercial use requires separate prior written permission. Third-party libraries, data, music and textures retain their own terms. See [licensing and commercial permission](LICENSING.md) for the full scope and contact route.

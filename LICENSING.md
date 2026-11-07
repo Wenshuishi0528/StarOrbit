@@ -1,11 +1,11 @@
 # 许可与商业授权 / Licensing and commercial permission
 
-Copyright © 2026 wenshuishi0528
+Copyright © 2026 Wenshuishi
 
-本仓库中由 wenshuishi0528 创作并拥有授权权利的原创代码、模型、界面设计及文档，采用 **CC BY-NC 4.0（知识共享署名—非商业性使用 4.0 国际许可协议）**。
+本仓库中由 Wenshuishi 创作并拥有授权权利的原创代码、模型、界面设计及文档，采用 **CC BY-NC 4.0（知识共享署名—非商业性使用 4.0 国际许可协议）**。
 
 - 可以在遵守署名条件的前提下，出于非商业目的使用、复制、分享和修改。
-- 分享时注明作者 **wenshuishi0528**、[项目来源](https://github.com/Wenshuishi0528/StarOrbit)、许可链接，并说明所作修改。
+- 分享时注明作者 **Wenshuishi**、[项目来源](https://github.com/Wenshuishi0528/StarOrbit)、许可链接，并说明所作修改。
 - **商业使用须事先取得作者的单独书面许可。** 可通过本仓库的 [GitHub Issues](https://github.com/Wenshuishi0528/StarOrbit/issues) 联系作者，说明用途和使用范围。提交申请不代表获得授权。
 
 许可全文见 [LICENSE](LICENSE)，[官方中文摘要](https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans)。商业授权可以由作者另行授予。
@@ -26,7 +26,7 @@ Copyright © 2026 wenshuishi0528
 
 ## English
 
-Original code, models, interface design and documentation authored by wenshuishi0528, to the extent the author holds the rights to license them, are licensed under **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**. Noncommercial use, sharing and adaptation are permitted under its terms. Credit wenshuishi0528, link to this repository and the license, and indicate modifications when sharing.
+Original code, models, interface design and documentation authored by Wenshuishi, to the extent the author holds the rights to license them, are licensed under **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**. Noncommercial use, sharing and adaptation are permitted under its terms. Credit wenshuishi0528, link to this repository and the license, and indicate modifications when sharing.
 
 **Commercial use requires separate prior written permission from the author.** Contact the author through this repository’s GitHub Issues with the intended use and scope. An authorization request is not a grant of permission.
 

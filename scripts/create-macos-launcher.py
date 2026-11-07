@@ -8,7 +8,7 @@ if not (runtime/'StarOrbit.html').is_file():raise SystemExit('Standalone HTML no
 if app.exists():raise SystemExit('Output already exists; choose a new app path')
 mac=app/'Contents/MacOS';resources=app/'Contents/Resources';mac.mkdir(parents=True);resources.mkdir()
 package=json.loads((root/'package.json').read_text());version=package.get('displayVersion',package['version'])
-info={'CFBundleName':'星轨','CFBundleDisplayName':'星轨','CFBundleIdentifier':'io.github.wenshuishi.tiangong-launcher','CFBundleExecutable':'StarOrbitLauncher','CFBundlePackageType':'APPL','CFBundleIconFile':'AppIcon','CFBundleShortVersionString':version,'CFBundleVersion':version,'LSMinimumSystemVersion':'12.0','LSUIElement':True,'NSHighResolutionCapable':True,'NSHumanReadableCopyright':'wenshuishi0528'}
+info={'CFBundleName':'星轨','CFBundleDisplayName':'星轨','CFBundleIdentifier':'io.github.wenshuishi.tiangong-launcher','CFBundleExecutable':'StarOrbitLauncher','CFBundlePackageType':'APPL','CFBundleIconFile':'AppIcon','CFBundleShortVersionString':version,'CFBundleVersion':version,'LSMinimumSystemVersion':'12.0','LSUIElement':True,'NSHighResolutionCapable':True,'NSHumanReadableCopyright':package['author']}
 (app/'Contents/Info.plist').write_bytes(plistlib.dumps(info))
 (resources/'launcher-config.json').write_text(json.dumps({'root':'.' if a.portable else str(runtime)},ensure_ascii=False)+'\n')
 with tempfile.TemporaryDirectory(prefix='starorbit-launcher-') as temporary:

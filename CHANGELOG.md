@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.20 — 2026-11-07 · 正式版 / Release
+
+按现行源码重整中英文介绍、操作手册和文档导航，补齐产品范围、架构、数据格式、开发发布及验证参考；明确三种操纵、保存与离线边界，保留历版证据。帮助新增观测、飞行、地形和缓存主题，保留八步导览。便携包按文档入口收集引用，补齐素材来源与许可，增加版本、链接、锚点和格式示例检查。发布包含本批文档、帮助和便携包引用修复。
+
+**English:** Reorganized the current overview, manual and documentation navigation; added product scope, architecture, formats, development/release and verification references. Clarified piloting, storage and offline boundaries while retaining historical evidence. Expanded optional help topics without extending the eight-step tour. Portable documentation now follows explicit entry points and local references, including missing provenance and license files, with version, link, anchor and example checks. This release includes the documentation, help and portable reference fixes.
+
+[本批检查记录 / Verification](docs/v1.20-validation.json)
+
 ## v1.19 — 2026-11-07 · 正式版 / Release
 
 修复巡天望远镜近看空间站时表面出现黑色雪花、闪烁的问题：根据实际航天器边界调整近裁剪面，提高深度精度，保留近处部件。取景与照片导出共用修复，不改变模型、阴影与星空画质。

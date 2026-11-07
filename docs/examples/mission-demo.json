@@ -1,0 +1,18 @@
+{
+  "format": "tiangong-mission-1",
+  "id": "docs-demo-satellite",
+  "name": "Documentation demo satellite",
+  "planet": "地球",
+  "category": "卫星",
+  "center": "EARTH",
+  "model": {
+    "file": "model.glb",
+    "metresPerUnit": 1,
+    "forwardAxis": "+Y",
+    "normalAxis": "-Z"
+  },
+  "orbit": {
+    "file": null
+  },
+  "spinRpm": 0
+}

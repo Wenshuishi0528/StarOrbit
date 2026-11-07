@@ -1,0 +1,107 @@
+{
+  "format": "tiangong-scene-2",
+  "name": "DFH-1 model-only documentation example",
+  "appVersion": "v1.20",
+  "mission": {
+    "id": "dfh1",
+    "pose": {
+      "roll": 0,
+      "pitch": 0,
+      "yaw": 0
+    },
+    "rotation": {
+      "mode": "prograde",
+      "enabled": false,
+      "phase": 0,
+      "epoch": 1794009600000
+    }
+  },
+  "assembly": null,
+  "simulation": {
+    "time": 1794009600000,
+    "speed": 1,
+    "auto": false,
+    "view": "follow"
+  },
+  "environment": {
+    "quality": "medium",
+    "exposure": "view",
+    "cloudOpacity": 0.85,
+    "starBrightness": 1,
+    "stars": true,
+    "milky": true,
+    "moon": true,
+    "clouds": true,
+    "groundTrack": false,
+    "cloudNightVisible": false,
+    "skyDetail": true,
+    "skyDetailSource": "auto",
+    "cityTerrain": true,
+    "cityAutoLoad": false,
+    "earthElevation": true
+  },
+  "weather": {
+    "cloud": "builtin",
+    "aurora": "off",
+    "seed": "docs-example",
+    "auroraStrength": 1.4,
+    "exposure": 1.15,
+    "volume": false,
+    "motion": true,
+    "adaptive": true,
+    "cloudRecord": null,
+    "auroraRecord": null
+  },
+  "display": {
+    "occlusion": true,
+    "orbitPath": true,
+    "sunVector": false,
+    "fillLight": false,
+    "labels": true,
+    "showTelemetry": true,
+    "showMinimap": true
+  },
+  "cameras": {
+    "focus": "mission",
+    "follow": {
+      "position": [
+        400,
+        300,
+        200
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "fov": 38,
+      "zoom": 1
+    },
+    "overview": {
+      "position": [
+        12000,
+        20000,
+        3000
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "fov": 38,
+      "zoom": 1
+    },
+    "home": null
+  },
+  "orbit": null
+}

@@ -376,9 +376,16 @@
     "bodyVisible": true
   },
   "runtime": {
-    "path": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "path": "[local runtime path redacted]",
     "sha256": "b97598c2620f1131b9288c24561e2a3c29b9ae5e6514bd7e953115a8f2b68d31",
     "launcherVersion": "0.37",
     "signatureVerified": true
+  },
+  "documentationRedaction": {
+    "version": "1.20",
+    "fields": [
+      "runtime.path"
+    ],
+    "reason": "Removed a machine-specific absolute path from distributed historical evidence; numerical results, file hashes and original test conclusions are unchanged."
   }
 }

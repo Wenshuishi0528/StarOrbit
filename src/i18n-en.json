@@ -2329,5 +2329,20 @@
   "地形显示预算已满，保留可用地形": "Terrain display budget reached; available terrain is retained",
   "地形构建内存已满，保留可用地形": "Terrain build memory budget reached; available terrain is retained",
   "高程处理失败，请重试": "Elevation processing failed; please retry",
-  "高程请求超时，可稍后重试": "Elevation request timed out; retry later"
+  "高程请求超时，可稍后重试": "Elevation request timed out; retry later",
+  "观测与操纵": "Observing and piloting",
+  "地球与星空数据": "Earth and sky data",
+  "数据与保存": "Data and storage",
+  "巡天取景与太阳观测": "Telescope and solar observations",
+  "主页面近轨操纵": "Main-view proximity piloting",
+  "自由飞行与对接": "Free flight and docking",
+  "城市影像与真实地形": "City imagery and real terrain",
+  "高清星空与星座": "Detailed sky and constellations",
+  "缓存与离线保存": "Caches and offline downloads",
+  "打开「巡天取景」，搜索天体或城市并拍照；太阳观测提供带观测日期的 SDO 实拍。改变模拟时间不会生成其它日期的太阳影像。": "Open Telescope to search for objects or cities and take photos. Solar observations show real SDO images with observation dates. Changing simulation time does not generate solar images for other dates.",
+  "在「航天器姿态」打开导航球，点击球面取得操纵焦点。W/S、A/D、Q/E 转向；R 切换 RCS，H/N、J/L、I/K 平移，T 切换 SAS。镜头目标与驾驶对象分别选择。": "Enable the navball under Spacecraft attitude and click its surface to take keyboard control. W/S, A/D and Q/E rotate; R toggles RCS, H/N, J/L and I/K translate, and T toggles SAS. Camera and piloted targets are selected separately.",
+  "从当前空间站组合选择神舟或天舟开始独立飞行，可保存后继续。任务实验室的交会对接训练使用独立教学场景；普通场景导出不包含自由飞行存档。": "Start an independent flight with a Shenzhou or Tianzhou from the current station assembly, then save and resume. Mission Lab docking training uses a separate teaching scenario. Ordinary scene exports do not include free-flight saves.",
+  "从城市库查看或下载影像，已内置北京和西雅图。真实地形默认开启，以实际海拔显示山川；影像与高程各有分辨率和年代，地形显示不增加着陆或碰撞模型。": "View or download imagery in the city library; Beijing and Seattle are bundled. Real terrain is on by default and uses actual elevations. Imagery and elevation have separate resolutions and dates. Terrain display adds no landing or collision model.",
+  "放大天区后按需加载所选星空影像，主画面、巡天和照片共用。内置宇宙悬崖来自 2022 年 JWST 红外观测；联网图源在覆盖之外会回退。星座插画和星名可在「地理与星图」分别开关。": "Zoom in to load the selected sky imagery on demand, shared by the main view, telescope and photos. Bundled Cosmic Cliffs uses 2022 JWST infrared observations; online sources fall back outside coverage. Constellation artwork and star names have separate Geography & sky chart switches.",
+  "在「数据与资源」查看来源、日期与缓存。城市的完整离线下载不自动淘汰，天空与高程采用有上限的缓存；清除网站数据会影响本地保存。场景文件不包含用户模型、音乐和下载缓存。": "Use Data & resources to inspect sources, dates and caches. Full city offline downloads are not automatically evicted; sky and elevation caches have size limits. Clearing site data affects local saves. Scene files do not contain user models, music or downloaded caches."
 }

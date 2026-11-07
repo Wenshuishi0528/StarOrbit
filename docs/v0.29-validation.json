@@ -316,7 +316,7 @@
     }
   },
   "installedRuntime": {
-    "root": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "root": "[local runtime path redacted]",
     "launcher": "/Applications/天宫轨道模拟.app",
     "launcherSignatureVerified": true,
     "version": "v0.29",
@@ -331,5 +331,12 @@
       "status": 200,
       "id": 4382
     }
+  },
+  "documentationRedaction": {
+    "version": "1.20",
+    "fields": [
+      "installedRuntime.root"
+    ],
+    "reason": "Removed a machine-specific absolute path from distributed historical evidence; numerical results, file hashes and original test conclusions are unchanged."
   }
 }

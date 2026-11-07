@@ -1,0 +1,1066 @@
+{
+  "schema": 1,
+  "version": "1.20",
+  "date": "2026-11-07",
+  "timezone": "Asia/Singapore",
+  "baseCommit": "6508bcde9a528aa207626387d0dc36830bd4abd1",
+  "workingTree": "Pre-publication validation of v1.20 documentation/help/packaging changes; publication authorized subsequently.",
+  "startedAt": "2026-11-07T12:28:58.620431+00:00",
+  "status": "complete",
+  "checks": {
+    "documentation": {
+      "status": "passed",
+      "command": "npm run test:docs",
+      "documents": 99,
+      "relativeReferences": 664,
+      "missingFilesOrAnchors": 0,
+      "structuralExamples": 4,
+      "checkerRegressions": 5,
+      "log": "output/playwright/v120-docs.log"
+    },
+    "defaultTests": {
+      "status": "passed",
+      "command": "npm test",
+      "log": "output/playwright/v120-tests.log",
+      "scope": "Every test explicitly chained by package.json; not all browser fixtures"
+    },
+    "format": {
+      "status": "passed",
+      "command": "npm run format:check"
+    },
+    "builds": {
+      "status": "passed",
+      "commands": [
+        "npm run build",
+        "npm run build:web",
+        "node tests/web-build.mjs dist-local",
+        "node tests/web-build.mjs dist"
+      ],
+      "logs": [
+        "output/playwright/v120-build.log",
+        "output/playwright/v120-build-web.log",
+        "output/playwright/v120-local-assets.log",
+        "output/playwright/v120-web-assets.log"
+      ]
+    },
+    "browserHelp": {
+      "status": "passed",
+      "command": "playwright-cli -s=starorbit-docs-v120 run-code --filename tests/browser/help-current.js",
+      "assertions": 107,
+      "topics": 16,
+      "tourSteps": 8,
+      "checks": [
+        {
+          "name": "sixteen optional help topics",
+          "pass": true
+        },
+        {
+          "name": "translated topic 1440/Zh/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/0",
+          "pass": true,
+          "details": {
+            "x": 974,
+            "y": 112.75,
+            "width": 340,
+            "height": 271.75
+          }
+        },
+        {
+          "name": "translated topic 1440/Zh/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/1",
+          "pass": true,
+          "details": {
+            "x": 82,
+            "y": 390.5390625,
+            "width": 340,
+            "height": 294.5
+          }
+        },
+        {
+          "name": "translated topic 1440/Zh/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/2",
+          "pass": true,
+          "details": {
+            "x": 974,
+            "y": 80,
+            "width": 340,
+            "height": 271.75
+          }
+        },
+        {
+          "name": "translated topic 1440/Zh/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/3",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 390.5390625,
+            "width": 340,
+            "height": 294.5
+          }
+        },
+        {
+          "name": "translated topic 1440/Zh/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/4",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 390.28125,
+            "width": 340,
+            "height": 294.5
+          }
+        },
+        {
+          "name": "translated topic 1440/Zh/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Zh/5",
+          "pass": true,
+          "details": {
+            "x": 962,
+            "y": 80,
+            "width": 340,
+            "height": 294.5
+          }
+        },
+        {
+          "name": "translated topic 1440/En/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/0",
+          "pass": true,
+          "details": {
+            "x": 916.9765625,
+            "y": 80,
+            "width": 340,
+            "height": 331.75
+          }
+        },
+        {
+          "name": "translated topic 1440/En/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/1",
+          "pass": true,
+          "details": {
+            "x": 82,
+            "y": 383.0390625,
+            "width": 340,
+            "height": 310.25
+          }
+        },
+        {
+          "name": "translated topic 1440/En/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/2",
+          "pass": true,
+          "details": {
+            "x": 964.578125,
+            "y": 80,
+            "width": 340,
+            "height": 310.25
+          }
+        },
+        {
+          "name": "translated topic 1440/En/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/3",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 371.5390625,
+            "width": 340,
+            "height": 333
+          }
+        },
+        {
+          "name": "translated topic 1440/En/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/4",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 363.078125,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/En/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/En/5",
+          "pass": true,
+          "details": {
+            "x": 924.5234375,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/0",
+          "pass": true,
+          "details": {
+            "x": 863.2109375,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/1",
+          "pass": true,
+          "details": {
+            "x": 82,
+            "y": 363.1875,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/2",
+          "pass": true,
+          "details": {
+            "x": 917.484375,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/3",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 363.1875,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/4",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 363.0234375,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Ru/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Ru/5",
+          "pass": true,
+          "details": {
+            "x": 911.5390625,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/0",
+          "pass": true,
+          "details": {
+            "x": 939.9453125,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/1",
+          "pass": true,
+          "details": {
+            "x": 82,
+            "y": 363.1875,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/2",
+          "pass": true,
+          "details": {
+            "x": 976.375,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/3",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 363.1875,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/4",
+          "pass": true,
+          "details": {
+            "x": 324,
+            "y": 363.2265625,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 1440/Fr/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 1440/Fr/5",
+          "pass": true,
+          "details": {
+            "x": 892.1953125,
+            "y": 80,
+            "width": 340,
+            "height": 350
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/0",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 252.390625
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/1",
+          "pass": true,
+          "details": {
+            "x": 64,
+            "y": 530.9140625,
+            "width": 300,
+            "height": 272.1875
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/2",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 252.390625
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/3",
+          "pass": true,
+          "details": {
+            "x": 39.5,
+            "y": 345.4140625,
+            "width": 300,
+            "height": 272.1875
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/4",
+          "pass": true,
+          "details": {
+            "x": 65.5,
+            "y": 349.5078125,
+            "width": 300,
+            "height": 272.1875
+          }
+        },
+        {
+          "name": "translated topic 390/Zh/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Zh/5",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 272.1875
+          }
+        },
+        {
+          "name": "translated topic 390/En/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/0",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 303.984375
+          }
+        },
+        {
+          "name": "translated topic 390/En/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/1",
+          "pass": true,
+          "details": {
+            "x": 64,
+            "y": 511.5625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/En/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/2",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 304.78125
+          }
+        },
+        {
+          "name": "translated topic 390/En/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/3",
+          "pass": true,
+          "details": {
+            "x": 39.5,
+            "y": 308.0625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/En/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/4",
+          "pass": true,
+          "details": {
+            "x": 75.65625,
+            "y": 311.3046875,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/En/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/En/5",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/0",
+          "pass": true,
+          "details": {
+            "x": 78,
+            "y": 146,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/1",
+          "pass": true,
+          "details": {
+            "x": 64,
+            "y": 511.5625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/2",
+          "pass": true,
+          "details": {
+            "x": 78,
+            "y": 146,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/3",
+          "pass": true,
+          "details": {
+            "x": 39.5,
+            "y": 308.0625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/4",
+          "pass": true,
+          "details": {
+            "x": 78,
+            "y": 311.453125,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Ru/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Ru/5",
+          "pass": true,
+          "details": {
+            "x": 78,
+            "y": 146,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/0",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/0",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/1",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/1",
+          "pass": true,
+          "details": {
+            "x": 64,
+            "y": 511.5625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/2",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/2",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/3",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/3",
+          "pass": true,
+          "details": {
+            "x": 39.5,
+            "y": 308.0625,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/4",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/4",
+          "pass": true,
+          "details": {
+            "x": 78,
+            "y": 311.3046875,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "translated topic 390/Fr/5",
+          "pass": true
+        },
+        {
+          "name": "help card fits 390/Fr/5",
+          "pass": true,
+          "details": {
+            "x": 12,
+            "y": 80,
+            "width": 300,
+            "height": 310
+          }
+        },
+        {
+          "name": "original tour stop 1",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 2",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 3",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 4",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 5",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 6",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 7",
+          "pass": true
+        },
+        {
+          "name": "original tour stop 8",
+          "pass": true
+        },
+        {
+          "name": "tour closes and clears highlight",
+          "pass": true
+        },
+        {
+          "name": "help preserves task, time and quality",
+          "pass": true
+        }
+      ],
+      "log": "output/playwright/v120-help-check.log",
+      "screenshots": [
+        "output/playwright/v120-help-1440.png",
+        "output/playwright/v120-help-390.png"
+      ],
+      "scope": "Current local build, six new topics in four languages and two viewports; existing eight-step tour and task/time/quality preservation"
+    },
+    "portableLauncher": {
+      "status": "passed",
+      "version": "1.20",
+      "author": "Wenshuishi",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "codesign": "ad-hoc; codesign --verify --deep --strict passed",
+      "notarized": false
+    },
+    "portableDocumentation": {
+      "status": "passed",
+      "documents": 99,
+      "relativeReferences": 664,
+      "missingFilesOrAnchors": 0,
+      "integrity": "ZIP CRC check passed",
+      "requiredProvenanceAndLicenses": "present",
+      "sourceReferences": "pinned links; source/test trees excluded",
+      "archive": "output/release120/StarOrbit-v1.20-portable.zip",
+      "checksum": "output/release120/SHA256SUMS",
+      "note": "Final archive is rechecked after freezing this record; checksum is outside the archive to avoid self-reference."
+    },
+    "installedRuntime": {
+      "status": "passed",
+      "version": "1.20",
+      "filesCompared": 110,
+      "configuredRootPreserved": true,
+      "httpEntryMatches": true,
+      "httpBundleMatches": true,
+      "bundle": "assets/app.bundle-114e1accd68e21ad.js",
+      "bundleSha256": "114e1accd68e21ada3cb8c0e3153423001d28e483968bc4361ce4b34c8047223",
+      "launcherCheck": "READY on port 8771",
+      "signature": "ad-hoc; strict verification passed",
+      "rollback": "output/docs-v120/baseline"
+    },
+    "independentReview": {
+      "status": "passed",
+      "reviewer": "independent subagent, not a document author",
+      "scope": [
+        "Current document facts against source",
+        "Help and translations",
+        "Repository file/anchor checks and production examples",
+        "Physical ZIP integrity, documentation, provenance, version and embedded help"
+      ],
+      "findingsResolved": [
+        "Playwright timeout argument and help-details expansion in browser harness",
+        "CI command sequence and recommended development environment",
+        "Two historical machine-specific path fields, explicitly redacted without changing measured results"
+      ],
+      "blockingFindingsRemaining": 0
+    },
+    "browserConsole": {
+      "status": "passed",
+      "errors": 0,
+      "warnings": 0,
+      "log": "output/playwright/v120-browser-console.log"
+    },
+    "historicalRedactions": {
+      "status": "passed",
+      "files": [
+        "docs/v0.29-validation.json",
+        "docs/v0.37-validation.json"
+      ],
+      "scope": "Only declared path fields and the explanatory documentationRedaction metadata differ from historical JSON values."
+    }
+  },
+  "limitations": [
+    "New help topics and navigation were exercised in Chrome at the listed sizes/languages. Full mission, rendering and storage acceptance was not repeated in every browser.",
+    "Fresh Windows, Linux, native Safari, Firefox and mobile-device installations were not tested in this batch.",
+    "No fresh third-party imagery/network availability or license-rights audit; source dates and historical measurements retain their original scope.",
+    "Output logs/screenshots are local development evidence, outside the portable documentation. Source/asset/format summaries are included.",
+    "No uniform cross-device FPS or startup-time guarantee is established."
+  ],
+  "environment": {
+    "os": "15.7.9",
+    "architecture": "x86_64",
+    "node": "v25.9.0",
+    "python": "3.9.6",
+    "browser": "Chrome 156.0.8078.81",
+    "browserOrigin": "http://127.0.0.1:8772",
+    "browserProfile": "isolated automation profile",
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "languages": [
+      "zh",
+      "en",
+      "ru",
+      "fr"
+    ]
+  },
+  "artifacts": {
+    "standalone": {
+      "path": "StarOrbit.html",
+      "bytes": 402661356,
+      "sha256": "4ef830f9a26733e57c3971c1954682d911868508630b8e93eb4992cd4af46e42"
+    },
+    "localEntry": {
+      "path": "dist-local/index.html",
+      "bytes": 406188,
+      "sha256": "ccd25b4a82bb3497c0e1f4fbd6e07cd1dc31454794168d28f1b7bea198d7ed23",
+      "bundle": "assets/app.bundle-114e1accd68e21ad.js",
+      "bundleSha256": "114e1accd68e21ada3cb8c0e3153423001d28e483968bc4361ce4b34c8047223"
+    },
+    "webEntry": {
+      "path": "dist/index.html",
+      "bytes": 406188,
+      "sha256": "d62aa64e6f50a45201fd56c3e3213ab258ee04ebae89001105e3261438d5a401",
+      "bundle": "assets/app.bundle-ba89dfae90a50b76.js",
+      "bundleSha256": "ba89dfae90a50b763338a658649da53ed8bdb8f70f7759743b0e180d1d73b0fd"
+    }
+  },
+  "capabilities": {
+    "SO-CRAFT-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-ORBIT-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-PILOT-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-FLIGHT-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-DOCK-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-OBSERVE-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-TELESCOPE-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-EARTH-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-SKY-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-RESOURCE-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-SAVE-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run"
+    },
+    "SO-DELIVERY-01": {
+      "automatedRegression": "passed",
+      "fullFeatureBrowserAcceptance": "not-run",
+      "helpBrowserAcceptance": "passed",
+      "portableDocumentation": "passed",
+      "installedRuntime": "passed"
+    }
+  },
+  "publication": {
+    "status": "outside-this-local-record",
+    "reason": "This record preserves pre-publication local validation. Publication was subsequently authorized; GitHub release and Pages workflow carry the publication state."
+  },
+  "sourceFilesSha256": {
+    ".github/workflows/pages.yml": "e213035c6d955b76b99bb82f84dbe1b29513c4fe448d19930ece45da438ceb71",
+    "AGENTS.md": "ac8a57add6e9547d6ac66b463f5814580d22db2f2f2ca82cbb0f56ea8331926c",
+    "CHANGELOG.md": "fdbbac0154b1f9bf640749efef2e2c5fc6915379d377a1d59fdda362647eb9ec",
+    "HANDOFF.md": "1f5eb49fa3e6343591fee75a13f53ca9e674f95b5f6243ed3d64d4e5b23a81e0",
+    "LICENSING.md": "ee9d22ff1043a92e028233e53503dde1b404d0d70a02543f7356d46c61b5e088",
+    "README.en.md": "95df31f7f57d92196afaba43f014c36522fe8937c0e998858f9309abd3935c6e",
+    "README.md": "c7e551bf5ec0f08a15e0edb5b8cafdfabba01f2b9d0b1d6e511b4a586081053a",
+    "assets/constellation-art/upstream-description.md": "5a395cffb0b51da5d33fa98dd586652792c039c63ff8fe2ff8bf5bf844bd0248",
+    "docs/README.md": "fbdebe1efd9ac4ef2b027fd5d229874aae824cf5a195a8106cc7a937e6bcfa33",
+    "docs/architecture.md": "2597ad5b142fc435e37ee83537a97f8c31ba06b1072bdb64fd7e4771fcc6c98d",
+    "docs/development-release.md": "cd960b4d04cb3ff92edd28b16bedd02872b5feda848b62933739c0565760b24e",
+    "docs/examples/mission-demo.json": "04d023fef0a911485235c9a15e2cb974e18a34ce71060c2884cd9452b716f183",
+    "docs/examples/orbit-demo.json": "5d5e2ee420de5d9f6114eac314ab0913b053c76806365d9b541103427a8c2c3d",
+    "docs/examples/scene-dfh1-model.json": "96cc8b6314360e9db11dad402c4d332a38d98166cfaeea9778f7795379ffb25b",
+    "docs/examples/weather-orbit-demo.json": "4d3d844ec6116520586407419816c8ad96f0a9391ea8a92e06821ca64896583b",
+    "docs/formats.md": "0f8f60b1e8ec0584d141e8f00f0c6ea13481ac9729ced64b4ff1be39b086b0f2",
+    "docs/product-scope.md": "c74def39f935516c9e1c519b882a26af1ee2bce73f07fd0fda828309a0fc4db0",
+    "docs/v0.18-details.md": "15c64c658542781eedc928c688efefbb434ac7b58d9b7002be39377887616a2d",
+    "docs/v0.19-details.md": "3474b3c884c36fbcefdb3952d98745a15a68c6b897064c7023e4a243082460f7",
+    "docs/v0.20-details.md": "939354ab492a507e34a9a2a28c48659babeeb2c31b95328931e5a5a517f1d717",
+    "docs/v0.21-details.md": "bb59be5f9554436f0131eb1490e92a029cc2655384474b0664d3b1365af006d8",
+    "docs/v0.22-details.md": "fb7296c0c4cef685aaed94a51c6abd25880dd451e72f6f86221f89597152a9ee",
+    "docs/v0.23-details.md": "cce17614d8f88ef0efbf13e8ad605876e91a683c74c2a7f000736ee98dbaa336",
+    "docs/v0.24-details.md": "7d39d6043da29503ba9906b238189b2bc712382123cebb263c224fbc6b3020f7",
+    "docs/v0.29-details.md": "639c8602ae58d87abc36debfe6550b916f0536d9b7c134694aeb3e16478c79bf",
+    "docs/v0.29-validation.json": "0e36defe16f2eb1179fd83bbb4c7c19a993f367df1e9fc7c935d6b691d2404fe",
+    "docs/v0.30-details.md": "743ced3c9b9b73a5d159cd6aa50ae691c5b4966073ed69609fadab60e7f7a66f",
+    "docs/v0.31-details.md": "4ec8c24441265ddeaa6b933955477f2c5b3032eca9bbda08ffcbefa60fe8a348",
+    "docs/v0.32-details.md": "5c7b1074b378c98a27899d3bd502ff3f6b02b8187ef9feeaa884468f8136ff24",
+    "docs/v0.34-details.md": "c2333250ad37c80afc4103ab71db084163cd1af92871426ad2c31cabeb86f5e3",
+    "docs/v0.35-details.md": "9b05196ed6b226cd9b021691439b5618a976a9e5250617ca05eb269f191fa9e7",
+    "docs/v0.36-details.md": "f2d63e041f2984e00b5508e8c8a50440f87c4ee11336f98e32e59dc775dc373a",
+    "docs/v0.37-details.md": "a63e1d58f784f586d911e4d8d7e3bf72ef6eebd821fae906767c4fabef4b3865",
+    "docs/v0.37-validation.json": "4027b8f43102e0722d0dd7f96fe8078508e9047083a11991e2e3cab325577a53",
+    "docs/v0.38-details.md": "c5836d615d82c3739c5d87b6aa1b6e60c0da24c82e88244b8608f965cc54d588",
+    "docs/v0.39-details.md": "63ee90e83caff129c6acbfd018880c769b2176522164e4f4de98fb67dae39e82",
+    "docs/v0.40-details.md": "8642e81193acc2467ec382a09fb5b4947ee8c1272719fd4ebdfcc879d18648d1",
+    "docs/v0.41-details.md": "38d8fd3c762f759e86afdab0c775d6a0540e6ed1379797b418851179a873c4f8",
+    "docs/v0.42-details.md": "4f94ae4ca89dc938541ce157af0d063701b6493e37a1730dc9a5401bf644f909",
+    "docs/v0.43-details.md": "4b927100091e0bfa2dd72d74305f7bbdd1b9df79f1eeb4ab5983da159cb33526",
+    "docs/v0.44-details.md": "7e6013db99ff44561dfb2779e7776622140511e9bfde806d28376ec9c7f4eb35",
+    "docs/v0.51-details.md": "1a66e4f12b4ea5e171c509145ff3eae2705f9d66c97695a3af097e49142bf860",
+    "docs/v0.53-details.md": "18c28bebfc3559fc591af349b9f1b257a80cb889daebfd8fd60a13f54e3ef362",
+    "docs/v0.55-details.md": "b3e788d4bd59b3b4f614de97e587dd461b6bd2dbff052b32a8dedd13bdf764f6",
+    "docs/v0.55-validation.md": "0320039554678c22ca2584d1850f74d3a2fd5acd5953b61ac685712d1ee97e18",
+    "docs/v0.56-details.md": "2944f3cc7a2b11d10b474d57d32e6ca77af822e917c4ea8adcc1ee871600172d",
+    "docs/v0.57-details.md": "1f9f6d5bde4ccc308ed6d9b4a41742f9f4d106d759946b64fb56969e8e606f24",
+    "docs/v0.58-details.md": "cbf4a076e18ef6c468ef8f049781236083bbf095797100d81b7ec5333cd09b8f",
+    "docs/v0.59-details.md": "30b52ff6043c08fef636ebc0b845e087eb3316b1416b60e525fb63c6a71cb7f6",
+    "docs/v0.60-details.md": "87167306180442efbf2aa290e3a7ad7cb63caf91492015980cda755580928fcd",
+    "docs/v0.61-details.md": "ec02c1d273f05c4c1e65e283725a4b6a9891d64f233a28564c19fdd3322a04f2",
+    "docs/v0.62-details.md": "78a1f9437581e14b8d72406ee68157b04cb2f69659a90256ab60f61871b908a4",
+    "docs/v0.63-details.md": "607ccd1fbfd1d3d8eeb593298710c1020a0551e23fffd20af1a095f2819ae3d5",
+    "docs/v0.64-details.md": "a2e762b3ae4f695898eb2efec91b62ca8f23b3950b5b5c5316d76ab005f05db9",
+    "docs/v0.65-details.md": "6ff6a831b7eecc0641df9d7fe755159eee614b0411328f215a3e497750d3abe4",
+    "docs/v0.66-details.md": "2e6a543c3a5ea090134e46f1a4c754ceb976c1cca41154f25e1708822f769abb",
+    "docs/v0.66-flight-lab.md": "f7e9db5bb57a4ee89f7aefd156f7b43c83ee8f39654061421b1f7fae94943566",
+    "docs/v0.67-details.md": "9b01b1182817771e4bd17328f27b0ca881fce86f178ef2a70a17d25fec4da4f9",
+    "docs/v0.68-details.md": "415e93c7be32c5ad119f210df39381e5e79d0910a238a8528a6f93bd481e5ca2",
+    "docs/v0.69-details.md": "d7a65f02de4b42a31543ae84e9bfacd1434e7a2e40ceea79eeda82e012a6c8ad",
+    "docs/v0.70-details.md": "7d96e481b18db4c4fb5b40f1719cc475356e59cd751d93ec21dcdc4af9ff753b",
+    "docs/v0.71-details.md": "9d088e9c0736588335f20a8bd988bff98ae3ae7e337e238f42afcc7eb8393a47",
+    "docs/v0.72-details.md": "7f71b1fd736a754a9b48826318423d788eeec86da781da66e78cb76f84c4fb4c",
+    "docs/v0.73-details.md": "7cd4655ddfe654b30e5392e154a650ee3e1297b3fb8b80a4296493cb363441e1",
+    "docs/v0.78-details.md": "78b4d0d6cac84bc231644ae7876a510c5359e9ae017ce6ce03ab763117611f31",
+    "docs/v0.81-night-lights.md": "bf0ba427251724a1db6cbe2f28c1e112203b627b1d34ba2a46547dc89cabd4a9",
+    "docs/v0.82-day-surface.md": "0e48c06e64ebb9034f1a232cdb501648786decea3cba91681188efeae9b8c69a",
+    "docs/v0.83-surface-radiometry.md": "7756662b8beb7b0880921200056314febf30c09deb5d25be8f73f0c5a1b0df6c",
+    "docs/v0.84-cloud-quality.md": "85a119a71155be0964de9cc82fb50c348ce78812d0493a58404115ed6414fb3b",
+    "docs/v0.85-viirs-trial.md": "9ea6a0993f64440d2df24a797f1831ca95336aa56db7825c6e5d7823154286c6",
+    "docs/v0.86-cloud-history.md": "16bb5d15bdf11105276cee662a5088f0d695f8f0c59c5b548e7a2c43702d19ba",
+    "docs/v0.87-cloud-versions.md": "e96cfb17b39e5d487532f795148849dc70023ad8431fe562c8cae7677210576a",
+    "docs/v0.88-cloud-library.md": "c6062c1d75a9eedc65241c3f13f035d5e13ebb0bb55f925a54cf218c3b871235",
+    "docs/v0.88-cloud-review.md": "9283e660def2bdd7b303ff3fad9519108c5c517e67b48fee72f89cece91535a6",
+    "docs/v0.89-minimap-daylight.md": "2a37eb6d02e70b876e8d40340f4ae1c279191daab21b9fc3e7285943ae51a77d",
+    "docs/v0.89-minimap-review.md": "ba4858af8cc7046115c931fed76ee520802c6c454497fbd660e6bbd0928e9bbb",
+    "docs/v0.90-minimap-review.md": "2abed4e8f86a0a279fc0502204507d35679e8b5a4ccd9334a170c03a0e8bddc3",
+    "docs/v0.90-minimap-rollback.md": "9fbdbec4e8c5c1bb1c945ba762f748f2c35c2ff2a8d814a958776a54d10385ec",
+    "docs/v0.91-minimap-review.md": "6e8510e463be9280169c95f047c65e78c465896e5e14fccf4278b136bd1182ac",
+    "docs/v0.91-minimap.md": "2ce9d2c684b210f64247fdf40dab71203a4033b0e779821780af0778f1ec2573",
+    "docs/v0.92-startup-review.md": "4e2bee7115ba0bde2383460e6fcfd18f2bb73da8810722249f6a7157bbab9679",
+    "docs/v0.92-startup.md": "acf33f89a84e8f4b4c1b1fb96e8e28c08be1b67b4c44c33828e6a69e86c6c161",
+    "docs/v0.93-cloud-sources.md": "acd2fa526357ca62c35f8defc88dc6ef8318d63c8986d90bda59eabe12b5c936",
+    "docs/v0.96-observing.md": "2d5f12ce787211c20fec35325897d618249348116067b0d6b8a3d46a370cd1c0",
+    "docs/v0.97-survey.md": "70c25b0d3d0cc8733c78554c7dcb44bf64b47d39aecb7bfd74a10f095dccd542",
+    "docs/v0.98-xuntian.md": "69248cf4deb5593bac695016bc20ac3b0b037c4a90b6f896a9e0450136a55161",
+    "docs/v0.99-xuntian-image.md": "8bdd66fa9b657e37d57a22e3302f236443e61a78f0b6cc18894ea143f2672c32",
+    "docs/v1.00-observing.md": "91d268b3a011e231b78e7609aed73f0e9c4422832936f866e7fb7b359f735944",
+    "docs/v1.08-flight-instruments.md": "c50caddc13bef32dffd3911a14853ce2a66f66d3efa0053d5892ce6eca61a766",
+    "docs/v1.09-pilot-star-chart.md": "401aae3f760f102c2d9b066703bc6dacd5c7580a163bfc4059b9a4f1eb2a2cb4",
+    "docs/v1.15-sky-detail.md": "7d17260e7d6010d6d6533e661a5950522e7950a67337f08f23f959df7b75ce45",
+    "docs/v1.16-city-sky.md": "7c107781675840f166dde9d3f239d7e705bf858628ec76f9e20f3be987936efb",
+    "docs/v1.17-earth-elevation.md": "ab1bb8a92746a78025613be5f5d5fc95b41030ca3a8aaad5ae715de0d8cd8321",
+    "docs/verification.md": "f23dd31da4acffea08a7cdcf9c42ea953ced28046ab06dabc623d7a842976d53",
+    "package-lock.json": "609745f8ac8c29dce2e1839e92fe19fa91927b17cb28fcbadcf8557de867e3e4",
+    "package.json": "309aa768f6117e14fa4e4e916b981a29949155d80f0feb0ff34cd09666c4453d",
+    "scripts/check-docs.py": "ad498f3dbff7b4dac6d793c108f84ac3f7cfa946e1fb5be4cd8f66b56ed43f75",
+    "scripts/create-macos-launcher.py": "086df692917b8a9db1d1f765fc9447eb63632b72afacb4f02fae5dde9277812a",
+    "scripts/documents.py": "14dcf55ff9938883df99c1eac7191f26a14243da79826f003d4d8ce0a8496d34",
+    "scripts/package-portable.py": "00956f5c042a0b4ed2c9ab12cba6332cf4acb8119b1bfe2ce36d7b5e01107ec2",
+    "src/help.js": "4068c0c32963efa459117bb0bcfc99b65c66e57056447ef5bc1cf48e561d4ee2",
+    "src/i18n-en.json": "dde97ec35226cf65851683b2574efe2bb3e42cabbdefb66ed457ec33afb0460f",
+    "src/i18n-fr.json": "89b794160a649eb05cdde03bc671e634fe289a2476abd096b74a270c97072ae6",
+    "src/i18n-ru.json": "015097cc9ca79dc05e41de6bcd28fcc56bd0cb45bf3c8deb72c8607478c8e5b7",
+    "tests/browser/help-current.js": "26dbbad3faedd66dbe6d59fe5c0d51626cfbc77aa8eb382b016e3427a6d6742f",
+    "tests/docs-examples.mjs": "9802335f59c29862c7e8edc1d381d411461e93672ecd2848433a8e65c6bfa6e1",
+    "tests/documentation.py": "79fe0d676c87c7cc8021712f328a76679d2e169b7d028df8eb16c9702bd411a3",
+    "使用说明.md": "0d9ba27eee0a165396d7d46c11ebcda4bceca7a9e8b44093ad90abec4d7fd034"
+  },
+  "sourceRecordExclusion": "This validation JSON excludes its own hash and ZIP hash; final archive SHA-256 is stored alongside the ZIP.",
+  "finishedAt": "2026-11-07T12:43:12.233182+00:00"
+}

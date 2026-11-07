@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { validateMissionPackage } from '../src/mission-package.js';
+import { validateOrbit } from '../src/orbit.js';
+import { bindOrbit } from '../src/missions.js';
+import { validateScene } from '../src/scene-format.js';
+
+const read = (name) => JSON.parse(fs.readFileSync(new URL('../docs/examples/' + name, import.meta.url)));
+const mission = validateMissionPackage(read('mission-demo.json'));
+assert.equal(mission.format, 'tiangong-mission-1');
+assert.equal(mission.model.file, 'model.glb');
+const orbit = validateOrbit(read('orbit-demo.json'));
+assert.equal(orbit.rows.length, 8);
+assert(orbit.rows.every((row) => Math.abs(Math.hypot(...row.slice(1, 4)) - 7000) < 0.01));
+const scene = validateScene(read('scene-dfh1-model.json'));
+assert.equal(scene.mission.id, 'dfh1');
+assert.equal(scene.assembly, null);
+assert.equal(scene.orbit, null);
+const weather = read('weather-orbit-demo.json');
+assert.equal(weather.format, 'tiangong-weather-1');
+assert.equal(weather.meta.kind, 'orbit');
+const decoded = Buffer.from(weather.base64, 'base64');
+assert.equal(decoded.toString('utf8'), fs.readFileSync(new URL('../docs/examples/orbit-demo.json', import.meta.url), 'utf8'));
+bindOrbit(validateOrbit(JSON.parse(decoded)), weather.meta.missionId);
+console.log('Four documented examples accepted by production validators; GLB loading and browser import round trips are outside this structural check.');
