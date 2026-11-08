@@ -12,10 +12,14 @@ async page=>{
  const settle=(id,mode='sky')=>page.waitForFunction(({id,mode})=>{const p=viewer.sim.xuntian.pointing;return p.locked&&p.mode===mode&&(!id||p.target===id);},{id,mode},{timeout:25000});
  const stamp=Date.UTC(2026,9,28,8);
  if(!await root.isVisible())await page.locator('#openXuntianMap').click();await ready();
+ check(await page.evaluate(()=>viewer.sim.cameraFocus.selected==='xuntian'),'Opening finder must focus Xuntian');
  const first=await state();check(first.p.mode==='free'&&!first.p.target&&first.p.roll===0,'Finder did not open in its along-track pose');
  await page.evaluate(stamp=>viewer.sim.seek(stamp),stamp);
  if(await root.isVisible())await page.locator('#xtClose').click();
  await page.locator('#openXuntianMap').click();await ready();
+ check(await page.evaluate(()=>viewer.sim.cameraFocus.selected==='xuntian'),'Reopening finder must focus Xuntian');
+ await page.evaluate(()=>{viewer.sim.cameraFocus.focus('mission');viewer.sim.xuntian.open();});
+ check(await page.evaluate(()=>viewer.sim.cameraFocus.selected==='mission'),'Already-open finder must preserve manual camera selection');
  // The recommendation is an explicit choice after reopening at the initial pose.
  await page.locator('#xtRecommend').click();
  await page.waitForFunction(()=>viewer.sim.xuntian.pointing.locked&&viewer.sim.xuntian.result?.center.kind==='sky');

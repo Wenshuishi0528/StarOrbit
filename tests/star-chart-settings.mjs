@@ -63,3 +63,21 @@ assert.equal(unavailable.catalogStarLabels,true,'a failed persistence attempt mu
 assert.equal(saves,1);
 assert.equal(JSON.parse(JSON.stringify(unavailable)).starChartCatalogDefaultVersion,1,'a later successful normal settings save retains the marker');
 console.log('Catalogue-label default: quiet first startup, one-time persisted migration, explicit opt-in and storage failure passed.');
+
+for (const value of [0,.15,.65,1]) assert.equal(normalizeStarChartSettings({chineseSymbolOpacity:value},{strict:true}).chineseSymbolOpacity,value);
+for (const value of [-.01,1.01,Infinity,NaN,'0.5',null]) assert.throws(()=>normalizeStarChartSettings({chineseSymbolOpacity:value},{strict:true}));
+assert.equal(normalizeStarChartSettings({skyCulture:'chinese'}).chineseSymbolOpacity,.2,'old settings acquire visible overview default');
+console.log('Chinese overview opacity: defaults, endpoints, persistence normalization and invalid input rejection passed');
+
+const opacityNodes={...nodes,chineseSymbolOpacity:{value:''},chineseSymbolOpacityValue:{textContent:''},chineseSymbolAppearance:{hidden:false}};
+globalThis.document={getElementById:id=>opacityNodes[id]};
+const opacitySettings={...STAR_CHART_DEFAULTS,skyCulture:'chinese',chineseSymbolArt:true};
+let opacityUpdates=0;bindStarChartControls(opacitySettings,()=>opacityUpdates++);
+assert.equal(opacityNodes.chineseSymbolOpacity.value,'0.2');assert.equal(opacityNodes.chineseSymbolOpacityValue.textContent,'20%');
+assert.equal(opacityNodes.chineseSymbolAppearance.hidden,false);
+opacityNodes.chineseSymbolOpacity.value='0.25';opacityNodes.chineseSymbolOpacity.oninput();
+assert.equal(opacitySettings.chineseSymbolOpacity,.25);assert.equal(opacityNodes.chineseSymbolOpacityValue.textContent,'25%');assert.equal(opacityUpdates,1);
+opacitySettings.skyCulture='western';syncStarChartControls(opacitySettings);assert.equal(opacityNodes.chineseSymbolAppearance.hidden,true);assert.equal(opacitySettings.chineseSymbolOpacity,.25);
+assert.equal(normalizeStarChartSettings(JSON.parse(JSON.stringify(opacitySettings)),{strict:true}).chineseSymbolOpacity,.25);
+delete globalThis.document;
+console.log('Chinese overview opacity slider: input, displayed percentage, culture visibility and saved preference passed');

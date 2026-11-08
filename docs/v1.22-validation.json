@@ -1,0 +1,438 @@
+{
+  "version": "1.22",
+  "status": "passed-with-documented-scope",
+  "recordedAt": "2026-11-07T17:23:27.715059+00:00",
+  "baseCommit": "ca99e309c79e81737d2194dfbdc77eb59d465331",
+  "workspace": "Local uncommitted v1.21 + v1.22 changes; no reset of earlier work",
+  "system": "macOS-10.16-x86_64-i386-64bit",
+  "scope": [
+    "Opening and reopening Xuntian frames the telescope once; later manual camera choice remains available",
+    "Physical reticle ranges: solar body centre, station/terrain hit, static high-SNR HIP stellar estimate; unavailable distances explicit",
+    "Shared default-off true equatorial-of-date grid and true ecliptic-of-date line in Western and Chinese cultures",
+    "Main view, finder/photo and balcony integration; independent annotation masters; epoch export caption"
+  ],
+  "automated": [
+    {
+      "name": "tests.log",
+      "status": "passed",
+      "log": "output/release122/tests.log",
+      "bytes": 40471,
+      "sha256": "a4a900fe9c5ba1074c198bb506f28ef02ed3abe6dc0e8be7d82dc71c6e8d9f18"
+    },
+    {
+      "name": "reference-final-tests.log",
+      "status": "passed",
+      "log": "output/release122/reference-final-tests.log",
+      "bytes": 567,
+      "sha256": "4addb0e241c1b796ea7e672e3880a8744bfdabefcc89695a2c711001cebce42d"
+    },
+    {
+      "name": "render-final-tests.log",
+      "status": "passed",
+      "log": "output/release122/render-final-tests.log",
+      "bytes": 880,
+      "sha256": "68e3b44871ebc5e49d86a53451694d859bd592b5475ecf9294f98482b1336a07"
+    },
+    {
+      "name": "integration-final.log",
+      "status": "passed",
+      "log": "output/release122/integration-final.log",
+      "bytes": 294,
+      "sha256": "2648c26586dcefed4586bd438bd31bf6cce164cdb07ca5dd538305f823ab7330"
+    },
+    {
+      "name": "format-final.log",
+      "status": "passed",
+      "log": "output/release122/format-final.log",
+      "bytes": 139,
+      "sha256": "9427076fd7af88f386e4a070345a4d17ec63daa0c4abac090039e893c09e7702"
+    },
+    {
+      "name": "build.log",
+      "status": "passed",
+      "log": "output/release122/build.log",
+      "bytes": 152,
+      "sha256": "78b52c3204a1b11352026785c5d8952c7c9cba8ca487c543abc67693f58dcd4b"
+    },
+    {
+      "name": "build-web.log",
+      "status": "passed",
+      "log": "output/release122/build-web.log",
+      "bytes": 98,
+      "sha256": "46084a8cdbb0d5b492c24f291802ba617a462aa25e9877727f6039af4f84340a"
+    },
+    {
+      "name": "web-assets.log",
+      "status": "passed",
+      "log": "output/release122/web-assets.log",
+      "bytes": 102,
+      "sha256": "c1354a5ed39dbc61bc5fc7a8a5b819945d2d47a8c7d4d7183f3cbb1b3b5ff50c"
+    },
+    {
+      "name": "local-assets.log",
+      "status": "passed",
+      "log": "output/release122/local-assets.log",
+      "bytes": 108,
+      "sha256": "acff8dc5f60766581d09b02003bf9b186801ae392a174251bffddfbcf242449c"
+    },
+    {
+      "name": "docs.log",
+      "status": "passed",
+      "log": "output/release122/docs.log",
+      "bytes": 454,
+      "sha256": "a04d34683683abdd28dcc88e596e035ae9a109c857f1cb670620774c6f283d1c"
+    },
+    {
+      "name": "diff-check.log",
+      "status": "passed",
+      "log": "output/release122/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "install.log",
+      "status": "passed",
+      "log": "output/release122/install.log",
+      "bytes": 607,
+      "sha256": "f22415bfaf3af02b7337e08ab58d05e744d01108611353f854caef1fa47c4d49"
+    },
+    {
+      "name": "launcher-installed-check.log",
+      "status": "passed",
+      "log": "output/release122/launcher-installed-check.log",
+      "bytes": 133,
+      "sha256": "a57ee812318c49c6d6010b0909c7e6742850b0f0cc4e4850300b2696246a5db0"
+    }
+  ],
+  "data": {
+    "source": "VizieR I/311/hip2, van Leeuwen 2007",
+    "sourceRows": 117955,
+    "retainedHIP": 19286,
+    "quality": "positive parallax and formal error, error/parallax <= 0.10",
+    "meaning": "approximate static distance from Sun in light-years; no simulated epoch extrapolation"
+  },
+  "browser": {
+    "surface": "ChatGPT in-app browser on macOS; exact browser version not captured",
+    "origins": [
+      "http://127.0.0.1:8874/StarOrbit.html",
+      "http://127.0.0.1:8771/StarOrbit.html"
+    ],
+    "performed": [
+      "Fresh open and reopen report cameraTarget=xuntian, near=true; both view manually selectable",
+      "HIP54061 reads about123ly, HIP91262 about25ly; unchanged by culture or date",
+      "Sun reads148260000km /0.991AU; terrain hit reads line-of-sight range",
+      "Grid remains when star/solar/asterism/deep-sky names and constellation lines/art are off",
+      "Chinese-Western culture switch retains both checkboxes",
+      "Paused simulated date changed from2026 to2100; visible Vega date grid, Earth-blocked north target remains physically masked",
+      "Actual1440x900PNG with and without photo annotations inspected: grid/ecliptic/art follow photo switch",
+      "Final installed-origin PNG includes true-of-date2026-11-07 14:34:49UTC footer and J2000-labelled finder readout",
+      "390x844 narrow layout in zh/en/ru/fr has scrollWidth390; temporaryviewport reset",
+      "Final installed page reportsv1.22 and has no captured console errors"
+    ],
+    "artifacts": {
+      "reference-on.png": {
+        "bytes": 2925458,
+        "sha256": "4a3ba3ede74092d5c37665a83ee0da2534c3a37c94b24bd7ea6ebc0d3835336b"
+      },
+      "reference-off.png": {
+        "bytes": 2904717,
+        "sha256": "976179c93c01aeecc38caa50109faec82c29bfa9b461c662a6d856db7726a126"
+      },
+      "reference-final.png": {
+        "bytes": 643012,
+        "sha256": "182a21e98f42ff5dd0b21248e5acbc72bcc26764d7d3d83efcca809676333336"
+      },
+      "grid-2100.png": {
+        "bytes": 178774,
+        "sha256": "80e1d4b39a724d3b95c7fcb8dc964d7001024db2389b688c4b3e1fe1e850248b"
+      },
+      "installed-ui.png": {
+        "bytes": 125223,
+        "sha256": "2018ef43237c0ccffc91278f1edf243e52d0c27fc21a60ecdc44da448ba43e1e"
+      }
+    }
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "bytes": 417122662,
+      "sha256": "9c1399f2c4e6fee3eccc6b0b8f0dadf9b07d70685bcae4c1dc3e67b61a6ef9b1"
+    },
+    "dist-local/index.html": {
+      "bytes": 466332,
+      "sha256": "3e6b68fcf8a0539d4c192b020adde3f0f3549925f2331fa277fba4c16c27c0a7"
+    },
+    "dist/index.html": {
+      "bytes": 466332,
+      "sha256": "9da83451b672a4d8bd849958ba8e8a2fc9aac7dc7c7be013fca67c9a85122ca4"
+    }
+  },
+  "installed": {
+    "version": "1.22",
+    "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "filesSynced": 3270,
+    "oldContentAddressedAssetsRetained": true,
+    "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release122/runtime-backup",
+    "htmlSHA256": "9c1399f2c4e6fee3eccc6b0b8f0dadf9b07d70685bcae4c1dc3e67b61a6ef9b1",
+    "entrySHA256": "3e6b68fcf8a0539d4c192b020adde3f0f3549925f2331fa277fba4c16c27c0a7",
+    "launcherRoot": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件"
+  },
+  "sourceFiles": {
+    "assets/stellar-distances/README.md": {
+      "bytes": 1966,
+      "sha256": "a8b42fac239a9daaa7723187cc66acd0527dd43a7c16e137ac0b2b0995e21b47"
+    },
+    "assets/stellar-distances/catalog.json": {
+      "bytes": 354388,
+      "sha256": "90926f3e18c3307cd3257f9177913a7c0a50d20120d0b7c87f5ca4a586b53739"
+    },
+    "assets/stellar-distances/source/I-311-hip2.tsv": {
+      "bytes": 2596756,
+      "sha256": "f69925ae9d2e2ba4390a1543eb6e4dad1ea0180455e7980b5f837b1e077ab27d"
+    },
+    "build.mjs": {
+      "bytes": 13710,
+      "sha256": "65ce66f14d9b1fbba8e7a8c5e0529a9253bf6b70f5d2dcf3d4e8f6fd2c9bcbf4"
+    },
+    "package-lock.json": {
+      "bytes": 19371,
+      "sha256": "90d0aa6fe074018db7cb66deaa0896d5843edfcfc6ae550231e1625047b55e49"
+    },
+    "package.json": {
+      "bytes": 5590,
+      "sha256": "0d4c9058a741a784f4c03b6ef23788b4a5d1b5c10b1ebfa5a970f6cbd002d1ac"
+    },
+    "scripts/check-docs.py": {
+      "bytes": 4311,
+      "sha256": "3e4d1048e04a458df82decf1620b0b734574a4b517b196476ea6a180e3414c59"
+    },
+    "scripts/documents.py": {
+      "bytes": 6137,
+      "sha256": "aa196ebac18421be8086932f3562a8b7ed149fffe31c6b4a7c78b58ed820ca6b"
+    },
+    "scripts/package-portable.py": {
+      "bytes": 3714,
+      "sha256": "275f60d19aa9ca08aeb0246dc30d23e8698e06dc1d208dbb510e0e04bb6a9ab1"
+    },
+    "scripts/prepare-chinese-art.py": {
+      "bytes": 47836,
+      "sha256": "1309d484098cd8f8db9026de4022657c2a6d39e01ae01881c78843cc8e4ecd65"
+    },
+    "scripts/prepare-chinese-sky.py": {
+      "bytes": 34852,
+      "sha256": "17aee5579d07319160456e7c31a646986b47bf695b0e069a982e7a3699ef9bf6"
+    },
+    "scripts/prepare-stellar-distances.py": {
+      "bytes": 1772,
+      "sha256": "468c652361618f2f1caa4d41761e7223e241bef7e4173c12ac0a9f8e0a0178e0"
+    },
+    "src/app.js": {
+      "bytes": 26555,
+      "sha256": "af5ed9e8d1274ad5859c7858037b48d68521732b8b09cc460845a130b5102a8d"
+    },
+    "src/balcony-lab.js": {
+      "bytes": 49482,
+      "sha256": "458e9a227ac1efe746b33a404a7c61fbd254ed066aff495369d2d4cfb2622289"
+    },
+    "src/balcony-sky-view-drawing.js": {
+      "bytes": 15667,
+      "sha256": "46a7203a424291acadeb64fcc938d78588ea2c963d23e37252c1fbfa2096e1a3"
+    },
+    "src/balcony-sky-view.js": {
+      "bytes": 9483,
+      "sha256": "470a59a44f7c10c29fbe72bf51cd57ca2a729ffa2a9c92f49820e6f0cf2b5884"
+    },
+    "src/chinese-sky-art.js": {
+      "bytes": 543,
+      "sha256": "11b66ef8efc3dc6ddf43ea0900e01ffc10748c925d2dde3a73684b3894630eba"
+    },
+    "src/constellation-art-layer.js": {
+      "bytes": 7084,
+      "sha256": "6eac411abd72d141fb2250b0a3f321f673fef65092c625a8ffacc255027e1cd1"
+    },
+    "src/constellation-art-math.js": {
+      "bytes": 12228,
+      "sha256": "ef5b53db4008a3a964fd32c278ac557375a774213916a19a81924faa19f90342"
+    },
+    "src/constellation-art.js": {
+      "bytes": 12548,
+      "sha256": "29c9cffb2164fffe960b0e695a15ed0cc0a9d39db54c3dd69afc878dbefff2ef"
+    },
+    "src/environment.js": {
+      "bytes": 39926,
+      "sha256": "b07c322e268b93870f9d8b622b047d75a840783fa2f3c9ec7b0784fcd98d1836"
+    },
+    "src/help.js": {
+      "bytes": 15247,
+      "sha256": "b1a12572b841aadea295c29144731e9ff0460644b6efdf4c5ba098c0dfcee8da"
+    },
+    "src/i18n-en.json": {
+      "bytes": 199941,
+      "sha256": "9133699901a0ebb83f71548caf51b6ef783137da23d99d2779fd9d8747d55c5a"
+    },
+    "src/i18n-fr.json": {
+      "bytes": 221056,
+      "sha256": "fa355c4e7e2961eaf0dfba6aa5042c71c5cced1137c8a79a7c9f60c7d0b33ed0"
+    },
+    "src/i18n-ru.json": {
+      "bytes": 287037,
+      "sha256": "2f3f6ac9b67ad28b62b086df2d23ae0773a8d4194113055a0d882a65b12dba69"
+    },
+    "src/layout.html": {
+      "bytes": 60219,
+      "sha256": "802646ef2250e8b797a74b5c64d6ea56817426305ced829beedc81e34c2ca4a4"
+    },
+    "src/sky-annotation-layout.js": {
+      "bytes": 14522,
+      "sha256": "b8bfb26571724a723937d3f95d497e4e79f3c9c809eb8cfb59c4cdf10b75c0a0"
+    },
+    "src/sky-culture-caption.js": {
+      "bytes": 1276,
+      "sha256": "74dc7d82764225ef56ca32bc4a59e8cc1bc8a46c3cceb6278d7f4dc73d92b762"
+    },
+    "src/sky-culture-controls.js": {
+      "bytes": 15507,
+      "sha256": "a1e0285fd780f38dbeebffeb5dfaedcfcaef836b51d7cb39ee2939cfb53693e4"
+    },
+    "src/sky-culture-screenshot.js": {
+      "bytes": 1406,
+      "sha256": "555c2ac31e516471b0fbe3cf26d4501dc45e6f7aaeaa31369b45c664e961e918"
+    },
+    "src/sky-cultures.js": {
+      "bytes": 2840,
+      "sha256": "041fa3a96d97e41e6b8fb24ef48a0609e8b05259358d9a377ead7020d3556ca9"
+    },
+    "src/sky-reference-layer.js": {
+      "bytes": 2545,
+      "sha256": "fa78ff65cd45c206674eb307869716a4936ea40a4d53fda4874f13f0e26f862a"
+    },
+    "src/sky-reference.js": {
+      "bytes": 6720,
+      "sha256": "fd017973a8e4bf0bf418d40d0bcecbc3ee70123854e53314e609cc7d47851b2d"
+    },
+    "src/star-chart-settings.js": {
+      "bytes": 7167,
+      "sha256": "032a615be1b03ce17a66e9fb68c7bb7a484ed9bcf8c40463c8d106b26e65efaa"
+    },
+    "src/star-chart.js": {
+      "bytes": 27538,
+      "sha256": "46c8cde573bc6449baba476f92007578249ca8ee58fce5ff54b6620d6f731d83"
+    },
+    "src/star-label-catalog.js": {
+      "bytes": 1461,
+      "sha256": "2a1b9b20601744807111e91bd2ca96c07e066e86acf9f0e6e5defde571ba86eb"
+    },
+    "src/weather.js": {
+      "bytes": 80453,
+      "sha256": "a2d897f1e52eb54894bbd631a453dac14a662646d73f481dcfb1afd7502fe38f"
+    },
+    "src/workspace.css": {
+      "bytes": 3860,
+      "sha256": "4646aefd59b94ae3316e0a8229e80d966a504f5e3e020f520bf8954bbf975de1"
+    },
+    "src/xuntian-catalog.js": {
+      "bytes": 21073,
+      "sha256": "8c4f643cc4865e856defefc56ea15b18b296c80c4ee22c4131bcc8e5e7a6e986"
+    },
+    "src/xuntian-crosshair.js": {
+      "bytes": 6473,
+      "sha256": "92c802ce5ad47624311d952b112b51eca94f27448aa9f73eaa813080fccf48e5"
+    },
+    "src/xuntian-distance.js": {
+      "bytes": 1916,
+      "sha256": "5565fceb653a8778436f3c64ff1bc45ecfe88a0a254ad257dffe5da10815252c"
+    },
+    "src/xuntian-earth-view.js": {
+      "bytes": 17762,
+      "sha256": "6bb9ee7e0889da8dfe70f65323aa8a3dacbc7cc6e08a193f6d19f61003aa75c8"
+    },
+    "src/xuntian-labels.js": {
+      "bytes": 2354,
+      "sha256": "4f6d7271dfa157ae16d3ac1ced83ebf0c4492a505a4f8587c2378f79b0f27df8"
+    },
+    "src/xuntian-pointing.js": {
+      "bytes": 3939,
+      "sha256": "bcd4e8846ed4be2e2786e5c76b897c3af651c68622cd202992c4f7de9e66b3c2"
+    },
+    "src/xuntian-scope.css": {
+      "bytes": 12753,
+      "sha256": "52166e010a34323d9882211210fb85c861ba31569fb92b19f6e4e2fb5c400f3f"
+    },
+    "src/xuntian-scope.html": {
+      "bytes": 7577,
+      "sha256": "4b79d0b216202b0ba949a500ead17f93fcfc1556e434e903bc9471c8b7139ad6"
+    },
+    "src/xuntian-scope.js": {
+      "bytes": 48157,
+      "sha256": "7921cbabfbde92099e6130001a1a54e398837d09e11eb6dd372e0d14d2496503"
+    },
+    "src/xuntian-search.js": {
+      "bytes": 6064,
+      "sha256": "53e7b4948313bfe49a665ada0ef487f5cd0bdca2d3cca787f0c0a4d4dc4eabba"
+    },
+    "src/xuntian-view-math.js": {
+      "bytes": 4920,
+      "sha256": "4ca304e1448d6015c40a4e6c67fd79591cfbc239da2796cf9a63ee4011dfcc19"
+    },
+    "src/xuntian-view-render.js": {
+      "bytes": 35219,
+      "sha256": "31d04aaaecb64eca4e69312caf14934e03a9e1922d9313f9fb874a33346a5179"
+    },
+    "tests/browser/xuntian-scope.js": {
+      "bytes": 9985,
+      "sha256": "189ee8830a55613844c70d4165999fbc92d2f848182d3b79be3dedd769b6737b"
+    },
+    "tests/chinese-sky-integration.mjs": {
+      "bytes": 8763,
+      "sha256": "2ceffd4f9ff92f789f6fa161f5e55ee3ac7e7205f470f947183dcd31af7f9006"
+    },
+    "tests/constellation-art.mjs": {
+      "bytes": 47044,
+      "sha256": "6a370910437dc0ae4aee5c1c6587881dc69e4e81c211ce515eb6a39c58cf3ee3"
+    },
+    "tests/sky-culture-rendering.mjs": {
+      "bytes": 15099,
+      "sha256": "2338b96e1698cd9feebfaae3ef874b281265bf1efd8998e603b4b0a82ec1f439"
+    },
+    "tests/sky-cultures.mjs": {
+      "bytes": 19934,
+      "sha256": "2e302ac9400ac34f9debc1e1aef0389272227b752d6438dfa83bc6f09e0c132d"
+    },
+    "tests/sky-reference.mjs": {
+      "bytes": 8797,
+      "sha256": "fdbd07ea44c9c468b316f283bee772aa5fb6b6d8e40700d1b112e2c847f1d70f"
+    },
+    "tests/web-build.mjs": {
+      "bytes": 7140,
+      "sha256": "3205c84120ce101e8f34eac2ad2e3d0b9ea2161d3612e8c511bf77f8de31393b"
+    },
+    "tests/xuntian-catalog.mjs": {
+      "bytes": 9060,
+      "sha256": "3b4f04fcc12128ac020ae47458ad1eff3c8b716b2ac4827210d96aaf6bf17f78"
+    },
+    "tests/xuntian-crosshair.mjs": {
+      "bytes": 11043,
+      "sha256": "707472d7ade47481940ca7b7d9b801f97a1887d081a2d4dea80b3ba959baa049"
+    },
+    "tests/xuntian-distance.mjs": {
+      "bytes": 2967,
+      "sha256": "363b53e873f4a40014eda8e33265cc6dd9caae45e5dc37120c5444fda9f28afc"
+    },
+    "tests/xuntian-view-render.mjs": {
+      "bytes": 13148,
+      "sha256": "d1c885bd627c8069f3daa0e12266aee1ecdb70e22ad6ce2f65db34f3ee75fc85"
+    }
+  },
+  "references": [
+    "https://github.com/cosinekitty/astronomy/blob/master/source/js/README.md",
+    "https://cdsarc.cds.unistra.fr/viz-bin/cat/I/311"
+  ],
+  "notRun": [
+    "Full native Safari/Chrome/Edge browser fixture suites forv1.22",
+    "Windows/Linux/physical mobile and clean-profile cold-offline startup",
+    "Actual4Kexport and balconyUI journey in this batch; shared paths/math reviewed and tested",
+    "Quantitative GPU/FPS or memory benchmark",
+    "Fresh-extracted portable launcher execution",
+    "Remote CI, push, Pages deployment, GitHub Release or notarization"
+  ],
+  "publication": "Local update only. Portable distribution receipt stored in output/release122."
+}

@@ -69,7 +69,7 @@ __WORKSPACE_CSS__
 <div class="row"><label for="nightSource">夜景数据</label><select id="nightSource"><option value="2024-1km">2024 · 1 公里</option><option value="2016">2016 · 原版 1 公里</option></select></div>
 <p class="small">近看时按视野加载夜景细节；简易画质不显示夜景。2024 数据覆盖北纬 75°至南纬 65°，极区保留 2016 底图。</p>
 <p class="small" id="qualityStatus" role="status">正在准备画质素材…</p>
-<div class="row"><label class="check"><input id="showMoon" type="checkbox" checked>月球</label><button id="lookMoon">望向月球</button></div>
+<div class="row"><label class="check"><input id="showMoon" type="checkbox" checked>月球</label><button id="lookMoon">望向月球</button><button id="openLunarLab">月球观测</button></div>
 <label class="check"><input id="showStars" type="checkbox" checked>星空</label>
 <label class="check"><input id="showClouds" type="checkbox" checked>云层</label>
 <label class="check"><input id="groundTrack" type="checkbox">地面轨迹（总览）</label>
@@ -121,13 +121,33 @@ __WORKSPACE_CSS__
 <details class="annotation-settings" data-memory-key="star-chart"><summary>星图标注</summary>
 <label class="check"><input id="starChartEnabled" type="checkbox">主画面显示星图标注</label>
 <p class="small">主画面、巡天取景与照片共用以下类别。</p>
+<div class="row"><label for="skyCulture">星空体系</label><select id="skyCulture"><option value="western">西方星座</option><option value="chinese">中国传统星官</option></select></div>
+<p class="small sky-culture-note" id="skyCultureNote"></p>
+<p class="small sky-culture-note" id="chineseSkyDisplayHint" role="status" hidden></p>
+<label class="check" title="保留原画造型，按天区和整体方向摆放；图像是现代教学意象。"><input id="constellationArt" type="checkbox" checked><span id="skyCultureArtLabel">星座图像 · 教学示意</span></label>
+<label class="check" hidden><input id="chineseSymbolArt" type="checkbox"><span>总览插画 · 四象、三垣</span></label>
+<div id="chineseSymbolAppearance" hidden><label class="small" for="chineseSymbolOpacity">总览插画透明度</label><input id="chineseSymbolOpacity" type="range" min="0" max="1" step=".05" value=".2"><div class="star-chart-density"><span>淡</span><output id="chineseSymbolOpacityValue" for="chineseSymbolOpacity">20%</output><span>浓</span></div><p class="small">仅调整四象、三垣总览，不影响星官插画。</p></div>
+<p class="small sky-culture-note" id="chineseSkyArtCoverage" hidden></p>
+<details id="chineseSkyExplorer" class="sky-culture-explorer" hidden data-memory-key="chinese-sky"><summary>中国星官导航</summary>
+<label class="small" for="chineseSkyGroup">天区</label><select id="chineseSkyGroup" class="wide"></select>
+<button id="observeChineseOverview" class="wide" type="button">巡天天区总览</button>
+<label class="small" for="chineseSkyObject">星官</label><select id="chineseSkyObject" class="wide"></select>
+<canvas id="chineseSkyDiagram" width="560" height="300" role="img" aria-label="星官成员图"></canvas>
+<p class="small" id="chineseSkyObjectInfo"></p>
+<p class="small sky-culture-note" id="chineseSkyArtMeaning" hidden></p>
+<div class="angle-actions"><button id="lookAtChineseSky">主画面定位</button><button id="observeChineseSky">巡天定位</button></div>
+<p class="small" id="chineseSkyStatus" role="status"></p>
+<a class="footer-link" href="https://hk.space.museum/tc/web/spm/resources/teachers-corner/constellations-and-myths/glossary-of-chinese-star-regions-asterisms-and-star-names.html" target="_blank" rel="noreferrer">星官资料与名称 ↗</a>
+</details>
 <label class="check"><input id="starNames" type="checkbox" checked>恒星名称与拜耳编号</label>
 <label class="check"><input id="catalogStarNames" type="checkbox">无常用名恒星 · 星表标识</label>
 <label class="check"><input id="solarSystemNames" type="checkbox" checked>太阳系天体名称</label>
-<label class="check"><input id="constellationNames" type="checkbox" checked>星座名称</label>
-<label class="check" title="88 星座的传统图像示意，按恒星位置配准；不是天体真实外形或星座边界，深度放大后淡出。"><input id="constellationArt" type="checkbox" checked>星座图像 · 教学示意</label>
-<label class="check"><input id="constellationLines" type="checkbox" checked>星座连线</label>
+<label class="check"><input id="constellationNames" type="checkbox" checked><span id="skyCultureNamesLabel">星座名称</span></label>
+<label class="check"><input id="constellationLines" type="checkbox" checked><span id="skyCultureLinesLabel">星座连线</span></label>
 <label class="check"><input id="constellationBoundaries" type="checkbox">星座边界</label>
+<label class="check"><input id="equatorialGrid" type="checkbox">赤道坐标网 · 所选日期</label>
+<label class="check"><input id="eclipticLine" type="checkbox">黄道 · 所选日期</label>
+<p class="small">赤道网与黄道随模拟日期更新，中西星图共用。赤经以小时、赤纬以度表示。</p>
 <label class="check"><input id="deepSkyObjects" type="checkbox" checked>深空目标 · 星云、星系与星团</label>
 <div class="row"><label for="deepSkyScope">深空目录</label><select id="deepSkyScope"><option value="featured">精选深空目标</option><option value="messier">梅西耶目录</option><option value="all">全部已收录目标</option></select></div>
 <p class="small">深空轮廓用于角尺度定位，不是摄影图像；星系用椭圆、星云用方框、星团用圆环。</p>

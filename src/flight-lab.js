@@ -1,10 +1,13 @@
 import { restoreControlFocus } from './display-controls.js';
-import { t, onLanguageChange } from './i18n.js';
+import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { mountPassPanel } from './pass-panel.js';
 import { mountDockingPanel } from './docking-panel.js';
 import { mountExposureLab } from './exposure-lab.js';
 import { mountBalconyLab } from './balcony-lab.js';
 import { mountSurveyLab } from './survey-lab.js';
+import { mountLunarLab } from './lunar-lab.js';
+import { mountCosmicLab } from './cosmic-lab.js';
+import { getXuntianTarget } from './xuntian-catalog.js';
 import { ObservationStore } from './observation-store.js';
 import { mountObservationJournal } from './observation-journal.js';
 
@@ -14,6 +17,8 @@ const labTabs = {
   exposure: { label: '轨道长曝光', mount: mountExposureLab },
   balcony: { label: '阳台观测', mount: mountBalconyLab },
   survey: { label: '巡天拍摄计划', mount: mountSurveyLab },
+  cosmic: { label: '宇宙探索馆', mount: mountCosmicLab },
+  lunar: { label: '月球观测', mount: mountLunarLab },
 };
 const tabNames = Object.keys(labTabs);
 
@@ -31,7 +36,7 @@ const style = `
 .flight-lab.dock-window-fill{width:100vw;height:100dvh;margin:0;inset:0;border:0;border-radius:0}
 .flight-lab input[type=number]{width:100%}.flight-lab button:focus-visible,.flight-lab canvas:focus-visible{outline:2px solid #74d9ef;outline-offset:3px}
 @media(max-width:700px){.flight-lab,.flight-lab.dock-large{width:100vw;height:100dvh;border-radius:0;border:0}.flight-lab-head{padding:12px}.flight-lab-head p{max-width:70vw}.flight-lab-tabs{padding:8px 12px}.flight-panel{padding:12px}.flight-lab-tabs button{flex:1;padding:9px 8px}}
-@media(max-width:700px){.flight-lab-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.flight-lab-tabs button{padding:6px;font-size:12px;line-height:1.25}.flight-panel{padding:10px}}
+@media(max-width:700px){.flight-lab-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:5px;min-height:52px;scrollbar-width:thin}.flight-lab-tabs button{flex:0 0 auto;max-width:160px;padding:8px 12px;font-size:12px;line-height:1.25}.flight-panel{padding:10px}}
 `;
 
 // The modal owns its views and simulation state. The main animation loop skips
@@ -46,6 +51,10 @@ export function installFlightLab(sim, assets) {
   openButton.id = 'openFlightLab';
   openButton.type = 'button';
   document.getElementById('toolbarActions').prepend(openButton);
+  const cosmicButton = document.createElement('button');
+  cosmicButton.id = 'openCosmicLab';
+  cosmicButton.type = 'button';
+  document.getElementById('toolbarActions').prepend(cosmicButton);
   const dialog = document.createElement('dialog');
   dialog.id = 'flightLab';
   dialog.className = 'flight-lab';
@@ -57,7 +66,8 @@ export function installFlightLab(sim, assets) {
   let activeTab = 'pass',
     visibleKey = null,
     journal = null,
-    handoffPending = false;
+    handoffPending = false,
+    openingControl = openButton;
   const bar = dialog.querySelector('.flight-lab-tabs'),
     body = dialog.querySelector('.flight-lab-content');
   for (const [index, key] of tabNames.entries()) {
@@ -99,11 +109,17 @@ export function installFlightLab(sim, assets) {
   }
   const refresh = () => {
     openButton.textContent = t('任务实验室');
-    $('flightLabTitle').textContent = t('任务实验室');
+    cosmicButton.textContent = t('宇宙探索馆');
+    $('flightLabTitle').textContent = t(
+      activeTab === 'cosmic' ? '宇宙探索馆' : activeTab === 'lunar' ? '月球观测' : '任务实验室'
+    );
     $('closeFlightLab').textContent = t('返回模拟器');
     for (const key of tabNames) $(key + 'Tab').textContent = t(labTabs[key].label);
   };
   function markTabs() {
+    $('flightLabTitle').textContent = t(
+      activeTab === 'cosmic' ? '宇宙探索馆' : activeTab === 'lunar' ? '月球观测' : '任务实验室'
+    );
     journal?.setTab(activeTab);
     for (const key of tabNames) {
       const selected = key === activeTab;
@@ -133,6 +149,7 @@ export function installFlightLab(sim, assets) {
     suspend();
     activeTab = key;
     markTabs();
+    if (dialog.open) $(key + 'Tab').scrollIntoView({ block: 'nearest', inline: 'center' });
     panels[key] ??= labTabs[key].mount($(key + 'Panel'), sim, assets);
     visibleKey = key;
     panels[key].resume?.();
@@ -176,6 +193,67 @@ export function installFlightLab(sim, assets) {
       handoffPending = false;
     }
   }
+  async function observeCosmicTarget(id) {
+    let closedForHandoff = false;
+    if (
+      handoffPending ||
+      sim.sceneBusy ||
+      sim.missions?.busy ||
+      !dialog.open ||
+      activeTab !== 'cosmic'
+    )
+      return false;
+    handoffPending = true;
+    try {
+      const target = getXuntianTarget(id, getLanguage(), sim.environment.settings.skyCulture);
+      if (!target?.direction) return false;
+      if (sim.missionId !== 'tiangong') await sim.missions.switchTo('tiangong');
+      if (!dialog.open || activeTab !== 'cosmic') return false;
+      closedForHandoff = true;
+      close();
+      if (!sim.xuntian?.observeTarget(target, { annotations: true })) {
+        open('cosmic');
+        return false;
+      }
+      labRoute('#xuntian');
+      return true;
+    } catch {
+      if ((dialog.open || closedForHandoff) && activeTab === 'cosmic') open('cosmic');
+      return false;
+    } finally {
+      handoffPending = false;
+    }
+  }
+  async function observeLunarTarget() {
+    if (
+      handoffPending ||
+      sim.sceneBusy ||
+      sim.missions?.busy ||
+      !dialog.open ||
+      activeTab !== 'lunar'
+    )
+      return false;
+    handoffPending = true;
+    let closedForHandoff = false;
+    try {
+      // Explicitly keeps the main clock: the lunar lab's independent date is not a mission seek.
+      if (sim.missionId !== 'tiangong') await sim.missions.switchTo('tiangong');
+      if (!dialog.open || activeTab !== 'lunar') return false;
+      closedForHandoff = true;
+      close();
+      if (!sim.xuntian?.observeBody('Moon')) {
+        open('lunar');
+        return false;
+      }
+      labRoute('#xuntian');
+      return true;
+    } catch {
+      if ((dialog.open || closedForHandoff) && activeTab === 'lunar') open('lunar');
+      return false;
+    } finally {
+      handoffPending = false;
+    }
+  }
   function openSurveyPhotos({ fieldId, recordId } = {}) {
     const panel = open('survey');
     if (!panel) return;
@@ -211,14 +289,29 @@ export function installFlightLab(sim, assets) {
       if (dialog.open) select(activeTab);
     },
   });
-  openButton.onclick = () => open();
+  openButton.onclick = () => {
+    openingControl = openButton;
+    open();
+  };
+  cosmicButton.onclick = () => {
+    openingControl = cosmicButton;
+    open('cosmic');
+  };
+  const lunarEntries = ['openLunarLab', 'xtLunarLab', 'xtLunarExplore']
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+  for (const entry of lunarEntries)
+    entry.onclick = () => {
+      openingControl = entry;
+      open('lunar');
+    };
   $('closeFlightLab').onclick = close;
   dialog.addEventListener('keydown', (event) => event.stopPropagation());
   dialog.addEventListener('close', () => {
     if (dialog.open) return;
     suspend();
     sim.lastWall = performance.now();
-    if (!sim.xuntian?.active) restoreControlFocus(openButton);
+    if (!sim.xuntian?.active) restoreControlFocus(openingControl);
   });
   const unsubscribe = onLanguageChange(refresh);
   refresh();
@@ -247,6 +340,8 @@ export function installFlightLab(sim, assets) {
     open,
     close,
     observeSurveyTile,
+    observeCosmicTarget,
+    observeLunarTarget,
     openSurveyPhotos,
     openGroundCapture,
     saveObservation: (record, media) => store.save(record, media),
@@ -277,6 +372,8 @@ export function installFlightLab(sim, assets) {
       store.dispose();
       dialog.remove();
       openButton.remove();
+      cosmicButton.remove();
+      for (const entry of lunarEntries) entry.onclick = null;
       sheet.remove();
     },
   };

@@ -21,8 +21,9 @@ files.append('scripts/solar_service.py')
 files = sorted(set(files + portable_documents(root)))
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []
 size = sum((root / name).stat().st_size for name in files)+sum(p.stat().st_size for p in launcher_files)
-if size > 430_000_000:
-    raise SystemExit('Runtime package exceeds the 430 MB budget')
+# v1.25 includes 319 Chinese sky artworks, lunar gazetteer/landings and geological maps.
+if size > 600_000_000:
+    raise SystemExit(f'Runtime package is {size} bytes, exceeding the 600 MB budget')
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
     for name in files:

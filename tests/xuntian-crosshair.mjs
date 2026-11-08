@@ -112,6 +112,9 @@ const exact = frame(starEye, starDirection),
 assert.equal(star.id, 'hip:91262');
 assert.equal(star.name, '织女星');
 assert.equal(star.kind, 'star');
+assert(star.distanceLightYears > 24 && star.distanceLightYears < 26, 'Vega uses its measured parallax distance');
+assert(star.distanceRelativeError > 0 && star.distanceRelativeError <= 0.1);
+assert.equal(star.distanceSource, 'hipparcos-2007');
 assert.equal(JSON.stringify(exact), saved, 'identification must not mutate pointing');
 assert.equal(identify({ ...exact, language: 'en' }, { limitMagnitude: 8 }).name, 'Vega');
 assert.equal(
@@ -169,6 +172,7 @@ for (const id of [
   });
   assert.equal(result.id, 'solar:' + id, id);
   assert.equal(result.withinDisc, true, id);
+  near(result.distanceKm, apparent.distanceKm);
   if (id === 'Moon') {
     const side = unit([apparent.direction[1], -apparent.direction[0], 0]),
       angle = apparent.radiusRad * 0.8;
@@ -191,6 +195,7 @@ for (const id of ['M1', 'M13', 'M31', 'M40', 'M42', 'M45', 'M57', 'M73', 'NGC700
   );
   assert.equal(result.kind, 'deep-sky');
   assert.equal(result.identifier, id);
+  assert.equal(result.distanceLightYears, undefined, 'Deep-sky distances must not be fabricated');
   assert.equal(result.name, object.name);
 }
 assert.equal(identify(null).kind, 'unavailable');
@@ -256,6 +261,16 @@ const imageHit = identify(
 assert.equal(imageHit.id, 'deep-sky:jwst-carina-2022');
 assert.equal(imageHit.imageField, true);
 assert.equal(imageHit.regionOnly, true);
+for (const [id, name] of [['M44','积尸'],['NGC6231','神宫'],['M7','鱼']]) {
+  const object = DEEP_SKY_OBJECTS.find(item => item.id === id);
+  assert(object, id);
+  const hit = identify(frame(object.direction.map(value => value * (EARTH_RADIUS + 405)), object.direction, {
+    fovY: 0.01,
+    chartSettings: {skyCulture:'chinese',deepSkyObjects:true,deepSkyScope:'all'},
+  }), {limitMagnitude:-100});
+  assert.equal(hit.name,name,`Chinese single-cluster asterism ${id}`);
+  assert.equal(hit.id,'deep-sky:'+id.toLowerCase());
+}
 console.log(
   'Crosshair identification: actual optical entrance, Earth/station occlusion, bounded nearby cities/date-line distance, exposure-aware HIP names, pixel/FOV tolerance, immutable pointing, solar bodies and deep-sky targets passed.'
 );

@@ -1,0 +1,50 @@
+#
+#   VizieR Astronomical Server vizier.cfa.harvard.edu
+#    Date: 2026-11-07T13:26:21 [V7.6.1]
+#   In case of problem, please report to:	cds-question@unistra.fr
+#
+#
+#Coosys	J2000:	eq_FK5 J2000
+#INFO	service_protocol=ASU	  IVOID of the protocol through which the data was retrieved
+#INFO	request_date=2026-11-07T13:26:21	  Query execution date
+#INFO	request=https://vizier.cfa.harvard.edu/viz-bin/asu-tsv?-source=I%2F239%2Fhip_main&HIP=4714%2C40205%2C44637%2C115481&-out=%2A&-out.max=10	  Full request URL
+#INFO	contact=cds-question@unistra.fr	  Email or URL to contact publisher
+#INFO	server_software=VizieR/7.6.1	  Software version
+#INFO	publisher=CDS	  Data centre that produced the VOTable
+
+#RESOURCE=yCat_1239
+#Name: I/239
+#Title: The Hipparcos and Tycho Catalogues (ESA 1997)
+#INFO	ivoid=ivo://cds.vizier/i/239	    IVOID of underlying data collection
+#INFO	data_ivoid=ivo://cds.vizier/i/239	    IVOID of underlying data collection
+#INFO	creator=ESA 1997	    First author or institution
+#INFO	cites=1997HIP...C......0E	    Article or Data origin sources
+#INFO	reference_url=https://cdsarc.cds.unistra.fr/viz-bin/cat/I/239	    Dataset landing page
+#INFO	publication_date=2021-11-18	    Date of first publication in the data centre
+#INFO	rights_uri=https://cds.unistra.fr/vizier-org/licences_vizier.html	    Licence URI
+#Coosys	H_1991.250:	ICRS
+#Table	I_239_hip_main:
+#Name: I/239/hip_main
+#Title: The Hipparcos Main Catalogue
+#Column	HIP	(I6)	Identifier (HIP number) (H1)	[ucd=meta.id;meta.main]
+#Column	RAhms	(A11)	Right ascension in h m s, ICRS (J1991.25) (H3)	[ucd=pos.eq.ra]
+#Column	DEdms	(A11)	Declination in deg ' ", ICRS (J1991.25) (H4)	[ucd=pos.eq.dec]
+#Column	Vmag	(F5.2)	? Magnitude in Johnson V (H5)	[ucd=phot.mag;em.opt.V]
+#Column	RAICRS	(F12.8)	? alpha, degrees (ICRS, Epoch=J1991.25) (H8)	[ucd=pos.eq.ra;meta.main]
+#Column	DEICRS	(F12.8)	? delta, degrees (ICRS, Epoch=J1991.25) (H9)	[ucd=pos.eq.dec;meta.main]
+#Column	Plx	(F7.2)	? Trigonometric parallax (H11)	[ucd=pos.parallax.trig]
+#Column	pmRA	(F8.2)	*? Proper motion mu_alpha.cos(delta), ICRS(H12)	[ucd=pos.pm;pos.eq.ra]
+#Column	pmDE	(F8.2)	*? Proper motion mu_delta, ICRS (H13)	[ucd=pos.pm;pos.eq.dec]
+#Column	e_Plx	(F6.2)	? Standard error in Plx (H16)	[ucd=stat.error;pos.parallax]
+#Column	B-V	(F6.3)	? Johnson B-V colour (H37)	[ucd=phot.color;em.opt.B;em.opt.V]
+#Column	Notes	(A1)	[DGPWXYZ] Existence of notes (H70)	[ucd=meta.note]
+#Column	_RA.icrs	(F12.8)	Right ascension (ICRS) at Epoch=J2000, proper motions taken into account	[ucd=pos.eq.ra]
+#Column	_DE.icrs	(F12.8)	Declination (ICRS) at Epoch=J2000, proper motions taken into account	[ucd=pos.eq.dec]
+HIP	RAhms	DEdms	Vmag	RAICRS	DEICRS	Plx	pmRA	pmDE	e_Plx	B-V	Notes	_RA.icrs	_DE.icrs
+ 	 	 	mag	deg	deg	mas	mas/yr	mas/yr	mas	mag	 	deg	deg
+------	-----------	-----------	-----	------------	------------	-------	--------	--------	------	------	-	------------	------------
+  4714	01 00 32.97	+65 06 54.3	 8.36	015.13739403	+65.11507298	   1.96	   -0.22	   -2.13	  0.89	 0.201	 	015.13739276	+65.11506780
+ 40205	08 12 42.34	-13 28 46.8	 8.16	123.17639779	-13.47966741	   3.82	  -12.43	   -5.08	  0.94	 0.132	 	123.17636672	-13.47967976
+ 44637	09 05 45.54	+17 23 24.5	 8.09	136.43976150	+17.39014916	   4.21	  -29.61	   -6.68	  1.04	 0.149	 	136.43968608	+17.39013292
+115481	23 23 35.77	+14 28 48.2	10.30	350.89905890	+14.48005926	   6.16	   -7.32	   11.87	  1.78	 0.589	 	350.89904052	+14.48008811
+

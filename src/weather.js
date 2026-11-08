@@ -1,4 +1,5 @@
 import { startupStatus } from './startup-status.js';
+import { saveSkyCultureScreenshot } from './sky-culture-screenshot.js';
 import { fetchResource, blobHash } from './resource-fetch.js';
 import { ResourceRecovery, recoverableDownload } from './resource-recovery.js';
 import { presetWeatherSettings } from './environment-presets.js';
@@ -2089,12 +2090,12 @@ export class Weather {
       renderer.setPixelRatio(1);
       renderer.setSize(w, h, false);
       this.sim.render();
-      const url = renderer.domElement.toDataURL('image/png'),
-        a = document.createElement('a');
-      a.href = url;
-      a.download =
-        'StarOrbit-Earth-' + new Date(this.sim.time).toISOString().replaceAll(':', '-') + '.png';
-      a.click();
+      saveSkyCultureScreenshot(
+        renderer.domElement,
+        this.env,
+        'StarOrbit-Earth-' + new Date(this.sim.time).toISOString().replaceAll(':', '-') + '.png',
+        () => this.sim.api.toast(t('照片未能保存'))
+      );
     } finally {
       renderer.setPixelRatio(ratio);
       renderer.setSize(size.x, size.y, false);

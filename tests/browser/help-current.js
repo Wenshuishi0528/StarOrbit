@@ -11,7 +11,7 @@ async page => {
   const initial = await page.evaluate(() => ({ mission: viewer.sim.missionId, quality: viewer.sim.environment.quality, time: viewer.sim.time }));
   if (await page.locator('#helpPanel').isVisible()) await page.locator('#closeHelp').click();
   await page.locator('#helpToggle').click();
-  check(await page.locator('.help-topic').count() === 16, 'sixteen optional help topics');
+  check(await page.locator('.help-topic').count() === 18, 'eighteen optional help topics');
   const targets = ['openXuntianMap', 'attitudeNavball', 'openFreeFlight', 'openCityTerrain', 'skyDetailSource', 'openDataResources'];
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 1440 ? 1000 : 844 });

@@ -61,6 +61,8 @@ export function paintFinderLabels(canvas, layout) {
       ctx.restore();
     }
     ctx.fillStyle =
+      (label.selected ? '#ffe5b3' : null) ||
+      label.color ||
       symbol?.labelColor ||
       (label.kind === 'solar' ? '#ffdcab' : label.kind === 'constellation' ? '#d0c09a' : '#d0e5f3');
     ctx.strokeText(text, rect.x + 2, rect.y + 2);

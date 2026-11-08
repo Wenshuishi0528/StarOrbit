@@ -1,0 +1,176 @@
+{
+  "version": "1.23",
+  "status": "passed-with-documented-scope",
+  "recordedAt": "2026-11-07T17:48:15.989824+00:00",
+  "baseCommit": "ca99e309c79e81737d2194dfbdc77eb59d465331",
+  "workspace": "Local uncommitted v1.21 + v1.22 + v1.23 changes; earlier work preserved",
+  "system": "macOS-10.16-x86_64-i386-64bit",
+  "scope": [
+    "Five procedural interactive cosmic teaching topics",
+    "Independent teaching time, parameters, physical readouts, observer pulse curve and captioned PNG export",
+    "Real remnant / host-galaxy handoff to existing Xuntian catalog",
+    "Four-language UI, narrow layout, bounded saved preferences and renderer lifecycle"
+  ],
+  "automated": [
+    {
+      "log": "output/release123/tests.log",
+      "status": "passed",
+      "bytes": 41353,
+      "sha256": "285d65830dd5df025ffedb4748c2cc9a7f47069f987248ae5fd8116ef34bed10"
+    },
+    {
+      "log": "output/release123/math-final.log",
+      "status": "passed",
+      "bytes": 209,
+      "sha256": "c60a0309b14b9c9723a8c567931cde555e4ab2d94c9c8fa3ce22a4cbc5311f06"
+    },
+    {
+      "log": "output/release123/content-final.log",
+      "status": "passed",
+      "bytes": 129,
+      "sha256": "3ba5bc8e2f486a2b942d799d672b4a4e5ee0a8e2e0772aa72d5368e6007e8021"
+    },
+    {
+      "log": "output/release123/state-final.log",
+      "status": "passed",
+      "bytes": 305,
+      "sha256": "d5a8bb47f3fa8708e03e2180ae13b9a7f5b7edb8d26cfebefb86a0eb4ecedb53"
+    },
+    {
+      "log": "output/release123/format-final.log",
+      "status": "passed",
+      "bytes": 139,
+      "sha256": "bf58bf15734801e28139c4053dff3c676b065518e44893bb5240d83468026e3a"
+    },
+    {
+      "log": "output/release123/format-accessibility.log",
+      "status": "passed",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "log": "output/release123/docs-final.log",
+      "status": "passed",
+      "bytes": 454,
+      "sha256": "d23dd332460260685c8037e5f3753ae75fe1cd5f6e40cf15c09bdcaeec228c48"
+    },
+    {
+      "log": "output/release123/diff-final.log",
+      "status": "passed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "output/release123/build.log",
+      "status": "passed",
+      "bytes": 152,
+      "sha256": "18f4d7ef98aeda2dcfd8ab694e43697f2481482167ae2695a9407c19e5ef71fe"
+    },
+    {
+      "log": "output/release123/build-web.log",
+      "status": "passed",
+      "bytes": 98,
+      "sha256": "7c9b853dc14700206ca5d161f4900e3ee3ca2121a874447119bd0dbb6d27a6ec"
+    },
+    {
+      "log": "output/release123/web-build-test.log",
+      "status": "passed",
+      "bytes": 102,
+      "sha256": "c1354a5ed39dbc61bc5fc7a8a5b819945d2d47a8c7d4d7183f3cbb1b3b5ff50c"
+    },
+    {
+      "log": "output/release123/local-assets.log",
+      "status": "passed",
+      "bytes": 108,
+      "sha256": "acff8dc5f60766581d09b02003bf9b186801ae392a174251bffddfbcf242449c"
+    },
+    {
+      "log": "output/release123/launcher.log",
+      "status": "passed",
+      "bytes": 92,
+      "sha256": "6b71b790ae013e5c35f908478edef2947d2e410567f5760905b3bc8d92fe66e0"
+    },
+    {
+      "log": "output/release123/launcher-installed-check.log",
+      "status": "passed",
+      "bytes": 133,
+      "sha256": "a57ee812318c49c6d6010b0909c7e6742850b0f0cc4e4850300b2696246a5db0"
+    },
+    {
+      "log": "output/release123/install.log",
+      "status": "passed",
+      "bytes": 607,
+      "sha256": "be88871f52199f3ff832584082c364e2d68952e35413e28dc0c7633f1215351c"
+    }
+  ],
+  "testTiming": "Full npm test passed before final period-axis caption, independent black-hole inclination, pulsar framing and slider accessibility refinements; cosmic math/content/state, formatting and build-asset checks passed after relevant refinements.",
+  "interactive": {
+    "environment": "Codex in-app browser on this Mac; actual WebGL UI at source port 8874 and installed port 8771",
+    "passed": [
+      "Five topic renders and controls, no captured console errors",
+      "Pause/play, timeline scrubbing, topic switches and close/reopen with saved parameters",
+      "Neutron radius 12 to 14 km updates density and compactness",
+      "Pulsar observer at 10 degrees misses beam; period 2 s updates graph time axis to 0–2 s; black-hole disk inclination remains independently 55 degrees",
+      "Black-hole mass 100 solar masses shows Schwarzschild radius 295 km; restored to default 10",
+      "Supernova late remnant visibility and meteor trail inside exaggerated atmospheric envelope",
+      "M1 and M87 finder handoffs name correct target; paused main date and independent photo-annotation preference retained",
+      "Chinese, English, Russian and French at 390 x 844 without horizontal overflow",
+      "PNG download opened: meteor at 50 percent, 35 km/s, 45 degrees, teaching disclaimer and author/license footer",
+      "Installed v1.23 startup and direct Universe explorer entry; screenshot retained"
+    ],
+    "artifacts": [
+      "output/release123/installed-universe.png",
+      "output/release123/meteor-ui.png",
+      "output/release123/meteor-export.png"
+    ]
+  },
+  "review": "Independent science/model and integration agents reviewed equations, catalog identities, disposal, re-entry, async handoff and snapshot state; findings addressed.",
+  "notRun": [
+    "Safari/Firefox/Edge/Windows/Android/iOS UI matrix",
+    "OS-level reduced-motion preference toggle (implementation reviewed only)",
+    "Quantitative FPS/GPU-memory/leak benchmark",
+    "Cross-mission failure-path fault injection",
+    "Physical meteor ablation simulation, supernova hydrodynamics and relativistic ray tracing (outside product model scope)"
+  ],
+  "sourceHashes": {
+    "src/cosmic-lab-style.js": "eaff3bb88d0e2f5873d4214eb58fea0c37edf0de6a5865e8c9b405eeed116060",
+    "src/cosmic-renderer.js": "6cd451be0c3716e0680a90fbec5040ae5a70aebe97b443f88624f7b01ec7d6e7",
+    "src/cosmic-ui-copy.js": "d15343f56f0e7a030122ee02a9b7bd21aa7f955b101d80667dd8a2b9e1ed50cd",
+    "src/cosmic-math.js": "d92d0028b75f23627768903a8f5f074dc83be97896df32765f47fd3d2aa263bc",
+    "src/cosmic-content.js": "1aef205bf509fae560775df6cd5651c7301d2aa066b057bd5958b4194ff6f61e",
+    "src/cosmic-lab.js": "d04f9d954cf37519bd76b1d90edbe5de24c4e1ad9e35f27cc5f0f78aba4b6a7a",
+    "src/flight-lab.js": "2521ddcc5b8e16d9a313fea9a47cc4581b7d7bd0d13d7cc0e678465c8f22f874",
+    "src/help.js": "6609c825467c2317597012ea2a5d5d900b38749f539db99666a8dbff9d056c81",
+    "build.mjs": "3e44a07c58656679b9604f924b55be43917428236ec222cd5f85d6bbd58b4d86",
+    "package.json": "4130834a46bcdef8fec1efa76335286290a284d12fea6f7f8dd83bd1a463aa9e",
+    "assets/cosmic/README.md": "64d23a36bd1da58e711f7ece45df3d0ebef73a4bd5d4d174c7165cf82e6cabe3",
+    "tests/cosmic-math.mjs": "3606f0f4fb1b464601cff7abf29d2b30b482e45200249ac039cb094702340feb",
+    "tests/cosmic-content.mjs": "33f4b64ecb89206f6ecd12e5c6d31f3391f5a831aa0bfc4b9b7853a77b76f65c",
+    "tests/cosmic-state.mjs": "ce4581f7fd5e4651626514e2567f72c6ef4b6e5d821d81e90e7b5c8605d38b65"
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "bytes": 417224765,
+      "sha256": "67da565d85287362fec57f033f8e4f45ec5ea5a9b891f7e72d9a5a75ad0d0e62"
+    },
+    "dist-local/index.html": {
+      "bytes": 472811,
+      "sha256": "0f7096f8a2f2c3b4b712afe30e3b32dbf7b0947cc1a1716579dd43e7345a430a"
+    },
+    "dist/index.html": {
+      "bytes": 472811,
+      "sha256": "a221a3f7dcaca183c9940ed5fbeab9cb441000a1d44e989fa2aa1c992fc8e1a3"
+    }
+  },
+  "installation": {
+    "version": "1.23",
+    "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "filesSynced": 3285,
+    "oldContentAddressedAssetsRetained": true,
+    "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release123/runtime-backup",
+    "htmlSHA256": "67da565d85287362fec57f033f8e4f45ec5ea5a9b891f7e72d9a5a75ad0d0e62",
+    "entrySHA256": "0f7096f8a2f2c3b4b712afe30e3b32dbf7b0947cc1a1716579dd43e7345a430a",
+    "launcherRoot": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件"
+  },
+  "publication": "Local only; no push, Release or Pages deployment"
+}

@@ -1,10 +1,18 @@
 # 数据格式与本机接口
 
-适用版本：v1.20。作者：Wenshuishi。核对日期：2026-11-07。
+适用版本：本地 v1.25。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页按 v1.19 实现整理，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
+月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
+
+本页按本地 v1.25 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
 
 示例中的轨道是为说明格式生成的合成数据，不能当作任何真实航天器的轨道或观测预报。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
+
+星图设置新增 `equatorialGrid`、`eclipticLine` 两个布尔类别，均默认 `false`。中西体系共用，场景和环境收藏沿用现有规范化／严格校验；旧数据缺字段时保持关闭，日期取模拟时钟。
+
+月球观测偏好使用 `starorbit-lunar-v1`，仅存白名单模式、图层、地形倍率、地名开关、目标 ID 和有界口径；不保存时间、播放状态或镜头。地点沿用 `starorbit-pass-observer-v1`；月面资产见 [terrain-manifest](../assets/moon/terrain-manifest.json)，gzip 解码为小端有符号 int16，每单位 0.5 m，相对 1737.4 km 球面。
+
+宇宙探索馆偏好使用独立键 `starorbit-cosmic-v1`，包含白名单主题、规范化参数与 0–1 进度。播放状态与相机不序列化；不改变普通场景格式，也不作为真实观测记录导入。
 
 ## 格式与交换能力总表
 
@@ -45,6 +53,8 @@
 | `display` | occlusion/orbitPath/sunVector/fillLight/labels/showTelemetry/showMinimap 七项布尔开关 |
 | `cameras` | follow/overview 相机和 home 或 `null`；相机包含 position/target/up 三维向量、fov 10…100°、zoom 0.1…20；位置不能等于目标，up 不能为零 |
 | `orbit` | 有效采样轨道或明确 `null`；恢复时绑定到 `mission.id` |
+
+星图设置新增 `environment.skyCulture`，只接受 `western` 或 `chinese`；当前场景格式仍为 `tiangong-scene-2`。严格校验拒绝其它值；缺少字段的旧场景正规化为 `western`。它随环境偏好和收藏恢复，与界面语言、影像来源以及主画面／巡天／照片的显示总开关独立。星官导航的当前展开状态或选中项不构成新的公开文件格式。
 
 可选高清设置中 `skyDetailSource` 为 auto/galaxy/dss/panstarrs/recent。当前兼容默认：缺省 `cloudNightVisible` 为 false；cityTerrain 为 true、cityAutoLoad 为 false、earthElevation 为 true。更完整的星图/地理字段由各设置模块正规化，不应依赖向 `environment` 任意添加键来保存私有数据。
 

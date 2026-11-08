@@ -13,9 +13,12 @@ const clampZoom = (value) => Math.max(1, Math.min(3.2, value));
 
 // Receives the same horizontal observation frame as the 2-D balcony chart.
 // A target-free frame can supply an independent solar elevation in degrees.
-export function createBalconySkyView(canvas, { onManual, onPick, onChange } = {}) {
+export function createBalconySkyView(
+  canvas,
+  { onManual, onPick, onChange, skyCulture, chartSettings } = {}
+) {
   const originalTouch = canvas.style.touchAction,
-    paint = createSkyPainter(canvas);
+    paint = createSkyPainter(canvas, skyCulture, chartSettings);
   const horizonPose = skyPose('hemisphere', 215, 0);
   const states = {
     hemisphere: { pose: skyPose('hemisphere', 180, 90), zoom: 1 },

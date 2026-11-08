@@ -4,6 +4,56 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.25 — 2026-11-08
+
+修复四象／三垣总览在常用视角下不可见的问题，增加仅作用于总览的独立透明度。保留原有 39 幅图像，新增 280 幅同风格教学插画，覆盖全部 312 条星官目录，另保留 7 幅总览；真实星位和连线独立保留。月球新增 9,087 条正式地名、40 项着陆任务（39 处有坐标，中国用红星）、搜索与标注密度；将中科院 2022 公开版全月地质图重投影为三维月球图层，保留原图、图例、年代尺及导出署名。巡天选中月球时突出显示观测入口。
+
+**English:** Restored Four Symbols / Three Enclosures overviews with independent opacity. Retained the original 39 illustrations and added 280 matching teaching artworks, covering all 312 catalog asterisms plus seven overviews without moving real stars or connections. Added 9,087 official lunar names, 40 landing records (39 located; Chinese missions use red stars), search and label density. Reprojected the CAS 2022 public geological map onto the 3D Moon, retaining the original map, legends, timescale and export credits. A contextual Moon card highlights the shared observatory in the Xuntian finder.
+
+数值配准、完整目录、回归、四语言界面、导出、构建及本机验证见本批记录。发布准备补齐可随仓库重建的插画方案，消除测试对本机临时目录的依赖；GitHub Release 包含当前便携包与校验文件。 / See this batch’s record for registration, catalog, regression, four-language UI, export, build and local validation. Publication preparation makes the illustration brief reproducible from the repository, removing a local-output dependency; the GitHub Release provides the portable build and verification files.
+
+[操作 / Usage](使用说明.md) · [插画 / Artwork](assets/chinese-sky/art/README.md) · [月球地质图 / Lunar geology](assets/moon/geology/README.md) · [验证 / Validation](docs/v1.25-validation.json)
+
+## v1.24 — 2026-11-08 · 本机版 / Local build
+
+新增月球观测工作台：独立日期与地面观测点驱动月相、天平动、方位与升落；可见光模型和真实 LOLA 三维高程共用月面方向。加入 16 个官方地名、晨昏线与月背探索、月相回放、分辨力估算、带说明的 PNG，以及保留主时钟的巡天月球追踪。原有入口整合为同一工作台，提供四语言与离线数据。
+
+**English:** Added a lunar observatory with site/date-driven phases, libration, directions and rise/set planning, visible-light modelling and real LOLA terrain. Includes 16 verified landmarks, terminator/far-side exploration, phase playback, resolution estimates, captioned PNG export and dynamic Xuntian Moon tracking using the main clock. Shared entry points, four languages and offline assets.
+
+默认回归、月球专项和三种构建通过；已核对真实月相、地形拾取、日期与地点、四语言窄屏、PNG 及本机巡天交接。 / Default regressions, lunar checks and all three builds passed; phases, terrain picking, site/date controls, four-language narrow layouts, PNG and local finder handoff were verified.
+
+[操作 / Usage](使用说明.md#月球观测) · [数据 / Data](assets/moon/README.md) · [科学边界 / Science](assets/moon/SCIENCE.md) · [验证 / Validation](docs/v1.24-validation.json)
+
+## v1.23 — 2026-11-08 · 本机版 / Local build
+
+新增「宇宙探索馆」：超新星、中子星、脉冲星、流星与黑洞五个三维交互主题，支持参数读数、独立演示时钟、阶段拖动和带说明的示意图导出。脉冲几何与接收曲线共用计算；真实遗迹／宿主星系可直接交接巡天。明确教学模型和真实观测边界，支持四语言、窄屏、减少动态效果及离开暂停。
+
+**English:** Added Universe explorer with five interactive 3D topics: supernovae, neutron stars, pulsars, meteors and black holes. Includes parameter readouts, independent demonstration time, timeline scrubbing and captioned image export. Pulse geometry and received profiles share one model, with finder handoff to real remnants and host galaxies. Teaching/observation boundaries, four languages, narrow layouts, reduced motion and inactive-view suspension are covered.
+
+默认回归、宇宙模型专项和三种构建通过；实际核对五主题、参数、真实天体跳转、PNG 导出及四语言窄屏。本机应用已同步，未发布线上。 / Default regressions, cosmic model checks and all three builds passed; five topics, controls, real-target handoff, PNG export and four-language narrow layouts were checked. Local app updated; no online publication.
+
+[操作与科学边界 / Usage](使用说明.md#宇宙探索馆) · [来源 / Sources](assets/cosmic/README.md) · [验证 / Validation](docs/v1.23-validation.json)
+
+## v1.22 — 2026-11-08 · 本机版 / Local build
+
+打开巡天取景默认将主镜头聚焦巡天望远镜。准星增加太阳系天体、可靠视差恒星与近处物体的实际距离，和角偏差分开，缺测明确提示。星图新增中西共用、分别控制的所选日期赤道坐标网与黄道；共享主画面、巡天照片与阳台天空，兼容旧设置和场景。
+
+**English:** Opening the Xuntian finder now frames the telescope. Reticle readouts distinguish physical distances from angular offsets, using solar-system geometry and quality-filtered stellar parallaxes, with explicit unknown distances. Added shared equatorial-of-date and ecliptic overlays with independent switches for both sky cultures, including main view, finder/photos and balcony sky, with older-scene compatibility.
+
+默认回归、日期坐标专项和三种构建通过；实际取景、照片开关及窄屏四语言已核对。验证范围及未运行项见记录。 / Default regressions, date-reference tests and all three builds passed; finder, photo switches and four-language narrow layouts were checked. Scope and untested environments are recorded.
+
+[操作与边界 / Usage and scope](使用说明.md#地球星空与环境) · [本批检查记录 / Verification](docs/v1.22-validation.json)
+
+## v1.21 — 2026-11-08 · 本机版 / Local build
+
+新增基于清代整理资料的中国传统星官体系，含 312 条星官导航、真实成员图和共享搜索／标注。提供二十八宿主星官与 4 个常见星官的 32 幅插画，以及独立开关、默认关闭的 7 幅四象／三垣总览；保留原画风、比例与轮廓，按天区和整体方向摆放。修复暂停时切换体系后的准星名称、深空目标和照片同步，兼容旧场景与环境收藏；同步四语言、帮助和维护文档。本批为本地更新，未发布。
+
+**English:** Added a Qing-compilation Chinese sky culture with 312 navigable asterism records, source-based member charts and shared search/annotations. Includes 32 individual illustrations and seven independently controlled Four Symbols / Three Enclosures overviews, which default off. Preserves the original art style and proportions with whole-image sky placement. Fixed paused reticle names, deep-sky targets and photo synchronization across culture changes; retained older-scene and preset compatibility. Updated all four UI languages, help and current documentation. This is a local update, not a publication.
+
+默认回归、三种构建与本机取景／导出检查通过；实际范围与未运行项见记录。 / Default regressions, all three builds and local finder/export checks passed; see the record for scope and untested environments.
+
+[操作与边界 / Usage and scope](使用说明.md#中国传统星官) · [本批检查记录 / Verification](docs/v1.21-validation.json)
+
 ## v1.20 — 2026-11-07 · 正式版 / Release
 
 按现行源码重整中英文介绍、操作手册和文档导航，补齐产品范围、架构、数据格式、开发发布及验证参考；明确三种操纵、保存与离线边界，保留历版证据。帮助新增观测、飞行、地形和缓存主题，保留八步导览。便携包按文档入口收集引用，补齐素材来源与许可，增加版本、链接、锚点和格式示例检查。发布包含本批文档、帮助和便携包引用修复。

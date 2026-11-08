@@ -1,14 +1,15 @@
 import * as THREE from 'three';
 import { constellationArtMesh, constellationArtFade } from './constellation-art-math.js';
 import { earthHit } from './xuntian-view-shaders.js';
+import { artworkTargets } from './constellation-art.js';
 
-const vertex = `varying vec2 artUV;varying vec3 cameraRay;uniform mat3 inertialToCamera;uniform vec2 lens;
-void main(){artUV=uv;cameraRay=inertialToCamera*position;gl_Position=vec4(cameraRay.xy/lens,0.,cameraRay.z);}`;
-const fragment = `varying vec2 artUV;varying vec3 cameraRay;uniform sampler2D artMap;uniform float opacity,inverseGain,scope;uniform vec3 ink;uniform mat3 cameraToFixed;uniform vec3 fixedEye;
+const vertex = `varying vec2 artUV;varying vec3 cameraRay;uniform mat3 inertialToCamera;uniform vec2 lens;uniform vec3 artPlaneNormal;uniform float artPlanar;
+void main(){artUV=uv;vec3 p=position;if(artPlanar>.5)p/=dot(artPlaneNormal,p);cameraRay=inertialToCamera*p;gl_Position=vec4(cameraRay.xy/lens,0.,cameraRay.z);}`;
+const fragment = `varying vec2 artUV;varying vec3 cameraRay;uniform sampler2D artMap;uniform float opacity,inverseGain,scope,sourceColor;uniform vec3 ink;uniform mat3 cameraToFixed;uniform vec3 fixedEye;
 ${earthHit}
 void main(){if(scope>.5&&groundDistance(fixedEye,cameraToFixed*normalize(cameraRay))>=0.)discard;
-float alpha=texture2D(artMap,vec2(artUV.x,1.-artUV.y)).a*opacity;if(alpha<.002)discard;
-gl_FragColor=vec4(ink*inverseGain,alpha);
+vec4 art=texture2D(artMap,vec2(artUV.x,1.-artUV.y));float alpha=art.a*opacity;if(alpha<.002)discard;
+gl_FragColor=vec4(mix(ink,art.rgb,sourceColor)*inverseGain,alpha);
 #include <colorspace_fragment>
 }`;
 
@@ -32,7 +33,13 @@ export class ConstellationArtLayer {
     };
   }
   update(view, enabled, options = {}) {
-    const entries = this.manager.update(this.id, view, enabled, this.priority),
+    const entries = this.manager.update(this.id, view, enabled, this.priority, {
+        culture: options.culture,
+        symbols: options.symbols,
+        asterisms: options.asterisms,
+        focusTargetId: options.focusTargetId,
+        overviewArtworkId: options.overviewArtworkId,
+      }),
       u = this.uniforms;
     u.inertialToCamera.value.fromArray([...view.right, ...view.up, ...view.forward]).transpose();
     const tangent = Math.tan((view.fovY * Math.PI) / 360);
@@ -49,6 +56,16 @@ export class ConstellationArtLayer {
         this.meshes.delete(id);
       }
     const fade = constellationArtFade(view.fovY);
+    const overviewOpacity = Number.isFinite(options.overviewOpacity)
+      ? Math.max(0, Math.min(1, options.overviewOpacity))
+      : 0.2;
+    const overviewBirth = new Map();
+    for (const entry of entries)
+      if (entry.frame.record.kind === 'symbols') {
+        const key =
+          entry.frame.record.original || entry.frame.record.artworkId || entry.frame.record.imageId;
+        overviewBirth.set(key, Math.max(overviewBirth.get(key) ?? -Infinity, entry.born));
+      }
     for (const entry of entries) {
       const id = entry.frame.id;
       let mesh = this.meshes.get(id);
@@ -59,7 +76,15 @@ export class ConstellationArtLayer {
         geometry.setAttribute('uv', new THREE.BufferAttribute(data.uv, 2));
         geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));
         const material = new THREE.ShaderMaterial({
-          uniforms: { ...u, artMap: { value: entry.texture }, opacity: { value: 0 } },
+          uniforms: {
+            ...u,
+            ink: { value: new THREE.Color(entry.frame.record.tint || '#d5c5a0') },
+            artMap: { value: entry.texture },
+            opacity: { value: 0 },
+            sourceColor: { value: entry.frame.record.colorMode === 'source' ? 1 : 0 },
+            artPlanar: { value: data.planeNormal ? 1 : 0 },
+            artPlaneNormal: { value: new THREE.Vector3(...(data.planeNormal || [0, 0, 1])) },
+          },
           vertexShader: vertex,
           fragmentShader: fragment,
           transparent: true,
@@ -80,8 +105,21 @@ export class ConstellationArtLayer {
         this.group.add(mesh);
       }
       mesh.material.uniforms.artMap.value = entry.texture;
+      const overview = entry.frame.record.kind === 'symbols',
+        matches = artworkTargets(entry.frame.record, options.focusTargetId),
+        emphasis = matches && !overview ? 1.3 : 1;
+      const born = overview
+        ? overviewBirth.get(
+            entry.frame.record.original ||
+              entry.frame.record.artworkId ||
+              entry.frame.record.imageId
+          )
+        : entry.born;
       mesh.material.uniforms.opacity.value =
-        0.22 * fade * Math.min(1, (performance.now() - entry.born) / 300);
+        (overview
+          ? overviewOpacity
+          : Math.min(0.42, (entry.frame.record.opacity ?? 0.22) * emphasis) * fade) *
+        Math.min(1, (performance.now() - born) / 300);
     }
     return this.manager.status(this.id);
   }
@@ -98,19 +136,29 @@ export class ConstellationArtLayer {
 
 export function paintConstellationArtCaption(canvas, status, bottomInset = 0) {
   if (!status?.ready) return 0;
-  const font = Math.max(11, Math.round(canvas.width / 120)),
-    height = font + 12,
+  const rows = [
+      status.caption ||
+        (status.culture === 'chinese'
+          ? 'Chinese asterism illustrations · modern teaching interpretation'
+          : 'Constellation illustrations: Johan Meuris / Stellarium · Free Art License · teaching overlay'),
+      ...(status.referenceCaption ? [status.referenceCaption] : []),
+    ],
+    font = Math.max(11, Math.round(canvas.width / 120)),
+    rowHeight = font + 12,
+    height = rowHeight * rows.length,
     ctx = canvas.getContext('2d');
   ctx.save();
   ctx.font = `${font}px sans-serif`;
   ctx.fillStyle = 'rgba(2,8,15,.76)';
   ctx.fillRect(0, canvas.height - bottomInset - height, canvas.width, height);
   ctx.fillStyle = '#d0dce8';
-  ctx.fillText(
-    'Constellation illustrations: Johan Meuris / Stellarium · Free Art License · teaching overlay',
-    8,
-    canvas.height - bottomInset - 7,
-    canvas.width - 16
+  rows.forEach((row, i) =>
+    ctx.fillText(
+      row,
+      8,
+      canvas.height - bottomInset - 7 - (rows.length - i - 1) * rowHeight,
+      canvas.width - 16
+    )
   );
   ctx.restore();
   return height;

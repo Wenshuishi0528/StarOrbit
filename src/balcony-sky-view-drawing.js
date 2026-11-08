@@ -1,6 +1,8 @@
+import { skyReferenceLayers, rotateSkyReference } from './sky-reference.js';
 import stars from '../assets/stars.json' with { type: 'json' };
 import names from '../assets/star-chart.json' with { type: 'json' };
 import { getLanguage, t } from './i18n.js';
+import { cultureStarName } from './sky-cultures.js';
 import { equatorial } from './environment-math.js';
 import { dot, earthAxes, sunPosition } from './orbit.js';
 import { lookAngles } from './pass-prediction.js';
@@ -18,6 +20,7 @@ function groundStars(frame, time) {
     catalog = stars
       .filter((row) => row[3] <= 5.5)
       .map(([id, ra, dec, mag, bv]) => ({
+        id,
         vector: equatorial(ra, dec),
         mag,
         name: named.get(id),
@@ -95,7 +98,7 @@ function colorSky(ray, profile, day, transparentGround) {
 // Reuse the background and horizontal star vectors while a pointer moves
 // against an unchanged observation time. Rays for the bitmap, guides, picks
 // and stars all use the same projection and the very same local sky basis.
-export function createSkyPainter(canvas) {
+export function createSkyPainter(canvas, skyCulture = () => 'western', chartSettings = () => ({})) {
   const backdrop = document.createElement('canvas'),
     back = backdrop.getContext('2d');
   let ground = [],
@@ -197,7 +200,10 @@ export function createSkyPainter(canvas) {
     for (const { dir, star, elevation, azimuth } of ground) {
       const below = elevation < 0 && transparentGround;
       if (!below && elevation <= horizonHeight(profile, azimuth)) continue;
-      const name = star.name?.[getLanguage()] || star.name?.en;
+      const name =
+        cultureStarName(star.id, skyCulture(), getLanguage()) ||
+        star.name?.[getLanguage()] ||
+        star.name?.en;
       if (!below && marker && name && star.mag < 2.4 && dark > 0.5) {
         const angle = Math.acos(limit(dot(marker, dir), -1, 1)) / DEG;
         if (!near || angle < near.angle) near = { name, angle };
@@ -231,6 +237,63 @@ export function createSkyPainter(canvas) {
     }
     for (const meridian of meridians)
       line(ctx, view, meridian, 'rgba(148,186,204,.24)', 0.8, [2, 6]);
+    const referenceBasis = groundBasis(frame, time),
+      referenceForward = [0, 1, 2].map((i) =>
+        referenceBasis.reduce((sum, axis, j) => sum + axis[i] * view.forward[j], 0)
+      ),
+      referenceLabels = [];
+    const referencePoint = (direction) => {
+      const local = referenceBasis.map((axis) => dot(axis, direction)),
+        angles = skyAngles(local);
+      if (
+        !(transparentGround && angles.elevation < 0) &&
+        angles.elevation <= horizonHeight(profile, angles.azimuth)
+      )
+        return null;
+      return projectSky(local, view);
+    };
+    for (const layer of skyReferenceLayers({
+      settings: chartSettings(),
+      epoch: time,
+      fovY: 82 / view.scale,
+      aspect: w / h,
+      forward: referenceForward,
+      language: getLanguage(),
+      allSky: view.mode === 'hemisphere',
+    })) {
+      ctx.beginPath();
+      for (const path of layer.paths) {
+        let previous = null;
+        for (const direction of path) {
+          const p = referencePoint(rotateSkyReference(layer.columns, direction));
+          if (p) {
+            if (previous) ctx.lineTo(p.x, p.y);
+            else ctx.moveTo(p.x, p.y);
+          }
+          previous = p;
+        }
+      }
+      ctx.strokeStyle = layer.color;
+      ctx.globalAlpha = layer.opacity;
+      ctx.lineWidth = layer.setting === 'eclipticLine' ? 1.2 : 0.8;
+      ctx.stroke();
+      for (const label of layer.labels) {
+        const p = referencePoint(rotateSkyReference(layer.columns, label.direction));
+        if (
+          p &&
+          p.x > 30 &&
+          p.y > 25 &&
+          p.x < w - 80 &&
+          p.y < h - 25 &&
+          !referenceLabels.some((q) => Math.abs(p.x - q.x) < 80 && Math.abs(p.y - q.y) < 22)
+        )
+          referenceLabels.push({ ...p, text: label.text, color: layer.color });
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.font = '11px system-ui, sans-serif';
+    for (const label of referenceLabels)
+      outlined(ctx, label.text, label.x + 4, label.y - 4, label.color);
     if (profile.length) line(ctx, view, skylinePoints, '#a4b7af', 1.35);
     ctx.font = '11px system-ui, sans-serif';
     ctx.textAlign = 'center';

@@ -1,3 +1,4 @@
+import { crosshairDistanceText } from './xuntian-distance.js';
 import { Quaternion } from 'three';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { shortClock } from './time-format.js';
@@ -43,7 +44,7 @@ import { xuntianSkySource } from './xuntian-view-sky.js';
 import { mountScopeInput } from './xuntian-input.js';
 import { mountScopeSearch } from './xuntian-search.js';
 import { makeScopeGuide } from './xuntian-guide.js';
-import { normalizeStarChartSettings } from './star-chart-settings.js';
+import { normalizeStarChartSettings, syncStarChartControls } from './star-chart-settings.js';
 import { mountXuntianSolarControls } from './xuntian-solar-controls.js';
 import { skyDetailTarget, skyDetailText, skyDetailCredits } from './sky-detail-controls.js';
 import { cityTerrainText } from './city-terrain-controls.js';
@@ -94,6 +95,7 @@ export function installXuntianScope(sim) {
     mode = 'sky',
     named = null,
     fieldId = null,
+    overviewArtworkId = null,
     field = DISCOVERY_FOV,
     aperture = 600,
     ev = 0,
@@ -118,7 +120,7 @@ export function installXuntianScope(sim) {
     nightCap = false,
     selectedAt = 0,
     locked = false,
-    exterior = 'both';
+    exterior = 'near';
   const stats = { frames: 0, lastRenderMs: 0 };
   let surveyMission,
     anchor = null,
@@ -194,6 +196,7 @@ export function installXuntianScope(sim) {
     if (active) hud();
   }
   function beginExternalSteering() {
+    overviewArtworkId = null;
     sim.mainFlight?.selectTarget?.('xuntian');
     sim.mainFlight?.endAttitudeControl?.('xuntian');
     clearPilot();
@@ -273,6 +276,17 @@ export function installXuntianScope(sim) {
     return solarApparent(sim.current, eye).find((entry) => entry.id === body);
   }
   function selectStar(target) {
+    const nextCulture =
+      target.type === 'asterism' ? 'chinese' : target.type === 'constellation' ? 'western' : null;
+    if (nextCulture && sim.environment.settings.skyCulture !== nextCulture) {
+      sim.environment.settings.skyCulture = nextCulture;
+      syncStarChartControls(sim.environment.settings);
+      sim.environment.save();
+    }
+    if (target.type === 'asterism') {
+      sim.environment.skyCultureFocus = target.id;
+      sim.skyCultureControls?.select?.(target.id);
+    }
     beginExternalSteering();
     if (target.type !== 'solar' || target.body !== 'Sun') solarControls.ordinary();
     if (target.type === 'solar') {
@@ -381,6 +395,7 @@ export function installXuntianScope(sim) {
     hud();
   }
   function capturePin(now) {
+    overviewArtworkId = null;
     const station = now && sim.current ? sampleStationPin(sim, now) : null;
     anchor = station
       ? { kind: 'station', point: station, up: cameraAxes(pose).up }
@@ -448,6 +463,7 @@ export function installXuntianScope(sim) {
   });
   const search = mountScopeSearch($('xtSearch'), $('xtResults'), {
     choose: selectStar,
+    skyCulture: () => sim.environment.settings.skyCulture || 'western',
     cityFinder: cities,
     isBlocked: (d) => earthInFront(optics?.eyeKm || sim.current?.position, d),
     solarVisible: (id) => {
@@ -620,6 +636,13 @@ export function installXuntianScope(sim) {
       detail += ' · ' + t('位于 {name} 天区', { name: hit.region.name });
     setText($('xtCrosshairName'), name);
     setText($('xtCrosshairDetail'), detail);
+    const distance = crosshairDistanceText(hit, t);
+    setText($('xtCrosshairDistance'), distance);
+    $('xtCrosshairDistance').hidden = !distance;
+    $('xtCrosshairDistance').title =
+      hit?.distanceSource === 'hipparcos-2007'
+        ? t('Hipparcos 2007 视差估计；视差相对误差不超过 10%。距离不随模拟年份外推。')
+        : '';
     $('xtCrosshairReadout').dataset.kind = kind;
     $('xtCrosshairReadout').dataset.target = hit?.id || hit?.city?.id || '';
   }
@@ -630,6 +653,9 @@ export function installXuntianScope(sim) {
       crosshairSun: lastResult?.identification?.body === 'Sun',
       unavailable,
     });
+    const lunarTarget = mode === 'solar' && named?.body === 'Moon';
+    const lunarCrosshair = lastResult?.identification?.body === 'Moon';
+    $('xtLunarDiscovery').hidden = unavailable || !(lunarTarget || lunarCrosshair);
     const sky =
         mode === 'solar' ||
         mode === 'sky' ||
@@ -965,7 +991,7 @@ export function installXuntianScope(sim) {
     if (!active) return;
     if (needsFrame && optics) {
       needsFrame = false;
-      frameExternal('both');
+      frameExternal('near');
     }
     if ($('xtShowGuide').checked && sim.view !== 'orbit') guide.update(optics, field, ASPECT);
     else guide.hide();
@@ -985,6 +1011,7 @@ export function installXuntianScope(sim) {
     photoNames: $('xtPhotoNames').checked,
     chartSettings: normalizeStarChartSettings(sim.environment.settings),
     focusTargetId: named?.id || null,
+    overviewArtworkId: mode === 'sky-pin' ? overviewArtworkId : null,
     q: sim.current,
     eyeKm: optics.eyeKm,
     eyeLocal: optics.eyeLocal,
@@ -1079,6 +1106,7 @@ export function installXuntianScope(sim) {
             mode,
             f.constellationId,
             f.focusTargetId,
+            f.overviewArtworkId,
             field,
             aperture,
             ev,
@@ -1268,9 +1296,13 @@ export function installXuntianScope(sim) {
     if (named?.type === 'solar') {
       named.name = solarLabel(named.body, getLanguage());
       $('xtSearch').value = named.name;
-    } else if (named) named = getXuntianTarget(named.id, getLanguage()) || named;
+    } else if (named)
+      named =
+        getXuntianTarget(named.id, getLanguage(), sim.environment.settings.skyCulture) || named;
     if (bookmark?.named)
-      bookmark.named = getXuntianTarget(bookmark.named.id, getLanguage()) || bookmark.named;
+      bookmark.named =
+        getXuntianTarget(bookmark.named.id, getLanguage(), sim.environment.settings.skyCulture) ||
+        bookmark.named;
     search.refresh();
     if (active) {
       if (anchor?.cityId)
@@ -1288,6 +1320,93 @@ export function installXuntianScope(sim) {
   return {
     open,
     close,
+    observeBody(body) {
+      if (
+        sim.missionId !== 'tiangong' ||
+        ![
+          'Sun',
+          'Moon',
+          'Mercury',
+          'Venus',
+          'Mars',
+          'Jupiter',
+          'Saturn',
+          'Uranus',
+          'Neptune',
+        ].includes(body)
+      )
+        return false;
+      open();
+      if (!active || !bodyNow(body)) return false;
+      selectStar({
+        id: 'solar:' + body,
+        body,
+        type: 'solar',
+        name: solarLabel(body, getLanguage()),
+      });
+      return mode === 'solar' && named?.body === body;
+    },
+    observeTarget(target, { annotations = false } = {}) {
+      if (sim.missionId !== 'tiangong' || !target?.direction) return false;
+      open();
+      if (!active) return false;
+      if (annotations) {
+        $('xtNames').checked = true;
+        pausedFrame = '';
+        lastDraw = -Infinity;
+        prefs();
+      }
+      selectStar(target);
+      return true;
+    },
+    observeRegion(target) {
+      if (sim.missionId !== 'tiangong' || !target?.direction?.every(Number.isFinite)) return false;
+      open();
+      if (!active) return false;
+      beginExternalSteering();
+      saveSky();
+      solarControls.ordinary();
+      surveyMission?.clear();
+      discardAnchor();
+      mode = 'sky-pin';
+      named = null;
+      fieldId = null;
+      overviewArtworkId = target.artworkId || null;
+      anchor = { kind: 'sky', direction: [...target.direction] };
+      setLens(target.fov);
+      aim(target.direction, true);
+      selectedAt = performance.now();
+      $('xtNames').checked = true;
+      $('xtSearch').value = '';
+      pausedFrame = '';
+      prefs();
+      hud();
+      canvas.focus({ preventScroll: true });
+      return true;
+    },
+    onSkyCultureChange() {
+      overviewArtworkId = null;
+      // A cultural group has no one-to-one counterpart. Preserve the optical
+      // ray and physical targets, clear only the old grouping and its bookmark.
+      if (named && ['asterism', 'constellation'].includes(named.type)) {
+        named = null;
+        $('xtSearch').value = '';
+      } else if (named && named.type !== 'solar') {
+        named =
+          getXuntianTarget(named.id, getLanguage(), sim.environment.settings.skyCulture) || named;
+        $('xtSearch').value = named.name;
+      }
+      if (bookmark?.named && ['asterism', 'constellation'].includes(bookmark.named.type))
+        bookmark.named = null;
+      else if (bookmark?.named && bookmark.named.type !== 'solar')
+        bookmark.named =
+          getXuntianTarget(bookmark.named.id, getLanguage(), sim.environment.settings.skyCulture) ||
+          bookmark.named;
+      search.refresh();
+      pausedFrame = '';
+      lastDraw = -Infinity;
+      if (active) hud();
+    },
     openSurveyTile,
     observeSolar,
     observeSkyDetail,

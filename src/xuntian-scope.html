@@ -3,9 +3,10 @@
  <div class="xt-body">
   <div class="xt-search"><label for="xtSearch" class="xt-caption">搜索天体或城市</label><input id="xtSearch" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="xtResults" placeholder="火星、织女星、Orion、北京"><div id="xtResults" role="listbox" hidden></div></div>
   <div class="xt-ocular"><canvas id="xtCanvas" width="480" height="300" tabindex="0" aria-label="巡天光学取景，拖动或用方向键转动，滚轮变焦"></canvas><canvas id="xtSurveyOverlay" aria-hidden="true"></canvas><i class="xt-reticle" aria-hidden="true"></i><span class="xt-field" id="xtField"></span><time id="xtClock"></time><span class="xt-coords" id="xtCoordinates"></span><span id="xtDepth" title="模拟极限星等越大，越暗的恒星也能显示。"></span><span class="xt-unavailable" id="xtUnavailable" hidden>当前时刻没有可用的轨道位置</span></div>
-  <div id="xtCrosshairReadout" class="xt-crosshair-readout" title="仅识别十字线当前所指，不改变固定跟踪。"><span>十字线所指</span><strong id="xtCrosshairName">—</strong><small id="xtCrosshairDetail"></small></div>
+  <div id="xtCrosshairReadout" class="xt-crosshair-readout" title="仅识别十字线当前所指，不改变固定跟踪。"><span>十字线所指</span><strong id="xtCrosshairName">—</strong><small id="xtCrosshairDetail"></small><small id="xtCrosshairDistance" hidden></small></div>
   <div class="xt-object"><strong id="xtTarget"></strong><span id="xtIllumination" hidden></span><span id="xtStatus" role="status"></span></div>
-  <div class="xt-track-actions"><button type="button" id="xtPin">随轨道转动</button><button type="button" id="xtPinHere">固定当前十字线</button><button type="button" id="xtGroundQuick">看地面</button><button type="button" id="xtObserveSun">太阳观测</button><button type="button" id="xtLookBody" hidden>主画面看目标</button><button type="button" id="xtInitial">恢复初始位置</button></div>
+  <section id="xtLunarDiscovery" class="xt-lunar-discovery" hidden aria-label="月球观测"><div><strong>月球 · 观测与探索</strong><p>查看实时月相、三维月面、地名与着陆点，探索全月地质图。</p></div><button type="button" id="xtLunarExplore" class="primary">打开月球观测</button></section>
+  <div class="xt-track-actions"><button type="button" id="xtPin">随轨道转动</button><button type="button" id="xtPinHere">固定当前十字线</button><button type="button" id="xtGroundQuick">看地面</button><button type="button" id="xtObserveSun">太阳观测</button><button type="button" id="xtLunarLab">月球观测</button><button type="button" id="xtLookBody" hidden>主画面看目标</button><button type="button" id="xtInitial">恢复初始位置</button></div>
   <div id="xtTrackingInfo" hidden></div>
   <div id="xtSources" title="当前载入的地表、银河和取景窗实际像素"></div>
   <div id="xtCityTerrain" class="xt-hint" hidden><span id="xtCityStatus"></span> <button id="xtCityLibrary" type="button">城市地景库…</button></div>
@@ -26,7 +27,7 @@
   <div class="xt-hint">标注类别与密度沿用左侧星图设置；照片开关独立。</div>
   <div class="xt-actions"><button type="button" id="xtCapture" class="primary">拍摄 PNG</button><select id="xtPhotoWidth" aria-label="照片尺寸" title="照片尺寸"><option value="1440">1440 × 900</option><option value="2560">2560 × 1600</option><option value="3840">3840 × 2400</option></select><button type="button" id="xtRecommend">推荐星野</button><button type="button" id="xtReturn" hidden>返回星野</button></div>
   <div class="xt-hint">点击取景窗后，W 低头 / S 抬头，A / D 左右转向，Q / E 左右滚转；拖动或方向键也可转向，滚轮或双指变焦。固定后移动会固定新落点；点击「随轨道转动」才解除。</div>
-  <div class="xt-exterior" role="group" aria-label="外景构图"><span>外景</span><button type="button" id="xtFrameBoth" aria-pressed="true">两器同框</button><button type="button" id="xtNear" aria-pressed="false">近看巡天</button></div>
+  <div class="xt-exterior" role="group" aria-label="外景构图"><span>外景</span><button type="button" id="xtFrameBoth" aria-pressed="false">两器同框</button><button type="button" id="xtNear" aria-pressed="true">近看巡天</button></div>
   <details id="xtMore"><summary>空间站、地球与伴飞位置</summary><label class="xt-guide"><input id="xtSkyCompass" type="checkbox" checked>显示天球方向尺</label><div class="xt-presets"><button type="button" data-xt-mode="station">看空间站</button><button type="button" data-xt-mode="horizon">看地平线</button><button type="button" data-xt-mode="nadir">看星下点</button><button type="button" data-xt-mode="sunlit">看日照地表</button></div><label class="xt-guide"><input id="xtShowGuide" type="checkbox" checked>外景显示望远镜视场</label><div id="xtFormationPanel"></div></details>
  </div>
 </section>

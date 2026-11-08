@@ -5,7 +5,7 @@ import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 const output=process.argv[2]||'dist';
 const html=fs.readFileSync(output+'/index.html','utf8'),data=id=>JSON.parse(html.match(new RegExp('<script id="'+id+'"[^>]*>([\\s\\S]*?)</script>'))[1]);
-assert(Buffer.byteLength(html)<500000);assert(!html.includes('__JS__'));assert(!html.includes('__HELP_'));assert(!html.includes('data:image/jpeg;base64,'));
+assert(Buffer.byteLength(html)<750000);assert(!html.includes('__JS__'));assert(!html.includes('__HELP_'));assert(!html.includes('data:image/jpeg;base64,'));
 function resource(url){assert(url.startsWith('assets/'));assert(!url.includes('..'));const p=path.join(output,url);assert(fs.existsSync(p),url);return fs.readFileSync(p);}
 const station=data('modelData'),unpacked=zlib.gunzipSync(resource(station.url));assert.equal(unpacked.readUInt32LE(),0x46546c67);assert(unpacked.equals(fs.readFileSync('assets/station.glb')));
 const catalog=JSON.parse(fs.readFileSync('assets/missions/catalog.json','utf8'));
@@ -15,7 +15,7 @@ for(const [id,source] of Object.entries(data('spacecraftModels'))){
 }
 const orbits=JSON.parse(resource(data('missionOrbits').url));assert(orbits.tiangong.rows.length>=8&&orbits.dfh1.rows.length>=8);
 const scan=value=>{if(typeof value==='string')resource(value);else if(value)Object.values(value).forEach(scan);};
-const {skyDetail,cityTerrain,constellationArt,elevation,...environment}=data('environmentAssets');scan(environment);
+const {skyDetail,cityTerrain,constellationArt,chineseConstellationArt,elevation,lunarTerrain,...environment}=data('environmentAssets');scan(environment);
 const elevationManifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));
 assert(resource(elevation.base.url).equals(fs.readFileSync(elevationManifest.base.file)));
 assert.equal(zlib.gunzipSync(resource(elevation.base.url)).byteLength,elevation.base.width*elevation.base.height*2);
@@ -31,7 +31,24 @@ for(const art of distributedArt.images){
  assert(fs.readFileSync(path.join(output,'assets/constellation-art',art.file)).equals(fs.readFileSync(source.file)));
 }
 for(const file of ['README.md','LICENSE-FAL-1.3.html','LICENSE-CC-BY-SA-4.0.txt','upstream-description.md'])assert(fs.readFileSync(output+'/assets/constellation-art/'+file).equals(fs.readFileSync('assets/constellation-art/'+file)));
+const chineseArt=JSON.parse(fs.readFileSync('assets/chinese-sky/art/manifest.json'));
+assert.equal(chineseConstellationArt.artworks,chineseArt.artworks);
+assert.equal(chineseConstellationArt.images.length,chineseArt.images.length);
+assert.equal(chineseConstellationArt.version,chineseArt.version);
+const chineseDistributed=JSON.parse(fs.readFileSync(output+'/assets/chinese-sky/art/manifest.json'));
+for(const art of chineseConstellationArt.images){
+ const source=chineseArt.images.find(c=>c.imageId===art.imageId);assert(source);
+ assert(resource(art.url).equals(fs.readFileSync(source.file)),art.imageId);
+ assert(!Object.hasOwn(art,'mesh'),'geometry belongs in the hashed application payload');
+ const distributed=chineseDistributed.images.find(c=>c.imageId===art.imageId);
+ const actual=path.resolve(output,'assets/chinese-sky/art',distributed.file);
+ assert(actual.startsWith(path.resolve(output)+path.sep));
+ assert(fs.readFileSync(actual).equals(fs.readFileSync(source.file)));
+}
+for(const file of ['README.md','catalog.json','source/CC-BY-SA-4.0.txt','source/index.json','source/I-239-hip_main.tsv','source/I-311-hip2.tsv','source/Gaia-DR3.csv','source/Gaia-DR3-AIP.xml','source/Gaia-HIP-crossmatch.csv','art/README.md','art/provenance.json','art/rigid-placements.json','art/expansion-brief.json','art/subjects.txt'])assert(fs.readFileSync(output+'/assets/chinese-sky/'+file).equals(fs.readFileSync('assets/chinese-sky/'+file)));
 assert.equal((html.match(/<\/head>/g)||[]).length,1,'Embedded licenses must not terminate the document head');
+for(const file of ['README.md','catalog.json','source/I-311-hip2.tsv'])assert(fs.readFileSync(output+'/assets/stellar-distances/'+file).equals(fs.readFileSync('assets/stellar-distances/'+file)),`stellar distance provenance ${file}`);
+assert(fs.readFileSync(output+'/assets/cosmic/README.md').equals(fs.readFileSync('assets/cosmic/README.md')),'Cosmic model methods and attribution remain available offline');
 const cityManifest=JSON.parse(fs.readFileSync('assets/earth/cities/manifest.json','utf8'));
 assert.equal(cityTerrain.version,cityManifest.version);
 let cityBytes=0,cityTiles=0;
@@ -63,3 +80,7 @@ for(const track of data('musicData')){assert(!track.base64);assert.equal(crypto.
 const appURL=html.match(/<script defer src="([^"]+)"/)[1];resource(appURL);
 assert.equal(JSON.parse(fs.readFileSync(output+'/version.json')).version,JSON.parse(fs.readFileSync('package.json')).displayVersion);
 console.log(output+' build: relative hashed URLs, compact entry, original models/music, orbit data and version passed');
+
+const lunarDEM=JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json'));assert(resource(lunarTerrain.url).equals(fs.readFileSync(lunarDEM.file)));assert.equal(zlib.gunzipSync(resource(lunarTerrain.url)).byteLength,lunarDEM.width*lunarDEM.height*2);for(const file of ['README.md','SCIENCE.md','terrain-manifest.json','lola-720x360.i16.gz','lroc-color-2k.jpg'])assert(fs.readFileSync(output+'/assets/moon/'+file).equals(fs.readFileSync('assets/moon/'+file)));
+
+const geology=JSON.parse(fs.readFileSync("assets/moon/geology/manifest.json"));for(const record of geology.outputs)assert(resource(data("environmentAssets").lunarGeology[record.id]).equals(fs.readFileSync(record.file)));

@@ -1,0 +1,172 @@
+{
+  "version": "1.24",
+  "status": "passed-with-documented-scope",
+  "recordedAt": "2026-11-07T18:14:24.206832+00:00",
+  "baseCommit": "ca99e309c79e81737d2194dfbdc77eb59d465331",
+  "workspace": "Local uncommitted v1.21–v1.24 changes; earlier work preserved",
+  "system": "macOS-10.16-x86_64-i386-64bit",
+  "scope": [
+    "Independent lunar workbench: Earth-observer disk and free 3D atlas",
+    "Site/date-driven phases, libration, parallax, angles, rise/set/transit and four primary phases",
+    "Real downsampled LOLA terrain, existing LROC mosaic, true relief and labelled x8 teaching mode",
+    "16 official landmarks, terminator search, far-side flight, picking, diffraction-limit calculator and captioned PNG",
+    "Integration with existing Moon settings, lab and Xuntian; explicit main-clock dynamic Moon handoff"
+  ],
+  "automated": [
+    {
+      "log": "output/release124/tests-final.log",
+      "status": "passed",
+      "bytes": 41886,
+      "sha256": "d29393b0d4b251eada5ca266a3000f5703443ac08c698a244d81955cf54ab2d2"
+    },
+    {
+      "log": "output/release124/lunar-final.log",
+      "status": "passed",
+      "bytes": 574,
+      "sha256": "72f1f66872a44103b7a7685a483851513d9fc2dc7613049b326aed5830f5ea02"
+    },
+    {
+      "log": "output/release124/format-final.log",
+      "status": "passed",
+      "bytes": 139,
+      "sha256": "ecac61ead11a43781804225969a18366662f1e2bd99d43ad5795e97f83594666"
+    },
+    {
+      "log": "output/release124/docs-final.log",
+      "status": "passed",
+      "bytes": 454,
+      "sha256": "641fc539d5709c616e2a58eb12df5184b6de03e2346e00b73e6cff025001d0da"
+    },
+    {
+      "log": "output/release124/diff-check.log",
+      "status": "passed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "output/release124/build.log",
+      "status": "passed",
+      "bytes": 152,
+      "sha256": "053d5c5c4624ae4d9274ea136c0824637fb7c262e27e498facf29e695e47b6d0"
+    },
+    {
+      "log": "output/release124/build-web.log",
+      "status": "passed",
+      "bytes": 98,
+      "sha256": "6039d6fd99448b1eac5d2090d1fc65006332c2dca8734a4cf47d69fc270b5bf4"
+    },
+    {
+      "log": "output/release124/web-assets.log",
+      "status": "passed",
+      "bytes": 102,
+      "sha256": "c1354a5ed39dbc61bc5fc7a8a5b819945d2d47a8c7d4d7183f3cbb1b3b5ff50c"
+    },
+    {
+      "log": "output/release124/local-assets.log",
+      "status": "passed",
+      "bytes": 108,
+      "sha256": "acff8dc5f60766581d09b02003bf9b186801ae392a174251bffddfbcf242449c"
+    },
+    {
+      "log": "output/release124/launcher.log",
+      "status": "passed",
+      "bytes": 92,
+      "sha256": "4c57102865fcb06d49225e5be6523a88ec9b29e8067f80c39ecea6d2adc5b17b"
+    },
+    {
+      "log": "output/release124/launcher-installed-check.log",
+      "status": "passed",
+      "bytes": 133,
+      "sha256": "a57ee812318c49c6d6010b0909c7e6742850b0f0cc4e4850300b2696246a5db0"
+    },
+    {
+      "log": "output/release124/install.log",
+      "status": "passed",
+      "bytes": 607,
+      "sha256": "49fe775217a22f7153ad1f551c70e1ac5aebecd28a7969e0a186f41bc64cf6d2"
+    }
+  ],
+  "testTiming": "Full npm test passed. Later UI readiness, pause/readout synchronization, narrow-screen navigation and conservative lunar-core shadow refinements were covered by final lunar/i18n tests, formatting, build-asset checks and targeted browser verification. Initial run ended only because the last new terrain test file had not yet been written; the completed full run passed.",
+  "interactive": {
+    "environment": "Codex in-app browser on this Mac, source port 8875 and installed port 8771",
+    "passed": [
+      "Both Earth-observer and 3D atlas render real assets with no captured console errors",
+      "Date input and explicit Apply time; November 17 2026 first-quarter replay gives approximately 49.7 percent illumination with correct bright-side geometry",
+      "Beijing and manually entered Sydney site change observer geometry/horizon values",
+      "Rise/set/transit and four primary-phase timestamps; clicking first quarter changes independent epoch",
+      "Playback advances independent clock; pause retains identical timestamp through repaint; close/reopen and tab switches suspend",
+      "Natural/elevation layers, atlas x8 and observer forced x1, far-side focus and mouse surface coordinate/elevation picking",
+      "Terminator recommendation selected Serenitatis with visible hemisphere and solar altitude about 20.7 degrees",
+      "Xuntian handoff tracks dynamic Moon at main November 8 date rather than lab November 25; scope entry reopens same lab epoch",
+      "390 x 844 Chinese/English/Russian/French: panel width equals scroll width; horizontal lab tabs preserve usable content space",
+      "PNG download opened and inspected: epoch, site, mode, relief, non-live simulation and source credits",
+      "Installed app v1.24 launches lunar workbench; final screenshots retained"
+    ],
+    "artifacts": [
+      "output/release124/installed-lunar.png",
+      "output/release124/lunar-terrain.png",
+      "output/release124/lunar-export.png"
+    ]
+  },
+  "independentReview": "Science/model and integration agents checked NASA reference samples, official coordinates, orientation/UV, observer frame, lunar-core and terrestrial eclipse geometry, lifecycle, saved-state bounds, handoff and capture state. Findings addressed.",
+  "notRun": [
+    "Full Safari/Firefox/Edge/Windows/Android/iOS UI matrix",
+    "OS-level reduced-motion preference change and WebGL context-loss fault injection",
+    "Quantitative FPS/GPU-memory benchmark",
+    "Terrain ray-traced cast shadows, earthshine, refracted red eclipse light, real-time lunar camera feed (outside this model scope)",
+    "Physical telescope diffraction/seeing image convolution (calculator only)"
+  ],
+  "modelLimits": [
+    "LOLA 0.5 degree grid: approximately 15.2 km per sample at equator; half-metre numeric quantization is not spatial resolution",
+    "Geometric lit fraction and surface solar altitude do not include eclipse brightness or local cast shadows",
+    "Atlas fill light and x8 relief are inspection aids; observation mode has physical relief and no fill light",
+    "Conservative solid lunar-core shadow blocks rays proven to cross the Moon; remaining terminator lighting is not a full terrain-shadow solution"
+  ],
+  "sourceHashes": {
+    "src/lunar-ui-copy.js": "24a38286e0899cdc878dcea0f9c4a55d4bd2f2880729d321e3a6227e2089bc6d",
+    "src/lunar-state.js": "4072b3f018922a37477f8b53db6b8cd640656231b502706372c882f0d5a33a8b",
+    "src/lunar-lab-style.js": "fcc820cd84164b404ee28b72e89de6173324b0135bdae05665b3b6a5cf1c1417",
+    "src/lunar-math.js": "5fc8a6b7525fe6d07deb85bf0c2ec81800208d3273796e5383d6a77b2b56042b",
+    "src/lunar-lab.js": "a369b6cde2b80568697f86874c7508db0353f5a93875a67c9581b4195550be1f",
+    "src/lunar-features.js": "5c5277503a854c047ac34f6300c32b6b58b3e6798adef8820a3ce0ce8b023bdf",
+    "src/lunar-renderer.js": "6b0b9f11437ea334b5ef156af00be2a71c7bdf71e1e2cc6e873a5e26c7a320b0",
+    "src/lunar-terrain.js": "ee467d51b5d06852f2b42e1a4b91d71ae6cc534bb9e6bdecf76d9ecd0c31ad76",
+    "src/flight-lab.js": "56bf0624aa5dcd09146dc2a412302810256256782d524e8c3965e65da90a68e3",
+    "src/xuntian-scope.js": "af7f9e94696b3db9a7ce7e01e13504d15c2088ec02d9ad655361a74a86dc13e5",
+    "src/help.js": "30439ab674b734c7fd9798b9a664deb73d50f3e839a9d8facdb9f5f138ad5379",
+    "build.mjs": "3931bbcc90150aa28f00686aaa23b007411c0aef99a119c522cb64a4874e1485",
+    "package.json": "c53e0808fa46033ce5814ca991c55d9e83bed8add67938f9b117355e62bc77fe",
+    "assets/moon/README.md": "4ca8665a4fa226e3f75991b50f472ab2a43c362160579def54d4817cdd2eaeb4",
+    "assets/moon/SCIENCE.md": "9b1c9634d59f2e37446241d2740537e2365d8882198f25c2cff13cd500240aed",
+    "assets/moon/terrain-manifest.json": "03d6fe56d7af3f2a1d2f39f75c324da5aeaee36c571c87fc71a99fedaf51b531",
+    "tests/lunar-math.mjs": "f3591f0240173bcea574739d0e827f01b3f3452d0906de59b5767c313e273239",
+    "tests/lunar-features.mjs": "ddaba6c36782b65487404e30f9c96a41e61ea7a64c545c29c82f8bd43d69be1f",
+    "tests/lunar-state.mjs": "c9c3261daadd9b9b8401aa5c2f9d018e68357dd46cdcb288b7667ab9ba04eb09",
+    "tests/lunar-terrain.mjs": "53827e431c50e82a35025843aca6414c1f243d84193c8b71a4c14ce590c8f411"
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "bytes": 417966984,
+      "sha256": "6c8c7f0af808ab5dbcebb1184180984110122888246b947414a2ca61885e577c"
+    },
+    "dist-local/index.html": {
+      "bytes": 485557,
+      "sha256": "17e8e937acb979158ec8c5acd88fc4e029d6add53922b855ccd4c7124224124d"
+    },
+    "dist/index.html": {
+      "bytes": 485557,
+      "sha256": "6b71509ebb00c6ded67e669bb6d0f7bb92f5737a40a3c3556fcc783240223c9f"
+    }
+  },
+  "installation": {
+    "version": "1.24",
+    "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "filesSynced": 3315,
+    "oldContentAddressedAssetsRetained": true,
+    "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release124/runtime-backup",
+    "htmlSHA256": "6c8c7f0af808ab5dbcebb1184180984110122888246b947414a2ca61885e577c",
+    "entrySHA256": "17e8e937acb979158ec8c5acd88fc4e029d6add53922b855ccd4c7124224124d",
+    "launcherRoot": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件"
+  },
+  "publication": "Local only; no push, Release or Pages deployment"
+}

@@ -1,8 +1,16 @@
 # 系统架构与状态边界
 
-适用版本：v1.20。作者：Wenshuishi。核对日期：2026-11-07。
+月面地名由 `lunar-place-catalog.js` 读取完整正式目录与着陆任务，`lunar-place-layout.js` 建立球面分桶索引，按视口、正背面、尺度和密度筛选。一张 Canvas2D 叠层承载全部标签并复用于 PNG 导出，避免创建数千个 DOM 节点；未知坐标的任务保留资料，不生成落点。`lunar-renderer.js` 按需加载经 Mollweide 反投影的 4096×2048 地质纹理，复用月固经纬、地形网格与 Canvas 标注；透明无数据像素显示中性灰色。地质图采用辅助照明并保留分类色，选择图层切至三维图鉴。`lunar-geology-viewer.js` 另外按需打开四幅离线原版图像，保留复合地图、图例与年代尺。四象与三垣的透明度经共享设置传递，仅影响总览 `symbols` 层。
 
-本页依据 v1.19 的实际实现整理 v1.20 文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
+适用版本：本地 v1.25。作者：Wenshuishi。核对日期：2026-11-08。
+
+本页维护本地 v1.25 的实现关系与文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
+
+赤道网与黄道作为共同天球参考层，由日期真赤道／真黄道旋转至现有 J2000 场景；主画面、巡天与照片、阳台使用同一数学定义。恒星距离按物理 HIP 身份查表，不随中西名称或语言变化。巡天打开时使用既有近景构图流程，之后不持续改变用户镜头。
+
+宇宙探索馆作为实验室第六页签懒加载，共用既有模态生命周期与主循环暂停机制。独立相位驱动纯数学读数和 Three.js 视图；单一渲染器缓存五场景，暂停拖动／尺寸变化按需刷新，退出停止 RAF。真实天区交接通过现有巡天物理目录解析，不改变目录或主场景时刻。
+
+月球观测作为第七页签复用实验室生命周期；地面视盘和自由三维月面共用 `lunar-math` 的月固坐标与 `lunar-renderer` 的真实位移网格。日照、月相和地名由同一经纬约定驱动；升落搜索只在显式计算时执行。地形 gzip 随构建内嵌或内容寻址，渲染器懒加载并独立释放。地面观测点复用已有 observer 存储；独立日期不修改主任务。巡天交接通过动态太阳系天体接口跟踪 Moon，沿用主时钟。
 
 ## 总体关系
 
@@ -52,7 +60,7 @@ flowchart TD
 | 保存、场景和观测记录 | `session-memory.js`、`scene-format.js`、`scene-share.js`、`observation-store.js` | 当前网址的偏好、完整场景、观测配方和独立飞行存档用途不同 |
 | 本机服务和分发 | `scripts/serve.py`、`build.mjs`、`scripts/package-portable.py`、`macos/Launcher.swift` | 服务工作根目录、构建方式、入口重定向、启动器引用和发布证据 |
 
-源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.20 新增文档及检查工具以本地源码为准。
+源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.25 的星官数据、共享文化图层及控件以当前工作副本为准；上述固定公开链接仅对应其历史提交。
 
 ## 状态由谁拥有
 
@@ -126,6 +134,16 @@ flowchart TD
 `xuntian-view-render.js` 为取景和照片建立不同 view ID，并把需求交给共享的星空/城市/高程管理器。预览按当前窗口尺寸请求；照片按输出尺寸准备，允许有限等待，并记录实际取得的数据状态。长曝光也会使用地球取景准备流程。缺覆盖、断网或超时应保留已有数据/较粗层级，并通过照片来源说明表达实际回退。
 
 修改图片导出时应同时核查：视野与相机方向、地球遮挡、天空与地表的分辨率、太阳影像时刻、星名开关、数据署名以及任务结束后的资源释放。只验证主画面无法证明照片路径正确。
+
+## 星空文化与教学图像
+
+`sky-cultures.js` 将西方星座和中国星官作为同一星空上的数据提供者；`sky-culture-controls.js` 提供天区／星官导航、成员图和主画面／巡天定位。`skyCulture` 由 `star-chart-settings.js` 正规化，默认 `western`，与 UI 语言、星空影像来源独立。场景和环境收藏通过现有环境设置路径保存它；旧场景缺省恢复西方。
+
+名称、成员和连线进入同一 `star-chart.js`、`sky-annotation-layout.js`、`star-label-catalog.js` 与巡天目录／准星路径。数据不能把所有成员压成 HIP：Gaia 恒星与星团对象保留独立标识。成员图和高亮使用同一目录的本体连线成员，不依赖某星官是否有插画；有名增星单独计数、支持搜索，不据此推造连线。切换只更新文化对象和相应选中状态，不能改变物理天体方向、时刻或强制执行跨体系群组映射。
+
+中国文化数据与现代图像分别位于 `assets/chinese-sky/` 和 `assets/chinese-sky/art/`。`ConstellationArt` 接受多个文化的 manifest，纹理键带文化命名空间，按视野请求、共享有界驻留与取消；当前代码的图像 GPU 预算为 16 MiB，不能把中西全部图片同时常驻。`ConstellationArtLayer` 按天球配准、遮挡与视场淡出，照片沿用当前体系及实际图像署名。四象是天球意象，不是固定屏幕方位；三垣和宿区不能复用西方 IAU 边界。
+
+修改时同时核查体系切换、语言切换、搜索／准星、无插画成员图、旧场景和收藏恢复、各视图释放及照片。来源和历史基线见[中国星官数据](../assets/chinese-sky/README.md)，图像归属见[教学意象说明](../assets/chinese-sky/art/README.md)。
 
 ## 本机服务与外部边界
 

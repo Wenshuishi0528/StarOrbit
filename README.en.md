@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.20 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.25 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,9 +14,11 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.20 updates the documentation and help based on the v1.19 implementation. See the [verification overview](docs/verification.md) for documentation and build acceptance status. Online and portable editions show their own version in the interface; the download link always points to a published release.
+> v1.25 completes Chinese asterism illustrations, restores overviews with independent opacity, and adds the full official lunar gazetteer, landing sites and CAS geology on the 3D Moon. See the [verification overview](docs/verification.md) for the measured scope; online and downloadable editions show their own version.
 
 <a id="interface-and-basic-controls"></a>
+
+The lunar observatory combines topocentric phases/libration, rise/set planning, real LRO terrain, surface exploration and captioned exports. See the [current manual](使用说明.md#月球观测).
 
 ## Get started
 
@@ -51,11 +53,12 @@ First use defaults to detailed 8K overall quality, the enhanced 16K Milky Way an
 | Explore orbits | Time control, ground tracks, sunlight and eclipses, apsides and equator crossings | [Time and events](使用说明.md#时间轨迹与事件) |
 | Pilot and fly | Main navball RCS/SAS, Shenzhou and Tianzhou undocking and return, separate docking workbench | [Three piloting modes](#three-piloting-modes) |
 | Explore Earth and sky | Dated surface/night-light choices, cloud library, sunrise and sunset, aurora, sky chart, city imagery and real terrain | [Earth, sky and environment](使用说明.md#地球星空与环境) |
+| Explore Chinese astronomy | Qing-era conventional asterisms, Three Enclosures and Twenty-Eight Mansions navigation, member charts, names, lines and symbolic artwork | [Chinese sky culture](使用说明.md#中国传统星官) |
 | Use Xuntian | Target search, pinned pointing, formation composition, Solar System targets, real SDO imagery and PNG exports | [Viewfinder](使用说明.md#主页面的巡天望远镜), [solar observations](使用说明.md#太阳观测) |
 | Plan observations | Pass forecasts, orbital long exposures, balcony observing, four-tile surveys and observation records | [Passes](使用说明.md#过境预报), [observation experiments](使用说明.md#长曝光阳台观测与巡天排程) |
 | Save and share | Screenshots, environment presets, scene JSON, resource snapshots and separate flight saves | [Photography and scenes](使用说明.md#摄影收藏与场景分享), [save scope](使用说明.md#设置保存与恢复) |
 
-The main view, Xuntian finder and photos share Earth and sky resources. Bundled 2025 Sentinel-2 10 m imagery covers Beijing (40 × 40 km) and Seattle (20 × 20 km); other cities support on-demand viewing and downloads. The chart includes teaching illustrations for 88 constellations and 12,162 deep-sky display entries. Catalogue labels and image coverage are separate. See the [manual](使用说明.md#地球星空与环境) for dates, bands, effective resolution and coverage fallback.
+The main view, Xuntian finder and photos share Earth and sky resources. Bundled 2025 Sentinel-2 10 m imagery covers Beijing (40 × 40 km) and Seattle (20 × 20 km); other cities support on-demand viewing and downloads. The chart switches between Western constellations and traditional Chinese asterisms, with 88 Western illustrations, 32 Chinese sky regions with 300 independent and 12 subsidiary asterisms, their member data, 312 asterism illustrations and seven optional overviews for the Four Symbols and Three Enclosures. Overviews default off and have a separate switch and opacity control. The shared deep-sky catalogue has 12,162 display entries. Catalogue labels and illustration coverage are separate. See the [manual](使用说明.md#地球星空与环境) for dates, bands, effective resolution and coverage fallback.
 
 ## Three piloting modes
 

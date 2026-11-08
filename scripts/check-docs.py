@@ -60,6 +60,10 @@ def check_package(path, version):
                     'assets/GEOTIFF-DEPENDENCY-LICENSES.txt', 'assets/earth/elevation/README.md',
                     'assets/constellation-art/README.md', 'assets/constellation-art/LICENSE-FAL-1.3.html',
                     'assets/constellation-art/LICENSE-CC-BY-SA-4.0.txt']
+        required += ['assets/chinese-sky/README.md', 'assets/chinese-sky/catalog.json',
+                     'assets/chinese-sky/source/CC-BY-SA-4.0.txt',
+                     'assets/chinese-sky/art/README.md', 'assets/chinese-sky/art/manifest.json',
+                     'assets/chinese-sky/art/rigid-placements.json']
         for name in required:
             if name not in names:
                 report['issues'].append(f'missing provenance or license: {name}')

@@ -29,16 +29,20 @@ const {
 );
 const json = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url)));
 const hips = json('../assets/stars.json'),
-  chart = json('../assets/star-chart.json');
+  chart = json('../assets/star-chart.json'),
+  chinese = json('../assets/chinese-sky/catalog.json');
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0),
   rad = Math.PI / 180;
 const unit = (v) => v.map((x) => x / Math.hypot(...v));
 const near = (a, b, e = 1e-9) => assert(Math.abs(a - b) < e, `${a} != ${b}`);
 const all = query([1, 0, 0], 180),
   deep = all.filter((p) => p.source === 'tycho');
-assert.equal(all.length, 57431);
-assert.equal(all.length - deep.length, 41411);
-assert.equal(deep.length, 16020);
+assert.equal(all.length, 57440);
+assert.equal(all.filter((p) => p.source === 'hip').length, 41411 + chinese.additionalStars.length);
+assert.equal(all.filter((p) => p.source === 'gaia').length, chinese.otherStars.length);
+// Two previously unmatched Tycho entries now match supplemental physical stars
+// within the existing 2-arcsecond policy and are no longer drawn twice.
+assert.equal(deep.length, 16018);
 assert.equal(new Set(all.map((p) => p.id)).size, all.length);
 assert(all.every((r, i) => !i || all[i - 1].mag <= r.mag));
 const byId = new Map(all.map((p) => [p.id, p]));
@@ -51,7 +55,7 @@ for (const [hip, ra, dec, mag] of hips) {
 assert(all.every((p) => Number.isFinite(p.mag) && (p.bv === null || Number.isFinite(p.bv))));
 assert.equal(
   hips.filter((s) => s[4] === '' || s[4] === null || !Number.isFinite(Number(s[4]))).length,
-  all.filter((s) => s.source === 'hip' && s.bv === null).length
+  all.filter((s) => s.source === 'hip' && s.bv === null && hips.some((row) => row[0] === s.hip)).length
 );
 for (const [id, queries] of [
   [
@@ -201,5 +205,5 @@ assert.deepEqual(query([0, 0, 0], 2), []);
 assert.deepEqual(query(orion.center, -1), []);
 assert.deepEqual(collect({ forward: orion.center, fovY: 180, aspect: 1 }), []);
 console.log(
-  'Xuntian: 41,411 HIP + 16,020 de-duplicated Tycho stars, 88 framed constellations, multilingual aliases/HIP and lossless cone queries passed.'
+  'Xuntian: base HIP positions, supplemental HIP/Gaia identities, de-duplicated Tycho stars, 88 framed constellations, multilingual aliases and lossless cone queries passed.'
 );

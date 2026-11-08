@@ -1,12 +1,17 @@
 export const STAR_CHART_DEFAULTS = Object.freeze({
+  skyCulture: 'western',
   starChartEnabled: false,
   starLabels: true,
   catalogStarLabels: false,
   solarSystemLabels: true,
   constellationNames: true,
   constellationArt: true,
+  chineseSymbolArt: false,
+  chineseSymbolOpacity: 0.2,
   constellationLines: true,
   constellationBoundaries: false,
+  equatorialGrid: false,
+  eclipticLine: false,
   deepSkyObjects: true,
   deepSkyScope: 'featured',
   starLabelDensity: 0.95,
@@ -18,8 +23,11 @@ const checkboxIds = {
   solarSystemLabels: 'solarSystemNames',
   constellationNames: 'constellationNames',
   constellationArt: 'constellationArt',
+  chineseSymbolArt: 'chineseSymbolArt',
   constellationLines: 'constellationLines',
   constellationBoundaries: 'constellationBoundaries',
+  equatorialGrid: 'equatorialGrid',
+  eclipticLine: 'eclipticLine',
   deepSkyObjects: 'deepSkyObjects',
 };
 const own = (value, key) => Object.hasOwn(value, key);
@@ -35,6 +43,10 @@ export function normalizeStarChartSettings(input = {}, { strict = false } = {}) 
       if (strict) throw Error('无效星图设置');
     },
     result = { ...STAR_CHART_DEFAULTS };
+  if (own(input, 'skyCulture')) {
+    if (['western', 'chinese'].includes(input.skyCulture)) result.skyCulture = input.skyCulture;
+    else invalid();
+  }
   for (const key of Object.keys(checkboxIds))
     if (own(input, key)) {
       if (typeof input[key] === 'boolean') result[key] = input[key];
@@ -81,14 +93,40 @@ export function normalizeStarChartSettings(input = {}, { strict = false } = {}) 
       result.starLabelDensity = input.starLabelDensity;
     else invalid();
   }
+  if (own(input, 'chineseSymbolOpacity')) {
+    if (
+      Number.isFinite(input.chineseSymbolOpacity) &&
+      input.chineseSymbolOpacity >= 0 &&
+      input.chineseSymbolOpacity <= 1
+    )
+      result.chineseSymbolOpacity = input.chineseSymbolOpacity;
+    else invalid();
+  }
   return result;
 }
 
 export function syncStarChartControls(settings) {
   const $ = (id) => document.getElementById(id);
+  if ($('skyCulture')) $('skyCulture').value = settings.skyCulture || 'western';
   for (const [key, id] of Object.entries(checkboxIds)) {
+    if (!$(id)) continue;
     $(id).checked = settings[key];
     $(id).disabled = false;
+  }
+  if ($('chineseSymbolArt')?.parentElement)
+    $('chineseSymbolArt').parentElement.hidden = settings.skyCulture !== 'chinese';
+  if ($('chineseSymbolAppearance'))
+    $('chineseSymbolAppearance').hidden = settings.skyCulture !== 'chinese';
+  const overviewOpacity = settings.chineseSymbolOpacity ?? STAR_CHART_DEFAULTS.chineseSymbolOpacity;
+  if ($('chineseSymbolOpacity')) $('chineseSymbolOpacity').value = String(overviewOpacity);
+  if ($('chineseSymbolOpacityValue'))
+    $('chineseSymbolOpacityValue').textContent = Math.round(overviewOpacity * 100) + '%';
+  if ($('chineseSkyArtCoverage'))
+    $('chineseSkyArtCoverage').hidden = settings.skyCulture !== 'chinese';
+  if ($('constellationBoundaries')) {
+    $('constellationBoundaries').disabled = settings.skyCulture === 'chinese';
+    if ($('constellationBoundaries').parentElement)
+      $('constellationBoundaries').parentElement.hidden = settings.skyCulture === 'chinese';
   }
   $('starLabelDensity').value = String(settings.starLabelDensity);
   $('starLabelDensity').disabled = false;
@@ -96,6 +134,10 @@ export function syncStarChartControls(settings) {
   $('deepSkyScope').disabled = !settings.deepSkyObjects;
   $('starDensityAll').hidden = settings.starLabelDensity < 1;
   $('starDensityAuto').hidden = settings.starLabelDensity >= 1;
+  if (typeof window !== 'undefined' && typeof CustomEvent !== 'undefined')
+    window.dispatchEvent(
+      new CustomEvent('starorbit-sky-culture', { detail: settings.skyCulture || 'western' })
+    );
 }
 
 export function bindStarChartControls(settings, onChange) {
@@ -104,9 +146,21 @@ export function bindStarChartControls(settings, onChange) {
       syncStarChartControls(settings);
       onChange();
     };
+  if ($('skyCulture'))
+    $('skyCulture').onchange = () => {
+      settings.skyCulture = $('skyCulture').value === 'chinese' ? 'chinese' : 'western';
+      changed();
+    };
   for (const [key, id] of Object.entries(checkboxIds))
-    $(id).onchange = () => {
-      settings[key] = $(id).checked;
+    if ($(id))
+      $(id).onchange = () => {
+        settings[key] = $(id).checked;
+        changed();
+      };
+  if ($('chineseSymbolOpacity'))
+    $('chineseSymbolOpacity').oninput = () => {
+      const value = Number($('chineseSymbolOpacity').value);
+      if (Number.isFinite(value)) settings.chineseSymbolOpacity = Math.max(0, Math.min(1, value));
       changed();
     };
   $('deepSkyScope').onchange = () => {
@@ -118,6 +172,22 @@ export function bindStarChartControls(settings, onChange) {
     changed();
   };
   syncStarChartControls(settings);
+}
+
+export function skyCultureArtOptions(settings = {}) {
+  return {
+    culture: settings.skyCulture || 'western',
+    asterisms: settings.constellationArt !== false,
+    symbols: settings.skyCulture === 'chinese' && settings.chineseSymbolArt === true,
+    overviewOpacity: settings.chineseSymbolOpacity ?? STAR_CHART_DEFAULTS.chineseSymbolOpacity,
+  };
+}
+
+export function skyCultureArtEnabled(settings = {}) {
+  return (
+    settings.constellationArt !== false ||
+    (settings.skyCulture === 'chinese' && settings.chineseSymbolArt === true)
+  );
 }
 
 // Apply the requested quieter startup once; later explicit maximum selections

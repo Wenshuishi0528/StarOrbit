@@ -21,6 +21,45 @@ export function sensorOptics(fovY, apertureMm, exposure = 1) {
 export function coneHalfAngle(tangent, aspect) {
   return Math.atan(tangent * Math.hypot(1, aspect)) / degree;
 }
+
+/** Exact intersection of an origin-centred spherical disc and a rectangular
+ * gnomonic camera field. Axes are orthonormal and fovY is in degrees. The
+ * closest ray may lie inside an edge, so neither the reticle nor corner-only
+ * sampling or a circumscribed diagonal cone is sufficient. */
+export function sphereIntersectsRectangularView(eye, axes, fovY, aspect, radius = EARTH_RADIUS) {
+  const distance = norm(eye);
+  if (
+    ![distance, fovY, aspect, radius].every(Number.isFinite) ||
+    !(fovY > 0 && fovY < 180 && aspect > 0 && radius > 0)
+  )
+    return false;
+  if (distance <= radius) return true;
+  const ty = Math.tan((fovY * degree) / 2),
+    tx = ty * aspect,
+    x = -dot(eye, axes.right) / distance,
+    y = -dot(eye, axes.up) / distance,
+    z = -dot(eye, axes.forward) / distance;
+  if (z > 0 && Math.abs(x) <= z * tx && Math.abs(y) <= z * ty) return true;
+  let maximum = -Infinity;
+  const sample = (a, b) => {
+      maximum = Math.max(maximum, (z + x * a + y * b) / Math.hypot(1, a, b));
+    },
+    clamp = (value, limit) => Math.max(-limit, Math.min(limit, value));
+  // On x=a the stationary maximum is y*(1+a²)/(z+x*a), and vice versa.
+  // A nonpositive denominator has no interior maximum; endpoints suffice.
+  for (const a of [-tx, tx]) {
+    sample(a, -ty);
+    sample(a, ty);
+    const base = z + x * a;
+    if (base > 0) sample(a, clamp((y * (1 + a * a)) / base, ty));
+  }
+  for (const b of [-ty, ty]) {
+    const base = z + y * b;
+    if (base > 0) sample(clamp((x * (1 + b * b)) / base, tx), b);
+  }
+  return maximum >= Math.sqrt(Math.max(0, 1 - (radius / distance) ** 2)) - 1e-12;
+}
+
 export function groundHit(eye, direction, earthAxes) {
   const near = -dot(eye, direction);
   if (near <= 0) return null;

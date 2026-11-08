@@ -13,6 +13,17 @@ DOCUMENT_ROOTS = (
     'assets/earth/cities/README.md', 'assets/earth/cities/manifest.json',
     'assets/earth/elevation/README.md', 'assets/earth/elevation/manifest.json',
     'assets/D3-CELESTIAL-LICENSE.txt', 'assets/GEOTIFF-DEPENDENCY-LICENSES.txt',
+    'assets/chinese-sky/README.md', 'assets/chinese-sky/catalog.json',
+    'assets/chinese-sky/source/CC-BY-SA-4.0.txt',
+    'assets/chinese-sky/art/README.md', 'assets/chinese-sky/art/manifest.json',
+    'assets/chinese-sky/art/provenance.json',
+    'assets/chinese-sky/art/rigid-placements.json',
+    'assets/chinese-sky-search.json', 'assets/OPENCC-LICENSE.txt',
+    'assets/stellar-distances/README.md',
+    'assets/cosmic/README.md',
+    'assets/moon/places/README.md', 'assets/moon/places/gazetteer.json', 'assets/moon/places/landings.json',
+    'assets/moon/geology/README.md', 'assets/moon/geology/manifest.json', 'assets/moon/geology/source-record.json',
+    'assets/moon/README.md', 'assets/moon/SCIENCE.md', 'assets/moon/terrain-manifest.json',
 )
 LINK = re.compile(r'!?\[[^\]\n]*\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+["\'][^\n]*?["\'])?\s*\)')
 
@@ -104,6 +115,8 @@ def portable_documents(root):
     selected.update(str(p.relative_to(root).as_posix())
                     for p in (root / 'assets/constellation-art').rglob('*')
                     if p.is_file() and not any(part.startswith('.') for part in p.relative_to(root).parts))
+    selected.update(str(p.relative_to(root).as_posix())
+                    for p in (root / 'assets/chinese-sky/art').glob('*.avif'))
     pending = list(selected)
     visited = set()
     while pending:

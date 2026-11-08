@@ -1,0 +1,145 @@
+{
+  "sourceProjection": "Mollweide",
+  "centralMeridianDegrees": 0,
+  "sourcePixelOrigin": "top-left, pixel centres; x right, y down",
+  "sourceCenterPixel": [
+    15007.410546941146,
+    6439.233338522413
+  ],
+  "sourceEllipseRadiiPixels": [
+    10628.4803278404,
+    5313.503859211767
+  ],
+  "outputProjection": "equirectangular / spherical latitude",
+  "longitudeConvention": "east-positive; -180 left, 0 centre, +180 right",
+  "latitudeConvention": "+90 top, -90 bottom; pixel-centre samples",
+  "outputSize": [
+    4096,
+    2048
+  ],
+  "alphaNoData": 0,
+  "validLatitudeLimitDegrees": null,
+  "outlineExclusionPixels": 8.0,
+  "latitudeLimitPolicy": "No arbitrary latitude cap; validity follows distance from the printed elliptical outline only.",
+  "validPixelFraction": 0.9825801849365234,
+  "validSphericalAreaFraction": 0.9976263694911303,
+  "areaWeighting": "cos(latitude) weights on equal longitude/latitude pixel centres",
+  "ellipseFit": {
+    "sampleCount": 360,
+    "rmsPixels": 1.3552785,
+    "maxResidualPixels": 15.46326,
+    "inlierCountWithin5Pixels": 358,
+    "inlierRmsPixels": 0.8861085,
+    "method": "Dark printed ellipse outline sampled every 1 degree; least-squares ellipse with independent x/y scale.",
+    "sampleRecord": "assets/moon/geology/outline-fit.json"
+  },
+  "controlPointReadingUncertaintyPixels": 3,
+  "graticuleControls": [
+    {
+      "longitude": 0,
+      "latitude": 0,
+      "observedPixel": [
+        15006,
+        6441
+      ],
+      "predictedPixel": [
+        15007.410546941146,
+        6439.233338522415
+      ],
+      "residualPixels": 2.260693577104289
+    },
+    {
+      "longitude": 60,
+      "latitude": 0,
+      "observedPixel": [
+        18549,
+        6441
+      ],
+      "predictedPixel": [
+        18550.237322887944,
+        6439.233338522415
+      ],
+      "residualPixels": 2.1568636269858357
+    },
+    {
+      "longitude": -60,
+      "latitude": 0,
+      "observedPixel": [
+        11465,
+        6441
+      ],
+      "predictedPixel": [
+        11464.583770994346,
+        6439.233338522415
+      ],
+      "residualPixels": 1.8150315042807212
+    },
+    {
+      "longitude": 0,
+      "latitude": 30,
+      "observedPixel": [
+        15006,
+        4294
+      ],
+      "predictedPixel": [
+        15007.410546941146,
+        4292.722554849026
+      ],
+      "residualPixels": 1.903026218138792
+    },
+    {
+      "longitude": 0,
+      "latitude": 60,
+      "observedPixel": [
+        15006,
+        2389
+      ],
+      "predictedPixel": [
+        15007.410546941146,
+        2388.2919172166094
+      ],
+      "residualPixels": 1.578297786005808
+    },
+    {
+      "longitude": 0,
+      "latitude": -60,
+      "observedPixel": [
+        15006,
+        10491
+      ],
+      "predictedPixel": [
+        15007.410546941146,
+        10490.174759828218
+      ],
+      "residualPixels": 1.634216636281472
+    }
+  ],
+  "method": "Backward output resampling: equirectangular pixel centre -> spherical Mollweide forward equations -> registered original raster; bilinear RGB sampling. Independent graticule controls not used in ellipse fit.",
+  "precision": "Educational visual registration, not analytical GIS. Grid controls agree within 3 original pixels; output spacing is 0.087890625 degree per pixel. Polar pinch and printed outline excluded; printed geological boundaries are not a numerical classification dataset.",
+  "retained": "Original colours, labels, hatching, graticule and pre-proofs watermarks within the global map; full credits and legend remain in the original-poster viewer.",
+  "sources": [
+    "https://pubs.usgs.gov/pp/1395/report.pdf",
+    "https://proj.org/en/stable/operations/projections/moll.html"
+  ],
+  "landmarkChecks": [
+    {
+      "name": "Tycho",
+      "latitude": -43.3,
+      "longitude": -11.22,
+      "source": "https://planetarynames.wr.usgs.gov/Feature/6163"
+    },
+    {
+      "name": "Copernicus",
+      "latitude": 9.62,
+      "longitude": -20.08,
+      "source": "https://planetarynames.wr.usgs.gov/Feature/1296"
+    },
+    {
+      "name": "Tsiolkovskiy",
+      "latitude": -20.38,
+      "longitude": 128.97,
+      "source": "https://planetarynames.wr.usgs.gov/Feature/6108"
+    }
+  ],
+  "landmarkCheckMethod": "Official IAU/USGS centres projected and visually overlaid on the original; all fall inside the corresponding named crater. This is an independent direction/location check, not a measured boundary-accuracy claim."
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "id": "lro-lola-svs4720-2ppd",
+  "title": "LRO LOLA lunar topography",
+  "width": 720,
+  "height": 360,
+  "encoding": "gzip-int16-le",
+  "scaleMeters": 0.5,
+  "offsetMeters": 0,
+  "referenceRadiusKm": 1737.4,
+  "projection": "equirectangular",
+  "longitude": "east-positive; -180 at left edge; 0 at centre",
+  "latitude": "90N at top edge;90S at bottom edge",
+  "registration": "pixel-centres",
+  "file": "assets/moon/lola-720x360.i16.gz",
+  "bytes": 481237,
+  "sha256": "f48b9023727a04723b5a14aea405ad61fc0ec663ba40592117c3a55d341a63b2",
+  "unpackedBytes": 518400,
+  "minMeters": -8327.5,
+  "maxMeters": 9789.5,
+  "processing": "2x2 arithmetic-mean downsample from 1440x720 float32 km to 720x360 signed half-metre int16; north-to-south rows unchanged",
+  "maxQuantizationErrorMeters": 0.25,
+  "source": {
+    "title": "NASA SVS CGI Moon Kit / LRO LOLA, spring 2019 gridded product",
+    "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4.tif",
+    "page": "https://svs.gsfc.nasa.gov/4720/",
+    "sha256": "330afa2556a86fd05ac6ba2f912f246600fdade35de2a0d90593d50d07b01b65",
+    "bytes": 4153352,
+    "width": 1440,
+    "height": 720,
+    "units": "float32 kilometres relative to 1737.4 km radius",
+    "credit": "NASA's Scientific Visualization Studio / LRO LOLA",
+    "usage": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  },
+  "color": {
+    "file": "assets/moon/lroc-color-2k.jpg",
+    "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+    "note": "Existing repository LROC visualization mosaic; no albedo image regeneration"
+  }
+}

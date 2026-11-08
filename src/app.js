@@ -1,4 +1,6 @@
 import { installCameraFocus } from './camera-focus.js';
+import { installSkyCultureControls } from './sky-culture-controls.js';
+import { saveSkyCultureScreenshot } from './sky-culture-screenshot.js';
 import { installFloatingWindows } from './floating-windows.js';
 import { installAttitudeNavball } from './attitude-navball.js';
 import { installMainFlight } from './main-flight.js';
@@ -560,10 +562,12 @@ $('reset').onclick = () => {
 $('saveImage').onclick = () => {
   if (sim) sim.render();
   else renderer.render(scene, camera);
-  const a = document.createElement('a');
-  a.download = 'StarOrbit_' + (sim?.missionId || 'tiangong') + '_preview.png';
-  a.href = renderer.domElement.toDataURL('image/png');
-  a.click();
+  saveSkyCultureScreenshot(
+    renderer.domElement,
+    sim?.environment,
+    'StarOrbit_' + (sim?.missionId || 'tiangong') + '_preview.png',
+    () => toast('照片未能保存')
+  );
 };
 const renderSize = new THREE.Vector2();
 function resize() {
@@ -739,6 +743,7 @@ async function boot() {
     sim.cameraFocus.resetAnchor();
     sim.freeFlight = installFreeFlight(sim, { templates, meta });
     sim.floatingWindows = installFloatingWindows();
+    sim.skyCultureControls = installSkyCultureControls(sim);
     installHelp(music);
     installVisitorCounter();
   } catch (e) {

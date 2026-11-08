@@ -1,0 +1,159 @@
+{
+  "@id": "https://doi.org/10.12176/03.99.02797",
+  "name": "The 1:2,500,000-Scale Geologic Map of the Global Moon",
+  "version": "1.0.0",
+  "datePublished": "2022-06-15T07:10:18.407Z",
+  "conditionsOfAccess": "PUBLIC",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "description": "Geologic maps of the Moon provide comprehensive information about the geologic strata, structural features, lithologies, and chronology of the lunar crustal surface, which reflect the evolution of the lunar crust under igneous processes, catastrophic impacts, and volcanic activities. The map in this repository is the first 1:2,500,000-scale lunar global geologic map, which incorporates the most comprehensive knowledge about the Moon by taking advantage of the latest exploration results and scientific findings. An updated lunar time scale is employed in this map to better reflect the dynamic evolution of the Moon. The map provides a state-of-the-art illustration of impact basins and craters of different periods, the distributions of 17 types of rocks and 14 types of structures. The map is free to use for non-commercial forms including scientific research and science promotion under proper citation. This data is provided for understanding the associated research paper (https://doi.org/10.1016/j.scib.2022.05.021). The geologic map will be officially published in both Chinese and English copies by the Geological Publishing House after being proofed.",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "School of Mining, Inner Mongolia University of Technology"
+        }
+      ],
+      "name": "Jinzhu Ji"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "National Space Science Center, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Dijun Guo"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": " Institute of Geochemistry, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Jianzhong Liu"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "College of Geoexploration Science and Technology, Jilin University"
+        }
+      ],
+      "name": "Shengbo Chen"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "School of Space Science and Physics, Shandong University, Weihai"
+        }
+      ],
+      "name": "Zongcheng Ling"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geology, Chinese Academy of Geological Sciences"
+        }
+      ],
+      "name": "Xiaozhong Ding"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geology, Chinese Academy of Geological Sciences"
+        }
+      ],
+      "name": "Kunying Han"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "School of Earth Sciences and Resources, China University of Geosciences (Beijing)"
+        }
+      ],
+      "name": "Jianping Chen"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geographic Sciences and Natural Resources Research, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Weiming Cheng"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": " Institute of Geochemistry, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Kai Zhu"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geochemistry, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Jingwen Liu"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geochemistry, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Juntao Wang"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "School of Space Science and Physics, Shandong University, Weihai"
+        }
+      ],
+      "name": "Jian Chen"
+    },
+    {
+      "@type": "sc:Person",
+      "affiliation": [
+        {
+          "@type": "sc:Organization",
+          "name": "Institute of Geochemistry, Chinese Academy of Sciences"
+        }
+      ],
+      "name": "Ziyuan Ouyang"
+    }
+  ],
+  "size": {
+    "@type": "sc:QuantitativeValue",
+    "unitText": "bytes",
+    "value": 206245173
+  },
+  "recordUrl": "https://www.scidb.cn/en/detail?dataSetId=972277454573928448",
+  "retrievedOn": "2026-11-08",
+  "method": "JSON-LD embedded in the official public record HTML; no account, agreement or gated API accessed."
+}

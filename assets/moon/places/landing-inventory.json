@@ -1,0 +1,374 @@
+{
+  "reviewedAt": "2026-11-08",
+  "records": [
+    {
+      "sourceName": "Luna 5",
+      "id": "luna-5",
+      "name": "Luna 5",
+      "nameZh": "月球5号",
+      "country": "SU",
+      "note": "Approximate published impact estimate; substantially different locations occur in the literature."
+    },
+    {
+      "sourceName": "Luna 7",
+      "id": "luna-7",
+      "name": "Luna 7",
+      "nameZh": "月球7号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 8",
+      "id": "luna-8",
+      "name": "Luna 8",
+      "nameZh": "月球8号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 9",
+      "id": "luna-9",
+      "name": "Luna 9",
+      "nameZh": "月球9号",
+      "country": "SU",
+      "note": "Historical reported location, not a confirmed lander position; NASA notes the true site may be at least 10 km away."
+    },
+    {
+      "sourceName": "Luna 13",
+      "id": "luna-13",
+      "name": "Luna 13",
+      "nameZh": "月球13号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 15",
+      "id": "luna-15",
+      "name": "Luna 15",
+      "nameZh": "月球15号",
+      "country": "SU",
+      "note": "Approximate crash-site estimate; alternative published positions exist."
+    },
+    {
+      "sourceName": "Luna 16",
+      "id": "luna-16",
+      "name": "Luna 16",
+      "nameZh": "月球16号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 17",
+      "id": "luna-17",
+      "name": "Luna 17",
+      "nameZh": "月球17号",
+      "country": "SU",
+      "carriedVehicles": [
+        "Lunokhod 1"
+      ]
+    },
+    {
+      "sourceName": "Luna 18",
+      "id": "luna-18",
+      "name": "Luna 18",
+      "nameZh": "月球18号",
+      "country": "SU",
+      "note": "Unconfirmed candidate in LROC imagery, not a securely identified lander."
+    },
+    {
+      "sourceName": "Luna 20",
+      "id": "luna-20",
+      "name": "Luna 20",
+      "nameZh": "月球20号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 21",
+      "id": "luna-21",
+      "name": "Luna 21",
+      "nameZh": "月球21号",
+      "country": "SU",
+      "carriedVehicles": [
+        "Lunokhod 2"
+      ]
+    },
+    {
+      "sourceName": "Luna 23",
+      "id": "luna-23",
+      "name": "Luna 23",
+      "nameZh": "月球23号",
+      "country": "SU",
+      "outcome": "soft-partial",
+      "note": "Landed but damaged; sample return failed."
+    },
+    {
+      "sourceName": "Luna 24",
+      "id": "luna-24",
+      "name": "Luna 24",
+      "nameZh": "月球24号",
+      "country": "SU"
+    },
+    {
+      "sourceName": "Luna 25",
+      "id": "luna-25",
+      "name": "Luna 25",
+      "nameZh": "月球25号",
+      "country": "RU"
+    },
+    {
+      "sourceName": "Surveyor 1",
+      "id": "surveyor-1",
+      "name": "Surveyor 1",
+      "nameZh": "勘测者1号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Surveyor 2",
+      "id": "surveyor-2",
+      "name": "Surveyor 2",
+      "nameZh": "勘测者2号",
+      "country": "US",
+      "note": "NASA mission page gives 23 September; NSSDCA artifact table gives 22 September. Coordinates remain approximate.",
+      "date": "1966-09-23",
+      "missionSourceUrl": "https://science.nasa.gov/mission/surveyor-2/"
+    },
+    {
+      "sourceName": "Surveyor 3",
+      "id": "surveyor-3",
+      "name": "Surveyor 3",
+      "nameZh": "勘测者3号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Surveyor 4",
+      "id": "surveyor-4",
+      "name": "Surveyor 4",
+      "nameZh": "勘测者4号",
+      "country": "US",
+      "note": "Contact lost before touchdown; actual impact location unknown. No marker is placed at the planned landing target."
+    },
+    {
+      "sourceName": "Surveyor 5",
+      "id": "surveyor-5",
+      "name": "Surveyor 5",
+      "nameZh": "勘测者5号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Surveyor 6",
+      "id": "surveyor-6",
+      "name": "Surveyor 6",
+      "nameZh": "勘测者6号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Surveyor 7",
+      "id": "surveyor-7",
+      "name": "Surveyor 7",
+      "nameZh": "勘测者7号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Apollo 11 LM descent stage",
+      "id": "apollo-11",
+      "name": "Apollo 11",
+      "nameZh": "阿波罗11号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Apollo 12 LM descent stage",
+      "id": "apollo-12",
+      "name": "Apollo 12",
+      "nameZh": "阿波罗12号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Apollo 14 LM descent stage",
+      "id": "apollo-14",
+      "name": "Apollo 14",
+      "nameZh": "阿波罗14号",
+      "country": "US"
+    },
+    {
+      "sourceName": "Apollo 15 LM descent stage",
+      "id": "apollo-15",
+      "name": "Apollo 15",
+      "nameZh": "阿波罗15号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ]
+    },
+    {
+      "sourceName": "Apollo 16 LM descent stage",
+      "id": "apollo-16",
+      "name": "Apollo 16",
+      "nameZh": "阿波罗16号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ]
+    },
+    {
+      "sourceName": "Apollo 17 LM descent stage",
+      "id": "apollo-17",
+      "name": "Apollo 17",
+      "nameZh": "阿波罗17号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ]
+    },
+    {
+      "sourceName": "Chang'e 3",
+      "id": "change-3",
+      "name": "Chang'e 3",
+      "nameZh": "嫦娥三号",
+      "country": "CN",
+      "carriedVehicles": [
+        "Yutu",
+        "玉兔"
+      ],
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758968/n6758972/c6798565/content.html",
+      "aliases": [
+        "嫦娥3号",
+        "CE3",
+        "CE-3",
+        "Chang'e-3"
+      ]
+    },
+    {
+      "sourceName": "Chang'e 4",
+      "id": "change-4",
+      "name": "Chang'e 4",
+      "nameZh": "嫦娥四号",
+      "country": "CN",
+      "carriedVehicles": [
+        "Yutu-2",
+        "玉兔二号"
+      ],
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758823/n6758844/n6760026/n6760027/c6805178/content.html",
+      "aliases": [
+        "嫦娥4号",
+        "CE4",
+        "CE-4",
+        "Chang'e-4"
+      ]
+    },
+    {
+      "sourceName": "Chang'e 5",
+      "id": "change-5",
+      "name": "Chang'e 5",
+      "nameZh": "嫦娥五号",
+      "country": "CN",
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6759533/c6810683/content.html",
+      "aliases": [
+        "嫦娥5号",
+        "CE5",
+        "CE-5",
+        "Chang'e-5"
+      ]
+    },
+    {
+      "sourceName": "Chang'e 6",
+      "id": "change-6",
+      "name": "Chang'e 6",
+      "nameZh": "嫦娥六号",
+      "country": "CN",
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758823/n6758844/n10518102/n10518147/c10565180/content.html",
+      "aliases": [
+        "嫦娥6号",
+        "CE6",
+        "CE-6",
+        "Chang'e-6"
+      ]
+    },
+    {
+      "sourceName": "Beresheet",
+      "id": "beresheet",
+      "name": "Beresheet",
+      "nameZh": "创世纪号",
+      "country": "IL"
+    },
+    {
+      "sourceName": "Vikram",
+      "id": "chandrayaan-2",
+      "name": "Chandrayaan-2 Vikram",
+      "nameZh": "月船二号·维克拉姆",
+      "country": "IN",
+      "carriedVehicles": [
+        "Pragyan"
+      ]
+    },
+    {
+      "sourceName": "Hakuto-R Mission 1",
+      "id": "hakuto-r-1",
+      "name": "HAKUTO-R Mission 1",
+      "nameZh": "白兔-R 一号",
+      "country": "JP",
+      "carriedVehicles": [
+        "Rashid",
+        "SORA-Q"
+      ]
+    },
+    {
+      "sourceName": "Chandrayaan 3",
+      "id": "chandrayaan-3",
+      "name": "Chandrayaan-3 Vikram",
+      "nameZh": "月船三号·维克拉姆",
+      "country": "IN",
+      "carriedVehicles": [
+        "Pragyan"
+      ],
+      "missionSourceUrl": "https://www.isro.gov.in/Chandrayaan3.html"
+    },
+    {
+      "sourceName": "SLIM",
+      "id": "slim",
+      "name": "SLIM",
+      "nameZh": "SLIM 精准月球着陆器",
+      "country": "JP",
+      "outcome": "soft-partial",
+      "note": "Precision soft landing with an abnormal final attitude; operations later resumed.",
+      "carriedVehicles": [
+        "LEV-1",
+        "LEV-2",
+        "SORA-Q"
+      ],
+      "missionSourceUrl": "https://www.jaxa.jp/press/2024/01/20240125-1_j.html"
+    },
+    {
+      "sourceName": "Odysseus (IM-1)",
+      "id": "im-1",
+      "name": "IM-1 Odysseus",
+      "nameZh": "IM-1 奥德修斯",
+      "country": "US",
+      "outcome": "soft-partial",
+      "note": "Reached the surface but tipped over, restricting operations."
+    },
+    {
+      "sourceName": "Blue Ghost 1",
+      "id": "blue-ghost-1",
+      "name": "Blue Ghost Mission 1",
+      "nameZh": "蓝色幽灵一号",
+      "country": "US",
+      "missionSourceUrl": "https://fireflyspace.com/missions/blue-ghost-mission-1/"
+    },
+    {
+      "sourceName": "Intuitive Machines 2",
+      "id": "im-2",
+      "name": "IM-2 Athena",
+      "nameZh": "IM-2 雅典娜",
+      "country": "US",
+      "outcome": "soft-partial",
+      "note": "Came to rest on its side in a crater; surface operations were curtailed.",
+      "missionSourceUrl": "https://www.intuitivemachines.com/im-2"
+    },
+    {
+      "sourceName": "Hakuto-R Mission 2",
+      "id": "hakuto-r-2",
+      "name": "HAKUTO-R Mission 2 RESILIENCE",
+      "nameZh": "白兔-R 二号·坚韧号",
+      "country": "JP",
+      "carriedVehicles": [
+        "Tenacious"
+      ]
+    }
+  ]
+}

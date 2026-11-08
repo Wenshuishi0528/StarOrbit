@@ -1,0 +1,488 @@
+{
+  "schema": 1,
+  "version": "1.21",
+  "date": "2026-11-08",
+  "timezone": "Asia/Singapore",
+  "baseCommit": "ca99e309c79e81737d2194dfbdc77eb59d465331",
+  "workingTree": "Local uncommitted implementation and verification. No remote push, release or site deployment.",
+  "status": "complete",
+  "finishedAt": "2026-11-08T01:01:47.603656+08:00",
+  "environment": {
+    "os": "15.7.9",
+    "osBuild": "24G830",
+    "processArchitecture": "x86_64",
+    "node": "v25.9.0",
+    "python": "3.9.6",
+    "browser": "Codex in-app browser via CUA; exact engine version not exposed",
+    "additionalBrowser": "Safari 26.4 (20624.1.16.18.2), native CUA smoke check",
+    "addresses": [
+      "http://127.0.0.1:8874/StarOrbit.html",
+      "http://127.0.0.1:8771/StarOrbit.html"
+    ],
+    "cache": "Warm/reloaded local pages; no clean-profile offline-cold-start claim",
+    "quality": "IAB source QA high/16K and installed QA medium/procedural sky; Safari high/8K Earth with existing user settings"
+  },
+  "checks": {
+    "defaultTests": {
+      "status": "passed",
+      "command": "npm test",
+      "exitCode": 0,
+      "scope": "All commands explicitly chained in package.json, including the final rectangular Earth-view visibility and Chinese culture tests. No claim that all browser fixtures ran.",
+      "log": "output/chinese-sky-final-tests.log"
+    },
+    "format": {
+      "status": "passed",
+      "command": "npm run format:check",
+      "exitCode": 0,
+      "log": "output/chinese-sky-final-format-check.log"
+    },
+    "diffWhitespace": {
+      "status": "passed",
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "documentation": {
+      "status": "passed",
+      "command": "npm run test:docs",
+      "exitCode": 0,
+      "documents": 101,
+      "relativeReferences": 698,
+      "issues": 0,
+      "portableFiles": 302,
+      "examples": 4,
+      "checkerRegressions": 5,
+      "log": "output/chinese-sky-final-docs.log"
+    },
+    "builds": {
+      "status": "passed",
+      "commands": [
+        "npm run build",
+        "npm run build:web",
+        "node tests/web-build.mjs dist-local",
+        "node tests/web-build.mjs dist"
+      ],
+      "scope": "Single-file, local split and static web builds; content-hashed runtime URLs, all 39 Chinese artworks and source/license files checked.",
+      "logs": [
+        "output/chinese-sky-final-build.log",
+        "output/chinese-sky-final-build-web.log",
+        "output/chinese-sky-final-local-assets.log",
+        "output/chinese-sky-final-web-assets.log"
+      ]
+    },
+    "registrationAndLifecycle": {
+      "status": "passed",
+      "scope": "Whole-image equal-scale placement, original North Dipper axis, all principal target footprints, restored gnomonic-plane interpolation, no folds/local warp; one complete overview per view; atomic patch decode/budget; focus/photo isolation and cancellation.",
+      "artTests": 31,
+      "logs": [
+        "output/release121/art-final-targeted-tests.log",
+        "output/release121/art-final-opacity-tests.log",
+        "output/release121/art-final-integration.log"
+      ],
+      "pngHashes": "output/release121/art-final-png-hashes.json",
+      "all39SourcePNGUnchangedDuringFinalCorrections": true
+    },
+    "terrainPhotoAttribution": {
+      "status": "passed",
+      "scope": "19 mathematical/consumer cases for exact rectangular field intersection, real corners, grazing edge interiors, mountain-only views, shared rotations and independent preview/photo state; atmosphere-only views retain rendering but omit terrain credits. Eleven terrain regressions also passed.",
+      "logs": [
+        "output/release121/terrain-footer-visibility-tests.log",
+        "output/release121/terrain-footer-elevation-regression.log"
+      ]
+    },
+    "browserCultureAndStorage": {
+      "status": "passed",
+      "method": "CUA interactions with the complete application; DOM observations and real downloaded PNGs, not injected window internals.",
+      "observations": [
+        "32 groups and 312 selectable catalogue records; all target IDs also resolve in module integration.",
+        "Chinese/Western switching preserves paused time, pointing and imagery choice.",
+        "At paused HIP 54061, reticle name changes between 北斗一 and 天枢 without changing the aim.",
+        "M44 reticle and bookmark change between 积尸 and 蜂巢星团; disabling deep-sky objects removes the cluster match and re-enabling restores it.",
+        "Chinese navigation enables preview annotations while preserving an independently disabled photo-annotations preference.",
+        "All-regions selection remains all 312 records after a language change.",
+        "Chinese, English, Russian and French controls remain translated and without horizontal document overflow at 390 CSS px. Art meanings without a dedicated translation retain the documented English fallback.",
+        "Scene export/import and environment-preset validators preserve culture/category flags; old missing fields retain Western defaults. An actual scene round trip was also exercised earlier in this batch.",
+        "Seven overviews were separately selected and exported. Genuine Earth occlusion was retained, including blocked TianShi and Black Tortoise at the first sampled epoch.",
+        "Both art categories can be independently enabled. Near North Dipper at 31.8 degrees, an enabled regional overview is hidden by the 40-degree threshold.",
+        "Actual installed origin serves the checked split build; North Dipper and Vermilion Bird exported at 1440x900, and Vermilion Bird at 3840x2400.",
+        "Ordinary and 4K main-view Blob screenshot downloads were exercised earlier in the batch; the final high-resolution finder export was repeated on the installed build.",
+        "Final IAB console error query returned an empty array."
+      ],
+      "photos": [
+        {
+          "file": "output/release121/north-dipper-final.png",
+          "pixels": [
+            1440,
+            900
+          ],
+          "bytes": 258942,
+          "sha256": "8eecf1c5e64e427eda34ada5538c88a5bde06e3f82d470ba45cf57e8a725a514"
+        },
+        {
+          "file": "output/release121/vermilion-bird-final.png",
+          "pixels": [
+            1440,
+            900
+          ],
+          "bytes": 1181672,
+          "sha256": "b636b819208e2179216b0f228402f03aea1920158b722fb0ffc4611806e9ec59"
+        },
+        {
+          "file": "output/release121/vermilion-bird-4k-final.png",
+          "pixels": [
+            3840,
+            2400
+          ],
+          "bytes": 4292635,
+          "sha256": "a43e504868dacaa4186c0848858b4858470b87a17693e360edd5ef2854be2e23"
+        }
+      ]
+    },
+    "expandedFinderWithMinimap": {
+      "status": "passed",
+      "method": "Final installed build, minimap remains enabled; responsive CSS DOM measurements and screenshots via CUA.",
+      "regression": "Previously an expanded 352x182 finder had a zero-sized canvas when the minimap coexistence rule overrode its layout.",
+      "samples": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "finder": [
+            1212,
+            630
+          ],
+          "canvas": [
+            838,
+            523.75
+          ]
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "finder": [
+            1368,
+            721.25
+          ],
+          "canvas": [
+            994,
+            621.25
+          ],
+          "horizontalOverflow": false
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "finder": [
+            390,
+            708.953125
+          ],
+          "canvas": [
+            330,
+            206.25
+          ],
+          "horizontalOverflow": false
+        }
+      ],
+      "temporaryViewportOverrideReset": true
+    },
+    "safariSmoke": {
+      "status": "passed",
+      "scope": "Actual installed HTTP origin; existing Chinese culture restored, catalogue coverage showed 32+7 artwork counts; opened Chinese navigation and located North Dipper; original gold-line art, stars and sourced lines visibly rendered.",
+      "limits": "Native Safari exposed incomplete AX content for the finder, so larger-window/photo controls were not fully exercised there; coordinate recovery failed and was stopped. No Safari full-regression or export claim. The agent-created tab was closed, retaining original tabs."
+    },
+    "installedRuntime": {
+      "status": "passed",
+      "version": "1.21",
+      "httpEntryMatchesSourceBuild": true,
+      "httpEntryBytes": 463627,
+      "httpEntrySHA256": "181e10c0fd62b08d7b59b29c0964c791e34a9847fb78436af2a972e903609ff3",
+      "launcherCheckExitCode": 0,
+      "launcherCheck": "READY http://127.0.0.1:8771/ — /Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件/StarOrbit.html",
+      "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+      "launcher": "/Applications/星轨.app",
+      "signature": "ad-hoc; verification passed; not notarized",
+      "recoverableBackup": "output/release121/runtime-backup"
+    }
+  },
+  "catalogue": {
+    "edition": {
+      "zh": "清代通行整理",
+      "en": "Qing-era conventional compilation",
+      "ru": "Традиционная система эпохи Цин",
+      "fr": "Compilation traditionnelle de l’époque Qing"
+    },
+    "sourceCommit": "3c4a720f313ada6124b86fef24131fa65900133f",
+    "counts": {
+      "asterismRecords": 312,
+      "independentAsterisms": 300,
+      "subsidiaryAsterisms": 12,
+      "groups": 32,
+      "lineHips": 1396,
+      "sourceLineHips": 1402,
+      "primaryHips": 1410,
+      "sourceConnectionCorrections": 10,
+      "unlinkedPrimaryMemberships": 14,
+      "primaryCountDiscrepancies": 26,
+      "resolvedHips": 3053,
+      "namedHips": 3053,
+      "nonHipNamedObjects": 19,
+      "supplementalHips": 4,
+      "singleObjectAsterisms": 57,
+      "gaiaStars": 7,
+      "unassignedNamedStars": 58
+    },
+    "interpretation": "Qing compilation, not a single Han/Tang system or a historical-year sky reconstruction. Member identities and stars remain physical; no invented exact lunar-mansion boundaries.",
+    "uncertainty": "Count discrepancies and uncertain physical identifications remain separately recorded and exposed. Ambiguous unassigned names stay searchable without invented nearest-centre membership. Gaia G brightness is not presented as exact V; absent proper motions/colours retain the documented fallbacks."
+  },
+  "artwork": {
+    "uniqueArtworks": 39,
+    "individual": 32,
+    "regionalOverviews": 7,
+    "renderPatches": 57,
+    "registrationComplete": true,
+    "pending": [],
+    "compressedBytes": 7862880,
+    "placement": "Original contours and proportions retained by whole-image similarity on a single gnomonic plane; local drawing details are not promised to coincide star by star.",
+    "northDipper": "Original illustration retained. Bowl-centre to handle-tip direction is constrained; per-star residuals remain disclosed in registration diagnostics.",
+    "rendering": "31 new artworks retain source RGB and alpha; original eight retain gold ink. Fine-line Four Symbols opacity is 0.23, palace overviews 0.14, individuals 0.19 before focus/fade.",
+    "overviewFadeDegrees": [
+      40,
+      75
+    ],
+    "individualFadeDegrees": [
+      1,
+      3
+    ],
+    "overviewDefault": false,
+    "provenance": "assets/chinese-sky/art/provenance.json"
+  },
+  "artifacts": {
+    "StarOrbit.html": {
+      "bytes": 416767219,
+      "sha256": "e0f5e1c1c12ca91b1bd1fa899380ddfdedbe7ed882ebc4f1df7d131d6a3fe97b"
+    },
+    "dist-local/index.html": {
+      "bytes": 463627,
+      "sha256": "181e10c0fd62b08d7b59b29c0964c791e34a9847fb78436af2a972e903609ff3"
+    },
+    "dist/index.html": {
+      "bytes": 463627,
+      "sha256": "d22a1fcf699746c2de7632c5caa1d3ba77a1e998d0714e9b876724b216983917"
+    },
+    "assets/chinese-sky/catalog.json": {
+      "bytes": 3101771,
+      "sha256": "8e14514ee454b6b6ce96f73ae477f5ba87a9c548cd5c0e6fa33ce03ab0ff5cfc"
+    },
+    "assets/chinese-sky/art/manifest.json": {
+      "bytes": 765099,
+      "sha256": "c286c1b1a13da86f87272c24c209df51f0f9d7aa33dc5e243ff1c3b9dcff93b3"
+    },
+    "assets/chinese-sky/art/rigid-placements.json": {
+      "bytes": 89399,
+      "sha256": "0b30c58b9e418a866cf277231e54f94065549b8eaa87919e2bdbb8f20477298e"
+    }
+  },
+  "notRun": [
+    {
+      "scope": "Windows/Linux and other physical devices",
+      "status": "not-run"
+    },
+    {
+      "scope": "Clean-profile cold offline start and all optional online imagery/cloud sources",
+      "status": "not-run"
+    },
+    {
+      "scope": "Full Safari, Chrome and multi-device browser fixture suites; quantitative FPS/GPU/process-RSS benchmarks",
+      "status": "not-run"
+    },
+    {
+      "scope": "Independent historian/astronomer acceptance of every source identification and modern illustration meaning",
+      "status": "not-run"
+    },
+    {
+      "scope": "GitHub CI, public Pages/Release publication and Apple notarization",
+      "status": "not-run"
+    }
+  ],
+  "distributionEvidence": "The final ZIP CRC, package documentation check, runtime/launcher verification and archive SHA-256 are recorded alongside the ZIP in output/release121/StarOrbit-v1.21-portable.validation.json and .sha256. Archive hash is excluded here to avoid self-reference.",
+  "sourceHashes": {
+    "CHANGELOG.md": "2ee02c85972190bfd26b4e7ade4457cd257d6595483c351e8dc1d579a7da6757",
+    "HANDOFF.md": "43c9d9d3250ff3c5fdd47dbb24d667b8a53c803bb0bc902f836a086112132f9e",
+    "README.en.md": "1f9601e8aad26b2df8170e66f8ecedbd6c2742f35d5680c0024dc68abec1bf67",
+    "README.md": "be1170b7b07ee7814fbf05e9074dfd3ddd265382bb1b77fb97b1adae422d8ed3",
+    "assets/OPENCC-LICENSE.txt": "1875412b4fbb9f8bce00b742fa0d58fc3de07b10e904f3c71b3b726fa84ced02",
+    "assets/chinese-sky-search.json": "08f8f556fd5c9fcf505f4b8328875b212177bb17a56c4386ee9e365a585aefe2",
+    "assets/chinese-sky/README.md": "336f4a279b59a4a9b61ba6245981db5ef0c1717702e1ba289e534f349522c239",
+    "assets/chinese-sky/art/README.md": "c8347ba3f08cf108f35af809172b733a04fe680f5970d6dd60657640a065d539",
+    "assets/chinese-sky/art/azure-dragon-0-0.avif": "fdbc4caf4b9c1e15bea3b064cc60db92d24d60244992440f3cfb5ef6ba30b93e",
+    "assets/chinese-sky/art/azure-dragon-1-0.avif": "36dfa183910a66402be476b6db7bc138db235588156827d291813410ad78f378",
+    "assets/chinese-sky/art/azure-dragon-2-0.avif": "1d99d51658699b251df4e884c6ac809efeef38efd6364547a19bbbbf863a324c",
+    "assets/chinese-sky/art/azure-dragon.png": "594274513d1a79d11ea1d1f4583a0927eae93c764716a00574d93bc2caafbd88",
+    "assets/chinese-sky/art/bi-hunting-net.avif": "1dbda7a62db22bfeefbdb5d17923098e8dad7aac400114ab5cb5f4ed7603801a",
+    "assets/chinese-sky/art/bi-hunting-net.png": "0ad5f583e816b9f088298e1eaed827f1efb31c4a90a606190663362be4b05714",
+    "assets/chinese-sky/art/bi-wall.avif": "2e37d96f31ca85ddd751c481e908fa4ca61c41e9d72023fe185bf5c965b35b2e",
+    "assets/chinese-sky/art/bi-wall.png": "64dcaf1467608ee287848c9619043d777faf5c3754fbf3f7bb571008477dc4c1",
+    "assets/chinese-sky/art/black-tortoise-0-0.avif": "667a57c71585a87fa81245b860d46e678076951cd714d309a0f0b82b7698b90b",
+    "assets/chinese-sky/art/black-tortoise-0-1.avif": "8f4d1d24b64d6a43ab54538b14fc4f1f28a517b3d1d1e313418647b10276a2fa",
+    "assets/chinese-sky/art/black-tortoise-1-0.avif": "452d450b60f4a572f9798674dd4ffe6f912234e66663da30fbee16cc8215ff24",
+    "assets/chinese-sky/art/black-tortoise-1-1.avif": "a6775c84f4f4f0ae9d9bf5bad3dbcaca160f3049e7ef448da9be075badca545f",
+    "assets/chinese-sky/art/black-tortoise.png": "299bcfd4463fed0e55a184a08d23c2585e75f9152504efd6df1a1cde892978da",
+    "assets/chinese-sky/art/celestial-wolf.avif": "b11839bf640aeda9156390ec2cf8b5450db5f5c33766dc1b91ac78a6592f8e2d",
+    "assets/chinese-sky/art/celestial-wolf.png": "928062fab7f3f42440b8fcbce0e762c8b991b30a215745426fa4623bc470993b",
+    "assets/chinese-sky/art/di-root.avif": "f9aa8c204908818824ec7a4862499382a75d09d5076b331d17cfa9b33c780f14",
+    "assets/chinese-sky/art/di-root.png": "604ccec9694bca8a08a0d1fdbf533a92dc5d70a13a42f0cac3f772c5d478bcbc",
+    "assets/chinese-sky/art/dou-southern-dipper.avif": "4045220e75c1ac674c9dfde67cd5135a5c790c3b71133a0444ed192dc892dc80",
+    "assets/chinese-sky/art/dou-southern-dipper.png": "e8a4f1451b96033df337208d9ff2c053815988c5ce4a3487a7f0d81265e7386d",
+    "assets/chinese-sky/art/fang-room.avif": "fc9902e628b83c615baf8e0ff2c551e97006ab0f74b73229e3c315e0c395f6aa",
+    "assets/chinese-sky/art/fang-room.png": "979109aa5935071363cf6028e1d679b7265f4b8d03d41faf226d24ef89363f7c",
+    "assets/chinese-sky/art/gui-ghosts.avif": "1614748d33fcc17f3c60feca55fae40d2fe4ace536064d38e2957e952a203bd6",
+    "assets/chinese-sky/art/gui-ghosts.png": "04315f3d9818781e8dcbc124084dad17524e12459cfc6fc974ca825bf8e03891",
+    "assets/chinese-sky/art/ji-winnowing-basket.avif": "b63d70f200d1e6fc8dad8868ba7b13c1fb02f3ae94cb25f6bb1fb230de7874b1",
+    "assets/chinese-sky/art/ji-winnowing-basket.png": "e179a019138dacd90393f9d494d67f8a7a895d2092bf7616885234160b66b3d2",
+    "assets/chinese-sky/art/jiao-horn.avif": "9522817cee614db9133cf927405465d35612d38f0f741a41b3eb7214b884c448",
+    "assets/chinese-sky/art/jiao-horn.png": "7bae5722c3435038e412be2ff14d7adda0c12778d5397354d3aa508927cff2ca",
+    "assets/chinese-sky/art/jing-well.avif": "53312b4d724b15badb9ffd9a7e77e98cca1cebab403cb112ddf87705b28ab3b7",
+    "assets/chinese-sky/art/jing-well.png": "3ffe5d4978ce678f44a4f9831dec27631c51f4d425a08feabd391b045d03ebce",
+    "assets/chinese-sky/art/kang-neck.avif": "4e436319dbd39526fd38db147b267ee126a677104ee647b7541ce85404814e2d",
+    "assets/chinese-sky/art/kang-neck.png": "b5b6f451a885d27214dcab9727e384244a02625683eb70ca7bb8565b4e29b450",
+    "assets/chinese-sky/art/kui-legs.avif": "7a28d2a0f728f2c83736b4f1dff91b0acd34facaf5d5271d0a0bafa48e33791b",
+    "assets/chinese-sky/art/kui-legs.png": "150710c187d7d243a86fd8e520f899937d000e579ca23c32c28b81a6ffc1a5e7",
+    "assets/chinese-sky/art/liu-willow.avif": "9af3066e0ae49f0140788793798b77828460691d3f0d79dcb058855339a2135f",
+    "assets/chinese-sky/art/liu-willow.png": "a3a8342d27b538fe8cd46d8f2a08464b949d6accea9a58cab491fe42fa44a093",
+    "assets/chinese-sky/art/lou-bond.avif": "0e5a62ab7195e9eb98691a6bb1d9ce075b43a7c78048f81f898dd4bba9d9eb47",
+    "assets/chinese-sky/art/lou-bond.png": "d13dd20fd3cbf7d758e53a69ab52efa1b1704d2bd633756b677e23b87101510f",
+    "assets/chinese-sky/art/manifest.json": "c286c1b1a13da86f87272c24c209df51f0f9d7aa33dc5e243ff1c3b9dcff93b3",
+    "assets/chinese-sky/art/mao-hairy-head.avif": "23076a52fd59eadb6dee765eec1528ade746c1667580dc68dc412732b9a4cee4",
+    "assets/chinese-sky/art/mao-hairy-head.png": "394fb357f83bd1c7e39d76759a074bfd04daf4f2d5903ffe9074dd1ea375e44a",
+    "assets/chinese-sky/art/niu-ox.avif": "338b02070662d72377d79c53d59d2859993dab2d021873d7cff48f29679606c7",
+    "assets/chinese-sky/art/niu-ox.png": "2e5cc712153dd3948f68f9fad5c2f47dbf61b381b0022b4444050d44467c697c",
+    "assets/chinese-sky/art/northern-dipper.avif": "48de6b0c864e22c55c7591c4c3f30c22d7b5bea14ca94e75ca126d47fa564ec5",
+    "assets/chinese-sky/art/northern-dipper.png": "ad74331f898de2e24c952d680fb61a360a2aa241560f271421bf3305ff606f94",
+    "assets/chinese-sky/art/nv-girl.avif": "2f20e7adf1d56c7b476940d35c6cf95943ca1074d90d26f385984dbcb8f694b6",
+    "assets/chinese-sky/art/nv-girl.png": "ba59cf7220ba4353b7d172058ba5ab481ae38a9f087c06a4e58d64b2b91c54db",
+    "assets/chinese-sky/art/provenance.json": "8e34b1e4f1e50d193082d55b0bcb67174907143278e9e96ec6d699ddc8cd8752",
+    "assets/chinese-sky/art/rigid-placements.json": "0b30c58b9e418a866cf277231e54f94065549b8eaa87919e2bdbb8f20477298e",
+    "assets/chinese-sky/art/river-drum.avif": "f1b680c3346156ba77f5dc582c3365f159fa2d894b439f3086c37c3ccab00e79",
+    "assets/chinese-sky/art/river-drum.png": "7ecf68c7d02b8589f35f43275b13ad8800c237086a9b4c40b8a8cc6b90ff6a5b",
+    "assets/chinese-sky/art/shen-three-stars.avif": "1a6dfeadfce927703c21fbfd607a567f13a2208134373ed0651ac0d0c93edccd",
+    "assets/chinese-sky/art/shen-three-stars.png": "56b8bc72e18a739d01d428a0dfd65f95a7fd6a19e1c88fadba93b00581e9fdfd",
+    "assets/chinese-sky/art/shi-encampment.avif": "cea728366193c8943a729ea7f4b0665e65c5a9366b9dc389f26502e2cfd532bd",
+    "assets/chinese-sky/art/shi-encampment.png": "f98eba1ac5356feeea125748adf629c06dd97868badddf3dfcc60a50c39cc1bc",
+    "assets/chinese-sky/art/taiwei-enclosure-0-0.avif": "37e924ec443f92c79218b08e83abdbc995a886e62048180450e68d83e9786ad6",
+    "assets/chinese-sky/art/taiwei-enclosure-1-0.avif": "f0f908b0a74bd8e3ea57923c124fb6ce0f6db0c29ccee97b5f64fc01454fac28",
+    "assets/chinese-sky/art/taiwei-enclosure-2-0.avif": "5c4baaed6a53375c5020cb8535ef26500030e1f5ffd2bd60e27ad0b2c5c77e2a",
+    "assets/chinese-sky/art/taiwei-enclosure.png": "4b6743e64c23df7fc891679827851a3a5a3ade8d84c488dd4df2e59658429c3b",
+    "assets/chinese-sky/art/tianshi-enclosure-0-0.avif": "c59e6ba19c80f2c904afe5073a0235b870ad0794710b9b007c897d014f6ea38b",
+    "assets/chinese-sky/art/tianshi-enclosure-0-1.avif": "28cd1dfa71fbf247b8277b4173f73097605ab7a579115d594f6964200a574356",
+    "assets/chinese-sky/art/tianshi-enclosure-1-0.avif": "65c2f45948ebaba1176d98abf211389a07f7d6eea1562cfe9cd21cb35458fc6f",
+    "assets/chinese-sky/art/tianshi-enclosure-1-1.avif": "5dc6790e1134a1fd17dedc4ac2da3e2c4ec3617a3613c2b7a2dce8e2b1dde602",
+    "assets/chinese-sky/art/tianshi-enclosure.png": "75b6dc539328378dc31886cce8618edbdff8143a208826877c08aac9177427ce",
+    "assets/chinese-sky/art/vermilion-bird-0-0.avif": "cc4bcf15d656091904d2c8be65f470d4fe4a161987cc1895757fa69579acdabf",
+    "assets/chinese-sky/art/vermilion-bird-0-1.avif": "9d7bc976fd460bf71c9c4cf0812a36795eee74d81dde759438cf133ecb41bd03",
+    "assets/chinese-sky/art/vermilion-bird-1-0.avif": "6a2c02cd48cf9bd6292a579f68df52e24970dfc7bcabcdd5a5570f607abc850d",
+    "assets/chinese-sky/art/vermilion-bird-1-1.avif": "a14982898758009dee48ea49453d9a2cf9ec7558502cbf1f28ba8ac6d21df550",
+    "assets/chinese-sky/art/vermilion-bird.png": "12e527a6e143249ef598d3cab9fde7aaf986850fc11e7c07ff5a9375084aa94e",
+    "assets/chinese-sky/art/weaving-maiden.avif": "de1d9b15858f4c5dec6813fdefa264af6a86f6922f1d4c2e74d217e636d206c9",
+    "assets/chinese-sky/art/weaving-maiden.png": "55d1c601da11038ca080b8bc79f6a85f2b3bf46c749a1aaed7375803bae7dcf4",
+    "assets/chinese-sky/art/wei-rooftop.avif": "80ebb325b1376493c9acb667d41ca0468c440b9016729a166a87a793c3076c14",
+    "assets/chinese-sky/art/wei-rooftop.png": "6ff93d8ed825d4c5ba460ce9494f61b3122d09619568cbfc4a791dbd2f2e6347",
+    "assets/chinese-sky/art/wei-stomach.avif": "e92eef6b3390cfd78c5affca682a5f598ede3265324fa79286d6e8cb663e147e",
+    "assets/chinese-sky/art/wei-stomach.png": "a9d9b982bef74bfa02d76a3887fb73b03ebb1f9993bc95c794b8dc2519c802db",
+    "assets/chinese-sky/art/wei-tail.avif": "c5f6153d0aac576f5e9273d6926186ceafc777db517e56e819fac7019e9f8c21",
+    "assets/chinese-sky/art/wei-tail.png": "e4e115f840d0310062fe6d0640d082be770881a2b0cfc225a17b5292370f8be8",
+    "assets/chinese-sky/art/white-tiger-0-0.avif": "5dd1ed04c0f7c72b07ac2d482fb37f054ae919742eaf1c7bd9262d5331dad8ed",
+    "assets/chinese-sky/art/white-tiger-1-0.avif": "8f040612e6b1b910e9c1c59a4f3f5f46917f07cbd4b2903fa1f58019c131419c",
+    "assets/chinese-sky/art/white-tiger-2-0.avif": "93c83a2c9def50f1a538a3db6f36a53e4217d0fa5d4d8aadba8c4ea3f27ac5e3",
+    "assets/chinese-sky/art/white-tiger.png": "18a2af57c6501e503c2f25228a43b50a900fd95903b5ee7b750dfff27f3f6336",
+    "assets/chinese-sky/art/xin-heart.avif": "1af6622997a4f2c7f97225fcef65f6fc0cbf08065de83ac3f5af9a4094e144a7",
+    "assets/chinese-sky/art/xin-heart.png": "14c046881e4e346531657543648bfff8dd22a93e4a859bdeb01ba1b3c17ead78",
+    "assets/chinese-sky/art/xing-bird-neck.avif": "ef51fba8ca10e68bf5f97d11adb55a78e500157c765f77ae4e94e1d7fd1343f1",
+    "assets/chinese-sky/art/xing-bird-neck.png": "449f6269d277246f1d36ce90aa151a8f41bbce8949ea63522b338f9ab21eb554",
+    "assets/chinese-sky/art/xu-emptiness.avif": "4aee23a5c6f67413af2f08d1869e5af9291fc2ffe03616d60428da784fc32684",
+    "assets/chinese-sky/art/xu-emptiness.png": "58971d847f08f6561935c0f39c497d58e0ae4ed544b9cf94297a845f4496e067",
+    "assets/chinese-sky/art/yi-wings.avif": "00dc129b4793349a003f65d382f8281d7f720e03373d89ba52a046d6bf3cc6a7",
+    "assets/chinese-sky/art/yi-wings.png": "c08e005ba058ec7dbc78a30398844abfdfff031c2cf558d233266f450abead47",
+    "assets/chinese-sky/art/zhang-extended-net.avif": "13b4f0904da8b67ee86c5615686089cdebd99dc671bc8f69717d415251e5d758",
+    "assets/chinese-sky/art/zhang-extended-net.png": "8d3b6fea7ad8ab726b1233095def9f22425af3bc0c9dcc2a713d8e165dfd3a11",
+    "assets/chinese-sky/art/zhen-chariot.avif": "791301c26d8713ca84448658bac2fa7f893cf6b2363efa4ac5750970d618a149",
+    "assets/chinese-sky/art/zhen-chariot.png": "d8f8112545cd1aab31ccfca67db9507a68b36d67ab10fbeb8af94cdd59a93b84",
+    "assets/chinese-sky/art/zi-turtle-beak.avif": "4a2c9fb7a87ed037de2980e19db629e5c3e75be39ffa88e197dd49246ca5a1d0",
+    "assets/chinese-sky/art/zi-turtle-beak.png": "f13415776865cc1fddbb72f31837c23a37fcbbfa79876aa4293b9f6ca5fc91eb",
+    "assets/chinese-sky/art/ziwei-enclosure-0-0.avif": "42327dc7c0036ac75bc0eb9005a84fdef6e2d0a7fc7c70d9974ea764fe8eebc9",
+    "assets/chinese-sky/art/ziwei-enclosure-0-1.avif": "e3ffae8529f5c82c7dfab6837fda3228034c78ce9e306e6d923fc4b6a388cfa9",
+    "assets/chinese-sky/art/ziwei-enclosure-1-0.avif": "97a18a2043089f9d0fec4bda7b5b0f6746c53a28773bc9c8ba0441db5d6a5303",
+    "assets/chinese-sky/art/ziwei-enclosure-1-1.avif": "8d70fcc957f3d5a76585a81a97a05c111999efeb0f03830ebcb9b8f4fc6731a2",
+    "assets/chinese-sky/art/ziwei-enclosure.png": "367fb9be1b09b52da7ccf9ec5e59359cbde7f75b6b77ed84a1693da9d23982e9",
+    "assets/chinese-sky/catalog.json": "8e14514ee454b6b6ce96f73ae477f5ba87a9c548cd5c0e6fa33ce03ab0ff5cfc",
+    "assets/chinese-sky/source/CC-BY-SA-4.0.txt": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+    "assets/chinese-sky/source/Gaia-DR3-AIP.xml": "3d4475cd5a9a1e8bc57963cbd259468dedf7f6a2e24120933dc18d4c2cad7dfd",
+    "assets/chinese-sky/source/Gaia-DR3.csv": "1d1454a0b13011091affac2c2fe1d55c3fa1de32b7beb19bd650567acacded18",
+    "assets/chinese-sky/source/Gaia-HIP-crossmatch.csv": "345e13b931c53fce7ebb943b4a175b8e40ef3fdb7cca608f4769942954aeb996",
+    "assets/chinese-sky/source/I-239-hip_main.tsv": "14e672e67eb322dd7eaa1d40d6717611c633bd76c7ae3d20ee24709b0d38d4c3",
+    "assets/chinese-sky/source/I-311-hip2.tsv": "95d374024dc211a892314088a6c8285c207199d9faed05ad5295419349267b95",
+    "assets/chinese-sky/source/description.md": "f0dec3d4fb115bb8d5667e96fb9af0450f33489ec02747c8229903c15b3a2cac",
+    "assets/chinese-sky/source/index.json": "426118e6238ae69edb319c91d1a74b705eaa758222e962206e58c49b9dac9d8a",
+    "build.mjs": "a17f262989ab54b44def268a74bdc355b0b1259a10e1db6f050b905e374d2dc9",
+    "docs/README.md": "b0fbba8477665a8e2ba5cb06aaecab5988aeeeceac4f5963e73a6c6c3901ae25",
+    "docs/architecture.md": "7642f935e6dab401212b498af1de3d0d42680f1e688511eeece3a9f51fa7543f",
+    "docs/development-release.md": "c779366459cee6db46a4ef5cb4a15a405d51065ccc62233ea0a6db3181c4b731",
+    "docs/formats.md": "df218a27388b8fc1f360a585c96c5c0aa2cb325b3b8d35bbe23dc491758f3a02",
+    "docs/product-scope.md": "06b4682ab3fa13b769629a37b176abccecbcf1482fb5c62e187d53e341f4635c",
+    "docs/verification.md": "911b0685e07235038380a0a0543fe007c5ac8bc259b93f10cb289ddca77141a3",
+    "package-lock.json": "079c285ce46e8a3bd002b4e120f4310b104b0343dfe3f38ce34c44907c5d66d5",
+    "package.json": "c77ddf78e608b5b4b4538caacd13fa4bbd5ed2453f781cb242d3dee4aff0d4b8",
+    "scripts/check-docs.py": "3e4d1048e04a458df82decf1620b0b734574a4b517b196476ea6a180e3414c59",
+    "scripts/documents.py": "02ca875cf9d10ccc21fd8ee8694dcee0861af43d19df2b9d2b652b695fb0e595",
+    "scripts/package-portable.py": "275f60d19aa9ca08aeb0246dc30d23e8698e06dc1d208dbb510e0e04bb6a9ab1",
+    "scripts/prepare-chinese-art.py": "1309d484098cd8f8db9026de4022657c2a6d39e01ae01881c78843cc8e4ecd65",
+    "scripts/prepare-chinese-sky.py": "17aee5579d07319160456e7c31a646986b47bf695b0e069a982e7a3699ef9bf6",
+    "src/app.js": "af5ed9e8d1274ad5859c7858037b48d68521732b8b09cc460845a130b5102a8d",
+    "src/balcony-lab.js": "84281cd082e12cba48c5bab1a61504dd380d4b51e332cdac36fb3fbf4e81a88d",
+    "src/balcony-sky-view-drawing.js": "abc590bf29d43f7bb0dc0b18edb8a84231f7a5db1d0335e2d784822b72e5e364",
+    "src/balcony-sky-view.js": "f6401906a1c4c55781a299058e81f7a4ab2bde3e8d18ea8722b34aa249be376a",
+    "src/chinese-sky-art.js": "11b66ef8efc3dc6ddf43ea0900e01ffc10748c925d2dde3a73684b3894630eba",
+    "src/constellation-art-layer.js": "d34772df7342ca7406805b103edcb0ab1db2021442a8682cb11d47aafd429dd7",
+    "src/constellation-art-math.js": "ef5b53db4008a3a964fd32c278ac557375a774213916a19a81924faa19f90342",
+    "src/constellation-art.js": "29c9cffb2164fffe960b0e695a15ed0cc0a9d39db54c3dd69afc878dbefff2ef",
+    "src/environment.js": "b07c322e268b93870f9d8b622b047d75a840783fa2f3c9ec7b0784fcd98d1836",
+    "src/help.js": "8c8b8987701404749dabcb7e854468b9247d5bd850a874560a3181f4a478e9db",
+    "src/i18n-en.json": "d91430adb8efabed6f2bea4246085ef3bb829c8cd8aa85fd5025f7ec4673fe9e",
+    "src/i18n-fr.json": "d5957e4b6fda51957b1ad9bd2730865ad94b74256294104964a9bbe564148d1d",
+    "src/i18n-ru.json": "6d97f01ecf70b49da2ae821ad060f6e0fea42cae8e5151eb3d5e60c20c8827ae",
+    "src/layout.html": "b6efb9c8346655484f50ed0d7636748818c5d6adb75dff4877d25bd81fda7ad6",
+    "src/sky-annotation-layout.js": "7a3c25755593327d12e6c899ea505b5fd15094168e12622bc2c5c0007f9b8fe3",
+    "src/sky-culture-caption.js": "32edb41948223d23bdfb39e56a04b450d3ab9e2fdc81c5badd52769d8de1d712",
+    "src/sky-culture-controls.js": "a1e0285fd780f38dbeebffeb5dfaedcfcaef836b51d7cb39ee2939cfb53693e4",
+    "src/sky-culture-screenshot.js": "130890816f6a63eaaccf39196feafa6acb99cc6ad79b057b03bc184ac74a7d7c",
+    "src/sky-cultures.js": "041fa3a96d97e41e6b8fb24ef48a0609e8b05259358d9a377ead7020d3556ca9",
+    "src/star-chart-settings.js": "90a258a9fdf69777f9931d97ad70814d3afaba9c40b20e19af1a3f61e7498e6d",
+    "src/star-chart.js": "f823e07538dfe4807e6811934b807a6589c8cf8586382f32d7968fa85e5279a5",
+    "src/star-label-catalog.js": "2a1b9b20601744807111e91bd2ca96c07e066e86acf9f0e6e5defde571ba86eb",
+    "src/weather.js": "a2d897f1e52eb54894bbd631a453dac14a662646d73f481dcfb1afd7502fe38f",
+    "src/workspace.css": "4646aefd59b94ae3316e0a8229e80d966a504f5e3e020f520bf8954bbf975de1",
+    "src/xuntian-catalog.js": "8c4f643cc4865e856defefc56ea15b18b296c80c4ee22c4131bcc8e5e7a6e986",
+    "src/xuntian-crosshair.js": "b04d2ca3ecffca374aab3d23def7f5ab7c52770fd58679700f994d303ae594cd",
+    "src/xuntian-earth-view.js": "6bb9ee7e0889da8dfe70f65323aa8a3dacbc7cc6e08a193f6d19f61003aa75c8",
+    "src/xuntian-labels.js": "b37469c412ff02fd343422fb0743773846ccf14867b982e6b3657040dcfe981b",
+    "src/xuntian-scope.css": "52166e010a34323d9882211210fb85c861ba31569fb92b19f6e4e2fb5c400f3f",
+    "src/xuntian-scope.js": "9cb866e34fa6f0fcac95fd574bfcfb08bee133e2cc06b775514af3995ab9c07a",
+    "src/xuntian-search.js": "53e7b4948313bfe49a665ada0ef487f5cd0bdca2d3cca787f0c0a4d4dc4eabba",
+    "src/xuntian-view-math.js": "4ca304e1448d6015c40a4e6c67fd79591cfbc239da2796cf9a63ee4011dfcc19",
+    "src/xuntian-view-render.js": "076abe85f580e90129094841b04d064a3790908c14ad3dde46ed4a3a301cb872",
+    "tests/chinese-sky-integration.mjs": "2ceffd4f9ff92f789f6fa161f5e55ee3ac7e7205f470f947183dcd31af7f9006",
+    "tests/constellation-art.mjs": "6a370910437dc0ae4aee5c1c6587881dc69e4e81c211ce515eb6a39c58cf3ee3",
+    "tests/sky-culture-rendering.mjs": "2338b96e1698cd9feebfaae3ef874b281265bf1efd8998e603b4b0a82ec1f439",
+    "tests/sky-cultures.mjs": "2e302ac9400ac34f9debc1e1aef0389272227b752d6438dfa83bc6f09e0c132d",
+    "tests/web-build.mjs": "a44c9dd195d16cd1d75a046a5360045d62f9a395b492c3a4491cae336ae4fba6",
+    "tests/xuntian-catalog.mjs": "3b4f04fcc12128ac020ae47458ad1eff3c8b716b2ac4827210d96aaf6bf17f78",
+    "tests/xuntian-crosshair.mjs": "0adf771a0260a1a4775eaf37a66eab4763745959eabf1afa60c6d89ea4947802",
+    "tests/xuntian-view-render.mjs": "d1c885bd627c8069f3daa0e12266aee1ecdb70e22ad6ce2f65db34f3ee75fc85",
+    "使用说明.md": "684bfbc760f957c573b3b536ebef0b57febeb5bac1d61db2d6551c92a72c87e3",
+    "素材与迁移说明.md": "3f02bedca2f4bd6601941146502ba90cd5306126f62515a2369a08ac8b90d0c9"
+  },
+  "sourceRecordExclusion": "This JSON excludes its own hash. Source hashes and build hashes bind the tested local work; packaging has a separate final archive receipt."
+}

@@ -1,0 +1,573 @@
+{
+  "snapshotDate": "2026-11-08",
+  "scope": "Lunar surface contact by attempted soft-landing missions, including failed and abnormal touchdowns. Excludes intentional impact probes, orbital disposals, launch/transit failures and future plans. Rover names identify shared landing/deployment sites, not current rover positions.",
+  "coordinateSystem": "Spherical latitude; east-positive longitude -180..180; NASA NSSDCA DE421 mean-Earth/polar-axis reference.",
+  "sourceLastUpdated": "2025-08-13",
+  "sourceSha256": "586aef752114a651b5a056299fdf2d850b6dfbb418580f49b6c099dfe70e705f",
+  "records": [
+    {
+      "id": "landing:luna-5",
+      "name": "Luna 5",
+      "nameZh": "月球5号",
+      "country": "SU",
+      "note": "Approximate published impact estimate; substantially different locations occur in the literature.",
+      "latitude": -1.35,
+      "longitude": -25.48,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed",
+      "date": "1965-05-12"
+    },
+    {
+      "id": "landing:luna-7",
+      "name": "Luna 7",
+      "nameZh": "月球7号",
+      "country": "SU",
+      "latitude": 9.0,
+      "longitude": -49.0,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed",
+      "date": "1965-10-07"
+    },
+    {
+      "id": "landing:luna-8",
+      "name": "Luna 8",
+      "nameZh": "月球8号",
+      "country": "SU",
+      "latitude": 9.1,
+      "longitude": -63.3,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed",
+      "date": "1965-12-06"
+    },
+    {
+      "id": "landing:luna-9",
+      "name": "Luna 9",
+      "nameZh": "月球9号",
+      "country": "SU",
+      "note": "Historical reported location, not a confirmed lander position; NASA notes the true site may be at least 10 km away.",
+      "latitude": 7.13,
+      "longitude": -64.37,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "soft-success",
+      "date": "1966-02-03"
+    },
+    {
+      "id": "landing:surveyor-1",
+      "name": "Surveyor 1",
+      "nameZh": "勘测者1号",
+      "country": "US",
+      "latitude": -2.4745,
+      "longitude": -43.3398,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1966-06-02"
+    },
+    {
+      "id": "landing:surveyor-2",
+      "name": "Surveyor 2",
+      "nameZh": "勘测者2号",
+      "country": "US",
+      "note": "NASA mission page gives 23 September; NSSDCA artifact table gives 22 September. Coordinates remain approximate.",
+      "date": "1966-09-23",
+      "missionSourceUrl": "https://science.nasa.gov/mission/surveyor-2/",
+      "latitude": 5.5,
+      "longitude": -12.0,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed"
+    },
+    {
+      "id": "landing:luna-13",
+      "name": "Luna 13",
+      "nameZh": "月球13号",
+      "country": "SU",
+      "latitude": 18.87,
+      "longitude": -62.05,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "soft-success",
+      "date": "1966-12-24"
+    },
+    {
+      "id": "landing:surveyor-3",
+      "name": "Surveyor 3",
+      "nameZh": "勘测者3号",
+      "country": "US",
+      "latitude": -3.0162,
+      "longitude": -23.418,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1967-04-20"
+    },
+    {
+      "id": "landing:surveyor-4",
+      "name": "Surveyor 4",
+      "nameZh": "勘测者4号",
+      "country": "US",
+      "note": "Contact lost before touchdown; actual impact location unknown. No marker is placed at the planned landing target.",
+      "latitude": null,
+      "longitude": null,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "unknown",
+      "outcome": "impact-failed",
+      "date": "1967-07-17"
+    },
+    {
+      "id": "landing:surveyor-5",
+      "name": "Surveyor 5",
+      "nameZh": "勘测者5号",
+      "country": "US",
+      "latitude": 1.4551,
+      "longitude": 23.1943,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1967-09-11"
+    },
+    {
+      "id": "landing:surveyor-6",
+      "name": "Surveyor 6",
+      "nameZh": "勘测者6号",
+      "country": "US",
+      "latitude": 0.4742,
+      "longitude": -1.4275,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1967-11-10"
+    },
+    {
+      "id": "landing:surveyor-7",
+      "name": "Surveyor 7",
+      "nameZh": "勘测者7号",
+      "country": "US",
+      "latitude": -40.9812,
+      "longitude": -11.5127,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1968-01-10"
+    },
+    {
+      "id": "landing:apollo-11",
+      "name": "Apollo 11",
+      "nameZh": "阿波罗11号",
+      "country": "US",
+      "latitude": 0.67416,
+      "longitude": 23.47314,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1969-07-20"
+    },
+    {
+      "id": "landing:luna-15",
+      "name": "Luna 15",
+      "nameZh": "月球15号",
+      "country": "SU",
+      "note": "Approximate crash-site estimate; alternative published positions exist.",
+      "latitude": 17.0,
+      "longitude": 60.0,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed",
+      "date": "1969-07-21"
+    },
+    {
+      "id": "landing:apollo-12",
+      "name": "Apollo 12",
+      "nameZh": "阿波罗12号",
+      "country": "US",
+      "latitude": -3.0128,
+      "longitude": -23.4219,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1969-11-19"
+    },
+    {
+      "id": "landing:luna-16",
+      "name": "Luna 16",
+      "nameZh": "月球16号",
+      "country": "SU",
+      "latitude": -0.5137,
+      "longitude": 56.3638,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1970-09-20"
+    },
+    {
+      "id": "landing:luna-17",
+      "name": "Luna 17",
+      "nameZh": "月球17号",
+      "country": "SU",
+      "carriedVehicles": [
+        "Lunokhod 1"
+      ],
+      "latitude": 38.23764,
+      "longitude": -35.00163,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1970-11-17"
+    },
+    {
+      "id": "landing:apollo-14",
+      "name": "Apollo 14",
+      "nameZh": "阿波罗14号",
+      "country": "US",
+      "latitude": -3.64589,
+      "longitude": -17.47194,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1971-02-05"
+    },
+    {
+      "id": "landing:apollo-15",
+      "name": "Apollo 15",
+      "nameZh": "阿波罗15号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ],
+      "latitude": 26.13239,
+      "longitude": 3.6333,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1971-07-30"
+    },
+    {
+      "id": "landing:luna-18",
+      "name": "Luna 18",
+      "nameZh": "月球18号",
+      "country": "SU",
+      "note": "Unconfirmed candidate in LROC imagery, not a securely identified lander.",
+      "latitude": 3.76,
+      "longitude": 56.66,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "approximate",
+      "outcome": "impact-failed",
+      "date": "1971-09-11"
+    },
+    {
+      "id": "landing:luna-20",
+      "name": "Luna 20",
+      "nameZh": "月球20号",
+      "country": "SU",
+      "latitude": 3.7863,
+      "longitude": 56.6242,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1972-02-21"
+    },
+    {
+      "id": "landing:apollo-16",
+      "name": "Apollo 16",
+      "nameZh": "阿波罗16号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ],
+      "latitude": -8.9734,
+      "longitude": 15.5011,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1972-04-21"
+    },
+    {
+      "id": "landing:apollo-17",
+      "name": "Apollo 17",
+      "nameZh": "阿波罗17号",
+      "country": "US",
+      "carriedVehicles": [
+        "Lunar Roving Vehicle"
+      ],
+      "latitude": 20.1911,
+      "longitude": 30.7723,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1972-12-11"
+    },
+    {
+      "id": "landing:luna-21",
+      "name": "Luna 21",
+      "nameZh": "月球21号",
+      "country": "SU",
+      "carriedVehicles": [
+        "Lunokhod 2"
+      ],
+      "latitude": 25.9994,
+      "longitude": 30.4076,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1973-01-15"
+    },
+    {
+      "id": "landing:luna-23",
+      "name": "Luna 23",
+      "nameZh": "月球23号",
+      "country": "SU",
+      "outcome": "soft-partial",
+      "note": "Landed but damaged; sample return failed.",
+      "latitude": 12.6667,
+      "longitude": 62.1511,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "date": "1974-11-06"
+    },
+    {
+      "id": "landing:luna-24",
+      "name": "Luna 24",
+      "nameZh": "月球24号",
+      "country": "SU",
+      "latitude": 12.7142,
+      "longitude": 62.2129,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "1976-08-18"
+    },
+    {
+      "id": "landing:change-3",
+      "name": "Chang'e 3",
+      "nameZh": "嫦娥三号",
+      "country": "CN",
+      "carriedVehicles": [
+        "Yutu",
+        "玉兔"
+      ],
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758968/n6758972/c6798565/content.html",
+      "aliases": [
+        "嫦娥3号",
+        "CE3",
+        "CE-3",
+        "Chang'e-3"
+      ],
+      "latitude": 44.1214,
+      "longitude": -19.5117,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2013-12-14"
+    },
+    {
+      "id": "landing:change-4",
+      "name": "Chang'e 4",
+      "nameZh": "嫦娥四号",
+      "country": "CN",
+      "carriedVehicles": [
+        "Yutu-2",
+        "玉兔二号"
+      ],
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758823/n6758844/n6760026/n6760027/c6805178/content.html",
+      "aliases": [
+        "嫦娥4号",
+        "CE4",
+        "CE-4",
+        "Chang'e-4"
+      ],
+      "latitude": -45.4561,
+      "longitude": 177.5885,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2019-01-03"
+    },
+    {
+      "id": "landing:beresheet",
+      "name": "Beresheet",
+      "nameZh": "创世纪号",
+      "country": "IL",
+      "latitude": 32.5956,
+      "longitude": 19.3496,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "impact-failed",
+      "date": "2019-04-11"
+    },
+    {
+      "id": "landing:chandrayaan-2",
+      "name": "Chandrayaan-2 Vikram",
+      "nameZh": "月船二号·维克拉姆",
+      "country": "IN",
+      "carriedVehicles": [
+        "Pragyan"
+      ],
+      "latitude": -70.881,
+      "longitude": 22.784,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "impact-failed",
+      "date": "2019-09-06"
+    },
+    {
+      "id": "landing:change-5",
+      "name": "Chang'e 5",
+      "nameZh": "嫦娥五号",
+      "country": "CN",
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6759533/c6810683/content.html",
+      "aliases": [
+        "嫦娥5号",
+        "CE5",
+        "CE-5",
+        "Chang'e-5"
+      ],
+      "latitude": 43.0576,
+      "longitude": -51.9161,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2020-12-01"
+    },
+    {
+      "id": "landing:hakuto-r-1",
+      "name": "HAKUTO-R Mission 1",
+      "nameZh": "白兔-R 一号",
+      "country": "JP",
+      "carriedVehicles": [
+        "Rashid",
+        "SORA-Q"
+      ],
+      "latitude": 47.581,
+      "longitude": 44.094,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "impact-failed",
+      "date": "2023-04-25"
+    },
+    {
+      "id": "landing:luna-25",
+      "name": "Luna 25",
+      "nameZh": "月球25号",
+      "country": "RU",
+      "latitude": -57.865,
+      "longitude": 61.36,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "impact-failed",
+      "date": "2023-08-19"
+    },
+    {
+      "id": "landing:chandrayaan-3",
+      "name": "Chandrayaan-3 Vikram",
+      "nameZh": "月船三号·维克拉姆",
+      "country": "IN",
+      "carriedVehicles": [
+        "Pragyan"
+      ],
+      "missionSourceUrl": "https://www.isro.gov.in/Chandrayaan3.html",
+      "latitude": -69.3741,
+      "longitude": 32.32,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2023-08-23"
+    },
+    {
+      "id": "landing:slim",
+      "name": "SLIM",
+      "nameZh": "SLIM 精准月球着陆器",
+      "country": "JP",
+      "outcome": "soft-partial",
+      "note": "Precision soft landing with an abnormal final attitude; operations later resumed.",
+      "carriedVehicles": [
+        "LEV-1",
+        "LEV-2",
+        "SORA-Q"
+      ],
+      "missionSourceUrl": "https://www.jaxa.jp/press/2024/01/20240125-1_j.html",
+      "latitude": -13.316,
+      "longitude": 25.251,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "date": "2024-01-19"
+    },
+    {
+      "id": "landing:im-1",
+      "name": "IM-1 Odysseus",
+      "nameZh": "IM-1 奥德修斯",
+      "country": "US",
+      "outcome": "soft-partial",
+      "note": "Reached the surface but tipped over, restricting operations.",
+      "latitude": -80.13,
+      "longitude": 1.44,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "date": "2024-02-22"
+    },
+    {
+      "id": "landing:change-6",
+      "name": "Chang'e 6",
+      "nameZh": "嫦娥六号",
+      "country": "CN",
+      "missionSourceUrl": "https://www.cnsa.gov.cn/n6758823/n6758844/n10518102/n10518147/c10565180/content.html",
+      "aliases": [
+        "嫦娥6号",
+        "CE6",
+        "CE-6",
+        "Chang'e-6"
+      ],
+      "latitude": -41.6385,
+      "longitude": -153.9852,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2024-06-01"
+    },
+    {
+      "id": "landing:blue-ghost-1",
+      "name": "Blue Ghost Mission 1",
+      "nameZh": "蓝色幽灵一号",
+      "country": "US",
+      "missionSourceUrl": "https://fireflyspace.com/missions/blue-ghost-mission-1/",
+      "latitude": 18.562,
+      "longitude": 61.81,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "soft-success",
+      "date": "2025-03-02"
+    },
+    {
+      "id": "landing:im-2",
+      "name": "IM-2 Athena",
+      "nameZh": "IM-2 雅典娜",
+      "country": "US",
+      "outcome": "soft-partial",
+      "note": "Came to rest on its side in a crater; surface operations were curtailed.",
+      "missionSourceUrl": "https://www.intuitivemachines.com/im-2",
+      "latitude": -84.7906,
+      "longitude": 29.1957,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "date": "2025-03-06"
+    },
+    {
+      "id": "landing:hakuto-r-2",
+      "name": "HAKUTO-R Mission 2 RESILIENCE",
+      "nameZh": "白兔-R 二号·坚韧号",
+      "country": "JP",
+      "carriedVehicles": [
+        "Tenacious"
+      ],
+      "latitude": 60.4445,
+      "longitude": -4.588,
+      "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html",
+      "locationAccuracy": "lro-imaged",
+      "outcome": "impact-failed",
+      "date": "2025-06-05"
+    }
+  ]
+}

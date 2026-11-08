@@ -173,6 +173,8 @@ export function mountBalconyLab(container, sim, assets) {
     lastSite = lastObserver();
   let controls = null;
   const view = createBalconySkyView(el.sky, {
+    skyCulture: () => sim.environment.settings.skyCulture || 'western',
+    chartSettings: () => sim.environment.settings,
     onManual: () => {
       controls?.stopMotion();
       setFollow(false);
@@ -1272,6 +1274,10 @@ export function mountBalconyLab(container, sim, assets) {
   el.height.value = '';
   el.start.value = inputText(time);
   const unsubscribe = onLanguageChange(translate);
+  const cultureChanged = () => {
+    if (active && !disposed) draw();
+  };
+  window.addEventListener('starorbit-sky-culture', cultureChanged);
   translate();
   return {
     openPass,
@@ -1334,6 +1340,7 @@ export function mountBalconyLab(container, sim, assets) {
       view.dispose();
       resize.disconnect();
       unsubscribe();
+      window.removeEventListener('starorbit-sky-culture', cultureChanged);
       document.removeEventListener('visibilitychange', visibility);
       image.removeEventListener('load', refreshTexture);
       root.remove();

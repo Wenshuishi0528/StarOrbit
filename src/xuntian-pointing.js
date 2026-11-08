@@ -47,7 +47,7 @@ export function skyCoordinates(f) {
     dec = Math.asin(clamp(f[2], -1, 1)) / D;
   const minutes = Math.round(ra * 60) % (24 * 60);
   return (
-    'RA ' +
+    'J2000 · RA ' +
     String(Math.floor(minutes / 60)).padStart(2, '0') +
     'ʰ ' +
     String(minutes % 60).padStart(2, '0') +

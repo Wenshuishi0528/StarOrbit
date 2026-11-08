@@ -1,8 +1,8 @@
 # 开发、发布与维护
 
-适用版本：v1.20。作者：Wenshuishi。核对日期：2026-11-07。
+适用版本：本地 v1.25。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页依据 v1.19 的实际工具链整理当前维护流程。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
+本页按本地 v1.25 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
 
 ## 先识别四个位置
 
@@ -46,6 +46,8 @@ python scripts/serve.py --port 8772 --open
 以上为 macOS/Linux shell 示例。Windows 可用 `.venv\Scripts\Activate.ps1` 激活 Python 环境，再运行等价命令；macOS 启动器仅用于 macOS。需要源码授权时应使用获准的仓库地址和访问方式。网页入口与源码仓库入口是不同交付物。
 
 `npm ci` 按锁文件安装依赖。Python 的云图处理依赖为 NumPy、Pillow、h5py、certifi；本机启动器寻找的是系统已安装 Python，不会自动选择仓库 `.venv`。如命令行能处理云图而 Finder 启动失败，应核对两条入口实际使用的 Python 和依赖环境。
+
+中国星官修改还需保留固定资料基线、成员目录身份与图像来源。数据制备与图像配准分别核对，不得把现代 AI 辅助教学意象写成古籍原图；检查无插画星官、三垣二十八宿导航、切换、旧场景、收藏以及照片。来源说明与图像许可应随便携包保留。
 
 正常构建使用已准备好的 `assets/`；不需要重跑原始 EXR、MODIS、城市影像或天区数据制备。只有明确更换对应资源时才安装额外地理/数据处理依赖并执行制备脚本。重制后应保存来源、日期、范围、处理参数与校验值，并按[素材说明](../素材与迁移说明.md)更新归属。
 
@@ -91,28 +93,28 @@ node tests/web-build.mjs dist
 
 每批已授权修改遵守仓库 `AGENTS.md`：版本只递增一次，同时更新 package.json 的 version/displayVersion、package-lock.json 项目版本、README 当前版本及构建页面版本；CHANGELOG 顶部保留简短中英总结，详细证据放稳定文档或版本记录。
 
-当前显示版本使用 v1.20，对应包元数据采用项目既有的 `1.0.20` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
+当前显示版本使用 v1.25，对应包元数据采用项目既有的 `1.0.25` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
 
 本地版本递增不自动代表已上线或已发布下载包。记录中应分别说明源码、本机运行、网页版和 Release 的已核验状态。检查失败或未执行时保留明确结果，不把“准备发布”写成“正式发布”。
 
 ## 便携包和 macOS 启动器
 
-先生成单文件，再执行打包脚本。下面以本批本地 v1.20 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
+先生成单文件，再执行打包脚本。下面以本批本地 v1.25 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
 
 ```sh
-python3 scripts/package-portable.py output/release120/StarOrbit-v1.20-portable.zip
-python3 -m zipfile -t output/release120/StarOrbit-v1.20-portable.zip
-python3 scripts/check-docs.py --package output/release120/StarOrbit-v1.20-portable.zip
-shasum -a 256 output/release120/StarOrbit-v1.20-portable.zip
+python3 scripts/package-portable.py output/release125/StarOrbit-v1.25-portable.zip
+python3 -m zipfile -t output/release125/StarOrbit-v1.25-portable.zip
+python3 scripts/check-docs.py --package output/release125/StarOrbit-v1.25-portable.zip
+shasum -a 256 output/release125/StarOrbit-v1.25-portable.zip
 ```
 
 需要 macOS 启动器时，先在装有 Swift/Xcode 命令行工具的 Mac 上生成一个**尚不存在**的 `.app` 路径，再把它交给打包脚本：
 
 ```sh
-python3 scripts/create-macos-launcher.py --root . --output output/release120/launcher/星轨.app --portable
-python3 scripts/package-portable.py output/release120/StarOrbit-v1.20-portable.zip --macos-launcher output/release120/launcher/星轨.app
-python3 -m zipfile -t output/release120/StarOrbit-v1.20-portable.zip
-python3 scripts/check-docs.py --package output/release120/StarOrbit-v1.20-portable.zip
+python3 scripts/create-macos-launcher.py --root . --output output/release125/launcher/星轨.app --portable
+python3 scripts/package-portable.py output/release125/StarOrbit-v1.25-portable.zip --macos-launcher output/release125/launcher/星轨.app
+python3 -m zipfile -t output/release125/StarOrbit-v1.25-portable.zip
+python3 scripts/check-docs.py --package output/release125/StarOrbit-v1.25-portable.zip
 ```
 
 生成工具需要 swiftc、lipo、sips、iconutil 和 codesign。当前脚本构建 arm64/x86_64 的 macOS 12+ 启动器并做本地 ad-hoc 签名；签名检查不能替代公证或所有系统的启动验收。脚本拒绝覆盖已存在的 `.app`；更换已有启动器前保留旧副本和配置。
@@ -125,7 +127,7 @@ python3 scripts/check-docs.py --package output/release120/StarOrbit-v1.20-portab
 4. 断网时可用的是内置资源及此前已缓存的范围；对未缓存的外部影像/高程核对回退提示。
 5. 若包含 `.app`，从解压后的最终位置运行，确认 `root:"."` 正确；不要仅在源码旁边测试启动器。
 
-打包预算由脚本执行，不能因本地有全部资源就把原始处理数据、依赖缓存和开发输出一并分发。文档/署名引用检查与运行资产检查互相补充：前者通过不证明渲染正确，后者通过也不证明使用手册可读。
+v1.25 的单文件预算为 500 MB，便携包解压后的运行文件预算为 600 MB；覆盖 319 幅中国星空教学插画、完整月面地名及着陆目录、地质纹理和原图，以及随包可读的资料署名；宇宙探索馆使用程序化模型，不新增大型贴图。打包预算由脚本执行，不能因本地有全部资源就把原始处理数据、依赖缓存和开发输出一并分发。文档/署名引用检查与运行资产检查互相补充：前者通过不证明渲染正确，后者通过也不证明使用手册可读。
 
 ## 运行版本与哈希核对
 
@@ -139,8 +141,8 @@ shasum -a 256 StarOrbit.html dist-local/index.html dist/index.html
 测试本机日常入口时，保存真实响应并与对应轻量入口比对：
 
 ```sh
-curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8771/StarOrbit.html -o output/release120/served-index.html
-shasum -a 256 output/release120/served-index.html dist-local/index.html
+curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8771/StarOrbit.html -o output/release125/served-index.html
+shasum -a 256 output/release125/served-index.html dist-local/index.html
 ```
 
 如果安装根目录与当前源码不同，应与安装根目录中的目标产物比对，再确认它与本批构建一致。核对真实入口引用的 `assets/app.bundle-<hash>.js`，下载该脚本并比对 SHA-256；文件名内的短哈希不是完整 SHA-256 结果。
@@ -178,4 +180,4 @@ Python 后台服务日志通常为系统临时目录下 `tiangong-viewer-<port>.
 
 完成记录至少列出：源码提交/工作树状态、本机运行目录及版本、网页地址与核对结果、便携包路径/哈希、启动器结果、实际测试范围、未完成项。仅本地完成时直接标明“未推送、未部署、未更新 Release”；某项尚未完成时说明它影响的交付范围。
 
-工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.20 的文档检查和打包调整以当前工作副本及本批验证记录为准。
+工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.25 的文档检查和打包调整以当前工作副本及本批验证记录为准。

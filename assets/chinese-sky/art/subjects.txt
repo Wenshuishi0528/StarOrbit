@@ -1,0 +1,280 @@
+019|A long curved palace wall with dignified watchtowers and one inward-facing gate, the right defensive enclosure of a celestial imperial court.
+020|A complementary curved palace wall with graceful towers and one inward-facing gate, the left defensive enclosure of a celestial imperial court.
+021|A gently curving city-market wall with a gate, small covered stalls and restrained hanging pennants, the right market boundary.
+022|A complementary city-market wall with a gate, covered stalls and restrained hanging pennants, the left market boundary.
+032|A tall dignified curved imperial enclosure wall with narrow towers and one ceremonial gateway, the right northern palace boundary.
+033|A complementary curved imperial enclosure wall with narrow towers and one ceremonial gateway, the left northern palace boundary.
+035|An elegant harvest arrangement of eight visually distinct cereal ears and seed heads, bound loosely with a simple ribbon, without labels.
+036|A fine woven bird-catching net loosely suspended between two slender wooden poles, entirely empty and gently curved.
+037|An old withered gourd with a curling dry vine and a lightly cracked shell, dignified and botanical rather than grotesque.
+038|An aged stone mortar with chipped rim and a simple worn pestle resting beside it, elegant archaeological object study.
+040|A graceful northern river ribbon with a small riverbank rock and sparse reeds, no landscape background.
+041|An upright ceremonial pole and a nested circular bronze disc, a modern emblem of the northern celestial pivot without a pole-star dot.
+042|A fortified northern military camp gateway, twin wooden watch platforms and restrained hanging standards.
+043|A freshwater softshell turtle swimming with a long supple neck and broad flattened shell, shown obliquely.
+044|An ornate shallow Persian-inspired metal vessel and a folded patterned textile, a modern cross-cultural motif without claiming an ancient Chinese portrait.
+045|A narrow measuring ruler beside a folded bolt of silk, precise parallel textile edges and a small tassel, no numerals.
+046|A long ceremonial banner attached to a slender pole, its cloth flowing diagonally with a restrained geometric border.
+047|A discreet small wooden screened service pavilion with a closed door and a covered water jar, no bodily functions or explicit contents.
+048|A gracefully curved ceremonial riding whip with a wrapped handle and a single flowing lash.
+049|Three ceremonial guard shields and upright spears in an orderly defensive formation, no battle scene.
+050|An open courtyard-like arrangement of two elegant wooden chariots and a low enclosing rail, isolated objects.
+051|A ceremonial two-wheeled chariot beside a dignified horse, a coherent side-view group with fine harness details.
+052|A compact open market stall with neatly stacked cloth bolts and storage jars, a simple awning and counter.
+053|A tied bundle of hay and grain straw resting on a small woven mat, airy individual stems.
+054|A long wooden pestle leaning beside a shallow grain basket, bold simple silhouette.
+055|A worn upright wooden pestle and a small shallow mortar, distinct from the larger grinding-stone motif.
+056|An elegant small walled town gate beside a gently winding river ribbon, a modern emblem of Changsha rather than a geographic map.
+057|A welcoming compact guest-house pavilion with an open veranda, a hanging lantern and a small travel bundle.
+058|Two small formal court tablets resting beside a folded attendant robe and a slender staff, symbolic retinue.
+059|A tidy group of court attendants' ritual tablets and folded sashes on a low stand, symbolic palace retinue.
+060|One powerful curved ceremonial animal horn with subtle carved bands at its base.
+061|An upright judicial tablet, a balanced bronze scale and a formal seal on a small low table, no written characters.
+062|A tranquil raised burial mound with a low stone enclosure and a simple uninscribed stele, no bodies.
+064|A neatly folded embroidered imperial sleeping mat and cushion on a low platform.
+065|A dignified empty imperial seat with a curved back, carved armrests and a small footstool.
+066|A ceremonial eastern double door with open leaves, elegant bronze fittings and a shallow threshold.
+067|A simple long-handled bronze ladle for liquids, with an open rounded bowl and graceful handle.
+068|Two paired legal tablets and a small balance scale on a plain stand, a restrained modern symbol of judicial examination.
+069|A crossed pair of ceremonial halberds and an orderly military standard, no violence or defeated people.
+070|A sealed legal tablet and an unoccupied ceremonial judgment stand, a restrained abstract justice motif without violence.
+071|A flying fish with broad winglike pectoral fins and a gently curved streamlined body, no water background.
+072|Two quiet rounded grave mounds and a low uninscribed memorial stone, restrained and respectful.
+073|An ancient ceremonial broad-bladed axe with a long wooden haft and restrained bronze engraving.
+074|A compact ceremonial blade and a low wooden block rendered as clean symbolic tools, no execution or injury.
+075|A shallow woven basket filled with a few fresh mulberry leaves, delicate stems and visible basket weave.
+076|Two soft irregular luminous ivory patches with restrained curling edges, abstract southern-sky name motif without fake stars.
+077|A narrow auxiliary stone path curving alongside two short boundary posts, minimal and readable.
+078|A humble masonry tool, a small rammed-earth wall segment and a formal court tablet, symbolic Fu Yue rather than an asserted portrait.
+079|A floating curved tiled roof with clearly drawn ridge beams and corner eaves, no complete building.
+080|A slender upright carved wooden canopy support with decorative collars and a small finial, without a canopy dome.
+081|An elevated ancient covered wooden walkway curving gently between two compact pavilions on graceful pillars.
+082|Three elegant long ceremonial lances gathered diagonally with simple bronze spearheads and restrained tassels.
+083|A curved protective array of ceremonial guard standards and small shields forming an open crescent, no stars or connectors.
+084|An ornate bronze gate lock and curved metal latch shown as a readable isolated object.
+085|A graceful alert domestic dog standing in profile with slightly raised head and flowing tail.
+086|A calm dog beside a small border standard and a low protective wall, a symbolic territory without ethnic caricature.
+087|A long coiled cord arranged into a loose open loop with a simple clasp, not restraining a person.
+088|An elegant ancient beacon brazier on a tall stone pedestal with restrained curling flame.
+089|A dignified tortoise walking in profile, rounded patterned shell and clearly visible small limbs.
+090|A compact rocky mountain rising above two elegant stylized wave ribbons, an isolated southern-sky seascape emblem.
+091|A rugged sea rock with a small curling wave at its foot, no rectangular landscape.
+094|A tall graceful crane with a curved neck, long legs and one partially opened wing.
+095|A short elegant section of carved ceremonial railing with evenly spaced upright posts.
+096|A simple armillary observing ring beside an unrolled record scroll and a low stool, symbolic court observer without an asserted portrait.
+097|An elegant recurved bow and a single long arrow arranged diagonally, clearly visible string and fletching.
+098|A square wooden grain measure with a short handle and a small mound of grain, no written graduations.
+099|An imposing ceremonial shield, a sheathed sword and a short guard standard, symbolic imperial bodyguard.
+100|A healthy rounded double gourd hanging from a supple vine with two broad leaves.
+101|An elegant domed imperial canopy with hanging tassels and a central pole, open airy silhouette.
+102|A formal folded court robe, a small ritual tablet and a restrained sash, symbolic palace official without bodily caricature.
+103|A graceful firebird in flight with finely layered feathers and a long flowing tail, restrained ivory-gold lines.
+104|A quiet funerary memorial cloth folded beside an uninscribed stone tablet, no bodies, gore or skull pile.
+105|A small solemn memorial mound and a folded offering cloth, no bodies, gore or skulls.
+106|A covered water-storage jar beside a shallow bowl, with one restrained flowing water ribbon.
+107|A tidy stack of cut firewood tied with a simple cord, varied grain lines and curved bark edges.
+108|An orderly cluster of ceremonial shields and spears on a shared rack, suggesting a troop without battle.
+109|A linked pair of soft irregular ivory mist patches, restrained abstract southern-sky name motif without fake stars.
+110|A small foundation platform with an upright ceremonial standard and an orderly set of posts, symbolic establishment.
+111|An elegant stepped terrace supporting a bronze water clock with stacked vessels, no digits or labels.
+112|A heavy horizontal wooden door bolt with two simple bronze brackets, clear mechanical form.
+113|A flowing goldfish with a rounded body, delicate scales and a long split tail.
+114|An open court tablet presented above a small ceremonial platform, an elegant ribbon suggesting recommendation of talent.
+115|A shallow water basin and a tall storage vessel with a short pouring stream.
+116|A compact stone-lined well with a small pulley frame and water bucket, symbolic wells without matching star count.
+117|A dignified arrangement of formal court tablets on a low tiered rack, symbolic senior officers without matching star count.
+118|A long imperial military flag with a tall pole, flowing ribbon tails and restrained border ornament.
+119|Several distinct rolled scrolls gathered around a shared open tablet, symbolic communication between regions without writing.
+120|A small wine-shop pennant above a rounded wine jar and two modest cups, no letters.
+121|A heavy round stone mortar with a stout wooden pestle resting across its rim.
+122|A curling ribbon of breath beside a closed uninscribed speech tablet, a discreet modern symbol of speech without a disembodied tongue.
+123|A sturdy military-camp well with a wooden bucket and a small guard shield nearby.
+124|A southern military gateway with paired wooden towers and one hanging camp standard.
+125|A compact military supply market stall with orderly packs, jars and a small shield, peaceful scene.
+126|A shallow basket of loose grain husks with a few light drifting chaff curls.
+127|A small elegant wooden boat floating above a compact oval lake-wave emblem.
+128|A peafowl standing in profile with an elegant partially spread tail and fine feather pattern.
+129|A softly folded mourning sleeve and one small teardrop-shaped pendant, restrained emotional symbol without suffering figures.
+130|A structured weapons store with a low tower-like rack, neatly arranged shields and sheathed spears, peaceful.
+131|A captain's ceremonial helmet, a formal command tablet and a small guard pennant.
+132|A row of formal guard tablets beside a folded uniform sash and a low rack.
+133|A dignified elderly scholar holding a long walking staff, flowing robe and gentle posture, no asserted historical portrait.
+134|A powerful branching lightning bolt beneath a compact curling storm cloud, elegant and contained.
+135|A long low fortified wall with alternating bastions and neatly spaced guard standards.
+136|A small tranquil resting palace with an open veranda, curved roof and low steps.
+137|An elegant carved jade pendant suspended on a delicate silk cord with two small beads.
+138|A graceful strand of pearls with a silk tassel, softly curved and uncluttered.
+139|A smooth rectangular whetstone beside a sheathed tool and a small water dish, no violence.
+140|A small jewelry stall with an open tray of jade pendants, pearls and simple bracelets.
+141|An elevated ancient observing terrace with an armillary ring and a low stair, no telescope or modern screen.
+142|Six slender ceremonial tablets arranged in a calm radial rosette, without characters, no claim of star-to-tablet correspondence.
+143|An orderly network of low irrigation dykes separating small water channels, compact isolated terrain emblem.
+144|The graceful central torso of a horse with subtle mane and flank contours, a tasteful partial animal motif without wounds.
+145|A long flowing horse tail with a small suggestion of hindquarters, elegant natural hair strands, no wound.
+146|A delicate bee seen obliquely with transparent outlined wings and a gently striped abdomen.
+147|A grand open ceremonial hall with a broad roof, symmetrical pillars and a low stepped platform.
+148|A graceful southern sailing boat with one curved sail, wooden hull and minimal wave ribbon.
+149|A gentle southern river ribbon with a small riverbank stone and sparse flowering reeds.
+151|A dignified southern gateway with two carved pillars, a shallow roof and open central passage.
+152|A compact palace-kitchen worktable with a bronze cooking pot, ladle and neatly arranged bowls.
+153|A clean ascending flight of inner palace steps with low side rails and a small top platform.
+154|A high judicial seat represented by a formal tablet and balanced scale on a raised pedestal.
+155|A beautiful small folding palace screen with subtle geometric panels and restrained feet.
+156|A gently curving paved imperial passage with low rails and a small ceremonial lamp.
+157|A graceful exotic bird's head and long curved beak, attached to a small feathered neck, no severed appearance.
+158|A dignified farmer's straw hat, wooden hoe and a small bound sheaf of grain, symbolic person rather than portrait.
+159|An elegant low sleeping couch with a folded cover and a small cushion, tasteful domestic object.
+160|An elegant upright lacquer writing desk, a slender bamboo record scroll and a ceremonial brush, a small folded court robe suggesting a female keeper of palace protocol; no human portrait.
+161|A single dramatic zigzag thunderbolt emerging from two restrained curling thunderclouds, pure ivory and pale gold linework.
+162|A dignified ancient balance scale on a low pedestal, centered and level, with two small weighing pans and a closed legal tablet.
+163|A broad gently curving level stone path, two low boundary stones and minimal tufts of grass, isolated readable silhouette.
+164|A simple elegant standing screen with a rectangular frame, subtle woven panel and two carved feet.
+165|Seven formal court tablets arranged on a low curved stand, symbolic excellencies without star-to-tablet mapping.
+167|A ceremonial cavalry shield, a horse bridle and a long pennant, peaceful orderly arrangement.
+168|A general's command standard beside a small chariot wheel and a ceremonial helmet, no battle scene.
+169|A folded mourning cloth with a tiny tear-shaped jade ornament, gentle and restrained, no suffering person.
+171|A low green-hill-shaped contour motif with a small tree and layered curved earth lines, no landscape background.
+172|A raised ceremonial gate mound with paired towers and a shallow central stair.
+173|Two dignified human silhouettes in simple flowing ancient robes, standing peacefully, no specific historical identity.
+174|A stylized circular sun disc with short elegant rays, a symbolic fixed-asterism name motif rather than the physical Sun.
+175|Three formal high-official tablets on a low palace stand, restrained symmetrical arrangement.
+176|Three ornate court seals with slender silk cords on a raised northern-palace platform.
+177|A simple elegant triangular bronze frame with restrained engraved corners, a modern southern-sky geometric motif.
+178|Three teacher's scrolls and a brush arranged on a small reading table, symbolic senior instructors.
+179|Three ascending stone steps with broad clean edges and a restrained ornamental rail.
+180|A royal secretary's writing desk with bamboo slips, a brush and a small closed seal box.
+181|A modest folded court robe and a slender administrative tablet on a low stand, symbolic junior officer.
+182|A supple curving midsection of a snake with clear scales, both ends flowing softly out of the compact motif, no injury.
+183|A graceful serpent's head and curved upper neck with fine scales and a calm closed mouth.
+184|A slender curling snake tail tapering naturally into an elegant spiral, no wound.
+185|A compact changing-room pavilion with a privacy screen and a folded ceremonial robe; not a deity palace.
+186|A ring of twelve small varied ceremonial standards around a plain central platform, symbolic states without invented flags or geography.
+187|A clean equal-width cross-shaped bronze navigational ornament, a neutral southern-sky geometric motif without added religious scene.
+188|A discreet closed ceramic service vessel beside a folded cleaning cloth, a restrained modern symbolic substitute with no excrement or bodily depiction.
+189|A small municipal market office with an open desk, orderly tablet rack and compact tiled roof.
+190|A restrained court sash, formal tablet and folded robe on a low stand, symbolic palace office without bodily caricature.
+191|A small irrigation gate with a sluice handle, two flowing water channels and a measuring rod.
+192|A beautifully winding stream ribbon with a smooth river stone and a small curl at its end.
+193|A slender water-level gauge beside a basin and a quiet horizontal water line, no numerals.
+194|A balanced scale and two contrasting closed tablets, symbolic right and wrong, no invented deity portrait.
+195|A protective ceremonial seal and a closed patterned box with a small curling cloud, symbolic restraint of disorder, no invented monsters.
+196|A tiered official tablet stand and a small seal with a dignified sash, symbolic rank, no deity portrait.
+197|A delicate unbroken life-ribbon looping around a small evergreen sprig and closed record tablet, no deity portrait.
+198|A protective seal beside a balanced pair of plain tokens, symbolic fortune and danger, no deity portrait or disaster spectacle.
+199|Four graceful river ribbons joining a shared broad channel, compact isolated water emblem.
+200|Four formal advisory tablets gathered around a small empty central seat, no star-to-object claim.
+201|A small child's ceremonial sash beside a mature folded robe, a gentle symbolic family-generation motif without portrait.
+202|A small ceremonial shield set beside a radiant sun-disc ornament, symbolic guardian, no actual solar observation.
+203|A single dignified abstract ceremonial roundel above a plain pedestal, an explicit modern symbol for the named celestial figure, no invented deity portrait.
+204|An elegant crown-prince ceremonial cap resting beside a slender court tablet and a silk sash.
+205|A refined ancestral ceremonial seal, a folded robe and a low dignified seat, symbolic royal elder.
+206|A long elegant flying serpent with a sinuous body, subtle small fins and flowing cloud-like ribbons.
+207|A shallow crescent-shaped ceremonial recess or hollow bronze vessel, a restrained modern visual interpretation of the name.
+208|An ancient long-handled flail with a short linked striking segment, displayed as a ceremonial object without action.
+209|A market officer's cap, a small inventory tablet and a tied bundle of goods on a low stand.
+210|A square wooden granary with an elevated floor, tiled roof and a small grain basket beside the door.
+211|Two closed speech tablets separated by a small protective seal, a restrained modern emblem of slander and judgment without accusing figures.
+212|A celestial kitchen still life with a bronze cooking vessel, ladle, stacked bowls and a neat folded cloth.
+213|A long graceful wooden boat with curved prow, a simple mast and restrained wave ribbon.
+214|A dignified low celestial bed with carved legs, a folded cover and a cylindrical cushion.
+215|An imposing ceremonial general's helmet, upright command banner and sheathed sword, peaceful arrangement.
+216|A single elegant ceremonial drumstick with a wrapped handle and rounded head, a small ribbon tied near its end.
+217|A wooden chariot wheel seen obliquely with clear radial spokes and a small central hub.
+218|Neatly bundled tent poles, rolled fabric and coiled guy ropes, a compact practical equipment arrangement.
+219|A tall stepped ceremonial terrace with a small open platform and an elegant stair.
+220|A graceful long bronze hook with a curved tip, straight shank and simple wrapped handle.
+221|A powerful but calm celestial dog in profile, slightly windswept fur and a flowing tail, no monstrous aggression.
+222|A mountain-pass gate framed by two compact rocky sides and a dignified wooden barrier.
+223|An empty majestic celestial throne beneath a simple ceremonial canopy, no asserted portrait of the heavenly emperor.
+224|A graceful wooden pier with a few evenly spaced posts and a mooring ring over a short wave ribbon.
+225|A tidy small pig enclosure with a low fence, a calm pig and a covered feed trough, no waste.
+226|A dignified rooster with an upright comb, layered feathers and a long curved tail.
+227|A small animal-inspection record tablet beside a measuring rod and a calm generic livestock profile, no written numbers.
+228|An orderly bound set of rule tablets and a simple ceremonial cord loop, symbolic discipline without punishment.
+229|A broad celestial river ribbon with three graceful bends and small isolated wave curls.
+230|A clean paved celestial street between two short rows of low ceremonial posts, no surrounding city background.
+231|A pair of matching bronze tally halves with an elegant joining edge and a short silk cord, no writing.
+232|A shallow river ford with a short line of stepping stones and two compact bank markers.
+233|A simple open-sided stable with a calm horse, a low manger and a curved roof.
+235|An unoccupied enclosed courtyard with a barred gate and a small lock, symbolic celestial prison without suffering figures.
+236|A compact walled defensive town with low towers and an open central gate.
+237|A dignified judicial seal beside a noble's formal tablet and a balanced scale, no portrait.
+238|A raised food storehouse with neatly stacked grain sacks and a small measuring vessel.
+239|A tall celestial ceremonial gate with two carved pillars, an open passage and restrained cloud ornaments.
+240|A small group of ancient round coins with square holes joined by a graceful cord, no legible inscriptions.
+241|A long elegant celestial spear with a leaf-shaped bronze tip and a small flowing tassel.
+242|A round grain store with a conical roof, raised circular base and a small basket of grain.
+243|A pale ceramic milk vessel beside a small bowl and a single graceful droplet-shaped ornament, discreet name-based symbol.
+244|A modest earth-altar shrine with a small stone platform, a low roof and a sprig of grain, no invented deity portrait.
+245|A compact orderly field with parallel furrows, small green shoots and a short irrigation channel.
+246|A terraced cultivated field with two curved planted rows and a small farming tool, isolated emblem.
+247|A premier's dignified court tablet, ceremonial cap and a closed seal box arranged on a low table.
+248|A plain celestial ceremonial disc framed by two restrained cloud curls, an explicit modern abstract symbol, no deity portrait.
+249|A shaded crescent-like jade pendant and a soft curling mist ribbon, symbolic yin force without claiming a historical icon.
+250|Two tidy conical stacks of grain bound with straw and a shallow basket nearby.
+251|A clear spring welling from a small rock basin, with two restrained flowing water ribbons.
+252|A small graceful orchard tree with round fruit and a low enclosing garden rail, isolated silhouette.
+253|A curved meadow patch with fine grasses, a simple low fence and a calm grazing horse.
+254|An ornate bronze keyhole plate and a slender ceremonial key, clean readable forms.
+255|A tall elegant celestial pillar with a simple base, decorative collars and a restrained capital.
+256|A fine bronze ritual wine cup with slender legs, a curved lip and restrained engraved bands.
+257|A clean closed meat-market stall represented by a wooden counter, balance and neatly hung sheathed tools, no meat or gore.
+258|A builder's square, a rammed-earth block and a small formal tablet, symbolic earthworks office.
+259|Neat bundles of timber, stacked bricks and a supply tally on a small low platform.
+260|A master builder's measuring cord, wooden square and miniature roof frame, carefully arranged.
+261|An outdoor kitchen stove with a cooking pot, ladle and a short stack of firewood.
+262|A low outer fence with simple carved posts and a small open gate, uncluttered silhouette.
+263|A graceful ceremonial chariot with flowing reins and a skilled charioteer's plain cap on the seat, symbolic Wang Liang without an asserted portrait.
+265|An orderly administrative desk with bound bamboo records, a brush and a formal seal box.
+266|Five small elegant chariot wheels and a central ceremonial yoke, symbolic five chariots without star-to-object mapping.
+267|Five compact inner ceremonial seats arranged in a shallow semicircle beneath a restrained canopy frame.
+268|Five dignified empty ceremonial seats on a shared low terrace, no deity or ruler portraits.
+269|Five simple feudal court tablets on a low curved stand, restrained local-ruler symbolism.
+270|Five ornate ceremonial seals with silk cords arranged around a plain central platform, symbolic lords.
+271|A ceremonial western double door with open leaves, elegant bronze fittings and a shallow threshold.
+272|A wooden chariot wheel under construction beside a carpenter's adze and measuring square, symbolic Xi Zhong without portrait.
+273|A quiet circular pool with a graceful curved rim, a single lotus leaf and restrained water rings.
+274|A dignified minister's formal tablet beside an open administrative scroll and a small seal.
+275|A small long-handled ladle with a shallow round bowl, a southern-sky name motif rather than the northern Little Dipper pattern.
+276|A small honorary court sash, a decorative pendant and a formal tablet on a low stand.
+277|A quiet small ancestral temple with a raised beam, simple roof and empty open interior.
+278|A dignified ceremonial chariot, a plain imperial canopy and a carved ritual tablet, symbolic Xuanyuan without an asserted historical portrait.
+279|A dark-toned ceremonial lance rendered in ivory and pale gold outline, curved side blade and elegant wrapped shaft.
+280|A powerful ancient battle axe displayed diagonally as a ceremonial object, broad blade and long straight haft.
+281|An open ceremonial gate framed by two slim pillars and a restrained radiant disc ornament, symbolic yang.
+282|A graceful wild pheasant with patterned feathers, slender legs and a long tapered tail.
+283|A court usher's long guiding staff, a formal tablet and a folded sash beside a small doorway emblem.
+284|An exotic small bird perched gracefully with distinctive curved beak and flowing tail feathers, no specific invented taxonomy.
+285|A small jade virtue pendant partly sheltered by a folded robe and a quiet leaf, restrained symbolic hidden virtue.
+286|A pastoral officer's tally beside a shepherd's crook and a small enclosed grass patch.
+287|A flowing right-side ceremonial banner on a slender pole, clear broad fabric silhouette and fine tassels.
+288|A right-hand ceremonial directing staff with a small guiding pennant and a court tablet.
+289|A graceful freshwater fish with clearly outlined fins, delicate scales and a gently curved body.
+290|A broad orderly fan of ceremonial guard standards, shields and spears, palace guard motif without battle or star-count matching.
+291|An elegant jade-rimmed well with a small bronze bucket, delicate rope and quiet water surface.
+292|A refined arrangement of folded court garments, slender hair ornaments and a small ceremonial tray, no objectifying portraits.
+293|A beautiful crescent-shaped jade moon ornament with a gentle circular halo line, symbolic fixed-asterism name rather than the physical Moon.
+294|A softly curling silk speech ribbon beside a small closed court tablet, discreet whisper symbol without disembodied anatomy.
+295|A compact cloud curl releasing several elegant rain strokes above a small water ripple.
+296|A graceful horse bridle, flowing reins and a ceremonial chariot wheel, symbolic charioteer Zaofu without asserted portrait.
+297|A long low city wall with a gentle curve, evenly spaced crenellations and one small watchtower.
+298|A dignified elder's walking staff, a folded robe and a small plain seat, symbolic grandfather without portrait.
+299|A slender ceremonial indicator staff with a small directional vane and a flowing tassel, no stars or compass text.
+300|A small supportive court tablet beside a larger plain tablet and a restrained linking ribbon, symbolic assistant.
+301|A closed legal decree tablet and a sheathed ceremonial blade resting on a low stand, nonviolent modern symbol without execution.
+302|A strong ancient battle chariot with large wooden wheels, a small shield and a rolled standard, peaceful display.
+303|A detailed right chariot wheel hub with a visible linchpin and short axle, an elegant mechanical object study.
+305|A complementary left chariot wheel hub with a visible linchpin and short axle, an elegant mechanical object study.
+306|A magnificent three-legged Zhou-style ritual bronze ding with two upright handles and restrained engraved bands.
+307|A group of dignified feudal ceremonial caps and formal tablets on a low tiered stand, no portraits.
+308|A small row of sturdy carved ceremonial pillars with simple bases and crossbeam fragments.
+309|Three elegant slender pillars with restrained capitals and a shared low base, no star-to-pillar claim.
+310|An archive official's bound bamboo records, writing brush and tall storage rack, no visible characters.
+311|A small folded child's ceremonial robe beside a simple jade pendant, gentle family-generation symbolism without portrait.
+312|A dignified ancestral hall tablet rack with a branching ornamental tree motif, no invented family names.
+313|A ritual officer's formal tablet, a small incense vessel and a folded ceremonial sash, no deity portrait.
+314|A royal-clan registry scroll, closed seal box and dignified formal tablet on a low desk.
+315|A forest officer's tally beside a slender tree, a measuring cord and a simple staff, no logging scene.
+316|A flowing left-side ceremonial banner on a slender pole, broad fabric silhouette and delicate tassels.
+317|A left-hand ceremonial directing staff with a small guiding pennant and a formal court tablet.
+318|A small ceremonial seat framed by two elegant fluttering flags and restrained tassels.

@@ -1,3 +1,4 @@
+import { stellarDistance } from './xuntian-distance.js';
 import { dot } from './orbit.js';
 import { solarApparent } from './solar-system.js';
 import { solarLabel } from './solar-targets.js';
@@ -87,6 +88,7 @@ export function identifyXuntianCrosshair(
       kind: 'solar',
       id: 'solar:' + body.id,
       body: body.id,
+      distanceKm: body.distanceKm,
       name: solarLabel(body.id, language),
       angularDistanceDeg: angle / DEG,
       withinDisc: angle <= body.radiusRad,
@@ -112,14 +114,16 @@ export function identifyXuntianCrosshair(
         continue;
       const angle = separation(direction, star.direction);
       if (angle > radius || angle >= bestDistance) continue;
-      const target = getXuntianTarget(star.id, language);
+      const target = getXuntianTarget(star.id, language, frame.chartSettings?.skyCulture);
       if (!target) continue;
       best = {
         kind: 'star',
         id: target.id,
         name: target.name,
         identifier: target.identifier,
+        ...(target.asterisms?.length ? { asterisms: target.asterisms } : {}),
         magnitude: star.mag,
+        ...stellarDistance(target.id),
         angularDistanceDeg: angle / DEG,
       };
       bestDistance = angle;
@@ -138,7 +142,9 @@ export function identifyXuntianCrosshair(
         kind: 'deep-sky',
         id: 'deep-sky:' + object.id.toLowerCase(),
         identifier: object.id,
-        name: deepSkyName(object, language),
+        name:
+          getXuntianTarget('deep-sky:' + object.id.toLowerCase(), language, settings?.skyCulture)
+            ?.name || deepSkyName(object, language),
         category: deepSkyTypeName(object.type, language),
         angularDistanceDeg: match.angularDistanceDeg,
         withinRegion: match.withinRegion,

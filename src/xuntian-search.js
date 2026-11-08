@@ -21,31 +21,39 @@ const exampleGroups = [
 // names or coordinates. Refreshing examples does not select an aiming target.
 export function createScopeExamples(random = Math.random) {
   let selected = [];
-  const targets = (language) =>
+  const targets = (language, skyCulture = 'western') =>
     selected
       .map((id, i) =>
         i === 1
           ? searchSolarTargets(id, language).find((target) => target.body === id)
-          : getXuntianTarget(id, language)
+          : getXuntianTarget(id, language, skyCulture)
       )
       .filter(Boolean);
   return {
     targets,
-    next(language) {
+    next(language, skyCulture = 'western') {
       selected = exampleGroups.map((group, i) => {
         const choices = group.filter((id) => id !== selected[i]);
         return choices[
           Math.min(choices.length - 1, Math.max(0, Math.floor(random() * choices.length)))
         ];
       });
-      return targets(language);
+      return targets(language, skyCulture);
     },
   };
 }
 export function mountScopeSearch(
   input,
   list,
-  { choose, isBlocked, cityFinder, cityVisible, solarVisible, extraTargets = () => [] }
+  {
+    choose,
+    isBlocked,
+    cityFinder,
+    cityVisible,
+    solarVisible,
+    extraTargets = () => [],
+    skyCulture = () => 'western',
+  }
 ) {
   let results = [],
     index = 0;
@@ -56,7 +64,7 @@ export function mountScopeSearch(
     input.removeAttribute('aria-activedescendant');
   };
   const placeholder = () => {
-    const rows = examples.targets(getLanguage());
+    const rows = examples.targets(getLanguage(), skyCulture());
     if (rows.length)
       input.placeholder = rows
         .map((target) => target.name)
@@ -73,7 +81,7 @@ export function mountScopeSearch(
     const query = input.value.trim();
     list.replaceChildren();
     if (query) {
-      const stars = searchXuntianTargets(query, getLanguage(), 7),
+      const stars = searchXuntianTargets(query, getLanguage(), 7, skyCulture()),
         cities = cityFinder.search(query, getLanguage());
       const bodies = searchSolarTargets(query, getLanguage());
       const exact = cities.filter((c) => c.score === 0),
@@ -91,9 +99,9 @@ export function mountScopeSearch(
         ...stars.slice(cap),
       ].slice(0, 7);
     } else {
-      results = examples.targets(getLanguage());
+      results = examples.targets(getLanguage(), skyCulture());
       if (!results.length) {
-        results = examples.next(getLanguage());
+        results = examples.next(getLanguage(), skyCulture());
         placeholder();
       }
     }
@@ -120,7 +128,11 @@ export function mountScopeSearch(
             ? solarVisible(r.body) === false
             : isBlocked(r.direction);
       info.textContent = [
-        t(city ? '城市' : r.category || (r.type === 'star' ? '恒星' : '星座')),
+        t(
+          city
+            ? '城市'
+            : r.category || (r.type === 'star' ? '恒星' : r.type === 'asterism' ? '星官' : '星座')
+        ),
         r.identifier,
         hidden ? t(city ? '目标在地平线下' : '地球遮挡') : '',
       ]
@@ -174,7 +186,7 @@ export function mountScopeSearch(
       if (!list.hidden) render();
     },
     refreshExamples() {
-      examples.next(getLanguage());
+      examples.next(getLanguage(), skyCulture());
       placeholder();
       if (!list.hidden) render();
     },

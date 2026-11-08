@@ -1,0 +1,7 @@
+# Preserve verbatim upstream catalog and license bytes (including source whitespace).
+assets/OPENCC-LICENSE.txt -whitespace
+assets/chinese-sky/source/CC-BY-SA-4.0.txt -whitespace
+assets/chinese-sky/source/I-239-hip_main.tsv -whitespace
+assets/chinese-sky/source/I-311-hip2.tsv -whitespace
+assets/chinese-sky/source/index.json -whitespace
+assets/stellar-distances/source/I-311-hip2.tsv -whitespace

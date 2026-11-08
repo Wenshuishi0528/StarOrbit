@@ -24,7 +24,8 @@ import { MainPlanets } from './main-planets.js';
 import { EarthDetail } from './earth-detail.js';
 import { t, setText, onLanguageChange } from './i18n.js';
 import * as THREE from 'three';
-import catalogue from '../assets/stars.json';
+import baseCatalogue from '../assets/stars.json';
+import { getSkyCulture } from './sky-cultures.js';
 import { Geography } from './geography.js';
 import { normalizeGeographySettings, bindGeographyControls } from './geography-settings.js';
 import { StarChart } from './star-chart.js';
@@ -33,6 +34,8 @@ import {
   bindStarChartControls,
   migrateStarDensityDefault,
   migrateCatalogStarDefault,
+  skyCultureArtOptions,
+  skyCultureArtEnabled,
 } from './star-chart-settings.js';
 import { QUALITY, equatorial, qualityFor } from './environment-math.js';
 import { EARTH_RADIUS, stateAt, earthAxes } from './orbit.js';
@@ -43,6 +46,7 @@ import { mountSkyDetailControls } from './sky-detail-controls.js';
 import { resolveSkyDetailSource } from './sky-detail-plan.js';
 import { CityTerrain } from './city-terrain.js';
 import { ConstellationArt } from './constellation-art.js';
+import { chineseSkyArtProvider } from './chinese-sky-art.js';
 import { ConstellationArtLayer } from './constellation-art-layer.js';
 import { cityCameraView } from './city-terrain-view.js';
 import { mountCityTerrainControls } from './city-terrain-controls.js';
@@ -52,10 +56,35 @@ import { mountEarthElevationControls } from './earth-elevation-controls.js';
 
 const $ = (id) => document.getElementById(id),
   V = (a) => new THREE.Vector3(...a);
+// Historical group membership may identify a few stars outside the original
+// display catalogue. Add their measured positions once, independent of culture;
+// existing stars keep their coordinates and the magnitude prefix stays sorted.
+const catalogue = (() => {
+  const existing = new Set(baseCatalogue.map((row) => row[0])),
+    culture = getSkyCulture('chinese'),
+    additional = [
+      ...(culture.additionalStars || []),
+      ...(culture.otherStars || []).map((star) => [
+        star.id,
+        star.ra,
+        star.dec,
+        star.mag,
+        star.colorUnavailable ? Number.NaN : (star.bv ?? Number.NaN),
+      ]),
+    ].filter((row) => !existing.has(row[0]));
+  return additional.length
+    ? [...baseCatalogue, ...additional].sort((a, b) => a[3] - b[3] || a[0] - b[0])
+    : baseCatalogue;
+})();
 export class Environment {
   constructor(sim) {
     this.sim = sim;
     this.api = sim.api;
+    this.starCatalogueStats = {
+      base: baseCatalogue.length,
+      additional: catalogue.length - baseCatalogue.length,
+      total: catalogue.length,
+    };
     this.ticket = 0;
     this.queue = Promise.resolve();
     this.textures = [];
@@ -299,7 +328,11 @@ export class Environment {
     this.skyDetail.setEnabled(this.settings.skyDetail);
     this.skyDetailLayer = new SkyDetailLayer(this.skyDetail, 'main');
     this.backdrop.add(this.skyDetailLayer.group);
-    this.constellationArt = new ConstellationArt(this.assets.constellationArt);
+    this.chineseSkyArt = chineseSkyArtProvider(this.assets.chineseConstellationArt);
+    this.constellationArt = new ConstellationArt(this.assets.constellationArt, {
+      chinese: this.chineseSkyArt,
+    });
+    this.constellationArt.setCulture(this.settings.skyCulture);
     this.constellationArtLayer = new ConstellationArtLayer(this.constellationArt, 'main');
     this.backdrop.add(this.constellationArtLayer.group);
     this.skyDetailControls = mountSkyDetailControls(this);
@@ -843,9 +876,11 @@ export class Environment {
       pixelHeight: this.api.renderer.domElement.height,
     };
     this.skyDetailLayer.update(celestialView, this.skyDetail.enabled);
+    this.constellationArt.setCulture(s.skyCulture);
     this.constellationArtLayer.update(
       celestialView,
-      !flight && s.stars && s.starChartEnabled && s.constellationArt
+      !flight && s.stars && s.starChartEnabled && skyCultureArtEnabled(s),
+      { ...skyCultureArtOptions(s), focusTargetId: this.skyCultureFocus }
     );
     this.skyDetailControls.update();
     this.cityTerrainControls.update();

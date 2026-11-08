@@ -6,6 +6,8 @@ import { SURVEY_FIELDS } from './survey-lab-math.js';
 import { decodeTycho, fieldRay } from './survey-sky-product-math.js';
 import { tychoCutouts } from './survey-sky-product-tycho.js';
 import { DEEP_SKY_OBJECTS, deepSkyName, deepSkyTypeName } from './deep-sky-catalog.js';
+import { getSkyCulture, normalizeSkyCulture, cultureStarName } from './sky-cultures.js';
+import chineseSearch from '../assets/chinese-sky-search.json';
 
 const DEG = Math.PI / 180,
   BIN = 5,
@@ -43,7 +45,10 @@ const traditional =
   '寶鷹壇獵馬鯨圓規鴿髮烏鴉鵝劍魚龍爐雙鶴時鐘長蠍獅貓顯鏡蒼蠅極戶飛鳳繪羅盤網儀遠鵑處織參陳繩車輔鶯鳥稱羣';
 const simple =
   '宝鹰坛猎马鲸圆规鸽发乌鸦鹅剑鱼龙炉双鹤时钟长蝎狮猫显镜苍蝇极户飞凤绘罗盘网仪远鹃处织参陈绳车辅莺鸟称群';
-const simplified = new Map([...traditional].map((c, i) => [c, simple[i]]));
+const simplified = new Map([
+  ...Object.entries(chineseSearch.characters),
+  ...[...traditional].map((c, i) => [c, simple[i]]),
+]);
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const clamp = (v) => Math.max(-1, Math.min(1, v));
 const wrap = (v) => ((v % 360) + 360) % 360;
@@ -124,10 +129,26 @@ function starSky() {
     (grid[i] ??= []).push(record);
     byId.set(id, record);
   }
-  for (const [hip, ra, dec, mag, rawBV] of hipCatalog) {
+  for (const [hip, ra, dec, mag, rawBV] of [
+    ...hipCatalog,
+    ...(getSkyCulture('chinese').additionalStars || []),
+  ]) {
+    if (byId.has('hip:' + hip)) continue;
     const bv =
       rawBV !== null && rawBV !== '' && Number.isFinite(Number(rawBV)) ? Number(rawBV) : null;
     insert('hip:' + hip, 'hip', hip, null, equatorial(ra, dec), mag, bv, 1);
+  }
+  for (const point of getSkyCulture('chinese').otherStars || []) {
+    const id = point.physicalId || point.id;
+    const bv =
+      !point.colorUnavailable &&
+      point.bv !== null &&
+      point.bv !== '' &&
+      Number.isFinite(Number(point.bv))
+        ? Number(point.bv)
+        : null;
+    if (!byId.has(id))
+      insert(id, 'gaia', null, null, equatorial(point.ra, point.dec), point.mag, bv, 1);
   }
   // The shipped Tycho cutouts already drop matched HIP identifiers. Keep the
   // same positional cross-catalogue tolerance after inverse tangent projection.
@@ -196,8 +217,22 @@ export function collectXuntianStars({ forward, fovY, aspect, maxMagnitude = Infi
 
 function constellationFrame(c) {
   const unique = new Map();
-  for (const path of c.lines)
-    for (const coord of path) unique.set(coord.join(','), equatorial(...coord));
+  if (c.primaryMemberHips || c.primaryMemberObjectIds) {
+    const primary = new Set([
+      ...(c.primaryMemberHips || []).map((hip) => 'hip:' + hip),
+      ...(c.primaryMemberObjectIds || []),
+    ]);
+    for (const member of c.members || [])
+      if (
+        primary.has(member.physicalId) &&
+        Number.isFinite(member.ra) &&
+        Number.isFinite(member.dec)
+      )
+        unique.set(member.physicalId, equatorial(member.ra, member.dec));
+  } else {
+    for (const path of c.lines)
+      for (const coord of path) unique.set(coord.join(','), equatorial(...coord));
+  }
   const points = [...unique.values()],
     label = equatorial(c.ra, c.dec);
   if (!points.length) return { direction: label, fov: 15, radius: 7.5 };
@@ -349,47 +384,148 @@ function searchCatalog() {
       point.mag
     );
   }
+  const chinese = getSkyCulture('chinese');
+  for (const asterism of chinese.asterisms) {
+    const frame = constellationFrame(asterism);
+    const r = entry(
+      asterism.targetId,
+      'asterism',
+      { zh: asterism.zh, en: asterism.en, ru: asterism.ru, fr: asterism.fr },
+      asterism.region || asterism.sourceId,
+      frame.direction,
+      Math.min(110, frame.fov),
+      frame.radius,
+      asterism.aliases || []
+    );
+    Object.assign(r, {
+      culture: 'chinese',
+      groupId: asterism.groupId,
+      memberHips: asterism.memberHips,
+      memberObjectIds: asterism.memberObjectIds || [],
+      primaryMemberHips: asterism.primaryMemberHips || [],
+      primaryMemberObjectIds: asterism.primaryMemberObjectIds || [],
+      primaryMemberStatus: asterism.primaryMemberStatus,
+      sourceId: asterism.sourceId,
+      isSubsidiary: asterism.isSubsidiary,
+    });
+  }
+  for (const object of chinese.namedObjects || []) {
+    const id = object.physicalId || object.id;
+    if (object.kind === 'deep') {
+      const record = deepSky.get(fold(object.catalogId || String(id).replace(/^deep:/, '')));
+      if (record) {
+        record.chineseNames = object.names || { zh: object.zh, en: object.en };
+        for (const name of [object.zh, object.en, ...(object.aliases || [])])
+          if (name) for (const term of nameForms(name).map(fold)) if (term) record.terms.add(term);
+      }
+      continue;
+    }
+    if (!/^gaia:/.test(id || '') || !Number.isFinite(object.ra) || !Number.isFinite(object.dec))
+      continue;
+    const r = entry(
+      id,
+      'star',
+      { zh: object.zh, en: object.en, ru: object.ru, fr: object.fr },
+      'Gaia DR3 ' + id.slice(5),
+      equatorial(object.ra, object.dec),
+      3,
+      0,
+      object.aliases || [],
+      object.mag ?? Infinity
+    );
+    r.culture = 'chinese';
+  }
+  for (const star of chinese.stars) {
+    const point = byId.get('hip:' + star.id);
+    if (!point) continue;
+    let r = records.get(point.id);
+    if (!r)
+      r = entry(
+        point.id,
+        'star',
+        { zh: star.zh, en: star.en, ru: star.ru, fr: star.fr },
+        'HIP ' + star.id,
+        point.direction,
+        8,
+        0,
+        star.aliases || [],
+        point.mag
+      );
+    for (const name of [star.zh, star.en, star.ru, star.fr, ...(star.aliases || [])])
+      if (name) for (const term of nameForms(name).map(fold)) if (term) r.terms.add(term);
+  }
   search = { records, constellations, deepSky };
   return search;
 }
-function localTarget(r, language) {
+function localTarget(r, language, skyCulture = 'western') {
+  const chinese = normalizeSkyCulture(skyCulture) === 'chinese';
+  const hip = r.type === 'star' ? Number(/^hip:(\d+)$/.exec(r.id)?.[1]) : null;
+  const cultureLabel = hip && chinese ? cultureStarName(hip, 'chinese', language) : null;
+  const objectLabel = chinese && r.chineseNames && (r.chineseNames[language] || r.chineseNames.en);
+  const group =
+    r.type === 'asterism' && getSkyCulture('chinese').groups.find((g) => g.id === r.groupId);
   return {
     id: r.id,
     type: r.type,
-    name: r.names[language] || r.names.en || r.identifier,
-    identifier: r.identifier,
+    name: cultureLabel || objectLabel || r.names[language] || r.names.en || r.identifier,
+    identifier: group ? group[language] || group.en || group.zh : r.identifier,
     direction: r.direction,
     ra: r.ra,
     dec: r.dec,
     fov: r.fov,
     radius: r.radius,
+    ...(r.culture
+      ? {
+          culture: r.culture,
+          groupId: r.groupId,
+          memberHips: r.memberHips,
+          sourceId: r.sourceId,
+          isSubsidiary: r.isSubsidiary,
+          memberObjectIds: r.memberObjectIds,
+          primaryMemberHips: r.primaryMemberHips,
+          primaryMemberObjectIds: r.primaryMemberObjectIds,
+          primaryMemberStatus: r.primaryMemberStatus,
+        }
+      : {}),
+    ...(r.type === 'star' && chinese
+      ? {
+          asterisms: getSkyCulture('chinese')
+            .asterisms.filter((a) =>
+              hip ? a.memberHips.includes(hip) : a.memberObjectIds?.includes(r.id)
+            )
+            .map((a) => ({ id: a.targetId, name: a[language] || a.en || a.zh })),
+        }
+      : {}),
     ...(r.category
       ? { category: deepSkyTypeName(r.objectType, language), objectType: r.objectType }
       : {}),
     ...(r.providerId ? { providerId: r.providerId } : {}),
   };
 }
-export function getXuntianTarget(id, language = 'zh') {
+export function getXuntianTarget(id, language = 'zh', skyCulture = 'western') {
   if (typeof id !== 'string') return null;
   const text = id.trim(),
     hip = /^hip[\s:#-]*(\d+)$/i.exec(text),
+    gaia = /^gaia(?:\s*dr3)?[\s:#-]*(\d{15,20})$/i.exec(text),
     con = /^constellation[\s:#-]+([a-z]{3})$/i.exec(text);
   const index = searchCatalog();
-  const deep = index.deepSky.get(fold(text.replace(/^deep-sky[:\s]*/i, '')));
-  if (deep) return localTarget(deep, language);
+  const deep = index.deepSky.get(fold(text.replace(/^deep(?:-sky)?[:\s]*/i, '')));
+  if (deep) return localTarget(deep, language, skyCulture);
   if (con) {
     const r = index.constellations.get(con[1].toLowerCase());
-    return r ? localTarget(r, language) : null;
+    return r ? localTarget(r, language, skyCulture) : null;
   }
-  const key = hip ? 'hip:' + Number(hip[1]) : text.toLowerCase(),
+  const key = hip ? 'hip:' + Number(hip[1]) : gaia ? 'gaia:' + gaia[1] : text.toLowerCase(),
     r = index.records.get(key);
-  if (r) return localTarget(r, language);
+  if (r) return localTarget(r, language, skyCulture);
   const p = starSky().byId.get(key);
   if (!p) return null;
   const identifier =
     p.source === 'hip'
       ? 'HIP ' + p.hip
-      : 'Tycho-2 · J2000 ' + p.ra.toFixed(4) + '° / ' + p.dec.toFixed(4) + '°';
+      : p.source === 'gaia'
+        ? 'Gaia DR3 ' + p.id.slice(5)
+        : 'Tycho-2 · J2000 ' + p.ra.toFixed(4) + '° / ' + p.dec.toFixed(4) + '°';
   return {
     id: p.id,
     type: 'star',
@@ -403,14 +539,22 @@ export function getXuntianTarget(id, language = 'zh') {
   };
 }
 
-export function searchXuntianTargets(text, language = 'zh', limit = 12) {
+export function searchXuntianTargets(text, language = 'zh', limit = 12, skyCulture = 'western') {
   if (typeof text !== 'string' || !Number.isFinite(limit) || limit < 1) return [];
   const raw = text.trim(),
     q = fold(raw);
   if (!q) return [];
-  if (/^(?:hip)?\d+$/.test(q) || /^(?:constellation|tycho|deep-sky):/i.test(raw)) {
+  if (/^\d{15,20}$/.test(raw)) {
+    const target = getXuntianTarget('gaia:' + raw, language, skyCulture);
+    return target ? [target] : [];
+  }
+  if (
+    /^(?:hip)?\d+$/.test(q) ||
+    /^(?:constellation|asterism|tycho|deep-sky|gaia):/i.test(raw) ||
+    /^gaia\s*dr3[\s:#-]*\d+$/i.test(raw)
+  ) {
     const id = /^(?:hip)?\d+$/.test(q) ? 'hip:' + q.replace(/^hip/, '') : raw;
-    const target = getXuntianTarget(id, language);
+    const target = getXuntianTarget(id, language, skyCulture);
     return target ? [target] : [];
   }
   const index = searchCatalog(),
@@ -423,7 +567,7 @@ export function searchXuntianTargets(text, language = 'zh', limit = 12) {
       /^(?:ngc|ic|m|b|c|mel|cl|hcg|ugc|pgc|eso)\d/.test(q) ||
       q === 'smc')
   )
-    return [localTarget(exactDeep, language)];
+    return [localTarget(exactDeep, language, skyCulture)];
   const results = [];
   for (const r of index.records.values()) {
     let rank = Infinity,
@@ -437,13 +581,20 @@ export function searchXuntianTargets(text, language = 'zh', limit = 12) {
         shortest = name.length;
       }
     }
-    if (Number.isFinite(rank)) results.push({ r, rank, shortest });
+    if (Number.isFinite(rank)) {
+      if (
+        (r.type === 'asterism' && skyCulture !== 'chinese') ||
+        (r.type === 'constellation' && skyCulture === 'chinese')
+      )
+        rank += 0.8;
+      results.push({ r, rank, shortest });
+    }
   }
   results.sort(
     (a, b) =>
       a.rank - b.rank || a.shortest - b.shortest || a.r.mag - b.r.mag || (a.r.id < b.r.id ? -1 : 1)
   );
-  return results.slice(0, Math.floor(limit)).map((x) => localTarget(x.r, language));
+  return results.slice(0, Math.floor(limit)).map((x) => localTarget(x.r, language, skyCulture));
 }
 export function pickXuntianStar(direction, radiusDeg, options = {}) {
   const center = normalized(direction);

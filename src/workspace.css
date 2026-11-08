@@ -160,3 +160,35 @@
     max-height: calc(100dvh - 200px);
   }
 }
+/* The culture explorer reuses the existing settings surface and native inputs. */
+.sky-culture-note {
+  color: #c6b582;
+  line-height: 1.5;
+}
+.sky-culture-explorer {
+  border-left: 2px solid #8a7851;
+  padding-left: 9px;
+}
+.sky-culture-explorer[hidden] {
+  display: none;
+}
+.sky-culture-explorer canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 8px 0;
+  border: 1px solid #344055;
+  border-radius: 7px;
+}
+.sky-culture-explorer select {
+  max-width: 100%;
+}
+.annotation-settings .check[hidden] {
+  display: none;
+}
+.sky-culture-explorer #chineseSkyObjectInfo {
+  max-height: 120px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}

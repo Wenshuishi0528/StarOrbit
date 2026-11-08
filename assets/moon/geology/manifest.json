@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "id": "igcas-global-geologic-map-2022-v1",
+  "title": "The 1:2,500,000-Scale Geologic Map of the Global Moon",
+  "version": "V1 / public pre-proofs / 2022-06-15",
+  "scaleDenominator": 2500000,
+  "authors": [
+    "Jinzhu Ji",
+    "Dijun Guo",
+    "Jianzhong Liu",
+    "Shengbo Chen",
+    "Zongcheng Ling",
+    "Xiaozhong Ding",
+    "Kunying Han",
+    "Jianping Chen",
+    "Weiming Cheng",
+    "Kai Zhu",
+    "Jingwen Liu",
+    "Juntao Wang",
+    "Jian Chen",
+    "Ziyuan Ouyang"
+  ],
+  "leadInstitution": "Institute of Geochemistry, Chinese Academy of Sciences",
+  "doi": "10.12176/03.99.02797",
+  "sourceRecord": "https://www.scidb.cn/en/detail?dataSetId=972277454573928448",
+  "articleDoi": "10.1016/j.scib.2022.05.021",
+  "original": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/The_geologic_map_of_the_Moon_at_1-2.5M_scale.jpg",
+    "width": 29999,
+    "height": 12978,
+    "bytes": 206245173,
+    "sha256": "dfc7efe5ec59aecd7b345f322fefb71ac918a89eb7b61f1bfa6f41728b547dd7"
+  },
+  "mirrorRecord": "https://commons.wikimedia.org/wiki/File:The_geologic_map_of_the_Moon_at_1-2.5M_scale.jpg",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "access": "PUBLIC",
+  "sourceDescriptionUseNote": "The official description also specifies non-commercial scientific research and science promotion with proper citation; preserved here alongside its CC BY 4.0 metadata. StarOrbit uses the map for non-commercial science education.",
+  "projection": {
+    "main": "Mollweide",
+    "layout": "Composite poster with separate polar maps, lithologic and tectonic insets, legend, chronology and credits",
+    "georeferencedRaster": false,
+    "globeTexture": true,
+    "derivedGeoreferencedRaster": true,
+    "registration": "assets/moon/geology/registration.json"
+  },
+  "processing": "JPEG draft decode, proportional Lanczos downsample and WebP compression; legend and time-scale views are identified crops. Complete poster and all original pre-proofs watermarks retained. No reprojection, recolouring or geologic class extraction. A separate registered 4096×2048 equirectangular globe view is derived from the central Mollweide panel; source watermarks retained, polar pinch and outline marked transparent no-data. See registration.json.",
+  "outputs": [
+    {
+      "id": "poster",
+      "file": "assets/moon/geology/poster.webp",
+      "width": 8192,
+      "height": 3544,
+      "bytes": 7110192,
+      "sha256": "10eac49eee502159c7f595dcbc78e244d32398b1cd1bce16b64fd5917dc4923f",
+      "cropNormalized": null
+    },
+    {
+      "id": "overview",
+      "file": "assets/moon/geology/overview.webp",
+      "width": 2400,
+      "height": 1038,
+      "bytes": 699994,
+      "sha256": "acb18fd411795da9edff522e774215a9d9105a9fc4bb396a5d3f055b3ec2417a",
+      "cropNormalized": null
+    },
+    {
+      "id": "legend",
+      "file": "assets/moon/geology/legend.webp",
+      "width": 2000,
+      "height": 2615,
+      "bytes": 299594,
+      "sha256": "05e85fefdb30e9369ba0ee5f0307b0eb39835f6377ecea2277e4391348271fef",
+      "cropNormalized": [
+        0.86,
+        0.56,
+        0.994,
+        0.965
+      ]
+    },
+    {
+      "id": "timescale",
+      "file": "assets/moon/geology/timescale.webp",
+      "width": 1905,
+      "height": 1687,
+      "bytes": 228588,
+      "sha256": "05ec2a80d8648c20a43bebe5d018379dcd5847a5f2cfaf7e87161dbab55f61f7",
+      "cropNormalized": [
+        0.018,
+        0.55,
+        0.145,
+        0.81
+      ]
+    },
+    {
+      "id": "globe",
+      "file": "assets/moon/geology/globe.webp",
+      "width": 4096,
+      "height": 2048,
+      "bytes": 3857562,
+      "sha256": "53b8944c7f07b2f75bbc67efceb042097f51fa23ff1920f44861792cefa7dc12",
+      "cropNormalized": null,
+      "projection": "equirectangular",
+      "hasAlphaNoData": true
+    }
+  ]
+}

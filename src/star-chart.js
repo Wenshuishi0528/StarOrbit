@@ -1,6 +1,8 @@
+import { SkyReferenceLayer } from './sky-reference-layer.js';
+import { SKY_REFERENCE_GLYPHS } from './sky-reference.js';
 import * as THREE from 'three';
 import { computeBoundsTree } from 'three-mesh-bvh';
-import data from '../assets/star-chart.json';
+import { getSkyCulture, normalizeSkyCulture } from './sky-cultures.js';
 import { equatorial } from './environment-math.js';
 import { solarLabel } from './solar-targets.js';
 import { getLanguage } from './i18n.js';
@@ -111,15 +113,7 @@ export class StarChart {
     this.group = new THREE.Group();
     this.group.visible = false;
     env.backdrop.add(this.group);
-    this.stars = data.stars.map((s) => ({ ...s, key: 'star-' + s.id, dir: vector(s.ra, s.dec) }));
-    this.constellations = data.constellations.flatMap((c) =>
-      (c.labelPositions || [[c.ra, c.dec]]).map(([ra, dec], i) => ({
-        ...c,
-        key: 'const-' + c.id + '-' + i,
-        dir: vector(ra, dec),
-        kind: 'constellation',
-      }))
-    );
+    this.references = new SkyReferenceLayer(this.group);
     this.deepSky = DEEP_SKY_OBJECTS.map((object) => ({
       ...object,
       key: 'deep-' + object.id,
@@ -147,16 +141,103 @@ export class StarChart {
     this.raycaster.firstHitOnly = true;
     this.hits = [];
     this.stats = { layouts: 0, uploads: 0, atlasBuilds: 0, candidates: 0, visible: 0, deepSky: 0 };
+    this.setCulture(env.settings?.skyCulture);
+  }
+  setCulture(id) {
+    const culture = normalizeSkyCulture(id);
+    if (this.culture === culture) return;
+    this.culture = culture;
+    this.data = getSkyCulture(culture);
+    this.stars = this.data.stars.map((s) => ({
+      ...s,
+      key: 'star-' + s.id,
+      dir: vector(s.ra, s.dec),
+    }));
+    this.constellations = this.data.asterisms.flatMap((c) =>
+      (c.labelPositions || [[c.ra, c.dec]]).map(([ra, dec], i) => ({
+        ...c,
+        key: (culture === 'western' ? 'const-' : 'asterism-chinese-') + c.id + '-' + i,
+        dir: vector(ra, dec),
+        kind: 'constellation',
+      }))
+    );
+    if (this.lines) {
+      this.lines.geometry.dispose();
+      this.lines.geometry = lineGeometry(
+        this.data.asterisms.flatMap((c) => c.lines),
+        THREE.MathUtils.degToRad(0.08)
+      );
+      this.lines.material.color.set(culture === 'chinese' ? '#bd9d6b' : '#7fabc3');
+      this.boundaries.geometry.dispose();
+      this.boundaries.geometry = lineGeometry(this.data.boundaries, 0);
+      this.boundaries.computeLineDistances();
+      this.labels.geometry.instanceCount = 0;
+      this.symbols.geometry.setDrawRange(0, 0);
+    }
+    this.shown.clear();
+    this.texture?.dispose();
+    this.texture = null;
+    this.uniforms.atlas.value = null;
+    this.glyphs.clear();
+    this.language = null;
+    this.lastKey = '';
+    this.geometryKey = '';
+    this.selectionKey = null;
+    this.lastLayout = -Infinity;
+    this.stats.culture = culture;
+    this.stats.asterisms = this.data.asterisms.length;
+    this.stats.boundaries = this.data.boundaries.length;
+    this.stats.selectedTarget = null;
+    this.stats.selectedMembers = 0;
+    if (this.selectedLines) this.updateSelection(null);
+  }
+  updateSelection(targetId) {
+    const key = this.culture + '|' + (targetId || '');
+    if (key === this.selectionKey) return;
+    this.selectionKey = key;
+    const selected = this.data.asterisms.find((item) => item.targetId === targetId),
+      positions = [],
+      members = new Set(
+        selected?.primaryMemberHips || selected?.lineMemberHips || selected?.memberHips || []
+      ),
+      objects = new Set(
+        selected?.primaryMemberObjectIds ||
+          selected?.lineMemberObjectIds ||
+          selected?.memberObjectIds ||
+          []
+      );
+    if (selected?.members?.length)
+      for (const member of selected.members) {
+        const primary = members.has(member.id) || objects.has(member.physicalId || member.id);
+        if (primary && Number.isFinite(member.ra) && Number.isFinite(member.dec))
+          positions.push(...vector(member.ra, member.dec).multiplyScalar(RADIUS).toArray());
+      }
+    else
+      for (const star of this.stars)
+        if (members.has(star.id))
+          positions.push(...star.dir.clone().multiplyScalar(RADIUS).toArray());
+    this.selectedLines.geometry.dispose();
+    this.selectedLines.geometry = lineGeometry(
+      selected?.lines || [],
+      THREE.MathUtils.degToRad(0.03)
+    );
+    this.selectedStars.geometry.dispose();
+    this.selectedStars.geometry = new THREE.BufferGeometry().setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(positions, 3)
+    );
+    this.stats.selectedTarget = selected?.targetId || null;
+    this.stats.selectedMembers = positions.length / 3;
   }
   ensureGeometry() {
     if (this.labels) return;
     this.lines = new THREE.LineSegments(
       lineGeometry(
-        data.constellations.flatMap((c) => c.lines),
+        this.data.asterisms.flatMap((c) => c.lines),
         THREE.MathUtils.degToRad(0.08)
       ),
       new THREE.LineBasicMaterial({
-        color: '#7fabc3',
+        color: this.culture === 'chinese' ? '#bd9d6b' : '#7fabc3',
         transparent: true,
         opacity: 0.35,
         depthTest: false,
@@ -165,7 +246,7 @@ export class StarChart {
       })
     );
     this.boundaries = new THREE.LineSegments(
-      lineGeometry(data.boundaries, 0),
+      lineGeometry(this.data.boundaries, 0),
       new THREE.LineDashedMaterial({
         color: '#b2a0ce',
         transparent: true,
@@ -178,6 +259,32 @@ export class StarChart {
       })
     );
     this.boundaries.computeLineDistances();
+    this.selectedLines = new THREE.LineSegments(
+      new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({
+        color: '#ffe0a0',
+        transparent: true,
+        opacity: 0.85,
+        depthTest: false,
+        depthWrite: false,
+        toneMapped: false,
+      })
+    );
+    this.selectedStars = new THREE.Points(
+      new THREE.BufferGeometry(),
+      new THREE.PointsMaterial({
+        color: '#ffe6ba',
+        size: 4,
+        sizeAttenuation: false,
+        transparent: true,
+        opacity: 0.8,
+        depthTest: false,
+        depthWrite: false,
+        toneMapped: false,
+      })
+    );
+    this.selectedLines.frustumCulled = this.selectedStars.frustumCulled = false;
+    this.selectedLines.renderOrder = this.selectedStars.renderOrder = 1.7;
     this.labels = new THREE.Mesh(
       labelGeometry(),
       new THREE.ShaderMaterial({
@@ -207,7 +314,14 @@ export class StarChart {
     this.symbols.frustumCulled = false;
     this.symbols.renderOrder = 2;
     this.lines.renderOrder = this.boundaries.renderOrder = 1.5;
-    this.group.add(this.lines, this.boundaries, this.symbols, this.labels);
+    this.group.add(
+      this.lines,
+      this.boundaries,
+      this.selectedLines,
+      this.selectedStars,
+      this.symbols,
+      this.labels
+    );
   }
   ensureAtlas(language) {
     if (this.language === language) return;
@@ -215,7 +329,8 @@ export class StarChart {
       chars = [
         ...new Set([
           ...labels.flatMap((s) => [...(s[language] || s.en || s.zh)]),
-          ...starChartGlyphText(language),
+          ...starChartGlyphText(language, this.culture),
+          ...SKY_REFERENCE_GLYPHS,
           ...this.deepSky.flatMap((s) => [...deepSkyLabel(s, language)]),
           ...deepSkyRegionLabel('', language),
         ]),
@@ -237,7 +352,7 @@ export class StarChart {
       canvas = document.createElement('canvas');
     canvas.width = canvas.height = side;
     const ctx = canvas.getContext('2d');
-    ctx.font = `500 ${FONT}px sans-serif`;
+    ctx.font = `500 ${FONT}px "PingFang SC","Microsoft YaHei",sans-serif`;
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = 'white';
     this.glyphs.clear();
@@ -326,6 +441,7 @@ export class StarChart {
   update(camera) {
     const s = this.env.settings,
       active = s.stars && s.starChartEnabled && s.starBrightness > 0;
+    this.setCulture(s.skyCulture);
     this.group.visible = active;
     if ((!active || this.env.sim.view !== 'follow') && this.modelSource) {
       this.modelSource = null;
@@ -334,18 +450,38 @@ export class StarChart {
     }
     if (!active) return;
     this.ensureGeometry();
+    const focusTargetId = this.env.skyCultureFocus || null;
+    this.updateSelection(focusTargetId);
     this.lines.visible = s.constellationLines;
-    this.boundaries.visible = s.constellationBoundaries;
+    this.boundaries.visible = s.constellationBoundaries && this.data.boundaries.length > 0;
+    this.selectedLines.visible = this.selectedStars.visible =
+      s.constellationLines && !!this.stats.selectedTarget;
     this.symbols.visible = s.deepSkyObjects;
     this.labels.visible =
       s.starLabels ||
       s.catalogStarLabels ||
       s.solarSystemLabels ||
       s.constellationNames ||
-      this.symbols.visible;
+      this.symbols.visible ||
+      s.equatorialGrid ||
+      s.eclipticLine;
     const brightness = Math.min(1, s.starBrightness);
     this.lines.material.opacity = 0.35 * brightness;
     this.boundaries.material.opacity = 0.24 * brightness;
+    this.selectedLines.material.opacity = 0.85 * brightness;
+    this.selectedStars.material.opacity = 0.8 * brightness;
+    this.references.update(
+      {
+        settings: s,
+        epoch: this.env.sim.current?.t,
+        fovY: THREE.MathUtils.radToDeg(
+          2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / camera.zoom)
+        ),
+        aspect: camera.aspect,
+        forward: new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).toArray(),
+      },
+      brightness
+    );
     if (!this.labels.visible) return;
     const language = getLanguage(),
       now = performance.now() / 1000,
@@ -379,6 +515,8 @@ export class StarChart {
         this.modelRecords.some((r) => !r.matrix.equals(r.object.matrixWorld)));
     const key = [
       language,
+      this.culture,
+      focusTargetId,
       width,
       height,
       camera.fov,
@@ -387,6 +525,8 @@ export class StarChart {
       s.catalogStarLabels,
       s.solarSystemLabels,
       s.constellationNames,
+      s.equatorialGrid,
+      s.eclipticLine,
       s.deepSkyObjects,
       s.deepSkyScope,
       s.starLabelDensity,
@@ -402,7 +542,8 @@ export class StarChart {
       camera.position.distanceToSquared(this.lastPosition) > 1e-6 ||
       (hasMoon && this.env.moon.mesh.position.distanceToSquared(this.lastMoon) > 1e-6);
     const epoch = sim.current?.t,
-      skyMoved = s.solarSystemLabels && epoch !== this.labelEpoch;
+      skyMoved =
+        (s.solarSystemLabels || s.equatorialGrid || s.eclipticLine) && epoch !== this.labelEpoch;
     const terrainKey = this.env.elevation?.key('main'),
       terrainMoved = terrainKey !== this.lastTerrainKey;
     if (
@@ -451,6 +592,7 @@ export class StarChart {
       width,
       height,
       language,
+      focusTargetId,
       showMoon: hasMoon,
       blocked: (direction) =>
         (terrainEye && this.env.elevation.skyOccluded(terrainEye, earthFixed(direction), 'main')) ||
@@ -489,7 +631,7 @@ export class StarChart {
         [
           p.key,
           p.text,
-          p.kind === 'solar' ? p.dir.toArray().join(',') : '',
+          p.kind === 'solar' || p.kind === 'reference' ? p.dir.toArray().join(',') : '',
           p.dx,
           p.dy,
           p.symbol?.width,
@@ -528,11 +670,14 @@ export class StarChart {
       let pen = label.dx;
       const scale = label.font / FONT,
         color = new THREE.Color(
-          label.kind === 'constellation'
-            ? '#d0c09a'
-            : label.kind === 'solar'
-              ? '#ffdcab'
-              : label.symbol?.labelColor || '#c8dce8'
+          label.selected
+            ? '#ffe5b3'
+            : label.color ||
+              (label.kind === 'constellation'
+                ? '#d0c09a'
+                : label.kind === 'solar'
+                  ? '#ffdcab'
+                  : label.symbol?.labelColor || '#c8dce8')
         );
       const anchor = label.dir.clone().multiplyScalar(RADIUS);
       if (label.symbol) {

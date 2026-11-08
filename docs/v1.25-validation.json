@@ -1,0 +1,206 @@
+{
+  "version": "1.25",
+  "status": "passed-with-documented-scope",
+  "recordedAt": "2026-11-08T03:20:29.548040+00:00",
+  "baseCommit": "ca99e309c79e81737d2194dfbdc77eb59d465331",
+  "workspace": "Local uncommitted v1.21–v1.25 changes; earlier work preserved",
+  "system": "macOS-10.16-x86_64-i386-64bit",
+  "scope": [
+    "All 312 Chinese catalog asterisms illustrated, plus seven independently controlled overviews; 39 prior artworks preserved byte-for-byte",
+    "Overviews visible at normal/narrow fields; independent 0–100% opacity, default 20%; fixed GPU/cache budget",
+    "9087 approved lunar names, including 7064 satellite features; 40 landing missions, 39 located; Chinese red-star markers",
+    "Search, type filters, progressive results, spherical visibility and independent names/landings/density controls",
+    "CAS 2022 public global geological map reprojected to a 4096×2048 3D lunar texture, with original poster/legend/timescale and source credits",
+    "Contextual Xuntian Moon discovery card opens the existing workbench; existing observation/date/terrain behavior retained"
+  ],
+  "artCoverage": {
+    "artworks": 319,
+    "individualAsterisms": 312,
+    "overviews": 7,
+    "newIllustrations": 280,
+    "oldIllustrationsPreserved": 39,
+    "oldAssetFilesByteIdentical": 96,
+    "registrationComplete": true,
+    "originalPNGBytes": 510093252,
+    "runtimeAVIFBytes": 48014036
+  },
+  "geology": {
+    "validSphericalAreaFraction": 0.9976263694911303,
+    "projectionTests": "Five independent projection/registration/actual-alpha checks passed",
+    "source": "2022 public pre-proof, DOI 10.12176/03.99.02797; not the 2024 atlas scan"
+  },
+  "automated": [
+    {
+      "log": "output/release125/tests-final.log",
+      "status": "passed",
+      "bytes": 43158,
+      "sha256": "f4e2fe63e5de40a264cfe5bd3ea1d0ab0b76d1721b0770d7408e99588d9dfb06"
+    },
+    {
+      "log": "output/release125/format-final.log",
+      "status": "passed",
+      "bytes": 139,
+      "sha256": "4420a294a1af33e5afd4ea3cf61c2ca5b409d9acc264df55ae6bc3a0e078851c"
+    },
+    {
+      "log": "output/release125/docs-final.log",
+      "status": "passed",
+      "bytes": 454,
+      "sha256": "324fb2e3838353a6c4e69535fbec9be144ffc42d70917856ba1995a6cea769f4"
+    },
+    {
+      "log": "output/release125/diff-check.log",
+      "status": "passed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "output/release125/build.log",
+      "status": "passed",
+      "bytes": 152,
+      "sha256": "d2945a8a20d6347bf444a23beb533ab67e9a84fd1d62ccac01cfd6f036132bf5"
+    },
+    {
+      "log": "output/release125/build-web.log",
+      "status": "passed",
+      "bytes": 98,
+      "sha256": "76385acd7fea6e97f1ef0fc004c5ec2080e25b8ea14b8bfd77b80c998c459d82"
+    },
+    {
+      "log": "output/release125/web-assets.log",
+      "status": "passed",
+      "bytes": 102,
+      "sha256": "c1354a5ed39dbc61bc5fc7a8a5b819945d2d47a8c7d4d7183f3cbb1b3b5ff50c"
+    },
+    {
+      "log": "output/release125/local-assets.log",
+      "status": "passed",
+      "bytes": 108,
+      "sha256": "acff8dc5f60766581d09b02003bf9b186801ae392a174251bffddfbcf242449c"
+    },
+    {
+      "log": "output/release125/launcher.log",
+      "status": "passed",
+      "bytes": 92,
+      "sha256": "86af8b8ca96e4112ec602b910146159eb0b7a9655c7d58e5504900853668ee6b"
+    },
+    {
+      "log": "output/release125/launcher-installed-check.log",
+      "status": "passed",
+      "bytes": 133,
+      "sha256": "a57ee812318c49c6d6010b0909c7e6742850b0f0cc4e4850300b2696246a5db0"
+    },
+    {
+      "log": "output/release125/install.log",
+      "status": "passed",
+      "bytes": 628,
+      "sha256": "8e0cb486ba1777cf97084ff47cae4e610bcf6e3fdcdb44f323dac21a2ba96c70"
+    }
+  ],
+  "interactive": {
+    "environment": "Codex in-app browser / macOS; source port 8875 and installed port 8771",
+    "passed": [
+      "Main-view overview visible; setting overview opacity to zero leaves individual asterism art visible",
+      "Full-catalog lunar search; Chang-e 6 focuses the far side and shows a red-star marker",
+      "CAS geology on the 3D Moon; normal/elevation/geology switching and automatic atlas/observation-mode rules",
+      "Labels appear after the initial geology load; independent switches clear overlays, including exported pixels",
+      "Geological PNG opened and visually checked: imagery, annotations, original source/license/DOI and reprojection line without clipping",
+      "Chinese/English/French/Russian lunar geology controls and 390px layouts; no panel horizontal overflow",
+      "Contextual Xuntian Moon entry opens the same workbench",
+      "Final installed v1.25 Moon and expanded Chinese art loaded; screenshots retained"
+    ],
+    "artifacts": [
+      "output/release125/overview-opacity-zero.png",
+      "output/release125/lunar-geology-export.png",
+      "output/release125/installed-lunar-geology.png",
+      "output/release125/installed-chinese-art.png"
+    ]
+  },
+  "reviews": "Independent renderer and map-preparation agents checked texture coordinates, color space, alpha masks, async readiness/disposal, export and localization. Source art inspected over actual dark-background alpha composites; whole-image sky placement checked numerically for all entries, with representative browser checks.",
+  "notRun": [
+    "Full Safari/Firefox/Edge/Windows/Android/iOS interactive matrix",
+    "Quantitative FPS/GPU-memory benchmark",
+    "Every individual illustration viewed interactively in every sky orientation",
+    "WebGL context-loss and network-failure fault injection"
+  ],
+  "modelLimits": [
+    "Illustrations are modern name-based teaching interpretations, not historical image reconstructions or star-by-star anatomical alignments",
+    "Single-star/tiny asterisms use an explicitly declared minimum visual angular size and artistic orientation; no stars invented",
+    "Lunar gazetteer names retain official spelling; translated names are limited to verified curated names and mission aliases",
+    "Landing coordinates have varying precision; unknown Surveyor 4 has a catalog entry without a map marker; rover names indicate landing/deployment rather than current positions",
+    "Geological texture derives from a printed 2022 pre-proof, retains labels/watermarks and has explicit gray no-data regions; no invented geological filling",
+    "Atlas fill light and x8 relief remain teaching aids; ground observation uses real relief and visible-light modelling"
+  ],
+  "sourceHashes": {
+    "src/lunar-ui-copy.js": "e2a6ea2f47bb3288d29bc090a78d887287e453c792e508851c65206658582cd6",
+    "src/lunar-state.js": "fc1af118ea1be56e6ea3991306577fc69dc8eb86c18b101065e1b8d74d78a948",
+    "src/lunar-lab-style.js": "b0d714e7420f45225273bcbb65c2545a03755708b3babf979d9e650653ccb7c9",
+    "src/lunar-math.js": "5fc8a6b7525fe6d07deb85bf0c2ec81800208d3273796e5383d6a77b2b56042b",
+    "src/lunar-geology.js": "12ba523e72a973e756c3ca3450c03b0354a5d83fd75e4a4c8947a6a5b298840f",
+    "src/lunar-place-layout.js": "d866c1e36befc89561960de76e165f172b700176fb37ac86b6565b77bac67fa9",
+    "src/lunar-place-controls.js": "b17545ffea234dde7273cd82f42b46a7a82889efe44bec13e3484acc3f81e8b7",
+    "src/lunar-geology-viewer.js": "f93f4344677ec3e8da436423d924f472031e00870a26a5e7fe0f70e6d8130c08",
+    "src/lunar-lab.js": "6826be3d8c349715a64ca5db5b22622c3f77e234b71aa4dd97544e9443fe9a88",
+    "src/lunar-features.js": "5c5277503a854c047ac34f6300c32b6b58b3e6798adef8820a3ce0ce8b023bdf",
+    "src/lunar-place-catalog.js": "29a9a71c9774e1481fef9a5f622ced4e831a2da07a052709c4917f7cd9281ab8",
+    "src/lunar-renderer.js": "62daa03e5f67c8df5ce6bd1b68600905a2924e312a987c7881eeb06d99fa6481",
+    "src/lunar-terrain.js": "ee467d51b5d06852f2b42e1a4b91d71ae6cc534bb9e6bdecf76d9ecd0c31ad76",
+    "src/flight-lab.js": "7c84c59d53dc85964f2cf74adcb11a1fdb7a2df2181651cbe1b035a859569709",
+    "src/xuntian-scope.js": "8d1e7d00c0ae9578add7003b061e80a41ff8474350a07a1f3dc43a4401aabf6a",
+    "src/xuntian-scope.html": "bebc044d284509d6d19076ed83ed866f9691ef4a6c1d1bedfcffe40fe5c69659",
+    "src/xuntian-scope.css": "2250a2b6cf19fb777d81dc6679af38b61829bcceb61bdd9607cd83197b2b8db8",
+    "src/help.js": "e85969a1f197832626b252076021f2bc2c22218641d4e637148d40123f803e64",
+    "src/star-chart-settings.js": "4f7ae22ac387fede45657af04eb25e8cf0b007e3ef1c8e812eb384b081cc5fc1",
+    "src/constellation-art.js": "da4f14a1f7e573eaa9636726ae3b97badb5c27e7ffd7adda75949139c5bb4997",
+    "src/constellation-art-layer.js": "9b84deb47b64f3057ed7c8be9120b97f6acfe383f70a66dab803c7c7a655f37d",
+    "src/constellation-art-math.js": "ed3d399bf0946d25d4ee3143c9d388125a5b0017124e47a190d2395b64ee277c",
+    "src/chinese-sky-art.js": "11b66ef8efc3dc6ddf43ea0900e01ffc10748c925d2dde3a73684b3894630eba",
+    "build.mjs": "6cb362c2e27177752f5cb18d30bee7608110fe1df2e87f19a5c030fbe6b1b731",
+    "package.json": "2071172f73593893b5bec53fb6baac1e32bf5479435c549bee951ea7c158e537",
+    "scripts/prepare-chinese-art.py": "98ede07f57076e1ffdb98c860e975513e59bbe484aad53ecd28ad10a211825a3",
+    "scripts/reproject-lunar-geology.py": "f7ee993058b1e842b652b9177cba9b0983e046b128a6f3e2b475b178c0a3914c",
+    "assets/moon/places/gazetteer.json": "19eff3024cd1558da0a8d9ad2b68d32e4cfda826e8a291caf9d6f7feb719faf7",
+    "assets/moon/places/landings.json": "a72b4fd56eb6a98ede4bb8b9030f6b644574e915c754d17a8000cf8611036e6e",
+    "assets/moon/geology/manifest.json": "be005db023672abc2dc5ee5e9a4d7be8972508ad1e2135c2d49b5ee11c8fa922",
+    "assets/moon/geology/registration.json": "a8633766324c51c2305595b4e19ba17095029528bae85efa14e7442074c95240",
+    "assets/moon/geology/outline-fit.json": "75c1bb97b185812d9df2e7d16377477c32b1157fdc0ca76c4a1d4918524b1da7",
+    "assets/moon/geology/globe.webp": "53b8944c7f07b2f75bbc67efceb042097f51fa23ff1920f44861792cefa7dc12",
+    "assets/chinese-sky/art/manifest.json": "2b5fd13c5cbb0c946d9411b5d7c16239d3d9c188e08a8e1f86bfcde6d79d18d0",
+    "assets/chinese-sky/art/provenance.json": "c7fff9f819d5b3225de3a675e58dde61a68a69c2323adea540543d5cf5a54eff",
+    "assets/chinese-sky/art/rigid-placements.json": "aae74b044feacb630a5807f5d88106a3d085306b5fcf3b8523f2fb2224f4f8c9",
+    "assets/chinese-sky/art/README.md": "ea700894911f319a3d134e79447cb11bd14db44e4c901ec8e5627672bd2b3af3",
+    "tests/lunar-places.mjs": "441896a8c93b5c9006baf82225687b9873cb29c7a6821c3d4f8c15e21850fe88",
+    "tests/lunar-place-layout.mjs": "52fe7ad4736f9bf2035855c92ff87b8b6cb661a95a5ded6935817b4208177c87",
+    "tests/lunar-geology.mjs": "2bf68458a5a6a05994f16620ab429233f8ea7fa267f116159ed2286481a924cd",
+    "tests/lunar-geology-projection.py": "646ecd01e0abbd154bdf88b97825c22cae0271f100e19b5fd55aaa5f21790f51",
+    "tests/chinese-art-expansion.py": "c88fed7b79b16e67f824446a3f88b4355c108f14f60333cb11f278a3631cad95",
+    "tests/constellation-art.mjs": "9cb29d077fe7d866c53cf19119edc077729aea6bf67902e3c47df328194d54cc",
+    "tests/chinese-sky-integration.mjs": "856e44d5be5db50d8f3ad414d30306b4d11372eb8285b41b3fdb42c6d30d2a99"
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "bytes": 490334257,
+      "sha256": "bdd6352f9430cbdb4698e92dc38846a0e553a9e122a13b97879176464df5ba15"
+    },
+    "dist-local/index.html": {
+      "bytes": 523151,
+      "sha256": "9fa7512d0d3d691aafbdbc3769cc7b99e5926a3cadf593f00ad0e5a3e085d9b3"
+    },
+    "dist/index.html": {
+      "bytes": 523151,
+      "sha256": "c638892298e30cdfe61cecb46ad1280e0c39bfbb12192b37b7441cb6ea88b87b"
+    }
+  },
+  "installation": {
+    "version": "1.25",
+    "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "filesSynced": 980,
+    "filesChecked": 4193,
+    "oldContentAddressedAssetsRetained": true,
+    "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release125/runtime-backup",
+    "htmlSHA256": "bdd6352f9430cbdb4698e92dc38846a0e553a9e122a13b97879176464df5ba15",
+    "entrySHA256": "9fa7512d0d3d691aafbdbc3769cc7b99e5926a3cadf593f00ad0e5a3e085d9b3",
+    "launcherRoot": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件"
+  },
+  "publication": "Local only; no push, Release or Pages deployment"
+}

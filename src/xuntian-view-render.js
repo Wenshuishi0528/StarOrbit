@@ -30,8 +30,17 @@ import {
 import { xuntianSkySource, xuntianStarPSF } from './xuntian-view-sky.js';
 import { identifyXuntianCrosshair } from './xuntian-crosshair.js';
 import { createCityFinder } from './xuntian-ground-target.js';
-import { SKY_CONSTELLATION_LINES, SKY_CONSTELLATION_BOUNDARIES } from './sky-annotation-layout.js';
-import { normalizeStarChartSettings } from './star-chart-settings.js';
+import {
+  getSkyConstellationLines,
+  getSkyConstellationBoundaries,
+} from './sky-annotation-layout.js';
+import { getSkyCulture, normalizeSkyCulture } from './sky-cultures.js';
+import { equatorial } from './environment-math.js';
+import {
+  normalizeStarChartSettings,
+  skyCultureArtOptions,
+  skyCultureArtEnabled,
+} from './star-chart-settings.js';
 import { paintSolarPhotoCaption } from './solar-photo-caption.js';
 import { SkyDetailLayer } from './sky-detail-layer.js';
 import { skyDetailView } from './sky-detail-plan.js';
@@ -39,6 +48,9 @@ import { paintSkyDetailCaption } from './sky-detail-controls.js';
 import { paintCityTerrainCaption } from './city-terrain-controls.js';
 import { paintElevationCaption } from './earth-elevation-controls.js';
 import { ConstellationArtLayer, paintConstellationArtCaption } from './constellation-art-layer.js';
+import { skyCulturePhotoCredit } from './sky-culture-caption.js';
+import { skyReferenceLayers } from './sky-reference.js';
+import { referenceLineGeometry } from './sky-reference-layer.js';
 
 let skyDetailSequence = 0;
 
@@ -257,24 +269,56 @@ function constellationGuide(shared) {
     depthTest: false,
     depthWrite: false,
   });
-  const layers = [
-    ['constellationLines', SKY_CONSTELLATION_LINES, [0.024, 0.068, 0.094], false],
-    ['constellationBoundaries', SKY_CONSTELLATION_BOUNDARIES, [0.063, 0.04, 0.083], true],
-  ].map(([setting, paths, tint, dashed]) => {
-    const positions = [];
-    for (const path of paths)
-      for (let i = 1; i < path.length; i++) positions.push(...path[i - 1], ...path[i]);
-    const geometry = new THREE.BufferGeometry().setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(positions, 3)
-    );
-    const scene = new THREE.Scene(),
-      lines = new THREE.LineSegments(geometry, material);
-    lines.frustumCulled = false;
-    scene.add(lines);
-    return { setting, tint, dashed, geometry, scene };
-  });
-  function draw(renderer, camera, settings, axes, gain) {
+  let layers = [],
+    signature = '';
+  const referenceLayers = new Map();
+  function rebuild(settings, focusTargetId) {
+    const culture = normalizeSkyCulture(settings.skyCulture),
+      key = culture + ':' + (focusTargetId || '');
+    if (key === signature) return;
+    for (const layer of layers) layer.geometry.dispose();
+    const selected =
+      culture === 'chinese' &&
+      getSkyCulture(culture).asterisms.find((a) => a.targetId === focusTargetId);
+    const definitions = [
+      [
+        'constellationLines',
+        getSkyConstellationLines(culture),
+        culture === 'chinese' ? [0.12, 0.085, 0.035] : [0.024, 0.068, 0.094],
+        false,
+      ],
+      [
+        'constellationBoundaries',
+        getSkyConstellationBoundaries(culture),
+        [0.063, 0.04, 0.083],
+        true,
+      ],
+    ];
+    if (selected)
+      definitions.push([
+        'constellationLines',
+        selected.lines.map((path) => path.map((p) => equatorial(...p))),
+        [0.48, 0.31, 0.1],
+        false,
+      ]);
+    layers = definitions.map(([setting, paths, tint, dashed]) => {
+      const positions = [];
+      for (const path of paths)
+        for (let i = 1; i < path.length; i++) positions.push(...path[i - 1], ...path[i]);
+      const geometry = new THREE.BufferGeometry().setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(positions, 3)
+      );
+      const scene = new THREE.Scene(),
+        lines = new THREE.LineSegments(geometry, material);
+      lines.frustumCulled = false;
+      scene.add(lines);
+      return { setting, tint, dashed, geometry, scene };
+    });
+    signature = key;
+  }
+  function draw(renderer, camera, settings, axes, gain, focusTargetId, frame, aspect) {
+    rebuild(settings, focusTargetId);
     u.inertialToCamera.value.copy(matrix(axes)).transpose();
     u.inverseGain.value = 1 / Math.max(0.0001, gain);
     for (const layer of layers)
@@ -283,11 +327,39 @@ function constellationGuide(shared) {
         u.guideDashed.value = Number(layer.dashed);
         renderer.render(layer.scene, camera);
       }
+    const viewRotation = matrix(axes).transpose();
+    for (const definition of skyReferenceLayers({
+      settings,
+      epoch: frame.q.t,
+      fovY: frame.fovY,
+      aspect,
+      forward: frame.axes.forward,
+    })) {
+      let layer = referenceLayers.get(definition.setting);
+      if (!layer) {
+        const scene = new THREE.Scene(),
+          lines = new THREE.LineSegments(new THREE.BufferGeometry(), material);
+        lines.frustumCulled = false;
+        scene.add(lines);
+        layer = { scene, lines, key: '' };
+        referenceLayers.set(definition.setting, layer);
+      }
+      if (layer.key !== definition.key) {
+        layer.lines.geometry.dispose();
+        layer.lines.geometry = referenceLineGeometry(definition.paths);
+        layer.key = definition.key;
+      }
+      u.inertialToCamera.value.multiplyMatrices(viewRotation, matrix(definition.columns));
+      u.guideTint.value.fromArray(definition.tint);
+      u.guideDashed.value = Number(definition.dashed);
+      renderer.render(layer.scene, camera);
+    }
   }
   return {
     draw,
     dispose() {
       for (const layer of layers) layer.geometry.dispose();
+      for (const layer of referenceLayers.values()) layer.lines.geometry.dispose();
       material.dispose();
     },
   };
@@ -409,7 +481,7 @@ export function createXuntianViewRenderer(
       env.constellationArt && new ConstellationArtLayer(env.constellationArt, skyPhotoId, true, 3);
   const wantsArt = (frame, size, photo = false) =>
     !!(photo ? frame.photoNames : frame.previewNames) &&
-    normalizeStarChartSettings(frame.chartSettings ?? env.settings).constellationArt &&
+    skyCultureArtEnabled(normalizeStarChartSettings(frame.chartSettings ?? env.settings)) &&
     frame.showStars !== false &&
     wantsSkyDetail({ ...frame, showGalaxy: true }, size, true);
   function wantsSkyDetail(frame, size, includeBackground = false) {
@@ -468,7 +540,7 @@ export function createXuntianViewRenderer(
     lastIdentification = -Infinity,
     identificationKey = '',
     identificationKind = '',
-    identificationLanguage = '';
+    identificationAppearance = '';
   function valid(frame) {
     return !!(
       frame?.q?.basis &&
@@ -486,9 +558,15 @@ export function createXuntianViewRenderer(
   function readIdentification(frame, surface, limit, groundSurface) {
     const height = canvas.clientHeight || canvas.height || 300,
       now = performance.now();
+    const appearance = [
+      frame.language,
+      frame.chartSettings?.skyCulture || 'western',
+      frame.chartSettings?.deepSkyObjects !== false,
+      frame.chartSettings?.deepSkyScope || 'featured',
+    ].join('|');
     const key = [
       frame.q.t,
-      frame.language,
+      appearance,
       frame.fovY,
       frame.showStars,
       height,
@@ -505,7 +583,7 @@ export function createXuntianViewRenderer(
     if (
       now - lastIdentification < 160 &&
       identificationKind === surface?.kind &&
-      identificationLanguage === frame.language
+      identificationAppearance === appearance
     )
       return identification;
     identification = identifyXuntianCrosshair(frame, {
@@ -520,7 +598,7 @@ export function createXuntianViewRenderer(
     lastIdentification = now;
     identificationKey = key;
     identificationKind = surface?.kind;
-    identificationLanguage = frame.language;
+    identificationAppearance = appearance;
     return identification;
   }
   function draw(frame, size, target, annotations = false) {
@@ -544,6 +622,8 @@ export function createXuntianViewRenderer(
         constellationNames: false,
         constellationLines: false,
         constellationBoundaries: false,
+        equatorialGrid: false,
+        eclipticLine: false,
         constellationArt: false,
         deepSkyObjects: false,
       });
@@ -588,6 +668,9 @@ export function createXuntianViewRenderer(
       wantsArt(frame, size, !annotations),
       {
         inverseGain: 1 / Math.max(0.0001, optics.areaGain),
+        ...skyCultureArtOptions(frame.chartSettings ?? env.settings),
+        focusTargetId: frame.focusTargetId,
+        overviewArtworkId: frame.overviewArtworkId,
         cameraToFixed: u.cameraToFixed.value,
         fixedEye: u.fixedEye.value,
       }
@@ -603,7 +686,17 @@ export function createXuntianViewRenderer(
       renderer.render(stars.scene, screenCamera);
       if (detailLayer) renderer.render(detailLayer.scene, screenCamera);
       if (currentArtLayer) renderer.render(currentArtLayer.scene, screenCamera);
-      if (wantNames) guide.draw(renderer, screenCamera, chartSettings, axes, optics.areaGain);
+      if (wantNames)
+        guide.draw(
+          renderer,
+          screenCamera,
+          chartSettings,
+          axes,
+          optics.areaGain,
+          frame.focusTargetId,
+          frame,
+          aspect
+        );
       solarView.draw(renderer, screenCamera, frame, size, optics);
       if (local.visible) station.draw(renderer, !!frame.fillLight);
       renderer.setRenderTarget(target.film);
@@ -638,6 +731,7 @@ export function createXuntianViewRenderer(
     if (annotations) readIdentification(frame, local.center, limit, ground);
     return {
       labels,
+      chartSettings,
       solarObservation,
       skyDetail,
       cityTerrain: earthView.cityStatus(!annotations),
@@ -721,6 +815,16 @@ export function createXuntianViewRenderer(
     ) {
       if (disposed || !valid(frame)) throw Error('没有可用的巡天光学位置');
       if (capturePending) throw Error('正在保存巡天取景照片');
+      const frozenChart = normalizeStarChartSettings(frame.chartSettings ?? env.settings);
+      const freezeCulture = (candidate) => ({
+        ...candidate,
+        chartSettings: { ...frozenChart },
+        language: frame.language,
+        photoNames: frame.photoNames,
+        focusTargetId: frame.focusTargetId,
+        overviewArtworkId: frame.overviewArtworkId,
+      });
+      frame = freezeCulture(frame);
       capturePending = true;
       let target;
       try {
@@ -735,7 +839,13 @@ export function createXuntianViewRenderer(
           env.constellationArt?.prepare(
             skyPhotoId,
             skyDetailView(frame, size),
-            wantsArt(frame, size, true)
+            wantsArt(frame, size, true),
+            2500,
+            {
+              ...skyCultureArtOptions(frozenChart),
+              focusTargetId: frame.focusTargetId,
+              overviewArtworkId: frame.overviewArtworkId,
+            }
           ),
           env.skyDetail?.prepare(
             skyPhotoId,
@@ -749,14 +859,20 @@ export function createXuntianViewRenderer(
         // together. A rapidly moving field is explicitly labelled incomplete,
         // rather than waiting forever or mixing a stale pose with live meshes.
         if (atShutter) {
-          const candidate = atShutter();
+          const candidate = freezeCulture(atShutter());
           if (!valid(candidate)) throw Error('没有可用的巡天光学位置');
           await Promise.all([
             earthView.prepareCityPhoto(candidate, size, 4000),
             env.constellationArt?.prepare(
               skyPhotoId,
               skyDetailView(candidate, size),
-              wantsArt(candidate, size, true)
+              wantsArt(candidate, size, true),
+              2500,
+              {
+                ...skyCultureArtOptions(frozenChart),
+                focusTargetId: candidate.focusTargetId,
+                overviewArtworkId: candidate.overviewArtworkId,
+              }
             ),
             env.skyDetail?.prepare(
               skyPhotoId,
@@ -769,7 +885,7 @@ export function createXuntianViewRenderer(
         if (disposed) throw Error('巡天取景器已关闭');
         // The terrain prefetch may yield. Snapshot the live model time and
         // entrance together immediately before drawing a survey shutter.
-        const actual = atShutter ? atShutter() : frame;
+        const actual = atShutter ? freezeCulture(atShutter()) : frame;
         if (!valid(actual)) throw Error('没有可用的巡天光学位置');
         target = makeTargets(renderer, size.w, size.h);
         const result = draw(actual, size, target);
@@ -801,7 +917,12 @@ export function createXuntianViewRenderer(
         );
         paintConstellationArtCaption(
           out,
-          result.constellationArt,
+          skyCulturePhotoCredit(
+            result.constellationArt,
+            result.chartSettings,
+            actual.photoNames,
+            actual.q.t
+          ),
           cityCaptionHeight + elevationCaptionHeight + skyCaptionHeight
         );
         const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));

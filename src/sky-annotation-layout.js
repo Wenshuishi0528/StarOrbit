@@ -1,4 +1,5 @@
-import chart from '../assets/star-chart.json';
+import { skyReferenceLayers, rotateSkyReference } from './sky-reference.js';
+import { getSkyCulture, normalizeSkyCulture } from './sky-cultures.js';
 import { equatorial } from './environment-math.js';
 import { solarApparent } from './solar-system.js';
 import { solarLabel } from './solar-targets.js';
@@ -17,21 +18,55 @@ const unit = (v) => {
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 let textCanvas = null;
 const widths = new Map();
-export const SKY_CONSTELLATION_LINES = chart.constellations
-  .flatMap((c) => c.lines)
-  .map((path) => path.map((p) => equatorial(...p)));
-export const SKY_CONSTELLATION_BOUNDARIES = chart.boundaries.map((path) =>
-  path.map((p) => equatorial(...p))
-);
-const constellationNames = chart.constellations.flatMap((c) =>
-  (c.labelPositions || [[c.ra, c.dec]]).map(([ra, dec], i) => ({
-    key: 'const-' + c.id + '-' + i,
-    kind: 'constellation',
-    targetId: 'constellation:' + c.id,
-    direction: equatorial(ra, dec),
-    names: c,
-  }))
-);
+const cultureGeometry = new Map();
+function skyCultureGeometry(id) {
+  const culture = normalizeSkyCulture(id);
+  if (!cultureGeometry.has(culture)) {
+    const data = getSkyCulture(culture);
+    cultureGeometry.set(culture, {
+      primaryStars: new Set(
+        data.asterisms.flatMap((item) => [
+          ...(item.primaryMemberHips || item.lineMemberHips || item.memberHips || []).map(
+            (hip) => 'hip:' + hip
+          ),
+          ...(
+            item.primaryMemberObjectIds ||
+            item.lineMemberObjectIds ||
+            item.memberObjectIds ||
+            []
+          ).map((id) => String(id).replace(/^star:/, 'hip:')),
+        ])
+      ),
+      lines: data.asterisms
+        .flatMap((c) => c.lines)
+        .map((path) => path.map((p) => equatorial(...p))),
+      boundaries: data.boundaries.map((path) => path.map((p) => equatorial(...p))),
+      names: data.asterisms.flatMap((c) =>
+        (c.labelPositions || [[c.ra, c.dec]]).map(([ra, dec], i) => ({
+          key: (culture === 'western' ? 'const-' : 'asterism-chinese-') + c.id + '-' + i,
+          kind: 'constellation',
+          culture,
+          theme: c.theme,
+          subsidiary: !!c.isSubsidiary,
+          targetId: c.targetId,
+          direction: equatorial(ra, dec),
+          names: c.names || c,
+        }))
+      ),
+    });
+  }
+  return cultureGeometry.get(culture);
+}
+
+export function getSkyConstellationLines(culture = 'western') {
+  return skyCultureGeometry(culture).lines;
+}
+export function getSkyConstellationBoundaries(culture = 'western') {
+  return skyCultureGeometry(culture).boundaries;
+}
+// Existing callers and fixtures retain the conventional western paths.
+export const SKY_CONSTELLATION_LINES = getSkyConstellationLines();
+export const SKY_CONSTELLATION_BOUNDARIES = getSkyConstellationBoundaries();
 
 export function skyAnnotationTextWidth(text, font = 13) {
   const key = font + '|' + text;
@@ -67,7 +102,25 @@ export function buildSkyAnnotationLayout({
 }) {
   if (!q || !axes || !(width > 0 && height > 0 && fovY > 0 && fovY < 180))
     return { labels: [], candidates: 0, total: 0, unfiltered: false, stats: { scanned: 0 } };
-  const density = clamp(settings.starLabelDensity ?? 0.95, 0, 1),
+  const culture = normalizeSkyCulture(settings.skyCulture),
+    cultureData = getSkyCulture(culture),
+    selectedAsterism = cultureData.asterisms.find((item) => item.targetId === focusTargetId),
+    selectedMembers = new Set(
+      selectedAsterism?.primaryMemberHips ||
+        selectedAsterism?.lineMemberHips ||
+        selectedAsterism?.memberHips ||
+        []
+    ),
+    selectedPhysical = new Set([
+      ...[...selectedMembers].map((hip) => 'hip:' + hip),
+      ...(
+        selectedAsterism?.primaryMemberObjectIds ||
+        selectedAsterism?.lineMemberObjectIds ||
+        selectedAsterism?.memberObjectIds ||
+        []
+      ).map((id) => String(id).replace(/^star:/, 'hip:')),
+    ]),
+    density = clamp(settings.starLabelDensity ?? 0.95, 0, 1),
     unfiltered = density >= 1,
     aspect = width / height;
   const tangent = Math.tan((fovY * DEG) / 2),
@@ -76,7 +129,12 @@ export function buildSkyAnnotationLayout({
   const bodies = solarApparent(q, eyeKm).filter(
     (body) => !body.behindEarth && (showMoon || body.id !== 'Moon')
   );
-  const starsLimit = 2.5 + density * 3 + Math.max(0, Math.log2(40 / fovY)) * 1.35;
+  const zoom = Math.max(0, Math.log2(40 / fovY)),
+    starsLimit =
+      culture === 'chinese' ? 1.8 + density * 2 + zoom * 1.35 : 2.5 + density * 3 + zoom * 1.35,
+    chinesePrimary =
+      culture === 'chinese' && !unfiltered ? skyCultureGeometry(culture).primaryStars : null,
+    secondaryLimit = starsLimit - Math.max(0, Math.log2(fovY / 3)) * 0.8;
   function add(item) {
     const dir = item.direction,
       z = dot(dir, axes.forward);
@@ -90,7 +148,7 @@ export function buildSkyAnnotationLayout({
     )
       return;
     if (blocked(dir)) return;
-    const font = item.kind === 'constellation' ? 14 : 13;
+    const font = item.kind === 'reference' ? 11 : item.kind === 'constellation' ? 14 : 13;
     const text =
       item.regionOnly && skyAnnotationTextWidth(item.text, font) + 4 > width - 10
         ? deepSkyRegionLabel(item.object.id, language)
@@ -134,10 +192,10 @@ export function buildSkyAnnotationLayout({
   // search. It still goes through the same category and solid-body filters.
   if (
     (settings.starLabels || settings.catalogStarLabels) &&
-    /^(hip|tycho):/.test(focusTargetId || '') &&
+    /^(hip|tycho|gaia):/.test(focusTargetId || '') &&
     !stars.some((star) => star.id === focusTargetId)
   ) {
-    const target = getXuntianTarget(focusTargetId, language);
+    const target = getXuntianTarget(focusTargetId, language, culture);
     if (target?.type === 'star')
       stars.push({
         ...target,
@@ -145,19 +203,49 @@ export function buildSkyAnnotationLayout({
         mag: Infinity,
       });
   }
+  if (settings.starLabels && selectedPhysical.size) {
+    const existing = new Set(stars.map((star) => star.id));
+    for (const id of selectedPhysical) {
+      if (existing.has(id)) continue;
+      const target = getXuntianTarget(id, language, culture);
+      if (target?.type === 'star')
+        stars.push({
+          ...target,
+          hip: Number(/^hip:(\d+)$/.exec(id)?.[1]) || null,
+          mag: target.mag ?? Infinity,
+        });
+    }
+  }
   for (const star of stars) {
-    const named = star.hip && starChartHasName(star.hip);
+    const gaia = star.id?.startsWith('gaia:'),
+      named = star.hip ? starChartHasName(star.hip, culture) : culture === 'chinese' && gaia;
     if (named ? !settings.starLabels : !settings.catalogStarLabels) continue;
+    // The Chinese catalogue includes thousands of added/secondary names. Wide
+    // fields first show the brighter figure members; zoom reveals the rest.
+    // Explicit targets and the selected figure's own members bypass density,
+    // while density 1 retains the shared, genuinely unfiltered contract.
+    if (
+      chinesePrimary &&
+      named &&
+      !selectedPhysical.has(star.id) &&
+      star.id !== focusTargetId &&
+      !chinesePrimary.has(star.id) &&
+      (fovY >= 16 || star.mag > secondaryLimit)
+    )
+      continue;
     const text = star.hip
-      ? starChartName(star.hip, language)
-      : 'Tycho-2 · ' + star.ra.toFixed(4) + '° / ' + star.dec.toFixed(4) + '°';
+      ? starChartName(star.hip, language, culture)
+      : gaia
+        ? getXuntianTarget(star.id, language, culture)?.name || 'Gaia DR3 ' + star.id.slice(5)
+        : 'Tycho-2 · ' + star.ra.toFixed(4) + '° / ' + star.dec.toFixed(4) + '°';
     add({
       ...star,
       key: star.hip ? 'star-' + star.hip : star.id,
       targetId: star.id,
       kind: 'star',
       text,
-      priority: star.mag,
+      selected: selectedPhysical.has(star.id),
+      priority: selectedPhysical.has(star.id) ? -1 : star.mag,
     });
   }
   if (settings.solarSystemLabels)
@@ -192,8 +280,16 @@ export function buildSkyAnnotationLayout({
       });
     }
   if (settings.constellationNames)
-    for (const item of constellationNames)
-      add({ ...item, text: item.names[language] || item.names.en || item.names.zh, priority: 1.7 });
+    for (const item of skyCultureGeometry(culture).names) {
+      const selected = item.targetId === focusTargetId;
+      if (!unfiltered && item.subsidiary && !selected && fovY > 25) continue;
+      add({
+        ...item,
+        selected,
+        text: item.names[language] || item.names.en || item.names.zh,
+        priority: selected ? -3 : item.subsidiary ? 2.1 : 1.7,
+      });
+    }
   if (settings.deepSkyObjects) {
     const regions = [];
     for (const object of DEEP_SKY_OBJECTS) {
@@ -233,6 +329,23 @@ export function buildSkyAnnotationLayout({
       });
     }
   }
+  for (const layer of skyReferenceLayers({
+    settings,
+    epoch: q.t,
+    fovY,
+    aspect,
+    forward: axes.forward,
+    language,
+  }))
+    for (const label of layer.labels)
+      add({
+        ...label,
+        key: 'reference-' + label.key,
+        kind: 'reference',
+        direction: rotateSkyReference(layer.columns, label.direction),
+        color: layer.color,
+        priority: 3.2,
+      });
   const centerDistance = (item) => Math.hypot(item.x - width / 2, item.y - height / 2);
   const selected = candidates.filter((item) => item.targetId === focusTargetId);
   const central = selected.length
@@ -240,6 +353,7 @@ export function buildSkyAnnotationLayout({
     : candidates.filter(
         (item) =>
           item.kind !== 'constellation' &&
+          item.kind !== 'reference' &&
           centerDistance(item) <= Math.min(24, Math.min(width, height) * 0.1)
       );
   const focus = central.reduce(
@@ -272,6 +386,15 @@ export function buildSkyAnnotationLayout({
     candidates: candidates.length,
     total: labels.length,
     unfiltered,
-    stats: { scanned: stars.length, deepSky: labels.filter((item) => item.kind === 'deep').length },
+    stats: {
+      culture,
+      selectedAsterism: selectedAsterism?.targetId || null,
+      selectedMembers: selectedPhysical.size,
+      selectedHipMembers: selectedMembers.size,
+      starMagnitudeLimit: unfiltered ? null : starsLimit,
+      secondaryStarsEnabled: !chinesePrimary || fovY < 16,
+      scanned: stars.length,
+      deepSky: labels.filter((item) => item.kind === 'deep').length,
+    },
   };
 }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { EarthDetail, detailRect } from './earth-detail.js';
 import { earthSurfaceRadiance } from './earth-shaders.js';
 import { EARTH_RADIUS, dot, norm } from './orbit.js';
-import { coneHalfAngle } from './xuntian-view-math.js';
+import { coneHalfAngle, sphereIntersectsRectangularView } from './xuntian-view-math.js';
 import { earthHit, quadVertex } from './xuntian-view-shaders.js';
 import { cityOpticalView } from './city-terrain-view.js';
 import { EarthElevationLayer } from './earth-elevation-layer.js';
@@ -211,7 +211,17 @@ export function createXuntianEarthView(env, quad) {
   let visible = false,
     disposed = false,
     previousFootprint = null;
+  const surfaceVisible = [false, false];
   function prepare(frame, size, force = false, photo = false) {
+    // Attribution follows possible ground/ridges in the actual detector,
+    // independently of the broader 300 km atmosphere rendering envelope.
+    surfaceVisible[Number(photo)] = sphereIntersectsRectangularView(
+      frame.eyeKm,
+      frame.axes,
+      frame.fovY,
+      size.aspect,
+      EARTH_RADIUS + 12
+    );
     visible = angularlyVisible(frame, size.aspect);
     if (!visible) {
       env.cityTerrain?.setView(photo ? cityPhotoId : cityScopeId, null, photo ? 3 : 2, force);
@@ -414,11 +424,12 @@ export function createXuntianEarthView(env, quad) {
     cityStatus: (photo = false) => env.cityTerrain?.status(photo ? cityPhotoId : cityScopeId),
     elevationStatus: (photo = false) => ({
       ...env.elevation?.status(photo ? cityPhotoId : cityScopeId),
-      visible,
+      visible: surfaceVisible[Number(photo)],
     }),
     releasePhoto: () => {
       env.cityTerrain?.release(cityPhotoId);
       env.elevation?.release(cityPhotoId);
+      surfaceVisible[1] = false;
     },
     source() {
       return {

@@ -1,14 +1,14 @@
 # 验证与验收指南
 
-适用版本：v1.20。作者：Wenshuishi。本文说明如何验证当前能力和保存证据；实际通过范围以对应版本的执行记录为准。本页不是标准符合性认证。
+适用版本：本地 v1.25。作者：Wenshuishi。本文说明如何验证当前能力和保存证据；实际通过范围以对应版本的执行记录为准。本页不是标准符合性认证。
 
 [能力与范围](product-scope.md) · [使用手册](../使用说明.md) · [技术资料索引](README.md) · [更新记录](../CHANGELOG.md)
 
 ## 基线、结果与证据
 
-`product-scope.md` 的能力ID依据现行实现建立。本批结果由[本地 v1.20 执行记录](v1.20-validation.json)保存，区分已执行、失败、受阻和未运行；以下命令与步骤不预先表示通过。后续版本另建记录。
+`product-scope.md` 的能力ID依据现行实现建立。本地 v1.25 的实际结果见[本批执行记录](v1.25-validation.json)，区分已执行、失败、受阻和未运行。以下流程和目标不能替代对应项目的实际结果。
 
-本地 v1.20 已执行文档与格式示例检查、完整默认回归、格式检查、三种构建和两种拆分资产校验；Chrome 的帮助专项通过 107 项断言，涵盖四种语言、两种窗口及八步导览。本机运行目录、启动器和便携文档已检查，并经过独立 subagent 复核。该摘要不表示全部任务、浏览器或操作系统重新完成视觉和持久化验收；各项范围和未测项以上述执行记录为准。
+[v1.20 执行记录](v1.20-validation.json)保留该版本的自动回归、构建和 107 项 Chrome 帮助检查等历史证据，不能作为本批中国星官功能的通过结论。v1.21 的中国星官历史验收保留于 [v1.21 记录](v1.21-validation.json)。v1.22 的坐标网与巡天距离历史结果见 [v1.22 记录](v1.22-validation.json)。v1.23 的宇宙探索验收保留于 [v1.23 记录](v1.23-validation.json)。v1.24 的月球观测与地形历史验收见 [v1.24 记录](v1.24-validation.json)。本批补齐星官插画，扩展月面地名、着陆点及三维地质图；几何配准、完整目录、标注开关、导出和四语言分别核对；未执行的系统、浏览器和操作保持明确状态。
 
 每条执行记录至少包括：
 
@@ -73,9 +73,24 @@ git diff --check
 | SO-TELESCOPE-01 | `tests/xuntian-pointing.mjs`、`tests/xuntian-crosshair.mjs`、`tests/xuntian-view-render.mjs`、`tests/solar-data.mjs`；`tests/browser/xuntian-view-render.js` | 搜索/固定/手动/导航球接管、遮挡、近站深度、照片；四波段/两分辨率/坏快照；时刻与来源正确 | 模块+WebGL+下载PNG；记录构图、快照、像素/几何结果 |
 | SO-EARTH-01 | `tests/city-terrain-cache.mjs`、`tests/city-terrain.mjs`、`tests/earth-elevation-math.mjs`、`tests/earth-elevation.mjs`；`tests/browser/earth-elevation.js`、`earth-elevation-geography.js` | 城市离线/下载/取消/删除/重开，高程/照片、地理开关、缺源与释放；影像/高程来源分开 | 模块+Chrome/WebKit/IndexedDB；保存视野、块数、预算、PNG和网络/重开结果 |
 | SO-SKY-01 | `tests/deep-sky-catalog.mjs`、`tests/sky-detail-cache.mjs`、`tests/constellation-art.mjs`；`tests/browser/sky-detail.js`、`sky-source-switch.js` | 三种目录范围、五种影像来源、回退、共享照片、关闭释放；目录/影像天区与年代正确 | 模块+完整渲染/重开/窄屏；保存来源、视场、目录口径和PNG |
+| SO-LUNAR-01 | `tests/lunar-math.mjs`、`tests/lunar-terrain.mjs`、`tests/lunar-features.mjs`、`tests/lunar-state.mjs`；实际浏览器 | NASA 参考、观测视角、真实地形、地名、事件、回放、导出、巡天交接 | 不将数值检查替代实际画面；不声称完整物理月食渲染或高分辨率地形测绘 |
+| SO-COSMIC-01 | `tests/cosmic-math.mjs`、`tests/cosmic-content.mjs`、`tests/cosmic-state.mjs`；完整应用实际操作 | 五主题、参数／曲线、暂停／切页、真实目标、署名导出、四语言窄屏 | 数值与实际 WebGL 分开；记录模型边界及浏览器范围 |
 | SO-RESOURCE-01 | `tests/resource-fetch.mjs`、`tests/resource-cache.mjs`、`tests/resource-recovery.mjs`、`tests/cloud-switch.mjs`、Python服务测试；`tests/browser/cloud-versions.js` | 重复下载、配额、断网、重启、收藏、取消/删除迟到响应；保留有效数据和独立错误 | 模拟服务与真实浏览器分开，使用隔离缓存；保存事务、请求和状态 |
 | SO-SAVE-01 | `tests/scene-share.mjs`、`tests/environment-presets.mjs`、`tests/free-flight-instruments.mjs`；`tests/browser/missions-reload.js`、`observation-archive.js` | 场景往返、缺快照、偏好独立、飞行读取、同源重开和存储失败；临时副本明确 | 正常/受限存储及不同源对照；保存测试文件和步骤 |
 | SO-DELIVERY-01 | `scripts/check-docs.py`、`tests/docs-examples.mjs`、`tests/documentation.py`、`tests/web-build.mjs`；`tests/browser/help-current.js`、`floating-windows.js`，ZIP/启动器核验 | 版本、帮助、三构建资源与包内文档一致；四语言关键入口窄屏可达；启动器目录正确 | 文档检查+三构建+解压包+实际入口；保存版本、SHA-256、签名/启动及链接检查范围 |
+
+## 中国星官持续验收目标
+
+以下项目按本批执行记录分别确认，不因存在实现或素材而自动通过：
+
+1. 固定清代资料基线，核对全部天区、独立／附属星官及成员解析；HIP、Gaia 与星团身份不能互相冒用，未解析项明确记录；不造精确宿界。
+2. 中西切换不改时刻、镜头方向或影像源；名称、连线、搜索、准星、成员图与四语言一致；旧体系群组不硬映射。
+3. 主画面、巡天和实际 PNG 使用同一体系；深度放大图像淡出，地球遮挡、选中成员星与照片独立标注开关有效。
+4. 检查密集北天、广角四象、拥挤银河天区和无插画星官；窄屏能找到天区／星官与定位，成员图可读。
+5. 同源重开、场景导入导出及环境收藏恢复体系；旧场景缺字段回到西方，非法值被严格校验拒绝。
+6. 反复切换、关闭和导出后核对图像请求取消、纹理预算与释放；离线内置数据和图像可用，最终便携包包含资料与各自许可。
+
+已存在的 `tests/sky-culture-rendering.mjs` 供共享图像与文化隔离专项检查，其实际覆盖以源码和本批执行结果为准；完整应用、资料核验、存储往返和视觉检查仍需分别记录。
 
 ## 浏览器脚本如何使用
 
@@ -118,7 +133,7 @@ DEM_ENGINE=webkit node tests/earth-elevation-source-browser.mjs
 | 类别 | 可查资料或入口 | 使用边界 |
 | --- | --- | --- |
 | 当前能力基线 | [产品范围](product-scope.md)及本页能力映射 | 当前实现整理，不是追补的历史需求审批记录 |
-| 本批执行 | `docs/v1.20-validation.json` | 由实际运行填写；每种未运行的浏览器、构建或来源必须保留相应状态 |
+| 本批执行 | `docs/v1.23-validation.json` | 由实际运行填写；每种未运行的浏览器、构建或来源必须保留相应状态 |
 | 历版验证 | `docs/v*-validation.json`、[v0.55记录](v0.55-validation.md)、各版本专题“验证”章节 | 对应版本、样本和环境的历史证据，不能证明当前源码全部通过 |
 | 高程与城市 | [地形数据和检查](v1.17-earth-elevation.md)、[城市与星空](v1.16-city-sky.md)、相关source-browser脚本 | 第三方源可能变化；完整联网检查、合成故障和离线重开分别记录 |
 | 星空与太阳 | [高清星空](v1.15-sky-detail.md)、[深空目录](deep-sky-catalog.md)、[太阳数据](solar-observations.md) | 历史目录/影像年代与软件时刻分开；来源/颜色和回退按实际使用写入 |

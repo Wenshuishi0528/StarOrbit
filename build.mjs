@@ -38,6 +38,9 @@ environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
 }
 {const manifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));const {file,...base}=manifest.base;environmentAssets.elevation={version:manifest.version,base:{...base,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')},source:manifest.source};}
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
+{const geology=JSON.parse(fs.readFileSync('assets/moon/geology/manifest.json','utf8'));environmentAssets.lunarGeology=Object.fromEntries(geology.outputs.map(record=>[record.id,image(record.file)]));}
+{const {file,...terrain}=JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json','utf8'));environmentAssets.lunarTerrain={...terrain,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')};}
+
 {
  const art=JSON.parse(fs.readFileSync('assets/constellation-art/manifest.json','utf8'));
  environmentAssets.constellationArt={version:art.version,constellationImages:art.constellationImages,images:art.images.map(c=>({imageId:c.imageId,width:c.width,height:c.height,size:c.size,constellationIds:c.constellationIds,anchors:c.anchors,url:image(c.file)}))};
@@ -45,6 +48,20 @@ environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
   const directory=out+'/assets/constellation-art';fs.mkdirSync(directory,{recursive:true});
   for(const name of ['README.md','LICENSE-FAL-1.3.html','LICENSE-CC-BY-SA-4.0.txt','upstream-description.md'])fs.copyFileSync('assets/constellation-art/'+name,directory+'/'+name);
   fs.writeFileSync(directory+'/manifest.json',JSON.stringify({...art,images:art.images.map((record,i)=>({...record,file:'../'+path.basename(environmentAssets.constellationArt.images[i].url)}))},null,2));
+ }
+}
+
+{
+ const art=JSON.parse(fs.readFileSync('assets/chinese-sky/art/manifest.json','utf8'));
+ environmentAssets.chineseConstellationArt={version:art.version,artworks:art.artworks,images:art.images.map(({imageId,file})=>({imageId,url:image(file)}))};
+ if(split){
+  const directory=out+'/assets/chinese-sky';fs.mkdirSync(directory+'/art',{recursive:true});
+  fs.copyFileSync('LICENSE',out+'/LICENSE');
+  for(const name of ['README.md','catalog.json'])fs.copyFileSync('assets/chinese-sky/'+name,directory+'/'+name);
+  fs.mkdirSync(directory+'/source',{recursive:true});
+  for(const name of ['CC-BY-SA-4.0.txt','index.json','I-239-hip_main.tsv','I-311-hip2.tsv','Gaia-DR3.csv','Gaia-DR3-AIP.xml','Gaia-HIP-crossmatch.csv'])fs.copyFileSync('assets/chinese-sky/source/'+name,directory+'/source/'+name);
+  for(const name of ['README.md','provenance.json','rigid-placements.json','expansion-brief.json','subjects.txt'])fs.copyFileSync('assets/chinese-sky/art/'+name,directory+'/art/'+name);
+  fs.writeFileSync(directory+'/art/manifest.json',JSON.stringify({...art,images:art.images.map((record,i)=>({...record,file:'../../../'+environmentAssets.chineseConstellationArt.images[i].url}))},null,2));
  }
 }
 
@@ -71,8 +88,20 @@ html=html.replace('</head>','<!-- Three.js license\n'+fs.readFileSync('node_modu
 html=html.replace('</head>','<!-- Astronomy Engine MIT / three-mesh-bvh MIT licenses\n'+fs.readFileSync('node_modules/astronomy-engine/astronomy.js','utf8').split('*/')[0].slice(3)+'\n'+fs.readFileSync('node_modules/three-mesh-bvh/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Earth and star credits\n'+fs.readFileSync('素材与迁移说明.md','utf8')+'\n'+fs.readFileSync('assets/D3-CELESTIAL-LICENSE.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Constellation art attribution and placement license\n'+fs.readFileSync('assets/constellation-art/README.md','utf8')+'\n'+fs.readFileSync('assets/constellation-art/LICENSE-CC-BY-SA-4.0.txt','utf8')+'\n'+fs.readFileSync('assets/constellation-art/LICENSE-FAL-1.3.html','utf8').replaceAll('<','&lt;').replaceAll('>','&gt;')+' -->\n</head>');
+html=html.replace('</head>','<!-- Chinese sky culture and modern teaching art credits\n'+fs.readFileSync('assets/chinese-sky/README.md','utf8')+'\n'+fs.readFileSync('assets/chinese-sky/art/README.md','utf8')+'\n'+fs.readFileSync('assets/chinese-sky/source/CC-BY-SA-4.0.txt','utf8')+' -->\n</head>');
+html=html.replace('</head>','<!-- Stellar distance catalogue attribution\n'+fs.readFileSync('assets/stellar-distances/README.md','utf8')+' -->\n</head>');
+if(split) fs.cpSync('assets/stellar-distances',out+'/assets/stellar-distances',{recursive:true});
+html=html.replace('</head>','<!-- Cosmic explorer: model methods and sources\n'+fs.readFileSync('assets/cosmic/README.md','utf8')+' -->\n</head>');
+if(split) fs.cpSync('assets/cosmic',out+'/assets/cosmic',{recursive:true});
+html=html.replace('</head>','<!-- Lunar observatory: sources and scientific scope\n'+fs.readFileSync('assets/moon/README.md','utf8')+'\n'+fs.readFileSync('assets/moon/SCIENCE.md','utf8')+' -->\n</head>');
+if(split){fs.mkdirSync(out+'/assets/moon',{recursive:true});for(const file of ['README.md','SCIENCE.md','terrain-manifest.json','lola-720x360.i16.gz','lroc-color-2k.jpg'])fs.copyFileSync('assets/moon/'+file,out+'/assets/moon/'+file);}
+for(const directory of ['places','geology']){if(split)fs.cpSync('assets/moon/'+directory,out+'/assets/moon/'+directory,{recursive:true});html=html.replace('</head>','<!-- Lunar '+directory+' provenance\n'+fs.readFileSync('assets/moon/'+directory+'/README.md','utf8')+' -->\n</head>');}
+
+
+html=html.replace('</head>','<!-- OpenCC search character mapping, Apache-2.0\n'+fs.readFileSync('assets/OPENCC-LICENSE.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- GeoTIFF decoder licenses\n'+fs.readFileSync('assets/GEOTIFF-DEPENDENCY-LICENSES.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.readFileSync('tests/reference/atmosphere-spectrum/LICENSE-Bruneton.txt','utf8')+' -->\n</head>');
 const bytes=Buffer.byteLength(html);
-if(bytes>410e6)throw new Error('Standalone app exceeds the 410 MB distribution budget');
+// v1.25 includes the lunar geological atlas and expanded Chinese teaching art.
+if(bytes>500e6)throw new Error(`Standalone app is ${bytes} bytes, exceeding the 500 MB distribution budget`);
 if(split){fs.writeFileSync(out+'/index.html',html);fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('StarOrbit.html',html);fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}

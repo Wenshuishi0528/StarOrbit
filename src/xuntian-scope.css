@@ -618,14 +618,12 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
   color: #a2acb3;
 }
 
-/* Independent instruments: keep the unmoved map clear of the finder. Saved
-   floating positions remain owned by the player and override these defaults. */
+/* Independent instruments: keep the unmoved map clear of the compact finder.
+   Expanded finders keep their full layout; saved floating positions override
+   these defaults. */
 @media (min-width: 1351px) {
-  #xuntianScope:not([data-floating-moved]) {
+  #xuntianScope:not(.expanded):not([data-floating-moved]) {
     right: 310px;
-  }
-  #xuntianScope.expanded:not([data-floating-moved]) {
-    width: min(calc(100vw - 680px), calc(146dvh - 110px));
   }
   body.xt-scope-open #orbitMinimap:not([data-floating-moved]) {
     left: 350px;
@@ -633,11 +631,6 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
     top: 110px;
     bottom: auto;
     width: 300px;
-  }
-  body.xt-scope-open:has(#orbitMinimap:not([hidden]))
-    #xuntianScope.expanded:not([data-floating-moved]) {
-    right: 310px;
-    width: min(calc(100vw - 1000px), calc(146dvh - 110px));
   }
 }
 @media (min-width: 761px) and (max-width: 1350px) {
@@ -650,7 +643,8 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
     max-height: 200px;
     overflow: auto;
   }
-  body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope:not([data-floating-moved]) {
+  body.xt-scope-open:has(#orbitMinimap:not([hidden]))
+    #xuntianScope:not(.expanded):not([data-floating-moved]) {
     top: 454px;
     bottom: auto;
     right: 20px;
@@ -668,14 +662,37 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
     max-height: calc(47dvh - 140px);
     overflow: auto;
   }
-  body.xt-scope-open:has(#orbitMinimap:not([hidden]))
-    #xuntianScope.expanded:not([data-floating-moved]) {
-    max-height: 53dvh;
-  }
 }
 
-@media (min-width: 1351px) and (max-width: 1799px) {
-  body.xt-scope-open:has(#orbitMinimap:not([hidden])) #xuntianScope.expanded .xt-body {
-    display: block;
+#xuntianScope .xt-lunar-discovery {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #6985ac;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #20324ce6, #172337e6);
+}
+#xuntianScope .xt-lunar-discovery[hidden] {
+  display: none;
+}
+#xuntianScope .xt-lunar-discovery strong {
+  color: #e1edff;
+  font-size: 14px;
+}
+#xuntianScope .xt-lunar-discovery p {
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #b8c9e1;
+}
+#xuntianScope .xt-lunar-discovery button {
+  flex: 0 0 auto;
+}
+@media (max-width: 480px) {
+  #xuntianScope .xt-lunar-discovery {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
