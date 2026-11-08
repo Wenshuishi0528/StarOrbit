@@ -1,5 +1,13 @@
 # 开发、发布与维护
 
+## 2026-11-09 发布渠道迁移
+
+完整开发工程与原始 Release 位于私有仓库 `Wenshuishi0528/StarOrbit-source`。公开仓库 `Wenshuishi0528/StarOrbit` 保存已构建网页版、公开文档及更新记录，Pages 从公开仓库 main 根目录发布，地址为 https://wenshuishi0528.github.io/StarOrbit/ 。
+
+原源码仓库的 Pages 工作流已停用。后续先在私库工作副本完成所需测试、`npm run build:web` 和 `node tests/web-build.mjs dist`，再将经过核对的 dist 文件与公开文档同步到独立公开工作副本。检查公开差异没有开发源码、source map 或可编辑工程后提交推送，等待公开仓库 Pages 部署成功，再验证版本、资源和主要界面。
+
+完整更新日志保留全部开发版本，公开 Release 归档原说明并注明原发布日期。便携包与开发附件保存于私库。以下旧版 CI 与发布示例需结合这一渠道分工使用。
+
 适用版本：本地 v1.36。作者：Wenshuishi。核对日期：2026-11-08。
 
 本页按本地 v1.36 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
