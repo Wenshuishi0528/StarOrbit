@@ -4,7 +4,7 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
-## v1.36 — 2026-11-08 · 本机版 / Local build
+## v1.36 — 2026-11-08
 
 地表移动时按视野加载卫星影像与分级高程，主页地球复用同一缓存；加载半径可分别调整，漫游影像和高程可独立清理。增加默认展开的位置小地图，显示朝向、地名和比例尺；云层沿用主页数据与设置，修正从云层下方观察的显示。夜景默认更新为2025年500米数据，保留2024及2016选项；新增夜景资源采用AVIF分块按需加载。NASA 下载目录自动预核验覆盖范围，可筛选基本全球版本；云图库支持确认后删除最新及收藏版本，同步清理浏览器、本机文件和完成任务引用。
 

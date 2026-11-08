@@ -236,7 +236,25 @@
     "server": "restarted only idle application server to load new Python APIs"
   },
   "publication": {
-    "status": "pending"
+    "status": "published",
+    "sourceCommit": "560da0daa7d26d51d7fa6d1eabc2819c12aa00b6",
+    "pagesWorkflowRun": 42496852244,
+    "pagesWorkflowConclusion": "success",
+    "web": {
+      "url": "https://wenshuishi0528.github.io/StarOrbit/",
+      "version": "1.36",
+      "entryBytes": 629465,
+      "bundle": "assets/app.bundle-9d9df9e8c35b3671.js",
+      "sha256": "9d9df9e8c35b367147efd81abbb8f0e9b00cd3e4170bce672f7780699701a32a",
+      "matchesLocalWebBuild": true,
+      "actualBrowser": "initialized v1.36,2025 default,ground minimap visible,no console errors"
+    },
+    "release": {
+      "url": "https://github.com/Wenshuishi0528/StarOrbit/releases/tag/v1.36",
+      "zipBytes": 544423851,
+      "sha256": "0d3f6cfb824651bb886241b93ef49e86c5d3f3116f9038e574790dae77c5a907",
+      "packageChecks": "648 files; ZIP CRC,114 documents813 references,universal launcher,portable root and cloud modules verified"
+    }
   },
   "limitations": [
     "Chrome/macOS actual UI validation; Safari/Firefox/mobile not exercised",
