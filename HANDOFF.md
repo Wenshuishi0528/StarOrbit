@@ -2,7 +2,7 @@
 
 **当前文档基线：本地 v1.33 · 作者：Wenshuishi · 核对日期：2026-11-08**
 
-本批新增星际穿梭、可靠距离星场、中西星图侧视、航点与导出，复用太阳系星历与资源。实现口径见[星际穿梭说明](docs/interstellar.md)，验收见[验证指南](docs/verification.md)。v1.33为本地更新；本批未推送GitHub或发布网页。
+本批新增星际穿梭、可靠距离星场、中西星图侧视、航点与导出，复用太阳系星历与资源。实现口径见[星际穿梭说明](docs/interstellar.md)，验收见[验证指南](docs/verification.md)。v1.33源码已推送GitHub；网页版由main分支的GitHub Pages流程自动部署，线上生效以流程完成及实际version.json为准。版本验收记录保留测试当时的发布状态。
 
 ## 当前接手入口
 
