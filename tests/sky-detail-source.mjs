@@ -227,3 +227,12 @@ assert.ok(
 console.log(
   'Sky imagery selection: same-source LOD, coverage fallback, shared controls, legacy master compatibility and honest stacked export credits passed'
 );
+
+// A birthday postcard opts into full-field DSS; ordinary finder policy stays unchanged.
+const wideProviders = [{id:'dss-color',minOrder:0,maxOrder:9,format:'jpg'}];
+const wideView = {forward:[1,0,0],right:[0,1,0],up:[0,0,1],fovY:65,aspect:1.6,pixelHeight:1500};
+const widePlan = planSkyDetailSelection(wideProviders,{...wideView,wideField:true},'dss');
+assert(widePlan.tiles.length>0 && widePlan.tiles.length<=36);
+assert(widePlan.tiles.every(t=>t.provider.id==='dss-color'));
+assert.equal(planSkyDetailSelection(wideProviders,wideView,'dss').fallback,'wide');
+assert.equal(planSkyDetailSelection(wideProviders,{...wideView,wideField:true},'galaxy').tiles.length,0);

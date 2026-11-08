@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.30 — 2026-11-08 · 本机版 / Local build
+
+生日卡背面改为独立星空明信片：东方／西方天区、银河／DSS背景、插画与连线分别选择；支持星名、坐标网等标注、独立亮度及缩放平移旋转。全幅横竖版与可选同尺寸导出，正反面预览分别缓存。DSS宽视场使用完整同源巡天瓦片，保留真实坐标与源配准。
+
+**English:** Birthday backs are independent full-frame postcards with Chinese/Western fields, Milky Way/DSS backgrounds, separate artwork/lines/labels, brightness and framing controls. Landscape, portrait and front-sized exports keep separate preview caches. Wide-field DSS uses complete survey tiles and preserves celestial registration.
+
+[本批验证 / Validation](docs/v1.30-validation.json)
+
 ## v1.29 — 2026-11-08
 
 新增生日星空卡：太阳黄经十二宫、明确版本的值日二十八宿规则及交界日处理；完整40项白话介绍、80条可编辑祝福，中西单卡、双联与纯星图PNG导出。星图与现有插画共用投影，制卡不改动轨道时间和全局设置。支持收礼人、赠送人和赠送日期落款；背面复用软件银河星空场景与独立生日时刻，星名、插画可选，正反面PNG可一次打包ZIP。翼宿插画及其方向保持不变。巡天搜索补齐二十八宿文化全称及繁简别名；巡天视角的航天器标注统一为“巡天望远镜”和“中国空间站”。

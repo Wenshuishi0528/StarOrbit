@@ -24,6 +24,26 @@ export function installBirthdayCard(sim) {
     backLabels,
     backArtwork,
     backTimeNote,
+    frontControls,
+    backControls,
+    backTarget,
+    backCulture,
+    backBackground,
+    backFormat,
+    backLines,
+    backNames,
+    backSkyBrightness,
+    backArtBrightness,
+    backDensity,
+    backGrid,
+    backEcliptic,
+    backPlanets,
+    backDeepSky,
+    backText,
+    backZoom,
+    backRotation,
+    backPanX,
+    backPanY,
     date,
     name,
     sender,
@@ -80,12 +100,14 @@ export function installBirthdayCard(sim) {
     if (imageURL) URL.revokeObjectURL(imageURL);
     imageURL = null;
   }
-  function invalidate() {
+  function invalidate(side = null) {
     generation++;
     controller?.abort();
     controller = null;
-    pages = { front: null, back: null };
-    download.disabled = true;
+    if (side === 'front' || side === 'back') pages[side] = null;
+    else pages = { front: null, back: null };
+    showPage();
+    download.disabled = !pages[activeSide];
     downloadPair.disabled = !result;
     generate.disabled = false;
     status.textContent = t('设置已改变，请生成新的预览。');
@@ -94,6 +116,12 @@ export function installBirthdayCard(sim) {
     western: result?.zodiacIndex == null ? null : BIRTHDAY_ZODIAC[result.zodiacIndex],
     mansion: result ? BIRTHDAY_MANSIONS[result.mansionIndex] : null,
   });
+  function updateBackTarget() {
+    const item = selected()[backCulture.value === 'chinese' ? 'mansion' : 'western'];
+    backTarget.textContent = item
+      ? item.zh + ' · ' + (item.fullName || item.en)
+      : t('生日位于星座交界');
+  }
   function calculate(resetText = true) {
     invalidate();
     try {
@@ -147,6 +175,7 @@ export function installBirthdayCard(sim) {
           offset: (moment.utcOffset >= 0 ? '+' : '') + moment.utcOffset,
         }
       );
+      updateBackTarget();
       downloadPair.disabled = false;
       status.textContent = t('日期已核对，可以生成生日星空卡。');
     } catch (error) {
@@ -156,6 +185,7 @@ export function installBirthdayCard(sim) {
       westernVisit.disabled = chineseVisit.disabled = true;
       downloadPair.disabled = true;
       backTimeNote.textContent = '';
+      backTarget.textContent = '—';
       status.textContent = t(error.message);
     }
   }
@@ -173,7 +203,7 @@ export function installBirthdayCard(sim) {
     const input = culture === 'western' ? westernText : chineseText;
     if (!item) return;
     input.value = item.blessings[(item.blessings.indexOf(input.value) + 1) % item.blessings.length];
-    invalidate();
+    invalidate('front');
   }
   function snapshot() {
     const { western, mansion } = selected();
@@ -200,6 +230,23 @@ export function installBirthdayCard(sim) {
       showLines: lines.checked,
       showExplanation: explanation.checked,
       showBlessing: blessing.checked,
+      backCulture: backCulture.value,
+      backBackground: backBackground.value,
+      backFormat: backFormat.value,
+      backLines: backLines.checked,
+      backNames: backNames.checked,
+      backSkyBrightness: Number(backSkyBrightness.value),
+      backArtBrightness: Number(backArtBrightness.value),
+      backDensity: Number(backDensity.value),
+      backGrid: backGrid.checked,
+      backEcliptic: backEcliptic.checked,
+      backPlanets: backPlanets.checked,
+      backDeepSky: backDeepSky.checked,
+      backText: backText.checked,
+      backZoom: Number(backZoom.value),
+      backRotation: Number(backRotation.value),
+      backPanX: Number(backPanX.value),
+      backPanY: Number(backPanY.value),
       backLabels: backLabels.checked,
       backArtwork: backArtwork.checked,
       width: mode.value === 'dual' ? 2400 : 1800,
@@ -220,8 +267,13 @@ export function installBirthdayCard(sim) {
   }
   async function prepare(sides) {
     if (!result || !giftDate.reportValidity()) return false;
-    if (!selected().western && mode.value !== 'chinese') {
-      status.textContent = t('请补充出生时间以确定西方生日星座，或选择东方单卡。');
+    if (
+      !selected().western &&
+      sides.some((side) =>
+        side === 'front' ? mode.value !== 'chinese' : backCulture.value === 'western'
+      )
+    ) {
+      status.textContent = t('请补充出生时间以确定西方生日星座，或选择东方天区。');
       return false;
     }
     controller?.abort();
@@ -245,7 +297,7 @@ export function installBirthdayCard(sim) {
         pages[side] = {
           blob: card.blob,
           date: options.date,
-          mode: options.mode,
+          mode: side === 'front' ? options.mode : options.backCulture,
           name: options.name,
         };
       }
@@ -266,6 +318,8 @@ export function installBirthdayCard(sim) {
   }
   function activateSide(side) {
     activeSide = side;
+    frontControls.hidden = side !== 'front';
+    backControls.hidden = side !== 'back';
     frontTab.setAttribute('aria-selected', String(side === 'front'));
     backTab.setAttribute('aria-selected', String(side === 'back'));
     frontTab.tabIndex = side === 'front' ? 0 : -1;
@@ -343,7 +397,8 @@ export function installBirthdayCard(sim) {
     giftDate.type = 'date';
     giftDate.min = '0001-01-01';
     giftDate.max = '9999-12-31';
-    const results = el('div', controls);
+    const results = el('details', controls);
+    el('summary', results, '生日对应的星座与星宿');
     const west = el('section', results);
     west.className = 'birthday-result';
     el('p', west, '西方生日星座');
@@ -390,7 +445,8 @@ export function installBirthdayCard(sim) {
       a.rel = 'noopener noreferrer';
       sources.append(document.createTextNode(' · '));
     }
-    mode = field(controls, '卡片组合', 'select', 'birthdayMode');
+    frontControls = el('section', controls);
+    mode = field(frontControls, '卡片组合', 'select', 'birthdayMode');
     for (const [value, label] of [
       ['dual', '中西双联卡'],
       ['western', '西方单卡'],
@@ -399,7 +455,7 @@ export function installBirthdayCard(sim) {
       const option = el('option', mode, label);
       option.value = value;
     }
-    layout = field(controls, '画面样式', 'select', 'birthdayLayout');
+    layout = field(frontControls, '画面样式', 'select', 'birthdayLayout');
     for (const [value, label] of [
       ['card', '生日纪念卡'],
       ['sky', '纯星图'],
@@ -407,7 +463,7 @@ export function installBirthdayCard(sim) {
       const option = el('option', layout, label);
       option.value = value;
     }
-    const words = el('details', controls);
+    const words = el('details', frontControls);
     words.open = true;
     el('summary', words, '祝福与画面');
     westernText = field(words, '西方卡祝福语', 'textarea', 'birthdayWesternWish');
@@ -447,12 +503,29 @@ export function installBirthdayCard(sim) {
     lines = check('显示星图连线', 'birthdayLines');
     explanation = check('显示简短介绍', 'birthdayExplanation');
     blessing = check('显示祝福语', 'birthdayBlessing');
-    const backOptions = el('details', controls);
-    el('summary', backOptions, '背面星空取景');
-    el('p', backOptions, '使用软件内的银河与星空场景，对准对应星座或星宿；正反面共用所选组合。');
-    backTimeNote = el('p', backOptions, null, 'birthdayBackTimeNote');
-    const backCheck = (label, id, checked) => {
-      const row = el('label', backOptions);
+    backControls = el('section', controls);
+    backControls.hidden = true;
+    const choice = (parent, label, id, entries) => {
+      const input = field(parent, label, 'select', id);
+      for (const [value, title] of entries) el('option', input, title).value = value;
+      return input;
+    };
+    backCulture = choice(backControls, '背面天区', 'birthdayBackCulture', [
+      ['western', '西方生日星座'],
+      ['chinese', '东方生日星宿'],
+    ]);
+    backTarget = el('h3', backControls, null, 'birthdayBackTarget');
+    backBackground = choice(backControls, '星空背景', 'birthdayBackBackground', [
+      ['galaxy', '银河星空'],
+      ['dss', 'DSS 光学巡天'],
+    ]);
+    backFormat = choice(backControls, '背面版式', 'birthdayBackFormat', [
+      ['landscape', '横版明信片'],
+      ['portrait', '竖版明信片'],
+      ['match', '与正面同尺寸'],
+    ]);
+    const backCheck = (parent, label, id, checked) => {
+      const row = el('label', parent);
       row.className = 'birthday-check';
       const input = el('input', row, null, id);
       input.type = 'checkbox';
@@ -460,8 +533,66 @@ export function installBirthdayCard(sim) {
       el('span', row, label);
       return input;
     };
-    backLabels = backCheck('背面显示星名', 'birthdayBackLabels', true);
-    backArtwork = backCheck('背面叠加插画', 'birthdayBackArtwork', false);
+    const backRange = (parent, label, id, value, min, max, step) => {
+      const input = field(parent, label, 'input', id);
+      input.type = 'range';
+      Object.assign(input, {
+        min: String(min),
+        max: String(max),
+        step: String(step),
+        value: String(value),
+      });
+      return input;
+    };
+    backLines = backCheck(backControls, '显示星图连线', 'birthdayBackLines', true);
+    backArtwork = backCheck(backControls, '叠加星座或星官插画', 'birthdayBackArtwork', false);
+    backArtBrightness = backRange(
+      backControls,
+      '背面插画亮度',
+      'birthdayBackArtBrightness',
+      1,
+      0,
+      2,
+      0.05
+    );
+    backSkyBrightness = backRange(
+      backControls,
+      '星空亮度',
+      'birthdayBackSkyBrightness',
+      1,
+      0.1,
+      2,
+      0.05
+    );
+    const annotations = el('details', backControls);
+    el('summary', annotations, '星图标注');
+    backLabels = backCheck(annotations, '恒星名称', 'birthdayBackLabels', false);
+    backNames = backCheck(annotations, '星座或星官名称', 'birthdayBackNames', true);
+    backPlanets = backCheck(annotations, '日月行星名称', 'birthdayBackPlanets', true);
+    backDeepSky = backCheck(annotations, '深空天体', 'birthdayBackDeepSky', false);
+    backGrid = backCheck(annotations, '赤道坐标网 · 所选日期', 'birthdayBackGrid', false);
+    backEcliptic = backCheck(annotations, '黄道 · 所选日期', 'birthdayBackEcliptic', false);
+    backDensity = backRange(annotations, '标注密度', 'birthdayBackDensity', 0.35, 0, 1, 0.05);
+    const framing = el('details', backControls);
+    el('summary', framing, '调整构图');
+    backZoom = backRange(framing, '天区缩放', 'birthdayBackZoom', 1, 0.65, 2.5, 0.05);
+    backRotation = backRange(framing, '画面旋转', 'birthdayBackRotation', 0, -180, 180, 1);
+    backPanX = backRange(framing, '水平构图', 'birthdayBackPanX', 0, -1, 1, 0.02);
+    backPanY = backRange(framing, '垂直构图', 'birthdayBackPanY', 0, -1, 1, 0.02);
+    button(framing, '回到目标', () => {
+      backZoom.value = '1';
+      for (const input of [backRotation, backPanX, backPanY]) input.value = '0';
+      invalidate('back');
+    });
+    backText = backCheck(backControls, '显示标题与落款', 'birthdayBackText', true);
+    const info = el('details', backControls);
+    el('summary', info, '取景时间与影像来源');
+    backTimeNote = el('p', info, null, 'birthdayBackTimeNote');
+    el(
+      'p',
+      info,
+      '银河采用 NASA 全天星空影像；DSS 为历史光学巡天影像，首次取景需联网加载。日月行星按生日时刻计算，标注与影像共用天球坐标。'
+    );
     const actions = el('div', controls);
     actions.className = 'birthday-actions';
     generate = button(actions, '生成预览', render, 'birthdayGenerate');
@@ -507,18 +638,42 @@ export function installBirthdayCard(sim) {
     status = el('p', panel, null, 'birthdayStatus');
     status.setAttribute('role', 'status');
     for (const input of [date, time, zone]) input.onchange = () => calculate();
+    for (const input of [name, sender, giftDate]) input.oninput = () => invalidate();
+    for (const input of [westernText, chineseText, westernBrightness, chineseBrightness])
+      input.oninput = () => invalidate('front');
+    for (const input of [mode, layout])
+      input.onchange = () => invalidate(backFormat.value === 'match' ? null : 'front');
+    for (const input of [lines, explanation, blessing]) input.onchange = () => invalidate('front');
     for (const input of [
-      name,
-      sender,
-      giftDate,
-      westernText,
-      chineseText,
-      westernBrightness,
-      chineseBrightness,
+      backBackground,
+      backFormat,
+      backLines,
+      backNames,
+      backLabels,
+      backArtwork,
+      backGrid,
+      backEcliptic,
+      backPlanets,
+      backDeepSky,
+      backText,
     ])
-      input.oninput = invalidate;
-    for (const input of [mode, layout, lines, explanation, blessing, backLabels, backArtwork])
-      input.onchange = invalidate;
+      input.onchange = () => invalidate('back');
+    for (const input of [
+      backSkyBrightness,
+      backArtBrightness,
+      backDensity,
+      backZoom,
+      backRotation,
+      backPanX,
+      backPanY,
+    ])
+      input.oninput = () => invalidate('back');
+    backCulture.onchange = () => {
+      backZoom.value = '1';
+      for (const input of [backRotation, backPanX, backPanY]) input.value = '0';
+      updateBackTarget();
+      invalidate('back');
+    };
     dialog.addEventListener('keydown', (event) => event.stopPropagation());
     dialog.addEventListener('close', () => {
       generation++;

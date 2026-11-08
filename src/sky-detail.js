@@ -65,6 +65,7 @@ export class SkyDetail {
       cache = createSkyTileCache(),
       fetcher = globalThis.fetch,
       source = 'auto',
+      wideField = false,
       decode = (blob) =>
         createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }),
     } = {}
@@ -87,6 +88,7 @@ export class SkyDetail {
     this.lastError = null;
     this.allowed = new Map();
     this.source = normalizeSkyDetailSource(source);
+    this.wideField = wideField === true;
     this.enabled = true;
     this.disposed = false;
     this.generation = 0;
@@ -140,6 +142,7 @@ export class SkyDetail {
     if (!old || (old.signature !== signature && (photo || now() - old.at >= 100))) {
       const snapshot = {
         ...view,
+        wideField: this.wideField,
         forward: [...view.forward],
         right: [...view.right],
         up: [...view.up],

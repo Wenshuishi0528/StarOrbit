@@ -39,7 +39,7 @@ export function planSkyDetailSelection(providers, view, requestedSource = 'auto'
             ? ps1
             : dss
           : null;
-  if (view.fovY <= 18 && provider) {
+  if ((view.fovY <= 18 || (view.wideField === true && source === 'dss')) && provider) {
     // Stay clear of PS1's irregular southern boundary. DSS is a complete parent
     // layer, including when an individual PS1 tile is missing or offline.
     // An explicit choice uses that same survey at every level. Automatic mode

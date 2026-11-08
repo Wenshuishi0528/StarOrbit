@@ -496,7 +496,11 @@ function writeCanvas(canvas, image, bytes, w, h) {
 export function createXuntianViewRenderer(
   sim,
   canvas,
-  { cityFinder = createCityFinder(sim.environment.geography?.items || []), skyOnly = false } = {}
+  {
+    cityFinder = createCityFinder(sim.environment.geography?.items || []),
+    skyOnly = false,
+    captions = true,
+  } = {}
 ) {
   const renderer = sim.api.renderer,
     env = sim.environment,
@@ -942,28 +946,30 @@ export function createXuntianViewRenderer(
         const out = document.createElement('canvas');
         writeCanvas(out, null, target.bytes, size.w, size.h);
         paintFinderLabels(out, result.labels);
-        paintSolarPhotoCaption(out, result.solarObservation, actual.q.t);
-        const cityCaptionHeight = paintCityTerrainCaption(out, result.cityTerrain);
-        const elevationCaptionHeight = paintElevationCaption(
-          out,
-          result.elevation,
-          cityCaptionHeight
-        );
-        const skyCaptionHeight = paintSkyDetailCaption(
-          out,
-          result.skyDetail,
-          cityCaptionHeight + elevationCaptionHeight
-        );
-        paintConstellationArtCaption(
-          out,
-          skyCulturePhotoCredit(
-            result.constellationArt,
-            result.chartSettings,
-            actual.photoNames,
-            actual.q.t
-          ),
-          cityCaptionHeight + elevationCaptionHeight + skyCaptionHeight
-        );
+        if (captions) {
+          paintSolarPhotoCaption(out, result.solarObservation, actual.q.t);
+          const cityCaptionHeight = paintCityTerrainCaption(out, result.cityTerrain);
+          const elevationCaptionHeight = paintElevationCaption(
+            out,
+            result.elevation,
+            cityCaptionHeight
+          );
+          const skyCaptionHeight = paintSkyDetailCaption(
+            out,
+            result.skyDetail,
+            cityCaptionHeight + elevationCaptionHeight
+          );
+          paintConstellationArtCaption(
+            out,
+            skyCulturePhotoCredit(
+              result.constellationArt,
+              result.chartSettings,
+              actual.photoNames,
+              actual.q.t
+            ),
+            cityCaptionHeight + elevationCaptionHeight + skyCaptionHeight
+          );
+        }
         const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
         if (!blob || disposed) throw Error('巡天取景图像生成失败');
         return blob;

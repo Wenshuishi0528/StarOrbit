@@ -1,0 +1,42 @@
+{
+  "version": "1.30",
+  "status": "passed-with-documented-scope",
+  "recordedAtUTC": "2026-11-08T07:21:06.180942+00:00",
+  "baseCommit": "19e7b315eff9d0663494432238236ea5c8fb5215",
+  "scope": [
+    "Independent Chinese or Western birthday postcard back",
+    "Milky Way or DSS optical survey background with complete same-survey wide-field tile loading",
+    "Independent art/lines/names/grid/ecliptic controls, brightness, zoom/pan/roll",
+    "Full-frame postcard layouts and independent front/back cache invalidation"
+  ],
+  "automated": {
+    "fullNpmTest": "passed",
+    "captionChangeRegression": [
+      "xuntian-view-render",
+      "birthday-sky-frame",
+      "birthday-card-back"
+    ],
+    "all40TargetsWithCameraTransforms": "passed",
+    "DSSWideFieldOptInAndIncompleteExportRejection": "passed",
+    "normalFinderWideFieldPolicy": "unchanged; tested",
+    "docs": "passed",
+    "i18n": "passed"
+  },
+  "browser": {
+    "environment": "macOS Safari, actual WebGL rendering, source split build",
+    "galaxyWesternBack": "rendered",
+    "DSSWesternBack": "rendered and downloaded 2400x1500 PNG",
+    "artOnLinesOff": "visually verified; downloaded",
+    "sourceChoiceIndependentOfFront": "western back after dual front; distinct controls",
+    "browserFallback": "in-app browser inventory timed out; native Safari succeeded",
+    "DSSChineseBack": "rendered and downloaded, original Wings artwork retained",
+    "duplexZIP": "dual front plus independent Chinese back; exact standalone back PNG bytes matched, CRC passed"
+  },
+  "sourceArtwork": "No artwork or registration data edited. Wing orientation preserved.",
+  "notes": [
+    "DSS is archival optical survey photography; only solar-system positions use the selected birthday epoch",
+    "DSS initial download requires internet; bounded local tile cache is reused",
+    "Publication and installation hashes are recorded separately in release output"
+  ],
+  "evidence": "output/release130 contains test logs, browser screenshots and exported postcard PNGs."
+}

@@ -1,8 +1,8 @@
 # 开发、发布与维护
 
-适用版本：本地 v1.29。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.30。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页按本地 v1.29 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
+本页按本地 v1.30 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
 
 ## 先识别四个位置
 
@@ -99,7 +99,7 @@ node tests/web-build.mjs dist
 
 ## 便携包和 macOS 启动器
 
-先生成单文件，再执行打包脚本。下面以本批本地 v1.29 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
+先生成单文件，再执行打包脚本。下面以本批本地 v1.30 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
 
 ```sh
 python3 scripts/package-portable.py output/release129/StarOrbit-v1.29-portable.zip
@@ -180,4 +180,4 @@ Python 后台服务日志通常为系统临时目录下 `tiangong-viewer-<port>.
 
 完成记录至少列出：源码提交/工作树状态、本机运行目录及版本、网页地址与核对结果、便携包路径/哈希、启动器结果、实际测试范围、未完成项。仅本地完成时直接标明“未推送、未部署、未更新 Release”；某项尚未完成时说明它影响的交付范围。
 
-工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.29 的文档检查和打包调整以当前工作副本及本批验证记录为准。
+工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.30 的文档检查和打包调整以当前工作副本及本批验证记录为准。

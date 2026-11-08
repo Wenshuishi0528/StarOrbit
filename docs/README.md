@@ -1,6 +1,6 @@
 # 星轨文档导航
 
-**当前文档基线：本地 v1.29，生日星空卡正反面与完整中西生日文化搜索，支持1901–2100年公历日期。** 先看[使用手册](../使用说明.md)、[日期口径](birthday-calendar-sources.md)和[验证总览](verification.md)。
+**当前文档基线：本地 v1.30，生日星空卡正反面与完整中西生日文化搜索，支持1901–2100年公历日期。** 先看[使用手册](../使用说明.md)、[日期口径](birthday-calendar-sources.md)和[验证总览](verification.md)。
 
 [中文介绍](../README.md) · [English overview](../README.en.md) · [使用手册](../使用说明.md) · [更新记录](../CHANGELOG.md)
 

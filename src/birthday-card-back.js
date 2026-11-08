@@ -5,61 +5,96 @@ import { createXuntianViewRenderer } from './xuntian-view-render.js';
 import { getSkyCulture } from './sky-cultures.js';
 import { normalizeStarChartSettings } from './star-chart-settings.js';
 import { ConstellationArt } from './constellation-art.js';
+import { SkyDetail } from './sky-detail.js';
+import { skyDetailView } from './sky-detail-plan.js';
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const font = '"Songti SC", "Noto Serif CJK SC", "STSong", serif';
 
-export function birthdayBackLayout({ count, layout, width }) {
-  if (count !== 1 && count !== 2) throw Error('请选择一个或两个生日天区');
-  const dual = count === 2,
-    pure = layout === 'sky';
-  const w = Math.round(clamp(Number(width) || (dual ? 2400 : 1800), 800, 3840));
-  const h = Math.round(w * (pure ? (dual ? 0.58 : 0.75) : dual ? 0.625 : 4 / 3));
-  const scale = w / (dual ? 2400 : 1800),
-    W = w / scale,
-    H = h / scale;
-  const margin = pure ? 24 : 48,
-    gap = dual ? 28 : 0;
-  const panelWidth = (W - margin * 2 - gap) / count;
-  const y = pure ? 24 : dual ? 210 : 240;
-  const panelHeight = H - y - (pure ? 94 : dual ? 160 : 210);
+// The back has one sky field; only the optional paper size follows the front.
+export function birthdayBackLayout(options = {}) {
+  const format = options.backFormat || 'landscape';
+  let width = 2400,
+    height = 1500;
+  if (format === 'portrait') {
+    width = 1800;
+    height = 2400;
+  }
+  if (format === 'match') {
+    const dual = options.mode === 'dual',
+      pure = options.layout === 'sky';
+    width = dual ? 2400 : 1800;
+    height = pure ? (dual ? 1392 : 1350) : dual ? 1500 : 2400;
+  }
+  const scale = width / 2400,
+    W = width / scale,
+    H = height / scale;
   return {
-    width: w,
-    height: h,
+    width,
+    height,
     scale,
     W,
     H,
-    pure,
-    dual,
-    panels: Array.from({ length: count }, (_, i) => ({
-      x: margin + i * (panelWidth + gap),
-      y,
-      w: panelWidth,
-      h: panelHeight,
-    })),
+    pure: options.backText === false,
+    panels: [{ x: 0, y: 0, w: W, h: H }],
   };
 }
 
 export function birthdayBackSettings(options, culture) {
-  const names = options.backLabels !== false;
   return normalizeStarChartSettings({
     skyCulture: culture,
     starChartEnabled: true,
-    starLabels: names,
+    starLabels: options.backLabels === true,
     catalogStarLabels: false,
-    solarSystemLabels: names,
-    constellationNames: names,
-    constellationLines: options.showLines !== false,
+    solarSystemLabels: options.backPlanets !== false,
+    constellationNames: options.backNames !== false,
+    constellationLines: options.backLines !== false,
     constellationArt: options.backArtwork === true,
     chineseSymbolArt: false,
     constellationBoundaries: false,
-    equatorialGrid: false,
-    eclipticLine: false,
-    deepSkyObjects: false,
-    starLabelDensity: 0.52,
-    westernArtBrightness: options.brightness?.western ?? 1,
-    chineseArtBrightness: options.brightness?.chinese ?? 1,
+    equatorialGrid: options.backGrid === true,
+    eclipticLine: options.backEcliptic === true,
+    deepSkyObjects: options.backDeepSky === true,
+    starLabelDensity: options.backDensity ?? 0.35,
+    westernArtBrightness: options.backArtBrightness ?? 1,
+    chineseArtBrightness: options.backArtBrightness ?? 1,
   });
+}
+
+export function birthdayBackView(frame, target, aspect, options = {}) {
+  const view = birthdaySkyView(frame, target, aspect);
+  const finite = (v, fallback) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
+  view.fovY = clamp(
+    Math.max(28, view.fovY) / clamp(finite(options.backZoom, 1), 0.65, 2.5),
+    8,
+    120
+  );
+  const rotate = (axis, angle) => {
+    const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(...axis), angle);
+    for (const key of ['right', 'up', 'forward'])
+      view[key] = new THREE.Vector3(...view[key]).applyQuaternion(q).toArray();
+  };
+  rotate(view.up, (clamp(finite(options.backPanX, 0), -1, 1) * view.fovY * Math.PI) / 360);
+  rotate(view.right, (clamp(finite(options.backPanY, 0), -1, 1) * view.fovY * Math.PI) / 360);
+  rotate(view.forward, (clamp(finite(options.backRotation, 0), -180, 180) * Math.PI) / 180);
+  return view;
+}
+
+export function birthdayBackTarget(options) {
+  if (options.items) {
+    if (options.items.length !== 1) throw Error('背面请选择一片天区');
+    return options.items[0];
+  }
+  return options.backCulture === 'chinese' ? options.mansion : options.western;
+}
+
+export function requireBirthdaySurvey(status) {
+  if (
+    !status?.complete ||
+    status.source !== 'dss' ||
+    !status.sources?.some((p) => p.id === 'dss-color')
+  )
+    throw Error('DSS 影像尚未完整加载，请重试或选择银河背景');
 }
 
 function fittedText(ctx, value, x, y, size, width, color = '#eee2cc') {
@@ -116,14 +151,8 @@ export async function renderBirthdayBack(options) {
   const environment = options.environment || options.env || options.sim?.environment;
   const renderer = options.renderer || options.sim?.api?.renderer;
   if (!environment || !renderer) throw Error('星空场景尚未就绪');
-  const supplied =
-    options.items ||
-    (options.mode === 'western'
-      ? [options.western]
-      : options.mode === 'chinese'
-        ? [options.mansion]
-        : [options.western, options.mansion]);
-  if (!Array.isArray(supplied) || supplied.some((x) => !x)) throw Error('请先计算生日天区');
+  const supplied = [birthdayBackTarget(options)];
+  if (supplied.some((x) => !x)) throw Error('请先计算生日天区');
   const items = structuredClone(supplied);
   const frozen = {
     ...options,
@@ -137,19 +166,15 @@ export async function renderBirthdayBack(options) {
     brightness: structuredClone(options.brightness || {}),
   };
   if ([...frozen.name].length > 40) throw Error('姓名或昵称请控制在 40 字以内');
-  const inscription = birthdayCardInscription(frozen);
-  const layout = birthdayBackLayout({
-    count: items.length,
-    layout: frozen.layout,
-    width: frozen.width,
+  const inscription = birthdayCardInscription({
+    ...frozen,
+    layout: frozen.backText === false ? 'sky' : 'card',
   });
+  const layout = birthdayBackLayout(frozen);
   const entries = items.map((item) => locate(environment, item));
   const plans = entries.map((entry, i) => {
     const box = layout.panels[i];
-    const view = birthdaySkyView(entry.frame, entry.target, box.w / box.h);
-    // A little surrounding sky gives small asterisms context while preserving
-    // the same fixed ICRS axes and all of the target's registered footprint.
-    view.fovY = Math.max(28, view.fovY);
+    const view = birthdayBackView(entry.frame, entry.target, box.w / box.h, frozen);
     const chartSettings = birthdayBackSettings(frozen, entry.item.culture);
     const frame = birthdaySkyFrame({
       date: frozen.date,
@@ -161,8 +186,9 @@ export async function renderBirthdayBack(options) {
       chartSettings,
       language: frozen.language || 'zh',
     });
-    frame.photoNames =
-      frozen.backLabels !== false || frozen.showLines !== false || frozen.backArtwork === true;
+    frame.photoNames = true;
+    frame.skyBrightness = clamp(Number(frozen.backSkyBrightness ?? 1), 0.1, 2);
+    frame.skyExposure = frozen.backBackground === 'dss' ? 'view' : 'cinematic';
     return { ...entry, box, view, captureFrame: frame };
   });
   const controller = new AbortController();
@@ -171,13 +197,16 @@ export async function renderBirthdayBack(options) {
   if (options.signal?.aborted) abort();
   const signal = controller.signal;
   const timer = setTimeout(abort, 60000);
-  let galaxy, capture, privateArt;
+  let galaxy, capture, privateArt, privateSky;
   const stopCapture = () => capture?.dispose();
   signal.addEventListener('abort', stopCapture);
   try {
     signal.throwIfAborted();
     await abortable(document.fonts?.ready, signal);
-    galaxy = await abortable(galaxyFor(environment, renderer, signal), signal);
+    if (frozen.backBackground !== 'dss')
+      galaxy = await abortable(galaxyFor(environment, renderer, signal), signal);
+    else
+      privateSky = new SkyDetail(environment.assets?.skyDetail, { source: 'dss', wideField: true });
     signal.throwIfAborted();
     if (frozen.backArtwork === true) {
       const records = (culture) =>
@@ -188,8 +217,8 @@ export async function renderBirthdayBack(options) {
       );
     }
     const skyEnvironment = Object.assign(Object.create(environment), {
-      galaxyTexture: galaxy.texture,
-      skyDetail: null,
+      galaxyTexture: galaxy?.texture || null,
+      skyDetail: privateSky || null,
       constellationArt: privateArt || null,
       settings: { ...environment.settings, stars: true, milky: true, exposure: 'cinematic' },
     });
@@ -215,12 +244,26 @@ export async function renderBirthdayBack(options) {
         );
         if (!state.complete || state.ready !== 1) throw Error('生日背面插画加载失败，请重试');
       }
+      if (privateSky) {
+        const size = { aspect: plan.view.aspect, h: Math.round(plan.box.h * layout.scale) };
+        const state = await abortable(
+          privateSky.prepare(
+            'birthday-photo-prefetch',
+            skyDetailView(plan.captureFrame, size),
+            true,
+            45000
+          ),
+          signal
+        );
+        requireBirthdaySurvey(state);
+      }
       const captureCanvas = document.createElement('canvas');
-      capture = createXuntianViewRenderer(sim, captureCanvas, { skyOnly: true });
+      capture = createXuntianViewRenderer(sim, captureCanvas, { skyOnly: true, captions: false });
       try {
         const width = Math.round(plan.box.w * layout.scale);
         const blob = await abortable(capture.capture(plan.captureFrame, { width }), signal);
         signal.throwIfAborted();
+        if (privateSky) requireBirthdaySurvey(capture.photoSkyStatus());
         const bitmap = await createImageBitmap(blob);
         try {
           signal.throwIfAborted();
@@ -232,23 +275,6 @@ export async function renderBirthdayBack(options) {
           ctx.strokeStyle = 'rgba(196,174,129,.3)';
           ctx.lineWidth = 1;
           ctx.strokeRect(box.x, box.y, box.w, box.h);
-          if (!layout.pure) {
-            const shade = ctx.createLinearGradient(0, box.y, 0, box.y + 115);
-            shade.addColorStop(0, 'rgba(1,6,15,.85)');
-            shade.addColorStop(1, 'rgba(1,6,15,0)');
-            ctx.fillStyle = shade;
-            ctx.fillRect(box.x, box.y, box.w, 115);
-            ctx.textAlign = 'center';
-            fittedText(
-              ctx,
-              plan.item.zh +
-                (plan.item.fullName ? ' · ' + plan.item.fullName : ' · ' + plan.item.en),
-              box.x + box.w / 2,
-              box.y + 51,
-              layout.dual ? 33 : 43,
-              box.w - 90
-            );
-          }
           ctx.restore();
         } finally {
           bitmap.close();
@@ -261,39 +287,59 @@ export async function renderBirthdayBack(options) {
     ctx.save();
     ctx.scale(layout.scale, layout.scale);
     ctx.textAlign = 'center';
-    const { W, H, dual, pure } = layout;
+    const { W, H, pure } = layout;
+    // Soft edge shading leaves the central sky unobstructed, like a photographic postcard.
+    const shadeHeight = pure ? 100 : 430;
+    const shade = ctx.createLinearGradient(0, H - shadeHeight, 0, H);
+    shade.addColorStop(0, 'rgba(2,7,15,0)');
+    shade.addColorStop(1, 'rgba(2,7,15,.94)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, H - shadeHeight, W, shadeHeight);
+    ctx.textAlign = 'left';
+    const item = items[0],
+      moment = plans[0].captureFrame.moment;
     if (!pure) {
+      fittedText(ctx, 'STARORBIT  /  星河留影', 90, H - 275, 22, W - 180, '#c6b793');
+      fittedText(ctx, item.zh + ' · ' + (item.fullName || item.en), 90, H - 185, 64, W - 180);
+      const offset = moment.utcOffset >= 0 ? '+' + moment.utcOffset : String(moment.utcOffset);
       fittedText(
         ctx,
-        frozen.name ? `致 ${frozen.name} · 星河留影` : '星河留影',
-        W / 2,
-        dual ? 86 : 100,
-        dual ? 40 : 48,
-        W - 180
-      );
-      const moment = plans[0].captureFrame.moment;
-      const offset = frozen.utcOffset >= 0 ? '+' + frozen.utcOffset : String(frozen.utcOffset);
-      const timeLabel = moment?.localTime || frozen.time || '20:00';
-      fittedText(
-        ctx,
-        `${inscription.birthday}  ${timeLabel}  UTC${offset}`,
-        W / 2,
-        dual ? 144 : 165,
-        dual ? 24 : 28,
+        `${inscription.birthday}  ${moment.localTime}  UTC${offset}`,
+        90,
+        H - 125,
+        25,
         W - 180,
-        '#adbacb'
+        '#c0cbd8'
       );
-      if (inscription.signature)
-        fittedText(ctx, inscription.signature, W / 2, H - 104, dual ? 26 : 30, W - 200, '#c4b393');
+      const signature = [frozen.name ? `致 ${frozen.name}` : '', inscription.signature]
+        .filter(Boolean)
+        .join('  /  ');
+      if (signature) fittedText(ctx, signature, 90, H - 78, 25, W - 180, '#d4c6ab');
     }
+    ctx.textAlign = 'center';
+    if (item.culture === 'chinese' || frozen.backArtwork)
+      fittedText(
+        ctx,
+        item.culture === 'chinese'
+          ? 'Chinese sky: Stellarium · CC BY-SA 4.0' +
+              (frozen.backArtwork ? ' / Artwork: StarOrbit · CC BY-NC 4.0' : '')
+          : 'Artwork: Johan Meurisse / Stellarium · Free Art License',
+        W / 2,
+        H - 48,
+        16,
+        W - 100,
+        '#99a6b7'
+      );
     fittedText(
       ctx,
-      'StarOrbit · NASA/Goddard SVS · Ernie Wright · ESA/Gaia/DPAC · d3-celestial',
+      frozen.backBackground === 'dss'
+        ? 'StarOrbit · DSS colored / CDS / STScI · ESA/Gaia/DPAC · d3-celestial'
+        : 'StarOrbit · NASA/Goddard SVS · Ernie Wright · ESA/Gaia/DPAC · d3-celestial',
       W / 2,
-      H - 57,
-      dual ? 15 : 17,
+      H - 26,
+      16,
       W - 100,
-      '#8292a7'
+      '#99a6b7'
     );
     ctx.restore();
     signal.throwIfAborted();
@@ -307,7 +353,9 @@ export async function renderBirthdayBack(options) {
         side: 'back',
         width: layout.width,
         height: layout.height,
-        layout: pure ? 'sky' : 'card',
+        layout: pure ? 'sky' : 'postcard',
+        culture: items[0].culture,
+        background: frozen.backBackground || 'galaxy',
         date: frozen.date,
         epoch: plans[0].captureFrame.q.t,
         moment: plans[0].captureFrame.moment,
@@ -316,7 +364,9 @@ export async function renderBirthdayBack(options) {
         sender: inscription.sender,
         giftDate: inscription.giftDate,
         source:
-          'StarOrbit sky-only Xuntian capture; NASA SVS 4851 panorama; birthday-epoch solar system',
+          'StarOrbit sky-only Xuntian capture; ' +
+          (frozen.backBackground === 'dss' ? 'DSS colored HiPS' : 'NASA SVS 4851 panorama') +
+          '; birthday-epoch solar system',
       },
     };
   } finally {
@@ -325,6 +375,7 @@ export async function renderBirthdayBack(options) {
     signal.removeEventListener('abort', stopCapture);
     capture?.dispose();
     privateArt?.dispose();
+    privateSky?.dispose();
     if (galaxy?.owned) galaxy.texture.dispose();
   }
 }

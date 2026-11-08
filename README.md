@@ -6,7 +6,7 @@
 
 [**在线体验**](https://wenshuishi0528.github.io/StarOrbit/) · [下载已发布便携版](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [使用手册](使用说明.md) · [文档导航](docs/README.md) · [更新记录](CHANGELOG.md)
 
-**作者：Wenshuishi · 当前源码：v1.29 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
+**作者：Wenshuishi · 当前源码：v1.30 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
 星轨是一款在浏览器中运行的三维航天与轨道模拟软件。它把自制中国空间站模型、轨道运动、太阳翼与姿态、地球和星空放进同一场景，并提供航天器导入、近轨操纵、自由飞行、交会对接训练和观测摄影工具。
 
@@ -14,7 +14,7 @@
 
 ![中国空间站、独立巡天、轨道读数与地面轨迹](docs/hero.jpg)
 
-> 本机 v1.29 新增生日星空卡：核验公历日期对应的十二宫与传统值日二十八宿，提供完整解释、祝福语和中西单卡／双联高清导出；巡天支持翼火蛇等全部二十八宿文化全称。[日期规则](docs/birthday-calendar-sources.md) · [验证总览](docs/verification.md)。线上与下载包以实际版本为准。
+> 本机 v1.30 将生日卡背面独立为星空明信片，可单独选东方／西方、银河／DSS、插画及连线，调整标注、亮度与构图。[日期规则](docs/birthday-calendar-sources.md) · [验证总览](docs/verification.md)。线上与下载包以实际版本为准。
 
 <a id="界面与基本操作"></a>
 

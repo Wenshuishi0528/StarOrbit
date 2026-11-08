@@ -19,6 +19,9 @@ const { outputFiles } = await build({
 const {
   birthdayBackLayout,
   birthdayBackSettings,
+  birthdayBackView,
+  birthdayBackTarget,
+  requireBirthdaySurvey,
   birthdaySkyView,
   birthdaySkyFrame,
   getSkyCulture,
@@ -27,46 +30,37 @@ const {
   'data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64')
 );
 
-for (const [count, layout, width, height] of [
-  [1, 'card', 1800, 2400],
-  [2, 'card', 2400, 1500],
-  [1, 'sky', 1800, 1350],
-  [2, 'sky', 2400, 1392],
+for (const [backFormat, mode, layout, width, height] of [
+  ['landscape','dual','card',2400,1500], ['landscape','chinese','sky',2400,1500],
+  ['portrait','western','card',1800,2400], ['match','dual','card',2400,1500],
+  ['match','chinese','card',1800,2400], ['match','dual','sky',2400,1392],
+  ['match','western','sky',1800,1350],
 ]) {
-  const result = birthdayBackLayout({ count, layout });
-  assert.equal(result.width, width);
-  assert.equal(result.height, height);
-  assert.equal(result.panels.length, count);
-  for (const panel of result.panels) {
-    assert(panel.x >= 0 && panel.y >= 0 && panel.w > 0 && panel.h > 0);
-    assert(panel.x + panel.w <= result.W);
-    assert(panel.y + panel.h <= result.H - 90, 'scene cannot cover bottom credits');
-  }
-  if (count === 2) assert(result.panels[0].x + result.panels[0].w < result.panels[1].x);
+  const result = birthdayBackLayout({backFormat, mode, layout});
+  assert.equal(result.width,width); assert.equal(result.height,height);
+  assert.equal(result.panels.length,1,'one independent full-frame back');
+  assert.equal(result.panels[0].w/result.panels[0].h,width/height);
 }
-assert.throws(() => birthdayBackLayout({ count: 0 }), /一个或两个/);
-
-const preferences = Object.freeze({
-  backLabels: false,
-  backArtwork: true,
-  showLines: false,
-  brightness: Object.freeze({ western: 1.4, chinese: 0.6 }),
-});
-for (const culture of ['western', 'chinese']) {
-  const settings = birthdayBackSettings(preferences, culture);
-  assert.equal(settings.skyCulture, culture);
-  assert.equal(settings.starLabels, false);
-  assert.equal(settings.solarSystemLabels, false);
-  assert.equal(settings.constellationNames, false);
-  assert.equal(settings.constellationLines, false);
-  assert.equal(settings.constellationArt, true, 'artwork is independent of names and lines');
-  assert.equal(settings.chineseSymbolArt, false);
-  assert.equal(settings.westernArtBrightness, 1.4);
-  assert.equal(settings.chineseArtBrightness, 0.6);
-  const defaults = birthdayBackSettings({}, culture);
-  assert(defaults.starLabels && defaults.constellationNames && defaults.solarSystemLabels);
-  assert.equal(defaults.constellationArt, false);
+const preferences=Object.freeze({ backLabels:false, backNames:false, backPlanets:false,
+  backArtwork:true, backLines:false, showLines:true, backArtBrightness:.7,
+  backGrid:true,backEcliptic:true,backDeepSky:true,backDensity:.3,
+  brightness:Object.freeze({western:1.9,chinese:1.8}) });
+for (const culture of ['western','chinese']) {
+ const settings=birthdayBackSettings(preferences,culture);
+ assert.equal(settings.skyCulture,culture);
+ for(const key of ['starLabels','constellationNames','solarSystemLabels','constellationLines'])assert.equal(settings[key],false);
+ for(const key of ['constellationArt','equatorialGrid','eclipticLine','deepSkyObjects'])assert.equal(settings[key],true);
+ assert.equal(settings.westernArtBrightness,.7);assert.equal(settings.chineseArtBrightness,.7);
+ assert.equal(settings.starLabelDensity,.3);
 }
+for(const mode of ['dual','western','chinese']) {
+ const options={mode,backCulture:'chinese',western:BIRTHDAY_ZODIAC[7],mansion:BIRTHDAY_MANSIONS[26]};
+ assert.equal(birthdayBackTarget(options),BIRTHDAY_MANSIONS[26]);
+ assert.equal(birthdayBackTarget({...options,backCulture:'western'}),BIRTHDAY_ZODIAC[7]);
+}
+assert.throws(()=>birthdayBackTarget({items:[1,2]}));
+for(const state of [null,{complete:false,source:'dss'},{complete:true,source:'galaxy'},{complete:true,source:'dss',sources:[]}])assert.throws(()=>requireBirthdaySurvey(state));
+requireBirthdaySurvey({complete:true,source:'dss',sources:[{id:'dss-color'}]});
 
 const json = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url)));
 const art = new ConstellationArt(json('../assets/constellation-art/manifest.json'), {
@@ -80,11 +74,10 @@ for (const item of [...BIRTHDAY_ZODIAC, ...BIRTHDAY_MANSIONS]) {
     .frames.find((x) => x.record.imageId === item.artworkId);
   const target = getSkyCulture(item.culture).asterisms.find((x) => x.targetId === item.targetId);
   const original = JSON.stringify(frame.record);
-  for (const count of [1, 2])
-    for (const layout of ['card', 'sky']) {
-      const panel = birthdayBackLayout({ count, layout }).panels[0];
-      const view = birthdaySkyView(frame, target, panel.w / panel.h);
-      view.fovY = Math.max(28, view.fovY);
+  for (const backFormat of ['landscape','portrait'])
+    for (const rotation of [0,90,-180]) {
+      const panel = birthdayBackLayout({backFormat}).panels[0];
+      const view = birthdayBackView(frame, target, panel.w / panel.h, {backRotation:rotation,backPanX:.3,backPanY:-.2,backZoom:1.2});
       const capture = birthdaySkyFrame({
         date: '2004-11-09',
         view,
@@ -92,7 +85,7 @@ for (const item of [...BIRTHDAY_ZODIAC, ...BIRTHDAY_MANSIONS]) {
         targetId: item.targetId,
         chartSettings: birthdayBackSettings({}, item.culture),
       });
-      assert(capture.fovY >= 28 && capture.fovY < 179);
+      assert(capture.fovY >= 8 && capture.fovY <= 120);
       assert.equal(capture.q.t, Date.parse('2004-11-09T12:00:00Z'));
       assert.equal(capture.focusTargetId, item.targetId);
       assert.equal(capture.chartSettings.skyCulture, item.culture);
@@ -120,5 +113,5 @@ await assert.rejects(
 art.dispose();
 assert.equal(verified, 40);
 console.log(
-  'Birthday back: matching front/back sizes, 40 independent dated sky fields, culture switches, immutable artwork and preflight cancellation passed.'
+  'Birthday back: independent postcard sizes/cultures/settings, 40 dated sky fields with rotation/pan, complete DSS gating, immutable artwork and cancellation passed.'
 );
