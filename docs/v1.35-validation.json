@@ -1,0 +1,63 @@
+{
+  "version": "1.35",
+  "date": "2026-11-08",
+  "scope": "Opaque ground terrain by default and opt-in see-through sky",
+  "builds": {
+    "dist-local": {
+      "entry": "c5374d79245035742929058e48eb66f2c6a398ae61e7ba065dfb7930c1fe486d",
+      "bundle": "dist-local/assets/app.bundle-59935c36978bf075.js",
+      "sha256": "59935c36978bf07538e18efd02689f7e8089052f6300d9dd22b944e33a26b92e"
+    },
+    "dist": {
+      "entry": "6a375951a7c4baf0df4a4b08bf0076cbf24167ae2ea5ba95c49e61459b1dcd19",
+      "bundle": "dist/assets/app.bundle-d2d3d8ae669a1902.js",
+      "sha256": "d2d3d8ae669a1902a501dc7f7f8acbd3b9ccb6a27cc898fbbeb37ebba936c18e"
+    }
+  },
+  "checks": [
+    "ground-earth-compositor",
+    "shared-world-earth",
+    "ground-world",
+    "ground-surface",
+    "ground-sky",
+    "shared-world-sky",
+    "solar-world",
+    "i18n",
+    "test:docs",
+    "web-build dist",
+    "web-build dist-local"
+  ],
+  "browser": {
+    "browser": "Chrome",
+    "site": {
+      "latitude": 39.99,
+      "longitude": 116.19,
+      "height": 700
+    },
+    "defaultOff": true,
+    "toggle": true,
+    "persistReload": true,
+    "dayTerrain": true,
+    "nightOcclusion": true,
+    "photoPNG": {
+      "width": 3840,
+      "height": 1702,
+      "bytes": 14477309
+    },
+    "consoleErrors": 0,
+    "evidence": "output/release135/acceptance/",
+    "modeSwitchSmoke": [
+      "solar",
+      "stellar"
+    ]
+  },
+  "desktop": {
+    "version": "1.35",
+    "launcherCheck": "READY",
+    "servedBundleSHA256": "59935c36978bf07538e18efd02689f7e8089052f6300d9dd22b944e33a26b92e",
+    "matchesLocalBuild": true,
+    "freshDefaultOff": true,
+    "visualCheck": "desktop-day-opaque.png"
+  },
+  "published": false
+}

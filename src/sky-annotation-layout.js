@@ -99,6 +99,7 @@ export function buildSkyAnnotationLayout({
   showMoon = true,
   focusTargetId = null,
   verticalInset = 0,
+  occludeBodies = true,
 }) {
   if (!q || !axes || !(width > 0 && height > 0 && fovY > 0 && fovY < 180))
     return { labels: [], candidates: 0, total: 0, unfiltered: false, stats: { scanned: 0 } };
@@ -126,9 +127,9 @@ export function buildSkyAnnotationLayout({
   const tangent = Math.tan((fovY * DEG) / 2),
     earth = eyeKm.map((value) => -value),
     candidates = [];
-  const bodies = solarApparent(q, eyeKm).filter(
-    (body) => !body.behindEarth && (showMoon || body.id !== 'Moon')
-  );
+  const bodies = (
+    occludeBodies || settings.solarSystemLabels ? solarApparent(q, eyeKm) : []
+  ).filter((body) => !body.behindEarth && (showMoon || body.id !== 'Moon'));
   const zoom = Math.max(0, Math.log2(40 / fovY)),
     starsLimit =
       culture === 'chinese' ? 1.8 + density * 2 + zoom * 1.35 : 2.5 + density * 3 + zoom * 1.35,
@@ -141,8 +142,14 @@ export function buildSkyAnnotationLayout({
     if (z <= 0) return;
     const x = dot(dir, axes.right) / (z * tangent * aspect),
       y = dot(dir, axes.up) / (z * tangent);
-    if (Math.abs(x) > 1 || Math.abs(y) > 1 || sphereHidesDirection(dir, earth, 6371)) return;
     if (
+      Math.abs(x) > 1 ||
+      Math.abs(y) > 1 ||
+      (occludeBodies && sphereHidesDirection(dir, earth, 6371))
+    )
+      return;
+    if (
+      occludeBodies &&
       item.kind !== 'solar' &&
       bodies.some((body) => dot(body.direction, dir) > Math.cos(body.radiusRad))
     )

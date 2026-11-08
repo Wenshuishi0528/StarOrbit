@@ -17,7 +17,7 @@ const headers = new Map(),
   jobs = new Map(),
   queue = [],
   ranges = new Map();
-const RANGE_CACHE_BYTES = 6 * 1024 * 1024;
+const RANGE_CACHE_BYTES = 16 * 1024 * 1024;
 let rangeBytes = 0;
 let running = false;
 let activeSignal;
@@ -190,7 +190,7 @@ async function openBand(id, band, signal) {
     nodata: image.getGDALNoData() ?? 0,
   };
   headers.set(url, record);
-  while (headers.size > 12) headers.delete(headers.keys().next().value);
+  while (headers.size > 48) headers.delete(headers.keys().next().value);
   return record;
 }
 
@@ -279,9 +279,21 @@ async function renderTile(meta, tile, signal) {
       const red = await openBand(id, 'B04', signal),
         b = red.bbox;
       if (b[0] >= mx1 || b[2] <= mx0 || b[1] >= my1 || b[3] <= my0) continue;
-      const records = [red, await openBand(id, 'B03', signal), await openBand(id, 'B02', signal)];
-      const rasters = [];
-      for (const r of records) rasters.push(await bandWindow(r, [mx0, my0, mx1, my1], signal));
+      // RGB bands are independent. Keep concurrency bounded to this one tile,
+      // and settle all reads before a mosaic error can advance the worker queue.
+      const opened = await Promise.allSettled([
+        Promise.resolve(red),
+        openBand(id, 'B03', signal),
+        openBand(id, 'B02', signal),
+      ]);
+      const openFailure = opened.find((result) => result.status === 'rejected');
+      if (openFailure) throw openFailure.reason;
+      const sampled = await Promise.allSettled(
+        opened.map((result) => bandWindow(result.value, [mx0, my0, mx1, my1], signal))
+      );
+      const sampleFailure = sampled.find((result) => result.status === 'rejected');
+      if (sampleFailure) throw sampleFailure.reason;
+      const rasters = sampled.map((result) => result.value);
       if (rasters.some((r) => !r)) continue;
       for (let y = 0; y < SIZE; y++)
         for (let x = 0; x < SIZE; x++) {

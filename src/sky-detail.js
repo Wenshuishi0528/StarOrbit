@@ -130,6 +130,7 @@ export class SkyDetail {
       view.fovY,
       view.aspect,
       view.pixelHeight,
+      view.wideField === true ? 1 : 0,
       ...view.forward,
       ...view.right,
       ...view.up,
@@ -142,7 +143,7 @@ export class SkyDetail {
     if (!old || (old.signature !== signature && (photo || now() - old.at >= 100))) {
       const snapshot = {
         ...view,
-        wideField: this.wideField,
+        wideField: view.wideField ?? this.wideField,
         forward: [...view.forward],
         right: [...view.right],
         up: [...view.up],

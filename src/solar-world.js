@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { createSharedWorldEarth, mountWorldEarthControls } from './shared-world-earth.js';
+import { createSharedWorldSky, mountWorldSkyControls } from './shared-world-sky.js';
 import { createOrbitControls } from './camera-controls.js';
 import { t, onLanguageChange } from './i18n.js';
 import { AU } from './orbit.js';
@@ -36,6 +38,7 @@ export const solarSurfaceShaders = { vertexShader: vertex, fragmentShader: fragm
 export function createSolarWorld({
   renderer,
   host,
+  environment = null,
   getTime,
   getSite = () => null,
   getEarthTexture = () => null,
@@ -46,7 +49,13 @@ export function createSolarWorld({
   initialTarget = null,
 }) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x02060e);
+  scene.background = environment ? null : new THREE.Color(0x02060e);
+  const sharedEarth = environment
+    ? createSharedWorldEarth({ environment, renderer, scene, id: 'solar-world-earth' })
+    : null;
+  const sharedSky = environment
+    ? createSharedWorldSky({ environment, renderer, id: 'solar-world-sky' })
+    : null;
   const camera = new THREE.PerspectiveCamera(44, 1, 0.000001, 160);
   camera.up.set(0, 0, 1);
   const controls = createOrbitControls(camera, renderer.domElement);
@@ -59,8 +68,23 @@ export function createSolarWorld({
   panel.innerHTML = `<style>
 .solar-world-panel{position:absolute;left:24px;top:88px;z-index:8;width:262px;padding:20px;border:1px solid #7891ac40;border-radius:16px;background:#09111de8;color:#e5eaf3;box-shadow:0 12px 50px #0006;backdrop-filter:blur(16px);font:13px/1.65 system-ui;pointer-events:auto}
 .solar-world-panel{max-height:calc(100% - 115px);overflow:auto}.solar-world-panel h3{font-size:19px;margin:0 0 4px;color:#f4dfb4;letter-spacing:.08em}.solar-world-panel small{color:#91a7c0}.solar-world-panel label{display:block;margin:13px 0 5px}.solar-world-panel select,.solar-world-panel button{font:inherit;color:#e5eaf3;background:#1b293d;border:1px solid #7e94ae40;border-radius:7px;padding:7px 9px}.solar-world-panel select{width:100%}.solar-world-actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.solar-world-panel button:hover{background:#34455d}.solar-world-readout{border-top:1px solid #7891ac30;margin-top:14px;padding-top:12px;white-space:pre-line;color:#c3cfdf;font-variant-numeric:tabular-nums}.solar-world-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}.solar-world-labels span{position:absolute;color:#cad6e5;white-space:nowrap;font:12px/1.3 system-ui;text-shadow:0 1px 5px #000,0 0 8px #000;transform:translate(8px,-50%)}.solar-world-labels .active{color:#ffdfa5;font-weight:600}.solar-world-legend{position:absolute;right:24px;bottom:28px;color:#8c9fb5;font:12px/1.5 system-ui;z-index:5;pointer-events:none;text-align:right}@media(max-width:700px){.solar-world-panel{left:12px;top:70px;width:210px;padding:12px;font-size:12px}.solar-world-panel h3{font-size:16px}.solar-world-legend{right:12px;bottom:12px;font-size:10px}}
-</style><h3 data-text="太阳系"></h3><small data-text="同一时刻 · 从地面到行星轨道"></small><label data-text="观察目标"></label><select aria-label="观察目标" data-target></select><div class="solar-world-actions"><button data-view="inner" data-text="内太阳系"></button><button data-view="all" data-text="全太阳系"></button><button data-view="earthmoon" data-text="地月系统"></button></div><label data-text="行星与卫星系统"></label><select aria-label="行星与卫星系统" data-system></select><label><input type="checkbox" data-size checked> <span data-text="放大天体显示"></span></label><label><input type="checkbox" data-orbits checked> <span data-text="显示轨道"></span></label><div class="solar-world-actions"><button data-observe data-text="打开观测窗口"></button><button data-ground data-text="返回观测地点"></button></div><small data-ephemeris></small><div class="solar-world-readout"></div>`;
+</style><h3 data-text="太阳系"></h3><small data-text="同一时刻 · 从地面到行星轨道"></small><label data-text="观察目标"></label><select aria-label="观察目标" data-target></select><div class="solar-world-actions"><button data-view="inner" data-text="内太阳系"></button><button data-view="all" data-text="全太阳系"></button><button data-view="earthmoon" data-text="地月系统"></button></div><label data-text="行星与卫星系统"></label><select aria-label="行星与卫星系统" data-system></select><label><input type="checkbox" data-size checked> <span data-text="放大天体显示"></span></label><label><input type="checkbox" data-orbits checked> <span data-text="显示轨道"></span></label><div class="solar-world-actions"><button data-observe data-text="打开观测窗口"></button><button data-ground data-text="返回观测地点"></button></div><label><span data-text="视场"></span> <output data-fov-value>44°</output><input data-fov type="range" min="0" max="1" step="0.001" value="0.915" aria-label="视场" style="width:100%"></label><small data-ephemeris></small><div class="solar-world-readout"></div>`;
   host.append(panel);
+  const fovSlider = panel.querySelector('[data-fov]'),
+    fovValue = panel.querySelector('[data-fov-value]');
+  const showFov = () => {
+    fovSlider.value = Math.log(camera.fov / 0.006) / Math.log(100 / 0.006);
+    fovValue.textContent =
+      camera.fov < 1 ? `${(camera.fov * 60).toFixed(2)}′` : `${camera.fov.toFixed(1)}°`;
+  };
+  fovSlider.addEventListener('input', () => {
+    camera.fov = 0.006 * Math.pow(100 / 0.006, Number(fovSlider.value));
+    camera.updateProjectionMatrix();
+    showFov();
+  });
+  showFov();
+  const skyControls = environment ? mountWorldSkyControls(panel, environment) : null;
+  const earthControls = environment ? mountWorldEarthControls(panel, environment) : null;
   const labelRoot = document.createElement('div');
   labelRoot.className = 'solar-world-labels';
   host.append(labelRoot);
@@ -236,6 +260,8 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
   const offLanguage = onLanguageChange(translate);
   translate();
   function setView(mode) {
+    camera.fov = 44;
+    showFov();
     pendingSatelliteFocus = null;
     systemParent =
       mode === 'earthmoon' ? 'Earth' : mode.startsWith('system:') ? mode.slice(7) : null;
@@ -257,6 +283,8 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
   setView('inner');
   function focus(id) {
     if (!entities.has(id)) return;
+    camera.fov = 44;
+    showFov();
     target = id;
     select.value = id;
     const satellite = SATELLITE_BY_ID.get(id);
@@ -316,7 +344,13 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
       el.style.top = `${(-vector.y * 0.5 + 0.5) * height}px`;
     }
   }
+  let lastControlRefresh = -Infinity;
   function update(time = getTime(), dt = 0) {
+    if (performance.now() - lastControlRefresh > 500) {
+      skyControls?.refresh();
+      earthControls?.refresh();
+      lastControlRefresh = performance.now();
+    }
     if (disposed) return;
     if (time !== lastTime || satellites.status !== lastEphemerisStatus) {
       states = solarWorldState(time, satellites);
@@ -408,6 +442,19 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     sunGlow.visible = enhanced;
     earthAir.position.copy(earth.mesh.position);
     earthAir.scale.setScalar(earth.radius * 1.015);
+    if (sharedEarth) {
+      earth.mesh.material.visible = false;
+      earthAir.visible = false;
+      sharedEarth.update({
+        time,
+        camera,
+        earthPosition: earth.mesh.position.toArray(),
+        unitsPerKm: 1 / AU,
+        displayScale: (earth.radius * AU) / 6371,
+        width,
+        height,
+      });
+    }
     earthAir.material.uniforms.sunPosition.value.copy(sunPosition);
     earth.mesh.material.uniforms.surfaceMap.value = tex;
     earth.mesh.material.uniforms.textured.value = !!tex && tex.image?.width > 1;
@@ -501,7 +548,13 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
           : time < satellites.start || time >= satellites.end
             ? t('卫星星历覆盖 2026—2030 · 调整时间查看')
             : t('卫星星历 · JPL 2026—2030');
+    if (sharedSky) {
+      sharedSky.update(camera, time, width, height);
+      sharedSky.render();
+      renderer.clearDepth();
+    }
     renderer.render(scene, camera);
+    sharedEarth?.renderEffects();
   }
   return {
     scene,
@@ -526,7 +579,8 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
       controls.target
         .copy(camera.position)
         .addScaledVector(forward, Math.max(0.001, camera.position.length()));
-      camera.fov = Math.max(8, Math.min(100, pose.fov || 44));
+      camera.fov = Math.max(0.006, Math.min(100, pose.fov || 44));
+      showFov();
       camera.updateProjectionMatrix();
     },
     resize(w, h) {
@@ -539,6 +593,10 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
       if (disposed) return;
       disposed = true;
       controls.dispose();
+      skyControls?.dispose();
+      earthControls?.dispose();
+      sharedSky?.dispose();
+      sharedEarth?.dispose();
       offLanguage?.();
       panel.remove();
       labelRoot.remove();

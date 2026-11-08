@@ -1,0 +1,246 @@
+{
+  "version": "1.36",
+  "date": "2026-11-08T23:32:40.169375+08:00",
+  "scope": "Shared Earth streaming imagery and DEM range, shared clouds, native 2025 500m AVIF night atlas and ground location map; NASA pre-download coverage estimates/filter and explicit cloud deletion",
+  "checks": {
+    "npmTest": {
+      "status": "passed",
+      "command": "npm test",
+      "log": "output/release136/acceptance/npm-release-test.log"
+    },
+    "nightAssets": {
+      "status": "passed",
+      "files": 1156,
+      "bytes": 132360045,
+      "samples": 8,
+      "boundaryChecks": 6,
+      "evidence": "output/release136/night-validation/asset-integrity.json"
+    },
+    "coverageSampling": {
+      "status": "passed",
+      "samples": 64800,
+      "method": "phase-time-stratified-v1; latitude-area weighted; separate from full retrieval quality",
+      "officialFrames": [
+        {
+          "item": {
+            "provider": "satcorps",
+            "date": "2026-10-23",
+            "slot": "12",
+            "key": "satcorps:2026-10-23:12",
+            "time": 1792756800000,
+            "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/10/23/satcorps-gcc.v02a.geoleo.glob-comp.2026296.1200.3km.nc"
+          },
+          "result": {
+            "coverage": 0.9980082836179409,
+            "polarCoverage": {
+              "north": 1.0,
+              "south": 0.999439467903888
+            },
+            "classification": "global",
+            "sampleCount": 64800,
+            "validSampleCount": 64698,
+            "weighting": "cos(latitude); regular 1 degree cell-centre samples",
+            "globalThreshold": 0.95,
+            "polarThreshold": 0.85,
+            "state": "ready",
+            "estimated": true,
+            "fullVerified": false,
+            "method": "phase-time-stratified-v1",
+            "metric": "valid-observation",
+            "checkedAt": 1794152706825,
+            "validatedAt": 1794152706825,
+            "downloadedBytes": 9637488,
+            "rangeRequests": 30,
+            "durationMs": 44827,
+            "sourceRevision": {
+              "etag": "\"53c0ae04-65eed161503c0\"",
+              "lastModified": "Wed, 28 Oct 2026 21:17:11 GMT",
+              "size": 1405136388
+            },
+            "cached": false
+          }
+        },
+        {
+          "item": {
+            "provider": "satcorps",
+            "date": "2026-11-07",
+            "slot": "12",
+            "key": "satcorps:2026-11-07:12",
+            "time": 1794052800000,
+            "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/11/07/satcorps-gcc.v02a.geoleo.glob-comp.2026311.1200.3km.nc"
+          },
+          "result": {
+            "coverage": 0.9477417188675605,
+            "polarCoverage": {
+              "north": 0.1407682728711881,
+              "south": 0.5928005428750752
+            },
+            "classification": "partial",
+            "sampleCount": 64800,
+            "validSampleCount": 54512,
+            "weighting": "cos(latitude); regular 1 degree cell-centre samples",
+            "globalThreshold": 0.95,
+            "polarThreshold": 0.85,
+            "state": "ready",
+            "estimated": true,
+            "fullVerified": false,
+            "method": "phase-time-stratified-v1",
+            "metric": "valid-observation",
+            "checkedAt": 1794152603970,
+            "validatedAt": 1794152603970,
+            "downloadedBytes": 8001026,
+            "rangeRequests": 30,
+            "durationMs": 39725,
+            "sourceRevision": {
+              "etag": "\"4d39de71-65fb02337b480\"",
+              "lastModified": "Sat, 07 Nov 2026 13:59:30 GMT",
+              "size": 1295638129
+            },
+            "cached": false
+          }
+        },
+        {
+          "item": {
+            "provider": "satcorps",
+            "date": "2026-11-08",
+            "slot": "12",
+            "key": "satcorps:2026-11-08:12",
+            "time": 1794139200000,
+            "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/11/08/satcorps-gcc.v02a.geoleo.glob-comp.2026312.1200.3km.nc"
+          },
+          "result": {
+            "coverage": 0.9312668128736541,
+            "polarCoverage": {
+              "north": 0.14273063688344861,
+              "south": 0.19562144496914052
+            },
+            "classification": "partial",
+            "sampleCount": 64800,
+            "validSampleCount": 49723,
+            "weighting": "cos(latitude); regular 1 degree cell-centre samples",
+            "globalThreshold": 0.95,
+            "polarThreshold": 0.85,
+            "state": "ready",
+            "estimated": true,
+            "fullVerified": false,
+            "method": "phase-time-stratified-v1",
+            "metric": "valid-observation",
+            "checkedAt": 1794152470055,
+            "validatedAt": 1794152470055,
+            "downloadedBytes": 7504269,
+            "rangeRequests": 31,
+            "durationMs": 47714,
+            "sourceRevision": {
+              "etag": "\"4bc23208-65fc43da95440\"",
+              "lastModified": "Sun, 08 Nov 2026 13:58:33 GMT",
+              "size": 1271017992
+            },
+            "cached": false
+          }
+        }
+      ]
+    }
+  },
+  "browser": {
+    "environment": "Chrome 156 macOS local split runtime",
+    "checks": [
+      {
+        "name": "5km Beijing outer mountains and streaming satellite imagery",
+        "status": "passed",
+        "site": [
+          40.15,
+          116.05,
+          5000
+        ],
+        "evidence": "output/release136/acceptance/ground-streaming.png"
+      },
+      {
+        "name": "Main Earth reuses streamed imagery while networking disabled",
+        "status": "passed",
+        "cachedBytes": 6947039,
+        "evidence": "output/release136/acceptance/main-shared-cache.png"
+      },
+      {
+        "name": "Clear automatic imagery cache from UI preserves built-in cities and pauses immediate refill",
+        "status": "passed",
+        "resultBytes": 0
+      },
+      {
+        "name": "Coverage UI propagates imagery 200km and DEM 240km to managers and persisted settings",
+        "status": "passed"
+      },
+      {
+        "name": "Ground minimap follow/zoom/collapse and ground-only visibility across all three modes",
+        "status": "passed",
+        "evidence": "output/release136/acceptance/location-map.png"
+      },
+      {
+        "name": "Shared cloud texture/time/opacity; below-layer BackSide and above-layer FrontSide rendering",
+        "status": "passed",
+        "evidence": [
+          "output/release136/acceptance/clouds-below.png",
+          "output/release136/acceptance/clouds-above.png"
+        ]
+      },
+      {
+        "name": "Native 2025 night source default; 48x24 atlas, 2024 switch 24x12, shared day/cloud textures retained",
+        "status": "passed",
+        "evidence": "output/release136/acceptance/night-2025.png"
+      },
+      {
+        "name": "675MB standalone browser startup and chunk release",
+        "status": "passed",
+        "decodedNightTiles": 1152,
+        "remainingInlineBlocks": 0,
+        "webglError": 0
+      },
+      {
+        "name": "NASA remote coverage polling updates November 7/8 without full download",
+        "status": "passed"
+      },
+      {
+        "name": "November 8 active cloud delete removes browser plus local file, selects builtin and remains deleted after reload",
+        "status": "passed",
+        "isolation": "copy of actual November 8 frame in output/release136/cloud-ui-cache; original user files untouched"
+      },
+      {
+        "name": "Remote NASA coverage filter lists October23 12UTC99.8% before cloud download",
+        "status": "passed",
+        "site": "http://127.0.0.1:8780/StarOrbit.html"
+      }
+    ]
+  },
+  "builds": {
+    "dist-local": {
+      "entrySHA256": "781716e53c07e8cdf6b0ab93f8838bbe40686c91f1f2e200844df90160eab5c8",
+      "bundle": "assets/app.bundle-bb18f979a85ad474.js",
+      "bundleSHA256": "bb18f979a85ad47429b96f22cfcc80b6156924921c6c243d962868e427370586"
+    },
+    "dist": {
+      "entrySHA256": "0ba598115d62c9c88cdc9b9dce1bab35fc1d6ffca9bf8095d73bc93773255399",
+      "bundle": "assets/app.bundle-9d9df9e8c35b3671.js",
+      "bundleSHA256": "9d9df9e8c35b367147efd81abbb8f0e9b00cd3e4170bce672f7780699701a32a"
+    },
+    "standalone": {
+      "bytes": 674922105,
+      "sha256": "b2b905183b7d0eb48e615bfd2d5e32dd536806000b1192aefee9ca9e0d9c7c8f",
+      "status": "passed; streamed build integrity and actual Chrome startup"
+    }
+  },
+  "desktop": {
+    "status": "passed",
+    "version": "1.36",
+    "filesSynced": 3543,
+    "entrySHA256": "781716e53c07e8cdf6b0ab93f8838bbe40686c91f1f2e200844df90160eab5c8",
+    "launcherCheck": "READY; signed application verified",
+    "server": "restarted only idle application server to load new Python APIs"
+  },
+  "publication": {
+    "status": "pending"
+  },
+  "limitations": [
+    "Chrome/macOS actual UI validation; Safari/Firefox/mobile not exercised",
+    "Coverage preview is a sampled valid-observation estimate, not full image-quality approval",
+    "2025 native night source covers 75N to65S; polar display uses2016 fallback"
+  ]
+}

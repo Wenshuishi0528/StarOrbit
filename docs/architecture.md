@@ -2,9 +2,9 @@
 
 月面地名由 `lunar-place-catalog.js` 读取完整正式目录与着陆任务，`lunar-place-layout.js` 建立球面分桶索引，按视口、正背面、尺度和密度筛选。一张 Canvas2D 叠层承载全部标签并复用于 PNG 导出，避免创建数千个 DOM 节点；未知坐标的任务保留资料，不生成落点。`lunar-renderer.js` 按需加载经 Mollweide 反投影的 4096×2048 地质纹理，复用月固经纬、地形网格与 Canvas 标注；透明无数据像素显示中性灰色。地质图采用辅助照明并保留分类色，选择图层切至三维图鉴。`lunar-geology-viewer.js` 另外按需打开四幅离线原版图像，保留复合地图、图例与年代尺。四象与三垣的透明度经共享设置传递，仅影响总览 `symbols` 层。
 
-适用版本：本地 v1.33。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.36。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页维护本地 v1.33 的实现关系与文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
+本页维护本地 v1.36 的实现关系与文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
 
 赤道网与黄道作为共同天球参考层，由日期真赤道／真黄道旋转至现有 J2000 场景；主画面、巡天与照片、阳台使用同一数学定义。恒星距离按物理 HIP 身份查表，不随中西名称或语言变化。巡天打开时使用既有近景构图流程，之后不持续改变用户镜头。
 
@@ -24,9 +24,9 @@
 
 ## 地表与太阳系主视图
 
-`world-explorer.js` 由 `app.js` 安装，主帧在活动时交给世界视图，共用 renderer、canvas 和 `Simulation.time`；切换地面／太阳系释放旧视图，返回轨道恢复原控制器。地面以 `ground-world-math` 的 WGS84/ENU 坐标和稳定高程取样为基础，`ground-world-input` 复用驾驶键位但按真实时间加减速，`ground-world-surface` 管理局部地形，`ground-world-sky` 将星空转入当地地平系。太阳系使用独立 `solar-world` 场景与同历元几何星历，不将天空视位置当作行星物理位置。
+`world-explorer.js` 由 `app.js` 安装，主帧在活动时交给世界视图，共用 renderer、canvas 和 `Simulation.time`；切换地面／太阳系释放旧视图，返回轨道恢复原控制器。地面以 `ground-world-math` 的WGS84/ENU导航和原始DEM取样为基础，`ground-world-input` 复用驾驶键位，按真实时间加减速并随离地高度调整速度。`ground-world-surface` 向主高程管理器申请接触样值并提供近地补片；`groundRenderPose` 将导航位置映射到主地球球面，`shared-world-earth` 以同一地表着色器绘制补片与完整地球，借用城市、高程、云、大气和极光。`ground-world-sky` 把当地视线转入共享星空层。太阳系使用独立 `solar-world` 场景与同历元几何星历，不将天空视位置当作行星物理位置。
 
-地点、最多30个收藏、地面移动／朝向偏好与天空设置位于 `starorbit-world-v1`，不会覆盖旧阳台观测点；首次无世界地点时可从旧观察者初始化。在线地名仅在显式搜索时请求 Photon。局部垂直基准及固定恒星目录的计算口径见[地表与太阳系](world-explorer.md)。
+`shared-world-sky` 统一主星表、银河、星图、插画和巡天细节消费者；主页及三个模式修改同一环境设置。地点、最多30个收藏、地面速度／朝向偏好与独立观察效果、视场位于 `starorbit-world-v1`，不会覆盖旧阳台观测点；首次无世界地点时可从旧观察者初始化。在线地名仅在显式搜索时请求 Photon。局部垂直基准及固定恒星目录的计算口径见[地表与太阳系](world-explorer.md)。
 
 ## 总体关系
 
@@ -76,7 +76,7 @@ flowchart TD
 | 保存、场景和观测记录 | `session-memory.js`、`scene-format.js`、`scene-share.js`、`observation-store.js` | 当前网址的偏好、完整场景、观测配方和独立飞行存档用途不同 |
 | 本机服务和分发 | `scripts/serve.py`、`build.mjs`、`scripts/package-portable.py`、`macos/Launcher.swift` | 服务工作根目录、构建方式、入口重定向、启动器引用和发布证据 |
 
-源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.33 的星官数据、共享文化图层及控件以当前工作副本为准；上述固定公开链接仅对应其历史提交。
+源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.34 的星官数据、共享文化图层及控件以当前工作副本为准；上述固定公开链接仅对应其历史提交。
 
 ## 状态由谁拥有
 
@@ -187,6 +187,14 @@ macOS `.app` 是本机服务与浏览器的启动器。安装版 `launcher-confi
 
 ## 星际空间
 
-世界视图统一管理星际、太阳系与地表的渲染器所有权和生命周期。`interstellar-catalog.js`首次进入时将共享星表与可靠视差表连接为不可变TypedArray；中西连线引用同一颗HIP恒星。`interstellar-math.js`维护日心J2000光年坐标、光度距离换算和按墙钟积分的加减速。`interstellar-world.js`以高低位拆分坐标在GPU计算相对星位，一次Points绘制恒星，不逐帧重建星表；标签池28项，以8Hz更新。`interstellar-solar.js`复用太阳系星历、表面着色器和已加载地月纹理。
+世界视图统一管理星际、太阳系与地表的渲染器所有权和生命周期。`interstellar-catalog.js`首次进入时将共享星表与可靠视差表连接为不可变TypedArray；中西连线引用同一颗HIP恒星。`interstellar-math.js`维护日心J2000光年坐标、光度距离换算和按墙钟积分的加减速。`interstellar-world.js`以高低位拆分坐标在GPU计算相对星位，一次Points绘制恒星，不逐帧重建星表；标签使用有限DOM池；全体系可用连线合并绘制，选中星图单独高亮。太阳邻域与太阳附近参考视角调用共享星空层，真实空间航行用三维坐标投影成员和连线。`interstellar-solar.js`复用太阳系星历、共享地球渲染器和已加载月球纹理。
 
 离开视图销毁几何、材质和输入监听，保留1.23MB共享空间数组及浏览器航点；银河纹理借用现有资源，不转移所有权。大型Gaia分块目录没有在本版引入。[数据和约束](interstellar.md)。
+
+## 地表流式资源与统一环境
+
+`surface-streaming-controls.js` 维护主环境中的自动影像开关、影像和高程半径，同一控件挂载到城市数据面板与世界地球面板。`surface-streaming-plan.js` 按视锥选择地理区域，`CityTerrain` 复用既有工作线程、瓦片缓存和纹理图集；移动后的需求更新取消不再需要的任务，缓存内容继续服务主页地球。高程数据和显示网格分别设预算，近、中、远采样环交错加载；接触精度按离地高度而非海拔确定。区域网格异步替换期间保留旧网格，避免数据更新造成空洞。
+
+缓存清理先取消当前请求并推进代次，清理后的当前区域暂停自动下载；位置或视野发生明显变化、或用户点击继续后恢复。影像清理不删除手动离线城市包。`ground-location-map.js` 只借用当前底图和图集绘制位置、朝向、地名及比例尺，不新建缓存。
+
+共享云层保留同一纹理和天气参数，根据观察者位于云球内外选择可见面，并在云着色中只计算观察者至云的空气路径。夜景年份由同一环境设置控制，2025 AVIF分块资源延迟加载，2024和2016仍可选。

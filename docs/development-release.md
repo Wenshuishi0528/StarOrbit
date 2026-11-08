@@ -1,8 +1,8 @@
 # 开发、发布与维护
 
-适用版本：本地 v1.33。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.36。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页按本地 v1.33 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
+本页按本地 v1.36 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
 
 地表／太阳系改动的专项入口是 `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`，均并入默认回归。浏览器需检查共用 canvas 的进入／返回、时间连续性、地形异步加载、输入焦点和截图；运行结果写入版本验收记录，不能仅用数值测试推断图形交互通过。
 
@@ -95,28 +95,28 @@ node tests/web-build.mjs dist
 
 每批已授权修改遵守仓库 `AGENTS.md`：版本只递增一次，同时更新 package.json 的 version/displayVersion、package-lock.json 项目版本、README 当前版本及构建页面版本；CHANGELOG 顶部保留简短中英总结，详细证据放稳定文档或版本记录。
 
-当前显示版本使用 v1.33，对应包元数据采用项目既有的 `1.0.33` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
+当前显示版本使用 v1.34，对应包元数据采用项目既有的 `1.0.34` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
 
 本地版本递增不自动代表已上线或已发布下载包。记录中应分别说明源码、本机运行、网页版和 Release 的已核验状态。检查失败或未执行时保留明确结果，不把“准备发布”写成“正式发布”。
 
 ## 便携包和 macOS 启动器
 
-先生成单文件，再执行打包脚本。下面以本批本地 v1.33 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
+先生成单文件，再执行打包脚本。下面以本批本地 v1.34 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
 
 ```sh
-python3 scripts/package-portable.py output/release133/StarOrbit-v1.33-portable.zip
-python3 -m zipfile -t output/release133/StarOrbit-v1.33-portable.zip
-python3 scripts/check-docs.py --package output/release133/StarOrbit-v1.33-portable.zip
-shasum -a 256 output/release133/StarOrbit-v1.33-portable.zip
+python3 scripts/package-portable.py output/release134/StarOrbit-v1.34-portable.zip
+python3 -m zipfile -t output/release134/StarOrbit-v1.34-portable.zip
+python3 scripts/check-docs.py --package output/release134/StarOrbit-v1.34-portable.zip
+shasum -a 256 output/release134/StarOrbit-v1.34-portable.zip
 ```
 
 需要 macOS 启动器时，先在装有 Swift/Xcode 命令行工具的 Mac 上生成一个**尚不存在**的 `.app` 路径，再把它交给打包脚本：
 
 ```sh
-python3 scripts/create-macos-launcher.py --root . --output output/release133/launcher/星轨.app --portable
-python3 scripts/package-portable.py output/release133/StarOrbit-v1.33-portable.zip --macos-launcher output/release133/launcher/星轨.app
-python3 -m zipfile -t output/release133/StarOrbit-v1.33-portable.zip
-python3 scripts/check-docs.py --package output/release133/StarOrbit-v1.33-portable.zip
+python3 scripts/create-macos-launcher.py --root . --output output/release134/launcher/星轨.app --portable
+python3 scripts/package-portable.py output/release134/StarOrbit-v1.34-portable.zip --macos-launcher output/release134/launcher/星轨.app
+python3 -m zipfile -t output/release134/StarOrbit-v1.34-portable.zip
+python3 scripts/check-docs.py --package output/release134/StarOrbit-v1.34-portable.zip
 ```
 
 生成工具需要 swiftc、lipo、sips、iconutil 和 codesign。当前脚本构建 arm64/x86_64 的 macOS 12+ 启动器并做本地 ad-hoc 签名；签名检查不能替代公证或所有系统的启动验收。脚本拒绝覆盖已存在的 `.app`；更换已有启动器前保留旧副本和配置。
@@ -129,7 +129,7 @@ python3 scripts/check-docs.py --package output/release133/StarOrbit-v1.33-portab
 4. 断网时可用的是内置资源及此前已缓存的范围；对未缓存的外部影像/高程核对回退提示。
 5. 若包含 `.app`，从解压后的最终位置运行，确认 `root:"."` 正确；不要仅在源码旁边测试启动器。
 
-v1.29 的单文件预算为 500 MB，便携包解压后的运行文件预算为 600 MB；覆盖 319 幅中国星空教学插画、完整月面地名及着陆目录、地质纹理和原图，以及随包可读的资料署名；宇宙探索馆使用程序化模型，不新增大型贴图。打包预算由脚本执行，不能因本地有全部资源就把原始处理数据、依赖缓存和开发输出一并分发。文档/署名引用检查与运行资产检查互相补充：前者通过不证明渲染正确，后者通过也不证明使用手册可读。
+v1.36 的单文件HTML预算为900 MB，便携包解压后的运行文件预算为900 MB。新增2025年夜景资产约126 MiB，使用AVIF保留原始15角秒采样；构建输出仍分开管理单文件与内容寻址资源。日常桌面和网页版优先使用拆分入口，按画质、选定年份和视野加载，不在启动时解码全套夜景。预算表示分发检查上限，不是实际包大小或运行内存。原始GeoTIFF、中间处理文件、依赖缓存和开发输出不进入运行包；实际产物大小与浏览器验收见对应版本记录。
 
 ## 运行版本与哈希核对
 
@@ -182,4 +182,6 @@ Python 后台服务日志通常为系统临时目录下 `tiangong-viewer-<port>.
 
 完成记录至少列出：源码提交/工作树状态、本机运行目录及版本、网页地址与核对结果、便携包路径/哈希、启动器结果、实际测试范围、未完成项。仅本地完成时直接标明“未推送、未部署、未更新 Release”；某项尚未完成时说明它影响的交付范围。
 
-工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.33 的文档检查和打包调整以当前工作副本及本批验证记录为准。
+工具实现可查固定公开基线：[构建脚本](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/build.mjs)、[本机服务](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)、[便携打包](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/package-portable.py)、[macOS 启动器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/macos/Launcher.swift)。本地 v1.36 的文档检查和打包调整以当前工作副本及本批验证记录为准。
+
+地表流式加载的专项测试包括 `tests/surface-streaming.mjs`、`tests/ground-location-map.mjs`、`tests/earth-elevation.mjs`、`tests/ground-surface.mjs` 和共享地球测试。实际名称以当前 `package.json` 为准；浏览器还需检查移动和高度变化、缓存清理后暂停／恢复、主页复用、云下／云上、夜景年份切换以及位置图缩放和折叠。

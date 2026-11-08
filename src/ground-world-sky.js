@@ -2,13 +2,7 @@ import * as THREE from 'three';
 import { earthAxes, sunPosition, dot, sunlightFraction } from './orbit.js';
 import { enuFrame, WGS84_A, WGS84_F } from './ground-world-math.js';
 import { solarApparent } from './solar-system.js';
-import { getSkyCulture, cultureObjectLabel } from './sky-cultures.js';
-import { equatorial } from './environment-math.js';
-import { getSkyConstellationLines } from './sky-annotation-layout.js';
-import { referenceLineGeometry, SkyReferenceLayer } from './sky-reference-layer.js';
-import { ConstellationArtLayer } from './constellation-art-layer.js';
-import { SkyDetail } from './sky-detail.js';
-import { SkyDetailLayer } from './sky-detail-layer.js';
+import { createSharedWorldSky } from './shared-world-sky.js';
 import { getLanguage, t } from './i18n.js';
 
 const V = (a) => new THREE.Vector3(...a);
@@ -74,38 +68,13 @@ const airColor = `vec3 airColour(vec3 d,vec3 sun,float day,float twilight){float
 const sphereVertex = `varying vec3 ray;void main(){ray=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 
 export function createGroundSky({ environment, renderer }) {
-  const scene = new THREE.Scene(),
-    celestial = new THREE.Group(),
-    guides = new THREE.Scene(),
-    guideFrame = new THREE.Group();
   const atmosphere = new THREE.Scene(),
-    bodiesScene = new THREE.Scene(),
-    earthScene = new THREE.Scene();
+    bodiesScene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 3000);
   camera.up.set(0, 0, 1);
-  scene.add(celestial);
-  guides.add(guideFrame);
-  const stars = new THREE.Points(environment.stars.geometry, environment.stars.material.clone());
-  stars.frustumCulled = false;
-  stars.renderOrder = 2;
-  celestial.add(stars);
-  const galaxy = new THREE.Mesh(environment.milky.geometry, environment.milky.material.clone());
-  galaxy.renderOrder = 0;
-  celestial.add(galaxy);
-  let ownedGalaxy = null,
-    disposed = false;
-  if (!environment.galaxyTexture && environment.assets.sky?.[4])
-    new THREE.CubeTextureLoader()
-      .loadAsync(environment.assets.sky[4])
-      .then((tex) => {
-        if (disposed) {
-          tex.dispose();
-          return;
-        }
-        tex.colorSpace = THREE.SRGBColorSpace;
-        ownedGalaxy = tex;
-      })
-      .catch(() => {});
+  const shared = createSharedWorldSky({ environment, renderer, id: 'ground-world' });
+  const inertialCamera = new THREE.PerspectiveCamera();
+  let disposed = false;
   const airUniforms = {
     sun: { value: new THREE.Vector3(0, 0, 1) },
     day: { value: 1 },
@@ -132,53 +101,7 @@ export function createGroundSky({ environment, renderer }) {
     })
   );
   atmosphere.add(air);
-  const earthUniforms = {
-    eye: { value: new THREE.Vector3() },
-    east: { value: new THREE.Vector3() },
-    north: { value: new THREE.Vector3() },
-    up: { value: new THREE.Vector3() },
-    radii: { value: new THREE.Vector3() },
-    sun: airUniforms.sun,
-    day: airUniforms.day,
-    twilight: airUniforms.twilight,
-  };
-  const earthMask = new THREE.Mesh(
-    new THREE.SphereGeometry(1400, 32, 16),
-    new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      depthTest: false,
-      depthWrite: false,
-      toneMapped: false,
-      uniforms: earthUniforms,
-      vertexShader: sphereVertex,
-      fragmentShader: `varying vec3 ray;uniform vec3 eye,east,north,up,radii,sun;uniform float day,twilight;${airColor}
-    void main(){vec3 local=normalize(ray),p=eye/radii,d=(east*local.x+north*local.y+up*local.z)/radii;float a=dot(d,d),b=dot(p,d),c=dot(p,p)-1.;if(b>=0.||b*b-a*c<0.)discard;vec3 csky=airColour(local,sun,day,twilight);gl_FragColor=vec4(mix(vec3(.003,.005,.006),csky*.5,clamp(day+twilight,0.,1.)),1.);
-    #include <colorspace_fragment>
-    }`,
-    })
-  );
-  earthScene.add(earthMask);
-  const lines = new THREE.LineSegments(
-    new THREE.BufferGeometry(),
-    new THREE.LineBasicMaterial({
-      color: 0x7ea9bc,
-      transparent: true,
-      opacity: 0.4,
-      depthTest: false,
-      depthWrite: false,
-    })
-  );
-  guideFrame.add(lines);
-  const refs = new SkyReferenceLayer(guideFrame);
-  // The world view replaces the main/scope render loop. Its visible artwork
-  // must win the shared texture budget over those views' retained requests.
-  // dispose() releases this demand so their normal priorities resume on exit.
-  const art = environment.constellationArt
-    ? new ConstellationArtLayer(environment.constellationArt, 'ground-world-art', false, 4)
-    : null;
-  let detail = null,
-    detailLayer = null,
-    culture = '',
+  let culture = '',
     enhanced = false;
   const disks = new Map();
   const moonUniforms = {
@@ -262,11 +185,6 @@ export function createGroundSky({ environment, renderer }) {
     }
     const basis = frame.basis,
       toLocal = (v) => basis.map((b) => dot(b, v));
-    for (const group of [celestial, guideFrame]) {
-      group.matrixAutoUpdate = false;
-      group.matrix.set(...[0, 1, 2].flatMap((i) => [...basis[i], 0]), 0, 0, 0, 1);
-      group.matrixWorldNeedsUpdate = true;
-    }
     const sun = bodies.find((b) => b.id === 'Sun'),
       moon = bodies.find((b) => b.id === 'Moon'),
       s = toLocal(sun?.direction || [1, 0, 0]);
@@ -287,56 +205,17 @@ export function createGroundSky({ environment, renderer }) {
     // Density attenuates radiance once; coverage fades independently into space.
     airUniforms.density.value = illumination.density;
     airUniforms.airVisibility.value = illumination.airVisibility;
-    const occ = groundEarthOccluder(site);
-    earthUniforms.eye.value.fromArray(occ.fixed.origin);
-    earthUniforms.radii.value.fromArray(occ.radii);
-    for (const axis of ['east', 'north', 'up'])
-      earthUniforms[axis].value.fromArray(occ.fixed[axis]);
-    stars.material.uniforms.brightness.value = brightness;
-    stars.material.uniforms.pixelRatio.value = renderer.getPixelRatio();
-    stars.material.uniforms.high.value = enhanced ? 1 : 0;
-    galaxy.material.uniforms.skyMap.value = environment.galaxyTexture || ownedGalaxy;
-    galaxy.material.uniforms.textured.value = galaxy.material.uniforms.skyMap.value ? 1 : 0;
-    galaxy.material.uniforms.brightness.value = (enhanced ? 0.8 : 0.1) * brightness;
-    if (culture !== settings.culture) {
-      culture = settings.culture;
-      lines.geometry.dispose();
-      lines.geometry = referenceLineGeometry(getSkyConstellationLines(culture), 1000);
-    }
-    lines.visible = !!settings.lines;
-    lines.material.opacity = 0.45 * (enhanced ? 1 : Math.max(0.15, night));
-    const right = V([1, 0, 0]).applyQuaternion(camera.quaternion).toArray(),
-      up = V([0, 1, 0]).applyQuaternion(camera.quaternion).toArray(),
-      forward = V([0, 0, -1]).applyQuaternion(camera.quaternion).toArray();
-    const inertial = (v) => [0, 1, 2].map((i) => basis.reduce((sum, b, j) => sum + b[i] * v[j], 0));
-    const view = {
-      right: inertial(right),
-      up: inertial(up),
-      forward: inertial(forward),
-      fovY: camera.fov,
-      aspect: camera.aspect,
-      pixelHeight: height,
-    };
-    refs.update(
-      {
-        settings: { equatorialGrid: settings.grid, eclipticLine: settings.ecliptic },
-        epoch: stamp,
-        ...view,
-        allSky: true,
-      },
-      enhanced ? 1 : Math.max(0.15, night)
-    );
-    art?.update(view, !!settings.art, {
-      culture,
-      asterisms: true,
-      symbols: false,
-      artBrightness: settings.artBrightness ?? 1,
+    culture = settings.culture || environment.settings.skyCulture;
+    const localToInertial = new THREE.Matrix4().makeBasis(...basis.map(V));
+    inertialCamera.quaternion.setFromRotationMatrix(localToInertial).multiply(camera.quaternion);
+    inertialCamera.fov = camera.fov;
+    inertialCamera.zoom = camera.zoom;
+    const sharedStatus = shared.update(inertialCamera, stamp, width, height, {
+      brightness: brightness * (environment.settings.starBrightness ?? 1),
+      wideField: settings.appearance === 'dss',
+      settings: { ...environment.settings, skyCulture: culture },
     });
-    if (settings.appearance === 'dss' && !detail) {
-      detail = new SkyDetail(environment.assets.skyDetail, { source: 'dss', wideField: true });
-      detailLayer = new SkyDetailLayer(detail, 'ground-dss');
-    }
-    detailLayer?.update(view, settings.appearance === 'dss', { skyGain: 1 });
+    const view = sharedStatus.view;
     let count = 0;
     for (const body of bodies) {
       const d = toLocal(body.direction);
@@ -369,16 +248,12 @@ export function createGroundSky({ environment, renderer }) {
       getLanguage(),
       !!settings.names,
       settings.appearance,
+      settings.seeThroughTerrain,
       stamp,
       key,
     ].join('|');
     if (labelKey !== lastLabelKey) {
-      lastLabels = settings.names
-        ? getSkyCulture(culture).asterisms.map((c) => ({
-            text: cultureObjectLabel(c, getLanguage()),
-            direction: toLocal(equatorial(c.ra, c.dec)),
-          }))
-        : [];
+      lastLabels = [];
       if (settings.names)
         lastLabels.push(
           ...bodies
@@ -401,7 +276,8 @@ export function createGroundSky({ environment, renderer }) {
               offsetY: -14,
             }))
         );
-      lastLabels = lastLabels.filter((row) => !groundRayBlocked(site, row.direction));
+      if (!settings.seeThroughTerrain)
+        lastLabels = lastLabels.filter((row) => !groundRayBlocked(site, row.direction));
       lastLabelKey = labelKey;
     }
     return {
@@ -411,7 +287,7 @@ export function createGroundSky({ environment, renderer }) {
       view,
       labels: lastLabels,
       camera,
-      dss: detail?.status('ground-dss'),
+      dss: sharedStatus.detail,
     };
   }
   return {
@@ -423,14 +299,11 @@ export function createGroundSky({ environment, renderer }) {
       try {
         renderer.setClearColor(0x02050d, 1);
         renderer.clear();
-        renderer.render(scene, camera);
-        if (detailLayer) renderer.render(detailLayer.scene, camera);
+        shared.render();
         renderer.render(atmosphere, camera);
         renderer.render(bodiesScene, camera);
-        renderer.render(guides, camera);
-        if (art) renderer.render(art.scene, camera);
-        // Draw all sky before the analytic Earth and the caller's actual terrain.
-        renderer.render(earthScene, camera);
+
+        // The following shared Earth/terrain pass supplies the actual silhouette.
         renderer.clearDepth();
       } finally {
         renderer.autoClear = auto;
@@ -438,19 +311,11 @@ export function createGroundSky({ environment, renderer }) {
     },
     dispose() {
       disposed = true;
-      ownedGalaxy?.dispose();
-      art?.dispose();
-      detailLayer?.dispose();
-      detail?.dispose();
-      refs.dispose();
-      stars.material.dispose();
-      galaxy.material.dispose();
-      for (const mesh of [air, earthMask]) {
+      shared.dispose();
+      for (const mesh of [air]) {
         mesh.geometry.dispose();
         mesh.material.dispose();
       }
-      lines.geometry.dispose();
-      lines.material.dispose();
       planetGeometry.dispose();
       planets.material.dispose();
       for (const m of disks.values()) {

@@ -1,0 +1,351 @@
+{
+  "version": "1.34",
+  "date": "2026-11-08T20:46:45.709284+08:00",
+  "source": {
+    "baseCommit": "6b042cc2979d00491426d4c3f280f77939046feb",
+    "state": "uncommitted v1.34 implementation",
+    "diffSHA256": "461300a077fb130079531ad78508eab6ccb05a075a799222de937d1612e88004",
+    "newFiles": {
+      "src/shared-world-earth.js": "abdfbc9c7b78f613705bbdc6382536109a6422ae175c37d809d3774b65e70551",
+      "src/shared-world-sky.js": "12141debb3a2c7f58aa1cfdbadd973f3ea5ee951c5541e0b4ddc5dbb739c62c5",
+      "tests/shared-world-earth.mjs": "2bc9a75accaafa8138a338bee377dd123964704e2309928da34a067aa251e682",
+      "tests/shared-world-sky.mjs": "c8e3f697a7def3cf81f7bd37c8852ac274183934176941a54cd6883dfb56d8a8"
+    }
+  },
+  "environment": {
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "node": "v25.9.0",
+    "preview": "http://127.0.0.1:8772/StarOrbit.html",
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+  },
+  "checks": {
+    "npmTest": "passed full suite; final terrain/sky/Earth/aurora/geography/interstellar changes rechecked with targeted tests",
+    "documentation": "passed",
+    "webBuild": "passed",
+    "localSplitBuild": "passed",
+    "standaloneBuild": "passed",
+    "format": "changed source files passed; repository-wide check reports pre-existing src/xuntian-scope.js formatting",
+    "diffCheck": "passed"
+  },
+  "browserGround": {
+    "version": "1.34",
+    "date": "2026-11-08T12:39:13.601Z",
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      912
+    ],
+    "checks": [
+      {
+        "name": "Beijing ground original DEM with fine data",
+        "height": 50.51679670365682,
+        "terrain": 48.81679670365682,
+        "source": {
+          "baseReady": true,
+          "detailed": true,
+          "pending": 0,
+          "tiles": 34,
+          "source": "Copernicus GLO-30 · OpenTopography",
+          "verticalDatum": "EGM2008",
+          "geoidCorrection": 0,
+          "lastError": "",
+          "credit": "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."
+        },
+        "cityReady": 14
+      },
+      {
+        "name": "Ground to 10 km UI preset",
+        "height": 9999.999999999993,
+        "site": {
+          "name": "北京",
+          "latitude": 39.90742,
+          "longitude": 116.40463,
+          "height": 9999.999999999993
+        },
+        "cityReady": 13
+      },
+      {
+        "name": "10 km to 400 km UI preset",
+        "height": 400000.0000000001,
+        "near": false,
+        "outer": false,
+        "terrainDemands": [
+          "world-ground-earth"
+        ]
+      },
+      {
+        "name": "400 km to 20000 km UI preset",
+        "height": 19999999.99999998,
+        "near": false,
+        "state": {
+          "site": {
+            "name": "北京",
+            "latitude": 39.90742,
+            "longitude": 116.40463,
+            "height": 50.83295463070135
+          },
+          "azimuth": 0,
+          "elevation": 5,
+          "mode": "free",
+          "eyeHeight": 1.7,
+          "speed": "normal",
+          "speedMps": 0,
+          "terrainHeight": 48.81679670365682,
+          "terrainReady": true,
+          "velocity": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "20000 km to Beijing ground UI preset",
+        "height": 50.51679670365682,
+        "terrain": 48.81679670365682,
+        "clearance": 1.7000000000000028,
+        "cityReady": 23
+      },
+      {
+        "name": "Real K key lifts observer",
+        "before": {
+          "name": "北京",
+          "latitude": 39.90742,
+          "longitude": 116.40463,
+          "height": 50.51679670365682
+        },
+        "after": {
+          "name": "北京",
+          "latitude": 39.90742,
+          "longitude": 116.40463,
+          "height": 50.83295463070135
+        },
+        "delta": 0.3161579270445287,
+        "trace": [
+          {
+            "n": "wheel",
+            "target": "CANVAS",
+            "trusted": true,
+            "t": 199059.29999995232
+          },
+          {
+            "n": "wheel",
+            "target": "CANVAS",
+            "trusted": true,
+            "t": 199096.5
+          },
+          {
+            "n": "wheel",
+            "target": "CANVAS",
+            "trusted": true,
+            "t": 199133.19999998808
+          },
+          {
+            "n": "keydown",
+            "code": "KeyK",
+            "target": "CANVAS",
+            "trusted": true,
+            "t": 282317.39999997616
+          },
+          {
+            "n": "keyup",
+            "code": "KeyK",
+            "target": "CANVAS",
+            "trusted": true,
+            "t": 282322.7999999523
+          }
+        ]
+      },
+      {
+        "name": "Final Xiangshan near/surround seam",
+        "status": "passed",
+        "screenshot": "xiangshan-terrain-final.png",
+        "position": {
+          "latitude": 39.99,
+          "longitude": 116.19,
+          "height": 700
+        },
+        "tiles": 34
+      },
+      {
+        "name": "City coverage switch Seattle",
+        "status": "passed",
+        "ready": 13,
+        "source": "seattle",
+        "screenshot": "seattle-city.png"
+      },
+      {
+        "name": "Shared volumetric aurora",
+        "status": "passed",
+        "volumeCreated": true,
+        "failed": false,
+        "screenshot": "arctic-aurora.png"
+      },
+      {
+        "name": "Stable Beijing 10km 4K viewport frame sample",
+        "frames": 119,
+        "medianMs": 50,
+        "p95Ms": 67.2,
+        "surfaceUpdateMedianMs": 0.1,
+        "surfaceUpdateP95Ms": 0.2,
+        "viewportPixels": [
+          3840,
+          1702
+        ]
+      },
+      {
+        "name": "Terrain switch actual controls",
+        "off": {
+          "enabled": false,
+          "hole": 0,
+          "patches": [
+            false,
+            false
+          ]
+        },
+        "on": true
+      }
+    ]
+  },
+  "browserSky": {
+    "dss": {
+      "source": "dss",
+      "requested": 7,
+      "ready": 7,
+      "complete": true,
+      "failed": 0,
+      "textureCount": 7,
+      "activeConsumers": [
+        "interstellar-world-detail"
+      ]
+    },
+    "closeZoomFov": 0.006,
+    "culture": "western",
+    "movement": {
+      "before": [
+        1.093339210238022e-05,
+        1.0296249440945161e-05,
+        4.4684280158090485e-06
+      ],
+      "after": [
+        1.091652765449362e-05,
+        1.030047548182118e-05,
+        4.500786071385664e-06
+      ],
+      "distanceLy": 3.6732993135666776e-08
+    },
+    "westernSegments": 617,
+    "screenshots": [
+      "stellar-near-sun-chinese.png",
+      "stellar-dipper-side.png",
+      "stellar-m42-dss-reference.png"
+    ],
+    "chineseCultureSegments": 890,
+    "selectedDipperSegments": 6,
+    "sideViewDistanceLy": 122,
+    "observed": "2026-11-08",
+    "browser": "headed Chromium isolated Playwright CLI",
+    "consoleErrors": 0,
+    "referenceTargetGuard": {
+      "target": "deep-sky:m42",
+      "goDisabled": true,
+      "earthControlsMounted": true
+    },
+    "afterExit": {
+      "active": false,
+      "skyConsumers": [
+        "main"
+      ],
+      "artConsumers": [
+        "main"
+      ]
+    }
+  },
+  "browserExports": {
+    "stellarPng": "stellar-actual-export.png",
+    "solarPng": "solar-actual-export.png",
+    "solarBackgroundToggle": [
+      "solar-earth-background-off.png",
+      "solar-earth-background-on.png"
+    ],
+    "earthGeographyControls": true,
+    "cityMainUniformObjectIdentityPreserved": true,
+    "mainCitySamplerIdentityPreserved": true,
+    "afterExit": {
+      "skyConsumers": [
+        "main"
+      ],
+      "cityConsumers": [
+        "main"
+      ],
+      "worldActive": false
+    },
+    "focusedTests": [
+      "shared-world-sky",
+      "shared-world-earth",
+      "solar-world"
+    ]
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "bytes": 497862550,
+      "sha256": "6f0de5727e261c8db0cd6e86fcfe67776d1b0485925dffdb51ce8e48ca32733b"
+    },
+    "dist-local/index.html": {
+      "bytes": 582990,
+      "sha256": "2a70db4d57140c82c01d23b378e208e59eb26e878031d57c4723a6c22c3e7dae"
+    },
+    "dist/index.html": {
+      "bytes": 582990,
+      "sha256": "a66bff7f2df0daa91779e6a3035ef1d60dc8c119300878730466c6af423ad03f"
+    }
+  },
+  "screenshots": {
+    "arctic-aurora.png": "8b918c53f82ec5b749c931787fb361bc9b481b5d31b7cf6b5ba6fcf081dae1ff",
+    "stellar-dipper-side.png": "19c7af7a4c6cf65fcbd1575540a5a362547c36591d9a95b09dcbac0594d0c8ab",
+    "solar-earth-background-off.png": "580554377a75d4aa45428d9425d43bb5a86203cebc2c24e9359cb6f457e0d09d",
+    "stellar-m42-dss-reference.png": "f63509e2d7dff186f1787c78b4991acdd7900e4f157166004f45fcadce8f051d",
+    "beijing-400km.png": "727c3ea0e4fbf0e18602820c8c739fde7d33a95e1b54f8e17e5ecb1fc0ae2f73",
+    "beijing-full-earth.png": "363e207147292a76a9a320454f15491629cc381fdf43dd1fb077bee4d25c05f6",
+    "stellar-actual-export.png": "d9a85fd9286669422e178c115c9f6ee78ad4b3356047f0750c82dfbae69a9d51",
+    "xiangshan-terrain-final.png": "6c213d73b14602e3259f17b16c06c81b6bc7e52c06b9b493d341059d45d3244f",
+    "solar-actual-export.png": "5a5daa5c6c4ebb8d61a06c833629a4fed985f56c7f2c441d29f174f987e2b945",
+    "seattle-city.png": "8a1f7c5c0f24160e1afcf7fd29ab992ec113e751ec6d2873ead0854313e086d1",
+    "beijing-10km.png": "1dcf4358533adbb438d8485f93d9e82d29ea4ef7d101984a35fc48c91d2309cb",
+    "solar-earth-background-on.png": "b3378eeae376d569587ccaaa25265fa4687b4c7198d027f70524d15b7a584b4f",
+    "stellar-near-sun-chinese.png": "3ad084bc1521fc1f7e9cdf40f5e24946da995ecdc35483ea96d25cde22b6be66",
+    "desktop-beijing-10km.png": "6d6562093974b4ef72ff6683142fc60a52552bfd9487fe16ec1844f8b2cbe5c8"
+  },
+  "notRun": [
+    "Safari/Firefox",
+    "fresh Tianjin city download; existing Beijing and Seattle city coverage tested",
+    "portable ZIP packaging"
+  ],
+  "publication": {
+    "github": "not published this batch",
+    "web": "built locally; not deployed this batch",
+    "desktop": "synced v1.34, launcher check and HTTP payload hashes verified; actual runtime Beijing view inspected"
+  },
+  "desktop": {
+    "version": "1.34",
+    "launchCheck": "passed",
+    "served": {
+      "version": "1.34",
+      "script": "assets/app.bundle-2feb15be9cf1797a.js",
+      "httpBytes": 582990,
+      "scriptSHA256": "2feb15be9cf1797a4e65b8b88eea8293a928176114cc47cc3392a0b9a9e45527",
+      "matchesRuntime": true,
+      "matchesCheckout": true
+    },
+    "browser": {
+      "url": "http://127.0.0.1:8771/StarOrbit.html",
+      "versionLabel": "v1.34",
+      "city": "beijing",
+      "cityTilesReady": 13,
+      "terrain": "Copernicus GLO-30",
+      "consoleErrors": 0,
+      "screenshot": "desktop-beijing-10km.png",
+      "userSettingsRestored": true
+    }
+  }
+}

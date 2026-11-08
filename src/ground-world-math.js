@@ -10,6 +10,7 @@ const clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
 export const wrapGroundLongitude = (v) => ((((v + 180) % 360) + 360) % 360) - 180;
 export const wrapGroundAzimuth = (v) => ((v % 360) + 360) % 360;
+export const MAX_GROUND_HEIGHT = 100_000_000;
 export const GROUND_SPEEDS = Object.freeze({ slow: 2, normal: 25, fast: 500 });
 
 export function normalizeGroundSite(site) {
@@ -117,7 +118,7 @@ export function createGroundState(options = {}) {
     site,
     azimuth: wrapGroundAzimuth(options.azimuth ?? 180),
     elevation: clamp(options.elevation ?? 15, -89.5, 89.5),
-    mode: options.mode === 'free' ? 'free' : 'grounded',
+    mode: options.mode === 'grounded' ? 'grounded' : 'free',
     eyeHeight: Math.max(0.2, Number(options.eyeHeight) || 1.7),
     speed: Object.hasOwn(GROUND_SPEEDS, options.speed) ? options.speed : 'normal',
     speedMps: 0,
@@ -125,6 +126,13 @@ export function createGroundState(options = {}) {
     terrainReady: false,
     velocity: [0, 0, 0],
   };
+}
+export function groundSpeedLimit(state) {
+  const base = GROUND_SPEEDS[state.speed] || GROUND_SPEEDS.normal;
+  if (state.mode === 'grounded') return base;
+  const clearance = Math.max(0, state.site.height - (state.terrainHeight ?? 0) - 50);
+  const factor = { slow: 0.03, normal: 0.2, fast: 0.6 }[state.speed] || 0.2;
+  return Math.min(1_000_000, base + clearance * factor);
 }
 function heightSample(sampleHeight, site) {
   const value = sampleHeight?.(site.latitude, site.longitude);
@@ -137,11 +145,16 @@ export function stepGroundMotion(state, axes = {}, dt = 0, sampleHeight) {
   if (!Number.isFinite(dt) || dt < 0) return state;
   let remaining = Math.min(dt, 0.25);
   const initialHeight = heightSample(sampleHeight, state.site);
+  const attached =
+    state.terrainReady &&
+    Number.isFinite(state.terrainHeight) &&
+    Math.abs(state.site.height - state.terrainHeight - state.eyeHeight) < 0.05 &&
+    state.velocity[2] <= 0.01;
   state.terrainReady = initialHeight !== null;
   if (initialHeight !== null) {
     state.terrainHeight = initialHeight;
-    if (state.mode === 'grounded') state.site.height = initialHeight + state.eyeHeight;
-    else state.site.height = Math.max(state.site.height, initialHeight + 0.2);
+    if (state.mode === 'grounded' || attached) state.site.height = initialHeight + state.eyeHeight;
+    else state.site.height = Math.max(state.site.height, initialHeight + state.eyeHeight);
   }
   while (remaining > 1e-8) {
     const h = Math.min(remaining, 1 / 60);
@@ -159,7 +172,7 @@ export function stepGroundMotion(state, axes = {}, dt = 0, sampleHeight) {
       f * Math.sin(e) + u,
     ];
     const length = Math.hypot(...direction),
-      cap = GROUND_SPEEDS[state.speed] || GROUND_SPEEDS.normal;
+      cap = groundSpeedLimit(state);
     const desired = direction.map((v) => (length > 0 ? (v / Math.max(1, length)) * cap : 0));
     const reversing = dot(desired, state.velocity) < 0;
     const tau = length === 0 ? 0.12 : reversing ? 0.18 : 1.3;
@@ -167,6 +180,7 @@ export function stepGroundMotion(state, axes = {}, dt = 0, sampleHeight) {
     state.velocity = state.velocity.map((v, i) => v + (desired[i] - v) * blend);
     if (state.mode === 'grounded') state.velocity[2] = 0;
     if (Math.hypot(...state.velocity) < 0.001) state.velocity = [0, 0, 0];
+    if (state.velocity.every((v) => v === 0)) continue;
     const beforeFrame = enuFrame(state.site),
       worldHeading = worldVector(groundViewDirection(state.azimuth), beforeFrame);
     const next = moveOnEarth(
@@ -187,9 +201,17 @@ export function stepGroundMotion(state, axes = {}, dt = 0, sampleHeight) {
       next.height =
         state.mode === 'grounded'
           ? terrain + state.eyeHeight
-          : Math.max(next.height, terrain + 0.2);
-      if (state.mode === 'free' && next.height <= terrain + 0.2 && state.velocity[2] < 0)
+          : Math.max(next.height, terrain + state.eyeHeight);
+      if (
+        state.mode === 'free' &&
+        next.height <= terrain + state.eyeHeight &&
+        state.velocity[2] < 0
+      )
         state.velocity[2] = 0;
+    }
+    if (next.height > MAX_GROUND_HEIGHT) {
+      next.height = MAX_GROUND_HEIGHT;
+      state.velocity[2] = Math.min(0, state.velocity[2]);
     }
     const afterFrame = enuFrame(next),
       heading = localVector(worldHeading, afterFrame);

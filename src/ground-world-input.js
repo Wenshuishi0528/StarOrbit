@@ -5,6 +5,7 @@ import {
   stepGroundMotion,
   wrapGroundAzimuth,
   GROUND_SPEEDS,
+  groundSpeedLimit,
 } from './ground-world-math.js';
 
 // The active canvas owns navigation; text fields and inactive views never do.
@@ -13,6 +14,7 @@ export function createGroundWorldInput({
   canvas,
   state = createGroundState(),
   sampleHeight,
+  getFov = () => 65,
   enabled = () => true,
   onChange = () => {},
 }) {
@@ -48,6 +50,12 @@ export function createGroundWorldInput({
       canvas.blur();
       return;
     }
+    if (event.code === 'Space') {
+      event.preventDefault();
+      event.stopPropagation();
+      stop();
+      return;
+    }
     if (!PILOT_KEY_AXES[event.code]) return;
     event.preventDefault();
     event.stopPropagation();
@@ -75,8 +83,11 @@ export function createGroundWorldInput({
       dy = event.clientY - lastY;
     lastX = event.clientX;
     lastY = event.clientY;
-    state.azimuth = wrapGroundAzimuth(state.azimuth + dx * 0.16);
-    state.elevation = Math.max(-89.5, Math.min(89.5, state.elevation - dy * 0.16));
+    state.azimuth = wrapGroundAzimuth(state.azimuth + dx * 0.16 * (getFov() / 65));
+    state.elevation = Math.max(
+      -89.5,
+      Math.min(89.5, state.elevation - dy * 0.16 * (getFov() / 65))
+    );
     onChange(state);
   });
   const endPointer = (event) => {
@@ -103,7 +114,11 @@ export function createGroundWorldInput({
         state.velocity = [0, 0, 0];
       }
       const held = new Set([...keys, ...taps]);
-      stepGroundMotion(state, pilotAxes(held), dt, sampleHeight);
+      const axes = pilotAxes(held),
+        turnScale = getFov() / 65;
+      axes.yaw *= turnScale;
+      axes.pitch *= turnScale;
+      stepGroundMotion(state, axes, dt, sampleHeight);
       if (dt > 0) taps.clear();
       onChange(state);
       return state;
@@ -127,7 +142,7 @@ export function createGroundWorldInput({
       if (!Object.hasOwn(GROUND_SPEEDS, speed)) return;
       state.speed = speed;
       const magnitude = Math.hypot(...state.velocity),
-        cap = GROUND_SPEEDS[speed];
+        cap = groundSpeedLimit(state);
       if (magnitude > cap) state.velocity = state.velocity.map((v) => (v * cap) / magnitude);
       state.speedMps = Math.hypot(...state.velocity);
       onChange(state);

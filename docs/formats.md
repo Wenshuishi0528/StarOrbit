@@ -1,10 +1,10 @@
 # 数据格式与本机接口
 
-适用版本：本地 v1.33。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.36。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
-本页按本地 v1.33 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
+本页按本地 v1.36 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
 
 示例中的轨道是为说明格式生成的合成数据，不能当作任何真实航天器的轨道或观测预报。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
 
@@ -281,3 +281,11 @@ JS
 ## 星际航点
 
 同源localStorage键 `starorbit-interstellar-v1` 保存 `speed`（local/nearby/cruise/fast）、`culture`（western/chinese）、最多12条 `bookmarks`。每条包含 `name`、日心J2000光年 `position[3]`、Three.js四元数 `quaternion[4]`（x/y/z/w）、视场 `fov`、恒星身份 `targetId`（Sun或hip:编号），兼容旧索引 `selected`、`culture` 和 `formation`。位置和四元数校验有限值，加载时归一化四元数。优先按稳定HIP身份恢复目标，兼容本版旧索引；该结构属于浏览器偏好。普通场景JSON不包含这些航点。
+
+## 地表加载偏好与缓存
+
+主环境偏好新增 `surfaceStreaming:boolean`（默认true）、`surfaceImageryRangeKm`（默认120）和 `surfaceElevationRangeKm`（默认160）；两项范围为20–400 km，按10 km步长归一化。各世界视图与主页共享这些字段。`starorbit-world-v1.settings.seeThroughTerrain` 为独立地表透视开关，默认false。
+
+影像继续使用IndexedDB数据库 `starorbit-city-terrain-v1`，自动漫游区域通过 `streaming:true` 与离线城市包区分。影像缓存预算512 MiB，下载的高程缓存为独立 `starorbit-elevation-v1`、预算128 MiB；浏览器存储不可用时界面显示临时内存缓存。清理后的暂停状态属于运行状态，不把它混入场景时间或地点记录。
+
+主环境 `nightSource` 新增 `2025-500m`；`nightSourceDefaultVersion:1` 标识本次默认迁移完成，此后保留用户所选年份。2025 manifest声明EPSG:4326、15角秒像元、75°N–65°S原始覆盖、极区2016回退、48×24瓦片与AVIF编码。原始辐亮度经manifest记载的显示曲线转为8位纹理，不能把显示纹理当作原始定量辐亮度。

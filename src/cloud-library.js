@@ -124,10 +124,12 @@ export class CloudLibrary {
     this.w.resourcePanel?.render();
   }
   async loadSaved() {
+    const generation = (this.savedGeneration = (this.savedGeneration || 0) + 1);
     await this.w.reload();
     if (this.local) {
       try {
         const data = await cloudJSON('library');
+        if (generation !== this.savedGeneration) return this.saved;
         this.disk = data.items || [];
         this.libraryError = '';
         this.w.serverCache = {
@@ -135,6 +137,7 @@ export class CloudLibrary {
           bytes: this.disk.reduce((n, r) => n + (r.size || 0), 0),
         };
       } catch (e) {
+        if (generation !== this.savedGeneration) return this.saved;
         this.libraryError = cloudError(e);
       }
     }
@@ -144,6 +147,7 @@ export class CloudLibrary {
   refreshCatalog(month, date = '', force = false) {
     if (this.catalogPromise && this.catalog.month === month && this.catalog.date === date && !force)
       return this.catalogPromise;
+    this.stopCoveragePolling();
     this.catalogController?.abort();
     const controller = new AbortController();
     this.catalogController = controller;
@@ -164,6 +168,7 @@ export class CloudLibrary {
         if (controller.signal.aborted) return;
         this.catalog = { ...data, month, date, state: 'ready', message: data.message };
         this.catalogs.set(query, this.catalog);
+        this.startCoveragePolling(month, date);
       } catch (e) {
         if (this.catalogController !== controller) return;
         this.catalog = {
@@ -183,7 +188,62 @@ export class CloudLibrary {
     this.catalogPromise = promise;
     return promise;
   }
+  stopCoveragePolling() {
+    clearTimeout(this.coverageTimer);
+    this.coverageController?.abort();
+    this.coverageController = null;
+  }
+  startCoveragePolling(month, date) {
+    this.stopCoveragePolling();
+    if (
+      !this.local ||
+      !this.catalog.items.some((item) => ['queued', 'running'].includes(item.coverageCheck?.state))
+    )
+      return;
+    const controller = (this.coverageController = new AbortController());
+    let failures = 0;
+    const poll = async () => {
+      try {
+        const data = await cloudJSON(
+          'coverage?' + new URLSearchParams({ month, ...(date ? { date } : {}) }),
+          { signal: controller.signal }
+        );
+        if (
+          controller.signal.aborted ||
+          this.coverageController !== controller ||
+          this.catalog.month !== month ||
+          this.catalog.date !== date
+        )
+          return;
+        const checked = new Map((data.items || []).map((item) => [item.key, item.coverageCheck]));
+        this.catalog.items = this.catalog.items.map((item) =>
+          checked.has(item.key) ? { ...item, coverageCheck: checked.get(item.key) } : item
+        );
+        this.catalog.coverageStatus = data.coverageStatus;
+        this.catalog.coveragePollError = '';
+        this.catalogs.set(month + '|' + date, this.catalog);
+        failures = 0;
+        this.notify();
+        if (
+          !this.catalog.items.some((item) =>
+            ['queued', 'running'].includes(item.coverageCheck?.state)
+          )
+        )
+          return;
+      } catch (error) {
+        if (controller.signal.aborted || this.coverageController !== controller) return;
+        this.catalog.coveragePollError = cloudError(error);
+        this.notify();
+        if (++failures >= 3) return;
+      }
+      this.coverageTimer = setTimeout(poll, failures ? 6000 : 3000);
+      this.coverageTimer.unref?.();
+    };
+    this.coverageTimer = setTimeout(poll, 1500);
+    this.coverageTimer.unref?.();
+  }
   cancelCatalog() {
+    this.stopCoveragePolling();
     this.catalogController?.abort();
   }
   async restore() {
@@ -214,6 +274,7 @@ export class CloudLibrary {
     }
   }
   download(row, { resumeJob } = {}) {
+    if (this.removing) return Promise.reject(Error(t('正在删除云图，请稍候')));
     if (this.downloadPromise) return this.downloadPromise;
     if (this.task.state === 'cancelling')
       return Promise.reject(Error(t('正在确认下载已停止，请稍候或重试取消')));
@@ -427,7 +488,7 @@ export class CloudLibrary {
     return record;
   }
   async use(row) {
-    if (this.using) throw Error(t('正在加载云图，请稍候'));
+    if (this.using || this.removing) throw Error(t('正在加载云图，请稍候'));
     this.using = row.key;
     this.notify();
     try {
@@ -439,7 +500,65 @@ export class CloudLibrary {
       this.notify();
     }
   }
+  async remove(row) {
+    if (!row || (!row.record && !row.diskRecord)) throw Error(t('请先选择已保存的云图'));
+    if (
+      this.removing ||
+      this.using ||
+      this.downloading ||
+      this.w.busy ||
+      this.w.sim.sceneBusy ||
+      this.w.sim.missions?.busy
+    )
+      throw Error(t('数据正在更新，请稍后重试'));
+    const identity = row.record || row.diskRecord;
+    const records = this.w.items.filter(
+      (item) => item.kind === 'cloud' && sameCloud(item, identity)
+    );
+    // Recheck the selected identity; stale UI must not remove a replaced record.
+    if (row.record && !records.some((item) => item.id === row.record.id))
+      throw Error(t('云图版本已改变，请刷新图库后重试'));
+    const disks = this.disk.filter((item) => sameCloud(item, identity));
+    if (row.diskRecord && !disks.some((item) => item.disk === row.diskRecord.disk))
+      throw Error(t('云图版本已改变，请刷新图库后重试'));
+    const ids = records.map((item) => item.id);
+    this.removing = row.key;
+    this.savedGeneration = (this.savedGeneration || 0) + 1;
+    ++this.taskGeneration; // A delayed startup status cannot restore this completion card.
+    this.notify();
+    try {
+      if (
+        ids.includes(this.w.active.cloud) ||
+        ids.includes(this.w.settings.cloudHistory) ||
+        ids.includes(this.w.pendingApply?.cloud?.recordId)
+      )
+        await this.w.setSource('cloud', 'builtin', 'auto');
+      for (const disk of disks) {
+        const result = await cloudJSON(
+          'library/delete?' +
+            new URLSearchParams({
+              name: disk.disk,
+              sha256: disk.sha256,
+              provider: disk.provider,
+              time: String(disk.time),
+            }),
+          { method: 'POST' }
+        );
+        if (!result.deleted) throw Error(t('云图文件删除失败，请刷新图库后重试'));
+      }
+      // Manual deletion may include favourites/recent versions. Do not use
+      // Weather.remove(), whose guards serve ordinary cache-retention actions.
+      if (ids.length) await this.w.removeRecords(ids);
+      if (ids.includes(this.task.recordId) || sameCloud(this.task.result, identity))
+        this.task = { state: 'idle', message: '' };
+      this.w.render();
+    } finally {
+      this.removing = null;
+      await this.loadSaved();
+    }
+  }
   dispose() {
+    this.stopCoveragePolling();
     this.catalogController?.abort();
     this.listeners.clear();
   }

@@ -75,8 +75,9 @@ export function createInterstellarInput({
   });
   listen(canvas, 'pointermove', (e) => {
     if (pointer !== e.pointerId) return;
-    camera.rotateY(-(e.clientX - x) * 0.003);
-    camera.rotateX(-(e.clientY - y) * 0.003);
+    const angularScale = Math.min(1, camera.fov / 65);
+    camera.rotateY(-(e.clientX - x) * 0.003 * angularScale);
+    camera.rotateX(-(e.clientY - y) * 0.003 * angularScale);
     x = e.clientX;
     y = e.clientY;
   });
@@ -107,7 +108,7 @@ export function createInterstellarInput({
         taps.clear();
       }
       const a = pilotAxes(new Set([...keys, ...taps])),
-        turn = Math.min(0.1, Math.max(0, dt)) * 0.75;
+        turn = Math.min(0.1, Math.max(0, dt)) * 0.75 * Math.min(1, camera.fov / 65);
       if (dt > 0) taps.clear();
       camera.rotateX(a.pitch * turn);
       camera.rotateY(a.yaw * turn);

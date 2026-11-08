@@ -4,6 +4,30 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.36 — 2026-11-08 · 本机版 / Local build
+
+地表移动时按视野加载卫星影像与分级高程，主页地球复用同一缓存；加载半径可分别调整，漫游影像和高程可独立清理。增加默认展开的位置小地图，显示朝向、地名和比例尺；云层沿用主页数据与设置，修正从云层下方观察的显示。夜景默认更新为2025年500米数据，保留2024及2016选项；新增夜景资源采用AVIF分块按需加载。NASA 下载目录自动预核验覆盖范围，可筛选基本全球版本；云图库支持确认后删除最新及收藏版本，同步清理浏览器、本机文件和完成任务引用。
+
+**English:** Added view-driven satellite imagery and terrain streaming with caches shared by the main Earth, independent coverage radii and cache cleanup. A default-open location map shows heading, place names and scale. Clouds share the main view’s data and settings, including observation from below. Night lights now default to the 2025 nominal 500 m dataset, retain 2024/2016 options, and use on-demand AVIF tiles. NASA download listings now estimate observation coverage automatically and can filter near-global versions. Explicit cloud deletion now includes recent and favourite versions and removes browser/local copies and completed-job references.
+
+[操作 / Guide](使用说明.md#地表观测与太阳系) · [数据与实现 / Implementation](docs/world-explorer.md) · [验收 / Validation](docs/verification.md)
+
+## v1.35 — 2026-11-08 · 本机版 / Local build
+
+地表新增默认关闭的「透过地形看星空」，记住选择并应用于照片；正常观察时山体遮住星空。大气与云层按真实地形距离截断，修正远山被过度冲淡的问题，日月行星标签也遵循山体遮挡。
+
+**English:** Added an opt-in, remembered see-through-terrain mode for ground observing and photos. Mountains normally occlude the sky; atmospheric/cloud paths and celestial labels now respect the rendered terrain silhouette.
+
+[操作 / Guide](使用说明.md#地表观测与太阳系) · [验收 / Validation](docs/verification.md)
+
+## v1.34 — 2026-11-08 · 本机版 / Local build
+
+地表、太阳系和星际视图共用主页的地球材质、城市影像、地形、银河／巡天图源与中西标注设置。地表统一自由移动和可见键位提示，支持地面、高空、近地轨道和完整地球间连续升降；接触高度采用原始DEM而非远景绘制网格。星际连线默认覆盖当前体系，远方巡航可独立查看太阳视角的图源和插画。
+
+**English:** Ground, Solar System and interstellar views reuse the main Earth's materials, city imagery, terrain, sky surveys and cultural annotations. Ground navigation has one free-movement scheme, visible key guidance and continuous surface-to-space altitude presets. Contact height samples the original DEM. Interstellar views draw the active culture's spatial lines and offer a solar-origin survey/art reference during distant travel.
+
+[实现 / Implementation](docs/world-explorer.md) · [验收 / Validation](docs/verification.md)
+
 ## v1.33 — 2026-11-08 · 本机版 / Local build
 
 新增星际穿梭，共用世界视图、时钟、操控键与拍照；19,286颗可靠距离恒星支持自由加减速、搜索前往、回望太阳、中西星图侧视和命名航点。相对坐标、批量星点和共享纹理控制精度与资源占用；太阳／天狼星A近景使用实测半径，太阳系附近沿用几何星历。

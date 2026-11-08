@@ -1,4 +1,8 @@
-"""Small official directory listings and local metadata; never download cloud fields."""
+"""Small official directory listings and local metadata.
+
+The HTTP handler submits returned NASA rows to cloud_coverage separately;
+directory fetches never wait for scientific-field coverage estimates.
+"""
 import datetime, hashlib, io, json, re, threading, time, math
 from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
@@ -91,7 +95,7 @@ def known_checks(result,cache):
         if not isinstance(check,dict):check={}
         if check.get('reason')=='image quality':warnings.append('上次检查提示：'+describe_reasons([x for x in check['details'] if isinstance(x,str)] if isinstance(check.get('details'),list) else []))
         coverage=check.get('coverage')
-        if check.get('reason')=='phase coverage' and isinstance(coverage,(int,float)) and 0<=coverage<=1:warnings.append('上次检查有效覆盖 '+str(round(coverage*100,1))+'%；选择下载可重新检查此时次')
+        if check.get('reason')=='phase coverage' and isinstance(coverage,(int,float)) and 0<=coverage<=1:warnings.append('上次检查有效覆盖 '+str(round(coverage*100,1))+'%')
         items.append({**item,**({'warnings':warnings} if warnings else {})})
     return {**result,'items':items}
 

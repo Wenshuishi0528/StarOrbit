@@ -22,6 +22,35 @@ export function nasaCoverage(record) {
   if (values.some(([value, threshold]) => valid(value) && value < threshold)) return 'partial';
   return values.every(([value]) => valid(value)) ? 'global' : 'unknown';
 }
+// Preview estimates are separate from the full scientific/quality acceptance gate.
+export function nasaCoverageEstimate(record) {
+  const check = record?.coverageCheck;
+  const valid = (value) => Number.isFinite(value) && value >= 0 && value <= 1;
+  if (
+    record?.provider !== 'satcorps' ||
+    check?.state !== 'ready' ||
+    check.estimated !== true ||
+    ![check.coverage, check.polarCoverage?.north, check.polarCoverage?.south].every(valid)
+  )
+    return null;
+  return check;
+}
+export function nasaMostlyGlobal(record) {
+  if (nasaCoverage(record) === 'global') return true;
+  if (record?.provider !== 'satcorps') return false;
+  const valid = (n) => Number.isFinite(n) && n >= 0 && n <= 1;
+  const value = [record.coverage, record.polarCoverage?.north, record.polarCoverage?.south].every(
+    valid
+  )
+    ? record
+    : nasaCoverageEstimate(record);
+  return (
+    !!value &&
+    value.coverage >= 0.95 &&
+    value.polarCoverage.north >= 0.85 &&
+    value.polarCoverage.south >= 0.85
+  );
+}
 export const GITHUB_CLOUD_UNAVAILABLE = '请在云图库下载去极区镜像的 GitHub 云图，再选择使用';
 export function acceptedCloudQuality(record) {
   return (

@@ -319,3 +319,17 @@ assert.throws(
 console.log(
   `Elevation math: geographic fixtures, triangle/height/normal/skirt seams, ${rayHits} independent ray hits and bounded LOD passed.`
 );
+
+// A ground observer is *inside* the maximum mountain envelope. The nominal
+// surface must still determine screen error, while range bounds the horizon.
+for (const elevation of [-90,-30,-5]) {
+ const lat=39.9*DEG,lon=116.4*DEG,up=[Math.cos(lat)*Math.cos(lon),Math.cos(lat)*Math.sin(lon),Math.sin(lat)];
+ const north=[-Math.sin(lat)*Math.cos(lon),-Math.sin(lat)*Math.sin(lon),Math.cos(lat)];
+ const right=[-Math.sin(lon),Math.cos(lon),0],a=elevation*DEG;
+ const view={eyeKm:up.map(x=>x*(R+5)),right,forward:up.map((x,i)=>Math.sin(a)*x+Math.cos(a)*north[i]),up:up.map((x,i)=>Math.cos(a)*x-Math.sin(a)*north[i]),fovY:65,width:1920,height:1080,aspect:1920/1080};
+ const plan=planElevationTiles(view,{rangeKm:160,minHeightMeters:-500,maxHeightMeters:9000});
+ assert(plan.tiles.length>0,`5km/${elevation} must load visible terrain`);
+ assert(plan.requestedLevel>=11,'screen error uses the near surface, not the mountain shell');
+ const local=planElevationTiles(view,{rangeKm:20,minHeightMeters:-500,maxHeightMeters:9000});
+ assert(local.level>=plan.level,'smaller radius preserves more local detail');
+}

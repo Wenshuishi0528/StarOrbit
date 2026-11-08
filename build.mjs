@@ -1,3 +1,4 @@
+import { jsonChunks, embeddedAssetScripts, writeTemplatePayloads } from './scripts/build-payload.mjs';
 import {build} from 'esbuild';import fs from 'node:fs';import zlib from 'node:zlib';import crypto from 'node:crypto';import path from 'node:path';
 const web=process.argv.includes('--web'),split=web||process.argv.includes('--local'),out=web?'dist':'dist-local';
 if(split){fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out+'/assets',{recursive:true});}
@@ -26,9 +27,10 @@ environmentAssets.minimap=image('assets/earth/simple/day.jpg');
 environmentAssets.detail=Object.fromEntries(fs.readdirSync('assets/earth/detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/detail/'+f)]));
 environmentAssets.nightDetail=Object.fromEntries(fs.readdirSync('assets/earth/night-detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/night-detail/'+f)]));
 environmentAssets.nightSources={'2016':{columns:24,rows:12,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,environmentAssets[tier].night]))}};
-for(const id of ['2024-1km']){
+for(const id of ['2024-1km','2025-500m']){
  const dir='assets/earth/night-'+id,meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8'));
- environmentAssets.nightSources[id]={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
+ const ext=id==='2025-500m'?'.avif':'.jpg';
+ environmentAssets.nightSources[id]={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+ext)])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.(jpg|avif)$/.test(f)).map(f=>[f.slice(0,-ext.length),image(dir+'/'+f)]))};
 }
 // The old July 2004 map remains a complete selectable source. Reuse its existing tiles.
 environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
@@ -87,7 +89,30 @@ environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py
  const {version,providers,local}=JSON.parse(fs.readFileSync('assets/sky-detail/manifest.json','utf8'));
  environmentAssets.skyDetail={version,providers:providers.map(({coverage,...provider})=>provider),local:{providerId:local.providerId,tiles:Object.fromEntries(Object.entries(local.tiles).map(([key,file])=>[key,image(file)]))}};
 }
-let html=fs.readFileSync('src/layout.html','utf8').replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8')).replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8')).replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n')).replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8')).replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8')).replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8')).replace('__MUSIC_CSS__',()=>fs.readFileSync('src/music.css','utf8')).replace('__MUSIC_UI__',()=>fs.readFileSync('src/music-widget.html','utf8')).replace('__MUSIC_DATA__',()=>JSON.stringify(music).replaceAll('</script','<\\/script')).replace('__APP_VERSION__',app.displayVersion||app.version).replace('__APP_AUTHOR__',app.author).replace('__ENV_ASSETS__',()=>JSON.stringify(environmentAssets)).replace('__SPACECRAFT_MODELS__',()=>JSON.stringify(spacecraftModels)).replace('__MISSION_ORBITS__',()=>JSON.stringify(split?{url:publish('orbits.json',Buffer.from(JSON.stringify(missionOrbits)))}:missionOrbits).replaceAll('</script','<\\/script')).replace('__META__',fs.readFileSync('assets/model.json','utf8')).replace('__MODEL__',split?JSON.stringify(packed('assets/station.glb')):packed('assets/station.glb')).replace('<script>__JS__</script>',()=>split?'<script defer src="'+publish('assets/app.bundle.js')+'"></script>':'<script>'+fs.readFileSync('assets/app.bundle.js','utf8').replaceAll('</script','<\\/script')+'</script>');
+let html=fs.readFileSync('src/layout.html','utf8')
+ .replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8'))
+ .replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8'))
+ .replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n'))
+ .replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8'))
+ .replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8'))
+ .replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8'))
+ .replace('__MUSIC_CSS__',()=>fs.readFileSync('src/music.css','utf8'))
+ .replace('__MUSIC_UI__',()=>fs.readFileSync('src/music-widget.html','utf8'))
+ .replace('__APP_VERSION__',app.displayVersion||app.version).replace('__APP_AUTHOR__',app.author)
+ .replace('<script id="environmentAssets" type="application/json">__ENV_ASSETS__</script>','__ENVIRONMENT_SCRIPT_PAYLOAD__')
+ .replace('<script>__JS__</script>','__APP_JS_SCRIPT__');
+const payloads={
+ __MUSIC_DATA__:()=>jsonChunks(music),
+ __ENVIRONMENT_SCRIPT_PAYLOAD__:function*(){
+  if(!split){yield* embeddedAssetScripts(environmentAssets);return;}
+  yield '<script id="environmentAssets" type="application/json">';yield* jsonChunks(environmentAssets);yield '</script>';
+ },
+ __SPACECRAFT_MODELS__:()=>jsonChunks(spacecraftModels),
+ __MISSION_ORBITS__:()=>jsonChunks(split?{url:publish('orbits.json',Buffer.from(JSON.stringify(missionOrbits)))}:missionOrbits),
+ __META__:()=>jsonChunks(JSON.parse(fs.readFileSync('assets/model.json','utf8'))),
+ __MODEL__:()=>split?jsonChunks(packed('assets/station.glb')):packed('assets/station.glb'),
+ __APP_JS_SCRIPT__:()=>split?'<script defer src="'+publish('assets/app.bundle.js')+'"></script>':'<script>'+fs.readFileSync('assets/app.bundle.js','utf8').replace(/<\/script/gi,'<\\/script')+'</script>',
+};
 html=html.replace('</head>','<!-- satellite.js MIT license\n'+fs.readFileSync('node_modules/satellite.js/LICENSE.md','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Three.js license\n'+fs.readFileSync('node_modules/three/LICENSE','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Astronomy Engine MIT / three-mesh-bvh MIT licenses\n'+fs.readFileSync('node_modules/astronomy-engine/astronomy.js','utf8').split('*/')[0].slice(3)+'\n'+fs.readFileSync('node_modules/three-mesh-bvh/LICENSE','utf8')+' -->\n</head>');
@@ -108,7 +133,7 @@ for(const directory of ['mars','satellites']){html=html.replace('</head>','<!-- 
 html=html.replace('</head>','<!-- OpenCC search character mapping, Apache-2.0\n'+fs.readFileSync('assets/OPENCC-LICENSE.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- GeoTIFF decoder licenses\n'+fs.readFileSync('assets/GEOTIFF-DEPENDENCY-LICENSES.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.readFileSync('tests/reference/atmosphere-spectrum/LICENSE-Bruneton.txt','utf8')+' -->\n</head>');
-const bytes=Buffer.byteLength(html);
-// v1.25 includes the lunar geological atlas and expanded Chinese teaching art.
-if(bytes>500e6)throw new Error(`Standalone app is ${bytes} bytes, exceeding the 500 MB distribution budget`);
-if(split){fs.writeFileSync(out+'/index.html',html);fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('StarOrbit.html',html);fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}
+// Keep the complete document and environment payload out of any single V8 string.
+// Writes are atomic; failed size checks preserve the previous runnable build.
+const bytes=writeTemplatePayloads(split?out+'/index.html':'StarOrbit.html',html,payloads,{maxBytes:900e6});
+if(split){fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}

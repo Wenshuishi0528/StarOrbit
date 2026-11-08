@@ -1,3 +1,8 @@
+import { readEmbeddedAssets } from './embedded-assets.js';
+import {
+  normalizeSurfaceStreamingSettings,
+  applySurfaceStreamingSettings,
+} from './surface-streaming-controls.js';
 import { startupStatus } from './startup-status.js';
 import { AuroraVolume } from './aurora-volume.js';
 import { cloudMoonIrradiance } from './cloud-lighting.js';
@@ -90,17 +95,19 @@ export class Environment {
     this.textures = [];
     this.lastTrack = 0;
     const assetNode = $('environmentAssets');
-    this.assets = JSON.parse(assetNode.textContent);
+    this.assets = readEmbeddedAssets(assetNode);
     // Parsed assets own the data now; release the large inline JSON DOM copy.
     assetNode.remove();
     this.settings = {
       quality: 'high',
       daySource: '2026-q2-1km',
-      nightSource: '2024-1km',
+      nightSource: '2025-500m',
+      nightSourceDefaultVersion: 1,
       stars: true,
       milky: true,
       skyDetail: true,
       skyDetailSource: 'auto',
+      ...normalizeSurfaceStreamingSettings(),
       cityTerrain: true,
       cityAutoLoad: false,
       earthElevation: true,
@@ -120,7 +127,8 @@ export class Environment {
       Object.assign(
         this.settings,
         normalizeStarChartSettings(old),
-        normalizeGeographySettings(old)
+        normalizeGeographySettings(old),
+        normalizeSurfaceStreamingSettings(old)
       );
       if (old?.starChartCatalogDefaultVersion === 1)
         this.settings.starChartCatalogDefaultVersion = 1;
@@ -140,7 +148,8 @@ export class Environment {
       // Adopt the new default once; later explicit on/off choices persist.
       if (old?.earthElevationDefaultVersion !== 1) this.settings.earthElevation = true;
       if (this.assets.daySources?.[old?.daySource]) this.settings.daySource = old.daySource;
-      if (this.assets.nightSources?.[old?.nightSource]) this.settings.nightSource = old.nightSource;
+      if (old?.nightSourceDefaultVersion === 1 && this.assets.nightSources?.[old?.nightSource])
+        this.settings.nightSource = old.nightSource;
       if (QUALITY[old?.quality]) this.settings.quality = old.quality;
       if (['view', 'photo', 'cinematic'].includes(old?.exposure))
         this.settings.exposure = old.exposure;
@@ -802,6 +811,7 @@ export class Environment {
     this.clouds.visible = !!detailed && s.clouds && !volume;
     this.detail.update(camera);
     this.nightDetail.update(camera);
+    applySurfaceStreamingSettings(this);
     this.cityTerrain.setEnabled(s.cityTerrain);
     this.cityTerrain.autoEnabled = s.cityAutoLoad;
     this.cityTerrain.setView(

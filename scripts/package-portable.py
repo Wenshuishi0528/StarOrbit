@@ -16,14 +16,15 @@ files = ['StarOrbit.html', '启动星轨.command',
          'scripts/serve.py', 'scripts/cloud_service.py', 'scripts/satcorps.py', 'scripts/cloud_quality.py', 'scripts/cloud_history.py', 'scripts/gmgsi.py', 'scripts/himawari.py', 'scripts/cloud_history_service.py', 'scripts/cloud_versions.py', 'scripts/http_download.py', 'scripts/cloud-requirements.txt']
 files.append('scripts/balcony_motion.py')
 files.append('scripts/solar_service.py')
+files.extend(['scripts/cloud_versions.py', 'scripts/cloud_coverage.py', 'scripts/cloud_library_delete.py'])
 # Explicit document entry points and their references, including asset provenance.
 # New unlinked engineering notes and temporary evidence are not silently distributed.
 files = sorted(set(files + portable_documents(root)))
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []
 size = sum((root / name).stat().st_size for name in files)+sum(p.stat().st_size for p in launcher_files)
-# v1.25 includes 319 Chinese sky artworks, lunar gazetteer/landings and geological maps.
-if size > 600_000_000:
-    raise SystemExit(f'Runtime package is {size} bytes, exceeding the 600 MB budget')
+# v1.36 retains native-resolution night imagery; large JSON is split into bounded inert blocks.
+if size > 900_000_000:
+    raise SystemExit(f'Runtime package is {size} bytes, exceeding the 900 MB budget')
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
     for name in files:

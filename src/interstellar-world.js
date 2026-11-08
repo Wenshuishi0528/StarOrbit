@@ -1,3 +1,9 @@
+import { mountWorldEarthControls } from './shared-world-earth.js';
+import {
+  createSharedWorldSky,
+  mountWorldSkyControls,
+  applyWorldSkySettings,
+} from './shared-world-sky.js';
 import * as THREE from 'three';
 import { HelioVector } from 'astronomy-engine';
 import {
@@ -17,7 +23,7 @@ import {
 } from './interstellar-math.js';
 import { createInterstellarSolar } from './interstellar-solar.js';
 import { createInterstellarInput } from './interstellar-input.js';
-import { searchXuntianTargets } from './xuntian-catalog.js';
+import { searchXuntianTargets, getXuntianTarget } from './xuntian-catalog.js';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { galaxyVertex, galaxyFragment } from './sky-shaders.js';
 
@@ -55,7 +61,7 @@ export function createInterstellarWorld({
   const catalog = interstellarCatalog();
   const scene = new THREE.Scene(),
     localScene = new THREE.Scene();
-  const solar = createInterstellarSolar({ environment, scene: localScene });
+  const solar = createInterstellarSolar({ environment, scene: localScene, renderer });
   const camera = new THREE.PerspectiveCamera(65, 1, 1e-10, 1e6);
   camera.up.set(0, 0, 1);
   const localCamera = new THREE.PerspectiveCamera(65, 1, 1e-7, 10000);
@@ -67,11 +73,14 @@ export function createInterstellarWorld({
     flight = null,
     disposed = false;
   let speed = 'cruise',
-    culture = 'chinese',
+    culture = environment.settings.skyCulture || 'western',
     formation = null,
-    showNames = true,
-    showLines = true,
-    brightness = 1,
+    showNames =
+      environment.settings.starLabels ||
+      environment.settings.constellationNames ||
+      environment.settings.catalogStarLabels,
+    showLines = environment.settings.constellationLines,
+    brightness = environment.settings.starBrightness ?? 1,
     magnitudeLimit = 8;
   let nearest = 0,
     nearestDistance = Infinity,
@@ -89,7 +98,6 @@ export function createInterstellarWorld({
       .filter(validPose)
       .slice(0, 12);
     if (Object.hasOwn(TRAVEL_SPEEDS, saved?.speed)) speed = saved.speed;
-    if (['western', 'chinese'].includes(saved?.culture)) culture = saved.culture;
   } catch {}
   const panel = document.createElement('aside');
   panel.className = 'interstellar-panel';
@@ -100,10 +108,24 @@ export function createInterstellarWorld({
 <label data-text="巡航速度"></label><select data-speed><option value="local">0.1 AU/s</option><option value="nearby">0.02 ly/s</option><option value="cruise">2 ly/s</option><option value="fast">50 ly/s</option></select>
 <label><input type="checkbox" data-assist checked> <span data-text="接近恒星时自动减速"></span></label>
 <div class="interstellar-actions"><button data-home data-text="返回太阳附近"></button><button data-sun data-text="回望太阳"></button><button data-solar data-text="进入太阳系"></button><button data-ground data-text="地表对照"></button></div>
-<details open><summary data-text="星图与画面"></summary><label data-text="星空体系"></label><select data-culture><option value="chinese" data-text="中国星官"></option><option value="western" data-text="西方星座"></option></select><select data-formation aria-label="选择星图"></select><div class="interstellar-actions"><button data-side data-text="从侧面看"></button><button data-earth data-text="太阳附近视角"></button></div><label><input type="checkbox" data-lines checked> <span data-text="三维连线"></span></label><label><input type="checkbox" data-names checked> <span data-text="恒星名称"></span></label><label><input type="checkbox" data-auto-exposure checked> <span data-text="自动曝光"></span></label><label data-text="星空亮度"></label><input data-brightness aria-label="星空亮度" type="range" min="0.2" max="2.5" step="0.05" value="1"><label data-text="视场"></label><input data-fov aria-label="视场" type="range" min="8" max="100" value="65"></details>
+<details open><summary data-text="星图与画面"></summary><label data-text="星空体系"></label><select data-culture><option value="chinese" data-text="中国星官"></option><option value="western" data-text="西方星座"></option></select><select data-formation aria-label="选择星图"></select><div class="interstellar-actions"><button data-side data-text="从侧面看"></button><button data-earth data-text="太阳附近视角"></button></div><label><input type="checkbox" data-lines checked> <span data-text="三维连线"></span></label><label><input type="checkbox" data-names checked> <span data-text="恒星名称"></span></label><label><input type="checkbox" data-auto-exposure checked> <span data-text="自动曝光"></span></label><label data-text="星空亮度"></label><input data-brightness aria-label="星空亮度" type="range" min="0.2" max="2.5" step="0.05" value="1"><label data-text="视场"></label><input data-fov aria-label="视场" type="range" min="0.006" max="100" step="0.001" value="65"></details>
 <details><summary data-text="航点与操作"></summary><input data-bookmark-name aria-label="航点名称" placeholder="航点名称" maxlength="40"><div class="interstellar-actions"><button data-save data-text="保存航点"></button><button data-remove data-text="删除航点"></button></div><select data-bookmarks aria-label="保存的航点"></select><p data-text="H / N 前后，J / L 左右，K / I 升降；W / S 俯仰，A / D 转向，Q / E 翻滚。拖动画面转向，滚轮缩放，空格停止。"></p></details>
 <details><summary data-text="星表与空间数据"></summary><p data-statistics></p><p data-text="恒星位置：J2000 星表快照；移动观察者产生空间视差。模拟时钟与穿梭速度独立，恒星自行尚未外推。"></p><p data-text="三维连线只显示两端均有可靠距离的线段。银河影像作为太阳邻域背景，远离后逐渐淡出。"></p><p data-text="太阳与天狼星 A 使用实测半径的球面；其他恒星显示星点。颜色与曝光为观测可视化，球面不代表实拍纹理。"></p><p>Hipparcos / van Leeuwen 2007 · d3-celestial · Stellarium CC BY-SA 4.0 · Sirius A: Davis et al. 2011</p></details><small data-message role="status"></small>`;
   host.append(panel);
+  const sharedSky = createSharedWorldSky({ environment, renderer, id: 'interstellar-world' });
+  const sharedControls = mountWorldSkyControls(panel, environment);
+  const earthControls = mountWorldEarthControls(panel, environment);
+  const referenceLabel = document.createElement('label');
+  referenceLabel.innerHTML =
+    '<input type="checkbox" data-reference> <span data-text="太阳视角参考 · 图源与插画"></span>';
+  sharedControls.root.before(referenceLabel);
+  let referenceTarget = null;
+  let referenceView = false,
+    nearSolarSky = true;
+  referenceLabel.querySelector('input').onchange = (e) => {
+    referenceView = e.target.checked;
+    stop();
+  };
   const $ = (selector) => panel.querySelector(selector);
   const labels = document.createElement('div');
   labels.className = 'interstellar-labels';
@@ -161,6 +183,35 @@ export function createInterstellarWorld({
   lines.frustumCulled = false;
   lines.renderOrder = 2;
   scene.add(lines);
+  const selectedLineMaterial = lineMaterial.clone();
+  selectedLineMaterial.uniforms = uniforms;
+  selectedLineMaterial.fragmentShader = `void main(){gl_FragColor=vec4(1.,.79,.43,.8);}`;
+  const selectedLines = new THREE.LineSegments(new THREE.BufferGeometry(), selectedLineMaterial);
+  selectedLines.frustumCulled = false;
+  selectedLines.renderOrder = 3;
+  scene.add(selectedLines);
+  let lineCulture = null;
+  function rebuildCultureLines() {
+    if (lineCulture === culture) return;
+    lineCulture = culture;
+    lines.geometry.dispose();
+    lines.geometry = spatialLineGeometry(
+      catalog.formations.filter((f) => f.culture === culture).flatMap((f) => f.segments)
+    );
+  }
+  function spatialLineGeometry(segments) {
+    const high = [],
+      low = [];
+    for (const pair of segments)
+      for (const index of pair)
+        for (let k = 0; k < 3; k++) {
+          high.push(catalog.high[index * 3 + k]);
+          low.push(catalog.low[index * 3 + k]);
+        }
+    return new THREE.BufferGeometry()
+      .setAttribute('position', new THREE.Float32BufferAttribute(high, 3))
+      .setAttribute('positionLow', new THREE.Float32BufferAttribute(low, 3));
+  }
   // Borrow the existing texture, never decode or cache a second Milky Way map.
   const milky = new THREE.Mesh(
     new THREE.SphereGeometry(1200, 32, 16),
@@ -251,7 +302,7 @@ export function createInterstellarWorld({
       }
     },
     onWheel: (delta) => {
-      camera.fov = THREE.MathUtils.clamp(camera.fov * Math.exp(delta * 0.001), 8, 100);
+      camera.fov = THREE.MathUtils.clamp(camera.fov * Math.exp(delta * 0.001), 0.006, 100);
       $('[data-fov]').value = camera.fov;
       camera.updateProjectionMatrix();
     },
@@ -263,6 +314,9 @@ export function createInterstellarWorld({
   function focus(index) {
     if (!Number.isInteger(index) || index < 0 || index >= catalog.count) return;
     stop();
+    referenceView = false;
+    referenceTarget = null;
+    referenceLabel.querySelector('input').checked = false;
     selected = index;
     aim(getPosition(index));
     labelElapsed = 1;
@@ -272,6 +326,7 @@ export function createInterstellarWorld({
     stop();
     if (['western', 'chinese'].includes(pose.culture)) {
       culture = pose.culture;
+      applyWorldSkySettings(environment, { culture });
       $('[data-culture]').value = culture;
       formationsMenu();
     }
@@ -282,12 +337,14 @@ export function createInterstellarWorld({
     if (catalog.byId.has(pose.targetId)) selected = catalog.byId.get(pose.targetId);
     else if (Number.isInteger(pose.selected) && pose.selected >= 0 && pose.selected < catalog.count)
       selected = pose.selected;
-    if (Number.isFinite(pose.fov)) camera.fov = THREE.MathUtils.clamp(pose.fov, 8, 100);
+    if (Number.isFinite(pose.fov)) camera.fov = THREE.MathUtils.clamp(pose.fov, 0.006, 100);
     $('[data-fov]').value = camera.fov;
     camera.updateProjectionMatrix();
     scanElapsed = labelElapsed = 1;
   }
   function home() {
+    referenceView = false;
+    referenceLabel.querySelector('input').checked = false;
     stop();
     const earth = HelioVector('Earth', new Date(getTime()));
     position.splice(0, 3, earth.x * AU_LY, earth.y * AU_LY, earth.z * AU_LY + 50000 / LY_KM);
@@ -299,6 +356,8 @@ export function createInterstellarWorld({
     scanElapsed = labelElapsed = 1;
   }
   function travel() {
+    referenceView = false;
+    referenceLabel.querySelector('input').checked = false;
     stop();
     const target = getPosition(selected),
       radius = catalog.photometry[selected * 3 + 2];
@@ -326,18 +385,9 @@ export function createInterstellarWorld({
   }
   function setFormation(item) {
     formation = item;
-    lines.geometry.dispose();
-    const high = [],
-      low = [];
-    for (const pair of item?.segments || [])
-      for (const index of pair)
-        for (let k = 0; k < 3; k++) {
-          high.push(catalog.high[index * 3 + k]);
-          low.push(catalog.low[index * 3 + k]);
-        }
-    lines.geometry = new THREE.BufferGeometry();
-    lines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(high, 3));
-    lines.geometry.setAttribute('positionLow', new THREE.Float32BufferAttribute(low, 3));
+    selectedLines.geometry.dispose();
+    selectedLines.geometry = spatialLineGeometry(item?.segments || []);
+    rebuildCultureLines();
     $('[data-formation]').value = item?.id || '';
     if (item?.members.length) {
       selected = item.members[0];
@@ -347,6 +397,8 @@ export function createInterstellarWorld({
     labelElapsed = 1;
   }
   function sideView() {
+    referenceView = false;
+    referenceLabel.querySelector('input').checked = false;
     if (!formation?.members.length) return;
     stop();
     const center = formationCenter(formation);
@@ -403,6 +455,7 @@ export function createInterstellarWorld({
   };
   $('[data-culture]').onchange = (e) => {
     culture = e.target.value;
+    applyWorldSkySettings(environment, { culture });
     setFormation(null);
     formationsMenu();
     persist();
@@ -411,20 +464,29 @@ export function createInterstellarWorld({
     setFormation(catalog.formations.find((f) => f.id === e.target.value) || null);
   $('[data-lines]').onchange = (e) => {
     showLines = e.target.checked;
+    applyWorldSkySettings(environment, { lines: showLines });
   };
   $('[data-names]').onchange = (e) => {
     showNames = e.target.checked;
+    applyWorldSkySettings(environment, { names: showNames });
     labels.hidden = !showNames;
   };
   $('[data-brightness]').oninput = (e) => {
     brightness = Number(e.target.value);
+    applyWorldSkySettings(environment, { starBrightness: brightness });
+    sharedControls.refresh();
   };
   $('[data-fov]').oninput = (e) => {
     camera.fov = Number(e.target.value);
     camera.updateProjectionMatrix();
   };
   $('[data-go]').onclick = travel;
-  $('[data-look]').onclick = () => focus(selected);
+  $('[data-look]').onclick = () => {
+    if (referenceView && referenceTarget) {
+      camera.lookAt(vector.fromArray(referenceTarget.direction));
+      camera.updateMatrixWorld();
+    } else focus(selected);
+  };
   $('[data-stop]').onclick = stop;
   $('[data-home]').onclick = home;
   $('[data-sun]').onclick = () => focus(0);
@@ -437,6 +499,7 @@ export function createInterstellarWorld({
     .forEach((button) => (button.onclick = () => focus(catalog.byId.get(button.dataset.shortcut))));
   $('[data-dipper]').onclick = () => {
     culture = 'chinese';
+    applyWorldSkySettings(environment, { culture });
     $('[data-culture]').value = culture;
     formationsMenu();
     setFormation(catalog.formations.find((f) => f.culture === 'chinese' && f.item.zh === '北斗'));
@@ -479,15 +542,27 @@ export function createInterstellarWorld({
       let count = 0;
       for (const hit of hits) {
         const index = catalog.byId.get(hit.id),
-          item = catalog.formations.find((f) => f.id === hit.id);
-        if (index === undefined && !item?.members.length) continue;
+          item = catalog.formations.find((f) => f.id === hit.id),
+          skyTarget = getXuntianTarget(hit.id, getLanguage(), culture);
+        if (index === undefined && !item?.members.length && !skyTarget?.direction) continue;
         const button = document.createElement('button');
         button.textContent = hit.name;
         button.onclick = () => {
           results.replaceChildren();
           if (index !== undefined) focus(index);
-          else {
+          else if (!item?.members.length) {
+            stop();
+            referenceView = true;
+            referenceTarget = skyTarget;
+            referenceLabel.querySelector('input').checked = true;
+            camera.lookAt(vector.fromArray(skyTarget.direction));
+            camera.fov = Math.max(0.006, Math.min(100, skyTarget.fov || 8));
+            camera.updateProjectionMatrix();
+            $('[data-fov]').value = camera.fov;
+            labelElapsed = 1;
+          } else {
             culture = item.culture;
+            applyWorldSkySettings(environment, { culture });
             $('[data-culture]').value = culture;
             formationsMenu();
             setFormation(item);
@@ -516,7 +591,7 @@ export function createInterstellarWorld({
     nearestDistance = Math.sqrt(nearestDistance);
   }
   // Pool DOM labels. Reproject at 8 Hz, not 19,000 DOM nodes per frame.
-  const labelPool = Array.from({ length: 28 }, () => {
+  const labelPool = Array.from({ length: 64 }, () => {
     const el = document.createElement('span');
     labels.append(el);
     return el;
@@ -526,11 +601,33 @@ export function createInterstellarWorld({
   function updateLabels() {
     camera.updateMatrixWorld();
     camera.getWorldDirection(forward);
-    const candidates = [...new Set([selected, 0, ...(formation?.members || []), ...named])],
+    const density = environment.settings.starLabelDensity ?? 0.95;
+    const capacity =
+      density >= 1
+        ? catalog.count
+        : Math.max(64, Math.ceil(((width * height) / 7000) * (0.3 + density * 2)));
+    function labelAt(index) {
+      while (labelPool.length <= index) {
+        const el = document.createElement('span');
+        labels.append(el);
+        labelPool.push(el);
+      }
+      return labelPool[index];
+    }
+    const candidates = [
+        ...new Set([
+          selected,
+          0,
+          ...(formation?.members || []),
+          ...(environment.settings.catalogStarLabels
+            ? Array.from({ length: catalog.count }, (_, i) => i)
+            : named),
+        ]),
+      ],
       occupied = [];
     let count = 0;
     for (const index of candidates) {
-      if (count >= labelPool.length) break;
+      if (count >= capacity) break;
       vector.set(
         catalog.positions[index * 3] - position[0],
         catalog.positions[index * 3 + 1] - position[1],
@@ -542,7 +639,9 @@ export function createInterstellarWorld({
       if (
         index !== selected &&
         !member &&
-        apparentMagnitude(catalog.photometry[index * 3], d) > 4.8
+        density < 1 &&
+        apparentMagnitude(catalog.photometry[index * 3], d) >
+          2.5 + density * 3 + Math.max(0, Math.log2(40 / camera.fov)) * 1.35
       )
         continue;
       projected.copy(vector).normalize().multiplyScalar(100).project(camera);
@@ -551,15 +650,43 @@ export function createInterstellarWorld({
         y = (-projected.y * 0.5 + 0.5) * height;
       if (x > width - 130 || y > height - 88) continue;
       if (!panel.hidden && x < panel.offsetWidth + 35 && y < panel.offsetHeight + 25) continue;
-      if (occupied.some((p) => Math.abs(p[0] - x) < 110 && Math.abs(p[1] - y) < 22)) continue;
+      if (density < 1 && occupied.some((p) => Math.abs(p[0] - x) < 110 && Math.abs(p[1] - y) < 22))
+        continue;
       occupied.push([x, y]);
-      const el = labelPool[count++];
-      el.hidden = !showNames;
+      const el = labelAt(count++);
+      el.hidden =
+        !(environment.settings.starLabels || environment.settings.catalogStarLabels) ||
+        !environment.settings.starChartEnabled;
       el.className = index === selected ? 'selected' : '';
       el.textContent = name(index);
       el.style.left = `${x}px`;
       el.style.top = `${y}px`;
     }
+    if (environment.settings.constellationNames && environment.settings.starChartEnabled)
+      for (const item of catalog.formations.filter(
+        (f) => f.culture === culture && f.members.length
+      )) {
+        vector.fromArray(formationCenter(item)).sub(targetVector.fromArray(position));
+        if (vector.dot(forward) <= 0) continue;
+        projected.copy(vector).normalize().multiplyScalar(100).project(camera);
+        if (Math.abs(projected.x) > 0.9 || Math.abs(projected.y) > 0.85) continue;
+        const x = (projected.x * 0.5 + 0.5) * width,
+          y = (-projected.y * 0.5 + 0.5) * height;
+        if (!panel.hidden && x < panel.offsetWidth + 35 && y < panel.offsetHeight + 25) continue;
+        if (
+          density < 1 &&
+          occupied.some((p) => Math.abs(p[0] - x) < 100 && Math.abs(p[1] - y) < 24)
+        )
+          continue;
+        if (count >= capacity) break;
+        occupied.push([x, y]);
+        const el = labelAt(count++);
+        el.hidden = false;
+        el.className = 'selected';
+        el.textContent = spatialFormationName(item, getLanguage());
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+      }
     while (count < labelPool.length) labelPool[count++].hidden = true;
     const info = [
       name(selected),
@@ -569,11 +696,16 @@ export function createInterstellarWorld({
       info.push(
         `${spatialFormationName(formation, getLanguage())} · ${t('三维线段 {count}/{total}', { count: formation.segments.length, total: formation.total })}`
       );
-    $('.interstellar-selected').textContent = info.join('\n');
+    $('.interstellar-selected').textContent =
+      referenceView && referenceTarget
+        ? referenceTarget.name + '\n' + t('太阳视角参考 · 图源与插画')
+        : info.join('\n');
     const along = position.map((n, i) => ['X', 'Y', 'Z'][i] + ' ' + n.toFixed(3)).join(' · ');
     hud.textContent = `${t('距太阳')} ${format(Math.hypot(...position))}  ·  ${t('速度')} ${format(currentSpeed)}/s\n${t('最近恒星')} ${name(nearest)} · ${format(nearestDistance)}`;
     hud.title = `${along} ly · J2000\n${t('累计航程')} ${format(pathLength)}`;
-    lastPhotoCaption = `${t('星际穿梭')} · ${name(selected)} · ${t('距太阳')} ${format(Math.hypot(...position))} · ${along} ly`;
+    lastPhotoCaption = referenceView
+      ? `${t('太阳视角参考 · 图源与插画')} · ${referenceTarget?.name || name(selected)}`
+      : `${t('星际穿梭')} · ${name(selected)} · ${t('距太阳')} ${format(Math.hypot(...position))} · ${along} ly`;
   }
   home();
   if (validPose(initialPose)) restore(initialPose);
@@ -602,6 +734,10 @@ export function createInterstellarWorld({
         labels: labelPool.length,
         formation: formation?.id || null,
         formationSegments: formation?.segments.length || 0,
+        cultureSegments: lines.geometry.attributes.position?.count / 2 || 0,
+        referenceView,
+        referenceTarget: referenceView ? referenceTarget?.id || null : null,
+        nearSolarSky,
         visits: visited,
       };
     },
@@ -617,7 +753,24 @@ export function createInterstellarWorld({
       if (disposed) return;
       const dt = Math.max(0, Math.min(0.1, elapsed)),
         before = [...position];
+      if (culture !== environment.settings.skyCulture) {
+        culture = environment.settings.skyCulture;
+        formation = null;
+        setFormation(null);
+        formationsMenu();
+        $('[data-culture]').value = culture;
+      }
+      brightness = environment.settings.starBrightness ?? 1;
+      showLines = environment.settings.constellationLines;
+      showNames =
+        environment.settings.starLabels ||
+        environment.settings.constellationNames ||
+        environment.settings.catalogStarLabels;
+      $('[data-lines]').checked = showLines;
+      $('[data-names]').checked = showNames;
+      $('[data-go]').disabled = referenceView && !!referenceTarget;
       const direction = input.update(dt);
+      if (referenceView) direction.fill(0);
       if (flight) {
         flight.elapsed = Math.min(flight.duration, flight.elapsed + dt);
         const u = flight.elapsed / flight.duration,
@@ -684,7 +837,45 @@ export function createInterstellarWorld({
       const exposureGoal = $('[data-auto-exposure]').checked ? 1 / (1 + angular * 0.045) : 1;
       exposure += (Math.max(0.12, exposureGoal) - exposure) * (1 - Math.exp(-dt * 3));
       uniforms.exposure.value = brightness * exposure;
-      lines.visible = showLines && !!formation;
+      nearSolarSky = Math.hypot(...position) < 0.01;
+      rebuildCultureLines();
+      lines.visible =
+        showLines &&
+        environment.settings.stars &&
+        brightness > 0 &&
+        environment.settings.starChartEnabled &&
+        !referenceView &&
+        !nearSolarSky;
+      selectedLines.visible = lines.visible && !!formation;
+      points.visible = !referenceView && environment.settings.stars !== false;
+      labels.hidden =
+        referenceView ||
+        nearSolarSky ||
+        !showNames ||
+        !environment.settings.stars ||
+        brightness <= 0 ||
+        !environment.settings.starChartEnabled;
+      sharedSky.update(camera, time, width, height, {
+        brightness: brightness * exposure,
+        showStars: referenceView,
+        showChart: true,
+        settings:
+          referenceView || nearSolarSky
+            ? {}
+            : {
+                starLabels: false,
+                catalogStarLabels: false,
+                constellationNames: false,
+                constellationLines: false,
+                constellationBoundaries: false,
+                deepSkyObjects: false,
+              },
+        showArt: referenceView || nearSolarSky,
+        showDetail: referenceView || nearSolarSky,
+        showGalaxy: false,
+        focusTargetId: formation?.id,
+      });
+      milky.visible = environment.settings.milky !== false;
       milky.material.uniforms.skyMap.value = environment.galaxyTexture || null;
       milky.material.uniforms.textured.value = environment.galaxyTexture ? 1 : 0;
       milky.material.uniforms.brightness.value =
@@ -693,8 +884,10 @@ export function createInterstellarWorld({
         (1 - THREE.MathUtils.smoothstep(Math.hypot(...position), 10, 100)) *
         0.65;
       camera.updateMatrixWorld();
+      if (referenceView) milky.material.uniforms.brightness.value = brightness * exposure;
       renderer.render(scene, camera);
-      disk.visible = angular > 1;
+      sharedSky.render();
+      disk.visible = !referenceView && angular > 1;
       if (disk.visible) {
         const p = getPosition(diskIndex);
         disk.position.set(...p.map((v, i) => (v - position[i]) / AU_LY));
@@ -706,7 +899,11 @@ export function createInterstellarWorld({
       localCamera.fov = camera.fov;
       localCamera.updateProjectionMatrix();
       renderer.clearDepth();
-      renderer.render(localScene, localCamera);
+      if (!referenceView) {
+        solar.renderEarth(localCamera, time, width, height);
+        renderer.render(localScene, localCamera);
+        solar.renderEarthEffects();
+      }
       labelElapsed += dt;
       if (labelElapsed >= 0.125) {
         scan();
@@ -717,6 +914,10 @@ export function createInterstellarWorld({
     dispose() {
       if (disposed) return;
       disposed = true;
+      sharedSky.dispose();
+      sharedControls.dispose();
+      earthControls.dispose();
+      referenceLabel.remove();
       solar.dispose();
       clearTimeout(searchTimer);
       persist();
@@ -726,6 +927,8 @@ export function createInterstellarWorld({
       points.material.dispose();
       lines.geometry.dispose();
       lineMaterial.dispose();
+      selectedLines.geometry.dispose();
+      selectedLineMaterial.dispose();
       milky.geometry.dispose();
       milky.material.dispose();
       disk.geometry.dispose();

@@ -254,7 +254,10 @@ export class AuroraVolume {
     this.time = time;
     this.lowEffects = !!lowEffects;
   }
-  render(camera) {
+  render(
+    camera,
+    { earthQuaternion = this.env.earth.quaternion, sun = this.env.uniforms.sun.value } = {}
+  ) {
     const e = this.env,
       r = e.api.renderer;
     if (!this.volumeMaterial || !e.aurora.visible || this.failed) return;
@@ -299,13 +302,11 @@ export class AuroraVolume {
         this.lastFluxWall = now;
         this.stats.fluxUpdates++;
       }
-      this.rotation.setFromMatrix4(
-        this.earthRotation.makeRotationFromQuaternion(e.earth.quaternion)
-      );
+      this.rotation.setFromMatrix4(this.earthRotation.makeRotationFromQuaternion(earthQuaternion));
       this.inverse.copy(this.rotation).transpose().premultiply(this.toMagnetic);
       const u = this.volumeMaterial.uniforms;
       u.origin.value.copy(camera.position).applyMatrix3(this.inverse);
-      u.sunLocal.value.copy(e.uniforms.sun.value).applyMatrix3(this.inverse).normalize();
+      u.sunLocal.value.copy(sun).applyMatrix3(this.inverse).normalize();
       const halfY = Math.tan((camera.fov * Math.PI) / 360) / camera.zoom,
         halfX = halfY * camera.aspect,
         rotation = this.cameraRotation.setFromMatrix4(camera.matrixWorld);

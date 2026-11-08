@@ -1,10 +1,15 @@
 import * as THREE from 'three';
 import { CityTerrainCache } from './city-terrain-cache.js';
 import { CityTerrainSource } from './city-terrain-source.js';
-import { allCityTiles, planCityTiles } from './city-terrain-math.js';
+import { allCityTiles, planCityTiles, planStreamedCityTiles } from './city-terrain-math.js';
+import {
+  planStreamingRegions,
+  streamingViewKey,
+  streamingAnchor,
+} from './surface-streaming-plan.js';
 
-export const CITY_GPU_LAYERS = 48,
-  CITY_DRAW_LIMIT = 32;
+export const CITY_GPU_LAYERS = 96,
+  CITY_DRAW_LIMIT = 64;
 const SIZE = 512,
   BYTES = SIZE * SIZE * 4,
   FADE_MS = 450;
@@ -44,6 +49,16 @@ export class CityTerrain {
     this.enabled = true;
     this.disposed = false;
     this.autoEnabled = false;
+    this.streaming = { enabled: false, rangeKm: 120 };
+    this.streamJobs = new Map();
+    this.streamFailures = new Map();
+    this.streamDismissed = new Map();
+    this.streamWanted = new Map();
+    this.streamPausedAt = null;
+    this.streamEpoch = 0;
+    this.streamError = '';
+    this.streamChecked = -Infinity;
+    this.catalogReady = false;
     this.lastError = '';
     this.lastPlan = -Infinity;
     this.texture = this.makeTexture(1);
@@ -55,11 +70,14 @@ export class CityTerrain {
         for (const row of rows)
           if (!this.cities.has(row.id) && !this.generation.has(row.id))
             this.cities.set(row.id, row);
+        this.catalogReady = true;
         this.revision++;
         this.schedule(true);
       })
       .catch((error) => {
         this.lastError = error.message;
+        this.catalogReady = true;
+        this.schedule(true);
       });
   }
   makeTexture(depth) {
@@ -103,6 +121,7 @@ export class CityTerrain {
     this.enabled = value;
     if (!value) {
       clearTimeout(this.retry);
+      for (const job of this.streamJobs.values()) job.controller.abort();
       for (const load of this.loads.values()) load.controller.abort();
       this.entries.clear();
       this.texture.dispose();
@@ -115,6 +134,150 @@ export class CityTerrain {
     }
     this.revision++;
     this.schedule(true);
+  }
+  configureStreaming({ enabled = this.streaming.enabled, rangeKm = this.streaming.rangeKm } = {}) {
+    if (this.disposed) return;
+    const next = {
+      enabled: enabled === true,
+      rangeKm: Math.max(20, Math.min(400, Number(rangeKm) || 120)),
+    };
+    if (next.enabled === this.streaming.enabled && next.rangeKm === this.streaming.rangeKm) return;
+    const enabling = next.enabled && !this.streaming.enabled;
+    this.streaming = next;
+    this.streamChecked = -Infinity;
+    if (!next.enabled) {
+      for (const job of this.streamJobs.values()) job.controller.abort();
+      for (const [key, load] of this.loads)
+        if (this.cities.get(key.split('/')[0])?.streaming) load.controller.abort();
+    }
+    if (enabling) this.resumeStreaming(false);
+    this.schedule(true);
+  }
+  resumeStreaming(schedule = true) {
+    this.streamPausedAt = null;
+    this.streamDismissed.clear();
+    this.streamFailures.clear();
+    this.streamError = '';
+    this.streamChecked = -Infinity;
+    for (const [key, time] of this.failures) if (!Number.isFinite(time)) this.failures.delete(key);
+    if (schedule) this.schedule(true);
+  }
+  async clearStreaming() {
+    this.streamPausedAt = streamingViewKey([...this.views.values()]);
+    this.streamEpoch++;
+    for (const job of this.streamJobs.values()) job.controller.abort();
+    this.streamWanted.clear();
+    await this.ready;
+    const ids = [...this.cities.values()].filter((meta) => meta.streaming).map((meta) => meta.id);
+    for (const id of ids) await this.removeCity(id);
+    this.revision++;
+    return ids.length;
+  }
+  updateStreaming() {
+    const now = performance.now();
+    if (now - this.streamChecked < 500) {
+      // Keep a trailing update: a camera may stop immediately after changing,
+      // in which case setView has no later signature change to wake discovery.
+      clearTimeout(this.streamReplan);
+      this.streamReplan = setTimeout(
+        () => {
+          this.streamChecked = -Infinity;
+          this.schedule(true);
+        },
+        Math.max(1, 500 - (now - this.streamChecked))
+      );
+      return;
+    }
+    clearTimeout(this.streamReplan);
+    this.streamChecked = now;
+    if (!this.catalogReady || !this.enabled || !this.streaming.enabled || this.disposed) return;
+    const views = [...this.views.values()]
+      .filter((v) => v.input)
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, 3);
+    const context = streamingViewKey(views);
+    if (context !== this.streamContext) {
+      this.streamError = '';
+      this.streamContext = context;
+    }
+    if (this.streamPausedAt !== null) {
+      if (this.streamPausedAt === context) return;
+      this.streamPausedAt = null;
+    }
+    const wanted = new Map();
+    for (const view of views)
+      for (const region of planStreamingRegions(view.input, { rangeKm: this.streaming.rangeKm })) {
+        if (wanted.size >= 48 && !wanted.has(region.id)) continue;
+        wanted.set(region.id, region);
+      }
+    for (const id of wanted.keys())
+      if (!this.streamWanted.has(id))
+        for (const [key, time] of this.failures)
+          if (key.startsWith(id + '/') && !Number.isFinite(time)) this.failures.delete(key);
+    this.streamWanted = wanted;
+    for (const [key, load] of this.loads)
+      if (this.cities.get(key.split('/')[0])?.streaming && !wanted.has(key.split('/')[0]))
+        load.controller.abort();
+    for (const [id, job] of this.streamJobs) if (!wanted.has(id)) job.controller.abort();
+    for (const [id, region] of wanted) {
+      if (this.streamJobs.size >= 1) break;
+      if (
+        this.cities.has(id) ||
+        this.streamJobs.has(id) ||
+        this.streamDismissed.get(id) === context ||
+        (this.streamFailures.get(id) || 0) > now
+      )
+        continue;
+      const controller = new AbortController(),
+        epoch = this.streamEpoch,
+        generation = this.generation.get(id) || 0;
+      const job = { controller, timedOut: false };
+      const timeout = setTimeout(() => {
+        job.timedOut = true;
+        controller.abort();
+      }, 90000);
+      this.streamJobs.set(id, job);
+      job.work = this.source
+        .prepare(region, controller.signal)
+        .then((meta) => {
+          if (
+            controller.signal.aborted ||
+            this.disposed ||
+            epoch !== this.streamEpoch ||
+            generation !== (this.generation.get(id) || 0) ||
+            !this.streamWanted.has(id)
+          )
+            return;
+          this.cities.set(id, { ...meta, id, streaming: true });
+          this.streamError = '';
+          this.revision++;
+          this.schedule(true);
+        })
+        .catch((error) => {
+          if (!controller.signal.aborted || job.timedOut) {
+            this.streamError = job.timedOut ? '卫星区域准备超时，可重试' : error.message;
+            this.streamFailures.set(id, performance.now() + 60000);
+          }
+        })
+        .finally(() => {
+          clearTimeout(timeout);
+          if (this.streamJobs.get(id) === job) this.streamJobs.delete(id);
+          this.streamChecked = -Infinity;
+          if (!this.disposed) this.schedule();
+        });
+    }
+    clearTimeout(this.streamRetry);
+    const retries = [...wanted.keys()]
+      .map((id) => this.streamFailures.get(id))
+      .filter((time) => time > now);
+    if (retries.length)
+      this.streamRetry = setTimeout(
+        () => {
+          this.streamChecked = -Infinity;
+          this.schedule(true);
+        },
+        Math.min(...retries) - now + 1
+      );
   }
   setView(id, input, priority = 1, force = false) {
     this.uniforms(id, priority);
@@ -152,6 +315,7 @@ export class CityTerrain {
   }
   reconcile() {
     this.lastPlan = performance.now();
+    this.updateStreaming();
     const wanted = new Set(),
       available = [...this.cities.values()].filter((c) => !this.disabled.has(c.id));
     for (const view of [...this.views.values()].sort(
@@ -159,8 +323,15 @@ export class CityTerrain {
     )) {
       let plan = [];
       if (this.enabled && view.input) {
-        for (const budget of [CITY_DRAW_LIMIT, 24, 16, 8, 4, 2, 1]) {
-          plan = planCityTiles(available, view.input, { maxTiles: budget });
+        for (const budget of [CITY_DRAW_LIMIT, 48, 32, 24, 16, 8, 4, 2, 1]) {
+          const planner = available.some((c) => c.streaming)
+            ? planStreamedCityTiles
+            : planCityTiles;
+          plan = planner(available, view.input, {
+            maxTiles: budget,
+            rangeKm: this.streaming.rangeKm,
+            center: streamingAnchor(view.input)?.center,
+          });
           if (new Set([...wanted, ...plan.map(keyOf)]).size <= CITY_GPU_LAYERS) break;
           plan = [];
         }
@@ -226,8 +397,8 @@ export class CityTerrain {
         })
         .catch((error) => {
           if (!controller.signal.aborted) {
-            this.lastError = error.message;
-            this.failures.set(key, performance.now() + 15000);
+            if (error.code !== 'offline') this.lastError = error.message;
+            this.failures.set(key, error.code === 'offline' ? Infinity : performance.now() + 15000);
             this.revision++;
           }
         })
@@ -240,7 +411,7 @@ export class CityTerrain {
     clearTimeout(this.retry);
     const retryAt = [...this.views.values()]
       .flatMap((v) => v.plan.map((t) => this.failures.get(keyOf(t))))
-      .filter((time) => time > performance.now());
+      .filter((time) => Number.isFinite(time) && time > performance.now());
     if (retryAt.length)
       this.retry = setTimeout(
         () => this.pump(),
@@ -259,7 +430,17 @@ export class CityTerrain {
     }
     const cached = await this.cache.getTile(meta.id, tile.key);
     if (cached) return cached;
-    if (!this.autoEnabled && !this.allowedOnline.has(meta.id) && !this.downloads.has(meta.id))
+    if (meta.streaming && (!this.streaming.enabled || !this.streamWanted.has(meta.id))) {
+      const error = Error('当前仅使用已缓存卫星影像');
+      error.code = 'offline';
+      throw error;
+    }
+    if (
+      !meta.streaming &&
+      !this.autoEnabled &&
+      !this.allowedOnline.has(meta.id) &&
+      !this.downloads.has(meta.id)
+    )
       throw Error('此城市仅使用已缓存影像；可在城市库下载完整区域');
     const payload = await this.sharedPayload(meta, tile, signal);
     signal?.throwIfAborted();
@@ -340,6 +521,8 @@ export class CityTerrain {
         .filter(Boolean)
         .sort(
           (a, b) =>
+            Number(this.cities.get(b.cityId)?.streaming) -
+              Number(this.cities.get(a.cityId)?.streaming) ||
             Number(this.cities.get(a.cityId)?.builtin) -
               Number(this.cities.get(b.cityId)?.builtin) ||
             a.cityId.localeCompare(b.cityId) ||
@@ -357,7 +540,12 @@ export class CityTerrain {
         }
         u.cityRects.value[i].fromArray(e.rect);
         u.cityBounds.value[i].fromArray(e.cityRect);
-        u.cityParams.value[i].set(e.layer, fade(e, now), group, e.z);
+        u.cityParams.value[i].set(
+          e.layer,
+          fade(e, now),
+          group,
+          this.cities.get(e.cityId)?.streaming ? -1 : e.z
+        );
         const n = 2 ** e.z;
         const neighbour = (x, y) => {
           if (x < 0 || y < 0 || x >= n || y >= n) return 1;
@@ -390,6 +578,13 @@ export class CityTerrain {
       gpuBytes: this.texture.image.depth === 1 ? 4 : (CITY_GPU_LAYERS * BYTES * 4) / 3,
       cpuBytes: this.texture.image.data.byteLength,
       error: this.lastError,
+      streaming: {
+        ...this.streaming,
+        preparing: this.streamJobs.size,
+        regionCount: [...this.cities.values()].filter((c) => c.streaming).length,
+        paused: this.streamPausedAt !== null,
+        error: this.streamError,
+      },
     };
   }
   key(id) {
@@ -514,8 +709,17 @@ export class CityTerrain {
     this.generation.set(id, (this.generation.get(id) || 0) + 1);
     this.cancelDownload(id);
     this.allowedOnline.delete(id);
-    this.autoDismissed?.add(id);
-    this.saveDismissed();
+    if (
+      this.cities.get(id)?.streaming ||
+      this.streamJobs.has(id) ||
+      id.startsWith('surface-2025-')
+    ) {
+      this.streamDismissed.set(id, streamingViewKey([...this.views.values()]));
+      this.streamJobs.get(id)?.controller.abort();
+    } else {
+      this.autoDismissed?.add(id);
+      this.saveDismissed();
+    }
     for (const [key, load] of this.loads) if (key.startsWith(id + '/')) load.controller.abort();
     this.cities.delete(id);
     this.revision++;
@@ -532,8 +736,11 @@ export class CityTerrain {
     this.disposed = true;
     clearTimeout(this.scheduled);
     clearTimeout(this.retry);
+    clearTimeout(this.streamRetry);
+    clearTimeout(this.streamReplan);
     for (const l of this.loads.values()) l.controller.abort();
     for (const j of this.downloads.values()) j.controller.abort();
+    for (const j of this.streamJobs.values()) j.controller.abort();
     this.enabled = false;
     this.source.close();
     this.cache.close();
@@ -548,16 +755,16 @@ export class CityTerrain {
 export const cityTerrainGLSL = `
 uniform highp sampler2DArray cityMap;
 uniform int cityCount;
-uniform vec4 cityRects[32],cityBounds[32],cityParams[32],cityEdges[32];
+uniform vec4 cityRects[64],cityBounds[64],cityParams[64],cityEdges[64];
 vec3 cityTerrainColor(vec2 uv,vec2 dx,vec2 dy,vec3 base){
  vec3 result=base,premul=vec3(0.);float opacity=0.,edge=0.,group=-1.;
- for(int i=0;i<32;i++){
+ for(int i=0;i<64;i++){
   if(i>=cityCount)break;
   vec4 info=cityParams[i],rect=cityRects[i];
   if(info.z!=group){
    result=mix(result,premul/max(opacity,.00001),opacity*edge);premul=vec3(0.);opacity=0.;group=info.z;
    vec2 q=(uv-cityBounds[i].xy)/cityBounds[i].zw;
-   edge=smoothstep(0.,.08,min(min(q.x,1.-q.x),min(q.y,1.-q.y)));
+   edge=info.w<0.?1.:smoothstep(0.,.08,min(min(q.x,1.-q.x),min(q.y,1.-q.y)));
   }
   vec2 p=(uv-rect.xy)/rect.zw;if(any(lessThan(p,vec2(0.)))||any(greaterThanEqual(p,vec2(1.))))continue;
   vec2 footprint=max(2.*sqrt(dx*dx+dy*dy)/rect.zw,vec2(.000001));

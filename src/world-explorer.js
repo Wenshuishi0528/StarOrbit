@@ -3,10 +3,21 @@ import { Equator, Horizon, Observer } from 'astronomy-engine';
 import atlas from '../assets/geography/atlas.json';
 import { createGroundState, normalizeGroundSite } from './ground-world-math.js';
 import { createGroundWorldInput } from './ground-world-input.js';
+import {
+  createSharedWorldEarth,
+  groundRenderPose,
+  mountWorldEarthControls,
+} from './shared-world-earth.js';
+import { mountGroundLocationMap } from './ground-location-map.js';
 import { createGroundSurface } from './ground-world-surface.js';
 import { createGroundSky } from './ground-world-sky.js';
 import { createSolarWorld } from './solar-world.js';
 import { createInterstellarWorld } from './interstellar-world.js';
+import {
+  readWorldSkySettings,
+  applyWorldSkySettings,
+  mountWorldSkyControls,
+} from './shared-world-sky.js';
 import { AU_LY } from './interstellar-math.js';
 import { lastObserver } from './observer-settings.js';
 import { dateTimeText, dateTimeValue, stepDateTime } from './date-time-input.js';
@@ -19,7 +30,7 @@ import { skyCulturePhotoCredit } from './sky-culture-caption.js';
 const KEY = 'starorbit-world-v1';
 const css = `
 .world-explorer{position:fixed;inset:0;z-index:1000;padding:0;border:0;background:#030811;color:#e8eff7;font:14px system-ui;display:flex;flex-direction:column}
-.world-explorer[hidden]{display:none}.world-bar{position:relative;height:auto;flex-shrink:0;justify-content:flex-start;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:#0b1420;border-bottom:1px solid #294052;z-index:5}.world-bar strong{color:#eed5a3;letter-spacing:2px;margin-right:16px}.world-bar input{width:190px}.world-bar button.active{background:#334e62;color:#ffe4ae}.world-explorer button,.world-explorer select,.world-explorer input{font:inherit;color:#e2edf8;background:#172737;border:1px solid #345065;border-radius:6px;padding:7px 10px}.world-explorer button{cursor:pointer}.world-explorer button:hover{background:#294359}.world-stage{flex:1;min-height:0;position:relative;overflow:hidden}.world-stage>canvas{position:absolute;inset:0;width:100%;height:100%;outline:0}.world-stage>canvas:focus{box-shadow:inset 0 0 0 1px #7399ae}.world-ground-panel{position:absolute;bottom:auto;top:18px;left:18px;width:280px;max-height:calc(100% - 115px);overflow:auto;padding:18px;background:#0b1623e8;border:1px solid #385065;border-radius:12px;z-index:4;backdrop-filter:blur(16px)}.world-ground-panel[hidden]{display:none}.world-ground-panel h3{margin:0 0 14px;color:#eed5a3}.world-ground-panel label{display:block;margin:12px 0 5px;color:#a8bdcf}.world-ground-panel label.check{display:flex;align-items:center;gap:8px}.world-ground-panel input:not([type=checkbox]),.world-ground-panel select{box-sizing:border-box;width:100%}.world-ground-panel .pair{display:flex;gap:8px}.world-ground-panel .pair>input{min-width:0;flex:1}.world-ground-panel .pair>button{flex-shrink:0;white-space:nowrap}.world-ground-panel .pair>div{width:50%}.world-ground-panel details{margin-top:15px}.world-ground-panel summary{cursor:pointer;color:#d7c39d}.world-results button{display:block;width:100%;text-align:left;margin-top:6px;font-size:12px}.world-hud{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:10px 22px;background:#08121dcc;border:1px solid #385065;border-radius:25px;white-space:pre-line;text-align:center;z-index:3;pointer-events:none;font-variant-numeric:tabular-nums}.world-credit{position:absolute;bottom:5px;right:12px;font-size:10px;color:#b5c4ce;max-width:80%;text-align:right;z-index:3;pointer-events:none}.world-labels{position:absolute;inset:0;pointer-events:none;z-index:2}.world-labels span{position:absolute;color:#e5d9ba;font-size:12px;text-shadow:0 1px 4px #000;transform:translate(-50%,-50%)}.world-panel-toggle{position:absolute;right:18px;top:18px;z-index:5}.world-ground-panel p{font-size:12px;line-height:1.6;color:#a8bdcf}.world-ground-panel canvas{width:100%;height:125px;border-radius:6px;cursor:crosshair}.world-entry{display:flex;gap:8px;margin:10px 0}.world-entry button{flex:1}
+.world-explorer[hidden]{display:none}.world-bar{position:relative;height:auto;flex-shrink:0;justify-content:flex-start;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:#0b1420;border-bottom:1px solid #294052;z-index:5}.world-bar strong{color:#eed5a3;letter-spacing:2px;margin-right:16px}.world-bar input{width:190px}.world-bar button.active{background:#334e62;color:#ffe4ae}.world-explorer button,.world-explorer select,.world-explorer input{font:inherit;color:#e2edf8;background:#172737;border:1px solid #345065;border-radius:6px;padding:7px 10px}.world-explorer button{cursor:pointer}.world-explorer button:hover{background:#294359}.world-stage{flex:1;min-height:0;position:relative;overflow:hidden}.world-stage>canvas{position:absolute;inset:0;width:100%;height:100%;outline:0}.world-stage>canvas:focus{box-shadow:inset 0 0 0 1px #7399ae}.world-ground-panel{position:absolute;bottom:auto;top:18px;left:18px;width:280px;max-height:calc(100% - 115px);overflow:auto;padding:18px;background:#0b1623e8;border:1px solid #385065;border-radius:12px;z-index:4;backdrop-filter:blur(16px)}.world-ground-panel[hidden]{display:none}.world-ground-panel h3{margin:0 0 14px;color:#eed5a3}.world-ground-panel label{display:block;margin:12px 0 5px;color:#a8bdcf}.world-ground-panel label.check{display:flex;align-items:center;gap:8px}.world-ground-panel input:not([type=checkbox]),.world-ground-panel select{box-sizing:border-box;width:100%}.world-ground-panel .pair{display:flex;gap:8px}.world-ground-panel .pair>input{min-width:0;flex:1}.world-ground-panel .pair>button{flex-shrink:0;white-space:nowrap}.world-ground-panel .pair>div{width:50%}.world-ground-panel details{margin-top:15px}.world-ground-panel summary{cursor:pointer;color:#d7c39d}.world-results button{display:block;width:100%;text-align:left;margin-top:6px;font-size:12px}.world-hud{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:10px 22px;background:#08121dcc;border:1px solid #385065;border-radius:25px;white-space:pre-line;text-align:center;z-index:3;pointer-events:none;font-variant-numeric:tabular-nums}.world-credit{position:absolute;bottom:5px;right:12px;font-size:10px;color:#b5c4ce;max-width:80%;text-align:right;z-index:3;pointer-events:none}.world-labels{position:absolute;inset:0;pointer-events:none;z-index:2}.world-labels span{position:absolute;color:#e5d9ba;font-size:12px;text-shadow:0 1px 4px #000;transform:translate(-50%,-50%)}.world-panel-toggle{position:absolute;right:18px;top:18px;z-index:5}.world-ground-panel p{font-size:12px;line-height:1.6;color:#a8bdcf}.world-ground-panel canvas{width:100%;height:125px;border-radius:6px;cursor:crosshair}.world-entry{display:flex;gap:8px;margin:10px 0}.world-entry button{flex:1}.world-ground-panel .world-entry{flex-wrap:wrap}.world-ground-panel .world-entry button{min-width:40%;font-size:12px}.world-key-guide{position:absolute;right:18px;bottom:40px;z-index:5;background:#0b1623dd;border:1px solid #385065;border-radius:10px;padding:10px 14px;color:#b8ccdf;font:12px/1.9 system-ui}.world-key-guide[hidden]{display:none}.world-key-guide summary{cursor:pointer;color:#ead6ae}.world-key-guide kbd{font:inherit;color:#edf4fa}@media(max-width:700px){.world-key-guide{bottom:105px;right:8px;font-size:10px;max-width:45%;padding:6px}}
 @media(max-width:700px){.world-bar{gap:5px;padding:7px;font-size:12px}.world-bar strong{display:none}.world-bar input{width:150px}.world-ground-panel{width:230px;top:8px;left:8px;padding:12px}.world-hud{font-size:11px;max-width:85%;bottom:26px}.world-credit{font-size:8px}.solar-world-panel{max-width:210px}}
 `;
 const fold = (s) =>
@@ -66,7 +77,7 @@ export function installWorldExplorer(sim) {
   host.className = 'world-explorer';
   host.hidden = true;
   host.setAttribute('aria-label', t('地表、太阳系与星际'));
-  host.innerHTML = `<header class="world-bar"><strong>STARORBIT · 世界</strong><button data-mode="ground">地表观测</button><button data-mode="solar">太阳系</button><button data-mode="stellar">星际穿梭</button><label>UTC+8 <input data-time aria-label="世界时间（UTC+8）" placeholder="YYYY-MM-DD HH:mm:ss"></label><button data-jump>跳转</button><button data-play>暂停</button><select data-speed aria-label="时间速度"><option value="1">1×</option><option value="60">1 分钟/秒</option><option value="3600">1 小时/秒</option><option value="86400">1 天/秒</option><option value="-3600">倒放 1 小时/秒</option></select><button data-now>现在</button><button data-photo>拍照</button><button data-exit>返回轨道</button></header><div class="world-stage"><div class="world-labels"></div><button class="world-panel-toggle">地点与画面</button><aside class="world-ground-panel"><h3>地表观测</h3><label>城市或地理名称</label><div class="pair"><input data-search aria-label="城市或地理名称" placeholder="北京、珠穆朗玛峰…"><button data-search-online>搜索</button></div><div class="world-results"></div><details><summary>坐标与地图选点</summary><div class="pair"><div><label>纬度 °</label><input data-lat type="number" min="-90" max="90" step=".00001"></div><div><label>经度 °</label><input data-lon type="number" min="-180" max="180" step=".00001"></div></div><button data-locate>到达此处</button><canvas data-map width="560" height="280" aria-label="点击世界地图选择地点"></canvas></details><label>移动方式</label><select data-movement><option value="grounded">贴地漫游</option><option value="free">自由升降</option></select><label data-height-label>眼高（米）</label><input data-height type="number" value="1.7" step=".1" min=".2" max="1000"><label>移动速度</label><select data-move-speed><option value="slow">慢速 · 2 m/s</option><option value="normal" selected>常速 · 25 m/s</option><option value="fast">快速 · 500 m/s</option></select><div class="pair" style="margin-top:12px"><button data-save>收藏地点</button><select data-bookmarks aria-label="收藏地点"><option value="">我的地点</option></select></div><details open><summary>天空与标注</summary><label>观察效果</label><select data-appearance><option value="natural">自然天空</option><option value="galaxy">银河增强</option><option value="dss">DSS 巡天影像</option></select><label>星空体系</label><select data-culture><option value="western">西方星座</option><option value="chinese">中国星官</option></select><label class="check"><input type="checkbox" data-lines checked>星图连线</label><label class="check"><input type="checkbox" data-names checked>星空名称</label><label class="check"><input type="checkbox" data-art>星空插画</label><label>插画亮度</label><input data-art-brightness type="range" min="0" max="2" step=".05" value="1"><label class="check"><input type="checkbox" data-grid>赤道坐标网</label><label class="check"><input type="checkbox" data-ecliptic>黄道</label><label>视场</label><input data-fov type="range" min="5" max="100" value="65"></details><details><summary>操控与数据</summary><p>点击画面后操作：H / N 前后，J / L 左右，K 上升、I 下降；W 低头、S 抬头，A / D 转向。拖动鼠标看向四周，滚轮缩放。持续按住平滑加速，松开减速。</p><p data-surface-status></p><p>地形：ETOPO 2022 / Copernicus GLO-30。银河与 DSS 为历史影像，日月行星按所选时刻显示。</p><p>地名：Natural Earth / 天地图；在线搜索：Photon · © OpenStreetMap contributors。</p></details><p data-message role="status"></p></aside><div class="world-hud"></div><div class="world-credit"></div></div>`;
+  host.innerHTML = `<header class="world-bar"><strong>STARORBIT · 世界</strong><button data-mode="ground">地表观测</button><button data-mode="solar">太阳系</button><button data-mode="stellar">星际穿梭</button><label>UTC+8 <input data-time aria-label="世界时间（UTC+8）" placeholder="YYYY-MM-DD HH:mm:ss"></label><button data-jump>跳转</button><button data-play>暂停</button><select data-speed aria-label="时间速度"><option value="1">1×</option><option value="60">1 分钟/秒</option><option value="3600">1 小时/秒</option><option value="86400">1 天/秒</option><option value="-3600">倒放 1 小时/秒</option></select><button data-now>现在</button><button data-photo>拍照</button><button data-exit>返回轨道</button></header><div class="world-stage"><div class="world-labels"></div><button class="world-panel-toggle">地点与画面</button><aside class="world-ground-panel"><h3>地表观测</h3><label>城市或地理名称</label><div class="pair"><input data-search aria-label="城市或地理名称" placeholder="北京、珠穆朗玛峰…"><button data-search-online>搜索</button></div><div class="world-results"></div><details><summary>坐标与地图选点</summary><div class="pair"><div><label>纬度 °</label><input data-lat type="number" min="-90" max="90" step=".00001"></div><div><label>经度 °</label><input data-lon type="number" min="-180" max="180" step=".00001"></div></div><button data-locate>到达此处</button><canvas data-map width="560" height="280" aria-label="点击世界地图选择地点"></canvas></details><div class="world-entry"><button data-altitude="ground">回到地面</button><button data-altitude="10000">高空</button><button data-altitude="400000">近地轨道</button><button data-altitude="20000000">完整地球</button></div><label data-height-label>海拔（米）</label><input data-height type="number" value="1.7" step=".1" min=".2" max="1000"><label>移动速度</label><select data-move-speed><option value="slow">慢速 · 2 m/s</option><option value="normal" selected>自动 · 随高度加速</option><option value="fast">快速 · 随高度加速</option></select><div class="pair" style="margin-top:12px"><button data-save>收藏地点</button><select data-bookmarks aria-label="收藏地点"><option value="">我的地点</option></select></div><details open><summary>天空与标注</summary><label>观察效果</label><select data-appearance><option value="natural">自然天空</option><option value="galaxy">银河增强</option><option value="dss">DSS 巡天影像</option></select><label><input type="checkbox" data-see-through-terrain> 透过地形看星空</label><div data-shared-sky></div><label>视场</label><input data-fov type="range" min=".006" max="100" step=".001" value="65"></details><div data-shared-earth></div><details><summary>操控与数据</summary><p>点击画面后操作：H / N 前后，J / L 左右，K 上升、I 下降；W 低头、S 抬头，A / D 转向。拖动鼠标看向四周，滚轮缩放。持续按住平滑加速，松开减速。</p><p data-surface-status></p><p>地形：ETOPO 2022 / Copernicus GLO-30。银河与 DSS 为历史影像，日月行星按所选时刻显示。</p><p>地名：Natural Earth / 天地图；在线搜索：Photon · © OpenStreetMap contributors。</p></details><p data-message role="status"></p></aside><div class="world-hud"></div><div class="world-credit"></div><details class="world-key-guide" open><summary>移动键位</summary><div><kbd>H / N</kbd> 前后　<kbd>J / L</kbd> 左右　<kbd>K / I</kbd> 升降<br><kbd>W / S</kbd> 俯仰　<kbd>A / D</kbd> 转向　<kbd>空格</kbd> 停止<br>拖动转向 · 滚轮缩放 · 持续按住加速</div></details></div>`;
   document.body.append(host);
   const $ = (s) => host.querySelector(s),
     stage = $('.world-stage'),
@@ -74,6 +85,8 @@ export function installWorldExplorer(sim) {
     labelRoot = $('.world-labels'),
     hud = $('.world-hud'),
     credit = $('.world-credit');
+  const locationMap = mountGroundLocationMap({ host: stage, environment: sim.environment });
+  locationMap.setVisible(false);
   let saved;
   try {
     saved = JSON.parse(localStorage.getItem(KEY));
@@ -85,7 +98,7 @@ export function installWorldExplorer(sim) {
         ![site.latitude, site.longitude, site.height].every(Number.isFinite) ||
         Math.abs(site.longitude) > 180 ||
         site.height < -12000 ||
-        site.height > 1000000
+        site.height > 100000000
       )
         return null;
       return normalizeGroundSite(site);
@@ -96,7 +109,7 @@ export function installWorldExplorer(sim) {
   const state = createGroundState({
     site: safeSite(saved?.site) ||
       lastObserver() || { name: t('北京'), latitude: 39.9042, longitude: 116.4074, height: 50 },
-    mode: saved?.navigation?.mode,
+    mode: 'free',
     speed: saved?.navigation?.speed,
     azimuth: Number.isFinite(saved?.navigation?.azimuth) ? saved.navigation.azimuth : 180,
     elevation: Number.isFinite(saved?.navigation?.elevation) ? saved.navigation.elevation : 15,
@@ -107,6 +120,7 @@ export function installWorldExplorer(sim) {
   let mode = null,
     sky = null,
     surface = null,
+    groundEarth = null,
     input = null,
     solar = null,
     stellar = null,
@@ -117,40 +131,37 @@ export function installWorldExplorer(sim) {
     ambient = null,
     lastClock = 0,
     request = null,
-    disposed = false;
+    disposed = false,
+    heightFlight = null;
   let bookmarks = Array.isArray(saved?.bookmarks)
     ? saved.bookmarks.slice(0, 30).map(safeSite).filter(Boolean)
     : [];
   const settings = {
-    culture: 'western',
+    ...readWorldSkySettings(sim.environment),
     appearance: 'natural',
-    lines: true,
-    names: true,
-    art: false,
-    grid: false,
-    ecliptic: false,
     fov: 65,
-    artBrightness: 1,
+    seeThroughTerrain: saved?.settings?.seeThroughTerrain === true,
   };
-  for (const key of ['culture', 'appearance']) {
-    const allowed = key === 'culture' ? ['western', 'chinese'] : ['natural', 'galaxy', 'dss'];
-    if (allowed.includes(saved?.settings?.[key])) settings[key] = saved.settings[key];
-  }
-  for (const key of ['lines', 'names', 'art', 'grid', 'ecliptic'])
-    if (typeof saved?.settings?.[key] === 'boolean') settings[key] = saved.settings[key];
-  for (const [key, min, max] of [
-    ['fov', 5, 100],
-    ['artBrightness', 0, 2],
-  ])
+  if (['natural', 'galaxy', 'dss'].includes(saved?.settings?.appearance))
+    settings.appearance = saved.settings.appearance;
+  for (const [key, min, max] of [['fov', 0.006, 100]])
     if (Number.isFinite(saved?.settings?.[key]))
       settings[key] = Math.max(min, Math.min(max, saved.settings[key]));
-  for (const key of ['culture', 'appearance', 'lines', 'names', 'art', 'grid', 'ecliptic', 'fov']) {
-    const node = $(`[data-${key}]`);
-    if (node.type === 'checkbox') node.checked = settings[key];
-    else node.value = settings[key];
-  }
-  $('[data-art-brightness]').value = settings.artBrightness;
-  $('[data-movement]').value = state.mode;
+  for (const key of ['appearance', 'fov']) $(`[data-${key}]`).value = settings[key];
+  $('[data-see-through-terrain]').checked = settings.seeThroughTerrain;
+  $('[data-see-through-terrain]').onchange = (e) => {
+    settings.seeThroughTerrain = e.target.checked;
+    lastLabels = 0;
+    persist();
+  };
+  const skyControls = mountWorldSkyControls($('[data-shared-sky]'), sim.environment, {
+    onChange: () => {
+      Object.assign(settings, readWorldSkySettings(sim.environment));
+      persist();
+    },
+  });
+  skyControls.root.open = true;
+  const earthControls = mountWorldEarthControls($(`[data-shared-earth]`), sim.environment);
   $('[data-move-speed]').value = state.speed;
   const entries = document.createElement('div');
   entries.className = 'world-entry';
@@ -219,15 +230,14 @@ export function installWorldExplorer(sim) {
     for (const [key, value] of [
       ['lat', state.site.latitude],
       ['lon', state.site.longitude],
-    ])
-      $(`[data-${key}]`).value = value.toFixed(5);
-    $('[data-height]').value =
-      state.mode === 'grounded' ? state.eyeHeight : state.site.height.toFixed(1);
-    $('[data-height-label]').textContent = t(
-      state.mode === 'grounded' ? '眼高（米）' : '海拔（米）'
-    );
-    $('[data-height]').min = state.mode === 'grounded' ? '.2' : '-12000';
-    $('[data-height]').max = state.mode === 'grounded' ? '1000' : '1000000';
+      ['height', state.site.height],
+    ]) {
+      const node = $(`[data-${key}]`);
+      if (document.activeElement !== node) node.value = value.toFixed(key === 'height' ? 1 : 5);
+    }
+    $('[data-height-label]').textContent = t('海拔（米）');
+    $('[data-height]').min = '-12000';
+    $('[data-height]').max = '100000000';
   }
   function locate(candidate) {
     const site = safeSite(candidate);
@@ -235,6 +245,7 @@ export function installWorldExplorer(sim) {
       $('[data-message]').textContent = t('坐标无效');
       return;
     }
+    heightFlight = null;
     request?.abort();
     request = null;
     // Position requests carry MSL altitude; attach to the new terrain before setting eye height.
@@ -353,28 +364,29 @@ export function installWorldExplorer(sim) {
       height: 0,
     });
   };
-  $('[data-movement]').onchange = (e) => {
-    input?.setMode(e.target.value);
-    syncSite();
-    $('[data-height-label]').textContent = t(
-      state.mode === 'grounded' ? '眼高（米）' : '海拔（米）'
-    );
-  };
   $('[data-height]').onchange = (e) => {
-    const h = e.target.valueAsNumber,
-      min = state.mode === 'grounded' ? 0.2 : -12000,
-      max = state.mode === 'grounded' ? 1000 : 1000000;
-    if (!Number.isFinite(h) || h < min || h > max) {
+    const h = e.target.valueAsNumber;
+    if (!Number.isFinite(h) || h < -12000 || h > 100000000) {
       syncSite();
       return;
     }
+    heightFlight = null;
     input?.stop();
-    if (state.mode === 'grounded') state.eyeHeight = h;
-    else state.site.height = h;
+    state.site.height = h;
+    state.terrainReady = false;
     input?.update(0);
     syncSite();
     persist();
   };
+  panel.querySelectorAll('[data-altitude]').forEach(
+    (button) =>
+      (button.onclick = () => {
+        input?.stop();
+        heightFlight = { from: state.site.height, target: button.dataset.altitude, elapsed: 0 };
+        state.elevation = button.dataset.altitude === 'ground' ? 5 : -89.5;
+        canvas.focus();
+      })
+  );
   $('[data-move-speed]').onchange = (e) => {
     input?.setSpeed(e.target.value);
     persist();
@@ -395,15 +407,23 @@ export function installWorldExplorer(sim) {
   $('[data-bookmarks]').onchange = (e) => {
     if (e.target.value !== '') locate(bookmarks[Number(e.target.value)]);
   };
-  for (const key of ['culture', 'appearance', 'lines', 'names', 'art', 'grid', 'ecliptic', 'fov'])
-    $(`[data-${key}]`).onchange = (e) =>
-      (settings[key] =
-        e.target.type === 'checkbox'
-          ? e.target.checked
-          : e.target.type === 'range'
-            ? Number(e.target.value)
-            : e.target.value);
-  $('[data-art-brightness]').oninput = (e) => (settings.artBrightness = Number(e.target.value));
+  for (const key of ['appearance', 'fov']) {
+    $(`[data-${key}]`).onchange = (e) => {
+      settings[key] = key === 'fov' ? Number(e.target.value) : e.target.value;
+      if (key === 'appearance' && settings.appearance === 'dss')
+        applyWorldSkySettings(sim.environment, { source: 'dss' });
+      if (key === 'appearance' && settings.appearance === 'galaxy') {
+        sim.environment.settings.milky = true;
+        sim.environment.save();
+      }
+      syncSkyUI();
+      persist();
+    };
+  }
+  function syncSkyUI() {
+    skyControls.refresh();
+    earthControls.refresh();
+  }
   let timeDraft = false;
   $('[data-time]').oninput = () => {
     timeDraft = true;
@@ -472,13 +492,24 @@ export function installWorldExplorer(sim) {
   const wheel = (e) => {
     if (mode !== 'ground') return;
     e.preventDefault();
-    settings.fov = Math.max(5, Math.min(100, settings.fov * Math.exp(e.deltaY * 0.001)));
+    settings.fov = Math.max(0.006, Math.min(100, settings.fov * Math.exp(e.deltaY * 0.001)));
     $('[data-fov]').value = settings.fov;
   };
   canvas.addEventListener('wheel', wheel, { passive: false });
+  const cancelHeightFlight = (e) => {
+    if (
+      mode === 'ground' &&
+      (/^Key[HNIJKLWASD]$/.test(e.code) || e.code === 'Space' || e.type === 'pointerdown')
+    )
+      heightFlight = null;
+  };
+  canvas.addEventListener('keydown', cancelHeightFlight);
+  canvas.addEventListener('pointerdown', cancelHeightFlight);
   function destroyView() {
     input?.dispose();
     input = null;
+    groundEarth?.dispose();
+    groundEarth = null;
     surface?.dispose();
     surface = null;
     sky?.dispose();
@@ -504,14 +535,26 @@ export function installWorldExplorer(sim) {
       previousControlsEnabled = controls.enabled;
       controls.stopMotion?.();
       controls.enabled = false;
+      sim.environment.cityTerrain.setView('main', null, 1, true);
+      for (const manager of [
+        sim.environment.elevation,
+        sim.environment.skyDetail,
+        sim.environment.constellationArt,
+      ])
+        manager?.release('main');
     }
+    heightFlight = null;
+    Object.assign(settings, readWorldSkySettings(sim.environment));
+    syncSkyUI();
     const departure = next === 'stellar' && mode === 'solar' ? solar.navigationPose() : null;
     const solarArrival = next === 'solar' && mode === 'stellar' ? stellar.snapshot() : null;
     destroyView();
     mode = next;
+    locationMap.setVisible(next === 'ground');
     panel.hidden = next !== 'ground';
     $('.world-panel-toggle').hidden = next !== 'ground';
     hud.hidden = next !== 'ground';
+    $('.world-key-guide').hidden = next !== 'ground';
     credit.hidden = next !== 'ground';
     host
       .querySelectorAll('[data-mode]')
@@ -524,12 +567,18 @@ export function installWorldExplorer(sim) {
       light = new THREE.DirectionalLight(0xfff3dc, 3);
       ambient = new THREE.HemisphereLight(0x8ab5e2, 0x2a251e, 0.7);
       groundScene.add(light, ambient);
+      groundEarth = createSharedWorldEarth({
+        environment: sim.environment,
+        renderer,
+        id: 'world-ground-earth',
+      });
       surface = createGroundSurface({ environment: sim.environment, scene: groundScene });
       sky = createGroundSky({ environment: sim.environment, renderer });
       input = createGroundWorldInput({
         canvas,
         state,
         sampleHeight: (lat, lon) => surface.heightAt(lat, lon),
+        getFov: () => settings.fov,
         enabled: () => mode === 'ground',
       });
       syncSite();
@@ -560,6 +609,7 @@ export function installWorldExplorer(sim) {
         getEarthTexture: () => sim.environment.uniforms.dayMap.value,
         getMoonTexture: () => sim.environment.moon.texture,
         assets: sim.environment.assets,
+        environment: sim.environment,
       });
     if (next === 'solar' && solarArrival)
       solar.restoreNavigationPose({
@@ -587,9 +637,7 @@ export function installWorldExplorer(sim) {
     sim.snap = true;
     sim.timeUI();
   }
-  const raycaster = new THREE.Raycaster(),
-    tmp = new THREE.Vector3();
-  raycaster.firstHitOnly = true;
+  const tmp = new THREE.Vector3();
   function paintLabels(labels) {
     labelRoot.replaceChildren();
     let count = 0;
@@ -604,8 +652,7 @@ export function installWorldExplorer(sim) {
         .add(groundCamera.position)
         .project(groundCamera);
       if (Math.abs(point.x) > 0.95 || Math.abs(point.y) > 0.92) continue;
-      raycaster.set(groundCamera.position, tmp.normalize());
-      if (raycaster.intersectObjects(groundScene.children, true).some((hit) => hit.object.isMesh))
+      if (!settings.seeThroughTerrain && groundEarth.terrainBlocksScreen(point.x, point.y))
         continue;
       const el = document.createElement('span');
       el.textContent = row.text;
@@ -644,10 +691,28 @@ export function installWorldExplorer(sim) {
         renderer.clear();
         solar.update(sim.time, dt);
       } else {
+        if (heightFlight) {
+          heightFlight.elapsed += Math.min(0.1, dt);
+          const u = Math.min(1, heightFlight.elapsed / 3),
+            ease = u * u * (3 - 2 * u);
+          const floor = surface.heightAt(state.site.latitude, state.site.longitude) ?? 0;
+          const target =
+            heightFlight.target === 'ground' ? floor + 1.7 : Number(heightFlight.target);
+          const offset = 12001;
+          state.site.height =
+            Math.exp(
+              Math.log(heightFlight.from + offset) * (1 - ease) + Math.log(target + offset) * ease
+            ) - offset;
+          if (u === 1) heightFlight = null;
+        }
         surface.update(state.site, sim.time);
         input.update(dt);
         surface.update(state.site, sim.time);
+        Object.assign(settings, readWorldSkySettings(sim.environment));
         const status = sky.update(state.site, sim.time, state, settings, w, h);
+        locationMap.update(state.site, state.azimuth, settings.fov);
+        groundCamera.near = Math.max(0.1, Math.min(1000, state.site.height * 0.00001));
+        groundCamera.far = Math.max(30000000, state.site.height + 20000000);
         groundCamera.position.set(0, 0, state.site.height);
         groundCamera.quaternion.copy(sky.camera.quaternion);
         groundCamera.aspect = w / h;
@@ -658,7 +723,18 @@ export function installWorldExplorer(sim) {
         light.intensity = Math.max(0, Math.min(3, status.sunAltitude / 5));
         ambient.intensity = 0.025 + Math.max(0, Math.min(0.7, (status.sunAltitude + 12) / 40));
         sky.render();
-        renderer.render(groundScene, groundCamera);
+        const earthPose = groundRenderPose(state.site, sim.time, groundCamera.quaternion);
+        groundEarth.update({
+          time: sim.time,
+          ...earthPose,
+          fov: settings.fov,
+          aspect: w / h,
+          width: w,
+          height: h,
+          nearPatch: surface.getPatch(),
+        });
+        renderer.clearDepth();
+        groundEarth.render({ seeThroughTerrain: settings.seeThroughTerrain });
         if (wall - lastLabels > 250) {
           paintLabels(status.labels);
           lastLabels = wall;
@@ -684,6 +760,10 @@ export function installWorldExplorer(sim) {
       renderer.toneMappingExposure = exposure;
     }
     if (wall - lastClock > 250) {
+      if (mode === 'ground') {
+        syncSite();
+        syncSkyUI();
+      }
       if (!timeDraft && document.activeElement !== $('[data-time]'))
         $('[data-time]').value = dateTimeText(sim.time, '24');
       $('[data-play]').textContent = t(sim.paused ? '播放' : '暂停');
@@ -739,22 +819,37 @@ export function installWorldExplorer(sim) {
             ? 'StarOrbit · Hipparcos / van Leeuwen 2007 · J2000 · d3-celestial · Stellarium CC BY-SA 4.0 · NASA/Goddard SVS'
             : 'StarOrbit · Astronomy Engine',
       ];
-      if (photoMode === 'ground') {
-        const terrain = surface.status();
-        if (terrain.tiles) sources.push(ELEVATION_SOURCE.credit, ELEVATION_SOURCE.liability);
-        const cultural = skyCulturePhotoCredit(
-          settings.art ? sim.environment.constellationArt?.status('ground-world-art') : null,
-          {
-            skyCulture: settings.culture,
-            equatorialGrid: settings.grid,
-            eclipticLine: settings.ecliptic,
-          },
-          settings.names || settings.lines || settings.grid || settings.ecliptic,
-          photoTime
+      const skyId =
+        photoMode === 'ground'
+          ? 'ground-world'
+          : photoMode === 'solar'
+            ? 'solar-world-sky'
+            : 'interstellar-world';
+      const worldSettings = sim.environment.settings;
+      const detailStatus = sim.environment.skyDetail.status(skyId + '-detail');
+      for (const provider of detailStatus.sources || [])
+        sources.push(`${provider.id} · ${provider.observed} · ${provider.credit}`);
+      const cultural = skyCulturePhotoCredit(
+        sim.environment.constellationArt?.status(skyId + '-art'),
+        worldSettings,
+        worldSettings.starChartEnabled,
+        photoTime
+      );
+      if (cultural?.ready && cultural.caption) sources.push(cultural.caption);
+      if (cultural?.referenceCaption) sources.push(cultural.referenceCaption);
+      const earthId =
+        photoMode === 'ground'
+          ? 'world-ground-earth'
+          : photoMode === 'solar'
+            ? 'solar-world-earth'
+            : 'interstellar-earth';
+      for (const city of sim.environment.cityTerrain.status(earthId).sources || [])
+        sources.push(
+          [city.name?.zh || city.name || city.id, city.credit || city.attribution]
+            .filter(Boolean)
+            .join(' · ')
         );
-        if (cultural?.ready && cultural.caption) sources.push(cultural.caption);
-        if (cultural?.referenceCaption) sources.push(cultural.referenceCaption);
-      }
+      if (photoMode === 'ground' && surface.status().tiles) sources.push(ELEVATION_SOURCE.credit);
       const size = Math.max(11, Math.round(output.width / 150)),
         padding = Math.max(12, Math.round(output.width / 100)),
         lines = [];
@@ -806,6 +901,11 @@ export function installWorldExplorer(sim) {
       return !!mode;
     },
     open,
+    get ground() {
+      return mode === 'ground'
+        ? { state, surface, camera: groundCamera, earth: groundEarth, settings }
+        : null;
+    },
     get interstellar() {
       return stellar;
     },
@@ -821,7 +921,7 @@ export function installWorldExplorer(sim) {
         state.elevation = Math.max(-89.5, Math.min(89.5, horizon.altitude));
       }
       if (Number.isFinite(options.fov)) {
-        settings.fov = Math.max(5, Math.min(100, options.fov));
+        settings.fov = Math.max(0.006, Math.min(100, options.fov));
         $('[data-fov]').value = settings.fov;
       }
     },
@@ -835,7 +935,12 @@ export function installWorldExplorer(sim) {
       disposed = true;
       request?.abort();
       offLanguage();
+      skyControls.dispose();
+      earthControls.dispose();
+      locationMap.dispose();
       canvas.removeEventListener('wheel', wheel);
+      canvas.removeEventListener('keydown', cancelHeightFlight);
+      canvas.removeEventListener('pointerdown', cancelHeightFlight);
       entries.remove();
       host.remove();
       style.remove();

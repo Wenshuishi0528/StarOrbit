@@ -1,3 +1,7 @@
+import {
+  mountSurfaceStreamingControls,
+  applySurfaceStreamingSettings,
+} from './surface-streaming-controls.js';
 import { t, setText, getLanguage } from './i18n.js';
 import { createCityFinder } from './xuntian-ground-target.js';
 
@@ -5,6 +9,7 @@ const writeText = (node, value) => {
   if (node.textContent !== value) node.textContent = value;
 };
 const names = (city) => city.names?.[getLanguage()] || city.name || city.names?.en || city.id;
+const mibLimit = (bytes) => (bytes / 1048576).toFixed(0);
 const megabytes = (bytes) => (bytes / 1048576).toFixed(1) + ' MiB';
 export function cityTerrainText(status) {
   if (!status?.enabled) return t('城市高清已关闭');
@@ -13,30 +18,10 @@ export function cityTerrainText(status) {
   return `${region ? region + ' · ' : ''}${status.ready}/${status.requested} · ${t(status.complete ? '已就绪' : status.loading ? '加载中' : '保留可用底图')}`;
 }
 
-function groundCenter(view) {
-  if (!view || view.fovY > 8) return null;
-  const p = view.eyeKm,
-    d = view.forward,
-    b = p.reduce((sum, x, i) => sum + x * d[i], 0);
-  const h = b * b - p.reduce((sum, x) => sum + x * x, 0) + 6371 ** 2;
-  if (h < 0) return null;
-  const distance = -b - Math.sqrt(h);
-  if (distance <= 0 || distance * Math.tan((view.fovY * Math.PI) / 360) * 2 > 60) return null;
-  const hit = p.map((x, i) => x + d[i] * distance);
-  return [
-    (Math.atan2(hit[1], hit[0]) * 180) / Math.PI,
-    (Math.asin(hit[2] / Math.hypot(...hit)) * 180) / Math.PI,
-  ];
-}
-
 export function mountCityTerrainControls(env) {
   const manager = env.cityTerrain,
     finder = createCityFinder(env.geography.items);
-  let last = -Infinity,
-    candidate = null,
-    since = 0,
-    automatic = null;
-  const dismissed = manager.autoDismissed;
+  let last = -Infinity;
   const open = () => {
     env.weather?.resourcePanel?.open();
     requestAnimationFrame(() =>
@@ -54,43 +39,6 @@ export function mountCityTerrainControls(env) {
       if (now - last < 500) return;
       last = now;
       setText('cityTerrainStatus', cityTerrainText(manager.status('main')));
-      if (!env.settings.cityTerrain || !env.settings.cityAutoLoad) {
-        automatic?.controller.abort();
-        automatic = null;
-        candidate = null;
-        return;
-      }
-      let hit = null;
-      for (const view of [...manager.views.values()].sort((a, b) => b.priority - a.priority)) {
-        const point = groundCenter(view.input);
-        if (point) {
-          hit = finder.nearest(point[1], point[0], getLanguage(), { maxDistanceKm: 12 });
-          if (hit) break;
-        }
-      }
-      const id = hit ? manager.idFor(hit) : null;
-      if (id !== candidate) {
-        automatic?.controller.abort();
-        automatic = null;
-        candidate = id;
-        since = now;
-      }
-      if (!hit || automatic || manager.cities.has(id) || dismissed.has(id) || now - since < 1500)
-        return;
-      const controller = new AbortController(),
-        job = { id, controller };
-      automatic = job;
-      manager
-        .addCity(hit, controller.signal, { automatic: true })
-        .catch((error) => {
-          if (!controller.signal.aborted) {
-            manager.lastError = error.message;
-            dismissed.add(id);
-          }
-        })
-        .finally(() => {
-          if (automatic === job) automatic = null;
-        });
     },
   };
 }
@@ -109,6 +57,8 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     <p data-city-storage class="resource-message" role="status"></p><div data-city-list></div>
     <div class="resource-card-actions"><button type="button" data-city-clear></button></div><p data-city-message class="resource-message" role="status"></p>`;
   parent.append(card);
+  const streaming = mountSurfaceStreamingControls(card, env);
+  card.insertBefore(streaming.root, card.querySelector('[data-city-search-label]'));
   const enabled = card.querySelector('#cityTerrainEnabled'),
     auto = card.querySelector('#cityAutoLoad'),
     search = card.querySelector('#cityTerrainSearch');
@@ -127,8 +77,8 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     render(true);
   };
   auto.onchange = () => {
-    env.settings.cityAutoLoad = auto.checked;
-    manager.autoEnabled = auto.checked;
+    env.settings.surfaceStreaming = auto.checked;
+    applySurfaceStreamingSettings(env);
     env.save();
     render(true);
   };
@@ -261,14 +211,15 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     last = now;
     busy = true;
     try {
+      streaming.refresh();
       enabled.checked = env.settings.cityTerrain;
-      auto.checked = env.settings.cityAutoLoad;
+      auto.checked = env.settings.surfaceStreaming;
       for (const [selector, text] of Object.entries({
-        '[data-city-title]': '城市高清地景',
-        '[data-city-enabled]': '显示已内置或已下载的城市地景',
-        '[data-city-auto]': '放大其它城市时自动加载（联网）',
+        '[data-city-title]': '地表卫星影像',
+        '[data-city-enabled]': '显示卫星影像与城市地景',
+        '[data-city-auto]': '随视野自动加载卫星影像',
         '[data-city-policy]':
-          '内置北京 40 × 40 km、西雅图 20 × 20 km。其它城市约 20 × 20 km；已保存的离线包不会自动删除。',
+          '漫游按视野加载并缓存卫星影像。内置与手动保存的城市包继续保留，可逐个管理。',
         '[data-city-search-label]': '搜索城市',
         '[data-city-clear]': '清理临时缓存',
       }))
@@ -305,12 +256,20 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
         writeText(row.progress, job ? `${t('下载中')} ${job.done}/${job.total || '—'}` : '');
         writeText(row.view, t('查看'));
         row.view.disabled = env.sim.missionId !== 'tiangong';
-        row.download.hidden = !!city.builtin;
+        row.download.hidden = !!city.builtin || !!city.streaming;
         row.download.disabled = !job && !!cache?.complete;
         writeText(row.download, t(job ? '取消下载' : cache?.complete ? '已离线保存' : '下载离线'));
         writeText(
           row.remove,
-          t(city.builtin ? (manager.disabled.has(city.id) ? '启用' : '停用') : '删除城市')
+          t(
+            city.builtin
+              ? manager.disabled.has(city.id)
+                ? '启用'
+                : '停用'
+              : city.streaming
+                ? '删除区域缓存'
+                : '删除城市'
+          )
         );
         writeText(row.summary, t('来源与拍摄日期'));
       }
@@ -322,7 +281,7 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
       const stats = await manager.cache.stats();
       writeText(
         card.querySelector('[data-city-storage]'),
-        `${t('城市缓存')} ${megabytes(stats.bytes)} / 512 MiB · ${t('GPU 上限')} 64 MiB${!stats.persistent ? ' · ' + t('当前环境无法持久保存') : ''}`
+        `${t('城市缓存')} ${megabytes(stats.bytes)} / ${mibLimit(stats.maxBytes)} MiB · ${t('GPU 上限')} ${mibLimit(manager.status().gpuBytes)} MiB${!stats.persistent ? ' · ' + t('当前环境无法持久保存') : ''}`
       );
       const preparing = [...manager.downloads.values()].filter(
         (job) => !manager.cities.has(job.id)
@@ -341,6 +300,7 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     render,
     dispose() {
       disposed = true;
+      streaming.dispose();
       card.remove();
     },
   };

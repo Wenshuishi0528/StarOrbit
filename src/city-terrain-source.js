@@ -74,14 +74,15 @@ export class CityTerrainSource {
   }
   async prepare(city, signal) {
     const center = [city.longitude, city.latitude],
-      bounds = cityBounds(center, 20);
+      bounds = city.streaming ? city.bounds : cityBounds(center, 20),
+      extentKm = city.streaming ? city.extentKm : 20;
     if (!bounds) throw Error('暂不支持极区或跨日期线的城市包');
     const url = new URL('https://stac.earthgenome.org/search');
     url.search = new URLSearchParams({
       collections: 'sentinel2-yearly-mosaics-v4',
       bbox: bounds.join(','),
       datetime: '2025-06-01T00:00:00Z',
-      limit: '30',
+      limit: '100',
     });
     const response = await fetch(url, { signal });
     if (!response.ok) throw Error('城市目录暂不可用，请稍后重试');
@@ -95,7 +96,8 @@ export class CityTerrainSource {
           .filter((id) => /^\d{2}[C-X][A-Z]{2}_2025-01-01_2026-01-01$/.test(id))
       ),
     ].sort();
-    if (!mosaics.length || mosaics.length > 9) throw Error('此城市没有可用的年度影像覆盖');
+    if (!mosaics.length || mosaics.length > (city.streaming ? 32 : 9))
+      throw Error('此城市没有可用的年度影像覆盖');
     const { pixelSizeMeters, samplingMetersPerPixel } = await this.request(
       { action: 'probe', mosaics, latitude: city.latitude },
       signal
@@ -106,13 +108,14 @@ export class CityTerrainSource {
       names: { zh: city.name, en: city.name },
       center,
       bounds,
-      extentKm: 20,
+      extentKm,
+      streaming: city.streaming === true,
       pixelSizeMeters,
       samplingMetersPerPixel,
       year: '2025',
       tileSize: 512,
       gutter: 4,
-      maxLevel: maxLevelFromExtent(20, pixelSizeMeters),
+      maxLevel: maxLevelFromExtent(extentKm, pixelSizeMeters),
       source: CITY_TERRAIN_SOURCE,
       mosaics,
     };

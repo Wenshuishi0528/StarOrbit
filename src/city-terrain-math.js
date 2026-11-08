@@ -332,3 +332,79 @@ export function planCityTiles(cities, view, { maxTiles = 40 } = {}) {
   }
   return [];
 }
+
+/** Shared conservative region visibility for stream discovery and mixed LOD. */
+export function visibleCityRegions(cities, input, { elevationKm = 0 } = {}) {
+  const view = makeView(input);
+  if (elevationKm > 0)
+    view.horizon += Math.acos(CITY_EARTH_RADIUS_KM / (CITY_EARTH_RADIUS_KM + elevationKm));
+  return cities.flatMap((meta) => {
+    const bounds = checkBounds(meta.bounds),
+      boundsCap = cap(bounds);
+    if (!visible(boundsCap, view)) return [];
+    const offset = subtract(boundsCap.center, view.eye),
+      depth = Math.max(0.01, dot(offset, view.forward) - boundsCap.radius);
+    const score = boundsCap.radius / (depth * view.pixelSlope);
+    return [{ meta, score }];
+  });
+}
+
+/** Mixed per-tile LOD: keep coarse coverage first, then spend the budget on the
+ * largest projected texel. A distant cell cannot force a nearby cell to blur.
+ * Ancestors stay resident while children arrive, avoiding holes during motion. */
+export function planStreamedCityTiles(
+  cities,
+  input,
+  { maxTiles = 64, rangeKm = 400, center = null } = {}
+) {
+  if (!Number.isInteger(maxTiles) || maxTiles < 0)
+    throw new RangeError('City tile budget must be a nonnegative integer');
+  if (!maxTiles) return [];
+  const view = makeView(input);
+  view.horizon += Math.acos(CITY_EARTH_RADIUS_KM / (CITY_EARTH_RADIUS_KM + 9));
+  const result = [],
+    leaves = [];
+  const priority = (node) => {
+    const tileCap = cap(tileBounds(node.meta, node.z, node.x, node.y));
+    let desired = desiredLevel(node.meta, tileCap, view);
+    if (
+      node.meta.streaming &&
+      center &&
+      angularDistance(direction(...center), tileCap.normal) * CITY_EARTH_RADIUS_KM -
+        tileCap.radius >
+        rangeKm
+    )
+      desired = 0;
+    const offset = subtract(tileCap.center, view.eye),
+      depth = Math.max(0.01, dot(offset, view.forward) - tileCap.radius);
+    const projected = tileCap.radius / (depth * view.pixelSlope);
+    return { desired, score: desired > node.z ? projected * (node.meta.streaming ? 1 : 2) : 0 };
+  };
+  const roots = visibleCityRegions(cities, input, { elevationKm: 9 }).sort(
+    (a, b) =>
+      Number(a.meta.streaming) - Number(b.meta.streaming) ||
+      b.score - a.score ||
+      a.meta.id.localeCompare(b.meta.id)
+  );
+  function add(meta, z, x, y) {
+    const node = { meta, z, x, y, ...priority({ meta, z, x, y }) };
+    result.push(tileDescriptor(meta, z, x, y, node.desired, z));
+    leaves.push(node);
+  }
+  for (const { meta } of roots.slice(0, maxTiles)) add(meta, 0, 0, 0);
+  while (result.length < maxTiles && leaves.length) {
+    leaves.sort((a, b) => b.score - a.score || a.meta.id.localeCompare(b.meta.id));
+    const node = leaves.shift();
+    if (node.score <= 0) break;
+    const children = [];
+    for (let dy = 0; dy < 2; dy++)
+      for (let dx = 0; dx < 2; dx++) {
+        const child = { z: node.z + 1, x: node.x * 2 + dx, y: node.y * 2 + dy };
+        if (visible(cap(tileBounds(node.meta, child.z, child.x, child.y)), view))
+          children.push(child);
+      }
+    if (result.length + children.length > maxTiles) continue;
+    for (const child of children) add(node.meta, child.z, child.x, child.y);
+  }
+  return result.sort((a, b) => a.z - b.z || a.cityId.localeCompare(b.cityId));
+}

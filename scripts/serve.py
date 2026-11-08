@@ -4,6 +4,8 @@ from pathlib import Path
 import urllib.request, urllib.error, urllib.parse, argparse, os, webbrowser, json, ssl, subprocess, tempfile, time
 from cloud_service import service as clouds
 from cloud_history_service import HistoryService
+from cloud_library_delete import remove_version
+from cloud_coverage import coverage_service
 from cloud_history import query as query_history
 from cloud_versions import catalog as cloud_catalog, library as cloud_library, local_image, known_checks
 import threading
@@ -51,6 +53,16 @@ class Handler(SimpleHTTPRequestHandler):
   if self.path=='/api/cloud/satcorps/update':
    self.send_json({'state':'error','error':'请在云图版本列表中刷新目录并选择下载；已取消逐日回查','retryable':False});return
   route=urllib.parse.urlparse(self.path)
+  if route.path=='/api/cloud/library/delete':
+   args=urllib.parse.parse_qs(route.query)
+   hosts={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
+   if self.headers.get('Host') not in hosts or self.headers.get('Sec-Fetch-Site')=='cross-site':self.send_error(403);return
+   if set(args)!={'name','sha256','provider','time'} or any(len(v)!=1 for v in args.values()):self.send_json({'error':'云图删除参数无效'},400);return
+   try:
+    with cloud_job_lock:self.send_json(remove_version(history,clouds,args['name'][0],args['sha256'][0],args['provider'][0],args['time'][0]))
+   except ValueError as error:self.send_json({'error':str(error)},409)
+   except OSError:self.send_json({'error':'云图文件删除失败，请刷新图库后重试'},500)
+   return
   if route.path=='/api/cloud/history/cancel':
    args=urllib.parse.parse_qs(route.query);self.send_json({'cancelled':history.cancel(args.get('id',[''])[0])});return
   if route.path=='/api/cloud/legacy-cancel':
@@ -91,10 +103,19 @@ class Handler(SimpleHTTPRequestHandler):
    if parsed.path=='/api/cloud/library':self.send_json({'items':cloud_library(clouds.cache)});return
    if parsed.path=='/api/cloud/versions':
     args=urllib.parse.parse_qs(parsed.query)
-    try:self.send_json(known_checks(cloud_catalog(args.get('month',[''])[0],args.get('date',[None])[0],args.get('force',['0'])[0]=='1'),clouds.cache))
+    try:
+     force=args.get('force',['0'])[0]=='1'
+     result=known_checks(cloud_catalog(args.get('month',[''])[0],args.get('date',[None])[0],force),clouds.cache)
+     self.send_json(coverage_service(clouds.cache).submit(result,force=force))
     except ValueError as error:self.send_json({'error':str(error)},400)
     except DownloadError as error:self.send_json({'error':{'code':'UPSTREAM_'+error.code.upper(),'message':'NASA 目录查询失败：'+str(error)+'。已保存云图仍可使用。','retryable':error.retryable}},502)
     except Exception:self.send_json({'error':'官方目录暂不可访问；已保存云图仍可使用，请稍后重试'},502)
+    return
+   if parsed.path=='/api/cloud/coverage':
+    args=urllib.parse.parse_qs(parsed.query)
+    if not set(args)<={'month','date'} or any(len(v)!=1 for v in args.values()):self.send_json({'error':'云图覆盖查询参数无效'},400);return
+    try:self.send_json(coverage_service(clouds.cache).snapshot(args.get('month',[''])[0],args.get('date',[None])[0]))
+    except ValueError as error:self.send_json({'error':str(error)},400)
     return
    if parsed.path=='/api/cloud/library/image':
     args=urllib.parse.parse_qs(parsed.query);data=local_image(clouds.cache,args.get('name',[''])[0],args.get('sha256',[''])[0],args.get('preview',['0'])[0]=='1')

@@ -225,6 +225,7 @@ export function planElevationTiles(view, options = {}) {
     radiusKm = ELEVATION_EARTH_RADIUS_KM,
     minHeightMeters = -12000,
     maxHeightMeters = 12000,
+    rangeKm = Infinity,
   } = options;
   checkLevel(minLevel);
   checkLevel(maxLevel);
@@ -239,6 +240,7 @@ export function planElevationTiles(view, options = {}) {
     !Number.isFinite(minHeightMeters) ||
     !Number.isFinite(maxHeightMeters) ||
     minHeightMeters > maxHeightMeters ||
+    !(rangeKm > 0) ||
     !(radiusKm + minHeightMeters / 1000 > 0)
   ) {
     throw new RangeError('Invalid elevation tile planning limits');
@@ -252,7 +254,16 @@ export function planElevationTiles(view, options = {}) {
   if (frame.eyeRadius <= frame.minimumRadius) {
     return { tiles: [], level: null, reason: 'inside-earth' };
   }
-  const centerDistance = rayDistance(frame, 0, 0, frame.maximumRadius);
+  // Below the tallest mountain envelope, its near intersection lies behind
+  // the eye. Use the nominal/inner surface for screen error instead; the outer
+  // shell remains solely a conservative visibility bound for raised ridges.
+  const sampleRadius = Math.min(
+    frame.maximumRadius,
+    Math.max(frame.minimumRadius, frame.eyeRadius - 0.001),
+    radiusKm
+  );
+  if (Number.isFinite(rangeKm)) frame.horizon = Math.min(frame.horizon, rangeKm / radiusKm);
+  const centerDistance = rayDistance(frame, 0, 0, sampleRadius);
   if (centerDistance !== null) {
     const center = frame.eye.map((value, i) => value + centerDistance * frame.forward[i]);
     if (Math.abs(Math.asin(clamp(center[2] / Math.hypot(...center), -1, 1)) / DEG) > maxLatitude) {
@@ -262,7 +273,7 @@ export function planElevationTiles(view, options = {}) {
   const distances = [];
   for (const v of [-1, 0, 1]) {
     for (const u of [-1, 0, 1]) {
-      const distance = rayDistance(frame, u, v, frame.maximumRadius);
+      const distance = rayDistance(frame, u, v, sampleRadius);
       if (distance !== null) distances.push(distance);
     }
   }
@@ -270,7 +281,7 @@ export function planElevationTiles(view, options = {}) {
   // of terrain can still enter between rays. The traversal resolves that case.
   const distance = distances.length
     ? Math.min(...distances)
-    : Math.max(1, -dot(frame.eye, frame.forward));
+    : Math.max(0.001, frame.eyeRadius - radiusKm);
   const metresPerPixel = (2000 * distance * frame.tanY) / frame.height;
   const desired = clamp(
     Math.ceil(

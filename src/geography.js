@@ -51,7 +51,7 @@ const lineFragment = `uniform vec3 tint;uniform float opacity;varying float hori
 void main(){float a=opacity*smoothstep(0.,40.,horizon);if(a<.005)discard;gl_FragColor=vec4(tint,a);
 #include <colorspace_fragment>
 }`;
-function lineGeometry(paths) {
+function lineGeometry(paths, surfaceHeight = null) {
   const points = [];
   for (const path of paths)
     for (let i = 1; i < path.length; i++) {
@@ -60,15 +60,19 @@ function lineGeometry(paths) {
       const steps = Math.max(1, Math.ceil(a.angleTo(b) / THREE.MathUtils.degToRad(0.5)));
       // Spherical subdivision keeps long simplified segments above Earth's surface.
       for (let j = 0; j < steps; j++)
-        for (const n of [j, j + 1])
+        for (const n of [j, j + 1]) {
+          const direction = a
+            .clone()
+            .lerp(b, n / steps)
+            .normalize();
+          const lon = (Math.atan2(direction.y, direction.x) * 180) / Math.PI;
+          const lat = (Math.asin(direction.z) * 180) / Math.PI;
           points.push(
-            ...a
-              .clone()
-              .lerp(b, n / steps)
-              .normalize()
-              .multiplyScalar(R)
+            ...direction
+              .multiplyScalar(surfaceHeight ? 6371 + surfaceHeight(lon, lat) / 1000 + 0.02 : R)
               .toArray()
           );
+        }
     }
   return new THREE.BufferGeometry().setAttribute(
     'position',
@@ -76,8 +80,9 @@ function lineGeometry(paths) {
   );
 }
 export class Geography {
-  constructor(env) {
+  constructor(env, options = {}) {
     this.env = env;
+    this.options = options;
     this.group = new THREE.Group();
     this.group.visible = false;
     env.earth.add(this.group);
@@ -110,7 +115,9 @@ export class Geography {
       new THREE.BufferGeometry(),
       new THREE.ShaderMaterial({
         uniforms: this.uniforms,
-        vertexShader: vertex,
+        vertexShader: this.options.worldView
+          ? vertex.replace('smoothstep(0.,35.,horizon)', 'smoothstep(0.,.003,horizon)')
+          : vertex,
         fragmentShader: fragment,
         transparent: true,
         depthTest: false,
@@ -142,7 +149,9 @@ export class Geography {
           new THREE.ShaderMaterial({
             uniforms,
             vertexShader: lineVertex,
-            fragmentShader: lineFragment,
+            fragmentShader: this.options.worldView
+              ? lineFragment.replace('smoothstep(0.,40.,horizon)', 'smoothstep(0.,.003,horizon)')
+              : lineFragment,
             transparent: true,
             depthTest: false,
             depthWrite: false,
@@ -155,7 +164,7 @@ export class Geography {
         this.lines[key] = line;
       }
       this.lines[key].geometry.dispose();
-      this.lines[key].geometry = lineGeometry(data.lines[key][tier]);
+      this.lines[key].geometry = lineGeometry(data.lines[key][tier], this.options.surfaceHeight);
     }
   }
   ensureAtlas(language) {
@@ -236,7 +245,7 @@ export class Geography {
     const s = this.env.settings,
       now = performance.now() / 1000,
       language = getLanguage();
-    this.updateLocation(q, now, language);
+    if (!this.options.worldView) this.updateLocation(q, now, language);
     this.group.visible = !!s.geographyEnabled && !!q;
     const follow = this.env.sim.view === 'follow',
       records = this.env.sim.shadowCache.records;
@@ -251,8 +260,9 @@ export class Geography {
     if (!this.group.visible) return;
     this.ensureGeometry();
     this.ensureAtlas(language);
-    const width = this.env.api.stage.clientWidth,
-      height = this.env.api.stage.clientHeight,
+    const viewport = this.options.viewport?.() || this.env.api.stage;
+    const width = viewport.clientWidth,
+      height = viewport.clientHeight,
       earthQ = this.env.earth.quaternion;
     const localCamera = camera.position.clone().applyQuaternion(earthQ.clone().invert());
     this.uniforms.localCamera.value.copy(localCamera);
@@ -275,7 +285,11 @@ export class Geography {
         : key === 'rivers'
           ? s.geoRivers
           : s.geoLakes;
-    const hudKey = ['telemetry', 'orbitMinimap', 'eventTimeline', 'orbitEventDetail']
+    const hudKey = (
+      this.options.worldView
+        ? []
+        : ['telemetry', 'orbitMinimap', 'eventTimeline', 'orbitEventDetail']
+    )
       .map((id) => {
         const el = document.getElementById(id);
         return [el.hidden, el.className, el.style.display].join(',');
@@ -326,11 +340,13 @@ export class Geography {
       }));
     }
     for (const p of this.items) {
+      if (this.options.surfaceHeight)
+        p.position.setLength(6371 + this.options.surfaceHeight(p.lon, p.lat) / 1000 + 0.02);
       const city = p.kind === 'capital' || p.kind === 'city';
       if (
         !(city ? cityLabelEnabled(p, s) : s[kinds[p.kind]]) ||
         p.rank > maxRank ||
-        p.position.dot(localCamera) / R <= 6371
+        p.position.dot(localCamera) / p.position.length() <= 6371
       )
         continue;
       const world = p.position.clone().applyQuaternion(earthQ),
@@ -357,8 +373,10 @@ export class Geography {
     candidates.sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
     this.stats.candidates = candidates.length;
     const stageBox = this.env.api.stage.getBoundingClientRect(),
-      reserved = [];
-    for (const id of ['telemetry', 'orbitMinimap', 'eventTimeline', 'orbitEventDetail']) {
+      reserved = this.options.reserved?.() || [];
+    for (const id of this.options.worldView
+      ? []
+      : ['telemetry', 'orbitMinimap', 'eventTimeline', 'orbitEventDetail']) {
       const el = document.getElementById(id),
         box = el.getBoundingClientRect();
       if (!el.hidden && box.width && box.height && getComputedStyle(el).visibility !== 'hidden')
@@ -394,6 +412,15 @@ export class Geography {
     if (signature === this.geometryKey) return;
     this.geometryKey = signature;
     this.upload();
+  }
+  dispose() {
+    this.group.removeFromParent();
+    this.group.traverse((object) => {
+      object.geometry?.dispose();
+      object.material?.dispose();
+    });
+    this.texture?.dispose();
+    this.shown.clear();
   }
   upload() {
     const arrays = { position: [], offset: [], uv: [], tint: [], lifetime: [] },

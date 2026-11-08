@@ -91,8 +91,8 @@ test('main, scope and photo share one bounded atlas and photo waits for tile fad
     assert.equal(calls.length, status.requested, 'shared consumers must not decode duplicates');
     assert.ok(calls.slice(1).every((call) => call.tile.z >= calls[0].tile.z));
     assert.equal(manager.texture.image.depth, CITY_GPU_LAYERS);
-    assert.equal(status.gpuBytes, 64 * 1024 * 1024);
-    assert.equal(status.cpuBytes, 48 * 1024 * 1024);
+    assert.equal(status.gpuBytes, (CITY_GPU_LAYERS * 512 * 512 * 4 * 4) / 3);
+    assert.equal(status.cpuBytes, CITY_GPU_LAYERS * 512 * 512 * 4);
     for (const id of ['main', 'scope', 'photo']) {
       const uniforms = manager.uniforms(id);
       assert.equal(uniforms.cityMap.value, manager.texture);

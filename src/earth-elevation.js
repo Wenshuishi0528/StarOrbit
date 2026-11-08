@@ -15,7 +15,7 @@ export const ELEVATION_DISK_BYTES = 128 * 1024 * 1024;
 export const ELEVATION_GEOMETRY_BYTES = 48 * 1024 * 1024;
 export const ELEVATION_CPU_BYTES = 96 * 1024 * 1024;
 const GRID = 129,
-  MAX_TILES = 48,
+  MAX_TILES = 384,
   FADE_MS = 500;
 const PATCH_VERTICES = GRID * GRID + 4 * (GRID - 1);
 const PATCH_INDICES = (GRID - 1) ** 2 * 6 + 4 * (GRID - 1) * 6;
@@ -139,6 +139,9 @@ export class EarthElevation {
     this.pending = new Map();
     this.wanted = new Map();
     this.failures = new Map();
+    this.streamingRangeKm = 160;
+    this.streamingPaused = false;
+    this.pausedViews = new Map();
     this.enabled = false;
     this.disposed = false;
     this.generation = 0;
@@ -161,12 +164,14 @@ export class EarthElevation {
           new Blob([await response.arrayBuffer()], { type: 'application/gzip' })
         );
         if (buffer.byteLength !== meta.width * meta.height * 2) throw Error('全球高程数据长度不符');
-        return elevationBaseMesh(new Int16Array(buffer), {
+        const rasterHeights = new Int16Array(buffer);
+        const mesh = elevationBaseMesh(rasterHeights, {
           width: meta.width,
           height: meta.height,
           columns: 512,
           rows: 256,
         });
+        return { ...mesh, rasterHeights, rasterWidth: meta.width, rasterHeight: meta.height };
       });
   }
   setEnabled(enabled) {
@@ -226,21 +231,43 @@ export class EarthElevation {
         if (generation === this.generation) this.baseTask = null;
       });
   }
+  configureStreaming({ rangeKm = this.streamingRangeKm } = {}) {
+    const next = Math.max(20, Math.min(400, Number(rangeKm) || 160));
+    if (next === this.streamingRangeKm) return;
+    this.streamingRangeKm = next;
+    this.resumeStreaming();
+    for (const [id, state] of [...this.views])
+      if (!state.dataOnly) this.setView(id, state.view, state.priority, true);
+  }
+  resumeStreaming() {
+    this.streamingPaused = false;
+    this.pausedViews.clear();
+    this.reconcile();
+  }
+  movedSincePause(id, view) {
+    const previous = this.pausedViews.get(id)?.view;
+    if (!previous) return true;
+    const displacement = Math.hypot(...view.eyeKm.map((x, i) => x - previous.eyeKm[i]));
+    const direction = view.forward.reduce((n, x, i) => n + x * previous.forward[i], 0);
+    return displacement > 0.2 || direction < 0.99 || Math.abs(view.fovY - previous.fovY) > 5;
+  }
   setView(id, view, priority = 1, force = false) {
     if (!this.enabled || !view) {
       this.release(id);
       return;
     }
+    if (this.streamingPaused && this.movedSincePause(id, view)) this.resumeStreaming();
     const old = this.views.get(id),
       now = this.now();
     if (!force && old && now - old.checked < 250) return;
     const plan = planElevationTiles(view, {
       maxTiles: 12,
-      minLevel: 7,
+      minLevel: Math.hypot(...view.eyeKm) - 6371 < 200 && this.streamingRangeKm > 220 ? 6 : 7,
       maxLevel: 12,
       gridSize: GRID,
       minHeightMeters: -500,
       maxHeightMeters: 9000,
+      rangeKm: Math.hypot(...view.eyeKm) - 6371 < 200 ? this.streamingRangeKm : Infinity,
     });
     const signature = plan.tiles
       .map((t) => t.key)
@@ -269,9 +296,42 @@ export class EarthElevation {
     });
     this.reconcile();
   }
+  // Contact/local-surface consumers share the same cache, source queue and budget.
+  // They need measured heights, not additional globe display geometries.
+  setSamplingTiles(id, tiles, priority = 4) {
+    if (!this.enabled || !tiles?.length) {
+      this.release(id);
+      return;
+    }
+    const signature = tiles
+      .map((tile) => tile.key)
+      .sort()
+      .join('|');
+    const previous = this.views.get(id);
+    const order = tiles.map((tile) => tile.key).join('|');
+    if (previous?.signature === signature && previous.dataOnly && previous.order === order) return;
+    if (previous) {
+      previous.stale = true;
+      for (const record of previous.display || []) record.geometry.dispose();
+    }
+    this.views.set(id, {
+      dataOnly: true,
+      order,
+      priority,
+      signature,
+      plan: { tiles, level: null },
+      checked: this.now(),
+      display: [],
+    });
+    this.reconcile();
+  }
   reconcile() {
     if (!this.enabled || this.disposed) return;
     const wanted = new Map();
+    if (this.streamingPaused) {
+      this.wanted = wanted;
+      return;
+    }
     for (const view of [...this.views.values()].sort((a, b) => b.priority - a.priority))
       for (const tile of view.plan.tiles)
         if (wanted.size < MAX_TILES || wanted.has(tile.key)) wanted.set(tile.key, tile);
@@ -418,6 +478,7 @@ export class EarthElevation {
     clearTimeout(this.buildTimer);
     let nextFade = Infinity;
     for (const [id, state] of [...this.views].sort((a, b) => b[1].priority - a[1].priority)) {
+      if (state.dataOnly) continue;
       const tiles = state.plan.tiles;
       if (tiles.some((tile) => !this.entries.has(tile.key) && !this.failures.has(tile.key)))
         continue;
@@ -539,18 +600,21 @@ export class EarthElevation {
       records = tiles.map((t) => this.entries.get(t.key));
     const ready = records.filter((e) => e?.valid).length,
       fallback = records.filter((e) => e && !e.valid).length;
-    const displayed = !state || state.displayKey === this.viewDataKey(state);
+    const displayed = !state || state.dataOnly || state.displayKey === this.viewDataKey(state);
     return {
       enabled: this.enabled,
       baseReady: !!this.base,
       requested: tiles.length,
+      streamingPaused: this.streamingPaused,
+      streamingRangeKm: this.streamingRangeKm,
       ready,
       fallback,
       loading:
-        !!this.baseTask ||
-        !!state?.building ||
-        (!!state && !displayed && !state.buildFailed) ||
-        tiles.some((t) => this.pending.has(t.key)),
+        !this.streamingPaused &&
+        (!!this.baseTask ||
+          !!state?.building ||
+          (!!state && !displayed && !state.buildFailed) ||
+          tiles.some((t) => this.pending.has(t.key))),
       complete: !!this.base && ready === tiles.length && displayed && !state?.building,
       error: this.lastError,
       gpuBytes:
@@ -595,10 +659,23 @@ export class EarthElevation {
     }
     this.reconcile();
   }
-  async clearCache() {
+  async clearCache({ pauseUntilMove = false } = {}) {
     const enabled = this.enabled;
+    const pausedViews = new Map(
+      [...this.views].map(([id, state]) => [
+        id,
+        {
+          view: state.view
+            ? { ...state.view, eyeKm: [...state.view.eyeKm], forward: [...state.view.forward] }
+            : null,
+          signature: state.signature,
+        },
+      ])
+    );
     this.setEnabled(false);
     const request = this.enableRequest;
+    this.streamingPaused = pauseUntilMove;
+    this.pausedViews = pauseUntilMove ? pausedViews : new Map();
     try {
       return await this.cache.clear();
     } finally {

@@ -503,7 +503,8 @@ export class StarChart {
     const earth = camera.position.clone().negate(),
       moon = this.env.moon.mesh.position.clone().sub(camera.position),
       hasMoon = this.env.moon.mesh.visible;
-    this.setDisc(this.uniforms.earthDisc.value, earth, EARTH);
+    if (this.env.skyOnly) this.uniforms.earthDisc.value.set(0, 0, 0, 2);
+    else this.setDisc(this.uniforms.earthDisc.value, earth, EARTH);
     if (hasMoon) this.setDisc(this.uniforms.moonDisc.value, moon, MOON);
     else this.uniforms.moonDisc.value.set(0, 0, 0, 2);
     const sim = this.env.sim,
@@ -594,6 +595,7 @@ export class StarChart {
       language,
       focusTargetId,
       showMoon: hasMoon,
+      occludeBodies: !this.env.skyOnly,
       blocked: (direction) =>
         (terrainEye && this.env.elevation.skyOccluded(terrainEye, earthFixed(direction), 'main')) ||
         this.hiddenBySpacecraft(new THREE.Vector3(...direction)),

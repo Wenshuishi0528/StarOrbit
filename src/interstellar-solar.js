@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createSharedWorldEarth } from './shared-world-earth.js';
 import { AU } from './orbit.js';
 import { AU_LY, LY_KM } from './interstellar-math.js';
 import { SOLAR_WORLD_BODIES, solarWorldState, solarWorldBodyAxes } from './solar-world-math.js';
@@ -6,7 +7,10 @@ import { solarSurfaceShaders } from './solar-world.js';
 
 // The same geometric ephemerides, radii, surface shader and borrowed Earth/Moon
 // textures as the Solar System view. No additional texture requests or renderer.
-export function createInterstellarSolar({ environment, scene }) {
+export function createInterstellarSolar({ environment, scene, renderer }) {
+  const sharedEarth = renderer
+    ? createSharedWorldEarth({ environment, renderer, scene, id: 'interstellar-earth' })
+    : null;
   const root = new THREE.Group();
   scene.add(root);
   const geometry = new THREE.SphereGeometry(1, 40, 24),
@@ -61,6 +65,28 @@ export function createInterstellarSolar({ environment, scene }) {
         mesh.material.uniforms.textured.value = !!texture && texture.image?.width > 1;
       }
     },
+    renderEarth(camera, time, width, height) {
+      if (!sharedEarth) return;
+      const earth = bodies.get('Earth');
+      sharedEarth.group.visible = root.visible;
+      if (!root.visible) {
+        environment.elevation.release('interstellar-earth');
+        environment.cityTerrain.setView('interstellar-earth', null);
+        return;
+      }
+      earth.visible = false;
+      sharedEarth.update({
+        time,
+        camera,
+        earthPosition: earth.position.toArray(),
+        unitsPerKm: 1 / AU,
+        width,
+        height,
+      });
+    },
+    renderEarthEffects() {
+      sharedEarth?.renderEffects();
+    },
     keepOutside(position) {
       if (!root.visible) return;
       for (const body of states) {
@@ -74,6 +100,7 @@ export function createInterstellarSolar({ environment, scene }) {
       }
     },
     dispose() {
+      sharedEarth?.dispose();
       root.removeFromParent();
       geometry.dispose();
       for (const mesh of bodies.values()) mesh.material.dispose();
