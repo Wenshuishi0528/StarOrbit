@@ -1,6 +1,6 @@
 # 星轨文档导航
 
-**当前文档基线：本地 v1.31，增加地表漫游与联动三维太阳系。** 先看[使用手册](../使用说明.md#地表观测与太阳系)、[计算口径](world-explorer.md)和[验证总览](verification.md)。
+**当前文档基线：本地 v1.33，加入星际穿梭，延续天体观测、地表与太阳系。** 先看[使用手册](../使用说明.md#星际穿梭)、[星际数据与性能](interstellar.md)和[验证总览](verification.md)。
 
 [中文介绍](../README.md) · [English overview](../README.en.md) · [使用手册](../使用说明.md) · [更新记录](../CHANGELOG.md)
 

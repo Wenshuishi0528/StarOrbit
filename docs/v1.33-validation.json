@@ -1,0 +1,175 @@
+{
+  "version": "1.33",
+  "status": "passed",
+  "scope": "SO-STELLAR-01 local implementation, full regression, targeted final checks and Chrome interaction",
+  "date": "2026-11-08T11:21:17.723233+00:00",
+  "sourceBase": "e1be6d86cb05c70fd15cede8588edb289ea1fe7b",
+  "workingTree": "uncommitted v1.33 changes on sourceBase",
+  "environment": {
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.12.7"
+  },
+  "commands": {
+    "npm test": {
+      "exitCode": 0,
+      "log": "output/release133/tests.log"
+    },
+    "node tests/interstellar.mjs": {
+      "exitCode": 0,
+      "log": "output/release133/interstellar-tests.log"
+    },
+    "npm run test:docs": {
+      "exitCode": 0,
+      "log": "output/release133/docs.log"
+    },
+    "npm run build": {
+      "exitCode": 0,
+      "log": "output/release133/build.log"
+    },
+    "npm run build:web": {
+      "exitCode": 0,
+      "log": "output/release133/build-web.log"
+    }
+  },
+  "browser": {
+    "checks": [
+      "19286 reliable-distance stars",
+      "Sirius travel arrives outside measured sphere",
+      "Paused clock remains independent of travel",
+      "Look back at Sun selects physical Sun",
+      "Big Dipper uses all six physical segments",
+      "Side view moves observer into space",
+      "Waypoint restores spatial coordinates",
+      "Waypoint restores culture formation",
+      "H advances observer",
+      "Space brakes immediately",
+      "Typing does not move camera",
+      "翼宿 searchable",
+      "翼火蛇 searchable",
+      "Sirius searchable",
+      "HIP 32349 searchable",
+      "Star scene stays within three draw calls",
+      "PNG photo generated",
+      "Four view cycles release GPU geometry and preserve shared textures",
+      "Closing restores orbit controls",
+      "Solar and interstellar round trip preserves camera position",
+      "Solar round trip preserves camera orientation",
+      "No WebGL error"
+    ],
+    "entryMs": 46.30000001192093,
+    "initial": {
+      "geometries": 843,
+      "textures": 13
+    },
+    "cycles": [
+      {
+        "geometries": 843,
+        "textures": 13
+      },
+      {
+        "geometries": 843,
+        "textures": 13
+      },
+      {
+        "geometries": 843,
+        "textures": 13
+      },
+      {
+        "geometries": 843,
+        "textures": 13
+      }
+    ],
+    "draw": {
+      "frame": 2662,
+      "calls": 3,
+      "triangles": 960,
+      "points": 19287,
+      "lines": 6
+    },
+    "photo": {
+      "bytes": 417269,
+      "width": 2476,
+      "height": 1702,
+      "type": "image/png"
+    },
+    "frames": {
+      "samples": 120,
+      "medianMs": 16.69999999999709,
+      "p95Ms": 18.600000000002183
+    },
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+  },
+  "artifacts": {
+    "StarOrbit.html": {
+      "bytes": 497826745,
+      "sha256": "e9390b9ceb779938d6294b84720ac39494ae8358711b1eb45d69460ebe0f7da6"
+    },
+    "dist-local/index.html": {
+      "bytes": 582990,
+      "sha256": "3049335d9af85350541022b648def484d102c7db721a21c4a12e312279d6aefa"
+    },
+    "dist-local/assets/app.bundle-5c7c171e818b506d.js": {
+      "bytes": 20100078,
+      "sha256": "5c7c171e818b506dea34c68da95e965c17f31a8ddc4b379f55884d3bc91387bd"
+    },
+    "dist/index.html": {
+      "bytes": 582990,
+      "sha256": "eb811d8c755f4da78dab1bdc24249a489b06ee66fb5cd12db8991c0cd093ce80"
+    },
+    "dist/assets/app.bundle-cf59c75a7bc0d3c7.js": {
+      "bytes": 20099959,
+      "sha256": "cf59c75a7bc0d3c7e30c8032798f482b7483414cf2d9e00cd85e5306941e8bad"
+    }
+  },
+  "sourceFiles": {
+    "src/interstellar-catalog.js": "c5db766791f016299f566719065ff1e9739dc50beeb4eeeeaa7e2f704e26ee75",
+    "src/interstellar-input.js": "c123ad308dbb53bd49c3405539f15174ff2e096eb1bc5cb8da33853e9214b445",
+    "src/interstellar-math.js": "04ccd99f10c2c3c8818b9bf3d5ca187cf252dd7f7c2f38d8f3f7ec4ee8596bde",
+    "src/interstellar-solar.js": "b3a7cbb82a61afd64fa8211039fa17adde35147be9d1fb3aed138b7a194984bd",
+    "src/interstellar-world.js": "42092607bfefef893c530322bd861e862aeb3995815da803fcda58dcfc5ad0ef",
+    "src/solar-world.js": "8f2f2d28571e856e0e94c4e8ed408185b76dfff2715216c995a3332c3adba0b2",
+    "src/world-explorer.js": "ebb75b81eaa12722ee72f7df25fc0e0888519ff67e2d14be780252b24b700cc8"
+  },
+  "delivery": {
+    "github": "not-pushed",
+    "web": "built locally; not deployed",
+    "portableZip": "not-created",
+    "desktop": {
+      "status": "synced and verified",
+      "installed": {
+        "version": "1.33",
+        "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+        "filesSynced": 35,
+        "filesChecked": 3845,
+        "oldContentAddressedAssetsRetained": true,
+        "backup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release133/runtime-backup",
+        "htmlSHA256": "e9390b9ceb779938d6294b84720ac39494ae8358711b1eb45d69460ebe0f7da6",
+        "entrySHA256": "3049335d9af85350541022b648def484d102c7db721a21c4a12e312279d6aefa",
+        "launcherRoot": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件"
+      },
+      "served": {
+        "version": "1.33",
+        "url": "http://127.0.0.1:8771/StarOrbit.html",
+        "entrySHA256": "3049335d9af85350541022b648def484d102c7db721a21c4a12e312279d6aefa",
+        "script": "assets/app.bundle-5c7c171e818b506d.js",
+        "scriptSHA256": "5c7c171e818b506dea34c68da95e965c17f31a8ddc4b379f55884d3bc91387bd",
+        "entryAndBundleMatch": true
+      },
+      "browserSmoke": {
+        "version": "v1.33",
+        "ready": true,
+        "stars": 19286,
+        "dipperSegments": 6,
+        "consoleErrors": 0,
+        "url": "http://127.0.0.1:8771/StarOrbit.html"
+      }
+    }
+  },
+  "limits": [
+    "Static J2000 stellar positions; no proper-motion or radial-velocity extrapolation",
+    "Only qualified Hipparcos subset, not a complete local stellar census",
+    "Measured-radius spheres for Sun and Sirius A; other stars remain points",
+    "Milky Way image fades between 10 and 100 ly; no Galactic volume model",
+    "Browser performance sample is local Chrome, not a cross-device guarantee; WebKit and mobile not run"
+  ]
+}

@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.33 — 2026-11-08 · 本机版 / Local build
+
+新增星际穿梭，共用世界视图、时钟、操控键与拍照；19,286颗可靠距离恒星支持自由加减速、搜索前往、回望太阳、中西星图侧视和命名航点。相对坐标、批量星点和共享纹理控制精度与资源占用；太阳／天狼星A近景使用实测半径，太阳系附近沿用几何星历。
+
+**English:** Added interstellar travel with 19,286 distance-qualified stars, shared world navigation and photography, free movement, star travel, looking back at the Sun, spatial cultural constellations and saved waypoints. Split relative coordinates, batched points and borrowed textures bound resource use. The Sun and Sirius A use measured radii; nearby planets share the geometric ephemerides.
+
+[数据与性能 / Data and performance](docs/interstellar.md) · [验证 / Validation](docs/verification.md)
+
 ## v1.32 — 2026-11-08 · 本机版 / Local build
 
 新增统一天体观测入口，火星真实地形与可见光／昼夜热红外／高程／地质图、地名与着陆点、地面望远镜视角；地球复用昼夜云图与地形，可选点进入地表。加入20颗主要卫星目录与母星系统、按需加载JPL星历子集。支持事件查询、同视场日期与图层对比，以及带时间地点和来源的照片。

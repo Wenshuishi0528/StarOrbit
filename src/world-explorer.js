@@ -6,6 +6,8 @@ import { createGroundWorldInput } from './ground-world-input.js';
 import { createGroundSurface } from './ground-world-surface.js';
 import { createGroundSky } from './ground-world-sky.js';
 import { createSolarWorld } from './solar-world.js';
+import { createInterstellarWorld } from './interstellar-world.js';
+import { AU_LY } from './interstellar-math.js';
 import { lastObserver } from './observer-settings.js';
 import { dateTimeText, dateTimeValue, stepDateTime } from './date-time-input.js';
 import { t, getLanguage, onLanguageChange, errorText } from './i18n.js';
@@ -63,8 +65,8 @@ export function installWorldExplorer(sim) {
   const host = document.createElement('section');
   host.className = 'world-explorer';
   host.hidden = true;
-  host.setAttribute('aria-label', t('地表与太阳系'));
-  host.innerHTML = `<header class="world-bar"><strong>STARORBIT · 世界</strong><button data-mode="ground">地表观测</button><button data-mode="solar">太阳系</button><label>UTC+8 <input data-time aria-label="世界时间（UTC+8）" placeholder="YYYY-MM-DD HH:mm:ss"></label><button data-jump>跳转</button><button data-play>暂停</button><select data-speed aria-label="时间速度"><option value="1">1×</option><option value="60">1 分钟/秒</option><option value="3600">1 小时/秒</option><option value="86400">1 天/秒</option><option value="-3600">倒放 1 小时/秒</option></select><button data-now>现在</button><button data-photo>拍照</button><button data-exit>返回轨道</button></header><div class="world-stage"><div class="world-labels"></div><button class="world-panel-toggle">地点与画面</button><aside class="world-ground-panel"><h3>地表观测</h3><label>城市或地理名称</label><div class="pair"><input data-search aria-label="城市或地理名称" placeholder="北京、珠穆朗玛峰…"><button data-search-online>搜索</button></div><div class="world-results"></div><details><summary>坐标与地图选点</summary><div class="pair"><div><label>纬度 °</label><input data-lat type="number" min="-90" max="90" step=".00001"></div><div><label>经度 °</label><input data-lon type="number" min="-180" max="180" step=".00001"></div></div><button data-locate>到达此处</button><canvas data-map width="560" height="280" aria-label="点击世界地图选择地点"></canvas></details><label>移动方式</label><select data-movement><option value="grounded">贴地漫游</option><option value="free">自由升降</option></select><label data-height-label>眼高（米）</label><input data-height type="number" value="1.7" step=".1" min=".2" max="1000"><label>移动速度</label><select data-move-speed><option value="slow">慢速 · 2 m/s</option><option value="normal" selected>常速 · 25 m/s</option><option value="fast">快速 · 500 m/s</option></select><div class="pair" style="margin-top:12px"><button data-save>收藏地点</button><select data-bookmarks aria-label="收藏地点"><option value="">我的地点</option></select></div><details open><summary>天空与标注</summary><label>观察效果</label><select data-appearance><option value="natural">自然天空</option><option value="galaxy">银河增强</option><option value="dss">DSS 巡天影像</option></select><label>星空体系</label><select data-culture><option value="western">西方星座</option><option value="chinese">中国星官</option></select><label class="check"><input type="checkbox" data-lines checked>星图连线</label><label class="check"><input type="checkbox" data-names checked>星空名称</label><label class="check"><input type="checkbox" data-art>星空插画</label><label>插画亮度</label><input data-art-brightness type="range" min="0" max="2" step=".05" value="1"><label class="check"><input type="checkbox" data-grid>赤道坐标网</label><label class="check"><input type="checkbox" data-ecliptic>黄道</label><label>视场</label><input data-fov type="range" min="5" max="100" value="65"></details><details><summary>操控与数据</summary><p>点击画面后操作：H / N 前后，J / L 左右，K 上升、I 下降；W 低头、S 抬头，A / D 转向。拖动鼠标看向四周，滚轮缩放。持续按住平滑加速，松开减速。</p><p data-surface-status></p><p>地形：ETOPO 2022 / Copernicus GLO-30。银河与 DSS 为历史影像，日月行星按所选时刻显示。</p><p>地名：Natural Earth / 天地图；在线搜索：Photon · © OpenStreetMap contributors。</p></details><p data-message role="status"></p></aside><div class="world-hud"></div><div class="world-credit"></div></div>`;
+  host.setAttribute('aria-label', t('地表、太阳系与星际'));
+  host.innerHTML = `<header class="world-bar"><strong>STARORBIT · 世界</strong><button data-mode="ground">地表观测</button><button data-mode="solar">太阳系</button><button data-mode="stellar">星际穿梭</button><label>UTC+8 <input data-time aria-label="世界时间（UTC+8）" placeholder="YYYY-MM-DD HH:mm:ss"></label><button data-jump>跳转</button><button data-play>暂停</button><select data-speed aria-label="时间速度"><option value="1">1×</option><option value="60">1 分钟/秒</option><option value="3600">1 小时/秒</option><option value="86400">1 天/秒</option><option value="-3600">倒放 1 小时/秒</option></select><button data-now>现在</button><button data-photo>拍照</button><button data-exit>返回轨道</button></header><div class="world-stage"><div class="world-labels"></div><button class="world-panel-toggle">地点与画面</button><aside class="world-ground-panel"><h3>地表观测</h3><label>城市或地理名称</label><div class="pair"><input data-search aria-label="城市或地理名称" placeholder="北京、珠穆朗玛峰…"><button data-search-online>搜索</button></div><div class="world-results"></div><details><summary>坐标与地图选点</summary><div class="pair"><div><label>纬度 °</label><input data-lat type="number" min="-90" max="90" step=".00001"></div><div><label>经度 °</label><input data-lon type="number" min="-180" max="180" step=".00001"></div></div><button data-locate>到达此处</button><canvas data-map width="560" height="280" aria-label="点击世界地图选择地点"></canvas></details><label>移动方式</label><select data-movement><option value="grounded">贴地漫游</option><option value="free">自由升降</option></select><label data-height-label>眼高（米）</label><input data-height type="number" value="1.7" step=".1" min=".2" max="1000"><label>移动速度</label><select data-move-speed><option value="slow">慢速 · 2 m/s</option><option value="normal" selected>常速 · 25 m/s</option><option value="fast">快速 · 500 m/s</option></select><div class="pair" style="margin-top:12px"><button data-save>收藏地点</button><select data-bookmarks aria-label="收藏地点"><option value="">我的地点</option></select></div><details open><summary>天空与标注</summary><label>观察效果</label><select data-appearance><option value="natural">自然天空</option><option value="galaxy">银河增强</option><option value="dss">DSS 巡天影像</option></select><label>星空体系</label><select data-culture><option value="western">西方星座</option><option value="chinese">中国星官</option></select><label class="check"><input type="checkbox" data-lines checked>星图连线</label><label class="check"><input type="checkbox" data-names checked>星空名称</label><label class="check"><input type="checkbox" data-art>星空插画</label><label>插画亮度</label><input data-art-brightness type="range" min="0" max="2" step=".05" value="1"><label class="check"><input type="checkbox" data-grid>赤道坐标网</label><label class="check"><input type="checkbox" data-ecliptic>黄道</label><label>视场</label><input data-fov type="range" min="5" max="100" value="65"></details><details><summary>操控与数据</summary><p>点击画面后操作：H / N 前后，J / L 左右，K 上升、I 下降；W 低头、S 抬头，A / D 转向。拖动鼠标看向四周，滚轮缩放。持续按住平滑加速，松开减速。</p><p data-surface-status></p><p>地形：ETOPO 2022 / Copernicus GLO-30。银河与 DSS 为历史影像，日月行星按所选时刻显示。</p><p>地名：Natural Earth / 天地图；在线搜索：Photon · © OpenStreetMap contributors。</p></details><p data-message role="status"></p></aside><div class="world-hud"></div><div class="world-credit"></div></div>`;
   document.body.append(host);
   const $ = (s) => host.querySelector(s),
     stage = $('.world-stage'),
@@ -107,6 +109,8 @@ export function installWorldExplorer(sim) {
     surface = null,
     input = null,
     solar = null,
+    stellar = null,
+    stellarPose = null,
     groundScene = null,
     groundCamera = null,
     light = null,
@@ -151,10 +155,11 @@ export function installWorldExplorer(sim) {
   const entries = document.createElement('div');
   entries.className = 'world-entry';
   entries.innerHTML =
-    '<button type="button">地表观测</button><button type="button">太阳系</button>';
+    '<button type="button">地表观测</button><button type="button">太阳系</button><button type="button">星际穿梭</button>';
   document.getElementById('viewMode').closest('.row').after(entries);
   entries.children[0].onclick = () => open('ground');
   entries.children[1].onclick = () => open('solar');
+  entries.children[2].onclick = () => open('stellar');
   const staticLabels = [],
     staticAttributes = [];
   for (const root of [host, entries]) {
@@ -174,7 +179,7 @@ export function installWorldExplorer(sim) {
   function translate() {
     for (const { node, key } of staticLabels) if (node.isConnected) node.nodeValue = t(key);
     for (const { el, attr, key } of staticAttributes) el.setAttribute(attr, t(key));
-    host.setAttribute('aria-label', t('地表与太阳系'));
+    host.setAttribute('aria-label', t('地表、太阳系与星际'));
     refreshBookmarks();
     syncSite();
   }
@@ -480,11 +485,14 @@ export function installWorldExplorer(sim) {
     sky = null;
     solar?.dispose();
     solar = null;
+    if (stellar) stellarPose = stellar.snapshot();
+    stellar?.dispose();
+    stellar = null;
     labelRoot.replaceChildren();
     groundScene = null;
   }
   function open(next, options = {}) {
-    if (disposed || mode === next || !['ground', 'solar'].includes(next)) return;
+    if (disposed || mode === next || !['ground', 'solar', 'stellar'].includes(next)) return;
     sim.planetaryObservatory?.close();
     request?.abort();
     request = null;
@@ -497,6 +505,8 @@ export function installWorldExplorer(sim) {
       controls.stopMotion?.();
       controls.enabled = false;
     }
+    const departure = next === 'stellar' && mode === 'solar' ? solar.navigationPose() : null;
+    const solarArrival = next === 'solar' && mode === 'stellar' ? stellar.snapshot() : null;
     destroyView();
     mode = next;
     panel.hidden = next !== 'ground';
@@ -523,6 +533,18 @@ export function installWorldExplorer(sim) {
         enabled: () => mode === 'ground',
       });
       syncSite();
+    } else if (next === 'stellar') {
+      stellar = createInterstellarWorld({
+        renderer,
+        host: stage,
+        environment: sim.environment,
+        getTime: () => sim.time,
+        onSolar: () => open('solar'),
+        onGround: () => open('ground'),
+        initialPose: departure
+          ? { ...departure, position: departure.position.map((v) => v * AU_LY) }
+          : stellarPose,
+      });
     } else
       solar = createSolarWorld({
         renderer,
@@ -538,6 +560,11 @@ export function installWorldExplorer(sim) {
         getEarthTexture: () => sim.environment.uniforms.dayMap.value,
         getMoonTexture: () => sim.environment.moon.texture,
         assets: sim.environment.assets,
+      });
+    if (next === 'solar' && solarArrival)
+      solar.restoreNavigationPose({
+        ...solarArrival,
+        position: solarArrival.position.map((v) => v / AU_LY),
       });
     if (next === 'solar' && options.system) solar.setView(`system:${options.system}`);
     timeDraft = false;
@@ -608,7 +635,11 @@ export function installWorldExplorer(sim) {
     renderer.autoClear = false;
     renderer.toneMappingExposure = 1;
     try {
-      if (mode === 'solar') {
+      if (mode === 'stellar') {
+        stellar.resize(w, h);
+        renderer.clear();
+        stellar.update(sim.time, dt);
+      } else if (mode === 'solar') {
         solar.resize(w, h);
         renderer.clear();
         solar.update(sim.time, dt);
@@ -679,7 +710,12 @@ export function installWorldExplorer(sim) {
       c.textBaseline = 'top';
       c.shadowColor = '#000';
       c.shadowBlur = 4;
-      const selector = photoMode === 'ground' ? '.world-labels span' : '.solar-world-labels span';
+      const selector =
+        photoMode === 'ground'
+          ? '.world-labels span'
+          : photoMode === 'stellar'
+            ? '.interstellar-labels span'
+            : '.solar-world-labels span';
       for (const node of stage.querySelectorAll(selector)) {
         const rect = node.getBoundingClientRect(),
           style = getComputedStyle(node);
@@ -697,7 +733,11 @@ export function installWorldExplorer(sim) {
       }
       c.restore();
       const sources = [
-        photoMode === 'ground' ? credit.textContent : 'StarOrbit · Astronomy Engine',
+        photoMode === 'ground'
+          ? credit.textContent
+          : photoMode === 'stellar'
+            ? 'StarOrbit · Hipparcos / van Leeuwen 2007 · J2000 · d3-celestial · Stellarium CC BY-SA 4.0 · NASA/Goddard SVS'
+            : 'StarOrbit · Astronomy Engine',
       ];
       if (photoMode === 'ground') {
         const terrain = surface.status();
@@ -738,7 +778,7 @@ export function installWorldExplorer(sim) {
       c.fillStyle = '#f0e3c8';
       c.font = `${Math.round(size * 1.5)}px system-ui`;
       c.fillText(
-        `StarOrbit · ${photoMode === 'ground' ? state.site.name || t('地表') : t('太阳系')} · ${dateTimeText(photoTime, '24')} UTC+8`,
+        `StarOrbit · ${photoMode === 'ground' ? state.site.name || t('地表') : photoMode === 'stellar' ? stellar.caption : t('太阳系')} · ${dateTimeText(photoTime, '24')} UTC+8`,
         padding,
         top + padding,
         output.width - padding * 2
@@ -766,6 +806,9 @@ export function installWorldExplorer(sim) {
       return !!mode;
     },
     open,
+    get interstellar() {
+      return stellar;
+    },
     openGround(site, options = {}) {
       open('ground');
       locate(site);

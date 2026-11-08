@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.32 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.33 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> Local v1.32 adds a unified observatory, Mars terrain and scientific layers, Earth-to-ground exploration, major moon systems, event searches and equal-field comparisons. [Procedures](使用说明.md#天体观测) · [Data and methods](docs/planetary-observatory.md) · [Verification](docs/verification.md).
+> Local v1.33 adds distance-based interstellar travel: star search, free movement, spatial views of Western and Chinese constellations, waypoints and photos, integrated with the ground and Solar System views. [Procedures](使用说明.md#星际穿梭) · [Data and performance](docs/interstellar.md) · [Verification](docs/verification.md).
 
 <a id="interface-and-basic-controls"></a>
 

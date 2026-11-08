@@ -31,6 +31,7 @@ gl_FragColor=vec4(color*stripe*(.025+.975*light),1.);
 #include <colorspace_fragment>
 }`;
 const names = new Map(SOLAR_WORLD_ENTITIES.map((b) => [b.id, b.name]));
+export const solarSurfaceShaders = { vertexShader: vertex, fragmentShader: fragment };
 
 export function createSolarWorld({
   renderer,
@@ -508,6 +509,26 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     update,
     focus,
     setView,
+    navigationPose() {
+      return {
+        position: camera.position.clone().add(origin).toArray(),
+        quaternion: camera.quaternion.toArray(),
+        fov: camera.fov,
+      };
+    },
+    restoreNavigationPose(pose) {
+      if (!pose?.position?.every(Number.isFinite) || Math.hypot(...pose.position) > 110) return;
+      setView('inner');
+      camera.position.fromArray(pose.position).sub(origin);
+      camera.quaternion.fromArray(pose.quaternion).normalize();
+      camera.up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      controls.target
+        .copy(camera.position)
+        .addScaledVector(forward, Math.max(0.001, camera.position.length()));
+      camera.fov = Math.max(8, Math.min(100, pose.fov || 44));
+      camera.updateProjectionMatrix();
+    },
     resize(w, h) {
       width = Math.max(1, w);
       height = Math.max(1, h);

@@ -1,10 +1,10 @@
 # 数据格式与本机接口
 
-适用版本：本地 v1.32。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.33。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
-本页按本地 v1.32 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
+本页按本地 v1.33 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
 
 示例中的轨道是为说明格式生成的合成数据，不能当作任何真实航天器的轨道或观测预报。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
 
@@ -277,3 +277,7 @@ JS
 ## 火星与卫星资产
 
 火星manifest声明等距圆柱投影、东经、像元中心及各图层来源；MOLA高程为gzip压缩int16小端米值，720×360。卫星manifest声明J2000、TDB、时间区间、每轴Chebyshev系数、量化单位和校核样本；运行时按需解压数据。格式及原始来源见[火星](../assets/mars/README.md)、[卫星](../assets/satellites/README.md)。
+
+## 星际航点
+
+同源localStorage键 `starorbit-interstellar-v1` 保存 `speed`（local/nearby/cruise/fast）、`culture`（western/chinese）、最多12条 `bookmarks`。每条包含 `name`、日心J2000光年 `position[3]`、Three.js四元数 `quaternion[4]`（x/y/z/w）、视场 `fov`、恒星身份 `targetId`（Sun或hip:编号），兼容旧索引 `selected`、`culture` 和 `formation`。位置和四元数校验有限值，加载时归一化四元数。优先按稳定HIP身份恢复目标，兼容本版旧索引；该结构属于浏览器偏好。普通场景JSON不包含这些航点。
