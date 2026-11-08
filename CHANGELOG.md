@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.31 — 2026-11-08
+
+新增地表观测与三维太阳系入口，共用模拟时钟。地表支持内置地名／显式联网搜索、坐标与地图选点、地点收藏、默认真实地形、贴地及自由升降、共用键位与持续按键加速；自然天空、银河和DSS、中西星空图层与拍照。太阳系显示同历元日心位置、行星轨道、地月系统和地面地点，可切换真实尺寸与显示增强。局部地面使用WGS84与稳定高程采样。
+
+**English:** Added movable ground observing and a linked 3D Solar System on the simulation clock. Ground mode supports offline names and explicit online search, coordinate/map selection, saved sites, measured terrain, grounded/free movement with shared keys and progressive speed, natural/Milky Way/DSS skies, cultural layers and photography. Solar views use geometric heliocentric positions, orbit tracks, Earth–Moon and site views, with physical or enhanced body sizes. Local terrain uses WGS84 and stable elevation samples.
+
+[实现与计算口径 / Implementation](docs/world-explorer.md) · [本批验证 / Validation](docs/v1.31-validation.json)
+
 ## v1.30 — 2026-11-08 · 本机版 / Local build
 
 生日卡背面改为独立星空明信片：东方／西方天区、银河／DSS背景、插画与连线分别选择；支持星名、坐标网等标注、独立亮度及缩放平移旋转。全幅横竖版与可选同尺寸导出，正反面预览分别缓存。DSS宽视场使用完整同源巡天瓦片，保留真实坐标与源配准。

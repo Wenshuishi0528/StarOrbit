@@ -6,6 +6,12 @@ const KEY = 'tiangong-help-v1',
   clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const topics = [
   {
+    title: '地表与太阳系',
+    group: '观测与操纵',
+    text: '从观察方式下方进入地表或太阳系。搜索地点或输入坐标，默认贴地漫游；自由升降可输入海拔。点击画面后用 H/N 前后、J/L 左右、K/I 升降，W/S 低头抬头、A/D 转向，持续按住逐渐加速。地面与太阳系共享时间；可切换中西星空、银河或 DSS，收藏地点并拍照。',
+    target: '.world-entry',
+  },
+  {
     title: '观察模型',
     text: '左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。',
     target: '#stage',

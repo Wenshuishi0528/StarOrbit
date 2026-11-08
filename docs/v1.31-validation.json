@@ -1,0 +1,139 @@
+{
+  "version": "1.31",
+  "date": "2026-11-08",
+  "timezone": "Asia/Singapore",
+  "baseCommit": "84c2b33fbe7894fc13ad428145bf664a7467701a",
+  "sourceState": "working tree with v1.31 changes; not published",
+  "environment": {
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "Safari": "26.4",
+    "Node": "v25.9.0",
+    "Python": "3.9.6",
+    "url": "http://127.0.0.1:8772/",
+    "windowPixels": [
+      3840,
+      2110
+    ],
+    "network": "online; coarse elevation followed by cached/downloaded Copernicus tiles"
+  },
+  "checks": [
+    {
+      "name": "default regression suite",
+      "status": "passed",
+      "evidence": "output/release131/tests.log",
+      "scope": "Full npm test before final UI/sky polish; affected modules rerun after those changes."
+    },
+    {
+      "name": "ground math, input, surface, sky and solar modules",
+      "status": "passed",
+      "commands": [
+        "node tests/ground-world.mjs",
+        "node tests/ground-surface.mjs",
+        "node tests/ground-sky.mjs",
+        "node tests/solar-world.mjs"
+      ],
+      "scope": "WGS84/ENU round trips, dateline/poles, contact, acceleration/braking, focus, cancellation, astronomical horizon cross-check, seasonal motion and scale."
+    },
+    {
+      "name": "format, translations, documentation",
+      "status": "passed",
+      "evidence": [
+        "output/release131/format.log",
+        "output/release131/docs.log"
+      ]
+    },
+    {
+      "name": "Safari ground interaction",
+      "status": "passed",
+      "scope": "Held H moves the site while astronomical time is paused; S changes elevation; release stops motion. Local place search selects Everest-region point, detailed elevation updates from 4498.7m to 6213.7m. Day/night and mountain occlusion visually checked."
+    },
+    {
+      "name": "Safari date and shared time",
+      "status": "passed",
+      "scope": "Pasted 2026-06-21 23:00:00 UTC+8, clicked jump, switched solar/Earth-Moon and returned to original orbit; date and pause preserved. Fixed draft input overwrite."
+    },
+    {
+      "name": "Safari solar and PNG export",
+      "status": "passed",
+      "evidence": [
+        "output/release131/solar-polished.png",
+        "/Users/apple/Downloads/StarOrbit-solar-1782054000000.png"
+      ],
+      "scope": "Inner-system and Earth-Moon presets, site marker, labels, photo with timestamp/credits; exported image inspected."
+    },
+    {
+      "name": "Safari final cultural art and DSS",
+      "status": "passed",
+      "scope": "Reopened saved ground location/culture/settings; active ground artwork wins shared cache budget; DSS and Chinese artwork visibly rendered together. Ground PNG includes labels, date, and source credits.",
+      "evidence": [
+        "output/release131/ground-final-dss.png",
+        "/Users/apple/Downloads/StarOrbit-ground-1782054000000.png"
+      ]
+    },
+    {
+      "name": "Safari final high-altitude daylight",
+      "status": "passed",
+      "scope": "Final build showed blue natural sky, visible solar disk, no catalogue stars in daylight; detailed mountain silhouette and surface at 6213.7m. Corrected sRGB conversion and density applied once. Names switch now controls body labels too.",
+      "evidence": [
+        "output/release131/ground-day-fixed.png",
+        "output/release131/ground-mountain-final.png"
+      ]
+    },
+    {
+      "name": "standalone, local and web builds",
+      "status": "passed",
+      "commands": [
+        "npm run build",
+        "npm run build:web",
+        "node tests/web-build.mjs",
+        "node tests/web-build.mjs dist-local"
+      ],
+      "evidence": [
+        "output/release131/build.log",
+        "output/release131/build-web.log"
+      ]
+    },
+    {
+      "name": "desktop runtime and launcher",
+      "status": "passed",
+      "scope": "Runtime synchronized with backup; ad hoc launcher signature verified; --check reports READY on 8771. HTTP entry equals installed dist-local/index.html.",
+      "evidence": "output/release131/installed.json"
+    }
+  ],
+  "limitations": [
+    "Terrain colour uses existing Earth imagery; this is not street-level imagery or a buildings/airport simulation.",
+    "Stellar catalogue coordinates remain fixed: no new per-star proper motion or annual parallax propagation.",
+    "Ground altitude shares DEM datum with local geometry; geoid correction interface currently uses N=0.",
+    "Online geographic search, every geography/altitude combination, prolonged memory stress, and offline cold-start are not comprehensively browser-tested in this batch.",
+    "Aircraft and rocket surface dynamics are outside this implementation."
+  ],
+  "publication": {
+    "githubPush": false,
+    "pagesDeployment": false,
+    "release": false,
+    "portableZip": "not built for this local update"
+  },
+  "builds": {
+    "StarOrbit.html": {
+      "sha256": "c801a45b6b5587b5cde5f51cbd695dbe4086092b365ea712608530743c4dbd89",
+      "bytes": 490733997
+    },
+    "dist-local/index.html": {
+      "sha256": "7dd89d04fdd6f3cb1135e55b618df0faeb78193e45eaee7c41fe95506ba2abd4",
+      "bytes": 525196
+    },
+    "dist/index.html": {
+      "sha256": "95cd0763fdb32bac5b81f1dfb61411e62896fe5e9895f32570cc8e4533e1f140",
+      "bytes": 525196
+    }
+  },
+  "sourceHashes": {
+    "src/ground-world-input.js": "2e83730cd5099aaf6fa876dbe824a77dd7302d40ce5f2e7901314e4d7663af61",
+    "src/ground-world-sky.js": "1cdf9c07ea4786b28eabe78e1bb0137f92860d0b5e812ed3bf5eec79ddece209",
+    "src/ground-world-surface.js": "1e523ed5bb03d803d8e91865918f5e13f5c6b4c77c55638f5b90df449736fa69",
+    "src/ground-world-math.js": "bbd7451bde181f5b231019f983424e6073dc65ad01593f440250dc107c16a55b",
+    "src/world-explorer.js": "a7a4c6b3be1dc810df903be19412d09e00c8183582a0c7482a99f578a60a9a5c",
+    "src/solar-world-math.js": "2a0429d9edeb1177572a2e75b83536ea57cabec9022fec4a6b5a7c731a8d2dd4",
+    "src/solar-world.js": "3f65bb2384f1cced2d43286a09c5d573b388db6084a3c1ffbd430444a466a9ea"
+  }
+}

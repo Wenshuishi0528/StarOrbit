@@ -2,6 +2,7 @@ import { installCameraFocus } from './camera-focus.js';
 import { spacecraftLabelNames } from './spacecraft-labels.js';
 import { installSkyCultureControls } from './sky-culture-controls.js';
 import { installBirthdayCard } from './birthday-card.js';
+import { installWorldExplorer } from './world-explorer.js';
 import { saveSkyCultureScreenshot } from './sky-culture-screenshot.js';
 import { installFloatingWindows } from './floating-windows.js';
 import { installAttitudeNavball } from './attitude-navball.js';
@@ -588,7 +589,7 @@ function resize() {
 function tick(wall) {
   requestAnimationFrame(tick);
   if (document.hidden) return;
-  resize();
+  if (!sim?.worldExplorer?.active) resize();
   if (sim?.freeFlight?.active) {
     last = wall;
     sim.lastWall = wall;
@@ -602,6 +603,10 @@ function tick(wall) {
   }
   const dt = Math.min((wall - last) / 1000, 0.1);
   last = wall;
+  if (sim?.worldExplorer?.active) {
+    sim.worldExplorer.tick(wall, dt);
+    return;
+  }
   if (sim?.initialized) sim.update(wall);
   if (sim?.initialized && playing && model.visible)
     changeAngle('left', ((state.angles[state.target].left + dt * 15 + 180) % 360) - 180);
@@ -756,6 +761,7 @@ async function boot() {
     sim.floatingWindows = installFloatingWindows();
     sim.skyCultureControls = installSkyCultureControls(sim);
     sim.birthdayCard = installBirthdayCard(sim);
+    sim.worldExplorer = installWorldExplorer(sim);
     installHelp(music);
     installVisitorCounter();
   } catch (e) {

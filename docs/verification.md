@@ -1,14 +1,14 @@
 # 验证与验收指南
 
-适用版本：本地 v1.30。作者：Wenshuishi。本文说明如何验证当前能力和保存证据；实际通过范围以对应版本的执行记录为准。本页不是标准符合性认证。
+适用版本：本地 v1.31。作者：Wenshuishi。本文说明如何验证当前能力和保存证据；实际通过范围以对应版本的执行记录为准。本页不是标准符合性认证。
 
 [能力与范围](product-scope.md) · [使用手册](../使用说明.md) · [技术资料索引](README.md) · [更新记录](../CHANGELOG.md)
 
 ## 基线、结果与证据
 
-`product-scope.md` 的能力ID依据现行实现建立。本地 v1.30 的实际结果见[本批执行记录](v1.30-validation.json)，区分已执行、失败、受阻和未运行。以下流程和目标不能替代对应项目的实际结果。
+`product-scope.md` 的能力ID依据现行实现建立。v1.31 世界视图的实际检查见[v1.31 执行记录](v1.31-validation.json)；[v1.30 执行记录](v1.30-validation.json)保留生日明信片的历史结果。以下流程和目标不能替代对应项目的实际结果。
 
-[v1.20 执行记录](v1.20-validation.json)保留该版本的自动回归、构建和 107 项 Chrome 帮助检查等历史证据，不能作为本批中国星官功能的通过结论。v1.21 的中国星官历史验收保留于 [v1.21 记录](v1.21-validation.json)。v1.22 的坐标网与巡天距离历史结果见 [v1.22 记录](v1.22-validation.json)。v1.23 的宇宙探索验收保留于 [v1.23 记录](v1.23-validation.json)。v1.24 的月球观测与地形历史验收见 [v1.24 记录](v1.24-validation.json)。v1.25 的完整插画、月面地名与地质图历史验收见 [v1.25 记录](v1.25-validation.json)。v1.26 的全部插画方向与尺度复核保留在 [v1.26 记录](v1.26-validation.json)。v1.27 的云图库与向日葵验证保留于 [v1.27 记录](v1.27-validation.json)。v1.28 的亮度验证见 [v1.28 记录](v1.28-validation.json)。本批核验生日历法、40项内容与巡天别名、独立构图与图片导出；实际执行范围见本批记录。
+[v1.20 执行记录](v1.20-validation.json)保留该版本的自动回归、构建和 107 项 Chrome 帮助检查等历史证据，不能作为本批中国星官功能的通过结论。v1.21 的中国星官历史验收保留于 [v1.21 记录](v1.21-validation.json)。v1.22 的坐标网与巡天距离历史结果见 [v1.22 记录](v1.22-validation.json)。v1.23 的宇宙探索验收保留于 [v1.23 记录](v1.23-validation.json)。v1.24 的月球观测与地形历史验收见 [v1.24 记录](v1.24-validation.json)。v1.25 的完整插画、月面地名与地质图历史验收见 [v1.25 记录](v1.25-validation.json)。v1.26 的全部插画方向与尺度复核保留在 [v1.26 记录](v1.26-validation.json)。v1.27 的云图库与向日葵验证保留于 [v1.27 记录](v1.27-validation.json)。v1.28 的亮度验证见 [v1.28 记录](v1.28-validation.json)。v1.29／v1.30 的生日历法、内容、巡天别名和图片导出记录保留其当时范围。
 
 每条执行记录至少包括：
 
@@ -20,6 +20,16 @@
 - 未完成范围、原因、关联问题和恢复步骤。截图不能替代交互、缓存或数值检查。
 
 开发日志和截图可在输出目录生成；正式引用的关键摘要随版本保留。大图不随包分发时，保存必要小图、指标和步骤，并注明原始证据范围。
+
+## v1.31 世界视图验收
+
+- 数值：运行 `node tests/ground-world.mjs`、`node tests/ground-surface.mjs`、`node tests/solar-world.mjs`、`node tests/ground-sky.mjs`；保存实际退出码。涵盖WGS84往返、局部方向、加减速／时间独立、高程采样、地心月球位置、半年季节变化及真实半径；地面天空专项对照日月地平位置，检查高海拔、南北半球、地球遮挡和昼夜亮度。
+- 地表：北京、山地、南半球和跨日界线选点；等待局部数据后观察站立高度与山体遮挡。短按、持续按、松开、反向、文字输入和窗口失焦逐一检查；W低头、S抬头。
+- 天空：同一地点比较昼夜和不同季节；银河／DSS、中西连线与插画切换、地平线遮挡、拍照和照片来源分别检查。
+- 联动：在UTC+8输入时刻、倍速和倒放后切换太阳系、地月与地表，确认时间、地点标记和返回后的轨道时间一致；检查真实半径与增强显示只影响尺寸。
+- 生命周期：反复进入与返回、纹理与高程请求中切换、显式在线搜索失败、收藏后重开；记录网络状态、图形错误和资源释放情况。
+
+以上为完整验收流程，已执行范围见[v1.31 执行记录](v1.31-validation.json)。
 
 ## 测试分层
 
@@ -71,6 +81,7 @@ git diff --check
 | SO-DOCK-01 | `tests/docking-training.mjs`、`tests/docking-assistance.mjs`、`tests/docking-workbench.mjs`；`tests/browser/flight-lab.js` | 起点、辅助/纯手动、停靠点、接触和导出；判定符合设置，快捷键不绕过限制 | 模块+训练页；记录场景、容差、辅助、接触值和JSON/CSV |
 | SO-OBSERVE-01 | `tests/pass-prediction.mjs`、`tests/exposure-lab.mjs`、`tests/balcony-lab.mjs`、`tests/survey-lab.mjs`；`tests/browser/observation-archive.js`、`survey-live.js` | 切目标、地点/时段、曝光对照、排程/补拍、保存重开；正确星历/时间，缺格明确 | 固定星历+完整实验；保存输入、窗口、成片和重开结果 |
 | SO-TELESCOPE-01 | `tests/xuntian-pointing.mjs`、`tests/xuntian-crosshair.mjs`、`tests/xuntian-view-render.mjs`、`tests/solar-data.mjs`；`tests/browser/xuntian-view-render.js` | 搜索/固定/手动/导航球接管、遮挡、近站深度、照片；四波段/两分辨率/坏快照；时刻与来源正确 | 模块+WebGL+下载PNG；记录构图、快照、像素/几何结果 |
+| SO-WORLD-01 | `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`；完整应用浏览器 | 坐标、高程、键位与加速、日期天空、太阳系联动、退出恢复 | 数值日志＋真实浏览器截图与操作结果 |
 | SO-EARTH-01 | `tests/city-terrain-cache.mjs`、`tests/city-terrain.mjs`、`tests/earth-elevation-math.mjs`、`tests/earth-elevation.mjs`；`tests/browser/earth-elevation.js`、`earth-elevation-geography.js` | 城市离线/下载/取消/删除/重开，高程/照片、地理开关、缺源与释放；影像/高程来源分开 | 模块+Chrome/WebKit/IndexedDB；保存视野、块数、预算、PNG和网络/重开结果 |
 | SO-SKY-01 | `tests/deep-sky-catalog.mjs`、`tests/sky-detail-cache.mjs`、`tests/constellation-art.mjs`；`tests/browser/sky-detail.js`、`sky-source-switch.js` | 三种目录范围、五种影像来源、回退、共享照片、关闭释放；目录/影像天区与年代正确 | 模块+完整渲染/重开/窄屏；保存来源、视场、目录口径和PNG |
 | SO-LUNAR-01 | `tests/lunar-math.mjs`、`tests/lunar-terrain.mjs`、`tests/lunar-features.mjs`、`tests/lunar-state.mjs`；实际浏览器 | NASA 参考、观测视角、真实地形、地名、事件、回放、导出、巡天交接 | 不将数值检查替代实际画面；不声称完整物理月食渲染或高分辨率地形测绘 |

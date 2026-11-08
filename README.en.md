@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.30 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.31 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> Local v1.30 adds independent birthday sky postcards: Chinese/Western fields, Milky Way/DSS backgrounds, separate artwork/lines/labels, brightness and framing. [Date rules](docs/birthday-calendar-sources.md) · [Verification](docs/verification.md). Published editions show their own version.
+> Local v1.31 connects movable ground observing with a 3D Solar System: place/coordinate selection, measured terrain, progressive movement, Chinese/Western sky layers and geometric planetary positions on one clock. [Procedures](使用说明.md#地表观测与太阳系) · [Technical notes](docs/world-explorer.md) · [Verification](docs/verification.md). Published editions show their own version.
 
 <a id="interface-and-basic-controls"></a>
 
@@ -52,6 +52,7 @@ First use defaults to detailed 8K overall quality, the enhanced 16K Milky Way an
 | Assemble the station | Port-based assemblies, repeated modules, constrained array axes and geometric illumination with occlusion | [Assembly](使用说明.md#空间站组合), [solar arrays](使用说明.md#太阳翼与受光) |
 | Explore orbits | Time control, ground tracks, sunlight and eclipses, apsides and equator crossings | [Time and events](使用说明.md#时间轨迹与事件) |
 | Pilot and fly | Main navball RCS/SAS, Shenzhou and Tianzhou undocking and return, separate docking workbench | [Three piloting modes](#three-piloting-modes) |
+| Ground and Solar System | Ground movement, terrain, dated sky, geographic search and linked planetary views | [Ground and Solar System](使用说明.md#地表观测与太阳系) |
 | Explore Earth and sky | Dated surface/night-light choices, cloud library, sunrise and sunset, aurora, sky chart, city imagery and real terrain | [Earth, sky and environment](使用说明.md#地球星空与环境) |
 | Explore Chinese astronomy | Qing-era conventional asterisms, Three Enclosures and Twenty-Eight Mansions navigation, member charts, names, lines and symbolic artwork | [Chinese sky culture](使用说明.md#中国传统星官) |
 | Use Xuntian | Target search, pinned pointing, formation composition, Solar System targets, real SDO imagery and PNG exports | [Viewfinder](使用说明.md#主页面的巡天望远镜), [solar observations](使用说明.md#太阳观测) |
