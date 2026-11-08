@@ -54,6 +54,37 @@ import { referenceLineGeometry } from './sky-reference-layer.js';
 
 let skyDetailSequence = 0;
 
+// A geocentric celestial chart has no terrestrial foreground or spacecraft.
+// Keep this explicit: an origin observer alone would make the terrain renderer
+// treat the camera as underground, and its sky visibility test divide by zero.
+export function geocentricSkyFrame(frame) {
+  if (!frame) return frame;
+  return {
+    ...frame,
+    eyeKm: [0, 0, 0],
+    eyeLocal: [0, 0, 0],
+    showStation: false,
+    solarChannel: 'none',
+    solarObservation: null,
+  };
+}
+
+function celestialForeground() {
+  return {
+    preparePhoto() {},
+    prepareCityPhoto() {},
+    render: () => null,
+    pick: () => null,
+    hides: () => false,
+    cityStatus: () => null,
+    elevationStatus: () => ({ visible: false }),
+    appearanceKey: () => 'sky-only',
+    source: () => ({ skyOnly: true }),
+    releasePhoto() {},
+    dispose() {},
+  };
+}
+
 const axesArray = (axes) => [axes.right, axes.up, axes.forward];
 const matrix = (columns) => new THREE.Matrix3().fromArray(columns.flat());
 const v2 = () => ({ value: new THREE.Vector2() }),
@@ -465,7 +496,7 @@ function writeCanvas(canvas, image, bytes, w, h) {
 export function createXuntianViewRenderer(
   sim,
   canvas,
-  { cityFinder = createCityFinder(sim.environment.geography?.items || []) } = {}
+  { cityFinder = createCityFinder(sim.environment.geography?.items || []), skyOnly = false } = {}
 ) {
   const renderer = sim.api.renderer,
     env = sim.environment,
@@ -492,6 +523,7 @@ export function createXuntianViewRenderer(
       (frame.solarChannel && frame.solarChannel !== 'none')
     )
       return false;
+    if (skyOnly) return true;
     const radius = Math.hypot(...frame.eyeKm),
       earthAngle = Math.asin(Math.min(1, 6371 / radius)),
       separation = Math.acos(
@@ -520,11 +552,11 @@ export function createXuntianViewRenderer(
   };
   const background = screenPass(geometry, backgroundFragment, u),
     film = screenPass(geometry, sensorFragment, sensor);
-  const earthView = createXuntianEarthView(env, geometry),
+  const earthView = skyOnly ? celestialForeground() : createXuntianEarthView(env, geometry),
     solarView = createSolarView(env, geometry, shared);
   const stars = makeStarLayer(renderer, shared),
     guide = constellationGuide(shared),
-    station = stationView(sim);
+    station = skyOnly ? null : stationView(sim);
   let surveyProbe = null,
     preview = null,
     previewImage = null,
@@ -627,8 +659,8 @@ export function createXuntianViewRenderer(
         constellationArt: false,
         deepSkyObjects: false,
       });
-    station.prepare(frame, aspect);
-    const local = station.inspect(frame, ground);
+    station?.prepare(frame, aspect);
+    const local = station?.inspect(frame, ground) || { visible: false, center: { kind: 'sky' } };
     u.cameraToInertial.value.copy(matrix(axes));
     u.cameraToFixed.value.copy(matrix(axes.map((axis) => toLocal(frame.q.earthAxes, axis))));
     u.fixedEye.value.fromArray(toLocal(frame.q.earthAxes, frame.eyeKm));
@@ -767,6 +799,7 @@ export function createXuntianViewRenderer(
     photoSkyStatus: () => lastPhotoStatus,
     photoCityStatus: () => lastCityPhotoStatus,
     identify(frame) {
+      if (skyOnly) frame = geocentricSkyFrame(frame);
       if (!valid(frame)) return { kind: 'unavailable' };
       const terrainHit = earthView.pick(frame);
       const ground =
@@ -776,6 +809,7 @@ export function createXuntianViewRenderer(
       return readIdentification(frame, lastStatus.center, lastStatus.limitMagnitude, ground);
     },
     render(frame) {
+      if (skyOnly) frame = geocentricSkyFrame(frame);
       if (disposed || !valid(frame)) return unavailable();
       const now = performance.now();
       if (previewPending || capturePending || now - lastRender < 1000 / VIEW_MAX_RATE)
@@ -813,6 +847,11 @@ export function createXuntianViewRenderer(
       frame,
       { width = 1440, surveyTarget = null, atShutter = null, onExposure = null } = {}
     ) {
+      if (skyOnly) {
+        frame = geocentricSkyFrame(frame);
+        // A historical sky capture must not resample the main scene clock.
+        atShutter = null;
+      }
       if (disposed || !valid(frame)) throw Error('没有可用的巡天光学位置');
       if (capturePending) throw Error('正在保存巡天取景照片');
       const frozenChart = normalizeStarChartSettings(frame.chartSettings ?? env.settings);

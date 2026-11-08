@@ -24377,5 +24377,11 @@
     "allSourceImagesVisuallyInspected": true,
     "transparencyInspection": "Actual-alpha composite over a dark sky background",
     "placement": "Uniform-scale whole-image placement; physical members unchanged; no anatomical star correspondence claimed"
+  },
+  "currentPlacementAudit": {
+    "version": "1.26",
+    "record": "placement-audit.json",
+    "sourceArtworkUnchanged": true,
+    "method": "Directed semantic axes where supported; uniform visible-subject span; no local warp; global tail reflection reviewed."
   }
 }

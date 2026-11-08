@@ -6,6 +6,8 @@ export const STAR_CHART_DEFAULTS = Object.freeze({
   solarSystemLabels: true,
   constellationNames: true,
   constellationArt: true,
+  westernArtBrightness: 1,
+  chineseArtBrightness: 1,
   chineseSymbolArt: false,
   chineseSymbolOpacity: 0.2,
   constellationLines: true,
@@ -102,12 +104,26 @@ export function normalizeStarChartSettings(input = {}, { strict = false } = {}) 
       result.chineseSymbolOpacity = input.chineseSymbolOpacity;
     else invalid();
   }
+  for (const key of ['westernArtBrightness', 'chineseArtBrightness'])
+    if (own(input, key)) {
+      if (Number.isFinite(input[key]) && input[key] >= 0 && input[key] <= 2)
+        result[key] = input[key];
+      else invalid();
+    }
   return result;
 }
 
 export function syncStarChartControls(settings) {
   const $ = (id) => document.getElementById(id);
   if ($('skyCulture')) $('skyCulture').value = settings.skyCulture || 'western';
+  for (const culture of ['western', 'chinese']) {
+    const key = culture + 'ArtBrightness',
+      value = settings[key] ?? STAR_CHART_DEFAULTS[key];
+    if ($(key)) $(key).value = String(value);
+    if ($(key + 'Value')) $(key + 'Value').textContent = Math.round(value * 100) + '%';
+    if ($(key + 'Control'))
+      $(key + 'Control').hidden = (settings.skyCulture || 'western') !== culture;
+  }
   for (const [key, id] of Object.entries(checkboxIds)) {
     if (!$(id)) continue;
     $(id).checked = settings[key];
@@ -151,6 +167,13 @@ export function bindStarChartControls(settings, onChange) {
       settings.skyCulture = $('skyCulture').value === 'chinese' ? 'chinese' : 'western';
       changed();
     };
+  for (const key of ['westernArtBrightness', 'chineseArtBrightness'])
+    if ($(key))
+      $(key).oninput = () => {
+        const value = Number($(key).value);
+        if (Number.isFinite(value)) settings[key] = Math.max(0, Math.min(2, value));
+        changed();
+      };
   for (const [key, id] of Object.entries(checkboxIds))
     if ($(id))
       $(id).onchange = () => {
@@ -180,6 +203,10 @@ export function skyCultureArtOptions(settings = {}) {
     asterisms: settings.constellationArt !== false,
     symbols: settings.skyCulture === 'chinese' && settings.chineseSymbolArt === true,
     overviewOpacity: settings.chineseSymbolOpacity ?? STAR_CHART_DEFAULTS.chineseSymbolOpacity,
+    artBrightness:
+      settings.skyCulture === 'chinese'
+        ? (settings.chineseArtBrightness ?? STAR_CHART_DEFAULTS.chineseArtBrightness)
+        : (settings.westernArtBrightness ?? STAR_CHART_DEFAULTS.westernArtBrightness),
   };
 }
 

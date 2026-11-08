@@ -6,6 +6,22 @@ export function cloudProvider(record) {
     : 'github';
 }
 export const CLOUD_QUALITY_SCHEMA = 1;
+// Coverage describes scientific valid-data support, not the amount of cloud or
+// the quality of its appearance. A global grid/filename alone proves neither.
+export function nasaCoverage(record) {
+  if (record?.provider !== 'satcorps') return 'unknown';
+  const values = [
+    [record.coverage, 0.995],
+    [record.polarCoverage?.north, 0.99],
+    [record.polarCoverage?.south, 0.99],
+    [record.footprint?.global, 0.995],
+    [record.footprint?.north, 0.995],
+    [record.footprint?.south, 0.995],
+  ];
+  const valid = (value) => Number.isFinite(value) && value >= 0 && value <= 1;
+  if (values.some(([value, threshold]) => valid(value) && value < threshold)) return 'partial';
+  return values.every(([value]) => valid(value)) ? 'global' : 'unknown';
+}
 export const GITHUB_CLOUD_UNAVAILABLE = '请在云图库下载去极区镜像的 GitHub 云图，再选择使用';
 export function acceptedCloudQuality(record) {
   return (
@@ -54,7 +70,6 @@ export async function retireNASA(cache) {
     .map((row) => row.id);
 }
 export function completeNASA(record, now = Date.now()) {
-  const footprint = record?.footprint;
   return (
     cloudProvider(record) === 'satcorps' &&
     acceptedCloudQuality(record) &&
@@ -67,12 +82,7 @@ export function completeNASA(record, now = Date.now()) {
     Number.isFinite(record.observedEnd) &&
     record.observedStart <= record.observedEnd &&
     record.observedEnd <= now + 300e3 &&
-    record.coverage >= 0.995 &&
-    record.polarCoverage?.north >= 0.99 &&
-    record.polarCoverage?.south >= 0.99 &&
-    footprint?.global >= 0.995 &&
-    footprint?.north >= 0.995 &&
-    footprint?.south >= 0.995
+    nasaCoverage(record) === 'global'
   );
 }
 export function selectCloud(items, mode, time, id, now = Date.now()) {

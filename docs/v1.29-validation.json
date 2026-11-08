@@ -1,0 +1,49 @@
+{
+  "version": "1.29",
+  "status": "passed-with-documented-scope",
+  "recordedAtUTC": "2026-11-08T06:46:53.163617+00:00",
+  "baseCommit": "c77424fb8da71f7547cfdab58f0784f080633d15",
+  "sourceTreeSHA256": "0ce8dce67923096a0576352fb91270a30bfbcec921bf8eaa839d534a138014a2",
+  "scope": [
+    "12 tropical signs and 28 daily mansions; 40 explanations, 80 wishes and 330 finder aliases",
+    "Birthday front/back cards, optional gift inscription, PNG and duplex ZIP export",
+    "Independent birthday sky capture using existing Xuntian renderer; main scene preserved",
+    "Telescope/station label grouping"
+  ],
+  "automated": {
+    "npmTest": "passed",
+    "formatCheck": "passed",
+    "dateFixtures": 884,
+    "all40TargetsAndFourLayouts": "passed",
+    "zipIndependentPythonExtraction": "passed",
+    "sharedRendererRestorationAndIndependentEpoch": "passed"
+  },
+  "browser": {
+    "environment": "macOS / Codex in-app Chromium browser with WebGL, local split build",
+    "dualFrontAndBack": "2400x1500, downloaded PNG and ZIP; extracted back bytes equal direct PNG",
+    "singleChineseBack": "rendered with original artwork enabled",
+    "plainSkyBack": "rendered and downloaded",
+    "recipientSenderGiftDate": "visually checked on front and back",
+    "mainTimePreserved": "live 2026 clock remained after rendering 2004 birthday",
+    "finderAliases": [
+      "翼宿",
+      "翼火蛇"
+    ],
+    "spacecraftLabels": [
+      "巡天望远镜",
+      "中国空间站"
+    ],
+    "consoleErrors": 0
+  },
+  "wingArtwork": {
+    "orientationChangedInThisBatch": false,
+    "registrationMatchesPreBirthdaySnapshot": true,
+    "registrationSHA256": "4d4c16398bc6e84a1d95a2fe3fed2d3ef5df50e3ee3a0c1858333f3ace890e69"
+  },
+  "evidence": "Local output/release129 contains logs and downloaded front/back PNGs, ZIP and UI screenshot. Publication/build/install hashes are recorded separately in the GitHub release publication-validation.json.",
+  "notRun": [
+    "Exhaustive browser screenshots for every date and all 40 entries",
+    "Physical two-sided printing",
+    "Cross-browser full end-to-end regression"
+  ]
+}

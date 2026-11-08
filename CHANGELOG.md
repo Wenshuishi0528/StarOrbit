@@ -4,6 +4,38 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.29 — 2026-11-08
+
+新增生日星空卡：太阳黄经十二宫、明确版本的值日二十八宿规则及交界日处理；完整40项白话介绍、80条可编辑祝福，中西单卡、双联与纯星图PNG导出。星图与现有插画共用投影，制卡不改动轨道时间和全局设置。支持收礼人、赠送人和赠送日期落款；背面复用软件银河星空场景与独立生日时刻，星名、插画可选，正反面PNG可一次打包ZIP。翼宿插画及其方向保持不变。巡天搜索补齐二十八宿文化全称及繁简别名；巡天视角的航天器标注统一为“巡天望远镜”和“中国空间站”。
+
+**English:** Added birthday sky cards with tropical-zodiac and documented daily-mansion rules, cusp handling, 40 explanations and 80 editable wishes. Single, paired and plain charts export to PNG using registered artwork and real star positions without changing the simulation. Optional recipient, sender and gift-date inscriptions are supported. A matching back uses the app’s Milky Way scene at an independent birthday time, with optional labels and artwork; both PNGs can be saved together as ZIP. The Wings artwork and its orientation remain unchanged. Finder search covers all 28 cultural mansion names and common aliases; telescope views identify Xuntian and the Chinese Space Station as separate spacecraft.
+
+[日期口径 / Rules](docs/birthday-calendar-sources.md) · [本批验证 / Validation](docs/v1.29-validation.json)
+
+## v1.28 — 2026-11-08 · 本机版 / Local build
+
+增加星官插画与西方星座插画独立亮度条（0–200%，默认 100%），切换体系保留各自数值，共用于主画面、巡天和照片；四象、三垣透明度仍单独控制。
+
+**English:** Added independent Chinese asterism and Western constellation artwork brightness controls (0–200%, default 100%), saved separately and shared by the main view, finder and photos. Overview opacity remains independent.
+
+[本批验证 / Validation](docs/v1.28-validation.json)
+
+## v1.27 — 2026-11-08 · 本机版 / Local build
+
+新增“NASA 全球覆盖”独立入口，从已保存或导入图中筛出全球与两极覆盖达标版本，显示覆盖比例、保留图像质量提示，未核验版本不混入。修复向日葵-9 官方文件名与内部整秒观测时间恰差一秒时被误判不符、导致最新云图下载失败的问题；保留超过一秒以及不同观测时次的拒绝检查。新增三种时间字段的正负边界回归，实测用户报告的 2026-11-08 04:00 UTC 原始文件。
+
+**English:** Added a dedicated NASA global-coverage library view, separating verified global/polar coverage from partial or unknown coverage while retaining image-quality warnings. Fixed Himawari-9 downloads rejected at the exact one-second boundary between filename timestamps and whole-second metadata. Larger discrepancies and wrong scan times remain rejected. Added boundary regressions and checked the reported 2026-11-08 04:00 UTC source object.
+
+[本批验证 / Validation](docs/v1.27-validation.json)
+
+## v1.26 — 2026-11-08 · 本机版 / Local build
+
+逐图检查全部 319 幅中国星空插画，修正弧矢箭杆朝向、猎网／尾宿／斗柄首尾及多幅细长物象的主轴。按可见主体与真实成员的整体跨度定标，消除强制包围全部星点导致的过度放大；单星保留明示的最小展示尺度。原始图像、真实星位及连线不变，增加方向与尺寸回归检查。
+
+**English:** Reviewed all 319 Chinese sky illustrations; corrected the Bow and Arrow, net/tail/dipper directions and elongated motifs. Size now follows visible-subject and stellar spans instead of inflating narrow artwork to contain every star. Original image bytes, stellar positions and connections are retained, with new direction and scale regressions.
+
+[审查 / Review](assets/chinese-sky/art/placement-audit.json) · [本批验证 / Validation](docs/v1.26-validation.json)
+
 ## v1.25 — 2026-11-08
 
 修复四象／三垣总览在常用视角下不可见的问题，增加仅作用于总览的独立透明度。保留原有 39 幅图像，新增 280 幅同风格教学插画，覆盖全部 312 条星官目录，另保留 7 幅总览；真实星位和连线独立保留。月球新增 9,087 条正式地名、40 项着陆任务（39 处有坐标，中国用红星）、搜索与标注密度；将中科院 2022 公开版全月地质图重投影为三维月球图层，保留原图、图例、年代尺及导出署名。巡天选中月球时突出显示观测入口。

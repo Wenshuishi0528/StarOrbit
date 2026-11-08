@@ -45,7 +45,7 @@ for(const art of chineseConstellationArt.images){
  assert(actual.startsWith(path.resolve(output)+path.sep));
  assert(fs.readFileSync(actual).equals(fs.readFileSync(source.file)));
 }
-for(const file of ['README.md','catalog.json','source/CC-BY-SA-4.0.txt','source/index.json','source/I-239-hip_main.tsv','source/I-311-hip2.tsv','source/Gaia-DR3.csv','source/Gaia-DR3-AIP.xml','source/Gaia-HIP-crossmatch.csv','art/README.md','art/provenance.json','art/rigid-placements.json','art/expansion-brief.json','art/subjects.txt'])assert(fs.readFileSync(output+'/assets/chinese-sky/'+file).equals(fs.readFileSync('assets/chinese-sky/'+file)));
+for(const file of ['README.md','catalog.json','source/CC-BY-SA-4.0.txt','source/index.json','source/I-239-hip_main.tsv','source/I-311-hip2.tsv','source/Gaia-DR3.csv','source/Gaia-DR3-AIP.xml','source/Gaia-HIP-crossmatch.csv','art/README.md','art/provenance.json','art/rigid-placements.json','art/expansion-brief.json','art/subjects.txt','art/placement-audit.json'])assert(fs.readFileSync(output+'/assets/chinese-sky/'+file).equals(fs.readFileSync('assets/chinese-sky/'+file)));
 assert.equal((html.match(/<\/head>/g)||[]).length,1,'Embedded licenses must not terminate the document head');
 for(const file of ['README.md','catalog.json','source/I-311-hip2.tsv'])assert(fs.readFileSync(output+'/assets/stellar-distances/'+file).equals(fs.readFileSync('assets/stellar-distances/'+file)),`stellar distance provenance ${file}`);
 assert(fs.readFileSync(output+'/assets/cosmic/README.md').equals(fs.readFileSync('assets/cosmic/README.md')),'Cosmic model methods and attribution remain available offline');
@@ -79,6 +79,8 @@ assert(skyBytes<15*1024*1024);assert.equal(skyDetail.provenance,undefined);
 for(const track of data('musicData')){assert(!track.base64);assert.equal(crypto.createHash('sha256').update(resource(track.url)).digest('hex'),track.sha256);}
 const appURL=html.match(/<script defer src="([^"]+)"/)[1];resource(appURL);
 assert.equal(JSON.parse(fs.readFileSync(output+'/version.json')).version,JSON.parse(fs.readFileSync('package.json')).displayVersion);
+const validation='docs/v'+JSON.parse(fs.readFileSync('package.json')).displayVersion+'-validation.json';
+if(fs.existsSync(validation))assert(fs.readFileSync(output+'/'+validation).equals(fs.readFileSync(validation)),'linked validation record must ship with the split build');
 console.log(output+' build: relative hashed URLs, compact entry, original models/music, orbit data and version passed');
 
 const lunarDEM=JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json'));assert(resource(lunarTerrain.url).equals(fs.readFileSync(lunarDEM.file)));assert.equal(zlib.gunzipSync(resource(lunarTerrain.url)).byteLength,lunarDEM.width*lunarDEM.height*2);for(const file of ['README.md','SCIENCE.md','terrain-manifest.json','lola-720x360.i16.gz','lroc-color-2k.jpg'])assert(fs.readFileSync(output+'/assets/moon/'+file).equals(fs.readFileSync('assets/moon/'+file)));

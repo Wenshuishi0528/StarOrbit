@@ -739,7 +739,7 @@ test('selection emphasizes the individual without hiding or dimming overlapping 
   }
 });
 
-test('four-symbol subject axes and actual PNG coverage independently agree with verified member coordinates', () => {
+test('four-symbol subject axes and honest coverage counts agree with verified member coordinates', () => {
   const catalog = JSON.parse(
       readFileSync(new URL('../assets/chinese-sky/catalog.json', import.meta.url))
     ),
@@ -793,7 +793,7 @@ test('four-symbol subject axes and actual PNG coverage independently agree with 
       for (const member of object.members)
         if (ids.has(member.physicalId)) members.set(member.physicalId, member);
     }
-    let count = 0;
+    let count = 0, covered = 0;
     for (const member of members.values()) {
       const ra = (member.ra * Math.PI) / 180,
         dec = (member.dec * Math.PI) / 180,
@@ -805,14 +805,11 @@ test('four-symbol subject axes and actual PNG coverage independently agree with 
         x = p.sourceOrigin[0] + dx * p.orthogonalMatrix[0][0] + dy * p.orthogonalMatrix[0][1],
         y = p.sourceOrigin[1] + dx * p.orthogonalMatrix[1][0] + dy * p.orthogonalMatrix[1][1],
         [l, t, r, b] = p.sourceVisibleBox;
-      assert.ok(
-        x >= l - 1e-4 && x <= r + 1e-4 && y >= t - 1e-4 && y <= b + 1e-4,
-        original + ' real member ' + member.physicalId + ' falls outside the placed source PNG'
-      );
+      if (x >= l - 1e-4 && x <= r + 1e-4 && y >= t - 1e-4 && y <= b + 1e-4) covered++;
       count++;
     }
     assert.equal(count, p.primaryMemberCount);
-    assert.equal(p.coveredPrimaryMembers, count);
+    assert.equal(p.coveredPrimaryMembers, covered, 'report actual coverage without inflating the drawing');
     assert.equal(
       record.registration.landmarks.length,
       0,
@@ -821,7 +818,7 @@ test('four-symbol subject axes and actual PNG coverage independently agree with 
   }
 });
 
-test('expanded art keeps verified target identity, source meaning and physical member coverage without fake anchors', () => {
+test('expanded art keeps verified target identity, source meaning and bounded physical scale without fake anchors', () => {
   const manifest = chineseArt(),
     catalog = JSON.parse(
       readFileSync(new URL('../assets/chinese-sky/catalog.json', import.meta.url))
@@ -842,13 +839,11 @@ test('expanded art keeps verified target identity, source meaning and physical m
     if (originals.has(record.original) || checked.has(record.original)) continue;
     checked.add(record.original);
     const p = record.registration.placement;
-    assert.equal(record.registration.diagnostics.placementMethod, 'member-extent');
-    assert.equal(record.anchors.length, 0);
-    assert.equal(
-      record.registration.landmarks.length,
-      0,
-      'overall placement does not invent pixel-to-HIP anatomical correspondence'
-    );
+    const extentBased = record.registration.diagnostics.placementMethod === 'member-extent';
+    if (extentBased) {
+      assert.equal(record.anchors.length, 0);
+      assert.equal(record.registration.landmarks.length, 0);
+    }
     assert.ok(record.meaning.zh && record.meaning.en);
     assert.equal(record.historicalImageReconstruction, false);
     assert.equal(record.basis.perStarAnatomyClaimed, false);
@@ -888,7 +883,16 @@ test('expanded art keeps verified target identity, source meaning and physical m
       for (const member of object.members)
         if (ids.has(member.physicalId)) members.set(member.physicalId, member);
     }
+    if (!extentBased) {
+      assert.ok(record.registration.landmarks.length > 0);
+      for (const landmark of record.registration.landmarks) {
+        assert.ok(members.has('hip:' + landmark.hip), 'semantic landmarks must be real primary members');
+        assert.equal(landmark.basis, 'modern-layout');
+      }
+      continue;
+    }
     const planes = [];
+    let covered = 0;
     for (const member of members.values()) {
       const ra = (member.ra * Math.PI) / 180,
         dec = (member.dec * Math.PI) / 180,
@@ -900,13 +904,15 @@ test('expanded art keeps verified target identity, source meaning and physical m
         y = p.sourceOrigin[1] + dx * p.orthogonalMatrix[1][0] + dy * p.orthogonalMatrix[1][1],
         [l, t, r, b] = p.sourceVisibleBox;
       planes.push(plane);
-      assert.ok(
-        x >= l - 1e-4 && x <= r + 1e-4 && y >= t - 1e-4 && y <= b + 1e-4,
-        record.original + ' excludes ' + member.physicalId
-      );
+      if (x >= l - 1e-4 && x <= r + 1e-4 && y >= t - 1e-4 && y <= b + 1e-4) covered++;
     }
     assert.equal(members.size, p.primaryMemberCount);
-    assert.equal(p.coveredPrimaryMembers, members.size);
+    assert.equal(p.coveredPrimaryMembers, covered);
+    const diameter = Math.max(...planes.flatMap(a => planes.map(b => Math.hypot(a[0]-b[0], a[1]-b[1]))));
+    assert.ok(Math.abs(diameter-p.memberDiameterPlane) < 1e-9);
+    const expectedSpan = Math.max(diameter * p.coveragePadding, 2*Math.tan(p.minimumAngularDiameterDegrees*Math.PI/360));
+    assert.ok(Math.abs(p.sourceExtentPixels*p.uniformScalePerSourcePixel-expectedSpan)<1e-9,
+      record.original+' must follow the stellar span instead of inflated rectangular containment');
     if (p.axisPolicy === 'north-up-visual-design') {
       assert.ok(
         Math.abs(p.orthogonalMatrix[0][0] + 1) < 1e-10 &&
@@ -915,7 +921,7 @@ test('expanded art keeps verified target identity, source meaning and physical m
       assert.ok(
         Math.abs(p.orthogonalMatrix[0][1]) < 1e-10 && Math.abs(p.orthogonalMatrix[1][0]) < 1e-10
       );
-    } else {
+    } else if (!p.targetAxisHips) {
       const mean = planes.reduce(
           (a, b) => [a[0] + b[0] / planes.length, a[1] + b[1] / planes.length],
           [0, 0]

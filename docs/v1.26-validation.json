@@ -1,0 +1,120 @@
+{
+  "version": "1.26",
+  "status": "passed-with-documented-scope",
+  "recordedAtUTC": "2026-11-08T04:05:13.384681+00:00",
+  "baseCommit": "c77424fb8da71f7547cfdab58f0784f080633d15",
+  "system": "macOS-10.16-x86_64-i386-64bit",
+  "scope": [
+    "Every 312 individual asterism and seven overview illustrations visually inspected before and after correction",
+    "Directed semantic axes and meaningful pivots; whole-image equal scale; no source-image repainting",
+    "Visible subject diameter replaces forced rectangular containment; explicit 3 degree visual floor retained",
+    "Safari live Xuntian finder and annotated 1440x900 PNG export for Bow and Arrow with Sirius in the same field"
+  ],
+  "artAudit": {
+    "reviewedArtworks": 319,
+    "individualAsterisms": 312,
+    "overviews": 7,
+    "originalPNGsPreserved": 319,
+    "encodedAVIFFilesPreserved": 337,
+    "rotationOrReflectionChanged": 39,
+    "scaleChanged": 315,
+    "arrowCheck": {
+      "imageId": "asterism-097",
+      "tipHIP": 34444,
+      "nockHIP": 37819,
+      "externalDirectionHIP": 32349,
+      "greatCircleDirectionErrorDegrees": 1.301908,
+      "externalStarAddedToAsterism": false
+    }
+  },
+  "catalogUnchanged": true,
+  "catalogSHA256": "8e14514ee454b6b6ce96f73ae477f5ba87a9c548cd5c0e6fa33ce03ab0ff5cfc",
+  "automated": [
+    {
+      "log": "output/release126/tests.log",
+      "status": "passed",
+      "sha256": "2bd756c58dca9d256f0646951f7621955d9dd7c11bcc031245dc72beeb048632"
+    },
+    {
+      "log": "output/release126/docs.log",
+      "status": "passed",
+      "sha256": "1a9b2d76d1f4f563f44d3d15d645efdd9d2595c0027b6bf0dc73cb70c0634e33"
+    },
+    {
+      "log": "output/release126/format.log",
+      "status": "passed",
+      "sha256": "16305789c9bfcbe9a3a1ef99169a8e9a7e97c92285df8d80d7a4a2f24afef2d1"
+    },
+    {
+      "log": "output/release126/build.log",
+      "status": "passed",
+      "sha256": "ae7bfada930f7b592f09846ea4c881088103db6b7489f92bd5a7cddfc54fb072"
+    },
+    {
+      "log": "output/release126/build-web.log",
+      "status": "passed",
+      "sha256": "83cdfa62f2b7efda115bd4e54654f93175a8ea7b0575ad8f01f6f7957b77ee2f"
+    },
+    {
+      "log": "output/release126/web-assets.log",
+      "status": "passed",
+      "sha256": "c1354a5ed39dbc61bc5fc7a8a5b819945d2d47a8c7d4d7183f3cbb1b3b5ff50c"
+    },
+    {
+      "log": "output/release126/local-assets.log",
+      "status": "passed",
+      "sha256": "acff8dc5f60766581d09b02003bf9b186801ae392a174251bffddfbcf242449c"
+    },
+    {
+      "log": "output/release126/placement-tests.log",
+      "status": "passed",
+      "sha256": "ca87233954fee83e45e3cc31ac40f69536502efdcb7c9a5ba119d02b2ec60559"
+    },
+    {
+      "log": "output/release126/docs-final.log",
+      "status": "passed",
+      "sha256": "ac87d266c0f02e7f7475bfb3f79b1b464381bf4809a198dfd7547270d4784ec0"
+    },
+    {
+      "log": "output/release126/diff-check.log",
+      "status": "passed",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "output/release126/build-local.log",
+      "status": "passed",
+      "sha256": "f7576dfe0b86c66802aeb498c3d73a564b724bc021844bad37cbf261d6de6677"
+    }
+  ],
+  "builds": {
+    "standaloneBytes": 490458283,
+    "standaloneSHA256": "72c565805da24340ea76b5b1b1af2ffc7f3594f9947df4681ec325558104c7ae",
+    "localEntrySHA256": "dab31c376372d7913e200156fdaafe6af11da70d086494eaa8fd8ab7c53c3c3a",
+    "webEntrySHA256": "be64b46ccfcec779645988b9201e6b56531715a744bae5fdc4794917f9ea9a3f"
+  },
+  "visualEvidence": [
+    {
+      "file": "output/release126/safari-hushi-sirius.png",
+      "sha256": "c2564ed948a9841febeb8e0b6fd9121988d4de8fdef00a5eabf501f35c1d755b",
+      "description": "Safari v1.26 live finder: arrow tip at Bow and Arrow I, shaft aimed toward Sirius"
+    },
+    {
+      "file": "output/release126/hushi-sirius-export.png",
+      "sha256": "29ec412e35c871e7a9a5fba248d33ed7876dca131e2db97770fcd8bf5773f7b0",
+      "description": "Actual annotated Xuntian PNG export with image/data credit footer"
+    }
+  ],
+  "limitations": [
+    "All-artwork inspection uses exact placement contact sheets; runtime visual check focuses on the reported Bow and Arrow case.",
+    "No claim of unique historical anatomy or exact per-star artistic coincidence for all motifs.",
+    "In-app browser connection timed out; native Safari was used successfully.",
+    "Windows, notarization and fresh portable-package launch not tested in this batch."
+  ],
+  "publication": "Local v1.26 only; GitHub and Pages remain v1.25.",
+  "localInstallation": {
+    "version": "1.26",
+    "runtime": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "launcher": "/Applications/星轨.app",
+    "verifiedAdHocSignature": true
+  }
+}

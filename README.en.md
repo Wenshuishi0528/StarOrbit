@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.25 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.29 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.25 completes Chinese asterism illustrations, restores overviews with independent opacity, and adds the full official lunar gazetteer, landing sites and CAS geology on the 3D Moon. See the [verification overview](docs/verification.md) for the measured scope; online and downloadable editions show their own version.
+> Local v1.29 adds birthday sky cards with tropical zodiac and declared traditional daily-mansion calculations, explanations, editable wishes and high-resolution single/paired cards. All 28 cultural mansion names are searchable in the finder. [Date rules](docs/birthday-calendar-sources.md) · [Verification](docs/verification.md). Published editions show their own version.
 
 <a id="interface-and-basic-controls"></a>
 

@@ -20,7 +20,7 @@ assert.equal(validateScene(JSON.parse(JSON.stringify(newScene))).environment.chi
 assert.equal(validateScene(newScene).simulation.time, validateScene(oldScene).simulation.time);
 assert.equal(normalizeStarChartSettings().chineseSymbolArt, false);
 assert.throws(() => normalizeStarChartSettings({chineseSymbolArt:'yes'}, {strict:true}));
-assert.deepEqual(skyCultureArtOptions({skyCulture:'chinese',constellationArt:false,chineseSymbolArt:true}),{culture:'chinese',asterisms:false,symbols:true,overviewOpacity:.2});
+assert.deepEqual(skyCultureArtOptions({skyCulture:'chinese',constellationArt:false,chineseSymbolArt:true}),{culture:'chinese',asterisms:false,symbols:true,overviewOpacity:.2,artBrightness:1});
 assert.equal(skyCultureArtEnabled({skyCulture:'chinese',constellationArt:false,chineseSymbolArt:true}),true);
 assert.equal(skyCultureArtEnabled({skyCulture:'chinese',constellationArt:false,chineseSymbolArt:false}),false);
 assert.equal(skyCultureArtEnabled({skyCulture:'western',constellationArt:false,chineseSymbolArt:true}),false);

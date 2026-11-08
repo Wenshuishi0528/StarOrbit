@@ -1,0 +1,52 @@
+{
+  "version": "1.28",
+  "status": "passed-with-documented-scope",
+  "dateUTC": "2026-11-08T04:59:05.569312+00:00",
+  "scope": "Independent Chinese asterism / Western constellation illustration brightness; overview opacity preserved",
+  "defaults": {
+    "westernArtBrightness": 1,
+    "chineseArtBrightness": 1,
+    "range": [
+      0,
+      2
+    ],
+    "chineseSymbolOpacity": 0.2
+  },
+  "checks": {
+    "relatedRegressionTests": [
+      "star-chart-settings",
+      "sky-culture-rendering",
+      "scene-share",
+      "chinese-sky-integration",
+      "constellation-art",
+      "i18n"
+    ],
+    "result": "passed",
+    "manualModuleCheck": "Both slider input handlers, independent culture values, 0%, default brightness, strict normalization/save round-trip, overview isolation passed.",
+    "docs": "passed",
+    "format": "passed",
+    "builds": [
+      "standalone",
+      "local split",
+      "web"
+    ],
+    "sharedRenderingPaths": [
+      "main via skyCultureArtOptions",
+      "finder via skyCultureArtOptions",
+      "photo via frozenChart and skyCultureArtOptions"
+    ]
+  },
+  "evidence": "output/release128/",
+  "sourceSHA256": {
+    "src/star-chart-settings.js": "8cb0743856b9e040bb8ce28f3dcd183b29efa59f5bfbdd5e1fa765882214156e",
+    "src/constellation-art-layer.js": "797e4e3c817491681eaf0d25a5e010afa54a86e8de00696e7bcbee650200331d",
+    "src/layout.html": "8fcee6bda7c01c74971b0314f247c55e6f6dee14d3fde4a310a5c6d9685a7c25"
+  },
+  "notRun": [
+    "Full unrelated regression suite",
+    "New native browser interaction test",
+    "Portable ZIP",
+    "GitHub/Pages publication"
+  ],
+  "publication": "Local only; public editions remain v1.25"
+}

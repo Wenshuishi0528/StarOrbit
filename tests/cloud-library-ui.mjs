@@ -105,3 +105,27 @@ assert(day.parentElement.children.includes(day),'render must preserve the date s
 library.notify();
 assert(month.parentElement.children.includes(month));assert(day.parentElement.children.includes(day));
 console.log('PASS: live library rendering preserves date controls nested in translated labels.');
+
+// Real view: coverage and quality are distinct; unknown/partial maps stay out,
+// while a same-hash disk sidecar can supply metadata missing from the browser.
+const full={...record,coverage:.9983,polarCoverage:{north:.9999,south:.9994},footprint:{global:.9997,north:.9999,south:.9996},quality:{schema:1,status:'rejected',reasons:['high-opacity-plateau']}};
+library.disk=[{...full,disk:'global.png'}];
+weather.items=[record,{...full,id:'partial',time:record.time+3600e3,sha256:'b'.repeat(64),coverage:.25},{...record,id:'unknown',time:record.time+7200e3,sha256:'c'.repeat(64)},{...full,id:'other',provider:'gdps',sha256:'d'.repeat(64)}];
+const globalTab=document.getElementById('cloudGlobalTab');
+globalTab.onclick();
+let shown=document.getElementById('cloudArchiveList').children;
+assert.equal(shown.length,1);
+assert(shown[0].textContent.includes('全球覆盖'));
+assert(shown[0].textContent.includes('亮度平台可能异常'),'quality warning survives the global-coverage filter');
+assert.equal(globalTab.textContent,'NASA 全球覆盖（1）');
+assert.equal(document.getElementById('historyApply').hidden,false);
+assert.equal(document.getElementById('cloudGlobalInfo').hidden,false);
+library.notify();
+assert.equal(document.getElementById('cloudArchiveList').children.length,1);
+library.disk=[];library.notify();
+assert.equal(globalTab.textContent,'NASA 全球覆盖（0）');
+assert(document.getElementById('cloudArchiveList').textContent.includes('不代表官方档案没有'));
+document.getElementById('cloudSavedTab').onclick();
+assert.equal(document.getElementById('cloudArchiveList').children.length,4,'all saved maps remain accessible');
+assert.equal(document.getElementById('cloudGlobalInfo').hidden,true);
+console.log('PASS: NASA global view separates valid coverage, missing metadata and quality hints without losing saved maps.');

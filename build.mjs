@@ -60,7 +60,10 @@ environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
   for(const name of ['README.md','catalog.json'])fs.copyFileSync('assets/chinese-sky/'+name,directory+'/'+name);
   fs.mkdirSync(directory+'/source',{recursive:true});
   for(const name of ['CC-BY-SA-4.0.txt','index.json','I-239-hip_main.tsv','I-311-hip2.tsv','Gaia-DR3.csv','Gaia-DR3-AIP.xml','Gaia-HIP-crossmatch.csv'])fs.copyFileSync('assets/chinese-sky/source/'+name,directory+'/source/'+name);
-  for(const name of ['README.md','provenance.json','rigid-placements.json','expansion-brief.json','subjects.txt'])fs.copyFileSync('assets/chinese-sky/art/'+name,directory+'/art/'+name);
+  for(const name of ['README.md','provenance.json','rigid-placements.json','expansion-brief.json','subjects.txt','placement-audit.json'])fs.copyFileSync('assets/chinese-sky/art/'+name,directory+'/art/'+name);
+  fs.mkdirSync(out+'/docs',{recursive:true});
+  for(const name of fs.readdirSync('docs').filter(name=>/^v\d+\.\d+-validation\.json$/.test(name)))fs.copyFileSync('docs/'+name,out+'/docs/'+name);
+  fs.copyFileSync('docs/birthday-calendar-sources.md',out+'/docs/birthday-calendar-sources.md');
   fs.writeFileSync(directory+'/art/manifest.json',JSON.stringify({...art,images:art.images.map((record,i)=>({...record,file:'../../../'+environmentAssets.chineseConstellationArt.images[i].url}))},null,2));
  }
 }

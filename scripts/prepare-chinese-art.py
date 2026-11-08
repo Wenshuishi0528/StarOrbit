@@ -46,6 +46,32 @@ def area(a, b, c):
     return float((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]))
 
 
+def visible_subject_diameter(image, threshold=32):
+    """Maximum separation of visible alpha pixels, excluding transparent margins.
+
+    Each convex-hull vertex is a row's first/last opaque pixel. This is exact
+    at source resolution and avoids a quadratic comparison of all image pixels.
+    """
+    mask = np.asarray(image.getchannel('A')) > threshold
+    rows = np.flatnonzero(mask.any(axis=1))
+    if not len(rows):
+        raise ValueError('The source illustration has no visible subject')
+    left = mask[rows].argmax(axis=1)
+    right = mask.shape[1] - 1 - mask[rows, ::-1].argmax(axis=1)
+    points = sorted(set(zip(left.tolist(), rows.tolist())) | set(zip(right.tolist(), rows.tolist())))
+    def half(values):
+        hull = []
+        for point in values:
+            while len(hull) >= 2 and area(np.asarray(hull[-2]), np.asarray(hull[-1]), np.asarray(point)) <= 0:
+                hull.pop()
+            hull.append(point)
+        return hull
+    hull = np.asarray(half(points)[:-1] + half(reversed(points))[:-1], dtype=float)
+    if len(hull) < 2:
+        raise ValueError('The visible subject has no measurable extent')
+    return float(np.max(np.linalg.norm(hull[:, None] - hull[None, :], axis=2)))
+
+
 def similarity(source, target, *, mirror='auto', scale_mode='least-squares'):
     x, y = np.asarray(source), np.asarray(target)
     xc, yc = x.mean(axis=0), y.mean(axis=0)
@@ -243,9 +269,12 @@ def registration(spec, hip, catalog=None):
                 axis_policy = 'north-up-visual-design'
             else:
                 b = eigenvectors[:, -1]
-                if b[0] > 0 or abs(b[0]) < 1e-10 and b[1] > 0:
+                # A PCA has no head/tail. Choose the sign that rotates the
+                # authored pose least from celestial north-up; semantic axes
+                # above take precedence whenever the endpoints are known.
+                if np.dot(b, -a) < 0:
                     b = -b
-                axis_policy = 'verified-primary-member-pca-westward-sign'
+                axis_policy = 'verified-primary-member-pca-minimum-rotation'
         parity = -1 if placement.get('mirror', False) else 1
         source_basis = np.asarray([a, [-a[1], a[0]]])
         target_basis = np.asarray([b, np.asarray([-b[1], b[0]]) * parity])
@@ -262,13 +291,20 @@ def registration(spec, hip, catalog=None):
         target_min, target_max = target_aligned.min(axis=0), target_aligned.max(axis=0)
         source_span, target_span = source_max - source_min, target_max - target_min
         padding = placement.get('coveragePadding', 1.08)
-        uniform_scale = max(target_span / source_span) * padding
+        member_diameter = float(np.max(np.linalg.norm(member_planes[:, None] - member_planes[None, :], axis=2)))
+        source_diameter = float(placement.get('sourceExtentPixels', max(bounds[2:] - bounds[:2]))) / scale
+        if not math.isfinite(source_diameter) or source_diameter <= 0:
+            raise ValueError('The visible subject diameter must be finite and positive')
+        # An illustration is not a stellar boundary. Requiring every member to
+        # fit inside both axes of a thin drawing inflated some images 4–7x.
+        # Match the overall spans instead; local stars may lie outside the art.
+        uniform_scale = member_diameter / source_diameter * padding
         minimum_diameter = float(placement.get('minimumAngularDiameterDegrees', 0))
         if not math.isfinite(minimum_diameter) or not 0 <= minimum_diameter < 90:
             raise ValueError('Minimum visual angular diameter must be finite and in [0, 90) degrees')
         # A single real member has no astronomical extent. Give only the image
         # an explicit modern visual size; never invent additional stellar anchors.
-        minimum_scale = 2 * math.tan(math.radians(minimum_diameter) / 2) / max(source_span)
+        minimum_scale = 2 * math.tan(math.radians(minimum_diameter) / 2) / source_diameter
         minimum_extent_applied = bool(uniform_scale < minimum_scale)
         uniform_scale = max(uniform_scale, minimum_scale)
         source_origin = (source_min + source_max) / 2
@@ -282,6 +318,10 @@ def registration(spec, hip, catalog=None):
                          'targetAxisPlane': b.tolist(), 'memberPcaEigenvalueRatio': axis_ratio,
                          'targetExtentInSourceBasis': [target_min.tolist(), target_max.tolist()],
                          'sourceVisibleBox': bounds.tolist(), 'coveragePadding': padding,
+                         'scalePolicy': 'visible-subject-diameter',
+                         'sourceExtentPixels': source_diameter * scale,
+                         'memberDiameterPlane': member_diameter,
+                         'illustrationDiameterPlane': source_diameter * uniform_scale,
                          'minimumAngularDiameterDegrees': minimum_diameter,
                          'minimumExtentApplied': minimum_extent_applied,
                          'minimumExtentBasis': 'modern-layout' if minimum_diameter else None,
@@ -415,7 +455,7 @@ def clip_polygon(polygon, axis, bound, greater):
     return output
 
 
-def write_artwork(spec, catalog, hip):
+def write_artwork(spec, catalog, hip, *, geometry_only=False):
     name = spec['imageId']
     original = ART / spec['sourceFile']
     image = Image.open(original).convert('RGBA')
@@ -493,7 +533,11 @@ def write_artwork(spec, catalog, hip):
                         'pos': point['pixel']} for point in actual]
             image_id = name + (f'-{x}-{y}' if large else '')
             file = ART / (image_id + '.avif')
-            tile.save(file, quality=92, speed=6, subsampling='4:4:4', alpha_premultiplied=False)
+            if geometry_only:
+                if not file.exists() or Image.open(file).size != tile.size:
+                    raise ValueError(name + ': geometry-only preparation requires the existing matching texture')
+            else:
+                tile.save(file, quality=92, speed=6, subsampling='4:4:4', alpha_premultiplied=False)
             result.append({'imageId': image_id, 'file': str(file.relative_to(ROOT)),
                            'width': tile.width, 'height': tile.height, 'size': list(tile.size),
                            'anchors': anchors, 'mesh': {'positions': [round(value, 12) for row in directions for value in row],
@@ -662,6 +706,10 @@ def import_expansion(config, brief_path):
     pending = []
     for entry in brief['entries']:
         identifier = entry['artworkId']
+        # Import adds new artwork. It must not erase a visually reviewed
+        # semantic direction or pivot when the generation brief is rerun.
+        if identifier in specifications:
+            continue
         original = ROOT / entry['sourcePNG']
         description = metadata.get(identifier, {})
         if not original.exists():
@@ -695,6 +743,7 @@ def import_expansion(config, brief_path):
                 'placement': {'method': 'member-extent',
                               'sourceAxisPixels': [[float(point[0] * image.width), float(point[1] * image.height)] for point in axis],
                               'sourceVisibleBox': list(bounds), 'alphaThreshold': 32,
+                              'sourceExtentPixels': visible_subject_diameter(image),
                               'axisRole': description.get('intrinsicPose', 'Declared modern subject axis'),
                               'sourceVisualCenterUV': description.get('centerUV'),
                               'orientation': 'north-up' if north_up else 'member-pca',
@@ -724,6 +773,7 @@ def main():
                         help='Import available PNGs plus authored axis metadata from a generic expansion brief')
     parser.add_argument('--guides', action='store_true', help='Write fixed-star redraw guides to output/release121 only')
     parser.add_argument('--diagnose-only', action='store_true', help='Print numerical fit checks without writing any assets or reports')
+    parser.add_argument('--geometry-only', action='store_true', help='Rebuild placement meshes while retaining existing encoded image bytes')
     args = parser.parse_args()
     REPORTS = args.reports
     selected_ids = {value.strip() for value in args.only.split(',') if value.strip()} if args.only else None
@@ -759,7 +809,12 @@ def main():
     for spec in selected:
         name = spec['imageId']
         try:
-            generated, report = write_artwork(spec, catalog, hip)
+            if args.geometry_only:
+                source_hash = hashlib.sha256((ART / spec['sourceFile']).read_bytes()).hexdigest()
+                old = [record for record in previous['images'] if record.get('original') == spec['sourceFile']]
+                if not old or any(record.get('originalSha256') != source_hash for record in old):
+                    raise ValueError(name + ': geometry-only mode cannot change source artwork')
+            generated, report = write_artwork(spec, catalog, hip, geometry_only=args.geometry_only)
             images = [record for record in images if record.get('imageId') != name and not record.get('imageId', '').startswith(name + '-')] + generated
         except (ValueError, KeyError, np.linalg.LinAlgError) as error:
             report = {'imageId': name, 'status': 'rejected', 'error': str(error),

@@ -8,6 +8,7 @@ import { tychoCutouts } from './survey-sky-product-tycho.js';
 import { DEEP_SKY_OBJECTS, deepSkyName, deepSkyTypeName } from './deep-sky-catalog.js';
 import { getSkyCulture, normalizeSkyCulture, cultureStarName } from './sky-cultures.js';
 import chineseSearch from '../assets/chinese-sky-search.json';
+import { birthdaySearchAliases } from './birthday-content.js';
 
 const DEG = Math.PI / 180,
   BIN = 5,
@@ -340,7 +341,13 @@ function searchCatalog() {
       frame.direction,
       frame.fov,
       frame.radius,
-      [field.id, field.en, ...(supplement?.names ?? []), supplement?.genitive]
+      [
+        field.id,
+        field.en,
+        ...(supplement?.names ?? []),
+        supplement?.genitive,
+        ...birthdaySearchAliases('constellation:' + field.id),
+      ]
     );
     constellations.set(field.id.toLowerCase(), r);
   }
@@ -395,7 +402,7 @@ function searchCatalog() {
       frame.direction,
       Math.min(110, frame.fov),
       frame.radius,
-      asterism.aliases || []
+      [...(asterism.aliases || []), ...birthdaySearchAliases(asterism.targetId)]
     );
     Object.assign(r, {
       culture: 'chinese',

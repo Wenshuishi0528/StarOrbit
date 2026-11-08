@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {selectCloud,validateNASA,completeNASA,retireNASA,protectedCloudIds} from '../src/cloud-source.js';
+import {selectCloud,validateNASA,completeNASA,retireNASA,protectedCloudIds,nasaCoverage} from '../src/cloud-source.js';
 const now=Date.now(),time=now-8*86400e3,old={kind:'cloud',id:'old',downloaded:now,time:null},nasa={kind:'cloud',id:'nasa',provider:'satcorps',quality:{schema:1,status:'accepted',reasons:[],metrics:{}},time,observedStart:time-5e6,observedEnd:time+2e6,downloaded:now,resolution:'8192×4096',nativeResolution:'12960×6480',channel:'red',coverage:.995,polarCoverage:{north:.999,south:.999},footprint:{global:1,north:1,south:1}};
 assert.equal(selectCloud([old,nasa],'latest',now),null);
 assert.equal(selectCloud([old,nasa],'satcorps',now).id,'nasa','complete historical data remains available regardless of age');
@@ -7,6 +7,16 @@ assert.equal(selectCloud([old,{...nasa,footprint:{global:.99,north:.7,south:.6}}
 assert.equal(selectCloud([old,nasa],'history',now,'old'),null);
 assert.equal(selectCloud([old,nasa],'history',now,'nasa').id,'nasa');
 assert.equal(validateNASA(nasa),nasa);
+assert.equal(nasaCoverage(nasa),'global');
+assert.equal(nasaCoverage({...nasa,quality:{status:'rejected'}}),'global','coverage is independent of image-quality advice');
+assert.equal(nasaCoverage({...nasa,coverage:.25225037151348884}),'partial');
+assert.equal(nasaCoverage({...nasa,polarCoverage:{north:1,south:.98999}}),'partial');
+assert.equal(nasaCoverage({...nasa,footprint:{global:1,north:1,south:.99499}}),'partial');
+assert.equal(nasaCoverage({...nasa,coverage:.995,polarCoverage:{north:.99,south:.99},footprint:{global:.995,north:.995,south:.995}}),'global');
+assert.equal(nasaCoverage({provider:'satcorps',remote:true,source:'glob-comp.nc'}),'unknown');
+assert.equal(nasaCoverage({...nasa,footprint:undefined}),'unknown');
+for(const invalid of [NaN,Infinity,1.01,-.1,'1',null]) assert.equal(nasaCoverage({...nasa,coverage:invalid}),'unknown');
+assert.equal(nasaCoverage({...nasa,provider:'gdps'}),'unknown');
 for(const change of [{nativeResolution:'4096×2048'},{observedStart:now+1e6},{coverage:.8},{polarCoverage:{north:1,south:.3}},{footprint:{global:1,north:1,south:.7}}])assert.throws(()=>validateNASA({...nasa,...change},now));
 assert.ok(!completeNASA({...nasa,time:now+3600e3},now));
 console.log('Cloud provider isolation, old complete archives, history and polar coverage guards passed');

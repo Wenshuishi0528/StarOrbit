@@ -56,6 +56,9 @@ export class ConstellationArtLayer {
         this.meshes.delete(id);
       }
     const fade = constellationArtFade(view.fovY);
+    const artBrightness = Number.isFinite(options.artBrightness)
+      ? Math.max(0, Math.min(2, options.artBrightness))
+      : 1;
     const overviewOpacity = Number.isFinite(options.overviewOpacity)
       ? Math.max(0, Math.min(1, options.overviewOpacity))
       : 0.2;
@@ -118,8 +121,9 @@ export class ConstellationArtLayer {
       mesh.material.uniforms.opacity.value =
         (overview
           ? overviewOpacity
-          : Math.min(0.42, (entry.frame.record.opacity ?? 0.22) * emphasis) * fade) *
-        Math.min(1, (performance.now() - born) / 300);
+          : Math.min(0.42, (entry.frame.record.opacity ?? 0.22) * emphasis) *
+            fade *
+            artBrightness) * Math.min(1, (performance.now() - born) / 300);
     }
     return this.manager.status(this.id);
   }

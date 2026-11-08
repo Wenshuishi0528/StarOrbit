@@ -1,5 +1,7 @@
 import { installCameraFocus } from './camera-focus.js';
+import { spacecraftLabelNames } from './spacecraft-labels.js';
 import { installSkyCultureControls } from './sky-culture-controls.js';
+import { installBirthdayCard } from './birthday-card.js';
 import { saveSkyCultureScreenshot } from './sky-culture-screenshot.js';
 import { installFloatingWindows } from './floating-windows.js';
 import { installAttitudeNavball } from './attitude-navball.js';
@@ -120,7 +122,7 @@ const coreName = (id) =>
     ? t('天和核心舱')
     : t('天和核心舱 {number}', { number: assembly.byId.get(id).number });
 const instanceName = (id) => {
-  if (id === 'freeXT') return t('巡天 · 独立飞行');
+  if (id === 'freeXT') return t('巡天望远镜');
   const item = assembly.byId.get(id);
   if (!item) return '';
   if (item.type === 'TH') return coreName(id);
@@ -583,40 +585,49 @@ function resize() {
     camera.updateProjectionMatrix();
   }
 }
-function tick(t) {
+function tick(wall) {
   requestAnimationFrame(tick);
   if (document.hidden) return;
   resize();
   if (sim?.freeFlight?.active) {
-    last = t;
-    sim.lastWall = t;
-    sim.freeFlight.tick(t);
+    last = wall;
+    sim.lastWall = wall;
+    sim.freeFlight.tick(wall);
     return;
   }
   if (sim?.flightLab?.active || sim?.environment?.weather?.resourcePanel?.active) {
-    last = t;
-    sim.lastWall = t;
+    last = wall;
+    sim.lastWall = wall;
     return;
   }
-  const dt = Math.min((t - last) / 1000, 0.1);
-  last = t;
-  if (sim?.initialized) sim.update(t);
+  const dt = Math.min((wall - last) / 1000, 0.1);
+  last = wall;
+  if (sim?.initialized) sim.update(wall);
   if (sim?.initialized && playing && model.visible)
     changeAngle('left', ((state.angles[state.target].left + dt * 15 + 180) % 360) - 180);
   sim?.cameraFocus?.update();
   controls.update();
   updateModelClipping();
   if (ready) {
+    const labelNames = spacecraftLabelNames(
+      Object.keys(tags).map((id) => ({
+        id,
+        type: types[id],
+        name: instanceName(id),
+        visible: groups[id].visible,
+      })),
+      {
+        enabled: model.visible && $('labels').checked,
+        cameraTarget: sim?.cameraFocus?.selected,
+        scopeActive: !!sim?.xuntian?.active,
+        translate: t,
+      }
+    );
     for (const [k, tag] of Object.entries(tags)) {
       const p = tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);
+      if (labelNames[k] && tag.el.textContent !== labelNames[k]) tag.el.textContent = labelNames[k];
       tag.el.style.display =
-        model.visible &&
-        groups[k].visible &&
-        $('labels').checked &&
-        p.z < 1 &&
-        p.z > -1 &&
-        Math.abs(p.x) < 1 &&
-        Math.abs(p.y) < 1
+        !!labelNames[k] && p.z < 1 && p.z > -1 && Math.abs(p.x) < 1 && Math.abs(p.y) < 1
           ? 'block'
           : 'none';
       tag.el.style.left = ((p.x + 1) * stage.clientWidth) / 2 + 'px';
@@ -625,7 +636,7 @@ function tick(t) {
   }
   if (sim) {
     sim.render();
-    sim.xuntian?.draw(t);
+    sim.xuntian?.draw(wall);
   } else renderer.render(scene, camera);
 }
 requestAnimationFrame(tick);
@@ -744,6 +755,7 @@ async function boot() {
     sim.freeFlight = installFreeFlight(sim, { templates, meta });
     sim.floatingWindows = installFloatingWindows();
     sim.skyCultureControls = installSkyCultureControls(sim);
+    sim.birthdayCard = installBirthdayCard(sim);
     installHelp(music);
     installVisitorCounter();
   } catch (e) {

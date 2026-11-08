@@ -1,0 +1,221 @@
+{
+  "version": "1.27",
+  "status": "passed-with-documented-scope",
+  "completedAtUTC": "2026-11-08T04:41:44.380921+00:00",
+  "baseCommit": "c77424fb8da71f7547cfdab58f0784f080633d15",
+  "workingTree": "Uncommitted v1.26 art calibration preserved; v1.27 cloud changes layered on top.",
+  "environment": {
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.9.6",
+    "node": "v25.9.0"
+  },
+  "scope": [
+    "Himawari exact one-second metadata boundary",
+    "Dedicated NASA global-coverage view of downloaded/imported records; truthful coverage labels and quality warnings"
+  ],
+  "himawari": {
+    "source": "https://noaa-himawari9.s3.amazonaws.com/AHI-L2-FLDK-Clouds/2026/11/08/0400/AHI-CMSK_v1r1_h09_s202611080400210_e202611080409404_c202611080414138.nc",
+    "filenameStart": "2026-11-08T04:00:21.000Z",
+    "internalStart": "2026-11-08T04:00:20Z",
+    "differenceMs": -1000,
+    "acceptedToleranceMs": 1000,
+    "realConversion": {
+      "provider": "himawari",
+      "date": "2026-11-08",
+      "slot": "04:00",
+      "time": 1794110400000,
+      "createdAt": 1794111253800,
+      "publishedAt": 1794111490000,
+      "observedStart": 1794110421000,
+      "observedEnd": 1794110980400,
+      "source": "https://noaa-himawari9.s3.amazonaws.com/AHI-L2-FLDK-Clouds/2026/11/08/0400/AHI-CMSK_v1r1_h09_s202611080400210_e202611080409404_c202611080414138.nc",
+      "release": "Himawari-9 AHI-CMSK v1r1",
+      "rawBytes": 370432369,
+      "remote": true,
+      "coverage": 0.3650398254394531,
+      "polarCoverage": {
+        "north": 0.1678628921508789,
+        "south": 0.1678628921508789
+      },
+      "nativeResolution": "5500×5500",
+      "resolution": "4096×2048",
+      "channel": "validity",
+      "size": 526578,
+      "sha256": "77df00551b0eaf0eac0a189dd54918ffe679dd9dd702c923152947375331ea9e",
+      "downloadBytes": 6607703,
+      "processing": "himawari-class-v1",
+      "manualEligible": true,
+      "attribution": "JMA Himawari-9 / NOAA NESDIS AHI-CMSK; reprojected by StarOrbit"
+    },
+    "regression": "All three fields accept +/-1000 ms and reject +/-1001 ms; wrong scan rejection retained"
+  },
+  "nasa": {
+    "coverageThresholds": {
+      "validGlobal": 0.995,
+      "validEachPolar": 0.99,
+      "footprintGlobalAndEachPolar": 0.995
+    },
+    "classification": "Coverage independent of visual quality. Missing/malformed metadata never establishes global coverage. This is not an exhaustive search or verification of the undownloaded official archive.",
+    "realSavedRecords": [
+      {
+        "time": 1792756800000,
+        "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/10/23/satcorps-gcc.v02a.geoleo.glob-comp.2026296.1200.3km.nc",
+        "coverage": 0.998342537818168,
+        "polarCoverage": {
+          "north": 0.9999795191281817,
+          "south": 0.9994135802469136
+        },
+        "footprint": {
+          "global": 0.999733093754763,
+          "north": 0.9999994284407865,
+          "south": 0.9996427754915409
+        },
+        "quality": {
+          "schema": 1,
+          "status": "rejected",
+          "reasons": [
+            "high-opacity-plateau"
+          ],
+          "metrics": {
+            "plateauFraction": 0.014202117919921875,
+            "plateauValue": 206,
+            "plateauDominance": 0.9898963041744216,
+            "datelineRun": 1,
+            "verticalRun": 3,
+            "horizontalRun": 7
+          },
+          "sha256": "5bec2cc5ad288fca8bb001431c852bcf19e9ef43bf4448c26c3ea6488f64d6df"
+        },
+        "sha256": "5bec2cc5ad288fca8bb001431c852bcf19e9ef43bf4448c26c3ea6488f64d6df"
+      },
+      {
+        "time": 1792497600000,
+        "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/10/20/satcorps-gcc.v02a.geoleo.glob-comp.2026293.1200.3km.nc",
+        "coverage": 0.9985940000571559,
+        "polarCoverage": {
+          "north": 0.9999994284407865,
+          "south": 0.9997806165218717
+        },
+        "footprint": {
+          "global": 0.9999622532769394,
+          "north": 0.9999994284407865,
+          "south": 0.999929983996342
+        },
+        "quality": {
+          "schema": 1,
+          "status": "rejected",
+          "reasons": [
+            "high-opacity-plateau"
+          ],
+          "metrics": {
+            "plateauFraction": 0.0063629150390625,
+            "plateauValue": 206,
+            "plateauDominance": 0.9866903283052352,
+            "datelineRun": 1,
+            "verticalRun": 3,
+            "horizontalRun": 13
+          },
+          "sha256": "e1016f93d144d2704fb734e1dc2142eb93064fe0706076bef0e5101a658069a8"
+        },
+        "sha256": "e1016f93d144d2704fb734e1dc2142eb93064fe0706076bef0e5101a658069a8"
+      },
+      {
+        "time": 1794110400000,
+        "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/11/08/satcorps-gcc.v02a.geoleo.glob-comp.2026312.0400.3km.nc",
+        "coverage": 0.25225037151348884,
+        "polarCoverage": {
+          "north": 0.01957847508001831,
+          "south": 0.007994875019051939
+        },
+        "footprint": {
+          "global": 0.2569367760249962,
+          "north": 0.01957847508001829,
+          "south": 0.01598308184727938
+        },
+        "quality": {
+          "schema": 1,
+          "status": "accepted",
+          "reasons": [],
+          "metrics": {
+            "plateauFraction": 8.392333984375e-05,
+            "plateauValue": 243,
+            "plateauDominance": 0.9361702127659575,
+            "datelineRun": 0,
+            "verticalRun": 5,
+            "horizontalRun": 8
+          },
+          "sha256": "7fca875a4478b1661071a6fcf94143f0b395c5753b94595681bf46807ad11380"
+        },
+        "sha256": "7fca875a4478b1661071a6fcf94143f0b395c5753b94595681bf46807ad11380"
+      },
+      {
+        "time": 1793764800000,
+        "source": "https://satcorps.larc.nasa.gov/prod/GCC-GEO-LEO/visst-pixel-netcdf_v2a/2026/11/04/satcorps-gcc.v02a.geoleo.glob-comp.2026308.0400.3km.nc",
+        "coverage": 0.761880477442463,
+        "polarCoverage": {
+          "north": 0.09017584971803083,
+          "south": 0.0701569882639842
+        },
+        "footprint": {
+          "global": 0.7698745903825637,
+          "north": 0.09017861225422953,
+          "south": 0.08545353223593964
+        },
+        "quality": {
+          "schema": 1,
+          "status": "accepted",
+          "reasons": [],
+          "metrics": {
+            "plateauFraction": 0.0011119842529296875,
+            "plateauValue": 206,
+            "plateauDominance": 0.9253968253968254,
+            "datelineRun": 0,
+            "verticalRun": 4,
+            "horizontalRun": 44
+          },
+          "sha256": "61aca9eef10621278e498a99d9a03679dc53d82e99253448872c30a33eaea12f"
+        },
+        "sha256": "61aca9eef10621278e498a99d9a03679dc53d82e99253448872c30a33eaea12f"
+      }
+    ],
+    "globalRecordCount": 2,
+    "safari": {
+      "url": "http://127.0.0.1:8772/StarOrbit.html",
+      "observed": [
+        "v1.27 loaded",
+        "All-saved list labels 25.23% and 76.19% records partial",
+        "NASA global coverage (2) filters to 2026-10-23 and 2026-10-20",
+        "Global/polar valid coverage and footprints displayed",
+        "Brightness-plateau warning retained",
+        "2026-10-23 global map previewed and successfully applied",
+        "Restored original built-in map after verification"
+      ],
+      "screenshot": "output/release127/nasa-global-safari.png"
+    }
+  },
+  "checks": {
+    "npm test": "passed exit 0",
+    "npm run test:docs": "passed exit 0",
+    "npm run format:check": "passed exit 0",
+    "npm run build": "passed standalone and local split",
+    "npm run build:web": "passed",
+    "targeted coverage/DOM/i18n": "passed",
+    "real NOAA object": "converted successfully"
+  },
+  "evidenceRoot": "output/release127/",
+  "sourceSHA256": {
+    "scripts/himawari.py": "6f87dd16b1423487fd7c3975a841965496be033786f6113e4a79254aef096933",
+    "tests/himawari.py": "08ab0e89191daae3f693577f9236b9b8ac0ffa298cccc4501c9be4d5cdefa34b",
+    "src/cloud-history.js": "69af0895ec2ee1c6dbe5ff06b519ad97d3dff76a011a9015dc7f96bb07377c47",
+    "src/cloud-source.js": "ca9946d80bb0a7ae79a56750d227c6e759efea115a1a0e4023302db08d7a371e",
+    "tests/cloud-source.mjs": "433d20b6731c3e35b74c3053341a9340bff8aa8f7b78715dce220c2317cda7a1",
+    "tests/cloud-library-ui.mjs": "fa140cd4f667aedcb8b58a985fcd131dfc30d7e0831792d95333a8af30643308"
+  },
+  "notRun": [
+    "Windows browser/launcher testing",
+    "New NASA archive-wide coverage scan",
+    "Portable ZIP packaging",
+    "GitHub/Pages publication"
+  ],
+  "publication": "Local only; GitHub/Pages remain v1.25"
+}

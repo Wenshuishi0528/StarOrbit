@@ -28,6 +28,10 @@ TRANSFER_LIMIT = 30_000_000
 IMAGE_LIMIT = 50_000_000
 BLOCK = 65536
 WORKERS = 6
+# NOAA filenames retain tenths of a second while NetCDF attributes use whole
+# seconds. Real H-9 granules can differ by exactly one second at the boundary.
+# Keep this tolerance narrow: a different scan/revision must still be rejected.
+TIME_METADATA_TOLERANCE_MS = 1000
 _latest_lock = threading.Lock()
 _cached = None
 
@@ -262,7 +266,7 @@ def _read_mask(reader, record, progress):
             raise ValueError('向日葵产品或云分类字段无效')
         for key,attr in [('observedStart','time_coverage_start'),('observedEnd','time_coverage_end'),('createdAt','date_created')]:
             stamp = _millis(_iso_time(f.attrs[attr]))
-            if abs(stamp-record[key]) >= 1000:
+            if abs(stamp-record[key]) > TIME_METADATA_TOLERANCE_MS:
                 raise ValueError('向日葵文件观测或制作时间与时次目录不符')
         if not 0 <= int(f['granule_level_quality_flag'][()]) < 63:
             raise ValueError('向日葵整幅红外通道失效，未生成云图')

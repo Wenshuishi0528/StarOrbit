@@ -2,6 +2,7 @@ import { LIVE_CLOUD_PROCESSING } from './cloud-texture.js';
 import { mergeCloudVersions, versionKey } from './cloud-history-data.js';
 import { cloudWarnings } from './cloud-manual.js';
 import { cloudTitle, cloudDate, cloudError } from './cloud-library.js';
+import { nasaCoverage } from './cloud-source.js';
 import { t, onLanguageChange } from './i18n.js';
 
 const css = `.cloud-history>.library-current{margin:10px 20px 0;flex-shrink:0}.cloud-history .library-current p{font-size:12px;line-height:1.45;margin:3px 0}.cloud-history .library-current details{font-size:13px}.cloud-history .library-current summary{cursor:pointer}.cloud-history .library-current .history-buttons{margin:8px 0 0}.cloud-history{box-sizing:border-box;width:min(1180px,97vw);height:92dvh;max-width:none;max-height:none;padding:0;background:#0b1826;color:#e4eff8;border:1px solid #385267;border-radius:14px}.cloud-history::backdrop{background:#020a13b8;backdrop-filter:blur(3px)}.cloud-history[open]{display:flex;flex-direction:column}.cloud-history header{position:static;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #32485e;gap:12px}.cloud-history h2{margin:0;font-size:20px}.cloud-history p{line-height:1.6;color:#b6cadb;margin:6px 0}.cloud-history .version-body{padding:16px 20px;overflow:auto;min-height:0}.cloud-history .history-controls,.cloud-history .history-buttons,.cloud-history .library-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}.cloud-history label{display:flex;gap:7px;align-items:center}.cloud-history button,.cloud-history input,.cloud-history select{font:inherit;width:auto;min-height:38px;max-width:100%;flex:none}.cloud-history input[type=month]{color-scheme:dark;min-width:145px}.cloud-history .version-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;margin-top:14px}.cloud-history .version-list{max-height:47dvh;overflow:auto;border:1px solid #30465a;border-radius:8px}.cloud-history .version-row{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #30465a;border-radius:0;background:#102336;padding:12px;line-height:1.6;white-space:normal}.cloud-history .version-row[aria-pressed=true]{background:#194658;box-shadow:inset 3px 0 #7ddfee}.cloud-history .version-row span{display:block;font-size:13px;color:#aac4d8;overflow-wrap:anywhere}.cloud-history .version-row .warning{color:#f1cc8c}.cloud-history .version-detail{min-width:0}.cloud-history .history-preview{display:block;width:100%;aspect-ratio:2;object-fit:contain;background:repeating-conic-gradient(#213344 0% 25%,#172836 0% 50%) 0 0/20px 20px;border:1px solid #32485e;border-radius:6px}.cloud-history [role=status]{white-space:pre-line;overflow-wrap:anywhere;font-size:13px}.cloud-history h3{font-size:16px;margin:0 0 10px}.cloud-history .version-warning{color:#f1cc8c;font-size:13px;white-space:pre-line}.cloud-history .library-current,.cloud-history .library-task{border:1px solid #345467;border-radius:9px;padding:12px 15px;background:#102b39}.cloud-history .library-current strong{display:block;color:#b3f0eb;font-size:16px}.cloud-history .library-current .history-buttons{margin-bottom:0}.cloud-history .library-task{margin-top:12px;background:#112537}.cloud-history .library-task[data-state=error]{border-color:#7e5142}.cloud-history .library-tabs{border-bottom:1px solid #32485e;padding-bottom:12px}.cloud-history .library-tabs [aria-pressed=true]{background:#245365;border-color:#6eabb7}.cloud-history .library-empty{padding:16px}.cloud-history .library-storage{font-size:13px}.cloud-history .download-cost{font-size:13px;color:#a9c1d5}.cloud-history [hidden]{display:none!important}.cloud-history button:focus-visible,.cloud-history select:focus-visible,.cloud-history input:focus-visible{outline:2px solid #83dcec;outline-offset:2px}@media(max-width:760px){.cloud-history{width:100vw;height:100dvh;border-radius:0}.cloud-history header,.cloud-history .version-body{padding:12px}.cloud-history .version-layout{grid-template-columns:1fr}.cloud-history .version-list{max-height:30dvh}.cloud-history .history-controls label{flex-wrap:wrap}.cloud-history .history-buttons{gap:7px}.cloud-history .history-buttons button{font-size:13px}.cloud-history header button{font-size:13px}}`;
@@ -36,6 +37,8 @@ export function mountCloudHistory(w) {
     currentNote,
     modeButtons,
     savedTab,
+    globalTab,
+    globalInfo,
     newTab,
     filters,
     sourceBar,
@@ -98,6 +101,13 @@ export function mountCloudHistory(w) {
     return e;
   };
   const selected = () => rows.find((r) => r.key === selectedKey);
+  const rowMeta = (r) => ({ ...r, ...r.diskRecord, ...r.record });
+  const coverageLabel = (r) =>
+    t(
+      { global: '全球覆盖 · 含两极', partial: '局部覆盖 / 存在缺测', unknown: '覆盖尚未核验' }[
+        nasaCoverage(r)
+      ]
+    );
   function revoke() {
     if (previewURL) URL.revokeObjectURL(previewURL);
     previewURL = null;
@@ -169,7 +179,11 @@ export function mountCloudHistory(w) {
       b.disabled = !!library.using || actionBusy;
     }
     savedTab.setAttribute('aria-pressed', String(view === 'saved'));
+    globalTab.setAttribute('aria-pressed', String(view === 'global'));
     newTab.setAttribute('aria-pressed', String(view === 'catalog'));
+    const globalRows = library.saved.filter((r) => nasaCoverage(rowMeta(r)) === 'global');
+    globalTab.textContent = t('NASA 全球覆盖（{count}）', { count: globalRows.length });
+    globalInfo.hidden = view !== 'global';
     const quick = view === 'catalog' && sourceSelect.value !== 'satcorps';
     sourceBar.hidden = view !== 'catalog';
     filters.hidden = view !== 'catalog' || quick;
@@ -219,10 +233,12 @@ export function mountCloudHistory(w) {
       : mergeCloudVersions(remote, w.items, library.disk).filter(
           (r) =>
             r.provider !== 'viirs' &&
-            (view === 'saved'
-              ? !!(r.record || r.diskRecord)
-              : r.provider === 'satcorps' &&
-                (!day.value || new Date(r.time).toISOString().slice(0, 10) === day.value))
+            (view === 'global'
+              ? !!(r.record || r.diskRecord) && nasaCoverage(rowMeta(r)) === 'global'
+              : view === 'saved'
+                ? !!(r.record || r.diskRecord)
+                : r.provider === 'satcorps' &&
+                  (!day.value || new Date(r.time).toISOString().slice(0, 10) === day.value))
         );
     if (!rows.some((r) => r.key === selectedKey))
       selectedKey =
@@ -244,6 +260,8 @@ export function mountCloudHistory(w) {
         r.record?.favorite,
         r.record?.integrityFailed,
         r.diskRecord?.disk,
+        nasaCoverage(rowMeta(r)),
+        rowMeta(r).quality,
         w.active.cloud === r.record?.id,
         r.key === selectedKey,
       ])
@@ -255,9 +273,11 @@ export function mountCloudHistory(w) {
         const p = document.createElement('p');
         p.className = 'library-empty';
         p.textContent = t(
-          view === 'saved'
-            ? '还没有保存的云图。可下载新云图，或导入已有快照。'
-            : '暂无可列出的版本。可更换月份或重试查询；已保存云图仍可使用。'
+          view === 'global'
+            ? '已保存云图中尚无核验为全球覆盖的 NASA 版本。这不代表官方档案没有全球图；未下载时次的覆盖尚未知。'
+            : view === 'saved'
+              ? '还没有保存的云图。可下载新云图，或导入已有快照。'
+              : '暂无可列出的版本。可更换月份或重试查询；已保存云图仍可使用。'
         );
         list.append(p);
       }
@@ -273,12 +293,13 @@ export function mountCloudHistory(w) {
           message = '';
           render();
         };
-        const meta = r.record || r.diskRecord || r,
+        const meta = rowMeta(r),
           info = document.createElement('span');
         info.textContent = [
           w.active.cloud === r.record?.id ? t('当前使用') : '',
           r.record || r.diskRecord ? t('已保存') : t('可下载'),
           r.record?.favorite ? t('已收藏') : '',
+          meta.provider === 'satcorps' ? coverageLabel(meta) : '',
           meta.size ? (meta.size / 1e6).toFixed(1) + ' MB' : '',
         ]
           .filter(Boolean)
@@ -295,7 +316,7 @@ export function mountCloudHistory(w) {
       }
     }
     const r = row?.record,
-      meta = r || row?.diskRecord || row,
+      meta = row ? rowMeta(row) : null,
       sceneBusy = !!(w.sim.sceneBusy || w.sim.missions?.busy),
       loading = !!library.using || actionBusy;
     detailTitle.textContent = row ? cloudTitle(row) : t('选择一份云图');
@@ -315,17 +336,28 @@ export function mountCloudHistory(w) {
           .map((x) => t(x))
           .join('\n')
       : '';
-    if (
-      meta?.provider === 'satcorps' &&
-      meta.polarCoverage &&
-      Math.min(meta.polarCoverage.north, meta.polarCoverage.south) < 0.99
-    )
-      warning.textContent +=
+    if (meta?.provider === 'satcorps') {
+      const percent = (value) =>
+        Number.isFinite(value) && value >= 0 && value <= 1 ? (100 * value).toFixed(2) + '%' : '—';
+      detailMeta.textContent += '\n' + coverageLabel(meta);
+      detailMeta.textContent +=
         '\n' +
-        t('极区有效覆盖：北 {north}% · 南 {south}%', {
-          north: (100 * meta.polarCoverage.north).toFixed(1),
-          south: (100 * meta.polarCoverage.south).toFixed(1),
+        t('有效覆盖：全球 {global} · 北极 {north} · 南极 {south}', {
+          global: percent(meta.coverage),
+          north: percent(meta.polarCoverage?.north),
+          south: percent(meta.polarCoverage?.south),
         });
+      detailMeta.textContent +=
+        '\n' +
+        t('观测足迹：全球 {global} · 北极 {north} · 南极 {south}', {
+          global: percent(meta.footprint?.global),
+          north: percent(meta.footprint?.north),
+          south: percent(meta.footprint?.south),
+        });
+      if (meta.quality?.status === 'rejected')
+        warning.textContent =
+          t('覆盖范围与图像质量分别核验：此图有质量提示，请先预览。') + '\n' + warning.textContent;
+    }
     if (meta?.processing === LIVE_CLOUD_PROCESSING)
       warning.textContent += '\n' + t('观测时间未提供') + ' · Contains modified EUMETSAT data';
     if (meta?.provider === 'gmgsi' || meta?.provider === 'himawari') {
@@ -488,6 +520,13 @@ export function mountCloudHistory(w) {
     tabs.setAttribute('aria-label', t('云图库视图'));
     savedTab = button(tabs, '已保存云图', showSaved);
     savedTab.id = 'cloudSavedTab';
+    globalTab = button(tabs, 'NASA 全球覆盖', () => {
+      view = 'global';
+      message = '';
+      listSignature = '';
+      render();
+    });
+    globalTab.id = 'cloudGlobalTab';
     newTab = button(tabs, '下载新云图', showCatalog);
     newTab.id = 'cloudDownloadTab';
     const importFile = node('input', tabs);
@@ -511,6 +550,12 @@ export function mountCloudHistory(w) {
     };
     count = node('p', body);
     count.className = 'library-storage';
+    globalInfo = node(
+      'p',
+      body,
+      '这里单列已下载或导入且覆盖达标的 NASA 云图。全球有效覆盖至少 99.5%，南北极各至少 99%，观测足迹也须达标；少量缺测仍可能存在。质量提示单独保留，新增下载会自动归类。'
+    );
+    globalInfo.id = 'cloudGlobalInfo';
     sourceBar = node('div', body);
     sourceBar.className = 'history-controls';
     const sourceLabel = node('label', sourceBar, '图源');

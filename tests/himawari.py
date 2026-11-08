@@ -63,6 +63,22 @@ def synthetic(wrong_navigation=False):
 
 
 class HimawariTests(unittest.TestCase):
+    def test_whole_second_metadata_boundary_accepts_one_second_but_not_more(self):
+        # Real NOAA 2026-11-08 04:00 object: filename start 04:00:21.0,
+        # time_coverage_start 04:00:20Z. It is the same ten-minute scan.
+        raw = synthetic()
+        for field in ['observedStart', 'observedEnd', 'createdAt']:
+            for delta, accepted in [(1000, True), (-1000, True), (1001, False), (-1001, False)]:
+                baseline = record[field] // 1000 * 1000
+                item = {**record, 'rawBytes':len(raw), field:baseline + delta}
+                with self.subTest(field=field, delta=delta), h._RangeReader(item) as reader, patch.object(h, 'download_bytes', side_effect=lambda url, *, byte_range, **kw:raw[byte_range[0]:byte_range[1]+1]):
+                    if accepted:
+                        mask = h._read_mask(reader, item, lambda s:None)
+                        self.assertEqual(mask.shape, (5500, 5500))
+                    else:
+                        with self.assertRaisesRegex(ValueError, '时间'):
+                            h._read_mask(reader, item, lambda s:None)
+
     def test_source_directory_across_year_and_updated_revision(self):
         today = dt.datetime(2026,1,1,0,9,tzinfo=h.UTC)
         newer = key.replace('c202601010004265','c202601010006000')
