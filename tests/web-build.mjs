@@ -15,7 +15,7 @@ for(const [id,source] of Object.entries(data('spacecraftModels'))){
 }
 const orbits=JSON.parse(resource(data('missionOrbits').url));assert(orbits.tiangong.rows.length>=8&&orbits.dfh1.rows.length>=8);
 const scan=value=>{if(typeof value==='string')resource(value);else if(value)Object.values(value).forEach(scan);};
-const {skyDetail,cityTerrain,constellationArt,chineseConstellationArt,elevation,lunarTerrain,...environment}=data('environmentAssets');scan(environment);
+const {skyDetail,cityTerrain,constellationArt,chineseConstellationArt,elevation,lunarTerrain,mars,satellites,...environment}=data('environmentAssets');scan(environment);
 const elevationManifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));
 assert(resource(elevation.base.url).equals(fs.readFileSync(elevationManifest.base.file)));
 assert.equal(zlib.gunzipSync(resource(elevation.base.url)).byteLength,elevation.base.width*elevation.base.height*2);
@@ -86,3 +86,13 @@ console.log(output+' build: relative hashed URLs, compact entry, original models
 const lunarDEM=JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json'));assert(resource(lunarTerrain.url).equals(fs.readFileSync(lunarDEM.file)));assert.equal(zlib.gunzipSync(resource(lunarTerrain.url)).byteLength,lunarDEM.width*lunarDEM.height*2);for(const file of ['README.md','SCIENCE.md','terrain-manifest.json','lola-720x360.i16.gz','lroc-color-2k.jpg'])assert(fs.readFileSync(output+'/assets/moon/'+file).equals(fs.readFileSync('assets/moon/'+file)));
 
 const geology=JSON.parse(fs.readFileSync("assets/moon/geology/manifest.json"));for(const record of geology.outputs)assert(resource(data("environmentAssets").lunarGeology[record.id]).equals(fs.readFileSync(record.file)));
+
+const marsManifest=JSON.parse(fs.readFileSync('assets/mars/manifest.json'));
+for(const [id,layer] of Object.entries(mars.layers))assert(resource(layer.url).equals(fs.readFileSync(marsManifest.layers[id].url)),`Mars ${id} asset`);
+assert(resource(mars.terrain.url).equals(fs.readFileSync(marsManifest.terrain.url)));
+assert.equal(zlib.gunzipSync(resource(mars.terrain.url)).byteLength,mars.terrain.width*mars.terrain.height*2);
+const satelliteManifest=JSON.parse(fs.readFileSync('assets/satellites/manifest.json'));
+assert(resource(satellites.url).equals(fs.readFileSync('assets/satellites/'+satelliteManifest.file)));
+assert.equal(zlib.gunzipSync(resource(satellites.url)).byteLength,satellites.decodedBytes);
+for(const dir of ['mars','satellites'])for(const name of ['README.md','manifest.json'])assert(fs.readFileSync(output+'/assets/'+dir+'/'+name).equals(fs.readFileSync('assets/'+dir+'/'+name)));
+console.log('Mars maps/DEM and major-satellite ephemerides match source assets; provenance included.');

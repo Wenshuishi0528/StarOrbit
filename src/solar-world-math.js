@@ -1,5 +1,6 @@
 import { HelioState, GeoMoon, RotationAxis } from 'astronomy-engine';
 import { AU, earthAxes } from './orbit.js';
+import { EXTRA_SATELLITES, SATELLITE_BY_ID } from './major-satellites.js';
 
 // Physical positions in AU, J2000 equatorial axes, at the same geometric epoch.
 // These are not light-time corrected apparent directions used by the sky view.
@@ -16,17 +17,33 @@ export const SOLAR_WORLD_BODIES = Object.freeze([
   { id: 'Neptune', name: '海王星', radiusKm: 24764, color: 0x4b77ce, period: 60189 },
 ]);
 const DAY = 86400000;
-export function solarWorldState(time) {
+export const SOLAR_WORLD_ENTITIES = Object.freeze([...SOLAR_WORLD_BODIES, ...EXTRA_SATELLITES]);
+export function solarWorldState(time, satellites = null) {
   if (!Number.isFinite(time)) throw new RangeError('Invalid solar system time');
   const date = new Date(time);
   const states = SOLAR_WORLD_BODIES.map((body) => {
     const p = HelioState(body.id, date);
     return { ...body, position: [p.x, p.y, p.z], velocity: [p.vx, p.vy, p.vz] };
   });
+  if (satellites) {
+    const parents = new Map(states.map((state) => [state.id, state]));
+    for (const body of EXTRA_SATELLITES) {
+      const relative = satellites.state(body.id, time);
+      if (!relative) continue;
+      const parent = parents.get(body.parent);
+      states.push({
+        ...body,
+        position: relative.position.map((v, i) => v + parent.position[i]),
+        relativePosition: relative.position,
+        source: relative.source,
+      });
+    }
+  }
   return states;
 }
-export function solarWorldOrbit(id, time, count = 192) {
-  const body = SOLAR_WORLD_BODIES.find((b) => b.id === id);
+export function solarWorldOrbit(id, time, count = 192, satellites = null) {
+  const body = SOLAR_WORLD_ENTITIES.find((b) => b.id === id);
+  const satellite = SATELLITE_BY_ID.get(id);
   if (
     !body?.period ||
     !Number.isFinite(time) ||
@@ -36,15 +53,35 @@ export function solarWorldOrbit(id, time, count = 192) {
   )
     throw new RangeError('Invalid orbit sampling request');
   const result = [];
+  // A complete local orbit track at a pack boundary uses the nearest covered
+  // interval. It is still an epoch-sampled track, not an osculating ellipse.
+  if (satellite && id !== 'Moon' && satellite.parent !== 'Jupiter') {
+    if (!satellites || satellites.availability(id, time) !== 'ready') return [];
+    const halfWindow = (body.period * DAY) / 2;
+    time = Math.max(satellites.start + halfWindow, Math.min(satellites.end - halfWindow - 1, time));
+  }
   for (let i = 0; i <= count; i++) {
     const date = new Date(time + (i / count - 0.5) * body.period * DAY);
-    const p = id === 'Moon' ? GeoMoon(date) : HelioState(id, date);
-    result.push([p.x, p.y, p.z]);
+    if (satellite && id !== 'Moon') {
+      const p = satellites?.state(id, date.getTime());
+      if (!p) return [];
+      result.push(p.position);
+    } else {
+      const p = id === 'Moon' ? GeoMoon(date) : HelioState(id, date);
+      result.push([p.x, p.y, p.z]);
+    }
   }
   return result;
 }
 export function solarWorldBodyAxes(id, time) {
   if (id === 'Earth') return earthAxes(time);
+  // Basic satellite spheres have no surface longitude texture to orient.
+  if (SATELLITE_BY_ID.has(id) && id !== 'Moon')
+    return [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ];
   const a = RotationAxis(id, new Date(time)),
     ra = (a.ra * Math.PI) / 12,
     spin = (a.spin * Math.PI) / 180,
@@ -73,6 +110,11 @@ export function solarWorldSiteDirection(site, time) {
 export function solarWorldDisplayRadius(body, distance, enhanced = true) {
   const physical = body.radiusKm / AU;
   if (!enhanced) return physical;
-  const limit = body.id === 'Moon' ? 0.012 : body.id === 'Sun' ? 0.09 : 0.045;
+  const satellite = SATELLITE_BY_ID.get(body.id);
+  const limit = satellite
+    ? (satellite.orbitRadiusKm / AU) * 0.08
+    : body.id === 'Sun'
+      ? 0.09
+      : 0.045;
   return Math.max(physical, Math.min(limit, Math.max(0, distance) * 0.009));
 }

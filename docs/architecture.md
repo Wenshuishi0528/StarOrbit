@@ -2,9 +2,9 @@
 
 月面地名由 `lunar-place-catalog.js` 读取完整正式目录与着陆任务，`lunar-place-layout.js` 建立球面分桶索引，按视口、正背面、尺度和密度筛选。一张 Canvas2D 叠层承载全部标签并复用于 PNG 导出，避免创建数千个 DOM 节点；未知坐标的任务保留资料，不生成落点。`lunar-renderer.js` 按需加载经 Mollweide 反投影的 4096×2048 地质纹理，复用月固经纬、地形网格与 Canvas 标注；透明无数据像素显示中性灰色。地质图采用辅助照明并保留分类色，选择图层切至三维图鉴。`lunar-geology-viewer.js` 另外按需打开四幅离线原版图像，保留复合地图、图例与年代尺。四象与三垣的透明度经共享设置传递，仅影响总览 `symbols` 层。
 
-适用版本：本地 v1.31。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.32。作者：Wenshuishi。核对日期：2026-11-08。
 
-本页维护本地 v1.31 的实现关系与文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
+本页维护本地 v1.32 的实现关系与文档基线，解释修改软件时需要保留的关系和边界。具体能力见[产品范围](product-scope.md)，字段见[数据格式与本机接口](formats.md)，操作见[使用手册](../使用说明.md)，执行结果见[验证指南](verification.md)。这里的结构描述不代表本批已经完成运行验收。
 
 赤道网与黄道作为共同天球参考层，由日期真赤道／真黄道旋转至现有 J2000 场景；主画面、巡天与照片、阳台使用同一数学定义。恒星距离按物理 HIP 身份查表，不随中西名称或语言变化。巡天打开时使用既有近景构图流程，之后不持续改变用户镜头。
 
@@ -17,6 +17,10 @@
 `birthday-card-back` 独立选取一个文化天区并绘制全幅明信片，所有标注仍使用主页星图代码。银河借用现有纹理或加载私有纹理；DSS建立私有SkyDetail，显式启用wideField，等待完整同源HiPS瓦片再捕获，释放私有纹理和缓存连接。普通主页／巡天保持原有18°影像策略。相机缩放、平移与滚转共同作用于影像、星位、连线及插画，不写回源配准。捕获继续复用skyOnly巡天渲染器并恢复共享renderer状态。
 
 界面以输入代次和取消信号隔离异步结果，分别缓存正面和背面Blob；共同生日或落款改变时两面失效；正面与背面的独有控件仅使本面失效，单面PNG直接复用预览。`birthday-card-export` 将两张PNG写入标准STORE ZIP，含CRC32、UTF-8文件名和中央目录，一次下载成套图片；打包前固定两面结果，设置变更或关闭窗口后不触发旧下载。
+
+## 天体观测台
+
+`planetary-observatory.js` 管理入口、图层、观测地点、事件与双栏比较；`planetary-renderer.js` 复用主WebGL渲染器，在体固坐标中显示地球和火星。地球纹理及高程只借用既有环境资源；火星纹理按需加载并限制缓存。太阳和月球交接至既有观测窗口。`planetary-observation-math.js` 计算地面视线、光行时和体固照明，`planetary-events.js` 独立异步搜索事件。`satellite-ephemeris.js` 懒解压JPL子集，在母星相对J2000坐标求值，太阳系统一变换位置。
 
 ## 地表与太阳系主视图
 
@@ -72,7 +76,7 @@ flowchart TD
 | 保存、场景和观测记录 | `session-memory.js`、`scene-format.js`、`scene-share.js`、`observation-store.js` | 当前网址的偏好、完整场景、观测配方和独立飞行存档用途不同 |
 | 本机服务和分发 | `scripts/serve.py`、`build.mjs`、`scripts/package-portable.py`、`macos/Launcher.swift` | 服务工作根目录、构建方式、入口重定向、启动器引用和发布证据 |
 
-源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.31 的星官数据、共享文化图层及控件以当前工作副本为准；上述固定公开链接仅对应其历史提交。
+源码路径均相对于源码仓库。便携包不包含完整源码；可查阅固定公开基线的 [app.js](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/app.js)、[Simulation](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/simulation.js)、[Environment](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/environment.js)。本地 v1.32 的星官数据、共享文化图层及控件以当前工作副本为准；上述固定公开链接仅对应其历史提交。
 
 ## 状态由谁拥有
 

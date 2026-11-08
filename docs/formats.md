@@ -1,10 +1,10 @@
 # 数据格式与本机接口
 
-适用版本：本地 v1.31。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.32。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
-本页按本地 v1.31 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
+本页按本地 v1.32 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
 
 示例中的轨道是为说明格式生成的合成数据，不能当作任何真实航天器的轨道或观测预报。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
 
@@ -273,3 +273,7 @@ JS
 ```
 
 维护者需在修改验证器、默认值、schema 或兼容规则后同步更新本页和例子，再按[验证指南](verification.md)执行实际文件往返。固定公开实现参考：[场景验证器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/scene-format.js)、[航天器验证器](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/mission-package.js)、[轨道解析](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/orbit.js)、[天气导入](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/weather.js)、[太阳快照](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/src/solar-data.js)、[本机路由](https://github.com/Wenshuishi0528/StarOrbit/blob/5ed3d96b52db26f5e9500430eec3a67a32d14f35/scripts/serve.py)。
+
+## 火星与卫星资产
+
+火星manifest声明等距圆柱投影、东经、像元中心及各图层来源；MOLA高程为gzip压缩int16小端米值，720×360。卫星manifest声明J2000、TDB、时间区间、每轴Chebyshev系数、量化单位和校核样本；运行时按需解压数据。格式及原始来源见[火星](../assets/mars/README.md)、[卫星](../assets/satellites/README.md)。

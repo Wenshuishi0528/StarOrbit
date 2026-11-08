@@ -656,6 +656,7 @@ export function installXuntianScope(sim) {
     const lunarTarget = mode === 'solar' && named?.body === 'Moon';
     const lunarCrosshair = lastResult?.identification?.body === 'Moon';
     $('xtLunarDiscovery').hidden = unavailable || !(lunarTarget || lunarCrosshair);
+    $('xtMarsDiscovery').hidden = unavailable || !((mode === 'solar' && named?.body === 'Mars') || lastResult?.identification?.body === 'Mars');
     const sky =
         mode === 'solar' ||
         mode === 'sky' ||

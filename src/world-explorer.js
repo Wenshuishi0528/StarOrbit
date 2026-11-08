@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Equator, Horizon, Observer } from 'astronomy-engine';
 import atlas from '../assets/geography/atlas.json';
 import { createGroundState, normalizeGroundSite } from './ground-world-math.js';
 import { createGroundWorldInput } from './ground-world-input.js';
@@ -482,8 +483,9 @@ export function installWorldExplorer(sim) {
     labelRoot.replaceChildren();
     groundScene = null;
   }
-  function open(next) {
+  function open(next, options = {}) {
     if (disposed || mode === next || !['ground', 'solar'].includes(next)) return;
+    sim.planetaryObservatory?.close();
     request?.abort();
     request = null;
     persist();
@@ -528,10 +530,16 @@ export function installWorldExplorer(sim) {
         getTime: () => sim.time,
         getSite: () => state.site,
         onGround: () => open('ground'),
+        initialTarget: options.target,
+        onObserve: (body) => {
+          close();
+          sim.planetaryObservatory?.open(body);
+        },
         getEarthTexture: () => sim.environment.uniforms.dayMap.value,
         getMoonTexture: () => sim.environment.moon.texture,
         assets: sim.environment.assets,
       });
+    if (next === 'solar' && options.system) solar.setView(`system:${options.system}`);
     timeDraft = false;
     $('[data-time]').value = dateTimeText(sim.time, '24');
     canvas.focus();
@@ -758,6 +766,25 @@ export function installWorldExplorer(sim) {
       return !!mode;
     },
     open,
+    openGround(site, options = {}) {
+      open('ground');
+      locate(site);
+      if (['Sun', 'Moon'].includes(options.body)) {
+        const date = new Date(sim.time);
+        const observer = new Observer(state.site.latitude, state.site.longitude, state.site.height);
+        const eq = Equator(options.body, date, observer, true, true);
+        const horizon = Horizon(date, observer, eq.ra, eq.dec, 'normal');
+        state.azimuth = horizon.azimuth;
+        state.elevation = Math.max(-89.5, Math.min(89.5, horizon.altitude));
+      }
+      if (Number.isFinite(options.fov)) {
+        settings.fov = Math.max(5, Math.min(100, options.fov));
+        $('[data-fov]').value = settings.fov;
+      }
+    },
+    get site() {
+      return { ...state.site };
+    },
     close,
     tick,
     dispose() {

@@ -4,12 +4,21 @@ import { t, onLanguageChange } from './i18n.js';
 import { AU } from './orbit.js';
 import {
   SOLAR_WORLD_BODIES,
+  SOLAR_WORLD_ENTITIES,
   solarWorldState,
   solarWorldOrbit,
   solarWorldBodyAxes,
   solarWorldSiteDirection,
   solarWorldDisplayRadius,
 } from './solar-world-math.js';
+
+import {
+  MAJOR_SATELLITES,
+  SATELLITE_BY_ID,
+  SATELLITE_SYSTEMS,
+  satelliteSystemRadiusKm,
+} from './major-satellites.js';
+import { createSatelliteEphemeris } from './satellite-ephemeris.js';
 
 const vertex = `varying vec3 surface,normalWorld,world;void main(){surface=position;normalWorld=normalize(mat3(modelMatrix)*normal);world=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`;
 const fragment = `uniform vec3 baseColor,sunPosition;uniform sampler2D surfaceMap;uniform bool textured;uniform float bands;varying vec3 surface,normalWorld,world;
@@ -21,7 +30,7 @@ gl_FragColor=vec4(color*stripe*(.025+.975*light),1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`;
-const names = new Map(SOLAR_WORLD_BODIES.map((b) => [b.id, b.name]));
+const names = new Map(SOLAR_WORLD_ENTITIES.map((b) => [b.id, b.name]));
 
 export function createSolarWorld({
   renderer,
@@ -32,6 +41,8 @@ export function createSolarWorld({
   getMoonTexture = () => null,
   assets = {},
   onGround = () => {},
+  onObserve = () => {},
+  initialTarget = null,
 }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x02060e);
@@ -40,14 +51,14 @@ export function createSolarWorld({
   const controls = createOrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.09;
-  controls.minDistance = 0.00009;
+  controls.minDistance = 1e-8;
   controls.maxDistance = 110;
   const panel = document.createElement('div');
   panel.className = 'solar-world-panel';
   panel.innerHTML = `<style>
 .solar-world-panel{position:absolute;left:24px;top:88px;z-index:8;width:262px;padding:20px;border:1px solid #7891ac40;border-radius:16px;background:#09111de8;color:#e5eaf3;box-shadow:0 12px 50px #0006;backdrop-filter:blur(16px);font:13px/1.65 system-ui;pointer-events:auto}
-.solar-world-panel h3{font-size:19px;margin:0 0 4px;color:#f4dfb4;letter-spacing:.08em}.solar-world-panel small{color:#91a7c0}.solar-world-panel label{display:block;margin:13px 0 5px}.solar-world-panel select,.solar-world-panel button{font:inherit;color:#e5eaf3;background:#1b293d;border:1px solid #7e94ae40;border-radius:7px;padding:7px 9px}.solar-world-panel select{width:100%}.solar-world-actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.solar-world-panel button:hover{background:#34455d}.solar-world-readout{border-top:1px solid #7891ac30;margin-top:14px;padding-top:12px;white-space:pre-line;color:#c3cfdf;font-variant-numeric:tabular-nums}.solar-world-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}.solar-world-labels span{position:absolute;color:#cad6e5;white-space:nowrap;font:12px/1.3 system-ui;text-shadow:0 1px 5px #000,0 0 8px #000;transform:translate(8px,-50%)}.solar-world-labels .active{color:#ffdfa5;font-weight:600}.solar-world-legend{position:absolute;right:24px;bottom:28px;color:#8c9fb5;font:12px/1.5 system-ui;z-index:5;pointer-events:none;text-align:right}@media(max-width:700px){.solar-world-panel{left:12px;top:70px;width:210px;padding:12px;font-size:12px}.solar-world-panel h3{font-size:16px}.solar-world-legend{right:12px;bottom:12px;font-size:10px}}
-</style><h3 data-text="太阳系"></h3><small data-text="同一时刻 · 从地面到行星轨道"></small><label data-text="观察目标"></label><select aria-label="观察目标" data-target></select><div class="solar-world-actions"><button data-view="inner" data-text="内太阳系"></button><button data-view="all" data-text="全太阳系"></button><button data-view="earthmoon" data-text="地月系统"></button></div><label><input type="checkbox" data-size checked> <span data-text="放大天体显示"></span></label><label><input type="checkbox" data-orbits checked> <span data-text="显示轨道"></span></label><button data-ground data-text="返回观测地点"></button><div class="solar-world-readout"></div>`;
+.solar-world-panel{max-height:calc(100% - 115px);overflow:auto}.solar-world-panel h3{font-size:19px;margin:0 0 4px;color:#f4dfb4;letter-spacing:.08em}.solar-world-panel small{color:#91a7c0}.solar-world-panel label{display:block;margin:13px 0 5px}.solar-world-panel select,.solar-world-panel button{font:inherit;color:#e5eaf3;background:#1b293d;border:1px solid #7e94ae40;border-radius:7px;padding:7px 9px}.solar-world-panel select{width:100%}.solar-world-actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.solar-world-panel button:hover{background:#34455d}.solar-world-readout{border-top:1px solid #7891ac30;margin-top:14px;padding-top:12px;white-space:pre-line;color:#c3cfdf;font-variant-numeric:tabular-nums}.solar-world-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}.solar-world-labels span{position:absolute;color:#cad6e5;white-space:nowrap;font:12px/1.3 system-ui;text-shadow:0 1px 5px #000,0 0 8px #000;transform:translate(8px,-50%)}.solar-world-labels .active{color:#ffdfa5;font-weight:600}.solar-world-legend{position:absolute;right:24px;bottom:28px;color:#8c9fb5;font:12px/1.5 system-ui;z-index:5;pointer-events:none;text-align:right}@media(max-width:700px){.solar-world-panel{left:12px;top:70px;width:210px;padding:12px;font-size:12px}.solar-world-panel h3{font-size:16px}.solar-world-legend{right:12px;bottom:12px;font-size:10px}}
+</style><h3 data-text="太阳系"></h3><small data-text="同一时刻 · 从地面到行星轨道"></small><label data-text="观察目标"></label><select aria-label="观察目标" data-target></select><div class="solar-world-actions"><button data-view="inner" data-text="内太阳系"></button><button data-view="all" data-text="全太阳系"></button><button data-view="earthmoon" data-text="地月系统"></button></div><label data-text="行星与卫星系统"></label><select aria-label="行星与卫星系统" data-system></select><label><input type="checkbox" data-size checked> <span data-text="放大天体显示"></span></label><label><input type="checkbox" data-orbits checked> <span data-text="显示轨道"></span></label><div class="solar-world-actions"><button data-observe data-text="打开观测窗口"></button><button data-ground data-text="返回观测地点"></button></div><small data-ephemeris></small><div class="solar-world-readout"></div>`;
   host.append(panel);
   const labelRoot = document.createElement('div');
   labelRoot.className = 'solar-world-labels';
@@ -57,12 +68,18 @@ export function createSolarWorld({
   host.append(legend);
   const select = panel.querySelector('[data-target]'),
     readout = panel.querySelector('.solar-world-readout');
-  for (const body of SOLAR_WORLD_BODIES) select.add(new Option(t(body.name), body.id));
+  for (const body of SOLAR_WORLD_ENTITIES) select.add(new Option(t(body.name), body.id));
+  const systemSelect = panel.querySelector('[data-system]');
+  systemSelect.add(new Option(t('选择行星系统'), ''));
+  for (const id of SATELLITE_SYSTEMS) systemSelect.add(new Option(t(names.get(id)), id));
+  const satellites = createSatelliteEphemeris(assets.satellites);
+  const ephemerisNote = panel.querySelector('[data-ephemeris]');
+  const observeButton = panel.querySelector('[data-observe]');
   const geometry = new THREE.SphereGeometry(1, 48, 32),
     entities = new Map(),
     orbitRoot = new THREE.Group();
   scene.add(orbitRoot);
-  for (const body of SOLAR_WORLD_BODIES) {
+  for (const body of SOLAR_WORLD_ENTITIES) {
     const material =
       body.id === 'Sun'
         ? new THREE.ShaderMaterial({
@@ -167,7 +184,14 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     origin = new THREE.Vector3(),
     orbitQueue = [],
     lastOrbitKey = '',
-    lastOrbitRefresh = -Infinity;
+    lastOrbitRefresh = -Infinity,
+    systemParent = null,
+    lastEphemerisStatus = '',
+    pendingSatelliteFocus = null,
+    unavailableTarget = null;
+  function ensureSatellites() {
+    if (satellites.status === 'idle' || satellites.status === 'error') satellites.load();
+  }
   const ownedTextures = new Map();
   function requestTexture(id) {
     const shared = id === 'Moon' ? getMoonTexture() : null;
@@ -203,31 +227,58 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
   function translate() {
     panel.querySelectorAll('[data-text]').forEach((el) => (el.textContent = t(el.dataset.text)));
     for (const option of select.options) option.textContent = t(names.get(option.value));
+    for (const option of systemSelect.options)
+      option.textContent = option.value ? t(names.get(option.value)) : t('选择行星系统');
     for (const { body, label } of entities.values()) label.textContent = t(body.name);
-    legend.textContent =
-      t('位置与轨道采用真实比例') + '\n' + t('Astronomy Engine · J2000 · 1 AU = 149,597,870.7 km');
+    legend.textContent = t('位置与轨道采用真实比例') + '\n' + 'JPL SPK · Astronomy Engine · J2000';
   }
   const offLanguage = onLanguageChange(translate);
   translate();
   function setView(mode) {
-    target = mode === 'earthmoon' ? 'Earth' : 'Sun';
+    pendingSatelliteFocus = null;
+    systemParent =
+      mode === 'earthmoon' ? 'Earth' : mode.startsWith('system:') ? mode.slice(7) : null;
+    if (systemParent && !SATELLITE_SYSTEMS.includes(systemParent)) systemParent = null;
+    target = systemParent || 'Sun';
     select.value = target;
+    systemSelect.value = systemParent || '';
     controls.target.set(0, 0, 0);
-    const d = mode === 'all' ? 65 : mode === 'earthmoon' ? 0.008 : 3.6;
+    const d = systemParent
+      ? (satelliteSystemRadiusKm(systemParent) / AU) * 3.1
+      : mode === 'all'
+        ? 65
+        : 3.6;
     camera.position.set(d * 0.6, -d * 0.8, d * 0.65);
     controls.update();
+    lastOrbitKey = '';
+    if (systemParent && !['Earth', 'Jupiter'].includes(systemParent)) ensureSatellites();
   }
   setView('inner');
   function focus(id) {
+    if (!entities.has(id)) return;
     target = id;
     select.value = id;
+    const satellite = SATELLITE_BY_ID.get(id);
+    systemParent = satellite?.parent || (SATELLITE_SYSTEMS.includes(id) ? id : null);
+    systemSelect.value = systemParent || '';
     controls.target.set(0, 0, 0);
-    const body = entities.get(id).body,
-      d =
-        id === 'Sun' ? 3.6 : Math.max((body.radiusKm / AU) * 8, id === 'Earth' ? 0.00045 : 0.00016);
+    const body = entities.get(id).body;
+    const available = !satellite || satellites.state(id, getTime());
+    pendingSatelliteFocus =
+      !available && satellites.availability(id, getTime()) !== 'out-of-range' ? id : null;
+    const d = !available
+      ? (satelliteSystemRadiusKm(satellite.parent) / AU) * 3.1
+      : id === 'Sun'
+        ? 3.6
+        : Math.max((body.radiusKm / AU) * 8, satellite ? 1e-7 : id === 'Earth' ? 0.00045 : 0.00016);
     camera.position.set(d * 0.6, -d * 0.8, d * 0.65);
     controls.update();
+    lastOrbitKey = '';
+    if (systemParent && !['Earth', 'Jupiter'].includes(systemParent)) ensureSatellites();
   }
+  if (initialTarget) focus(initialTarget);
+  systemSelect.onchange = () =>
+    setView(systemSelect.value ? `system:${systemSelect.value}` : 'inner');
   select.onchange = () => focus(select.value);
   panel
     .querySelectorAll('[data-view]')
@@ -235,8 +286,13 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
   panel.querySelector('[data-size]').onchange = (e) => (enhanced = e.target.checked);
   panel.querySelector('[data-orbits]').onchange = (e) => (orbitRoot.visible = e.target.checked);
   panel.querySelector('[data-ground]').onclick = () => onGround();
+  observeButton.onclick = () => onObserve(target);
+  ephemerisNote.onclick = () => {
+    if (satellites.status === 'error') ensureSatellites();
+  };
   function buildOrbit(id, time) {
-    const points = solarWorldOrbit(id, time, 160).map((p) => new THREE.Vector3(...p));
+    const points = solarWorldOrbit(id, time, 160, satellites).map((p) => new THREE.Vector3(...p));
+    if (!points.length) return;
     const line = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(points),
       new THREE.LineBasicMaterial({
@@ -261,13 +317,31 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
   }
   function update(time = getTime(), dt = 0) {
     if (disposed) return;
-    if (time !== lastTime) {
-      states = solarWorldState(time);
+    if (time !== lastTime || satellites.status !== lastEphemerisStatus) {
+      states = solarWorldState(time, satellites);
       lastTime = time;
+      if (satellites.status !== lastEphemerisStatus) lastOrbitKey = '';
+      lastEphemerisStatus = satellites.status;
     }
     const byId = new Map(states.map((s) => [s.id, s]));
-    origin.fromArray(byId.get(target).position);
-    const orbitKey = String(Math.floor(time / (30 * 86400000)));
+    if (pendingSatelliteFocus === target && byId.has(target)) focus(target);
+    const selectedSatellite = SATELLITE_BY_ID.get(target);
+    const selectedState = byId.get(target);
+    if (selectedSatellite && !selectedState && unavailableTarget !== target) {
+      // Changing the clock outside the pack window must not leave the camera
+      // at a tiny moon-close distance inside its parent planet.
+      unavailableTarget = target;
+      const d = (satelliteSystemRadiusKm(selectedSatellite.parent) / AU) * 3.1;
+      controls.target.set(0, 0, 0);
+      camera.position.set(d * 0.6, -d * 0.8, d * 0.65);
+    } else if (selectedState && unavailableTarget === target) {
+      unavailableTarget = null;
+      focus(target);
+    } else if (!selectedSatellite) unavailableTarget = null;
+    origin.fromArray(
+      (selectedState || byId.get(selectedSatellite?.parent) || byId.get('Sun')).position
+    );
+    const orbitKey = `${systemParent || 'solar'}:${Math.floor(time / ((systemParent ? 1 : 30) * 86400000))}`;
     if (
       orbitKey !== lastOrbitKey &&
       (!lastOrbitKey || (!orbitQueue.length && performance.now() - lastOrbitRefresh > 1500))
@@ -275,7 +349,11 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
       lastOrbitRefresh = performance.now();
       lastOrbitKey = orbitKey;
       lastOrbitTime = time;
-      orbitQueue = SOLAR_WORLD_BODIES.filter((b) => b.period).map((b) => b.id);
+      orbitQueue = systemParent
+        ? MAJOR_SATELLITES.filter((b) => b.parent === systemParent && byId.has(b.id)).map(
+            (b) => b.id
+          )
+        : SOLAR_WORLD_BODIES.filter((b) => b.period && b.id !== 'Moon').map((b) => b.id);
       for (const line of [...orbitRoot.children]) {
         orbitRoot.remove(line);
         line.geometry.dispose();
@@ -291,6 +369,11 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     camera.far = Math.max(100, distance * 3);
     camera.updateProjectionMatrix();
     const sunPosition = new THREE.Vector3().fromArray(byId.get('Sun').position).sub(origin);
+    for (const { body, mesh, label } of entities.values()) {
+      const satellite = SATELLITE_BY_ID.get(body.id);
+      mesh.visible = byId.has(body.id) && (!satellite || satellite.parent === systemParent);
+      label.hidden = !mesh.visible;
+    }
     for (const state of states) {
       const item = entities.get(state.id),
         { mesh, label } = item;
@@ -329,8 +412,8 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     earth.mesh.material.uniforms.textured.value = !!tex && tex.image?.width > 1;
     for (const line of orbitRoot.children) {
       line.position.copy(origin).negate();
-      if (line.userData.body === 'Moon')
-        line.position.add(new THREE.Vector3(...byId.get('Earth').position));
+      const parent = SATELLITE_BY_ID.get(line.userData.body)?.parent;
+      if (parent) line.position.add(new THREE.Vector3(...byId.get(parent).position));
     }
     scene.updateMatrixWorld(true);
     camera.updateMatrixWorld(true);
@@ -363,6 +446,10 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
         (a.body.id === target ? -2 : a.body.id === 'Earth' ? -1 : 0) -
         (b.body.id === target ? -2 : b.body.id === 'Earth' ? -1 : 0)
     )) {
+      if (!mesh.visible) {
+        label.hidden = true;
+        continue;
+      }
       projectLabel(label, mesh.position.clone().addScaledVector(camera.up, radius * 1.2));
       if (!label.hidden) {
         const x = parseFloat(label.style.left),
@@ -384,10 +471,35 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
       siteLabel.hidden = y > height - 18;
       siteLabel.style.top = `${y}px`;
     }
-    const selected = byId.get(target),
+    const selected = selectedState || entities.get(target).body,
       earthPosition = byId.get('Earth').position;
     const siteName = site?.name || t('观测地点');
-    readout.textContent = `${t(selected.name)} · ${enhanced ? t('天体显示增强') : t('真实尺寸')}\n${t('日心距离')}  ${Math.hypot(...selected.position).toFixed(4)} AU\n${t('地心距离')}  ${(Math.hypot(...selected.position.map((n, i) => n - earthPosition[i])) * AU).toLocaleString(undefined, { maximumFractionDigits: 0 })} km\n${t('地面位置')}  ${siteName}`;
+    observeButton.hidden = !['Sun', 'Earth', 'Moon', 'Mars'].includes(target);
+    let lines = `${t(selected.name)} · ${enhanced ? t('天体显示增强') : t('真实尺寸')}`;
+    if (selectedSatellite) {
+      lines += `\n${t('平均半径')}  ${selected.radiusKm.toLocaleString()} km\n${t('公转周期')}  ${selected.period.toLocaleString()} ${t('天')}`;
+      if (selectedState) {
+        const parentPosition = byId.get(selectedSatellite.parent).position;
+        const separation =
+          Math.hypot(...selected.position.map((v, i) => v - parentPosition[i])) * AU;
+        lines += `\n${t('距母星中心')}  ${separation.toLocaleString(undefined, { maximumFractionDigits: 0 })} km`;
+      }
+    } else {
+      lines += `\n${t('日心距离')}  ${Math.hypot(...selected.position).toFixed(4)} AU\n${t('地心距离')}  ${(Math.hypot(...selected.position.map((n, i) => n - earthPosition[i])) * AU).toLocaleString(undefined, { maximumFractionDigits: 0 })} km\n${t('地面位置')}  ${siteName}`;
+    }
+    readout.textContent = lines;
+    const needsPack = systemParent && !['Earth', 'Jupiter'].includes(systemParent);
+    ephemerisNote.hidden = !needsPack;
+    ephemerisNote.style.cursor = satellites.status === 'error' ? 'pointer' : 'default';
+    ephemerisNote.textContent = !needsPack
+      ? ''
+      : satellites.status === 'loading'
+        ? t('正在载入卫星轨道…')
+        : satellites.status === 'error'
+          ? t('卫星轨道载入失败 · 点击重试')
+          : time < satellites.start || time >= satellites.end
+            ? t('卫星星历覆盖 2026—2030 · 调整时间查看')
+            : t('卫星星历 · JPL 2026—2030');
     renderer.render(scene, camera);
   }
   return {

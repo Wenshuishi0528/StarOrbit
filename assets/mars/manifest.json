@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "body": "Mars",
+  "coordinateSystem": "IAU Mars 2000 planetocentric; east-positive longitude",
+  "projection": "equirectangular",
+  "longitudeRange": [
+    -180,
+    180
+  ],
+  "latitudeRange": [
+    90,
+    -90
+  ],
+  "pixelRegistration": "cell-centre",
+  "layers": {
+    "visible": {
+      "url": "assets/mars/visible.jpg",
+      "label": "可见光 · Viking",
+      "credit": "NASA/USGS · Viking MDIM 2.1 / NASA Ames 着色",
+      "sourceUrl": "https://mars.asu.edu/data/mdim_color/",
+      "kind": "visible",
+      "description": "Viking 可见光镶嵌，经 MOLA 控制网配准并着色。",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 595357,
+      "sha256": "ede93c82d551a3078a9d2c55da1d3b5ab6a0988fc85a27532984ccb6fbd39837"
+    },
+    "dayIR": {
+      "url": "assets/mars/day-ir.webp",
+      "label": "白昼热红外 · THEMIS",
+      "credit": "NASA/JPL/ASU · THEMIS 日间全球镶嵌 v12 (2014)",
+      "sourceUrl": "https://mars.asu.edu/data/thm_dir/",
+      "kind": "infrared",
+      "description": "白昼热红外历史镶嵌；灰度呈现热辐射强度与地形纹理。",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 795118,
+      "sha256": "eae6bcb5ceda80f3f28a47852c81642b2698ab92b39ca734e4729e10b59a6178",
+      "noData": "transparent"
+    },
+    "nightIR": {
+      "url": "assets/mars/night-ir.webp",
+      "label": "夜间热红外 · THEMIS",
+      "credit": "NASA/JPL/ASU/USGS · THEMIS 夜间控制镶嵌 (2018)",
+      "sourceUrl": "https://mars.asu.edu/data/themis_nightir/",
+      "kind": "infrared",
+      "description": "夜间热红外历史镶嵌；覆盖约南北纬65°以内，透明区域为未覆盖。",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 468084,
+      "sha256": "e8a84f20e5d4f3e450b1a9ee5937f3115fe21a52c60c6f65c5e3d5a577c23a69",
+      "coverageLatitude": [
+        -65,
+        65
+      ],
+      "noData": "transparent"
+    },
+    "elevation": {
+      "url": "assets/mars/elevation.jpg",
+      "label": "高程 · MOLA",
+      "credit": "NASA/GSFC · MGS MOLA MEGDR v2",
+      "sourceUrl": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg004/megt90n000cb.lbl",
+      "kind": "elevation",
+      "description": "相对火星参考等位面（areoid）的实测高程，单位米。",
+      "width": 720,
+      "height": 360,
+      "bytes": 64320,
+      "sha256": "2ebda04b5852cd3da8b8bcba53d1d984c78e710c985f43b6dbeb33c9b01ea935"
+    },
+    "geology": {
+      "url": "assets/mars/geology.png",
+      "label": "全球地质 · USGS",
+      "credit": "USGS · Tanaka et al. 2014 · SIM 3292",
+      "sourceUrl": "https://pubs.usgs.gov/sim/3292/",
+      "kind": "geology",
+      "description": "由全球地质 GIS 的 Robinson 投影反投影至经纬网，保留官方地质单元配色。",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 91325,
+      "sha256": "2102924bbf2171d808aff87b9e4c77390f79e05ef815eafd25c3860b4e7f1f1e",
+      "legendUrl": "assets/mars/geology-legend.json"
+    }
+  },
+  "terrain": {
+    "url": "assets/mars/mola-height.i16.gz",
+    "width": 720,
+    "height": 360,
+    "scaleMeters": 1,
+    "offsetMeters": 0,
+    "encoding": "int16-le-gzip",
+    "pixelRegistration": "cell-centre",
+    "longitudeRange": [
+      -180,
+      180
+    ],
+    "latitudeRange": [
+      90,
+      -90
+    ],
+    "noData": null,
+    "reference": "MOLA GMM3 areoid",
+    "sourceResolutionDeg": 0.25,
+    "resolutionDeg": 0.5,
+    "minMeters": -7696,
+    "maxMeters": 20930,
+    "credit": "NASA/GSFC · MGS MOLA MEGDR v2",
+    "sourceUrl": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg004/megt90n000cb.lbl",
+    "colorLegend": [
+      {
+        "meters": -8200,
+        "color": "#141e5a"
+      },
+      {
+        "meters": -6000,
+        "color": "#26569a"
+      },
+      {
+        "meters": -4000,
+        "color": "#318db5"
+      },
+      {
+        "meters": -2000,
+        "color": "#57bab0"
+      },
+      {
+        "meters": 0,
+        "color": "#bdce7a"
+      },
+      {
+        "meters": 2000,
+        "color": "#e4b55d"
+      },
+      {
+        "meters": 5000,
+        "color": "#cd7343"
+      },
+      {
+        "meters": 10000,
+        "color": "#a24c48"
+      },
+      {
+        "meters": 16000,
+        "color": "#d2b5a7"
+      },
+      {
+        "meters": 22000,
+        "color": "#ffffff"
+      }
+    ],
+    "bytes": 424326,
+    "sha256": "55de668fd013142547ba1cc4326275ba8475236eb4494de367cf32388a88b77d"
+  },
+  "sources": [
+    {
+      "file": "megt90n000cb.img",
+      "url": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg004/megt90n000cb.img",
+      "bytes": 2073600,
+      "sha256": "25f16fb7aaf857898dcf98bc4f841341a24f8b9f7e98453ca083bc45d897ca2c"
+    },
+    {
+      "file": "megt90n000cb.lbl",
+      "url": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg004/megt90n000cb.lbl",
+      "bytes": 4796,
+      "sha256": "5a3fe60256afa1c35fea5d551fe0ab0a9198fb2bcd2c2e161d078aa69627ebac"
+    },
+    {
+      "file": "names.zip",
+      "url": "https://asc-planetarynames-data.s3.us-west-2.amazonaws.com/MARS_nomenclature_center_pts.zip",
+      "bytes": 5421247,
+      "sha256": "32e51774ac882643c3d7b3d674cef2e3cf0aefa9dd20a41aba5680f96247687a"
+    },
+    {
+      "file": "geology-layer-3.json",
+      "url": "https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Tanaka_et_al_2014_Mars_Global_Map_Features/FeatureServer/3",
+      "bytes": 37886,
+      "sha256": "67edebda90b56a7fc619dab1b44fc4d5219c49970975fe69566d227e0169538d"
+    },
+    {
+      "file": "geology-polygons-original.json",
+      "url": "https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Tanaka_et_al_2014_Mars_Global_Map_Features/FeatureServer/3/query?f=json&where=1%3D1&outFields=Unit%2CUnitDesc%2CUnitGroup&returnGeometry=true&resultRecordCount=2000&maxAllowableOffset=0",
+      "bytes": 115029306,
+      "sha256": "3053f782e77a89b11add1c89d177cb996e70bac92c5423b90826ca5ec26c7cc4"
+    },
+    {
+      "file": "MDIM21_color.png",
+      "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=%2Fmaps%2Fmars%2Fmars_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=MDIM21_color&STYLES=&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=2048&HEIGHT=1024&FORMAT=image%2Fpng&TRANSPARENT=TRUE",
+      "bytes": 3947945,
+      "sha256": "08e744640c748b89057d7c3f752dbdc07f9c397aefbba400059a34a5772b5eb7"
+    },
+    {
+      "file": "THEMIS.png",
+      "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=%2Fmaps%2Fmars%2Fmars_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=THEMIS&STYLES=&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=2048&HEIGHT=1024&FORMAT=image%2Fpng&TRANSPARENT=TRUE",
+      "bytes": 2303732,
+      "sha256": "b7f7d22a28ca2578a219f23869695fb521beefe572e9752c35b5be11a5b6ea55"
+    },
+    {
+      "file": "THEMIS_night.png",
+      "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=%2Fmaps%2Fmars%2Fmars_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=THEMIS_night&STYLES=&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=2048&HEIGHT=1024&FORMAT=image%2Fpng&TRANSPARENT=TRUE",
+      "bytes": 1642481,
+      "sha256": "d7e633edc65d155af9d71f75b46a7f18aae33dd39e41e36454684649d0d0e1a1"
+    }
+  ],
+  "geologyPolygonCount": 1311,
+  "geologyUnitCount": 44
+}

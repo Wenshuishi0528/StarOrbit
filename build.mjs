@@ -6,7 +6,7 @@ function publish(file,bytes=fs.readFileSync(file),suffix=path.extname(file)){
  const hash=crypto.createHash('sha256').update(bytes).digest('hex').slice(0,16),name=path.basename(file,path.extname(file))+'-'+hash+suffix,url='assets/'+name;
  if(!emitted.has(url)){fs.writeFileSync(out+'/'+url,bytes);emitted.set(url,bytes.length);}return url;
 }
-const image=file=>split?publish(file):'data:image/'+({'.png':'png','.avif':'avif'}[path.extname(file)]||'jpeg')+';base64,'+fs.readFileSync(file).toString('base64');
+const image=file=>split?publish(file):'data:image/'+({'.png':'png','.avif':'avif','.webp':'webp'}[path.extname(file)]||'jpeg')+';base64,'+fs.readFileSync(file).toString('base64');
 const packed=file=>{const bytes=zlib.gzipSync(fs.readFileSync(file),{level:9});return split?{url:publish(file,bytes,'.glb.gz')}:bytes.toString('base64');};
 import {SPACECRAFT,MISSIONS} from './src/missions.js';
 const spacecraftModels=Object.fromEntries(Object.entries(SPACECRAFT).filter(([,x])=>x.asset).map(([id,x])=>[id,packed(x.asset)]));
@@ -38,6 +38,8 @@ environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
 }
 {const manifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));const {file,...base}=manifest.base;environmentAssets.elevation={version:manifest.version,base:{...base,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')},source:manifest.source};}
 environmentAssets.moon=image('assets/moon/lroc-color-2k.jpg');
+{const manifest=JSON.parse(fs.readFileSync('assets/satellites/manifest.json','utf8'));const file='assets/satellites/'+manifest.file;environmentAssets.satellites={...manifest,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')};}
+{const {sources,...manifest}=JSON.parse(fs.readFileSync('assets/mars/manifest.json','utf8'));environmentAssets.mars={...manifest,layers:Object.fromEntries(Object.entries(manifest.layers).map(([id,record])=>[id,{...record,url:image(record.file??record.url)}]))};const file=manifest.terrain.file??manifest.terrain.url;environmentAssets.mars.terrain={...manifest.terrain,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')};}
 {const geology=JSON.parse(fs.readFileSync('assets/moon/geology/manifest.json','utf8'));environmentAssets.lunarGeology=Object.fromEntries(geology.outputs.map(record=>[record.id,image(record.file)]));}
 {const {file,...terrain}=JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json','utf8'));environmentAssets.lunarTerrain={...terrain,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')};}
 
@@ -100,6 +102,8 @@ html=html.replace('</head>','<!-- Lunar observatory: sources and scientific scop
 if(split){fs.mkdirSync(out+'/assets/moon',{recursive:true});for(const file of ['README.md','SCIENCE.md','terrain-manifest.json','lola-720x360.i16.gz','lroc-color-2k.jpg'])fs.copyFileSync('assets/moon/'+file,out+'/assets/moon/'+file);}
 for(const directory of ['places','geology']){if(split)fs.cpSync('assets/moon/'+directory,out+'/assets/moon/'+directory,{recursive:true});html=html.replace('</head>','<!-- Lunar '+directory+' provenance\n'+fs.readFileSync('assets/moon/'+directory+'/README.md','utf8')+' -->\n</head>');}
 
+
+for(const directory of ['mars','satellites']){html=html.replace('</head>','<!-- Planetary sources\n'+fs.readFileSync('assets/'+directory+'/README.md','utf8').replaceAll('-->','-- >')+' -->\n</head>');if(split){fs.mkdirSync(out+'/assets/'+directory,{recursive:true});for(const file of ['README.md','manifest.json',...(directory==='mars'?['geology-legend.json']:[])])fs.copyFileSync('assets/'+directory+'/'+file,out+'/assets/'+directory+'/'+file);}}
 
 html=html.replace('</head>','<!-- OpenCC search character mapping, Apache-2.0\n'+fs.readFileSync('assets/OPENCC-LICENSE.txt','utf8')+' -->\n</head>');
 html=html.replace('</head>','<!-- GeoTIFF decoder licenses\n'+fs.readFileSync('assets/GEOTIFF-DEPENDENCY-LICENSES.txt','utf8')+' -->\n</head>');

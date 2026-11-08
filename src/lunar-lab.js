@@ -732,6 +732,13 @@ export function mountLunarLab(container, sim) {
   fillSite();
   translate();
   return {
+    setObservation({ time: nextTime, site: nextSite }) {
+      if (nextSite) {
+        site = { ...nextSite };
+        fillSite();
+      }
+      setTime(nextTime);
+    },
     resume() {
       visible = true;
       if (!viewer)

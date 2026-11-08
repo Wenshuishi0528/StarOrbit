@@ -1,0 +1,91 @@
+{
+  "version": "1.32",
+  "status": "local-verified",
+  "checkedAtUTC": "2026-11-08T10:32:57.874927+00:00",
+  "automated": {
+    "npm test": "passed (full regression run; final changed modules also rerun)",
+    "npm run test:docs": "passed",
+    "additionalFinalTests": [
+      "planetary-observation-data",
+      "planetary-observatory",
+      "planetary-renderer",
+      "major-satellites",
+      "solar-world",
+      "ground-world",
+      "ground-sky",
+      "lunar-state",
+      "weather",
+      "i18n"
+    ],
+    "splitBuildValidation": [
+      "dist",
+      "dist-local"
+    ],
+    "standaloneBytes": 497773777
+  },
+  "browser": {
+    "engine": "native Safari on macOS",
+    "sourceURL": "http://127.0.0.1:8772/",
+    "installedURL": "http://127.0.0.1:8771/",
+    "passed": [
+      "v1.32 boot and observatory entry",
+      "Mars visible surface and named features",
+      "Zhurong red star and GIS geological texture",
+      "equal-field date comparison: 6.8 versus 13.8 arcseconds",
+      "PNG export inspected with both dates and source credits",
+      "Earth selection to Beijing ground mode",
+      "Mars/Jupiter system views and four Galilean moon positions",
+      "installed Mars opposition event query",
+      "Moon handoff at matching UTC epoch and return to main scene"
+    ],
+    "evidence": [
+      "output/release132/desktop-mars.png",
+      "output/release132/mars-geology-safari.png",
+      "output/release132/mars-date-comparison.png"
+    ],
+    "notRun": [
+      "physical mobile-device acceptance",
+      "exhaustive interactive testing of every satellite and event category"
+    ],
+    "postVisualChanges": "Caption refinement hides Earth-observer readings in free 3D exploration; integration tests rerun."
+  },
+  "desktop": {
+    "version": "1.32",
+    "root": "/Users/apple/Documents/3D打印/中国空间站_1比200_模块化/交互预览软件",
+    "launcherCheck": "READY http://127.0.0.1:8771/",
+    "codeSignature": "codesign --verify --deep --strict passed",
+    "backup": "output/release132/runtime-backup"
+  },
+  "assets": {
+    "marsBytes": 2456746,
+    "satelliteGzipBytes": 2699512,
+    "satelliteCoverageUTC": [
+      "2026-01-01T00:00:00Z",
+      "2031-01-01T00:00:00Z exclusive"
+    ],
+    "catalogue": {
+      "moons": 20,
+      "marsPlaces": 44,
+      "marsLayers": 5
+    }
+  },
+  "builds": {
+    "dist": {
+      "entrySHA256": "68f90b79fc7090e01d19feed21f5b1fe3911ef4a8b7ebb52075348e77ae2a204",
+      "bundle": "assets/app.bundle-036c6d31ac23fc2d.js",
+      "bundleSHA256": "036c6d31ac23fc2d9ab44dda9ab2c9d9a22739a3bbfdfa4b206634660160c817"
+    },
+    "dist-local": {
+      "entrySHA256": "c9dd777beb819e6032c382132ace9d7cdc6222bbca439612a2c0913ddfaf71f7",
+      "bundle": "assets/app.bundle-4d994cd43f2ebd71.js",
+      "bundleSHA256": "4d994cd43f2ebd719e755a37f110eb9394ce6e5d2b570ec4bf84177af18c26fb"
+    },
+    "standalone": {
+      "sha256": "612d8e81921665228ed7670b11f44f4240060446851d4ed308bad422e15edd50"
+    }
+  },
+  "publication": {
+    "published": false,
+    "currentPublishedVersion": "1.31"
+  }
+}

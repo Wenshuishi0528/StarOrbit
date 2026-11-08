@@ -1865,6 +1865,7 @@ export class Weather {
         '%';
     if (k === 'cloud' && r) s = cloudTitle(r) + '\n' + s;
     $(k + 'DataStatus').textContent = s;
+    return s;
   }
   get waitingForRegionalCloud() {
     return (

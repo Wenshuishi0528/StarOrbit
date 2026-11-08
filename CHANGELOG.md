@@ -4,6 +4,14 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.32 — 2026-11-08 · 本机版 / Local build
+
+新增统一天体观测入口，火星真实地形与可见光／昼夜热红外／高程／地质图、地名与着陆点、地面望远镜视角；地球复用昼夜云图与地形，可选点进入地表。加入20颗主要卫星目录与母星系统、按需加载JPL星历子集。支持事件查询、同视场日期与图层对比，以及带时间地点和来源的照片。
+
+**English:** Added a unified observatory with measured Mars terrain, visible/thermal/elevation/geological layers, named features and landing sites, and Earth-based disk views. Earth reuses existing layers and connects to ground exploration. Twenty major moons and parent-system views use compact, on-demand ephemerides. Added event searches, equal-field date/layer comparisons and attributed photo exports.
+
+[数据与算法 / Data and methods](docs/planetary-observatory.md) · [验证 / Validation](docs/verification.md)
+
 ## v1.31 — 2026-11-08
 
 新增地表观测与三维太阳系入口，共用模拟时钟。地表支持内置地名／显式联网搜索、坐标与地图选点、地点收藏、默认真实地形、贴地及自由升降、共用键位与持续按键加速；自然天空、银河和DSS、中西星空图层与拍照。太阳系显示同历元日心位置、行星轨道、地月系统和地面地点，可切换真实尺寸与显示增强。局部地面使用WGS84与稳定高程采样。
