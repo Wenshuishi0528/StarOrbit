@@ -4,7 +4,7 @@
   "status": "passed",
   "source": {
     "baseCommit": "f258e764d266b953d2b43523ba60856237f6fb02",
-    "workingTree": "v1.37 feature batch prepared for publication"
+    "featureCommit": "e6f981edf139f73854e15509b87519cdf6a74338"
   },
   "environment": {
     "os": "macOS-10.16-x86_64-i386-64bit",
@@ -100,8 +100,8 @@
   "delivery": {
     "build": "single-file, local split and static web builds complete",
     "desktop": "synced v1.37; signed launcher --check READY; final HTTP entry/bundle and standalone SHA256 match source builds",
-    "github": "authorized; publication in progress",
-    "web": "verified static build prepared for https://wenshuishi0528.github.io/StarOrbit/"
+    "github": "source pushed to private StarOrbit-source; compiled distribution and public documentation pushed to public StarOrbit",
+    "web": "v1.37 deployed successfully; live entry, bundle, manifest, elevation and mineral catalog SHA256 match validated local build"
   },
   "builds": {
     "dist-local": {
@@ -120,5 +120,45 @@
       "bytes": 710376435,
       "sha256": "7798935e9615d048b672fc45f017d724f571955a8603154cc24aea1bbcd68c33"
     }
+  },
+  "publication": {
+    "date": "2026-11-09",
+    "webCommit": "03ce10b4ac58038ffb783cd04c5db2c4317bc806",
+    "pagesRun": "https://github.com/Wenshuishi0528/StarOrbit/actions/runs/42548081907",
+    "pagesConclusion": "success",
+    "url": "https://wenshuishi0528.github.io/StarOrbit/",
+    "httpChecks": [
+      {
+        "path": "version.json",
+        "bytes": 18,
+        "sha256": "508b27378f581801715df7c708d7d46f32b1ca17eba79fe1fe55ca72bb66f566"
+      },
+      {
+        "path": "index.html",
+        "bytes": 648409,
+        "sha256": "bf481b932a27789227194b37f879badbb91f4a72c34f350e6a1a3f1093290248"
+      },
+      {
+        "path": "assets/app.bundle-af2c4fda14eb95eb.js",
+        "bytes": 20267858,
+        "sha256": "af2c4fda14eb95ebb078afd5ca66f3bba11df20b648a90670ddff36bfa4e854f"
+      },
+      {
+        "path": "assets/earth/observation/manifest.json",
+        "bytes": 19696,
+        "sha256": "67d99e4d986926f578d0833c24fa0f0bf85f957fef413a44c22847c1b92b1140"
+      },
+      {
+        "path": "assets/elevation-8dfcb20fccef39e8.avif",
+        "bytes": 829967,
+        "sha256": "8dfcb20fccef39e8151566ff076e89dbd37e513aa8ef045a325b99743662a6ec"
+      },
+      {
+        "path": "assets/minerals.json-d24ff7aab8131e37.gz",
+        "bytes": 6225834,
+        "sha256": "d24ff7aab8131e378dc871addf67dbed25749f0c3d4ac8d800670cc9a5d46d95"
+      }
+    ],
+    "liveBrowser": "Visible Chrome loaded v1.37, but could not initialize WebGL 2 after reload. Live 3D interaction recheck blocked by browser graphics availability; prior local visual and interaction checks passed on the identical build."
   }
 }
