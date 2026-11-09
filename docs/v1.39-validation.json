@@ -3,7 +3,8 @@
   "date": "2026-11-09",
   "source": {
     "baseCommit": "29e52f9",
-    "workingTree": "v1.38 and v1.39 feature batch"
+    "workingTree": "v1.38 and v1.39 feature batch",
+    "implementationCommit": "5d12cb4"
   },
   "automated": {
     "npm test": "passed",
@@ -54,7 +55,22 @@
     "browser": "Installed v1.39 native Simple/Full and fit-range controls, 1920x1080 full viewport checked",
     "evidence": "output/playwright/v139-installed-check.log"
   },
-  "publication": "pending",
+  "publication": {
+    "status": "passed",
+    "sourceRepository": "Wenshuishi0528/StarOrbit-source",
+    "publicRepository": "Wenshuishi0528/StarOrbit",
+    "publicBuildCommit": "1d12d1475348299b546df08998946499a7970438",
+    "pagesRun": "https://github.com/Wenshuishi0528/StarOrbit/actions/runs/42564535059",
+    "pagesConclusion": "success",
+    "liveUrl": "https://wenshuishi0528.github.io/StarOrbit/",
+    "liveHashVerification": "version.json, index.html and JavaScript bundle match local web build",
+    "liveBrowser": "v1.39, native Full/Simple switching and fit-range; 1920x1080 full viewport; no page errors",
+    "evidence": [
+      "output/release139/live-hashes.json",
+      "output/playwright/v139-live-check.log",
+      "output/playwright/v139-live.png"
+    ]
+  },
   "artifacts": {
     "StarOrbit.html": {
       "bytes": 710412721,
