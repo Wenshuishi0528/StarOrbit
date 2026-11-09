@@ -1,3 +1,4 @@
+import { installEarthObservationControls } from './earth-observation-controls.js';
 import { sampleElevationBase } from './earth-elevation-math.js';
 import { createPlanetaryRenderer } from './planetary-renderer.js';
 import { findPlanetaryEvents, planetaryComparisonDates } from './planetary-events.js';
@@ -37,6 +38,12 @@ export function installPlanetaryObservatory(sim) {
     panel = $('.planet-panel'),
     labels = $('.planet-overlay'),
     status = $('.planet-status');
+  const earthObservation = installEarthObservationControls({
+    host,
+    environment: sim.environment,
+    selectFeature,
+  });
+  Object.assign(layerNames, earthObservation.labels);
   const entry = document.createElement('button');
   entry.id = 'openPlanetaryObservatory';
   document.getElementById('toolbarActions')?.prepend(entry);
@@ -81,6 +88,7 @@ export function installPlanetaryObservatory(sim) {
       ...Object.entries(bodies).map(([id, name]) => new Option(t(name), id))
     );
     $('[data-body]').value = current || target;
+    earthObservation.translate();
     renderBody();
   }
   function syncSite() {
@@ -91,7 +99,7 @@ export function installPlanetaryObservatory(sim) {
   }
   function layers() {
     return target === 'Earth'
-      ? ['day', 'night']
+      ? ['day', 'night', ...Object.keys(earthObservation.labels)]
       : ['visible', 'dayIR', 'nightIR', 'elevation', 'geology'].filter(
           (id) => id === 'visible' || sim.environment.assets.mars?.layers?.[id]
         );
@@ -142,12 +150,13 @@ export function installPlanetaryObservatory(sim) {
   function selectFeature(f) {
     selection = f;
     $('[data-selection]').textContent =
-      `${featureName(f) || t('已选地点')} · ${f.latitude.toFixed(3)}°, ${f.longitude.toFixed(3)}°${f.description ? '\n' + t(f.description) : ''}`;
+      `${featureName(f) || t('已选地点')} · ${f.latitude.toFixed(3)}°, ${f.longitude.toFixed(3)}°${Number.isFinite(f.height) ? '\n' + t('高程概览值') + ' ' + Math.round(f.height).toLocaleString() + ' m' : ''}${f.description ? '\n' + t(f.description) : ''}`;
     $('[data-view]').value = 'explore';
     $('[data-fov-row]').hidden = true;
     view?.focus(f);
   }
   function layerSource(id) {
+    if (target === 'Earth' && earthObservation.source(id)) return earthObservation.source(id);
     const info = sim.environment.assets.mars?.layers?.[id];
     const earthSource =
       document.getElementById(id === 'night' ? 'nightSource' : 'daySource')?.selectedOptions?.[0]
@@ -159,7 +168,18 @@ export function installPlanetaryObservatory(sim) {
       : `${t(info?.label ?? layerNames[id])} · ${info?.credit ?? 'NASA / USGS / ASU'}${info?.description ? '\n' + t(info.description) : ''}`;
   }
   function showSource() {
+    earthObservation.update(target, layer);
     const earth = target === 'Earth';
+    const dateOption = $('[data-compare] option[value="date"]');
+    if (dateOption) {
+      dateOption.disabled = earth && !!sim.environment.assets.earthObservation?.layers?.[layer];
+      dateOption.textContent = t(earth ? '不同照明时刻' : '不同日期 · 同一视场');
+      if (dateOption.disabled && $('[data-compare]').value === 'date')
+        $('[data-compare]').value = 'off';
+    }
+    for (const key of ['time-b', 'apply-b'])
+      $(`[data-${key}]`).hidden =
+        earth && !!sim.environment.assets.earthObservation?.layers?.[layer];
     const record = earth
       ? sim.environment.weather?.items?.find((r) => r.id === sim.environment.weather.active.cloud)
       : null;
@@ -169,6 +189,12 @@ export function installPlanetaryObservatory(sim) {
     $('[data-source]').textContent = source;
     const legend = $('[data-legend]');
     legend.replaceChildren();
+    if (earth) for (const id of [...new Set(ids)]) earthObservation.legend(id, legend);
+    $('[data-cloud-row]').hidden =
+      target !== 'Earth' ||
+      (earth && ids.every((id) => !!sim.environment.assets.earthObservation?.layers?.[id]));
+    $('[data-clouds]').disabled =
+      earth && ids.every((id) => !!sim.environment.assets.earthObservation?.layers?.[id]);
     if (target === 'Mars' && ids.includes('geology'))
       for (const unit of geologyLegend.units) {
         const row = document.createElement('p'),
@@ -185,7 +211,13 @@ export function installPlanetaryObservatory(sim) {
         row.append(swatch, document.createTextNode(`${unit.meters.toLocaleString()} m`));
         legend.append(row);
       }
-    $('.planet-credit').textContent = source.replaceAll('\n', ' · ');
+    $('.planet-credit').textContent = earth
+      ? [...new Set(ids)]
+          .map(
+            (id) => sim.environment.assets.earthObservation?.layers?.[id]?.credit ?? 'NASA / NOAA'
+          )
+          .join(' · ')
+      : source.replaceAll('\n', ' · ');
     return { source, record };
   }
   async function handoff(body) {
@@ -219,9 +251,13 @@ export function installPlanetaryObservatory(sim) {
         renderer,
         environment: sim.environment,
         onPick: (pick) => selectFeature({ ...pick, name: t('已选地点') }),
+        onMineralPick: (group) => {
+          earthObservation.showSelection(group);
+        },
       });
     }
     target = body;
+    if (body === 'Earth') earthObservation.open();
     selection = null;
     frames = null;
     $('[data-selection]').textContent = '';
@@ -244,6 +280,7 @@ export function installPlanetaryObservatory(sim) {
     $('[data-time-b]').value = dateTimeText(compareTime, '24');
     sim.environment.elevation?.setEnabled(true);
     renderBody();
+    $('[data-event-search]').closest?.('details')?.removeAttribute('open');
     view.focus(body === 'Earth' ? site : { latitude: 18.65, longitude: -133.8 });
     message('');
     void comparisonPresets();
@@ -252,6 +289,7 @@ export function installPlanetaryObservatory(sim) {
   function close() {
     if (!active) return;
     active = false;
+    earthObservation.close();
     eventRequest?.abort();
     presetRequest?.abort();
     view?.dispose();
@@ -538,6 +576,7 @@ export function installPlanetaryObservatory(sim) {
       atlas: $('[data-atlas]').checked,
       relief: $('[data-relief]').checked,
       clouds: $('[data-clouds]').checked,
+      ...earthObservation.settings(),
     };
   }
   const labelMeasure = document.createElement('canvas').getContext('2d');
@@ -564,7 +603,7 @@ export function installPlanetaryObservatory(sim) {
     for (const frame of [frames.a, frames.b].filter(Boolean)) {
       const el = document.createElement('div');
       const o = frame.settings.view === 'observe' ? frame.observation : null;
-      el.textContent = `${t(layerNames[frame.settings.layer])} · ${dateTimeText(frame.settings.time, '24')} UTC+8${o ? '\n' + o.angularDiameterArcsec.toFixed(1) + '″ · ' + t('中央经线') + ' ' + o.centralMeridianEastDeg.toFixed(1) + '°E' : ''}`;
+      el.textContent = `${t(layerNames[frame.settings.layer])} · ${frame.settings.target === 'Earth' && sim.environment.assets.earthObservation?.layers?.[frame.settings.layer]?.periodStart ? sim.environment.assets.earthObservation.layers[frame.settings.layer].periodStart + ' — ' + sim.environment.assets.earthObservation.layers[frame.settings.layer].periodEnd : frame.settings.target === 'Earth' && frame.settings.layer === 'earthElevation' ? 'ETOPO 2022' : dateTimeText(frame.settings.time, '24') + ' UTC+8'}${o ? '\n' + o.angularDiameterArcsec.toFixed(1) + '″ · ' + t('中央经线') + ' ' + o.centralMeridianEastDeg.toFixed(1) + '°E' : ''}`;
       captions.append(el);
     }
     const o = frames.a.settings.view === 'observe' ? frames.a.observation : null;
@@ -576,10 +615,15 @@ export function installPlanetaryObservatory(sim) {
       const priority = (f) =>
         selection && f.latitude === selection.latitude && f.longitude === selection.longitude
           ? 0
-          : f.country === 'CN'
-            ? 1
-            : 2;
-      const list = [...features()].sort((a, b) => priority(a) - priority(b));
+          : target === 'Earth'
+            ? (f.rank ?? 4) * 10 + ({ capital: 0, country: 1, city: 2, landform: 3 }[f.kind] ?? 4)
+            : f.country === 'CN'
+              ? 1
+              : 2;
+      const list = [
+        ...(selection && (!selection.mineral || s.mineralVisible) ? [selection] : []),
+        ...features().filter((f) => f !== selection),
+      ].sort((a, b) => priority(a) - priority(b));
       for (const frame of [frames.a, frames.b].filter(Boolean)) {
         const occupied = [];
         for (const f of list) {
@@ -653,7 +697,7 @@ export function installPlanetaryObservatory(sim) {
     }
   }
   $('[data-photo]').onclick = () => {
-    if (!view || view.loading) {
+    if (!view || view.loading || earthObservation.loading) {
       message(t('图层加载中，请稍后拍照'));
       return;
     }
@@ -687,12 +731,13 @@ export function installPlanetaryObservatory(sim) {
     }
     const columnWidth = output.width / snapshots.length;
     const notes = snapshots.map((frame) => [
-      `${t(layerNames[frame.settings.layer])} · ${dateTimeText(frame.settings.time, '24')} UTC+8`,
+      `${t(layerNames[frame.settings.layer])} · ${t('场景时刻')} ${dateTimeText(frame.settings.time, '24')} UTC+8`,
+      ...(earthObservation.photoNote ? [earthObservation.photoNote] : []),
       ...wrap(layerSource(frame.settings.layer), columnWidth - margin * 2),
     ]);
     output.height =
       canvas.height +
-      Math.ceil(65 * scale + Math.max(...notes.map((lines) => lines.length)) * lineHeight);
+      Math.ceil(105 * scale + Math.max(...notes.map((lines) => lines.length)) * lineHeight);
     c.fillStyle = '#07111d';
     c.fillRect(0, 0, output.width, output.height);
     c.drawImage(canvas, 0, 0);
@@ -729,7 +774,12 @@ export function installPlanetaryObservatory(sim) {
     c.fillText(`STARORBIT · ${t(bodies[capturedTarget])}`, margin, canvas.height + 22 * scale);
     c.fillStyle = '#a8bacb';
     c.font = `${11 * scale}px system-ui`;
-    const siteText = `${site.name ?? ''} ${site.latitude.toFixed(3)}°, ${site.longitude.toFixed(3)}° · ${site.height.toFixed(0)} m`;
+    const siteText =
+      capturedTarget === 'Earth'
+        ? selection
+          ? `${featureName(selection)} · ${selection.latitude.toFixed(3)}°, ${selection.longitude.toFixed(3)}°`
+          : t('地球全球观测')
+        : `${site.name ?? ''} ${site.latitude.toFixed(3)}°, ${site.longitude.toFixed(3)}° · ${site.height.toFixed(0)} m`;
     c.fillText(siteText, margin, canvas.height + 43 * scale, output.width - margin * 2);
     notes.forEach((lines, index) =>
       lines.forEach((line, n) =>
@@ -739,6 +789,16 @@ export function installPlanetaryObservatory(sim) {
           canvas.height + 65 * scale + n * lineHeight,
           columnWidth - margin * 2
         )
+      )
+    );
+    snapshots.forEach((frame, i) =>
+      earthObservation.paintLegend(
+        c,
+        frame.settings.layer,
+        i * columnWidth + margin,
+        output.height - 35 * scale,
+        columnWidth - 2 * margin,
+        scale
       )
     );
     output.toBlob((blob) => {
@@ -767,6 +827,7 @@ export function installPlanetaryObservatory(sim) {
     dispose() {
       close();
       off();
+      earthObservation.dispose();
       entry.remove();
       host.remove();
       style.remove();

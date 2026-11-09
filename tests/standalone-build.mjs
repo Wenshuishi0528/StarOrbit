@@ -4,6 +4,8 @@ import crypto from 'node:crypto';
 const file = process.argv[2] || 'StarOrbit.html';
 assert(fs.statSync(file).size <= 900e6, 'standalone distribution budget');
 const manifest = JSON.parse(fs.readFileSync('assets/earth/night-2025-500m/manifest.json', 'utf8'));
+const earthManifest = JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json','utf8'));
+const earthFiles = new Set([...Object.values(earthManifest.layers).map(r=>r.file),earthManifest.layers.earthElevation.heightFile,earthManifest.minerals.file]);
 const expected = new Set(
   Object.keys(manifest.files).filter((name) => /^\d+-\d+\.avif$/.test(name))
 );
@@ -35,6 +37,12 @@ function script(attributes, body) {
   blocks++;
   last = payload.last;
   for (const [path, value] of payload.patches) {
+    if (path[0] === 'earthObservation' && typeof value === 'string' && value.startsWith('data:')) {
+      const record = path[1] === 'layers' ? earthManifest.layers[path[2]] : earthManifest.minerals;
+      const file = path.at(-1) === 'heightUrl' ? record.heightFile : record.file;
+      assert(earthFiles.delete(file), file);
+      assert.equal(sha(Buffer.from(value.slice(value.indexOf(',')+1),'base64')),sha(fs.readFileSync(file)));
+    }
     if (
       path[0] !== 'nightSources' ||
       path[1] !== '2025-500m' ||
@@ -86,6 +94,7 @@ assert.equal(tag, null, 'all script tags terminate');
 assert(format && blocks > 1 && last);
 assert.equal(expected.size, 0);
 assert.equal(nightBases, 4);
+assert.equal(earthFiles.size,0);
 console.log(
   JSON.stringify({
     file,

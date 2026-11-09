@@ -1,0 +1,124 @@
+{
+  "version": "1.37",
+  "date": "2026-11-09",
+  "status": "passed",
+  "source": {
+    "baseCommit": "f258e764d266b953d2b43523ba60856237f6fb02",
+    "workingTree": "v1.37 feature batch prepared for publication"
+  },
+  "environment": {
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "browser": "Chrome DevTools isolated context earth137",
+    "url": "http://127.0.0.1:8772/StarOrbit.html?v=137"
+  },
+  "data": {
+    "imageryPeriod": [
+      "2026-10-24",
+      "2026-10-31"
+    ],
+    "mineralRecords": 304632,
+    "rareEarthRecords": 1387,
+    "addedAssetBytes": 26515402,
+    "manifestSHA256": "67d99e4d986926f578d0833c24fa0f0bf85f957fef413a44c22847c1b92b1140"
+  },
+  "automated": [
+    {
+      "command": "npm test",
+      "status": "passed",
+      "log": "output/release137/tests.log"
+    },
+    {
+      "command": "npm run test:docs",
+      "status": "passed"
+    },
+    {
+      "command": "node tests/i18n.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node tests/web-build.mjs dist-local && node tests/web-build.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node tests/standalone-build.mjs",
+      "status": "passed"
+    }
+  ],
+  "browserChecks": [
+    {
+      "check": "ETOPO globe actual visual inspection, Beijing/Asia direction, bathymetry colours and legend",
+      "status": "passed"
+    },
+    {
+      "check": "day/night land surface temperature same-pose comparison with fixed imagery epoch and same Celsius scale",
+      "status": "passed"
+    },
+    {
+      "check": "NIR/SWIR actual side-by-side rendering",
+      "status": "passed"
+    },
+    {
+      "check": "304632-record catalog load, REE filter 1387, Bayan search and actual result-button click",
+      "status": "passed",
+      "sourceRecord": "10085044",
+      "coordinates": [
+        109.9994,
+        41.6315
+      ]
+    },
+    {
+      "check": "native canvas click opened Bayan group with two original records",
+      "status": "passed"
+    },
+    {
+      "check": "wheel event exercised closer-scale display; narrow viewport and panel display inspected",
+      "status": "passed"
+    },
+    {
+      "check": "actual photo button export and decoded PNG visual inspection including two legends/source/date footers",
+      "status": "passed",
+      "width": 2448,
+      "height": 1896,
+      "bytes": 2995889
+    },
+    {
+      "check": "local static web build: Earth elevation and mineral asset loading; console has no warnings or errors",
+      "status": "passed",
+      "url": "http://127.0.0.1:8772/dist/index.html?v=137"
+    }
+  ],
+  "testNotes": [
+    "An initial synthetic pointer event caused a browser setPointerCapture error because synthetic pointer IDs are not active hardware pointers. The subsequent native canvas click passed. This was a test-harness event, not a user interaction failure.",
+    "Chrome screenshot file-path writes were rejected by the tool workspace configuration; rendered screenshots were returned and visually inspected in the conversation instead."
+  ],
+  "limits": [
+    "Fixed built-in eight-day atlas, not arbitrary-date remote imagery.",
+    "Scientific raster previews: 4096x2048; ETOPO overview: 2048x1024.",
+    "MRDS historical occurrence coverage varies by region and is not current reserve or mine-operating-status data.",
+    "No physical mobile-device, Safari or Firefox run."
+  ],
+  "delivery": {
+    "build": "single-file, local split and static web builds complete",
+    "desktop": "synced v1.37; signed launcher --check READY; final HTTP entry/bundle and standalone SHA256 match source builds",
+    "github": "authorized; publication in progress",
+    "web": "verified static build prepared for https://wenshuishi0528.github.io/StarOrbit/"
+  },
+  "builds": {
+    "dist-local": {
+      "entryBytes": 648409,
+      "entrySHA256": "d2ab9bbb392238fc28cfc2cd01c49a8acb6cdb873c973a0a46e35bba7b7d1b86",
+      "bundle": "assets/app.bundle-4ece5794af804df1.js",
+      "bundleSHA256": "4ece5794af804df10a501977f9eee73568d98f1c2dd15eeafb15118fdf2f856b"
+    },
+    "dist": {
+      "entryBytes": 648409,
+      "entrySHA256": "bf481b932a27789227194b37f879badbb91f4a72c34f350e6a1a3f1093290248",
+      "bundle": "assets/app.bundle-af2c4fda14eb95eb.js",
+      "bundleSHA256": "af2c4fda14eb95ebb078afd5ca66f3bba11df20b648a90670ddff36bfa4e854f"
+    },
+    "standalone": {
+      "bytes": 710376435,
+      "sha256": "7798935e9615d048b672fc45f017d724f571955a8603154cc24aea1bbcd68c33"
+    }
+  }
+}

@@ -150,6 +150,7 @@ const sandbox = {
   MARS_FEATURES: [],
   findPlanetaryEvents: (args) => new Promise((resolve) => eventSearches.push({ args, resolve })),
   planetaryComparisonDates: (args) => new Promise((resolve) => presets.push({ args, resolve })),
+  installEarthObservationControls: () => ({ labels: {}, translate() {}, source: () => '', legend() {}, update() {}, open() {}, close() {}, dispose() {}, paintLegend() {}, settings: () => ({}) }),
   createPlanetaryRenderer: () => ({
     loading: false,
     focus() {},

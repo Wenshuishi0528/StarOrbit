@@ -15,7 +15,7 @@ for(const [id,source] of Object.entries(data('spacecraftModels'))){
 }
 const orbits=JSON.parse(resource(data('missionOrbits').url));assert(orbits.tiangong.rows.length>=8&&orbits.dfh1.rows.length>=8);
 const scan=value=>{if(typeof value==='string')resource(value);else if(value)Object.values(value).forEach(scan);};
-const {skyDetail,cityTerrain,constellationArt,chineseConstellationArt,elevation,lunarTerrain,mars,satellites,...environment}=data('environmentAssets');scan(environment);
+const {skyDetail,cityTerrain,constellationArt,chineseConstellationArt,elevation,lunarTerrain,mars,satellites,earthObservation,...environment}=data('environmentAssets');scan(environment);
 const elevationManifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));
 assert(resource(elevation.base.url).equals(fs.readFileSync(elevationManifest.base.file)));
 assert.equal(zlib.gunzipSync(resource(elevation.base.url)).byteLength,elevation.base.width*elevation.base.height*2);
@@ -96,3 +96,11 @@ assert(resource(satellites.url).equals(fs.readFileSync('assets/satellites/'+sate
 assert.equal(zlib.gunzipSync(resource(satellites.url)).byteLength,satellites.decodedBytes);
 for(const dir of ['mars','satellites'])for(const name of ['README.md','manifest.json'])assert(fs.readFileSync(output+'/assets/'+dir+'/'+name).equals(fs.readFileSync('assets/'+dir+'/'+name)));
 console.log('Mars maps/DEM and major-satellite ephemerides match source assets; provenance included.');
+
+const earthManifest=JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json'));
+for(const [id,layer] of Object.entries(earthObservation.layers))assert(resource(layer.url).equals(fs.readFileSync(earthManifest.layers[id].file)),`Earth ${id} asset`);
+assert(resource(earthObservation.layers.earthElevation.heightUrl).equals(fs.readFileSync(earthManifest.layers.earthElevation.heightFile)));
+assert(resource(earthObservation.minerals.url).equals(fs.readFileSync(earthManifest.minerals.file)));
+assert.equal(JSON.parse(zlib.gunzipSync(resource(earthObservation.minerals.url))).length,304632);
+assert(fs.readFileSync(output+'/assets/earth/observation/README.md').equals(fs.readFileSync('assets/earth/observation/README.md')));
+console.log('Earth scientific maps, unflattened ETOPO heights, mineral catalog and provenance match source assets.');

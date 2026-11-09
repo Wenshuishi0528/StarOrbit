@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createMineralLayer } from './earth-minerals.js';
 import { createOrbitControls } from './camera-controls.js';
 import { HelioVector } from 'astronomy-engine';
 import { earthAxes } from './orbit.js';
@@ -7,8 +8,8 @@ import { cloudToneGLSL } from './cloud-texture.js';
 import { planetaryObservation, planetarySurfaceDirection } from './planetary-observation-math.js';
 
 const vertex = `varying vec3 surface,nrm;void main(){surface=position;nrm=normal;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-const fragment = `uniform sampler2D map;uniform bool textured,atlas;uniform vec3 sun,color;uniform int layer;varying vec3 surface,nrm;
-void main(){vec3 p=normalize(surface);vec2 uv=vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);vec4 sampled=textured?texture2D(map,uv):vec4(color,1.);float checker=mod(floor(uv.x*72.)+floor(uv.y*36.),2.);vec3 noData=vec3(mix(.035,.055,checker));vec3 c=mix(noData,sampled.rgb,sampled.a);float light=max(0.,dot(normalize(nrm),sun));float f=atlas||layer==1?1.:.025+.975*light;gl_FragColor=vec4(c*f,1.);
+const fragment = `uniform sampler2D map;uniform bool textured,atlas,earthThematic;uniform vec3 sun,color;uniform int layer;varying vec3 surface,nrm;
+void main(){vec3 p=normalize(surface);vec2 uv=vec2(atan(p.y,p.x)/6.28318530718+.5,asin(clamp(p.z,-1.,1.))/3.14159265359+.5);vec4 sampled=textured?texture2D(map,uv):vec4(color,1.);float checker=mod(floor(uv.x*72.)+floor(uv.y*36.),2.);vec3 noData=earthThematic?mix(vec3(.003,.006,.01),vec3(.004,.008,.013),checker):vec3(mix(.035,.055,checker));vec3 c=mix(noData,sampled.rgb,sampled.a);float light=max(0.,dot(normalize(nrm),sun));float f=atlas||layer==1?1.:.025+.975*light;gl_FragColor=vec4(c*f,1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`;
@@ -68,7 +69,12 @@ export function configurePlanetaryObservationCamera(camera, observation, fovArcs
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld(true);
 }
-export function createPlanetaryRenderer({ renderer, environment, onPick = () => {} }) {
+export function createPlanetaryRenderer({
+  renderer,
+  environment,
+  onPick = () => {},
+  onMineralPick = () => {},
+}) {
   const canvas = renderer.domElement,
     scene = new THREE.Scene();
   scene.background = new THREE.Color(0x030810);
@@ -88,6 +94,7 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
     uniforms: {
       map: { value: null },
       textured: { value: false },
+      earthThematic: { value: false },
       sun: { value: new THREE.Vector3(1, 0, 0) },
       color: { value: new THREE.Color(0xb97250) },
       atlas: { value: false },
@@ -96,6 +103,7 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
   });
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
+  const minerals = createMineralLayer(scene);
   const loader = new THREE.TextureLoader(),
     textures = new Map(),
     pending = new Map(),
@@ -149,6 +157,8 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
             return;
           }
           textures.set(url, tex);
+          lastError = '';
+          textureRetry.delete(url);
           while (textures.size > 4) {
             const [key, old] = textures.entries().next().value;
             textures.delete(key);
@@ -166,8 +176,7 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
     }
     return null;
   }
-  async function terrain() {
-    const meta = environment.assets.mars?.terrain;
+  async function terrain(meta = environment.assets.mars?.terrain) {
     if (
       !meta?.url ||
       terrainCache.has(meta.url) ||
@@ -232,7 +241,21 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
   }
-  function configure({ target, layer, time, site, atlas, relief, clouds, view, fov }) {
+  function configure({
+    target,
+    layer,
+    time,
+    site,
+    atlas,
+    relief,
+    clouds,
+    view,
+    fov,
+    mineralRows,
+    mineralCommodity,
+    mineralVisible,
+    mineralOpacity,
+  }) {
     body = target;
     shape(relief);
     let observation = null,
@@ -249,19 +272,49 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
     }
     const source =
       body === 'Earth'
-        ? environment.uniforms[layer === 'night' ? 'nightMap' : 'dayMap']?.value
+        ? environment.assets.earthObservation?.layers?.[layer]
+          ? texture(environment.assets.earthObservation.layers[layer].url)
+          : environment.uniforms[layer === 'night' ? 'nightMap' : 'dayMap']?.value
         : texture(
             environment.assets.mars?.layers?.[layer]?.url ?? environment.assets.planets?.Mars
           );
+    const scientific = body === 'Earth' && !!environment.assets.earthObservation?.layers?.[layer];
+    minerals.update(
+      mineralRows,
+      mineralCommodity,
+      body === 'Earth' && mineralVisible,
+      camera.position.length(),
+      mineralOpacity ?? 0.9,
+      renderer.getPixelRatio()
+    );
+    if (body === 'Earth' && layer === 'earthElevation') {
+      const r = environment.assets.earthObservation.layers.earthElevation;
+      void terrain({
+        url: r.heightUrl,
+        width: r.width,
+        height: r.height,
+        encoding: 'int16-le-gzip',
+      });
+    }
+    material.uniforms.earthThematic.value = scientific;
     material.uniforms.map.value = source;
     material.uniforms.textured.value = !!source && source !== environment.fallback;
     material.uniforms.color.value.set(body === 'Earth' ? 0x426a85 : 0xb97250);
     material.uniforms.sun.value.fromArray(sun).normalize();
     material.uniforms.atlas.value = atlas;
+    if (material.toneMapped === scientific) {
+      material.toneMapped = !scientific;
+      material.needsUpdate = true;
+    }
     material.uniforms.layer.value =
-      layer === 'night' || ['dayIR', 'nightIR', 'geology', 'elevation'].includes(layer) ? 1 : 0;
+      scientific ||
+      layer === 'night' ||
+      ['dayIR', 'nightIR', 'geology', 'elevation'].includes(layer)
+        ? 1
+        : 0;
     const map = environment.uniforms.cloudMap?.value;
-    cloudMesh.visible = body === 'Earth' && clouds && !!map && map !== environment.fallback;
+    cloudMesh.visible =
+      body === 'Earth' && !scientific && clouds && !!map && map !== environment.fallback;
     cloudMaterial.uniforms.map.value = map;
     cloudMaterial.uniforms.templateMap.value = environment.uniforms.cloudTemplateMap?.value ?? map;
     cloudMaterial.uniforms.channel.value = environment.uniforms.cloudChannel?.value ?? 0;
@@ -361,7 +414,9 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
       feature.longitude,
       frame.settings.relief
     );
-    const point = direction.clone().multiplyScalar(1 + h / radius + 0.0001);
+    const point = direction
+      .clone()
+      .multiplyScalar(feature.mineral ? 1.002 : 1 + h / radius + 0.0001);
     if (direction.dot(frame.camera.position.clone().sub(point)) <= 0) return null;
     const p = point.project(frame.camera);
     if (Math.abs(p.x) > 0.97 || Math.abs(p.y) > 0.93 || p.z > 1 || p.z < -1) return null;
@@ -404,6 +459,23 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
       x = ((e.clientX - bounds.left) * total) / bounds.width,
       y = ((e.clientY - bounds.top) * lastFrame.a.rect.height) / bounds.height;
     const f = lastFrame.b && x >= lastFrame.b.rect.x ? lastFrame.b : lastFrame.a;
+    if (f.settings.target === 'Earth' && f.settings.mineralVisible) {
+      let nearest = null,
+        distance = 10;
+      for (const group of minerals.groups) {
+        const p = project(group, f);
+        if (!p) continue;
+        const d = Math.hypot(p.x - x, p.y - y);
+        if (d < distance) {
+          nearest = group;
+          distance = d;
+        }
+      }
+      if (nearest) {
+        onMineralPick(nearest);
+        return;
+      }
+    }
     body = f.settings.target;
     shape(f.settings.relief);
     mesh.updateMatrixWorld(true);
@@ -420,7 +492,18 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
       onPick({
         latitude,
         longitude,
-        height: heightAt(body, latitude, longitude, f.settings.relief),
+        height:
+          body === 'Earth' &&
+          f.settings.layer === 'earthElevation' &&
+          terrainCache.has(environment.assets.earthObservation?.layers?.earthElevation?.heightUrl)
+            ? samplePlanetaryTerrain(
+                terrainCache.get(
+                  environment.assets.earthObservation.layers.earthElevation.heightUrl
+                ),
+                latitude,
+                longitude
+              )
+            : heightAt(body, latitude, longitude, f.settings.relief),
       });
     }
   };
@@ -444,6 +527,7 @@ export function createPlanetaryRenderer({ renderer, environment, onPick = () => 
       canvas.removeEventListener('pointerdown', start);
       canvas.removeEventListener('pointerup', pick);
       canvas.removeEventListener('pointercancel', cancel);
+      minerals.dispose();
       geometry.dispose();
       material.dispose();
       cloudGeometry.dispose();

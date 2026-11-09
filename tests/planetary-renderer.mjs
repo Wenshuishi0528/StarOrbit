@@ -23,7 +23,7 @@ assert.throws(()=>decodePlanetaryTerrain(new ArrayBuffer(2),{width:4,height:2}),
 class Canvas extends EventTarget{constructor(){super();this.style={};this.ownerDocument=new EventTarget();}getRootNode(){return this.ownerDocument;}getBoundingClientRect(){return{left:0,top:0,width:1000,height:500};}}
 const canvas=new Canvas(),viewport=new THREE.Vector4(7,8,9,10),box=new THREE.Vector4(11,12,13,14),renders=[];
 let scissor=false;
-const renderer={domElement:canvas,autoClear:false,toneMappingExposure:1.2,capabilities:{getMaxAnisotropy:()=>4},getScissorTest:()=>scissor,setScissorTest:v=>scissor=v,getViewport:v=>v.copy(viewport),getScissor:v=>v.copy(box),setViewport:(...args)=>args[0]?.isVector4?viewport.copy(args[0]):viewport.set(...args),setScissor:(...args)=>args[0]?.isVector4?box.copy(args[0]):box.set(...args),render:(scene,camera)=>{scene.updateMatrixWorld(true);renders.push({camera:camera.clone(),scene});}};
+const renderer={getPixelRatio:()=>1,domElement:canvas,autoClear:false,toneMappingExposure:1.2,capabilities:{getMaxAnisotropy:()=>4},getScissorTest:()=>scissor,setScissorTest:v=>scissor=v,getViewport:v=>v.copy(viewport),getScissor:v=>v.copy(box),setViewport:(...args)=>args[0]?.isVector4?viewport.copy(args[0]):viewport.set(...args),setScissor:(...args)=>args[0]?.isVector4?box.copy(args[0]):box.set(...args),render:(scene,camera)=>{scene.updateMatrixWorld(true);renders.push({camera:camera.clone(),scene});}};
 const day=new THREE.Texture(),night=new THREE.Texture(),cloud=new THREE.Texture();let sharedDisposals=0;for(const t of [day,night,cloud])t.addEventListener('dispose',()=>sharedDisposals++);
 const environment={assets:{mars:{layers:{}}},uniforms:{dayMap:{value:day},nightMap:{value:night},cloudMap:{value:cloud},cloudTemplateMap:{value:cloud},cloudChannel:{value:1},cloudTone:{value:0}},elevation:{base:null}};
 const view=createPlanetaryRenderer({renderer,environment});
@@ -37,7 +37,7 @@ assert.ok(returnAtlas.a.camera.position.distanceTo(exploration.a.camera.position
 assert.equal(renderer.autoClear,false);near(renderer.toneMappingExposure,1.2);assert.equal(scissor,false);assert.deepEqual(viewport.toArray(),[7,8,9,10]);assert.deepEqual(box.toArray(),[11,12,13,14]);
 view.frame({...settings,target:'Earth',layer:'day',relief:true,clouds:true},null,1000,500);
 assert.equal(renders.at(-1).scene.children[0].material.uniforms.map.value,day);
-assert.equal(renders.at(-1).scene.children[1].material.uniforms.channel.value,1,'Earth RGBA cloud encoding is preserved');
+assert.equal(renders.at(-1).scene.children.find(x=>x.material?.uniforms?.channel).material.uniforms.channel.value,1,'Earth RGBA cloud encoding is preserved');
 view.dispose();assert.equal(sharedDisposals,0,'Earth texture resources remain owned by Environment');
 console.log('Planetary renderer: exact angular fields/limbs, comparison pose, camera restoration, cell-centred terrain/seam/poles, Earth borrowing and renderer state passed.');
 const {readFileSync}=await import('node:fs');

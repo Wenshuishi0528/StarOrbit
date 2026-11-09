@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit-source/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.36 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.37 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> Local v1.36 adds view-driven satellite imagery and terrain streaming, shared caches, adjustable coverage, a ground location map, and 2025 nominal 500 m night lights. Ground, Solar System, interstellar and main views use the same Earth and sky resources. [Procedures](使用说明.md#地表观测与太阳系) · [Implementation](docs/world-explorer.md) · [Verification](docs/verification.md).
+> Local v1.37 adds Earth multispectral imagery, day/night land surface temperatures, elevation/bathymetry, and filterable USGS historical mineral records with comparisons and photo legends. Existing features include view-driven satellite imagery and terrain streaming, shared caches, adjustable coverage, a ground location map, and 2025 nominal 500 m night lights. Ground, Solar System, interstellar and main views use the same Earth and sky resources. [Procedures](使用说明.md#地表观测与太阳系) · [Implementation](docs/world-explorer.md) · [Verification](docs/verification.md).
 
 <a id="interface-and-basic-controls"></a>
 

@@ -1,6 +1,6 @@
 # 数据格式与本机接口
 
-适用版本：本地 v1.36。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.37。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
@@ -289,3 +289,7 @@ JS
 影像继续使用IndexedDB数据库 `starorbit-city-terrain-v1`，自动漫游区域通过 `streaming:true` 与离线城市包区分。影像缓存预算512 MiB，下载的高程缓存为独立 `starorbit-elevation-v1`、预算128 MiB；浏览器存储不可用时界面显示临时内存缓存。清理后的暂停状态属于运行状态，不把它混入场景时间或地点记录。
 
 主环境 `nightSource` 新增 `2025-500m`；`nightSourceDefaultVersion:1` 标识本次默认迁移完成，此后保留用户所选年份。2025 manifest声明EPSG:4326、15角秒像元、75°N–65°S原始覆盖、极区2016回退、48×24瓦片与AVIF编码。原始辐亮度经manifest记载的显示曲线转为8位纹理，不能把显示纹理当作原始定量辐亮度。
+
+## 地球观测图集
+
+`assets/earth/observation/manifest.json`登记北上经纬栅格、波段组合、八日合成时段、温度／高程图例及SHA-256。AVIF保留有效性alpha；MRDS gzip JSON按记录保存编号、原名、经纬度、矿种代码、历史状态和资料等级。矿点是分类矢量叠加，栅格是独立底图；照片保存图例与来源。[图集格式与来源](../assets/earth/observation/README.md)。
