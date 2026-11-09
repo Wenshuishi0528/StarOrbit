@@ -1,0 +1,85 @@
+{
+  "version": "1.39",
+  "date": "2026-11-09",
+  "source": {
+    "baseCommit": "29e52f9",
+    "workingTree": "v1.38 and v1.39 feature batch"
+  },
+  "automated": {
+    "npm test": "passed",
+    "docs": "passed: npm run test:docs",
+    "builds": "standalone, local and web builds and artifact checks passed",
+    "format": "changed production JavaScript and whitespace checks passed"
+  },
+  "browser": {
+    "engine": "headed Playwright Chromium with WebGL",
+    "checks": [
+      "Native Simple/Full toggle and persistence on reentry",
+      "2D/3D, zoom and stop controls; layout switch preserves position and selection",
+      "Main, ground, solar and stellar host/backing buffer/GL viewport alignment at 900x700, 2560x1440 and 1440x1000",
+      "Device pixel ratios 1, 2 (render cap 1.6) and 1.25 update with the active view",
+      "390x844 compact layout bounded by viewport",
+      "Native Mars comparison selection and three window sizes; both comparison columns render and restore full viewport"
+    ],
+    "mapBounds": {
+      "simple": [
+        230,
+        388.5
+      ],
+      "full": [
+        320,
+        607
+      ]
+    },
+    "evidence": "output/playwright/v139-browser-check.log",
+    "screenshots": [
+      "output/playwright/v139-simple-final.png",
+      "output/playwright/v139-resize-main.png",
+      "output/playwright/v139-resize-ground.png",
+      "output/playwright/v139-resize-solar.png",
+      "output/playwright/v139-resize-stellar.png",
+      "output/playwright/v139-narrow.png",
+      "output/playwright/v139-planet-comparison.png"
+    ]
+  },
+  "reportedResizeIssue": {
+    "originalHalfFrame": "Not reproduced in normal window resizing before this change; exact user trigger unconfirmed",
+    "confirmedCorrection": "Browser/device DPR was read only at startup; now live views synchronize current DPR, full viewport and disabled inherited scissor before rendering"
+  },
+  "desktop": {
+    "status": "passed",
+    "launcherVersion": "1.39",
+    "launcherCheck": "READY http://127.0.0.1:8771/",
+    "artifacts": "standalone HTML, entry and JavaScript bundle hashes match source build",
+    "browser": "Installed v1.39 native Simple/Full and fit-range controls, 1920x1080 full viewport checked",
+    "evidence": "output/playwright/v139-installed-check.log"
+  },
+  "publication": "pending",
+  "artifacts": {
+    "StarOrbit.html": {
+      "bytes": 710412721,
+      "sha256": "1e15edab1f34fdfdfb4adabee6bd20efa9da9c6e5f39e993c89a8f93a3278e20",
+      "checked": true
+    },
+    "dist-local/index.html": {
+      "bytes": 648409,
+      "sha256": "517c39db6cdf7ef5fc5a72fe40d0faeb6206882e73740506976029c8a16c10b3",
+      "checked": true
+    },
+    "dist/index.html": {
+      "bytes": 648409,
+      "sha256": "b32c313595af8d742ddeaed56d4669eb302ed154710820a22f7000c81bda2bdf",
+      "checked": true
+    },
+    "dist/assets/app.bundle-cc63d44935503942.js": {
+      "bytes": 20304144,
+      "sha256": "cc63d44935503942dd66344506b3e5390fe6c99dee054cba02b74d5fa2b1d989",
+      "checked": true
+    },
+    "dist-local/assets/app.bundle-2898d641670c893c.js": {
+      "bytes": 20304263,
+      "sha256": "2898d641670c893c2ee1d8da92a1d0074f580c52ed51f42e969e975c459352a3",
+      "checked": true
+    }
+  }
+}

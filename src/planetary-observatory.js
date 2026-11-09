@@ -1,3 +1,4 @@
+import { resizeRenderSurface } from './render-surface.js';
 import { installEarthObservationControls } from './earth-observation-controls.js';
 import { sampleElevationBase } from './earth-elevation-math.js';
 import { createPlanetaryRenderer } from './planetary-renderer.js';
@@ -666,12 +667,7 @@ export function installPlanetaryObservatory(sim) {
     }
     const w = Math.max(1, stage.clientWidth),
       h = Math.max(1, stage.clientHeight);
-    if (
-      canvas.clientWidth !== w ||
-      canvas.clientHeight !== h ||
-      canvas.width !== Math.round(w * renderer.getPixelRatio())
-    )
-      renderer.setSize(w, h, false);
+    resizeRenderSurface(renderer, w, h);
     try {
       paint(w, h);
       if (wall - lastUI > 300) {

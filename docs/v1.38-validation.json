@@ -1,0 +1,103 @@
+{
+  "version": "1.38",
+  "date": "2026-11-09",
+  "status": "passed",
+  "source": {
+    "baseCommit": "29e52f9",
+    "workingTree": "uncommitted feature batch"
+  },
+  "automated": [
+    "Full npm test passed before final UI refinements; affected interstellar/input/map/i18n tests rerun on final code",
+    "npm run test:docs passed: 114 documents, 826 references, 627 portable files",
+    "node tests/standalone-build.mjs passed",
+    "node tests/web-build.mjs dist-local and dist passed",
+    "Prettier changed-JS check and git diff --check passed"
+  ],
+  "browser": {
+    "engine": "Playwright Chromium, headed, local application with WebGL",
+    "viewport": [
+      1440,
+      1000
+    ],
+    "checks": [
+      "Native navigation into interstellar mode and actual 3D map image",
+      "2D top/side and 3D switch preserves main camera quaternion and FOV",
+      "Native map drag and wheel leave main camera unchanged",
+      "Native projected star click selects without moving observer",
+      "Map focus and 2D switch preserve an active automatic flight",
+      "Map Space stops flight",
+      "Waypoint preview does not teleport; explicit restore succeeds",
+      "Sun-centered automatic range and independent preferences persist on reentry",
+      "Chinese, English, French and Russian map UI inspected",
+      "Selected Big Dipper has six spatial lines",
+      "Map is removed on exit and exactly one map exists on reentry",
+      "390x844 viewport inspected; not a physical mobile-device test",
+      "Static map render count remains unchanged across a 500ms idle sample",
+      "Coincident star and waypoint picker uses separate deduplicated choices; native waypoint choice and restore passed",
+      "Waypoint look/restore leaves solar-reference mode",
+      "Immediate fit after changing main target uses new target, not previous waypoint preview",
+      "Installed desktop v1.38 actual WebGL screenshots and native interaction passed",
+      "Narrow viewport with expanded options remains bounded and scrollable"
+    ],
+    "screenshots": [
+      "output/playwright/v138-map-3d.png",
+      "output/playwright/v138-map-side.png",
+      "output/playwright/v138-map-expanded.png",
+      "output/playwright/v138-map-travel.png",
+      "output/playwright/v138-map-narrow.png",
+      "output/playwright/v138-map-dipper.png",
+      "output/playwright/v138-map-en.png",
+      "output/playwright/v138-map-fr.png",
+      "output/playwright/v138-map-ru.png",
+      "output/playwright/v138-installed-3d.png",
+      "output/playwright/v138-installed-dipper.png",
+      "output/playwright/v138-installed-narrow-options.png"
+    ]
+  },
+  "performance": {
+    "nearby": {
+      "visibleStars": 26,
+      "samples": 20,
+      "medianDrawMs": 0.5499999998137355
+    },
+    "wide": {
+      "visibleStars": 19275,
+      "samples": 30,
+      "medianDrawMs": 7.0,
+      "maxDrawMs": 8.099999999627471
+    },
+    "note": "Canvas draw duration, not whole-app frame time; wide sample measured during native 3D map rotation after density refinement. Idle redraw suppression separately verified.",
+    "maxTrailPoints": 512,
+    "newWebGLContexts": 0,
+    "addedRasterAssets": 0
+  },
+  "delivery": {
+    "desktop": "v1.38 synced; signed launcher --check READY; runtime standalone, HTTP entry and bundle SHA256 verified; actual installed WebGL view and native map/waypoint interactions passed",
+    "github": "not requested for v1.38; not pushed",
+    "web": "local build only; public site remains v1.37"
+  },
+  "limits": [
+    "Existing Hipparcos bright-star distance sample; not a complete nearby-star census or whole-Galaxy map.",
+    "No physical mobile-device, Safari or Firefox acceptance.",
+    "Historical static J2000 positions; no new stellar-motion propagation.",
+    "Map trail is session-only; photos continue to export main scene without the map."
+  ],
+  "builds": {
+    "dist-local": {
+      "entryBytes": 648409,
+      "entrySHA256": "cdd935c2adb227d527ed139247a5003374360c08cdc6e0bdc06d43ff1bbe9764",
+      "bundle": "assets/app.bundle-d51516273515a4e1.js",
+      "bundleSHA256": "d51516273515a4e1633897e2889ba7f3cca8f25ab19a466d5f4ff1110a2c812f"
+    },
+    "dist": {
+      "entryBytes": 648409,
+      "entrySHA256": "1e8bf5866fc7c25f5ee94b93acd061786497f3a55abf70fcdd10119ad32231b3",
+      "bundle": "assets/app.bundle-70e26287ea3148f7.js",
+      "bundleSHA256": "70e26287ea3148f7ca5a5475b2928614abf5e7be52ca5c1e104d9df9bba0f444"
+    },
+    "standalone": {
+      "bytes": 710410757,
+      "sha256": "6827381f9621f77128bf3449da12ad9fc745d1cd1c2aeceaadf4094c393c3b3c"
+    }
+  }
+}

@@ -22,6 +22,7 @@ import {
   apparentMagnitude,
 } from './interstellar-math.js';
 import { createInterstellarSolar } from './interstellar-solar.js';
+import { createInterstellarMap } from './interstellar-map.js';
 import { createInterstellarInput } from './interstellar-input.js';
 import { searchXuntianTargets, getXuntianTarget } from './xuntian-catalog.js';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
@@ -65,6 +66,8 @@ export function createInterstellarWorld({
   const camera = new THREE.PerspectiveCamera(65, 1, 1e-10, 1e6);
   camera.up.set(0, 0, 1);
   const localCamera = new THREE.PerspectiveCamera(65, 1, 1e-7, 10000);
+  let navigationMap = null;
+  const mapVelocity = [0, 0, 0];
   const position = [0, 0, 0],
     velocity = [0, 0, 0];
   let width = 1,
@@ -301,6 +304,7 @@ export function createInterstellarWorld({
         currentSpeed = 0;
       }
     },
+    preserveNavigationFocus: (target) => !!target?.closest?.('.interstellar-map'),
     onWheel: (delta) => {
       camera.fov = THREE.MathUtils.clamp(camera.fov * Math.exp(delta * 0.001), 0.006, 100);
       $('[data-fov]').value = camera.fov;
@@ -324,6 +328,9 @@ export function createInterstellarWorld({
   function restore(pose) {
     if (!validPose(pose)) return;
     stop();
+    referenceView = false;
+    referenceTarget = null;
+    referenceLabel.querySelector('input').checked = false;
     if (['western', 'chinese'].includes(pose.culture)) {
       culture = pose.culture;
       applyWorldSkySettings(environment, { culture });
@@ -332,6 +339,7 @@ export function createInterstellarWorld({
     }
     if (Object.hasOwn(pose, 'formation'))
       setFormation(catalog.formations.find((f) => f.id === pose.formation) || null);
+    navigationMap?.resetTrail();
     position.splice(0, 3, ...pose.position);
     camera.quaternion.fromArray(pose.quaternion).normalize();
     if (catalog.byId.has(pose.targetId)) selected = catalog.byId.get(pose.targetId);
@@ -343,6 +351,7 @@ export function createInterstellarWorld({
     scanElapsed = labelElapsed = 1;
   }
   function home() {
+    navigationMap?.resetTrail();
     referenceView = false;
     referenceLabel.querySelector('input').checked = false;
     stop();
@@ -397,6 +406,7 @@ export function createInterstellarWorld({
     labelElapsed = 1;
   }
   function sideView() {
+    navigationMap?.resetTrail();
     referenceView = false;
     referenceLabel.querySelector('input').checked = false;
     if (!formation?.members.length) return;
@@ -701,12 +711,48 @@ export function createInterstellarWorld({
         ? referenceTarget.name + '\n' + t('太阳视角参考 · 图源与插画')
         : info.join('\n');
     const along = position.map((n, i) => ['X', 'Y', 'Z'][i] + ' ' + n.toFixed(3)).join(' · ');
-    hud.textContent = `${t('距太阳')} ${format(Math.hypot(...position))}  ·  ${t('速度')} ${format(currentSpeed)}/s\n${t('最近恒星')} ${name(nearest)} · ${format(nearestDistance)}`;
+    hud.textContent = `${t('距太阳')} ${format(Math.hypot(...position))}  ·  ${t('速度')} ${format(currentSpeed)}/s\n${t('最近已收录恒星')} ${name(nearest)} · ${format(nearestDistance)}`;
     hud.title = `${along} ly · J2000\n${t('累计航程')} ${format(pathLength)}`;
     lastPhotoCaption = referenceView
       ? `${t('太阳视角参考 · 图源与插画')} · ${referenceTarget?.name || name(selected)}`
       : `${t('星际穿梭')} · ${name(selected)} · ${t('距太阳')} ${format(Math.hypot(...position))} · ${along} ly`;
   }
+  navigationMap = createInterstellarMap({
+    host,
+    catalog,
+    name,
+    getState: () => ({
+      position,
+      velocity: mapVelocity,
+      forward: camera.getWorldDirection(new THREE.Vector3()).toArray(),
+      selected,
+      nearest,
+      nearestDistance,
+      formation,
+      bookmarks,
+      referenceView,
+      flightTarget: flight?.target,
+      culture,
+    }),
+    onSelect: (index) => {
+      selected = index;
+      labelElapsed = 1;
+    },
+    onLook: (pose) => {
+      if (pose) {
+        stop();
+        referenceView = false;
+        referenceTarget = null;
+        referenceLabel.querySelector('input').checked = false;
+        aim(pose.position);
+      } else focus(selected);
+    },
+    onTravel: (pose) => {
+      if (pose) restore(pose);
+      else travel();
+    },
+    onStop: stop,
+  });
   home();
   if (validPose(initialPose)) restore(initialPose);
   return {
@@ -739,6 +785,7 @@ export function createInterstellarWorld({
         referenceTarget: referenceView ? referenceTarget?.id || null : null,
         nearSolarSky,
         visits: visited,
+        navigationMap: navigationMap.status(),
       };
     },
     resize(w, h) {
@@ -818,6 +865,7 @@ export function createInterstellarWorld({
       const travelled = Math.hypot(...position.map((v, i) => v - before[i]));
       pathLength += travelled;
       currentSpeed = dt > 0 ? travelled / dt : 0;
+      for (let i = 0; i < 3; i++) mapVelocity[i] = dt > 0 ? (position[i] - before[i]) / dt : 0;
       splitPosition(position, high, low);
       uniforms.observerHigh.value.fromArray(high);
       uniforms.observerLow.value.fromArray(low);
@@ -910,10 +958,12 @@ export function createInterstellarWorld({
         updateLabels();
         labelElapsed = 0;
       }
+      navigationMap.update(dt);
     },
     dispose() {
       if (disposed) return;
       disposed = true;
+      navigationMap.dispose();
       sharedSky.dispose();
       sharedControls.dispose();
       earthControls.dispose();

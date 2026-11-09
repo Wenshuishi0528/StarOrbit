@@ -1,3 +1,4 @@
+import { resizeRenderSurface } from '../src/render-surface.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
@@ -77,7 +78,7 @@ const presets = [],
   routes = [];
 const sim = {
   api: {
-    renderer: { domElement: canvas, getPixelRatio: () => 1, setSize() {} },
+    renderer: { domElement: canvas, getPixelRatio: () => 1, getSize: v => v.set(800, 600), setSize() {}, setViewport() {}, setScissorTest() {} },
     controls: { enabled: true, stopMotion() {} },
     toast() {},
   },
@@ -120,6 +121,7 @@ const sim = {
   flightLab: { close() {} },
 };
 const sandbox = {
+  resizeRenderSurface,
   document,
   window: { matchMedia: () => ({ matches: false }) },
   Option: class extends Element {

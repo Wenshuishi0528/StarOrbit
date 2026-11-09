@@ -1,3 +1,4 @@
+import { resizeRenderSurface } from './render-surface.js';
 import { installCameraFocus } from './camera-focus.js';
 import { spacecraftLabelNames } from './spacecraft-labels.js';
 import { installSkyCultureControls } from './sky-culture-controls.js';
@@ -573,15 +574,11 @@ $('saveImage').onclick = () => {
     () => toast('照片未能保存')
   );
 };
-const renderSize = new THREE.Vector2();
 function resize() {
   const w = stage.clientWidth,
     h = stage.clientHeight;
   if (w < 1 || h < 1) return;
-  renderer.getSize(renderSize);
-  // CSS fills the stage even while the browser's fullscreen animation is running.
-  // Only reallocate the drawing buffer when its logical size actually changes.
-  if (renderSize.x !== w || renderSize.y !== h) renderer.setSize(w, h, false);
+  resizeRenderSurface(renderer, w, h);
   if (camera.aspect !== w / h) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();

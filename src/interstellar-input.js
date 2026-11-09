@@ -6,6 +6,7 @@ export function createInterstellarInput({
   camera,
   onNavigate = () => {},
   onWheel = () => {},
+  preserveNavigationFocus = () => false,
 }) {
   const doc = canvas.ownerDocument,
     win = doc.defaultView,
@@ -49,9 +50,9 @@ export function createInterstellarInput({
     }
   });
   listen(win, 'keyup', (e) => keys.delete(e.code));
-  listen(canvas, 'blur', () => {
+  listen(canvas, 'blur', (e) => {
     stop();
-    onNavigate(true);
+    if (!preserveNavigationFocus(e.relatedTarget)) onNavigate(true);
   });
   listen(win, 'blur', () => {
     stop();

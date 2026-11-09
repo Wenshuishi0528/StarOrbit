@@ -146,6 +146,7 @@ let brakes = 0;
 const input = createInterstellarInput({
   canvas,
   camera,
+  preserveNavigationFocus: (target) => target?.isMap === true,
   onNavigate: (brake) => {
     if (brake) brakes++;
   },
@@ -160,6 +161,12 @@ fire(canvas, 'keydown', { code: 'Space' });
 assert.deepEqual(input.update(1 / 60), [0, 0, 0], 'space clears held thrust');
 assert(brakes > 0);
 fire(canvas, 'keydown', { code: 'KeyL' });
+const beforeMapFocus = brakes;
+fire(canvas, 'blur', { relatedTarget: { isMap: true } });
+assert.equal(brakes, beforeMapFocus, 'map focus preserves navigation');
+assert.deepEqual(input.update(1 / 60), [0, 0, 0], 'map focus clears held keys');
+fire(win, 'blur');
+assert.equal(brakes, beforeMapFocus + 1, 'window blur still brakes');
 canvas.blur();
 assert.deepEqual(input.update(1 / 60), [0, 0, 0]);
 canvas.focus();

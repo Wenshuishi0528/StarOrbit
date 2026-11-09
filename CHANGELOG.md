@@ -4,6 +4,22 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.39 — 2026-11-09
+
+星际导航图增加默认简易版和可记忆的完整版切换；简易版保留导航球、二维／三维、缩放、复位、目标距离与停止。主页面、世界模式和行星观测统一同步窗口尺寸、当前屏幕像素比例与完整渲染区域。
+
+**English:** Added a compact default stellar navigator with remembered Simple/Full switching, retaining the map, 2D/3D, zoom, reset, target distance and stop controls. Main, world and planetary views now share canvas sizing with current browser DPR and a full render viewport.
+
+[操作 / Guide](docs/interstellar.md#星际导航图) · [验收 / Validation](docs/v1.39-validation.json)
+
+## v1.38 — 2026-11-09 · 本机版 / Local build
+
+星际穿梭新增二维俯视／侧视与三维导航球，共享恒星、观察者、目标和航点。支持太阳定位、真实三维距离、朝向与移动方向、边缘指示、航迹、所选星图连线、独立缩放和展开。地图单击只选择，显式看向／前往；修正点击导航地图导致自动航行停止的问题，保留窗口失焦与空格急停。
+
+**English:** Added a shared-data stellar navigator with 2D top/side views and a 3D sphere, Sun/target/waypoint location, true spatial distances, gaze and travel direction, edge indicators, bounded trails and selected pattern lines. Map zoom/rotation are independent of the flight view. Selecting a map target preserves navigation; explicit Look/Go actions and window-blur/Space stopping remain available.
+
+[操作与实现 / Guide and implementation](docs/interstellar.md#星际导航图)
+
 ## v1.37 — 2026-11-09
 
 地球观测增加NASA可见光、近红外、短波红外、昼夜地表温度及同源ETOPO地形／海底高程图。新增304,632条USGS历史矿点，支持矿种筛选、搜索、按尺度聚合、点击资料及亮度调整。新增栅格统一AVIF，沿用现有观测、对比和拍照入口；图像数据期、科学图例与场景时钟分开，照片保留来源与色标。调整地球标注优先级，优先呈现主要地名。

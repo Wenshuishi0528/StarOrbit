@@ -1,3 +1,4 @@
+import { resizeRenderSurface } from './render-surface.js';
 import * as THREE from 'three';
 import { Equator, Horizon, Observer } from 'astronomy-engine';
 import atlas from '../assets/geography/atlas.json';
@@ -69,7 +70,6 @@ export function installWorldExplorer(sim) {
     canvas = renderer.domElement;
   const originalParent = canvas.parentNode;
   let previousControlsEnabled = controls.enabled;
-  const renderSize = new THREE.Vector2();
   const style = document.createElement('style');
   style.textContent = css;
   document.head.append(style);
@@ -675,8 +675,7 @@ export function installWorldExplorer(sim) {
     const w = stage.clientWidth,
       h = stage.clientHeight;
     if (w < 1 || h < 1) return;
-    renderer.getSize(renderSize);
-    if (renderSize.x !== w || renderSize.y !== h) renderer.setSize(w, h, false);
+    resizeRenderSurface(renderer, w, h);
     const auto = renderer.autoClear,
       exposure = renderer.toneMappingExposure;
     renderer.autoClear = false;
