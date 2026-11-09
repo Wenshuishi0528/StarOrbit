@@ -14,6 +14,12 @@
 
 地表／太阳系改动的专项入口是 `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`，均并入默认回归。浏览器需检查共用 canvas 的进入／返回、时间连续性、地形异步加载、输入焦点和截图；运行结果写入版本验收记录，不能仅用数值测试推断图形交互通过。
 
+## 原生浏览器窗口验收
+
+测试拖大／最大化浏览器时，使用原生视口（Playwright `viewport: null`）并改变浏览器窗口边界。`page.setViewportSize()`只验证固定测试视口，不能代替原生窗口测试；留下固定视口会导致用户拖大窗口后整个页面仍只有原来的宽度。必须核对`innerWidth`、原生窗口宽度、顶部栏和场景边界，而不只比较canvas与页面宿主。
+
+固定尺寸测试使用独立测试标签，完成后关闭该标签；保留给用户的页面应是同一上下文中的原生视口标签，以保留站点设置。多调试连接下，另一CDP session的`clearDeviceMetricsOverride`不一定清除原测试连接的固定视口，应以原生窗口实际调整结果为准。
+
 ## 先识别四个位置
 
 | 位置 | 如何确定 | 用途与注意点 |

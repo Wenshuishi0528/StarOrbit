@@ -44,8 +44,26 @@
     ]
   },
   "reportedResizeIssue": {
-    "originalHalfFrame": "Not reproduced in normal window resizing before this change; exact user trigger unconfirmed",
-    "confirmedCorrection": "Browser/device DPR was read only at startup; now live views synchronize current DPR, full viewport and disabled inherited scissor before rendering"
+    "status": "resolved",
+    "cause": "A fixed 1440x1000 viewport left in a headed Playwright Chrome tab; the native window grew to 1869x1033 while the document stayed 1440 pixels wide. Reproduced the screenshot including the header ending with the scene.",
+    "priorCorrection": "The v1.39 live-DPR correction remains, but was not the cause of this specific partial-page report.",
+    "recovery": "Opened a native-viewport tab in the same browser context, preserving site storage; closed only the reproduced fixed-viewport StarOrbit test tab.",
+    "validation": {
+      "viewport": null,
+      "nativeWindowWidths": [
+        1000,
+        1800,
+        1920
+      ],
+      "documentHeaderAndCanvasRight": "equal to native window width at each step",
+      "nativeDPR": 2
+    },
+    "evidence": [
+      "output/playwright/native-window-recovery.log",
+      "output/playwright/native-window-final.log",
+      "output/playwright/native-window-final.png"
+    ],
+    "applicationChanges": "none; v1.39 build unchanged"
   },
   "desktop": {
     "status": "passed",
