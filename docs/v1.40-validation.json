@@ -365,9 +365,12 @@
     "servedHashes": "Index and script SHA256 matched dist-local over127.0.0.1:8771"
   },
   "publication": {
-    "status": "deploying",
-    "authorized": "2026-11-10",
-    "version": "1.40"
+    "status": "published",
+    "version": "1.40",
+    "sourceCommit": "da71f7c",
+    "webCommit": "5622aea",
+    "url": "https://wenshuishi0528.github.io/StarOrbit/",
+    "deploymentHistory": "https://github.com/Wenshuishi0528/StarOrbit/actions"
   },
   "cleanup": {
     "retainedBackup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release140/runtime-before",

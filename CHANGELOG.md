@@ -4,7 +4,7 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
-## v1.40 — 2026-11-10 · 本机版 / Local build
+## v1.40 — 2026-11-10
 
 白天地表新增默认的2026 Q2原生500米级MODIS合成，采用分块AVIF并沿用各视图共用地球。海岸采用细分遮罩，海面和缺测区域使用连续海色与后备影像；1公里和NASA原版可切换。首次迁移默认图源，此后保留用户选择。
 
