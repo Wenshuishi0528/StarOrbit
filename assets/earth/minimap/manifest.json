@@ -1,0 +1,11 @@
+{
+  "source": "../simple/day.jpg",
+  "sourceSHA256": "35ee9cfae3c422be7b92e1ec01ab473c62bc66cff47fb9c73e3b74f010f2fcab",
+  "coastline": "../day-2026-q2-500m/coastline.geojson.gz",
+  "coastlineSHA256": "a955097d34f2644239ff535d2318277eacb90003ae317e7640076756dafc56d7",
+  "file": "display.avif",
+  "width": 1024,
+  "height": 512,
+  "role": "Fixed v0.91 display palette. North-polar ocean is blue; coastline and land retained. Not a seasonal sea-ice map.",
+  "sha256": "e34fcb1b03857f09bffd9285664c8742c9aadd78acd9c5c810a4dd5985aa1c46"
+}

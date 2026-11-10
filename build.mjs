@@ -23,7 +23,7 @@ const elevationWorker=await build({entryPoints:['src/earth-elevation-worker.js']
 await build({entryPoints:['src/app.js'],bundle:true,format:'iife',minify:true,outfile:'assets/app.bundle.js',legalComments:'none',define:{__WEB_BUILD__:String(web),__TELEMETRY_WORKLET_SOURCE__:JSON.stringify(worklet.outputFiles[0].text),__CITY_TERRAIN_WORKER__:JSON.stringify(cityWorker.outputFiles[0].text),__ELEVATION_WORKER__:JSON.stringify(elevationWorker.outputFiles[0].text),__VIIRS_TRIAL__:JSON.stringify(trial)}});
 const environmentAssets=Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,Object.fromEntries(fs.readdirSync('assets/earth/'+tier).filter(f=>f.endsWith('.jpg')).map(f=>[f.replace('.jpg',''),image(f==='day.jpg'&&tier!=='high'?'assets/earth/day-2004/'+tier+'.jpg':'assets/earth/'+tier+'/'+f)]))]));
 // The minimap is a readable display map, independent of 3D reflectance assets.
-environmentAssets.minimap=image('assets/earth/simple/day.jpg');
+environmentAssets.minimap=image('assets/earth/minimap/display.avif');
 environmentAssets.detail=Object.fromEntries(fs.readdirSync('assets/earth/detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/detail/'+f)]));
 environmentAssets.nightDetail=Object.fromEntries(fs.readdirSync('assets/earth/night-detail').filter(f=>f.endsWith('.jpg')).map(f=>[f.slice(0,-4),image('assets/earth/night-detail/'+f)]));
 environmentAssets.nightSources={'2016':{columns:24,rows:12,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,environmentAssets[tier].night]))}};

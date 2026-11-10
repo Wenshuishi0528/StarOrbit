@@ -104,7 +104,7 @@ export function createObservationCard(host, { preview, watch, choose } = {}) {
     const window = model.windows[index];
     stages.replaceChildren();
     if (!window) {
-      range.textContent = t('此次没有候选观测窗口');
+      range.textContent = t('此次过境不满足可见条件');
       note.textContent = emptyReason(model.reason);
       stages.hidden = true;
     } else {

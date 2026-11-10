@@ -1,3 +1,9 @@
+import {
+  createObservationListControls,
+  renderObservationList,
+  observationListStyle,
+} from './observation-list-controls.js';
+import { observationQuerySummary } from './observation-query-display.js';
 import { getLanguage, onLanguageChange, t } from './i18n.js';
 import { mission, MISSIONS } from './missions.js';
 import { dot, earthAxes, sunPosition } from './orbit.js';
@@ -7,7 +13,6 @@ import {
   createPassSampler,
   lookAngles,
   observerFrame,
-  predictPasses,
   predictionSource,
   validateObserver,
 } from './pass-prediction.js';
@@ -58,6 +63,7 @@ import {
   reasonLabel,
   sightDirection,
 } from './observation-card.js';
+import { queryObservation, DEFAULT_PREDICTION, PREDICTION_HOURS } from './observation-query.js';
 const TARGET_KEY = 'starorbit-balcony-target-v1';
 function initialTarget(fallback) {
   try {
@@ -69,19 +75,25 @@ function initialTarget(fallback) {
 const template = `
  <div class="bal-top"><div><h3 data-t="阳台观测"></h3><p data-id="context"></p></div>
  <div class="bal-select"><label class="bal-target"><span data-t="观测目标"></span><select data-id="dataset"></select></label><select data-id="passes" data-label="选择一次过境" disabled></select><button type="button" data-id="demo" data-t="历史回放"></button></div></div>
- <details class="bal-config" data-id="config"><summary data-t="观测地点与预报参数"></summary><div class="bal-form">
+ <p class="bal-status" data-id="status" role="status"></p>
+ <details class="bal-config" data-id="config" open><summary data-t="观测地点与预报参数"></summary><div class="bal-form">
  <label><span data-t="已保存的观测地点"></span><select data-id="sites"></select></label>
  <label><span data-t="地点名称"></span><input data-id="name" type="text" maxlength="60"></label>
  <label><span data-t="纬度（北纬为正）"></span><input data-id="latitude" type="number" min="-90" max="90" step=".00001"></label>
  <label><span data-t="经度（东经为正）"></span><input data-id="longitude" type="number" min="-180" max="180" step=".00001"></label>
  <label><span data-t="海拔（米）"></span><input data-id="height" type="number" min="-500" max="9000" step="1"></label>
- <label class="bal-date"><span data-t="开始时间 · UTC+8"></span><input data-id="start" type="datetime-local" step="1"></label>
- <div class="bal-actions"><button type="button" class="bal-primary" data-id="predict" data-t="计算过境"></button><button type="button" data-id="saveSite" data-t="保存地点"></button><button type="button" data-id="locate" data-t="使用设备位置"></button><button type="button" data-id="beijing" data-t="北京示例"></button><button type="button" data-id="now" data-t="使用现在"></button></div>
+ <label class="bal-date"><span data-t="基准时间 · UTC+8"></span><input data-id="start" type="datetime-local" step="1"></label>
+ <label><span data-t="预报时长"></span><select data-id="hours"><option value="24" data-t="24 小时"></option><option value="48" data-t="48 小时"></option><option value="72" data-t="72 小时"></option><option value="168" data-t="一周（7 天）"></option></select></label>
+ <label><span data-t="最低仰角（度）"></span><input data-id="minimum" type="number" min="0" max="80" value="10"></label>
+ <div class="bal-actions"><button type="button" class="bal-primary" data-id="predict" data-t="计算过境"></button><button type="button" data-id="saveSite" data-t="保存地点"></button><button type="button" data-id="locate" data-t="使用设备位置"></button><button type="button" data-id="beijing" data-t="北京示例"></button><button type="button" data-id="simTime" data-t="使用模拟时刻"></button><button type="button" data-id="now" data-t="使用现在"></button></div>
+ <div class="bal-high" style="grid-column:1/-1"><h4 data-t="高仰角过境"></h4><p data-t="从基准时间向前或向后寻找最近一次达标过境，不受预报时长限制。"></p><div class="bal-form">
+ <label><span data-t="最高仰角至少（度）"></span><input data-id="peakMinimum" type="number" min="0" max="90" value="60"></label>
+ <label><span data-t="最高点时的当地昼夜"></span><select data-id="daylight"><option value="any" data-t="白天与黑夜"></option><option value="day" data-t="白天"></option><option value="night" data-t="黑夜"></option></select></label></div>
+ <div class="bal-actions"><button data-id="previousHigh" data-t="上一次"></button><button data-id="nextHigh" data-t="下一次"></button><button data-id="cancel" data-t="停止计算" hidden></button></div></div>
  <p data-id="locationNote" role="status" class="bal-note" style="grid-column:1/-1" hidden></p>
  </div></details>
  <details class="bal-config" data-id="sourcePanel"><summary data-id="sourceSummary"></summary><div class="bal-actions bal-source-actions"><button type="button" data-id="update" data-t="更新轨道数据"></button><button type="button" data-id="latest" data-t="使用本机最新星历"></button><button type="button" data-id="importTarget" data-t="为此目标导入轨道"></button><input data-id="orbitFile" type="file" accept=".json,.txt,.oem,.csv" hidden><button type="button" data-id="estimate" data-t="按当前数据计算"></button></div><p class="bal-note" style="padding:0 12px;white-space:pre-line" data-id="coverageText"></p></details>
  <p class="bal-status" data-id="updateStatus" role="status" hidden></p>
- <p class="bal-status" data-id="status" role="status"></p>
  <div data-id="scene" hidden>
  <section class="bal-watch"><div class="bal-watch-head"><b data-t="观测模式"></b><div role="group" data-label="观测模式"><button type="button" data-id="previewMode" data-t="预演"></button><button type="button" data-id="liveMode" data-t="现在守候"></button></div></div>
  <div data-id="watchReadout" class="bal-watch-readout" hidden><strong data-id="watchTitle"></strong><b data-id="watchDirection"></b><span data-id="watchReason"></span><svg data-id="watchCompass" viewBox="0 0 80 80" role="img" data-label="方向与仰角"><circle cx="40" cy="40" r="24" fill="none" stroke="#527a81"/><path d="M40 16v5m0 38v5M16 40h5m38 0h5" fill="none" stroke="#9db4b9"/><text data-t="北" x="40" y="11"></text><text data-t="东" x="73" y="43"></text><text data-t="南" x="40" y="78"></text><text data-t="西" x="7" y="43"></text><g data-id="watchArrow"><path d="M40 18l-5 12 5-2 5 2z" fill="#a5f4d8"/><path d="M40 28v12" stroke="#a5f4d8" stroke-width="2"/><circle cx="40" cy="40" r="2.5" fill="#a5f4d8"/></g></svg></div></section>
@@ -90,6 +102,7 @@ const template = `
  <div class="bal-playbar" data-id="playbar"><small data-id="liveScrubNote" hidden></small><button type="button" data-id="play"></button><input type="range" data-id="scrub" min="0" max="1000" step="1" data-label="拖动过境时间"><select data-id="speed" data-label="回放速度"><option>1×</option><option selected>10×</option><option>30×</option></select></div>
  <div class="bal-times" data-id="times"><span data-id="begin"></span><span data-id="end"></span></div></div>
  <div class="bal-grid"><div class="bal-card"><div class="bal-heading"><b data-t="地面视角"></b><button type="button" data-id="follow" data-t="跟随目标" aria-pressed="true"></button></div>
+ <label class="bal-note" style="display:flex;gap:8px;align-items:center;margin:12px"><input type="checkbox" data-id="obstruction" checked><span data-t="建筑与树木遮挡模拟"></span></label>
  <div data-id="viewControls"></div>
  <div class="bal-sky-wrap"><canvas class="bal-sky" data-id="sky" tabindex="0" role="img" data-label="地面星空、过境轨迹与楼顶轮廓"></canvas></div>
  <div class="bal-legend" data-id="legend"><span data-t="候选可见轨迹"></span><span data-t="其余轨迹"></span></div>
@@ -112,12 +125,33 @@ export function mountBalconyLab(container, sim, assets) {
   root.className = 'balcony-lab';
   root.dataset.testid = 'balcony-lab';
   const sheet = document.createElement('style');
-  sheet.textContent = style + opportunityStyle;
+  sheet.textContent = style + opportunityStyle + observationListStyle;
   root.innerHTML = template;
   container.append(sheet, root);
   const el = Object.fromEntries(
     [...root.querySelectorAll('[data-id]')].map((node) => [node.dataset.id, node])
   );
+  const tableHost = document.createElement('div');
+  tableHost.className = 'observation-list-table';
+  tableHost.hidden = true;
+  el.sourcePanel.before(tableHost);
+  const listControls = createObservationListControls(root.querySelector('.bal-high'), {
+    start: () => parseLocalTime(el.start.value) || sim.time,
+    changed: () => dirty(),
+    calculate: () => formSearch(false, false, 0, true),
+  });
+  el.hours.replaceChildren(
+    ...PREDICTION_HOURS.map((h) => {
+      const option = new Option('', h);
+      option.dataset.t = h === 168 ? '一周（7 天）' : `${h} 小时`;
+      return option;
+    })
+  );
+  el.hours.value = DEFAULT_PREDICTION.hours;
+  el.minimum.value = DEFAULT_PREDICTION.minimumElevation;
+  el.peakMinimum.value = DEFAULT_PREDICTION.minimumPeakElevation;
+  let lastQuery = { history: false, direction: 0 },
+    lastResult = null;
   const sites = storedSites(),
     diskCache = {};
   let site = null,
@@ -129,7 +163,7 @@ export function mountBalconyLab(container, sim, assets) {
     liveTimer = null,
     watchFrom = -Infinity,
     models = [],
-    minimumElevation = 5,
+    minimumElevation = DEFAULT_PREDICTION.minimumElevation,
     archived = false,
     archivedName = '';
   let replay = false,
@@ -144,7 +178,7 @@ export function mountBalconyLab(container, sim, assets) {
     sampler = null,
     events = [],
     segments = [];
-  let time = Date.now(),
+  let time = sim.time,
     centre = 0,
     following = true,
     picking = false,
@@ -462,12 +496,18 @@ export function mountBalconyLab(container, sim, assets) {
     job?.abort();
     job = null;
     el.predict.disabled = false;
+    el.cancel.hidden = true;
+    listControls.setBusy(false);
+    el.previousHigh.disabled = el.nextHigh.disabled = false;
   }
   function clearPass() {
     stop();
     clearLive();
     card.set(null);
     models = [];
+    lastResult = null;
+    tableHost.hidden = true;
+    tableHost.replaceChildren();
     current = null;
     sampler = null;
     events = [];
@@ -478,7 +518,17 @@ export function mountBalconyLab(container, sim, assets) {
     el.passes.disabled = true;
     el.events.replaceChildren();
   }
+  function renderList() {
+    renderObservationList(
+      tableHost,
+      lastResult,
+      selected,
+      (index) => choosePass(index, passes[index].maximum.time),
+      models
+    );
+  }
   function passOptions() {
+    renderList();
     el.passes.replaceChildren(
       ...passes.map((p, i) =>
         option(
@@ -508,17 +558,26 @@ export function mountBalconyLab(container, sim, assets) {
       })
     );
   }
+  const activeProfile = () => (el.obstruction.checked ? profile : []);
+  const activeProfileKind = () => (el.obstruction.checked ? profileKind : 'flat');
+  el.obstruction.onchange = () => {
+    if (sampler) models = passes.map((p) => observationOpportunity(p, sampler, activeProfile()));
+    passOptions();
+    if (current) refreshTrack();
+    if (lastResult) status(observationQuerySummary(lastResult, models));
+    draw();
+  };
   function refreshTrack() {
-    events = balconyEvents(current, profile, sampler);
+    events = balconyEvents(current, activeProfile(), sampler);
     const model = models[selected];
     const edges = model.windows.flatMap((w) => [{ time: w.start }, { time: w.end }]);
-    segments = balconyTrack(current, profile, sampler, [...events, ...edges]);
+    segments = balconyTrack(current, activeProfile(), sampler, [...events, ...edges]);
     renderEvents();
     card.set({
       model,
       pass: current,
       observer: site,
-      profileKind,
+      profileKind: activeProfileKind(),
       minimumElevation,
       replay: replay || current.end < Date.now(),
       reference: observationStart,
@@ -536,6 +595,7 @@ export function mountBalconyLab(container, sim, assets) {
       : (models[index].windows[0]?.peak.time ?? current.maximum.time);
     refreshTrack();
     el.passes.value = String(index);
+    renderList();
     el.scene.hidden = false;
     el.begin.textContent = shortClock(current.start);
     el.end.textContent = shortClock(current.end);
@@ -552,7 +612,12 @@ export function mountBalconyLab(container, sim, assets) {
             ? '原始星历回放'
             : '有效星历'
         : '地面星空';
-    el.context.textContent = [label, craftName(), site ? profileLabel(profileKind) : null, t(state)]
+    el.context.textContent = [
+      label,
+      craftName(),
+      site ? profileLabel(activeProfileKind()) : null,
+      t(state),
+    ]
       .filter(Boolean)
       .join(' · ');
   }
@@ -575,7 +640,7 @@ export function mountBalconyLab(container, sim, assets) {
       q = hasTarget ? sampler(time) : null,
       axes = earthAxes(time);
     syncObservationMode(q);
-    const state = hasTarget ? observationState(q, profile) : null;
+    const state = hasTarget ? observationState(q, activeProfile()) : null;
     if (following && q) centre = q.azimuth;
     const height = q
       ? q.sunElevation
@@ -588,7 +653,7 @@ export function mountBalconyLab(container, sim, assets) {
       time,
       sunElevation: height,
       segments,
-      profile,
+      profile: activeProfile(),
       frame,
       centre,
       craftName: craftName(),
@@ -682,19 +747,27 @@ export function mountBalconyLab(container, sim, assets) {
     useExample = false,
     history = false,
     skyline = null,
+    direction = 0,
+    list = false,
+    end,
+    visibleOnly = false,
   }) {
     cancelSearch();
     clearPass();
     archived = false;
-    minimumElevation = 5;
+    minimumElevation = direction || list ? 0 : Number(el.minimum.value);
     const token = revision,
       controller = new AbortController();
     job = controller;
     el.predict.disabled = true;
+    el.previousHigh.disabled = el.nextHigh.disabled = true;
+    el.cancel.hidden = false;
+    listControls.setBusy(true);
     if (id !== target) el.updateStatus.hidden = true;
     dirtyForm = false;
     id = target;
     replay = history;
+    lastQuery = { history, direction, list, end, visibleOnly };
     el.sourcePanel.open = false;
     el.cardFold.open = true;
     source = null;
@@ -722,32 +795,43 @@ export function mountBalconyLab(container, sim, assets) {
         return;
       }
       if (!s) return;
-      source = predictionSource(data, { allowEstimate: !history });
-      if (history && (start < source.start || start >= source.end)) start = source.epoch;
-      time = observationStart = start;
-      el.start.value = inputText(start);
-      draw();
-      const result = await predictPasses(data, site, start, 48, {
-        minimumElevation: 5,
+      source = predictionSource(data);
+      if ((direction || list ? el.peakMinimum : el.minimum).value.trim() === '')
+        throw Error(direction ? '高仰角搜索参数无效' : '预报参数无效');
+      const result = await queryObservation(data, site, start, {
+        hours: Number(el.hours.value),
+        minimumElevation,
+        direction,
+        list,
+        end,
+        visibleOnly,
+        history,
+        minimumPeakElevation: Number(el.peakMinimum.value),
+        daylight: el.daylight.value,
         signal: controller.signal,
-        allowEstimate: !history,
+        onProgress: (progress) => {
+          if (revision !== token || disposed) return;
+          status(
+            t('正在寻找高仰角过境…') +
+              '\n' +
+              t('已检查 {days} 天 · {count} 次过境', {
+                days: progress.daysScanned.toFixed(1),
+                count: progress.checkedPasses,
+              })
+          );
+        },
       });
       if (disposed || revision !== token || !sameSelection(selection, orbitSelection(sim, id)))
         return;
+      time = observationStart = history ? result.start : start;
+      el.start.value = inputText(observationStart);
+      draw();
+      lastResult = result;
       passes = result.passes;
       const sample = createPassSampler(source, site);
-      models = passes.map((p) => observationOpportunity(p, sample, profile));
+      models = passes.map((p) => observationOpportunity(p, sample, activeProfile()));
       passOptions();
-      const hasCandidate = models.some((model) => model.windows.length);
-      status(
-        !passes.length
-          ? '所选时段没有达到 5° 仰角的过境。'
-          : !hasCandidate
-            ? '有几何过境，此地点和天际线下没有候选可见时段。'
-            : result.clipped
-              ? '所选时段已按计算上限截短。'
-              : ''
-      );
+      status(observationQuerySummary(result, models));
       if (passes.length)
         choosePass(
           preferredOpportunity(
@@ -771,14 +855,25 @@ export function mountBalconyLab(container, sim, assets) {
       if (revision === token) {
         job = null;
         el.predict.disabled = false;
+        el.previousHigh.disabled = el.nextHigh.disabled = false;
+        el.cancel.hidden = true;
+        listControls.setBusy(false);
       }
     }
   }
-  function formSearch(history = false, saveExample = false) {
+  function formSearch(history = false, saveExample = false, direction = 0, listMode = false) {
     try {
       const s = getSiteForm(),
         useExample = example && siteKey(s) === siteKey(BEIJING_BALCONY) && !saveExample;
-      return search({ s, start: readFormDate(), save: !useExample, history, useExample });
+      return search({
+        s,
+        start: readFormDate(),
+        save: !useExample,
+        history,
+        useExample,
+        direction,
+        ...(listMode ? listControls.read() : {}),
+      });
     } catch (error) {
       cancelSearch();
       clearPass();
@@ -788,7 +883,7 @@ export function mountBalconyLab(container, sim, assets) {
     }
   }
   function demo() {
-    return search({ target: id, s: BEIJING_BALCONY, start: Date.now(), useExample: true });
+    return search({ target: id, s: BEIJING_BALCONY, start: readFormDate(), useExample: true });
   }
   function openPass(payload) {
     if (!payload?.pass || !payload.observer) return;
@@ -796,7 +891,8 @@ export function mountBalconyLab(container, sim, assets) {
     cancelSearch();
     clearPass();
     archived = false;
-    el.config.open = el.sourcePanel.open = false;
+    el.config.open = true;
+    el.sourcePanel.open = false;
     el.cardFold.open = true;
     container.scrollTop = 0;
     try {
@@ -811,7 +907,9 @@ export function mountBalconyLab(container, sim, assets) {
       if (p.start < source.start || p.end > source.end || !(p.start < p.end))
         throw Error('预报时间超出有效轨道区间');
       replay = !!payload.replay;
-      minimumElevation = payload.minimumElevation ?? 5;
+      minimumElevation = payload.minimumElevation ?? DEFAULT_PREDICTION.minimumElevation;
+      el.minimum.value = minimumElevation;
+      lastQuery = { history: false, direction: 0 };
       syncMissionOptions();
       el.dataset.value = id;
       loadSite(
@@ -830,7 +928,7 @@ export function mountBalconyLab(container, sim, assets) {
       status('');
       context();
       passes = [p];
-      models = [observationOpportunity(p, createPassSampler(source, site), profile)];
+      models = [observationOpportunity(p, createPassSampler(source, site), activeProfile())];
       passOptions();
       choosePass(0, payload.time);
       if (payload.watch) enterLive(payload.time);
@@ -842,8 +940,8 @@ export function mountBalconyLab(container, sim, assets) {
     if (job) return null;
     return balconyRecord({
       site,
-      profile,
-      profileKind,
+      profile: activeProfile(),
+      profileKind: activeProfileKind(),
       missionId: id,
       targetName: MISSIONS[id]?.name || (archived && archivedName) || id,
       time,
@@ -879,13 +977,14 @@ export function mountBalconyLab(container, sim, assets) {
     syncMissionOptions();
     el.dataset.value = id;
     loadSite(restored.observer, false, { points: restored.profile, kind: restored.profileKind });
-    el.config.open = el.sourcePanel.open = false;
+    el.config.open = true;
+    el.sourcePanel.open = false;
     el.cardFold.open = true;
     observationStart = p?.start ?? record.time;
     el.start.value = inputText(observationStart);
     if (p) {
       passes = [p];
-      models = [observationOpportunity(p, reader, profile)];
+      models = [observationOpportunity(p, reader, activeProfile())];
       passOptions();
       choosePass(0, record.time);
     }
@@ -903,13 +1002,15 @@ export function mountBalconyLab(container, sim, assets) {
     profileKind = profile.length ? 'saved' : 'flat';
     if (!archived) saveSite();
     editOptions();
-    if (sampler) models = passes.map((pass) => observationOpportunity(pass, sampler, profile));
+    if (sampler)
+      models = passes.map((pass) => observationOpportunity(pass, sampler, activeProfile()));
     passOptions();
     if (select !== undefined) {
       el.points.value = String(select);
       el.removePoint.disabled = el.points.value === '';
     }
     if (current) refreshTrack();
+    if (lastResult) status(observationQuerySummary(lastResult, models));
     draw();
   }
   function savePoint() {
@@ -963,6 +1064,16 @@ export function mountBalconyLab(container, sim, assets) {
     return demo();
   };
   el.predict.onclick = () => formSearch();
+  el.previousHigh.onclick = () => formSearch(false, false, -1);
+  el.nextHigh.onclick = () => formSearch(false, false, 1);
+  el.cancel.onclick = () => {
+    cancelSearch();
+    status('计算已停止');
+  };
+  el.simTime.onclick = () => {
+    el.start.value = inputText(sim.time);
+    formSearch();
+  };
   el.estimate.onclick = () => formSearch();
   el.saveSite.onclick = () => formSearch(false, true);
   el.now.onclick = () => {
@@ -996,7 +1107,7 @@ export function mountBalconyLab(container, sim, assets) {
     try {
       start = readFormDate();
     } catch {
-      start = Date.now();
+      start = sim.time;
     }
     el.dataset.value = target;
     await search({
@@ -1019,9 +1130,19 @@ export function mountBalconyLab(container, sim, assets) {
     draw();
     status('应用地点与时刻后重新计算。');
   };
-  for (const key of ['name', 'latitude', 'longitude', 'height', 'start'])
+  for (const key of [
+    'name',
+    'latitude',
+    'longitude',
+    'height',
+    'start',
+    'hours',
+    'minimum',
+    'peakMinimum',
+    'daylight',
+  ])
     el[key].addEventListener('input', () => {
-      if (key !== 'start') example = false;
+      if (['name', 'latitude', 'longitude', 'height'].includes(key)) example = false;
       if (key === 'height') heightManual = true;
       if (key === 'name') nameManual = true;
       if (key === 'latitude' || key === 'longitude') {
@@ -1094,7 +1215,7 @@ export function mountBalconyLab(container, sim, assets) {
             s: site,
             start: observationStart,
             useExample: example,
-            history: replay,
+            ...lastQuery,
           });
       }
     } catch (error) {
@@ -1115,7 +1236,7 @@ export function mountBalconyLab(container, sim, assets) {
           target,
           s: site,
           start: observationStart,
-          history: replay,
+          ...lastQuery,
           useExample: example,
         });
     } catch (error) {
@@ -1145,7 +1266,7 @@ export function mountBalconyLab(container, sim, assets) {
           target,
           s: site,
           start: observationStart,
-          history: replay,
+          ...lastQuery,
           useExample: example,
         });
     } catch (error) {
@@ -1247,6 +1368,7 @@ export function mountBalconyLab(container, sim, assets) {
   };
   document.addEventListener('visibilitychange', visibility);
   function translate() {
+    listControls.refresh();
     for (const n of root.querySelectorAll('[data-t]')) n.textContent = t(n.dataset.t);
     for (const n of root.querySelectorAll('[data-label]'))
       n.setAttribute('aria-label', t(n.dataset.label));
@@ -1255,7 +1377,7 @@ export function mountBalconyLab(container, sim, assets) {
     controls?.refresh();
     renderLocationNote();
     el.play.textContent = t(playing ? '暂停回放' : '播放过境');
-    status(report, reportError);
+    status(lastResult ? observationQuerySummary(lastResult, models) : report, reportError);
     context();
     siteOptions();
     editOptions();
@@ -1275,7 +1397,7 @@ export function mountBalconyLab(container, sim, assets) {
       sameSelection(selection, orbitSelection(sim, id))
     )
       return;
-    search({ target: id, s: site, start: observationStart, history: replay, useExample: example });
+    search({ target: id, s: site, start: observationStart, ...lastQuery, useExample: example });
   }
   let restart = false;
   el.height.value = '';
@@ -1301,19 +1423,19 @@ export function mountBalconyLab(container, sim, assets) {
         initialized = true;
         lastSite = stored;
         const saved = stored ?? [...sites.values()].at(-1)?.site ?? null;
-        el.config.open = !saved;
-        search({ target: initialTarget(sim.missionId), s: saved, start: Date.now() });
+        el.config.open = true;
+        search({ target: initialTarget(sim.missionId), s: saved, start: sim.time });
       } else if (!archived && stored && !sameObserver(stored, lastSite) && !dirtyForm) {
         lastSite = stored;
         restart = false;
-        search({ target: id, s: stored, start: observationStart, history: replay });
+        search({ target: id, s: stored, start: observationStart, ...lastQuery });
       } else if (restart && !dirtyForm) {
         restart = false;
         search({
           target: id,
           s: site,
           start: observationStart,
-          history: replay,
+          ...lastQuery,
           useExample: example,
         });
       } else {

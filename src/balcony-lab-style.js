@@ -14,7 +14,7 @@ export default `
 .balcony-lab summary{cursor:pointer;padding:9px 12px;color:#bfd0dd;font-size:12px}.balcony-lab summary:focus-visible{outline:2px solid #8adccc}
 .bal-form{padding:0 12px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;align-items:end}
 .bal-form label,.bal-edit label{min-width:0}.bal-form .bal-date{grid-column:span 2}.bal-form .bal-actions{grid-column:1/-1}
-.bal-status{font-size:12px;color:#c2d6db;margin:3px 0 10px!important}.bal-status[data-error=true]{color:#ffc2a4}
+.bal-status{white-space:pre-line;font-size:12px;color:#c2d6db;margin:3px 0 10px!important}.bal-status[data-error=true]{color:#ffc2a4}
 .bal-grid{display:grid;grid-template-columns:minmax(0,2.6fr) minmax(210px,1fr);gap:12px;align-items:start}
 .bal-card{border:1px solid var(--bal-line);border-radius:10px;background:#0e1d2b;overflow:hidden;min-width:0}
 .bal-heading{padding:10px 13px;justify-content:space-between;line-height:1.35}.bal-heading b{font-size:13px}.bal-heading small{font-variant-numeric:tabular-nums;font-size:11px}

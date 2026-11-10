@@ -1,3 +1,9 @@
+import {
+  createObservationListControls,
+  renderObservationList,
+  observationListStyle,
+} from './observation-list-controls.js';
+import { observationQuerySummary } from './observation-query-display.js';
 import { t, onLanguageChange } from './i18n.js';
 import { clockText, inputText, parseLocalTime } from './time-format.js';
 import { mission } from './missions.js';
@@ -6,7 +12,6 @@ import {
   validateObserver,
   predictionSource,
   predictionWindow,
-  predictPasses,
   passesToICS,
   createPassSampler,
 } from './pass-prediction.js';
@@ -25,7 +30,7 @@ import { siteHorizon } from './observation-sites.js';
 import { observationOpportunity, preferredOpportunity } from './observation-opportunity.js';
 import { createObservationCard, opportunityStyle } from './observation-card.js';
 import { observationState } from './balcony-lab-geometry.js';
-import { findHighPass } from './pass-highpoint-search.js';
+import { queryObservation, PREDICTION_HOURS, DEFAULT_PREDICTION } from './observation-query.js';
 
 const BEIJING = { name: '北京', latitude: 39.9042, longitude: 116.4074, height: 50 };
 const css = `
@@ -53,7 +58,7 @@ export function mountPassPanel(container, sim) {
   const root = node('div', 'pass-panel', container);
   root.dataset.testid = 'pass-panel';
   const style = node('style', '', root);
-  style.textContent = css + opportunityStyle;
+  style.textContent = css + opportunityStyle + observationListStyle;
   const labels = [],
     label = (element, key) => {
       labels.push(() => (element.textContent = t(key)));
@@ -128,18 +133,23 @@ export function mountPassPanel(container, sim) {
     fields[key] = el;
     return el;
   };
-  select('hours', '预报时长', [
-    [24, '24 小时'],
-    [48, '48 小时'],
-    [72, '72 小时'],
-  ]);
-  input('minimum', '最低仰角（度）', 'number', 10, { min: 0, max: 80, step: 1 });
+  select(
+    'hours',
+    '预报时长',
+    PREDICTION_HOURS.map((h) => [h, h === 168 ? '一周（7 天）' : `${h} 小时`])
+  );
+  input('minimum', '最低仰角（度）', 'number', DEFAULT_PREDICTION.minimumElevation, {
+    min: 0,
+    max: 80,
+    step: 1,
+  });
   const actions = node('div', 'pass-actions', setup),
     button = (key, parent = actions) => label(node('button', '', parent), key);
   const calculate = button('计算过境'),
     beijing = button('使用北京'),
     current = button('使用模拟时刻'),
-    interval = button('使用有效数据时段'),
+    now = button('使用现在'),
+    interval = button('历史回放'),
     update = button('更新当前轨道'),
     importButton = button('导入轨道');
   calculate.dataset.action = 'predict';
@@ -151,7 +161,14 @@ export function mountPassPanel(container, sim) {
     '从基准时间向前或向后寻找最近一次达标过境，不受预报时长限制。'
   );
   const highForm = node('div', 'pass-form', highSearch);
-  input('peakMinimum', '最高仰角至少（度）', 'number', 60, { min: 0, max: 90, step: 1 }, highForm);
+  input(
+    'peakMinimum',
+    '最高仰角至少（度）',
+    'number',
+    DEFAULT_PREDICTION.minimumPeakElevation,
+    { min: 0, max: 90, step: 1 },
+    highForm
+  );
   select(
     'daylight',
     '最高点时的当地昼夜',
@@ -170,10 +187,17 @@ export function mountPassPanel(container, sim) {
   nextHigh.dataset.action = 'next-high-pass';
   cancel.dataset.action = 'cancel';
   cancel.hidden = true;
+  const listControls = createObservationListControls(highSearch, {
+    start: () => parseLocalTime(fields.start.value),
+    changed: () => invalidate(),
+    calculate: () => run(0, false, true),
+  });
   const status = node('p', 'pass-status', root);
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
   status.tabIndex = -1;
+  const tableHost = node('div', 'observation-list-table', root);
+  tableHost.hidden = true;
   const results = node('div', 'pass-results', root),
     list = node('div', 'pass-list', results),
     preview = node('div', 'pass-preview', results);
@@ -253,10 +277,20 @@ export function mountPassPanel(container, sim) {
       fields.name.value.trim() || `${fields.latitude.value}°, ${fields.longitude.value}°`;
     if (example) contextValues.site.textContent += ' · ' + t('北京示例');
     contextValues.site.title = `${fields.latitude.value}°, ${fields.longitude.value}°`;
-    setupSummary.textContent = t('{hours} 小时 · 最低仰角 {elevation}°', {
-      hours: fields.hours.value,
-      elevation: fields.minimum.value,
-    });
+    const query = result && isCurrent() ? result.query : null;
+    setupSummary.textContent = query
+      ? `${t(query.list ? '条件过境列表' : query.direction === 1 ? '下一次高仰角过境' : '上一次高仰角过境')} · ≥${query.minimumPeakElevation}° · ${t({ any: '白天与黑夜', day: '白天', night: '黑夜' }[query.daylight])}${query.visibleOnly ? ' · ' + t('仅看最高点适合目视观测') : ''}`
+      : t('{hours} 小时 · 最低仰角 {elevation}°', {
+          hours: fields.hours.value,
+          elevation: fields.minimum.value,
+        });
+    if (query?.list)
+      setupSummary.textContent += ` · ${passClockParts(result.start).date} — ${passClockParts(result.end).date}`;
+    setupSummary.title = query
+      ? query.list
+        ? `${clockText(result.start)} — ${clockText(result.end)} UTC+8`
+        : `${t('基准时间')}：${clockText(query.referenceTime)} UTC+8`
+      : '';
     sourceSummary.textContent = orbitDescription(sim.data);
     sourceDetails.textContent = sourceSummary.textContent;
     let state = 'error',
@@ -265,9 +299,12 @@ export function mountPassPanel(container, sim) {
       const start = parseLocalTime(fields.start.value);
       if (!Number.isFinite(start)) message = '请设置开始时间';
       else {
-        const window = predictionWindow(sim.data, start, Number(fields.hours.value), {
-          allowEstimate: true,
-        });
+        const window =
+          result && isCurrent()
+            ? result
+            : predictionWindow(sim.data, start, Number(fields.hours.value), {
+                allowEstimate: true,
+              });
         state = window.clipped || window.mode !== 'catalog' ? 'partial' : 'ready';
         message =
           window.mode === 'catalog'
@@ -290,6 +327,8 @@ export function mountPassPanel(container, sim) {
     job = null;
     setBusy(false);
     result = null;
+    tableHost.hidden = true;
+    tableHost.replaceChildren();
     identity = null;
     models = [];
     horizon = null;
@@ -317,6 +356,7 @@ export function mountPassPanel(container, sim) {
   function setBusy(busy) {
     calculate.disabled = previousHigh.disabled = nextHigh.disabled = busy || updating;
     cancel.hidden = !busy;
+    listControls.setBusy(busy || updating);
   }
   function refreshOpportunities() {
     horizon = siteHorizon(result.observer, example);
@@ -494,7 +534,16 @@ export function mountPassPanel(container, sim) {
   };
   function renderResults() {
     if (!result) return;
+    refreshContext();
     results.hidden = !result.passes.length;
+    renderObservationList(tableHost, result, selected, (index) => {
+      if (!isCurrent()) return invalidate();
+      selected = index;
+      previewTime = result.passes[index].maximum.time;
+      renderResults();
+    });
+    list.hidden = Boolean(result.query?.list);
+    results.style.gridTemplateColumns = result.query?.list ? '1fr' : '';
     const listScroll = list.scrollTop;
     list.replaceChildren();
     result.passes.forEach((pass, index) => {
@@ -548,25 +597,9 @@ export function mountPassPanel(container, sim) {
       draw();
       details.textContent = `${t('最高点距离')}：${pass.maximum.range.toFixed(0)} km\n${t('候选可观测时段')} · UTC+8：${models[selected].windows.length ? models[selected].windows.map((x) => clockText(x.start) + ' — ' + clockText(x.end)).join('\n') : t('无')}`;
     }
-    if (result.query) {
-      const q = result.query;
-      const description = `${t(q.direction === 1 ? '下一次高仰角过境' : '上一次高仰角过境')} · ≥${q.minimumPeakElevation}° · ${t({ any: '白天与黑夜', day: '白天', night: '黑夜' }[q.daylight])}`;
-      status.textContent =
-        description + '\n' + t('基准时间') + '：' + clockText(q.referenceTime) + ' UTC+8';
-      if (result.passes.length)
-        status.textContent += '\n' + t(resultMode(result.mode, result.end < Date.now()));
-      else
-        status.textContent +=
-          '\n' +
-          (result.status === 'unreachable'
-            ? t('该轨道在此地点的仰角上限约为 {elevation}°，请降低门槛或更换地点。', {
-                elevation: result.reachability.upperBoundElevation.toFixed(1),
-              })
-            : t('已搜索至可计算时间边界，未找到达标过境。'));
-    } else
-      status.textContent = `${t('找到 {count} 次过境', { count: result.passes.length })} · ${t(resultMode(result.mode, result.end < Date.now()))}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped ? '\n' + t('所选时段已按计算上限截短。') : ''}${result.passes.length ? '' : '\n' + t('未找到符合条件的过境，可延长时段或降低最低仰角。')}`;
+    status.textContent = observationQuerySummary(result, models);
   }
-  async function run(direction = 0) {
+  async function run(direction = 0, history = false, listMode = false) {
     if (updating || job) return;
     invalidate();
     const token = generation,
@@ -586,42 +619,36 @@ export function mountPassPanel(container, sim) {
       });
       const time = parseLocalTime(fields.start.value),
         hours = Number(fields.hours.value),
-        minimumElevation = direction ? 0 : numeric('minimum');
+        minimumElevation = direction || listMode ? 0 : numeric('minimum');
       const data = sim.data,
         missionId = sim.missionId;
       setBusy(true);
       status.textContent = t(direction ? '正在寻找高仰角过境…' : '正在计算过境…');
-      const next = direction
-        ? await findHighPass(data, observer, time, {
-            direction,
-            minimumPeakElevation: numeric('peakMinimum'),
-            daylight: fields.daylight.value,
-            signal: controller.signal,
-            onProgress: (progress) => {
-              if (token !== generation || disposed || controller.signal.aborted) return;
-              status.textContent =
-                t('正在寻找高仰角过境…') +
-                '\n' +
-                t('已检查 {days} 天 · {count} 次过境', {
-                  days: progress.daysScanned.toFixed(1),
-                  count: progress.checkedPasses,
-                }) +
-                '\n' +
-                clockText(progress.activeStart) +
-                ' — ' +
-                clockText(progress.activeEnd) +
-                ' UTC+8';
-            },
-          })
-        : await predictPasses(data, observer, time, hours, {
-            minimumElevation,
-            signal: controller.signal,
-            allowEstimate: true,
-          });
+      const next = await queryObservation(data, observer, time, {
+        direction,
+        ...(listMode ? listControls.read() : {}),
+        history,
+        hours,
+        minimumElevation,
+        minimumPeakElevation: direction || listMode ? numeric('peakMinimum') : undefined,
+        daylight: fields.daylight.value,
+        signal: controller.signal,
+        onProgress: (progress) => {
+          if (token !== generation || disposed || controller.signal.aborted) return;
+          status.textContent =
+            t('正在寻找高仰角过境…') +
+            '\n' +
+            t('已检查 {days} 天 · {count} 次过境', {
+              days: progress.daysScanned.toFixed(1),
+              count: progress.checkedPasses,
+            });
+        },
+      });
       if (disposed || token !== generation || data !== sim.data || missionId !== sim.missionId) {
         if (token === generation) invalidate();
         return;
       }
+      if (history) fields.start.value = inputText(next.start);
       sampler = createPassSampler(predictionSource(data, { allowEstimate: true }), observer);
       result = next;
       identity = { data, missionId };
@@ -671,15 +698,11 @@ export function mountPassPanel(container, sim) {
     fields.start.value = inputText(sim.time);
     invalidate();
   };
-  interval.onclick = () => {
-    try {
-      const source = predictionSource(sim.data);
-      fields.start.value = inputText(source.recordStart);
-      invalidate();
-    } catch (error) {
-      status.textContent = t(error.message);
-    }
+  now.onclick = () => {
+    fields.start.value = inputText(Date.now());
+    invalidate();
   };
+  interval.onclick = () => run(0, true);
   update.onclick = async () => {
     if (updating) return;
     if (job) invalidate();
@@ -793,6 +816,7 @@ export function mountPassPanel(container, sim) {
   };
   const unsubscribe = onLanguageChange(() => {
     for (const render of labels) render();
+    listControls.refresh();
     refreshContext();
     if (result) renderResults();
     else if (errorKey) status.textContent = t(errorKey);

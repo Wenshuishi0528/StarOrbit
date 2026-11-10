@@ -1,0 +1,55 @@
+{
+  "version": "1.41",
+  "date": "2026-11-10",
+  "scope": "Local desktop update; not published",
+  "sourceBase": "00d7ac99d779161ef2ae9e22ecad3a5011981703",
+  "workingTree": "uncommitted changes",
+  "environment": "macOS, headed Chromium with native viewport, localhost:8771 dist-local",
+  "tests": [
+    "observation-query",
+    "pass-prediction",
+    "pass-reference",
+    "pass-highpoint-search",
+    "balcony-lab",
+    "observation-opportunity",
+    "observer-targets",
+    "balcony-sky-view",
+    "balcony-orientation",
+    "pass-display",
+    "i18n",
+    "test:docs"
+  ],
+  "browser": {
+    "main": {
+      "balconyStatus": "找到 36 次过境\n含轨道延续演算\n其中 0 次有候选可见时段\n预报区间：2026-11-10 12:00:00 — 2026-11-17 12:00:00 UTC+8",
+      "balconyPasses": "2026-11-10 12:00:00 · 21°\n2026-11-10 13:34:56 · 64°\n2026-11-10 15:11:46 · 57°\n2026-11-10 16:48:08 · 13°\n2026-11-11 09:21:27 · 14° · 估算\n2026-11-11 10:57:51 · 63° · 估算\n2026-11-11 12:34:42 · 63° · 估算\n2026-11-11 14:11:36 · 85° · 估算\n2026-11-11 15:48:09 · 21° · 估算\n2026-11-12 09:57:43 · 39° · 估算\n2026-11-12 11:34:27 · 71° · 估算\n2026-11-12 13:11:23 · 74° · 估算\n2026-11-12 14:48:05 · 35° · 估算\n2026-11-13 08:57:39 · 23° · 估算\n2026-11-13 10:34:13 · 90° · 估算\n2026-11-13 12:11:08 · 64° · 估算\n2026-11-13 13:47:58 · 57° · 估算\n2026-11-13 15:24:20 · 13° · 估算\n2026-11-14 07:57:38 · 14° · 估算\n2026-11-14 09:34:02 · 62° · 估算\n2026-11-14 11:10:53 · 63° · 估算\n2026-11-14 12:47:47 · 85° · 估算\n2026-11-14 14:24:20 · 22° · 估算\n2026-11-15 08:33:54 · 38° · 估算\n2026-11-15 10:10:37 · 71° · 估算\n2026-11-15 11:47:34 · 73° · 估算\n2026-11-15 13:24:16 · 36° · 估算\n2026-11-16 07:33:50 · 23° · 估算\n2026-11-16 09:10:24 · 89° · 估算\n2026-11-16 10:47:19 · 64° · 估算\n2026-11-16 12:24:09 · 58° · 估算\n2026-11-16 14:00:31 · 13° · 估算\n2026-11-17 06:33:50 · 14° · 估算\n2026-11-17 08:10:13 · 62° · 估算\n2026-11-17 09:47:03 · 63° · 估算\n2026-11-17 11:23:58 · 86° · 估算",
+      "passStatus": "找到 36 次过境\n含轨道延续演算\n其中 0 次有候选可见时段\n预报区间：2026-11-10 12:00:00 — 2026-11-17 12:00:00 UTC+8",
+      "previous": "上一次高仰角过境 · ≥60° · 黑夜\n基准时间：2026-11-10 12:00:00 UTC+8\n找到 1 次过境\n轨道延续演算\n其中 0 次有候选可见时段\n预报区间：2026-11-03 17:16:29 — 2026-11-03 17:26:59 UTC+8",
+      "next": "下一次高仰角过境 · ≥60° · 白天\n基准时间：2026-11-10 12:00:00 UTC+8\n找到 1 次过境\n有效星历\n其中 0 次有候选可见时段\n预报区间：2026-11-10 13:29:42 — 2026-11-10 13:40:11 UTC+8",
+      "cancelled": "计算已停止",
+      "history": "找到 33 次过境\n有效星历\n其中 5 次有候选可见时段\n预报区间：2026-11-04 07:00:00 — 2026-11-11 07:00:00 UTC+8",
+      "historyStart": "2026-11-04T07:00",
+      "errors": []
+    },
+    "final": {
+      "historical": "找到 33 次过境\n有效星历\n其中 5 次有候选可见时段\n预报区间：2026-11-04 07:00:00 — 2026-11-11 07:00:00 UTC+8",
+      "flat": "找到 33 次过境\n有效星历\n其中 5 次有候选可见时段\n预报区间：2026-11-04 07:00:00 — 2026-11-11 07:00:00 UTC+8",
+      "blocked": "找到 33 次过境\n有效星历\n其中 0 次有候选可见时段\n预报区间：2026-11-04 07:00:00 — 2026-11-11 07:00:00 UTC+8",
+      "restored": "找到 33 次过境\n有效星历\n其中 5 次有候选可见时段\n预报区间：2026-11-04 07:00:00 — 2026-11-11 07:00:00 UTC+8",
+      "passHistory": "找到 0 次过境\n未找到符合条件的过境，可延长时段或降低最低仰角。\n预报区间：2026-11-11 06:00:00 — 2026-11-11 07:00:00 UTC+8\n所选时段已按计算上限截短。",
+      "coverage": "航天器\n中国空间站\n观测地点\n北京 · 北京示例\n轨道时段覆盖\n所选时段部分覆盖",
+      "passHigh": "上一次高仰角过境 · ≥70° · 黑夜\n基准时间：2026-11-11 06:00:00 UTC+8\n找到 1 次过境\n轨道延续演算\n其中 0 次有候选可见时段\n预报区间：2026-11-03 17:16:29 — 2026-11-03 17:26:59 UTC+8",
+      "handoff": "2026-11-03 17:21:44 · 74° · 估算",
+      "independent": "找到 5 次过境\n含轨道延续演算\n其中 1 次有候选可见时段\n预报区间：2026-11-03 17:16:29 — 2026-11-04 17:16:29 UTC+8",
+      "errors": [],
+      "failed": []
+    }
+  },
+  "review": "Independent agent review found 3 issues; fixed and re-reviewed successfully",
+  "desktop": "StarOrbitLauncher --check READY; canonical dist-local runtime",
+  "evidence": "output/release141/",
+  "limits": [
+    "Single-file HTML rebuilt; interactive acceptance performed on desktop split build. No portable ZIP or public deployment requested.",
+    "A transient Earth tile 404 occurred while rebuilding the running server; subsequent final browser run had zero asset failures and zero page exceptions."
+  ]
+}

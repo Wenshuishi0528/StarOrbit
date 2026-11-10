@@ -1,8 +1,32 @@
 # Changelog / 更新记录
 
+## v1.44 · 2026-11-10
+
+- 阳台观测增加建筑与树木遮挡开关，画面与候选观测窗口同步更新，保留已编辑轮廓。
+- Added a balcony obstruction toggle; skyline rendering and viewing windows update together without deleting saved profiles.
+
+## v1.43 · 2026-11-10
+
+- 实验室过境预报与阳台观测新增共享条件列表，支持自定日期范围、昼夜、最高仰角和目视筛选，表格可选择查看详情。
+- 主侧栏“地表观测”“星际穿梭”统一为居中两字一行。
+- Added shared filtered pass lists to both laboratory planners, with date ranges, day/night and peak-elevation filters, viewing conditions and selectable details.
+
+
 按开发版本倒序记录，每版保留简短中英总结；每次完成更新继续在顶部追加。早期缺少独立证据的版本逐条标为“记录待核实”，不将后续累计功能倒填。
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
+
+## v1.42 — 2026-11-10
+
+恢复独立明亮的小地图底图与原有平滑昼夜阴影，不加晨昏线描边；修正北极海面白带，底图不再跟随主地球图源。两类过境查询默认最低仰角恢复5°，结果显示昼夜次数。使用11月9日官方OEM、独立Skyfield/JPL计算和J2积分核对，确认低仰角过滤与显示回归的原因，保留已核验的轨道接续算法。
+
+**English:** Restored a fixed, bright minimap with the existing smooth night shade and no terminator outline; corrected the polar-ocean band. Restored the 5° forecast default and added day/night peak counts. Independent official-OEM, Skyfield/JPL and J2 checks verified continuing orbital precession and identified filtering/display regressions.
+
+## v1.41 — 2026-11-10
+
+阳台观测与过境预报共用查询规则并保留独立入口，均支持一周预报和前后高仰角查询。统一初始时间与结果摘要，明确过境数量及可见条件；历史回放限制在原始星历区间。验证记录见[当前验收](docs/verification.md)。
+
+**English:** Unified pass and balcony query rules with independent entry points, seven-day forecasts and previous/next high-pass searches. Aligned initial time and result summaries, distinguished passes from visibility, and bounded historical replay to original ephemerides.
 
 ## v1.40 — 2026-11-10
 

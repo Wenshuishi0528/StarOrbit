@@ -112,10 +112,12 @@ export function predictionSource(data, { archived = false } = {}) {
   };
 }
 export function predictionWindow(data, start, hours, options = {}) {
-  if (!Number.isFinite(start) || ![24, 48, 72].includes(hours)) throw Error('预报时间无效');
+  if (!Number.isFinite(start) || ![24, 48, 72, 168].includes(hours)) throw Error('预报时间无效');
   const source = predictionSource(data, options);
   if (start < source.start || start >= source.end) throw Error('预报时间无效');
-  const end = Math.min(start + hours * 3600000, source.end);
+  if (options.history && (start < source.recordStart || start >= source.recordEnd))
+    start = source.recordStart;
+  const end = Math.min(start + hours * 3600000, options.history ? source.recordEnd : source.end);
   const mode =
     start >= source.recordStart && end <= source.recordEnd
       ? 'catalog'
@@ -213,7 +215,7 @@ export function* scanPasses(sample, start, end, { minimumElevation = 10, stepMs 
     !Number.isFinite(start) ||
     !Number.isFinite(end) ||
     end <= start ||
-    end - start > 72 * 3600000 ||
+    end - start > 168 * 3600000 ||
     !Number.isFinite(minimumElevation) ||
     minimumElevation < 0 ||
     minimumElevation > 80 ||
@@ -289,11 +291,11 @@ export function predictPasses(
   observer,
   start,
   hours,
-  { minimumElevation = 10, signal, allowEstimate = false } = {}
+  { minimumElevation = 10, signal, allowEstimate = false, history = false } = {}
 ) {
   let window, scan;
   try {
-    window = predictionWindow(data, start, hours, { allowEstimate });
+    window = predictionWindow(data, start, hours, { allowEstimate, history });
     scan = scanPasses(createPassSampler(window.source, observer), window.start, window.end, {
       minimumElevation,
     });
