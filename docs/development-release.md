@@ -2,7 +2,7 @@
 
 ## 2026-11-09 发布渠道迁移
 
-完整开发工程与原始 Release 位于私有仓库 `Wenshuishi0528/StarOrbit-source`。公开仓库 `Wenshuishi0528/StarOrbit` 保存已构建网页版、公开文档及更新记录，Pages 从公开仓库 main 根目录发布，地址为 https://wenshuishi0528.github.io/StarOrbit/ 。
+完整开发工程与原始 Release 位于私有仓库 `Wenshuishi0528/StarOrbit-source`。公开仓库 `Wenshuishi0528/StarOrbit` 保存已构建网页版、公开文档及更新记录，Pages 由公开仓库 main 的`.github/workflows/pages.yml`发布根目录产物，地址为 https://wenshuishi0528.github.io/StarOrbit/ 。
 
 原源码仓库的 Pages 工作流已停用。后续先在私库工作副本完成所需测试、`npm run build:web` 和 `node tests/web-build.mjs dist`，再将经过核对的 dist 文件与公开文档同步到独立公开工作副本。检查公开差异没有开发源码、source map 或可编辑工程后提交推送，等待公开仓库 Pages 部署成功，再验证版本、资源和主要界面。
 
@@ -13,6 +13,8 @@
 本页按本地 v1.36 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
 
 地表／太阳系改动的专项入口是 `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`，均并入默认回归。浏览器需检查共用 canvas 的进入／返回、时间连续性、地形异步加载、输入焦点和截图；运行结果写入版本验收记录，不能仅用数值测试推断图形交互通过。
+
+v1.40起公开仓库使用显式Pages工作流，Pages配置为workflow；只上传已构建产物，不在公开仓库构建源码。部署等待上限30分钟、作业40分钟，用于完整地表图集；完成后仍须核对线上入口与脚本摘要。
 
 ## 本机统一目录
 
