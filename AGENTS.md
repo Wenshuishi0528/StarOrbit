@@ -12,18 +12,16 @@
 - docs/v* 文件保留版本设计和当时证据。引用历史结果时标明版本与范围，不把它们写成当前版本已通过；当前验收记录绑定版本、实际构建及环境。
 - 运行 npm run test:docs；打包后再运行 python3 scripts/check-docs.py --package <实际ZIP路径>。便携包文档以显式入口和相对引用收集；源码引用用固定提交链接，素材来源和许可文件应随包可读。
 
-# 私有源码与公开发布（2026-11-09 起）
+# 公开源码与统一发布（2026-11-10 起）
 
-- 完整源码、原始模型工程、全部开发历史和历史便携附件位于私有仓库 `Wenshuishi0528/StarOrbit-source`。本工作副本 origin 已指向私库。
-- `Wenshuishi0528/StarOrbit` 是全新历史的公开展示与网页仓库，Pages 地址为 `https://wenshuishi0528.github.io/StarOrbit/`。仅同步通过检查的 `dist/` 网页产物、公开文档、截图、许可和发布说明。
-- 公开仓库本机工作副本为 `/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/publish/public`。禁止向公开仓库推送本仓库分支、标签、src、scripts、tests、macos、可编辑模型工程、源码映射和便携源码包。
-- 原 `pages.yml` 工作流已在 GitHub 停用。向私库推送不会自动更新网页版；每次授权发布还需单独同步并推送公开发布工作副本，再等待 Pages 完成并验证线上。
-- 旧 Release 与附件完整保留在私库。公开 Release 仅归档说明，标记原发布日期，其标签指向公开资料。新发布也遵循这一分工。
-- 本机 pre-push hook 限制源码只推送到私库；新克隆需重新设置本机 hook 并检查远端地址。
-- 本次迁移只调整仓库与发布资料，网页保持已验证的 v1.36 构建。
+- 原始仓库 `Wenshuishi0528/StarOrbit` 恢复公开，保留完整开发历史、原始标签和 Release。原创内容使用 CC BY-NC 4.0，商业使用需作者单独书面许可；第三方材料保留各自条款。
+- Pages 地址保持 `https://wenshuishi0528.github.io/StarOrbit/`，由原仓库 `.github/workflows/pages.yml` 完成测试、构建和部署。授权发布后须等待成功并核对线上版本、入口及脚本。
+- 临时展示仓库改名为私有 `Wenshuishi0528/StarOrbit-showcase-archive`，独立工作副本保留在 `publish/public`，仅作历史归档，不再承担发布。
+- 推送前核对 origin 指向原始仓库（GitHub repository id 1427973518）；本机 pre-push hook 限制目标地址，避免把源码推到展示归档。
+- 新 Release、便携包和更新记录在原始仓库统一发布，保留历史 Release 与附件；不要重建原始历史或强制覆盖标签。
 
 # 本机目录统一（2026-11-09）
 
 - 唯一开发与桌面运行根为本仓库；`/Applications/星轨.app`配置root指向本仓库，继续使用127.0.0.1:8771，优先提供dist-local。不要再向原3D打印目录同步完整开发副本。
-- 公开发布工作副本为`publish/public`，由根`.gitignore`隔离，保持独立Git和公开remote；构建仍先写`dist`，不要让构建脚本覆盖公开工作副本的`.git`。
+- 历史展示归档工作副本为`publish/public`，由根`.gitignore`隔离，保持独立Git和私有归档remote；构建仍写`dist`，不要覆盖归档工作副本的`.git`。
 - 清理大产物先核对恢复来源；保留未匹配云端的ZIP、原始科学数据、验收记录与最近回退。移动到废纸篓时保留恢复清单，不自动清空废纸篓。

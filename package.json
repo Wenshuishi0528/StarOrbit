@@ -1,8 +1,8 @@
 {
   "name": "starorbit",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "private": true,
-  "description": "StarOrbit — Space & Orbit Simulator. Shared Earth resources, modular spacecraft, independent orbits and attitude controls.",
+  "description": "StarOrbit — Explore spacecraft, Earth, the Solar System and Chinese sky culture in your browser.",
   "author": "Wenshuishi",
   "license": "CC-BY-NC-4.0",
   "dependencies": {
@@ -23,7 +23,7 @@
     "format:check": "prettier --check \"src/**/*.{js,css}\"",
     "test:docs": "python3 scripts/check-docs.py && node tests/docs-examples.mjs && python3 tests/documentation.py"
   },
-  "displayVersion": "1.44",
+  "displayVersion": "1.45",
   "devDependencies": {
     "prettier": "3.6.2"
   }

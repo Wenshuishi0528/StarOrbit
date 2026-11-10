@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v1.45 · 2026-11-10
+
+- 恢复原仓库的源码公开，继续采用 CC BY-NC 4.0；更新中英文介绍，新增中国星官图像专节与三组九宫格。
+- 统一源码、网页与便携版发布入口，保留原网页版地址和历史更新记录。
+- Restored public source access under CC BY-NC 4.0, refreshed both introductions and added three Chinese sky illustration galleries; reunited source, web and portable releases at the original repository and URL.
+
 ## v1.44 · 2026-11-10
 
 - 阳台观测增加建筑与树木遮挡开关，画面与候选观测窗口同步更新，保留已编辑轮廓。

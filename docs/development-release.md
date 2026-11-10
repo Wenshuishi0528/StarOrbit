@@ -1,26 +1,26 @@
 # 开发、发布与维护
 
-## 2026-11-09 发布渠道迁移
+适用版本：v1.45。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
 
-完整开发工程与原始 Release 位于私有仓库 `Wenshuishi0528/StarOrbit-source`。公开仓库 `Wenshuishi0528/StarOrbit` 保存已构建网页版、公开文档及更新记录，Pages 由公开仓库 main 的`.github/workflows/pages.yml`发布根目录产物，地址为 https://wenshuishi0528.github.io/StarOrbit/ 。
+## 公开源码与统一发布
 
-原源码仓库的 Pages 工作流已停用。后续先在私库工作副本完成所需测试、`npm run build:web` 和 `node tests/web-build.mjs dist`，再将经过核对的 dist 文件与公开文档同步到独立公开工作副本。检查公开差异没有开发源码、source map 或可编辑工程后提交推送，等待公开仓库 Pages 部署成功，再验证版本、资源和主要界面。
+原始仓库 `Wenshuishi0528/StarOrbit` 统一保存源码、开发历史、标签、Release 和便携附件，原创内容采用 CC BY-NC 4.0。Pages 由 `.github/workflows/pages.yml` 从 main 构建，地址保持 https://wenshuishi0528.github.io/StarOrbit/ 。
 
-完整更新日志保留全部开发版本，公开 Release 归档原说明并注明原发布日期。便携包与开发附件保存于私库。以下旧版 CI 与发布示例需结合这一渠道分工使用。
+2026-11-09 建立的临时展示仓库保留为私有 `Wenshuishi0528/StarOrbit-showcase-archive`；本机独立副本位于 `publish/public`，仅用于回溯，不参与正常发布。恢复公开沿用原始仓库身份与历史，不合并展示仓库的独立提交和重建标签。
 
-适用版本：本地 v1.44。作者：Wenshuishi。核对日期：2026-11-08。
+授权发布时，在原始源码仓库完成检查与构建后推送 main，等待 Pages 工作流通过并读回线上版本及脚本；便携包、校验值和中英文说明发布到同一仓库的版本 Release。本次切换与验证记录见 [v1.45 发布记录](v1.45-release.md)。
 
 本页按本地 v1.36 的工具链和运行方式维护。命令以源码根目录为工作目录；下载的便携包不含完整 `src/`、`tests/`、构建脚本和 Node 依赖，不能直接用于开发测试。产品能力见[范围说明](product-scope.md)，结构见[系统架构](architecture.md)，执行与未执行项目见[验证指南](verification.md)。本页描述流程，不表示这些步骤在每次更新中均已完成。
 
 地表／太阳系改动的专项入口是 `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`，均并入默认回归。浏览器需检查共用 canvas 的进入／返回、时间连续性、地形异步加载、输入焦点和截图；运行结果写入版本验收记录，不能仅用数值测试推断图形交互通过。
 
-v1.40起公开仓库使用显式Pages工作流，Pages配置为workflow；只上传已构建产物，不在公开仓库构建源码。部署等待上限30分钟、作业40分钟，用于完整地表图集；完成后仍须核对线上入口与脚本摘要。
+v1.45 使用原始源码仓库的 Pages 工作流，配置为 workflow；在 CI 中测试和构建后上传 dist。部署等待上限 30 分钟、部署作业 40 分钟，用于完整地表图集同步；完成后仍须核对线上入口与脚本摘要。
 
 ## 本机统一目录
 
 2026-11-09整理后，`/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator`同时作为唯一源码根与已安装桌面运行根。桌面启动器配置root指向这里，本机地址继续使用`http://127.0.0.1:8771/StarOrbit.html`，保留同一origin的浏览器设置和缓存。`dist-local`由该根的`serve.py`优先提供，不再同步整套工程到3D打印目录。
 
-公开网页工作副本收进`publish/public`，保留独立`.git`与公开remote，并在主仓库`.gitignore`中排除整个`publish`。网页仍先构建到`dist`，再按发布规则同步到公开副本；不要将私有源码、原始模型、历史归档或恢复清单复制到公开副本。
+历史展示工作副本保留在`publish/public`，保留独立`.git`与私有归档remote，并在主仓库`.gitignore`中排除整个`publish`。正常发布由原始仓库的工作流构建与部署`dist`，不再同步到归档副本。
 
 历史清理使用带日期的白名单与恢复清单；原始数据、未匹配云端的安装包、必要日志和最近回退保留。废纸篓内文件仍占空间；确认不需恢复后再由用户清空。本机当前记录入口为`output/cleanup-current.json`，此目录不随公开网页发布。
 
@@ -69,7 +69,7 @@ npm run build
 python scripts/serve.py --port 8772 --open
 ```
 
-以上为 macOS/Linux shell 示例。Windows 可用 `.venv\Scripts\Activate.ps1` 激活 Python 环境，再运行等价命令；macOS 启动器仅用于 macOS。需要源码授权时应使用获准的仓库地址和访问方式。网页入口与源码仓库入口是不同交付物。
+以上为 macOS/Linux shell 示例。Windows 可用 `.venv\Scripts\Activate.ps1` 激活 Python 环境，再运行等价命令；macOS 启动器仅用于 macOS。完整源码可从公开仓库取得，使用与分享遵循项目许可。
 
 `npm ci` 按锁文件安装依赖。Python 的云图处理依赖为 NumPy、Pillow、h5py、certifi；本机启动器寻找的是系统已安装 Python，不会自动选择仓库 `.venv`。如命令行能处理云图而 Finder 启动失败，应核对两条入口实际使用的 Python 和依赖环境。
 
@@ -119,28 +119,28 @@ node tests/web-build.mjs dist
 
 每批已授权修改遵守仓库 `AGENTS.md`：版本只递增一次，同时更新 package.json 的 version/displayVersion、package-lock.json 项目版本、README 当前版本及构建页面版本；CHANGELOG 顶部保留简短中英总结，详细证据放稳定文档或版本记录。
 
-当前显示版本使用 v1.34，对应包元数据采用项目既有的 `1.0.34` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
+当前显示版本使用 v1.45，对应包元数据采用项目既有的 `1.0.45` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
 
 本地版本递增不自动代表已上线或已发布下载包。记录中应分别说明源码、本机运行、网页版和 Release 的已核验状态。检查失败或未执行时保留明确结果，不把“准备发布”写成“正式发布”。
 
 ## 便携包和 macOS 启动器
 
-先生成单文件，再执行打包脚本。下面以本批本地 v1.34 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
+先生成单文件，再执行打包脚本。下面以v1.45 的新输出路径为例；脚本读取源码版本，不按文件名决定版本：
 
 ```sh
-python3 scripts/package-portable.py output/release134/StarOrbit-v1.34-portable.zip
-python3 -m zipfile -t output/release134/StarOrbit-v1.34-portable.zip
-python3 scripts/check-docs.py --package output/release134/StarOrbit-v1.34-portable.zip
-shasum -a 256 output/release134/StarOrbit-v1.34-portable.zip
+python3 scripts/package-portable.py output/release145/StarOrbit-v1.45-portable.zip
+python3 -m zipfile -t output/release145/StarOrbit-v1.45-portable.zip
+python3 scripts/check-docs.py --package output/release145/StarOrbit-v1.45-portable.zip
+shasum -a 256 output/release145/StarOrbit-v1.45-portable.zip
 ```
 
 需要 macOS 启动器时，先在装有 Swift/Xcode 命令行工具的 Mac 上生成一个**尚不存在**的 `.app` 路径，再把它交给打包脚本：
 
 ```sh
-python3 scripts/create-macos-launcher.py --root . --output output/release134/launcher/星轨.app --portable
-python3 scripts/package-portable.py output/release134/StarOrbit-v1.34-portable.zip --macos-launcher output/release134/launcher/星轨.app
-python3 -m zipfile -t output/release134/StarOrbit-v1.34-portable.zip
-python3 scripts/check-docs.py --package output/release134/StarOrbit-v1.34-portable.zip
+python3 scripts/create-macos-launcher.py --root . --output output/release145/launcher/星轨.app --portable
+python3 scripts/package-portable.py output/release145/StarOrbit-v1.45-portable.zip --macos-launcher output/release145/launcher/星轨.app
+python3 -m zipfile -t output/release145/StarOrbit-v1.45-portable.zip
+python3 scripts/check-docs.py --package output/release145/StarOrbit-v1.45-portable.zip
 ```
 
 生成工具需要 swiftc、lipo、sips、iconutil 和 codesign。当前脚本构建 arm64/x86_64 的 macOS 12+ 启动器并做本地 ad-hoc 签名；签名检查不能替代公证或所有系统的启动验收。脚本拒绝覆盖已存在的 `.app`；更换已有启动器前保留旧副本和配置。

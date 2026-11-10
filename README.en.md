@@ -4,17 +4,17 @@
 
 [中文](README.md) | English
 
-[**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit-source/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
+[**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.44 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.45 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
-StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
+StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools, with exploration extending to ground roaming, the Solar System and interstellar travel.
 
-It is intended for space enthusiasts, educational demonstrations and scene creation. Start by watching the station move through day and night, then assemble modules, undock a ship, find a pass or compose an image with the Xuntian telescope. Public orbital and astronomical sources support the calculations; historical reconstructions, training models and visual effects have explicit limits.
+It is intended for space enthusiasts, educational demonstrations and scene creation. Start by watching the station move through day and night, then assemble modules, undock a ship, find a pass or compose an image with the Xuntian telescope. The interface supports Chinese, English, Russian and French. Public orbital and astronomical sources support the calculations; data and models are described below.
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.40 upgrades the daytime Earth to native 500 m MODIS composites for 2026 Q2, stored as AVIF tiles with one shared source and settings across Earth views. The 1 km and original NASA maps remain selectable. Fractional coast coverage preserves land detail; oceans use a continuous water background, with clouds, reflections and lighting rendered by the scene. Terrain/imagery streaming, 2025 500 m night lights, Earth science layers and the 2D/3D stellar navigator remain available. [Procedures](使用说明.md#地表观测与太阳系) · [Data sources](assets/earth/day-2026-q2-500m/README.md) · [Verification](docs/verification.md).
+> v1.45 brings together recent updates: native 500 m MODIS daytime imagery, Earth science layers, 2D/3D stellar navigation, shared filtered pass lists, date and day/night selection, high-elevation searches, and balcony building/tree obstruction controls. This release restores public source access in the original repository and updates the introduction and Chinese sky gallery. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 
@@ -53,13 +53,41 @@ First use defaults to detailed 8K overall quality, the enhanced 16K Milky Way an
 | Explore orbits | Time control, ground tracks, sunlight and eclipses, apsides and equator crossings | [Time and events](使用说明.md#时间轨迹与事件) |
 | Pilot and fly | Main navball RCS/SAS, Shenzhou and Tianzhou undocking and return, separate docking workbench | [Three piloting modes](#three-piloting-modes) |
 | Ground and Solar System | Ground movement, terrain, dated sky, geographic search and linked planetary views | [Ground and Solar System](使用说明.md#地表观测与太阳系) |
+| Interstellar travel | Explore stars using distance-based 3D positions, search targets, save waypoints and use 2D/3D navigation maps | [Interstellar travel](使用说明.md#星际穿梭) |
 | Explore Earth and sky | Dated surface/night-light choices, cloud library, sunrise and sunset, aurora, sky chart, city imagery and real terrain | [Earth, sky and environment](使用说明.md#地球星空与环境) |
 | Explore Chinese astronomy | Qing-era conventional asterisms, Three Enclosures and Twenty-Eight Mansions navigation, member charts, names, lines and symbolic artwork | [Chinese sky culture](使用说明.md#中国传统星官) |
 | Use Xuntian | Target search, pinned pointing, formation composition, Solar System targets, real SDO imagery and PNG exports | [Viewfinder](使用说明.md#主页面的巡天望远镜), [solar observations](使用说明.md#太阳观测) |
-| Plan observations | Pass forecasts, orbital long exposures, balcony observing, four-tile surveys and observation records | [Passes](使用说明.md#过境预报), [observation experiments](使用说明.md#长曝光阳台观测与巡天排程) |
-| Save and share | Screenshots, environment presets, scene JSON, resource snapshots and separate flight saves | [Photography and scenes](使用说明.md#摄影收藏与场景分享), [save scope](使用说明.md#设置保存与恢复) |
+| Plan observations | Filtered pass lists, high-elevation searches, long exposures, balcony obstructions and viewing windows, survey planning | [Passes](使用说明.md#过境预报), [observation experiments](使用说明.md#长曝光阳台观测与巡天排程) |
+| Save and share | Screenshots, birthday sky cards, environment presets, scene JSON, resource snapshots and separate flight saves | [Photography and scenes](使用说明.md#摄影收藏与场景分享), [save scope](使用说明.md#设置保存与恢复) |
 
-The main view, Xuntian finder and photos share Earth and sky resources. Bundled 2025 Sentinel-2 10 m imagery covers Beijing (40 × 40 km) and Seattle (20 × 20 km); other cities support on-demand viewing and downloads. The chart switches between Western constellations and traditional Chinese asterisms, with 88 Western illustrations, 32 Chinese sky regions with 300 independent and 12 subsidiary asterisms, their member data, 312 asterism illustrations and seven optional overviews for the Four Symbols and Three Enclosures. Overviews default off and have a separate switch and opacity control. The shared deep-sky catalogue has 12,162 display entries. Catalogue labels and illustration coverage are separate. See the [manual](使用说明.md#地球星空与环境) for dates, bands, effective resolution and coverage fallback.
+The main view, Xuntian finder and photos share Earth and sky resources. Bundled 2025 Sentinel-2 10 m imagery covers Beijing (40 × 40 km) and Seattle (20 × 20 km); other cities support on-demand viewing and downloads. The chart switches between Western constellations and traditional Chinese asterisms, with 88 Western illustrations. The shared deep-sky catalogue has 12,162 display entries. See the [manual](使用说明.md#地球星空与环境) for dates, bands, effective resolution and coverage.
+
+## Chinese asterism illustrations
+
+Traditional Chinese astronomy is one of StarOrbit's distinctive features. Combining source research with OpenAI image-generation assistance, I created modern teaching illustrations in a consistent pale-gold line style, bringing the people, animals, palaces and objects of star names into the 3D sky. The current Qing-era catalogue organisation contains **32 sky regions, 300 independent and 12 subsidiary asterisms**. Illustrations cover all 312 asterism entries, plus seven overviews of the Four Symbols and Three Enclosures — **319 images in total**.
+
+Browse by enclosure, mansion or region, compare artwork with member stars and connections, control asterism and overview layers separately, and include them in viewfinder photographs. The three galleries below show 27 selected images. [Usage guide](使用说明.md#中国传统星官) · [Motifs and production records](assets/chinese-sky/art/README.md).
+
+<details>
+<summary>View gallery: Symbols and asterisms</summary>
+
+![Azure Dragon, White Tiger, Vermilion Bird, Black Tortoise, Northern Dipper, Weaver Girl, River Drum, Celestial Wolf and Ox](docs/chinese-sky-gallery/01-symbols.jpg)
+
+</details>
+
+<details>
+<summary>View gallery: Celestial palaces</summary>
+
+![The Three Enclosures and six palace, official and banner motifs](docs/chinese-sky-gallery/02-palaces.jpg)
+
+</details>
+
+<details>
+<summary>View gallery: Life among the stars</summary>
+
+![Crane, Firebird, Turtle, Eight Crops, Gourd, Willow, Bow and Arrow, Chariots and Celestial Wine Cup](docs/chinese-sky-gallery/03-everyday-sky.jpg)
+
+</details>
 
 ## Three piloting modes
 
@@ -77,9 +105,9 @@ The modes share the main attitude and translation keys, but have different dynam
 
 - **Orbits and time:** OEM records are interpolated inside their interval and continued using the supported model outside it. Modern satellites use public elements and SGP4. Continuation includes orbital perturbations and is shared by the scene and planners. Previous/next high-elevation searches default to an adjustable 60° threshold. Interface date/time inputs use UTC+8; UTC observation times are labelled separately.
 - **History and training:** The historical DFH-1 orbit is a source-constrained reconstruction, and telemetry uses reference sensor models. Near-orbit flight and docking are educational/gameplay approximations.
-- **Illumination and terrain:** Array output is a geometric illumination fraction. Real terrain affects meshes and ground pointing, rather than adding terrain collisions or landing physics. Orbital altitude readings retain the existing spherical-Earth reference.
-- **Imagery and environment:** Surface imagery, night lights, clouds, elevations, sky images and SDO observations keep independent sources and dates. Moving simulation time does not generate real imagery for that date. Aurora and atmospheric phenomena include procedural visual models.
-- **Network and storage:** Settings, imported models, music and most caches belong to the current browser and origin; the local cloud library also uses disk storage. Scene files do not contain every downloaded resource or separate flight records. See [resource management](使用说明.md#数据更新与缓存) and [formats and compatibility](docs/formats.md).
+- **Illumination and terrain:** Array output is a geometric illumination fraction. Real terrain supports surface meshes and ground pointing. Orbital altitude readings retain the existing spherical-Earth reference.
+- **Imagery and environment:** Surface imagery, night lights, clouds, elevations, sky images and SDO observations keep independent sources and dates. Real imagery uses its labelled observation time. Aurora and atmospheric phenomena include procedural visual models.
+- **Network and storage:** Settings, imported models, music and most caches belong to the current browser and origin; the local cloud library also uses disk storage. Downloaded resources and flight records are managed separately. See [resource management](使用说明.md#数据更新与缓存) and [formats and compatibility](docs/formats.md).
 
 See the [product baseline](docs/product-scope.md) for scope and limits, [architecture](docs/architecture.md) for module relationships, and the [documentation index](docs/README.md) for numerical methods and historical evidence.
 
@@ -120,6 +148,12 @@ Version-named technical documents may contain the design, procedures and measure
 
 Earth, sky, cloud, orbit, solar, constellation and music resources retain their own attribution and terms. Sources, preparation, resolution, dates, licences and derived processing are collected in the [asset notes](素材与迁移说明.md), with notices also retained beside the relevant assets.
 
+## Why I build and share StarOrbit
+
+A visit to Beijing Planetarium deepened my appreciation of China's own sky tradition and the history, everyday life and imagination carried by its star names. Through StarOrbit, I hope more people can discover this heritage and explore today's China Space Station and space technology for themselves.
+
+I briefly made the source private after finding my work reused without author attribution. After reflecting on its purpose, I decided to make it public again, contributing a practical resource for Chinese astronomical heritage, Chinese spaceflight and science education. I hope an application people can experience, learn from and discuss can help make science more accessible. Improvements and sharing are welcome with attribution under the license.
+
 ## Licensing
 
-Original code, models, interface and documentation that the author has rights to license use **[CC BY-NC 4.0](LICENSE)**. Commercial use requires separate prior written permission. Third-party libraries, data, music and textures retain their own terms. See [licensing and commercial permission](LICENSING.md) for the full scope and contact route.
+**Unauthorized commercial use is prohibited.** Original code, models, interface, documentation and Chinese asterism illustrations that the author has rights to license use **[CC BY-NC 4.0](LICENSE)**. Noncommercial modification and sharing are welcome under the license: credit **Wenshuishi / StarOrbit**, link to the project and license, and indicate changes. Commercial use requires separate prior written permission. Third-party libraries, data, music and textures retain their own terms. See [licensing and commercial permission](LICENSING.md) for the full scope and contact route.

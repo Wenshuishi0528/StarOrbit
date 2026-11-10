@@ -16,5 +16,5 @@ __pycache__/
 
 /StarOrbit.html
 
-# Separate public distribution repository; never include its Git history in private source.
+# Separate historical showcase checkout; keep its Git history outside this repository.
 /publish/
