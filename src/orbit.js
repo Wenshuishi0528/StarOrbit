@@ -1,5 +1,8 @@
 import { DFH1_HISTORY, orbitSegment, historicalEllipse } from './dfh1-history.js';
 import * as Astronomy from 'astronomy-engine';
+import { earthAxes } from './earth-frame.js';
+import { createOrbitContinuation } from './orbit-continuation.js';
+export { earthAxes } from './earth-frame.js';
 export const EARTH_RADIUS = 6371,
   SUN_RADIUS = 695700,
   AU = 149597870.7;
@@ -55,10 +58,10 @@ export function interpolate(rows, t) {
   }
   return { position: out.slice(0, 3), velocity: out.slice(3) };
 }
-// Source samples remain unchanged. Outside their span, reuse the nearest endpoint's
-// osculating ellipse. Evaluation is constant cost even after years of time steps.
+// Source samples remain unchanged. Outside their span, continue from the nearest
+// endpoint with fitted near-Earth SGP4 or a velocity-matched secular J2 model.
 const MU = 398600.4418,
-  ellipses = new WeakMap();
+  continuations = new WeakMap();
 // Reserve one day at the Date representation edge for astronomical sampling.
 export const MIN_TIME = -8.64e15 + 86400000,
   MAX_TIME = 8.64e15 - 86400000;
@@ -87,13 +90,17 @@ export function ellipseFromState({ position, velocity, t }) {
   return ellipse([t, ...position, ...velocity]);
 }
 function endpoint(data, last) {
-  let pair = ellipses.get(data);
+  let pair = continuations.get(data);
   if (!pair) {
-    pair = [ellipse(data.rows[0]), ellipse(data.rows.at(-1))];
-    ellipses.set(data, pair);
+    pair = [null, null];
+    continuations.set(data, pair);
   }
-  return pair[last ? 1 : 0];
+  const i = last ? 1 : 0;
+  if (pair[i] === null)
+    pair[i] = createOrbitContinuation(data.rows[last ? data.rows.length - 1 : 0]) || false;
+  return pair[i] || null;
 }
+
 function sampledOrbitMode(data, t) {
   if (!data || !validTime(t)) return 'unavailable';
   if (t >= data.rows[0][0] && t <= data.rows.at(-1)[0]) return 'interpolation';
@@ -107,7 +114,10 @@ export function orbitComputationMode(data, t) {
 export function orbitEllipse(data, t) {
   const mode = orbitComputationMode(data, t);
   if (mode === 'historical') return historyAt(t);
-  if (mode === 'propagation') return endpoint(data, t > data.rows.at(-1)[0]);
+  if (mode === 'propagation') {
+    const pv = endpoint(data, t > data.rows.at(-1)[0]).state(t);
+    return pv ? ellipse([t, ...pv.position, ...pv.velocity]) : null;
+  }
   if (mode === 'interpolation') {
     const pv = interpolate(data.rows, t);
     return ellipse([t, ...pv.position, ...pv.velocity]);
@@ -132,7 +142,7 @@ export function stateAt(data, t, segmentTime = t) {
   const mode = sampledOrbitMode(data, t);
   if (mode === 'unavailable') return null;
   if (mode === 'interpolation') return interpolate(data.rows, t);
-  return ellipseState(endpoint(data, t > data.rows.at(-1)[0]), t);
+  return endpoint(data, t > data.rows.at(-1)[0]).state(t);
 }
 export function ellipseState(q, t) {
   const { a, b, e, x, y, n } = q;
@@ -184,19 +194,7 @@ export function sunlightFraction(r, sun) {
     0.5 * Math.sqrt(Math.max(0, (-d + a + b) * (d + a - b) * (d - a + b) * (d + a + b)));
   return clamp(1 - overlap / (Math.PI * a * a), 0, 1);
 }
-export function earthAxes(t) {
-  const date = new Date(t),
-    a = (Astronomy.SiderealTime(date) * Math.PI) / 12,
-    rot = Astronomy.Rotation_EQD_EQJ(date);
-  return [
-    [Math.cos(a), Math.sin(a), 0],
-    [-Math.sin(a), Math.cos(a), 0],
-    [0, 0, 1],
-  ].map((v) => {
-    const q = Astronomy.RotateVector(rot, new Astronomy.Vector(...v, date));
-    return [q.x, q.y, q.z];
-  });
-}
+
 export function snapshot(data, t) {
   if (!data) return null;
   const pv = stateAt(data, t);

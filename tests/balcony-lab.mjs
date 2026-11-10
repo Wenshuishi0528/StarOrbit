@@ -23,7 +23,7 @@ close(angularSeparation({azimuth:0,elevation:0},{azimuth:90,elevation:0}),90);
 
 const data=JSON.parse(readFileSync(new URL('../assets/orbit.json',import.meta.url),'utf8'));
 const source=predictionSource(data),site=BEIJING_BALCONY,frame=observerFrame(site);
-const result=await predictPasses(data,site,source.start,48,{minimumElevation:5});
+const result=await predictPasses(data,site,source.recordStart,48,{minimumElevation:5});
 const demo=result.passes[recommendedPass(result.passes,EXAMPLE_HORIZON)];
 assert.ok(demo&&demo.visible.length,'Beijing demo has a real optical candidate');
 const sample=createPassSampler(source,site),time=previewTime(demo,EXAMPLE_HORIZON),centre=sample(time);

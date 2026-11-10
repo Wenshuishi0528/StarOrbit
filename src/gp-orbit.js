@@ -1,5 +1,7 @@
-import { json2satrec, propagate, gstime } from 'satellite.js';
-import { earthAxes, validateOrbit, parseOrbit } from './orbit.js';
+import { json2satrec, propagate } from 'satellite.js';
+import { temeToJ2000State } from './earth-frame.js';
+export { temeToJ2000 } from './earth-frame.js';
+import { validateOrbit, parseOrbit } from './orbit.js';
 import { mission, bindOrbit } from './missions.js';
 
 export const GP_WINDOW_MS = 3 * 86400000;
@@ -58,28 +60,12 @@ export function validateGP(input, id, task = mission(id)) {
   }
   return clean;
 }
-// Vallado TEME -> PEF uses GMST82. The existing Earth axes map PEF to
-// EQJ using GAST and Astronomy Engine's EQD -> EQJ precession/nutation.
-// UTC approximates UT1; polar motion is omitted. This is a visualization
-// conversion, independently checked against Skyfield (see docs/v0.29-details).
-export function temeToJ2000(vector, time) {
-  const a = gstime(new Date(time)),
-    c = Math.cos(a),
-    s = Math.sin(a),
-    fixed = [c * vector[0] + s * vector[1], -s * vector[0] + c * vector[1], vector[2]],
-    axes = earthAxes(time);
-  return [0, 1, 2].map((i) => fixed.reduce((sum, v, k) => sum + v * axes[k][i], 0));
-}
 export function gpState(satrec, time) {
   const result = propagate(satrec, new Date(time));
   if (!result?.position || !result.velocity || satrec.error) throw Error('轨道传播失败');
   const r = ['x', 'y', 'z'].map((k) => result.position[k]),
     v = ['x', 'y', 'z'].map((k) => result.velocity[k]);
-  const position = temeToJ2000(r, time),
-    velocity = temeToJ2000(v, time),
-    before = temeToJ2000(r, time - 500),
-    after = temeToJ2000(r, time + 500);
-  return { position, velocity: velocity.map((n, i) => n + after[i] - before[i]) };
+  return temeToJ2000State({ position: r, velocity: v }, time);
 }
 export function orbitFromGP(input, id, { source = '导入 GP / OMM · SGP4', url = '' } = {}) {
   const gp = validateGP(input, id),

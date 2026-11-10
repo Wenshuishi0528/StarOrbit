@@ -1,6 +1,6 @@
 # 数据格式与本机接口
 
-适用版本：本地 v1.39。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：本地 v1.40。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
@@ -295,3 +295,5 @@ JS
 `assets/earth/observation/manifest.json`登记北上经纬栅格、波段组合、八日合成时段、温度／高程图例及SHA-256。AVIF保留有效性alpha；MRDS gzip JSON按记录保存编号、原名、经纬度、矿种代码、历史状态和资料等级。矿点是分类矢量叠加，栅格是独立底图；照片保存图例与来源。[图集格式与来源](../assets/earth/observation/README.md)。
 
 星际导航图使用独立本机键 `starorbit-interstellar-map-v1`：`mode` 为 `2d/3d`，`center` 为 `self/sun/target`，`radius` 为光年，限制1AU至1亿光年；`collapsed/auto/simple`为布尔值。首次默认3D、自身居中、20光年、简易版、展开、手动范围；旧设置未存`simple`时使用简易版。未知值回退默认；航迹、地图旋转、预览航点和展开大图状态不持久化。航点继续沿用原星际存储，不改变场景JSON格式。
+
+白天地表新增daySource值`2026-q2-500m`，仍支持`2026-q2-1km`及`2004`。`daySourceDefaultVersion:1`标记已迁移；旧1公里默认首次升级为500米，旧NASA原版选择保留，迁移后所有有效手动选择均保留。新AVIF图源使用48×24网格，单块核心1800与边缘8像素，不改变地理坐标或场景时间。

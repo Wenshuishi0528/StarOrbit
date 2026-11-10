@@ -15,3 +15,6 @@ __pycache__/
 /天宫空间站交互预览.html
 
 /StarOrbit.html
+
+# Separate public distribution repository; never include its Git history in private source.
+/publish/

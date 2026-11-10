@@ -14,6 +14,14 @@ assert.equal(minimap.image.src,'display-map.jpg');assert.ok(minimap.visible);
 minimap.setVisible(false);assert.equal(elements.get('openOrbitMap')['aria-expanded'],'false');assert.equal(elements.get('showMinimap').checked,false);minimap.setVisible(true);assert.equal(elements.get('openOrbitMap')['aria-expanded'],'true');
 delete sim.environment.assets.minimap;
 assert.equal(new OrbitMinimap(sim).image.src,'reflectance-map.jpg');
+const shared500={width:4096,height:2048,src:'day-500m.avif'};
+sim.environment.uniforms={dayMap:{value:{image:shared500}}};
+assert.equal(minimap.image,shared500,'reuse selected Earth image without another decode');
+const sharedLegacy={width:2048,height:1024,src:'legacy.jpg'};
+sim.environment.uniforms.dayMap.value.image=sharedLegacy;
+assert.equal(minimap.image,sharedLegacy,'source changes propagate to the map');
+sim.environment.uniforms.dayMap.value.image={width:1,height:1,data:new Uint8Array(4)};
+assert.equal(minimap.image,minimap.fallbackImage,'do not draw a GPU placeholder on Canvas');
 console.log({minimapIndependentAsset:'pass',legacyFallback:'pass',inlineJSONNotRead:true});
 
 // Shade resources are lazy, fixed-size and reused through resize/time changes.

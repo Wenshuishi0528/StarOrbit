@@ -35,7 +35,9 @@ assert.notDeepEqual(sampleOrbitPath(dfh,H.epoch+86400000),historic,'historical p
 assert.notDeepEqual(sampleOrbitPath(dfh,H.cutoff),historic,'exact cutoff switches the whole ellipse');
 assert.deepEqual(sampleOrbitPath(dfh,H.cutoff),sampleOrbitPath({...dfh,missionId:'other'},H.cutoff));
 verify(dfh,H.cutoff-1);verify(dfh,H.cutoff);
-assert.deepEqual(sampleOrbitPath(dfh,now),sampleOrbitPath(dfh,now+3600000),'moving along one propagated ellipse does not change its outline');
+assert.notDeepEqual(sampleOrbitPath(dfh,now),sampleOrbitPath(dfh,now+3600000),'continued orbit outline follows its precessing plane');
+const plane=t=>{const q=orbitEllipse(dfh,t);return unit(cross(q.x,q.y));};
+assert(norm(sub(plane(now),plane(now+3600000)))>1e-4,'plane rotation is physically visible rather than floating-point noise');
 assert.equal(orbitEllipse(null,now),null);assert.deepEqual(sampleOrbitPath(null,now),[]);
 assert.deepEqual(sampleOrbitPath(dfh,NaN),[]);assert.deepEqual(sampleOrbitPath(dfh,MAX_TIME+1),[]);
 // Imported circular, long-period and eccentric orbits use the same geometric budget.
@@ -46,4 +48,4 @@ for(const [a,e] of [[7000,0],[42164,0],[25000,.7]]){
 }
 const unbound={...station,rows:station.rows.map(row=>[row[0],...row.slice(1,4),30,0,0])};
 assert.deepEqual(sampleOrbitPath(unbound,unbound.rows[100][0]),[],'do not invent a closed ellipse for an unbound state');
-console.log('Geometric orbit loops: complete ellipse, marker alignment, era selection, time independence and imported orbit budget passed',checks);
+console.log('Geometric orbit loops: complete ellipse, marker alignment, era selection, evolving continuation and imported orbit budget passed',checks);

@@ -8,6 +8,9 @@ import {
   stateAt,
   sunPosition,
   unit,
+  MIN_TIME,
+  MAX_TIME,
+  validTime,
 } from './orbit.js';
 import { groundTrackAttitude } from './attitude.js';
 
@@ -237,12 +240,11 @@ export function earthIntercept(position, direction) {
 }
 
 export function recommendedNight(data, preferred, seconds, azimuth = 56) {
-  const first = data?.rows[0]?.[0],
-    last = data?.rows.at(-1)?.[0] - seconds * 1000;
-  if (!Number.isFinite(first) || last < first) return null;
-  const center = Math.max(first, Math.min(last, preferred));
-  const lo = Math.max(first, center - 86400000),
-    hi = Math.min(last, center + 86400000);
+  if (!data?.rows || data.rows.length < 8 || !validTime(preferred) || !(seconds > 0)) return null;
+  const center = preferred;
+  const lo = Math.max(MIN_TIME, center - 86400000),
+    hi = Math.min(MAX_TIME - seconds * 1000, center + 86400000);
+  if (hi < lo) return null;
   let best = lo,
     bestScore = -Infinity;
   // Look ahead and across track along the camera's ray to favour actual lit land.
@@ -270,5 +272,5 @@ export function recommendedNight(data, preferred, seconds, azimuth = 56) {
       bestScore = score;
     }
   }
-  return best;
+  return Number.isFinite(bestScore) ? best : null;
 }

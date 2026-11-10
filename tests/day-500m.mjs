@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import zlib from 'node:zlib';
+import { EarthDetail, detailCell, detailRect } from '../src/earth-detail.js';
+const dir='assets/earth/day-2026-q2-500m';
+const m=JSON.parse(fs.readFileSync(dir+'/manifest.json'));
+assert.equal(m.product,'MCD43A4.061');assert.equal(m.nativeResolutionMeters,500);
+assert.deepEqual(m.period,['2026-04-01','2026-06-30']);
+assert.deepEqual([m.width,m.height,m.columns,m.rows,m.tileSize,m.gutter],[86400,43200,48,24,1800,8]);
+assert.match(m.resampling,/without spatial averaging/);assert.match(m.oceanTreatment,/mixed coastal pixels/);assert.match(m.fallback,/not new 500m observations/);
+const shore=fs.readFileSync(dir+'/'+m.shoreline.file);assert.equal(crypto.createHash('sha256').update(shore).digest('hex'),m.shoreline.sha256);assert.match(m.shoreline.method,/fractional 500m-grid/);
+assert.equal(m.sourceTiles,m.sourceInventory.tiles.length);assert(m.sourceTiles>280);
+assert.equal(m.sourceInventory.centers.length,10);
+const provenanceBytes=fs.readFileSync(dir+'/'+m.provenanceFile);
+assert.equal(crypto.createHash('sha256').update(provenanceBytes).digest('hex'),m.provenanceSHA256);
+const provenance=JSON.parse(zlib.gunzipSync(provenanceBytes));
+for(const tile of m.sourceInventory.tiles){
+ const c=m.sourceComposites[tile];assert.equal(c.nativeResolutionMeters,500);assert.equal(c.processingRule,'native500m-temporal-qa-median-v1');assert.match(c.sha256,/^[a-f0-9]{64}$/);
+ assert.equal(provenance.reports[tile].sha256,c.sha256);
+ assert.equal(provenance.reports[tile].transfers.length,c.sourceWindows.length);
+ for(const transfer of provenance.reports[tile].transfers)for(const hash of Object.values(transfer.assetSHA256))assert.match(hash,/^[a-f0-9]{64}$/);
+ for(const w of c.sourceWindows)assert(w.start>='2026-04-01T00:00:00Z'&&w.end<'2026-07-01T00:00:00Z');
+}
+assert.equal(m.reprojectedPixelCounts.reduce((a,b)=>a+b,0),m.width*m.height);
+const names=['simple','medium','standard','high'].map(t=>t+'.avif');
+for(let y=0;y<24;y++)for(let x=0;x<48;x++)names.push(`${x}-${y}.avif`);
+assert.deepEqual(Object.keys(m.files).sort(),names.sort());
+let bytes=0;
+for(const name of names){const data=fs.readFileSync(dir+'/'+name);bytes+=data.length;assert.equal(crypto.createHash('sha256').update(data).digest('hex'),m.files[name]);assert.equal(data.toString('ascii',8,12),'avif');}
+assert.equal(bytes,m.totalBytes);
+const e=new EarthDetail({uniforms:{},fallback:{}},false);
+e.setSource({},24,12);let disposed=0;e.slots[0]={key:'19-3',texture:{dispose(){disposed++},image:{close(){}}}};
+e.setSource({},48,24);assert.equal(disposed,1);assert.equal(e.slots.length,4);
+assert.deepEqual(detailCell(116.4,39.9,48,24),{key:'39-6',x:39,y:6});assert.equal(detailRect({x:39,y:6},48,24)[2],1/48);
+const env=fs.readFileSync('src/environment.js','utf8');const settings=env.slice(env.indexOf('    this.settings = {'),env.indexOf('    try {\n      migrateStarDensityDefault'));
+const init=new Function('localStorage','normalizeStarChartSettings','normalizeGeographySettings','normalizeSurfaceStreamingSettings','QUALITY','THREE','resolveSkyDetailSource',settings+'\nreturn this.settings;');
+const assets={daySources:Object.fromEntries(['2004','2026-q2-1km','2026-q2-500m'].map(k=>[k,{}]))};
+const restore=old=>init.call({assets},{getItem:()=>JSON.stringify(old)},()=>({}),()=>({}),()=>({}),{high:{}},{MathUtils:{clamp:(n,a,b)=>Math.max(a,Math.min(b,n))}},()=>'auto');
+for(const old of [null,{}, {daySource:'2026-q2-1km'},{daySource:'unknown'}])assert.equal(restore(old).daySource,'2026-q2-500m');
+assert.equal(restore({daySource:'2004'}).daySource,'2004');
+for(const id of Object.keys(assets.daySources))assert.equal(restore({daySource:id,daySourceDefaultVersion:1}).daySource,id);
+console.log({native500m:'passed',sourceTiles:m.sourceTiles,displayMB:bytes/1e6,tiles:1152,boundedResidentTiles:e.slots.length});

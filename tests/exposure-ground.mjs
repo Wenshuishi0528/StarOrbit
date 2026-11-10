@@ -7,7 +7,7 @@ import {predictPasses} from '../src/pass-prediction.js';
 
 const close=(a,b,d=1e-8)=>assert(Math.abs(a-b)<d,`${a} != ${b}`),near=(a,b,d)=>a.forEach((v,i)=>close(v,b[i],d));
 const raw=JSON.parse(readFileSync(new URL('../assets/orbit.json',import.meta.url)));raw.missionId='tiangong';
-const source=groundSource(raw),site=exposureSite(BEIJING_EXPOSURE),next=await predictPasses(raw,site.site,source.start,48,{minimumElevation:0,allowEstimate:true});
+const source=groundSource(raw),site=exposureSite(BEIJING_EXPOSURE),next=await predictPasses(raw,site.site,source.recordStart,48,{minimumElevation:0,allowEstimate:true});
 const pass=next.passes.find(p=>p.maximum.elevation>25&&p.end-p.start>180000);assert(pass);
 const start=pass.maximum.time-15000,finish=start+30000,first=groundExposureState(raw,source,start),last=groundExposureState(raw,source,finish);
 const cam=presetCamera('wide'),open=groundCamera(first,first.position,site,cam),fixed=trackingAxes(first,first.basis,open,'body');

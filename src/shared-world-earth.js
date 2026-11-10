@@ -531,31 +531,42 @@ export function mountWorldEarthControls(host, environment, { onChange = () => {}
   host.append(root);
   const streaming = mountSurfaceStreamingControls(root, environment);
   root.insertBefore(streaming.root, root.children[1]);
-  const nightLabel = document.createElement('label'),
-    nightSource = document.createElement('select');
-  nightLabel.dataset.key = '夜景数据';
-  nightSource.dataset.nightSource = '';
-  root.insertBefore(nightSource, streaming.root.nextSibling);
-  root.insertBefore(nightLabel, nightSource);
-  nightSource.onchange = async () => {
-    nightSource.disabled = true;
-    try {
-      await environment.setQuality(
-        environment.settings.quality,
-        nightSource.value,
-        environment.settings.daySource
-      );
-    } finally {
-      refresh();
-    }
-  };
+  const sourceControls = [];
+  const sourceAnchor = streaming.root.nextSibling;
+  for (const [kind, labelText] of [
+    ['day', '白天地表'],
+    ['night', '夜景数据'],
+  ]) {
+    const label = document.createElement('label');
+    const select = document.createElement('select');
+    label.dataset.key = labelText;
+    select.dataset[kind + 'Source'] = '';
+    select.setAttribute('aria-label', t(labelText));
+    root.insertBefore(label, sourceAnchor);
+    root.insertBefore(select, sourceAnchor);
+    select.onchange = async () => {
+      for (const control of sourceControls) control.select.disabled = true;
+      try {
+        await environment.setQuality(
+          environment.settings.quality,
+          kind === 'night' ? select.value : environment.settings.nightSource,
+          kind === 'day' ? select.value : environment.settings.daySource
+        );
+      } finally {
+        refresh();
+      }
+    };
+    sourceControls.push({ kind, select, labelText });
+  }
   function refresh() {
     streaming.refresh();
-    const mainNight = document.getElementById('nightSource');
-    if (mainNight && nightSource.innerHTML !== mainNight.innerHTML)
-      nightSource.innerHTML = mainNight.innerHTML;
-    nightSource.value = environment.settings.nightSource;
-    nightSource.disabled = !!mainNight?.disabled;
+    for (const { kind, select, labelText } of sourceControls) {
+      const main = document.getElementById(kind + 'Source');
+      if (main && select.innerHTML !== main.innerHTML) select.innerHTML = main.innerHTML;
+      select.value = environment.settings[kind + 'Source'];
+      select.disabled = environment.loading || !!main?.disabled;
+      select.setAttribute('aria-label', t(labelText));
+    }
     for (const el of root.querySelectorAll('[data-setting]')) {
       const value = environment.settings[el.dataset.setting];
       if (el.type === 'checkbox') el.checked = !!value;

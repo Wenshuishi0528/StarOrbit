@@ -89,7 +89,7 @@ export function createObservationCard(host, { preview, watch, choose } = {}) {
       profileLabel(profileKind),
       t('最低仰角 {angle}°', { angle: minimumElevation }),
     ].join(' · ');
-    if (context.pass.estimated) siteLine.textContent += ' · ' + t('本地短期估算');
+    if (context.pass.estimated) siteLine.textContent += ' · ' + t('轨道延续演算');
     else if (replay) siteLine.textContent += ' · ' + t('原始星历回放');
     picker.hidden = model.windows.length <= 1;
     picker.setAttribute('aria-label', t('选择候选时段'));

@@ -34,9 +34,10 @@ for(const id of ['2024-1km','2025-500m']){
 }
 // The old July 2004 map remains a complete selectable source. Reuse its existing tiles.
 environmentAssets.daySources={'2004':{columns:12,rows:6,base:{}}};
-{
- const dir='assets/earth/day-2026-q2-1km',meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8'));
- environmentAssets.daySources['2026-q2-1km']={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+'.jpg')])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.jpg$/.test(f)).map(f=>[f.slice(0,-4),image(dir+'/'+f)]))};
+for(const id of ['2026-q2-1km','2026-q2-500m']){
+ const dir='assets/earth/day-'+id,meta=JSON.parse(fs.readFileSync(dir+'/manifest.json','utf8')),ext=id.endsWith('500m')?'.avif':'.jpg';
+ environmentAssets.daySources[id]={columns:meta.columns,rows:meta.rows,base:Object.fromEntries(['simple','medium','standard','high'].map(tier=>[tier,image(dir+'/'+tier+ext)])),tiles:Object.fromEntries(Object.keys(meta.files).filter(f=>/^\d+-\d+\.(jpg|avif)$/.test(f)).map(f=>[f.slice(0,-ext.length),image(dir+'/'+f)]))};
+ if(split&&id.endsWith('500m')){fs.mkdirSync(out+'/'+dir,{recursive:true});for(const name of ['README.md','manifest.json','provenance.json.gz','coastline.geojson.gz','coverage.png'])fs.copyFileSync(dir+'/'+name,out+'/'+dir+'/'+name);}
 }
 {const manifest=JSON.parse(fs.readFileSync('assets/earth/elevation/manifest.json','utf8'));const {file,...base}=manifest.base;environmentAssets.elevation={version:manifest.version,base:{...base,url:split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64')},source:manifest.source};}
 {const manifest=JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json','utf8'));const binary=file=>split?publish(file):'data:application/gzip;base64,'+fs.readFileSync(file).toString('base64');environmentAssets.earthObservation={...manifest,layers:Object.fromEntries(Object.entries(manifest.layers).map(([id,r])=>[id,{...r,url:image(r.file),...(r.heightFile?{heightUrl:binary(r.heightFile)}:{})}])),minerals:{...manifest.minerals,url:binary(manifest.minerals.file)}};}
@@ -137,7 +138,7 @@ html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.r
 html=html.replace('</head>','<!-- Earth observation sources\n'+fs.readFileSync('assets/earth/observation/README.md','utf8').replaceAll('-->','-- >')+' -->\n</head>');
 // Keep the complete document and environment payload out of any single V8 string.
 // Writes are atomic; failed size checks preserve the previous runnable build.
-const bytes=writeTemplatePayloads(split?out+'/index.html':'StarOrbit.html',html,payloads,{maxBytes:900e6});
+const bytes=writeTemplatePayloads(split?out+'/index.html':'StarOrbit.html',html,payloads,{maxBytes:1200e6});
 if(split){fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}
 
 if(split){fs.mkdirSync(out+'/assets/earth/observation',{recursive:true});for(const file of ['README.md','manifest.json'])fs.copyFileSync('assets/earth/observation/'+file,out+'/assets/earth/observation/'+file);}

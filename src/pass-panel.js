@@ -25,11 +25,13 @@ import { siteHorizon } from './observation-sites.js';
 import { observationOpportunity, preferredOpportunity } from './observation-opportunity.js';
 import { createObservationCard, opportunityStyle } from './observation-card.js';
 import { observationState } from './balcony-lab-geometry.js';
+import { findHighPass } from './pass-highpoint-search.js';
 
 const BEIJING = { name: '北京', latitude: 39.9042, longitude: 116.4074, height: 50 };
 const css = `
 .pass-context{position:sticky;top:-1px;z-index:2;display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:12px;padding:12px;background:#102235;border:1px solid #304c63;border-radius:9px;margin-bottom:12px;box-shadow:0 6px 12px #091321}
 .pass-context>div{min-width:0}.pass-context small{display:block;color:#9eb3c9;font-size:11px;margin-bottom:4px}.pass-context strong{display:block;font-size:13px;overflow-wrap:anywhere}.pass-context [data-state=partial]{color:#f1cb84}.pass-context [data-state=error]{color:#ffb7a7}
+.pass-high-search{border-top:1px solid #304c63;margin-top:16px;padding-top:12px}.pass-high-search h3{margin:0 0 8px;font-size:14px;color:#d5eef5}.pass-high-search .pass-form{grid-template-columns:repeat(2,minmax(0,1fr))}.pass-high-search .pass-actions{margin-bottom:0}
 .pass-panel .pass-setup,.pass-panel .pass-source-info{border:1px solid #2b4359;border-radius:9px;background:#0b1928;margin-bottom:12px;padding:10px 12px}
 .pass-panel summary{cursor:pointer;color:#c9e2ee;font-size:13px;line-height:1.5}.pass-panel summary:focus-visible{outline:2px solid #74d9ef;outline-offset:3px}.pass-setup-summary{margin-left:12px;color:#91adbf;font-size:12px}.pass-panel .pass-setup[open] .pass-form{margin-top:12px}.pass-panel .pass-source-info{margin-top:14px}.pass-source-details{white-space:pre-line;font-size:12px;line-height:1.7;color:#a7bbce}.pass-panel .pass-actions .primary{background:#184d60;border-color:#73c9de;font-weight:600}.pass-panel .pass-status:empty{display:none}
 .pass-panel [hidden]{display:none!important}.pass-panel{color:#dce8f4;font-size:13px}.pass-panel .pass-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pass-panel label{display:flex;flex-direction:column;gap:5px;color:#a7bbce}.pass-panel input,.pass-panel select{box-sizing:border-box;width:100%;min-width:0;max-width:none;background:#101e2d;border:1px solid #345068;color:#edf5fa;padding:8px;border-radius:6px}.pass-panel .pass-wide{grid-column:span 2}.pass-panel .pass-actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pass-panel button{cursor:pointer;font:inherit;padding:8px 12px;border:1px solid #36556e;border-radius:7px;background:#183247;color:#e5f5ff}.pass-panel button:disabled{opacity:.45;cursor:default}.pass-panel .pass-status{white-space:pre-line;line-height:1.6;color:#c0d3e2}.pass-panel .pass-note{font-size:12px;color:#a1b2c3;line-height:1.6}.pass-panel .pass-results{display:grid;grid-template-columns:minmax(210px,.85fr) minmax(0,2.15fr);gap:18px;align-items:start}.pass-panel .pass-list{display:grid;gap:7px;max-height:clamp(180px,calc(92dvh - 300px),660px);overflow:auto}.pass-panel .pass-item{text-align:left;white-space:pre-line;line-height:1.6}.pass-panel .pass-item[aria-pressed=true]{border-color:#77daf0;background:#18475b}.pass-panel .pass-preview{min-width:0}.pass-panel .pass-heading{font-size:15px;margin:0 0 10px}.pass-panel .pass-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pass-panel .pass-stage{min-width:0;padding:11px;background:#102235;border:1px solid #304c63;border-radius:9px;line-height:1.6}.pass-panel .pass-stage[data-stage="1"]{border-color:#5ca5b6;background:#123342}.pass-panel .pass-stage-title{display:block;color:#adc2d3;min-height:2.8em;font-size:12px}.pass-panel .pass-stage-time{display:block;color:#f0f7fe;font-size:18px;font-variant-numeric:tabular-nums}.pass-panel .pass-stage-date{display:block;color:#91a9bc;font-size:11px}.pass-panel .pass-stage-direction{display:block;margin-top:7px;color:#a8edf1}.pass-panel .pass-stage-elevation{display:block;color:#d7e5f1}.pass-panel .pass-threshold-note{margin:10px 0 14px}.pass-panel .pass-chart{display:block;width:100%;height:300px;background:#07121f;border:1px solid #294156;border-radius:12px}.pass-panel .pass-legend{display:flex;flex-wrap:wrap;gap:7px 15px;margin:8px 0;color:#adc2d3;font-size:12px;line-height:1.6}.pass-panel .pass-legend span{display:inline-flex;align-items:center;gap:6px}.pass-panel .pass-swatch{display:inline-block;width:19px;border-top:3px solid #72869a}.pass-panel .pass-swatch.candidate{border-color:#80e9ef}.pass-panel .pass-swatch.threshold{border-top:2px dashed #e7bb79}.pass-panel .pass-scrubber{margin-top:14px;padding:12px;background:#102235;border:1px solid #304c63;border-radius:9px}.pass-panel .pass-scrubber label{font-weight:600;color:#dbeaf5}.pass-panel .pass-scrubber input[type=range]{accent-color:#80e9ef;padding:0;margin:9px 0;height:28px;border:0}.pass-panel .pass-readout-time{display:block;color:#b6cbdd;font-variant-numeric:tabular-nums}.pass-panel .pass-readout-direction{display:block;color:#e3f8fb;font-size:16px;line-height:1.7;margin:5px 0}.pass-panel .pass-readout-status{display:block;color:#a1b2c3;line-height:1.6}.pass-panel .pass-readout-status[data-candidate=true]{color:#80e9ef}.pass-panel .pass-details{line-height:1.7;white-space:pre-line}.pass-panel .pass-error{color:#ffb7a7}
@@ -74,8 +76,7 @@ export function mountPassPanel(container, sim) {
   updateStatus.dataset.testid = 'pass-update-status';
   updateStatus.setAttribute('role', 'status');
   const dataActions = node('div', 'pass-actions', root);
-  const estimate = label(node('button', '', dataActions), '用已有星历估算'),
-    latest = label(node('button', '', dataActions), '使用本机最新星历');
+  const latest = label(node('button', '', dataActions), '使用本机最新星历');
   const setup = node('details', 'pass-setup', root);
   setup.open = true;
   const setupHeading = node('summary', '', setup);
@@ -83,8 +84,8 @@ export function mountPassPanel(container, sim) {
   const setupSummary = node('span', 'pass-setup-summary', setupHeading);
   const form = node('div', 'pass-form', setup),
     fields = {};
-  const input = (key, title, type, value, attrs = {}) => {
-    const wrap = node('label', '', form);
+  const input = (key, title, type, value, attrs = {}, parent = form) => {
+    const wrap = node('label', '', parent);
     label(node('span', '', wrap), title);
     const el = node('input', '', wrap);
     el.type = type;
@@ -110,12 +111,12 @@ export function mountPassPanel(container, sim) {
     step: 0.0001,
   });
   input('height', '海拔（米）', 'number', saved.height, { min: -500, max: 9000, step: 1 });
-  const begin = input('start', '开始时间 · UTC+8', 'datetime-local', inputText(Date.now()), {
+  const begin = input('start', '基准时间 · UTC+8', 'datetime-local', inputText(sim.time), {
     step: 1,
   });
   begin.parentElement.classList.add('pass-wide');
-  const select = (key, title, values) => {
-    const wrap = node('label', '', form);
+  const select = (key, title, values, parent = form) => {
+    const wrap = node('label', '', parent);
     label(node('span', '', wrap), title);
     const el = node('select', '', wrap);
     el.dataset.passField = key;
@@ -143,6 +144,32 @@ export function mountPassPanel(container, sim) {
     importButton = button('导入轨道');
   calculate.dataset.action = 'predict';
   calculate.classList.add('primary');
+  const highSearch = node('div', 'pass-high-search', setup);
+  label(node('h3', '', highSearch), '高仰角过境');
+  label(
+    node('p', 'pass-note', highSearch),
+    '从基准时间向前或向后寻找最近一次达标过境，不受预报时长限制。'
+  );
+  const highForm = node('div', 'pass-form', highSearch);
+  input('peakMinimum', '最高仰角至少（度）', 'number', 60, { min: 0, max: 90, step: 1 }, highForm);
+  select(
+    'daylight',
+    '最高点时的当地昼夜',
+    [
+      ['any', '白天与黑夜'],
+      ['day', '白天'],
+      ['night', '黑夜'],
+    ],
+    highForm
+  );
+  const highActions = node('div', 'pass-actions', highSearch),
+    previousHigh = button('上一次', highActions),
+    nextHigh = button('下一次', highActions),
+    cancel = button('停止计算', highActions);
+  previousHigh.dataset.action = 'previous-high-pass';
+  nextHigh.dataset.action = 'next-high-pass';
+  cancel.dataset.action = 'cancel';
+  cancel.hidden = true;
   const status = node('p', 'pass-status', root);
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
@@ -163,7 +190,7 @@ export function mountPassPanel(container, sim) {
   for (const [key, className] of [
     ['候选可观测时段', 'candidate'],
     ['仅几何通视', ''],
-    ['设定的最低仰角', 'threshold'],
+    ['仰角门槛', 'threshold'],
   ]) {
     const item = node('span', '', legend);
     node('i', 'pass-swatch ' + className, item);
@@ -232,8 +259,6 @@ export function mountPassPanel(container, sim) {
     });
     sourceSummary.textContent = orbitDescription(sim.data);
     sourceDetails.textContent = sourceSummary.textContent;
-    estimate.hidden = sim.missionId !== 'tiangong';
-    estimate.disabled = updating || estimate.hidden || !sim.data;
     let state = 'error',
       message;
     try {
@@ -263,7 +288,7 @@ export function mountPassPanel(container, sim) {
     generation++;
     job?.abort();
     job = null;
-    calculate.disabled = updating;
+    setBusy(false);
     result = null;
     identity = null;
     models = [];
@@ -288,6 +313,10 @@ export function mountPassPanel(container, sim) {
     status.textContent = '';
     setup.open = true;
     refreshContext();
+  }
+  function setBusy(busy) {
+    calculate.disabled = previousHigh.disabled = nextHigh.disabled = busy || updating;
+    cancel.hidden = !busy;
   }
   function refreshOpportunities() {
     horizon = siteHorizon(result.observer, example);
@@ -314,10 +343,13 @@ export function mountPassPanel(container, sim) {
         elevation: point.elevation.toFixed(1),
       });
     });
-    thresholdNote.textContent = t(
-      '进入和离开指跨过设定的最低仰角 {elevation}°，不一定是从地平线升起或落下。',
-      { elevation: result.minimumElevation }
-    );
+    thresholdNote.textContent = result.query
+      ? t('最高仰角门槛为 {elevation}°；进入和离开按地平线计算。', {
+          elevation: result.query.minimumPeakElevation,
+        })
+      : t('进入和离开指跨过设定的最低仰角 {elevation}°，不一定是从地平线升起或落下。', {
+          elevation: result.minimumElevation,
+        });
     if (pass.clippedStart || pass.clippedEnd)
       thresholdNote.textContent += ' ' + t('此过境在预报窗口边缘被截断');
   }
@@ -392,7 +424,7 @@ export function mountPassPanel(container, sim) {
           'font-size': 11,
         });
     }
-    const thresholdY = y(result.minimumElevation);
+    const thresholdY = y(result.query?.minimumPeakElevation ?? result.minimumElevation);
     svg(
       'line',
       {
@@ -469,7 +501,7 @@ export function mountPassPanel(container, sim) {
       const item = node('button', 'pass-item', list);
       item.dataset.passIndex = index;
       item.setAttribute('aria-pressed', String(index === selected));
-      item.textContent = `${clockText(pass.maximum.time)} UTC+8\n${t('最高仰角')} ${pass.maximum.elevation.toFixed(1)}° · ${t('持续')} ${Math.round((pass.end - pass.start) / 1000)} s\n${t(models[index].windows.length ? '含候选可观测时段' : '几何过境')}${pass.estimated ? ' · ' + t('本地短期估算') : ''}`;
+      item.textContent = `${clockText(pass.maximum.time)} UTC+8\n${t('最高仰角')} ${pass.maximum.elevation.toFixed(1)}° · ${t('持续')} ${Math.round((pass.end - pass.start) / 1000)} s\n${t(models[index].windows.length ? '含候选可观测时段' : '几何过境')}${pass.estimated ? ' · ' + t('轨道延续演算') : ''}`;
       item.onclick = () => {
         if (!isCurrent()) {
           invalidate();
@@ -490,13 +522,10 @@ export function mountPassPanel(container, sim) {
     });
     list.scrollTop = listScroll;
     const selectedTime = result.passes[selected]?.maximum.time,
-      covered =
-        Number.isFinite(selectedTime) &&
-        selectedTime >= sim.data.rows[0][0] &&
-        selectedTime <= sim.data.rows.at(-1)[0];
+      covered = Number.isFinite(selectedTime);
     jump.disabled = !covered;
     download.disabled = !result.passes.length;
-    jump.title = covered ? '' : t('当前三维星历未覆盖此时刻，可查看天空轨迹图。');
+    jump.title = '';
     if (!result.passes.length) {
       chart.replaceChildren();
       stages.replaceChildren();
@@ -517,11 +546,27 @@ export function mountPassPanel(container, sim) {
       });
       renderStages(pass);
       draw();
-      details.textContent = `${t('最高点距离')}：${pass.maximum.range.toFixed(0)} km\n${t('候选可观测时段')} · UTC+8：${models[selected].windows.length ? models[selected].windows.map((x) => clockText(x.start) + ' — ' + clockText(x.end)).join('\n') : t('无')}${covered ? '' : '\n' + t('当前三维星历未覆盖此时刻，可查看天空轨迹图。')}`;
+      details.textContent = `${t('最高点距离')}：${pass.maximum.range.toFixed(0)} km\n${t('候选可观测时段')} · UTC+8：${models[selected].windows.length ? models[selected].windows.map((x) => clockText(x.start) + ' — ' + clockText(x.end)).join('\n') : t('无')}`;
     }
-    status.textContent = `${t('找到 {count} 次过境', { count: result.passes.length })} · ${t(resultMode(result.mode, result.end < Date.now()))}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped ? '\n' + t('所选时段已按计算上限截短。') : ''}${result.passes.length ? '' : '\n' + t('未找到符合条件的过境，可延长时段或降低最低仰角。')}`;
+    if (result.query) {
+      const q = result.query;
+      const description = `${t(q.direction === 1 ? '下一次高仰角过境' : '上一次高仰角过境')} · ≥${q.minimumPeakElevation}° · ${t({ any: '白天与黑夜', day: '白天', night: '黑夜' }[q.daylight])}`;
+      status.textContent =
+        description + '\n' + t('基准时间') + '：' + clockText(q.referenceTime) + ' UTC+8';
+      if (result.passes.length)
+        status.textContent += '\n' + t(resultMode(result.mode, result.end < Date.now()));
+      else
+        status.textContent +=
+          '\n' +
+          (result.status === 'unreachable'
+            ? t('该轨道在此地点的仰角上限约为 {elevation}°，请降低门槛或更换地点。', {
+                elevation: result.reachability.upperBoundElevation.toFixed(1),
+              })
+            : t('已搜索至可计算时间边界，未找到达标过境。'));
+    } else
+      status.textContent = `${t('找到 {count} 次过境', { count: result.passes.length })} · ${t(resultMode(result.mode, result.end < Date.now()))}\n${t('预报区间')}：${clockText(result.start)} — ${clockText(result.end)} UTC+8${result.clipped ? '\n' + t('所选时段已按计算上限截短。') : ''}${result.passes.length ? '' : '\n' + t('未找到符合条件的过境，可延长时段或降低最低仰角。')}`;
   }
-  async function run() {
+  async function run(direction = 0) {
     if (updating || job) return;
     invalidate();
     const token = generation,
@@ -529,7 +574,8 @@ export function mountPassPanel(container, sim) {
     job = controller;
     try {
       const numeric = (key) => {
-        if (fields[key].value.trim() === '') throw Error('观测点坐标无效');
+        if (fields[key].value.trim() === '')
+          throw Error(key === 'peakMinimum' ? '高仰角搜索参数无效' : '观测点坐标无效');
         return Number(fields[key].value);
       };
       const observer = validateObserver({
@@ -540,16 +586,38 @@ export function mountPassPanel(container, sim) {
       });
       const time = parseLocalTime(fields.start.value),
         hours = Number(fields.hours.value),
-        minimumElevation = numeric('minimum');
+        minimumElevation = direction ? 0 : numeric('minimum');
       const data = sim.data,
         missionId = sim.missionId;
-      calculate.disabled = true;
-      status.textContent = t('正在计算过境…');
-      const next = await predictPasses(data, observer, time, hours, {
-        minimumElevation,
-        signal: controller.signal,
-        allowEstimate: true,
-      });
+      setBusy(true);
+      status.textContent = t(direction ? '正在寻找高仰角过境…' : '正在计算过境…');
+      const next = direction
+        ? await findHighPass(data, observer, time, {
+            direction,
+            minimumPeakElevation: numeric('peakMinimum'),
+            daylight: fields.daylight.value,
+            signal: controller.signal,
+            onProgress: (progress) => {
+              if (token !== generation || disposed || controller.signal.aborted) return;
+              status.textContent =
+                t('正在寻找高仰角过境…') +
+                '\n' +
+                t('已检查 {days} 天 · {count} 次过境', {
+                  days: progress.daysScanned.toFixed(1),
+                  count: progress.checkedPasses,
+                }) +
+                '\n' +
+                clockText(progress.activeStart) +
+                ' — ' +
+                clockText(progress.activeEnd) +
+                ' UTC+8';
+            },
+          })
+        : await predictPasses(data, observer, time, hours, {
+            minimumElevation,
+            signal: controller.signal,
+            allowEstimate: true,
+          });
       if (disposed || token !== generation || data !== sim.data || missionId !== sim.missionId) {
         if (token === generation) invalidate();
         return;
@@ -573,23 +641,18 @@ export function mountPassPanel(container, sim) {
       status.focus({ preventScroll: true });
       if (!next.passes.length) status.scrollIntoView({ block: 'nearest' });
     } catch (error) {
-      if (error.name !== 'AbortError' && token === generation && !disposed) {
+      if (error.name === 'AbortError' && token === generation && !disposed)
+        status.textContent = t('已停止计算');
+      else if (token === generation && !disposed) {
         errorKey = error.message;
-        status.textContent =
-          t(errorKey) +
-          '\n' +
-          t(
-            sim.missionId === 'tiangong' && errorKey === '预报时间超出有效轨道区间'
-              ? '超过本地估算上限时，可使用本机最新星历、更新轨道，或回放原始区间。'
-              : '可更新轨道数据，或使用有效数据时段查看历史过境。'
-          );
+        status.textContent = t(errorKey);
         status.classList.add('pass-error');
         status.focus({ preventScroll: true });
         status.scrollIntoView({ block: 'nearest' });
       }
     } finally {
       if (token === generation) {
-        calculate.disabled = updating;
+        setBusy(false);
         job = null;
       }
     }
@@ -611,7 +674,7 @@ export function mountPassPanel(container, sim) {
   interval.onclick = () => {
     try {
       const source = predictionSource(sim.data);
-      fields.start.value = inputText(source.kind === 'sgp4' ? source.epoch : source.start);
+      fields.start.value = inputText(source.recordStart);
       invalidate();
     } catch (error) {
       status.textContent = t(error.message);
@@ -627,7 +690,8 @@ export function mountPassPanel(container, sim) {
     const id = sim.missionId,
       beforeData = sim.data;
     updating = true;
-    update.disabled = calculate.disabled = importButton.disabled = true;
+    update.disabled = importButton.disabled = true;
+    setBusy(false);
     updateStatus.textContent = t('正在更新轨道…');
     try {
       const weather = sim.environment.weather,
@@ -648,15 +712,20 @@ export function mountPassPanel(container, sim) {
       }
     } finally {
       updating = false;
-      if (!disposed) update.disabled = calculate.disabled = importButton.disabled = false;
+      if (!disposed) {
+        update.disabled = importButton.disabled = false;
+        setBusy(false);
+      }
     }
   };
   importButton.onclick = () => {
     invalidate();
     document.getElementById('importOrbit').click();
   };
-  calculate.onclick = run;
-  estimate.onclick = run;
+  calculate.onclick = () => run();
+  previousHigh.onclick = () => run(-1);
+  nextHigh.onclick = () => run(1);
+  cancel.onclick = () => job?.abort();
   latest.onclick = async () => {
     const target = sim.missionId;
     latest.disabled = true;
@@ -701,7 +770,7 @@ export function mountPassPanel(container, sim) {
       return;
     }
     const time = result?.passes[selected]?.maximum.time;
-    if (Number.isFinite(time) && time >= sim.data.rows[0][0] && time <= sim.data.rows.at(-1)[0]) {
+    if (Number.isFinite(time)) {
       if (sim.flightLab?.previewPass) sim.flightLab.previewPass(time);
       else sim.seek(time);
     }
@@ -726,9 +795,7 @@ export function mountPassPanel(container, sim) {
     for (const render of labels) render();
     refreshContext();
     if (result) renderResults();
-    else if (errorKey)
-      status.textContent =
-        t(errorKey) + '\n' + t('可更新轨道数据，或使用有效数据时段查看历史过境。');
+    else if (errorKey) status.textContent = t(errorKey);
   });
   const resizeObserver = new ResizeObserver(() => {
     if (

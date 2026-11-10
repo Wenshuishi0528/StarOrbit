@@ -7,7 +7,7 @@ import {CAMERA_PRESETS,CAMERA_OFFSET_LIMIT,cameraAtOpen,moveExposureCamera,earth
 const orbit=JSON.parse(fs.readFileSync(new URL('../assets/orbit.json',import.meta.url)));
 const first=orbit.rows[0][0],last=orbit.rows.at(-1)[0];
 const seconds=300,start=recommendedNight(orbit,last+86400000,seconds);
-assert(start>=first&&start+seconds*1000<=last);
+assert(start>=last&&start<=last+2*86400000,'recommend around the requested date, including continuation');
 assert.equal(start,recommendedNight(orbit,last+86400000,seconds));
 assert.equal(recommendedNight(null,first,seconds),null);
 assert.equal(recommendedNight({rows:[[0],[6000]]},0,30),null);

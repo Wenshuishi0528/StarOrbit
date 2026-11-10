@@ -5,23 +5,13 @@ import { predictionSource } from './pass-prediction.js';
 export function orbitDescription(data, { archived = false } = {}) {
   try {
     const s = predictionSource(data, { allowEstimate: true, archived }),
-      end = s.recordEnd ?? s.end;
+      end = s.recordEnd;
     const lines = [
       data.source,
       t('数据历元') + ' · ' + clockText(s.epoch) + ' UTC+8',
-      t(s.kind === 'sgp4' ? 'SGP4 有效区间' : '原始星历区间') +
-        ' · ' +
-        clockText(s.start) +
-        ' — ' +
-        clockText(end) +
-        ' UTC+8',
+      t('原始星历区间') + ' · ' + clockText(s.recordStart) + ' — ' + clockText(end) + ' UTC+8',
     ];
-    if (s.end > end)
-      lines.push(
-        t('本地估算止于 {end}，最多延伸 72 小时，不含之后的轨道机动。', {
-          end: clockText(s.end) + ' UTC+8',
-        })
-      );
+    lines.push(t('区间外按当前轨道状态继续演算，包含轨道摄动。'));
     return lines.filter(Boolean).join('\n');
   } catch (error) {
     return t(error.message);
@@ -29,9 +19,9 @@ export function orbitDescription(data, { archived = false } = {}) {
 }
 export const resultMode = (mode, historical = false) =>
   mode === 'estimate'
-    ? '本地短期估算'
+    ? '轨道延续演算'
     : mode === 'mixed'
-      ? '含区间外本地估算'
+      ? '含轨道延续演算'
       : historical
         ? '原始星历回放'
         : '有效星历';

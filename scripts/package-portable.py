@@ -22,9 +22,9 @@ files.extend(['scripts/cloud_versions.py', 'scripts/cloud_coverage.py', 'scripts
 files = sorted(set(files + portable_documents(root)))
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []
 size = sum((root / name).stat().st_size for name in files)+sum(p.stat().st_size for p in launcher_files)
-# v1.36 retains native-resolution night imagery; large JSON is split into bounded inert blocks.
-if size > 900_000_000:
-    raise SystemExit(f'Runtime package is {size} bytes, exceeding the 900 MB budget')
+# Native day/night imagery is retained; large JSON is split into bounded inert blocks.
+if size > 1_200_000_000:
+    raise SystemExit(f'Runtime package is {size} bytes, exceeding the 1200 MB budget')
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
     for name in files:

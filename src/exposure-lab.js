@@ -278,12 +278,12 @@ export function mountExposureLab(root, sim, assets) {
     let message;
     if (result.ok)
       message = t(
-        result.estimated ? '该地在快门期间可见，轨道使用短期估算。' : '该地在快门期间可见。'
+        result.estimated ? '该地在快门期间可见，轨道使用延续演算。' : '该地在快门期间可见。'
       );
     else if (result.reason === 'coverage')
       message = t('快门超出可用星历 {start} 至 {end}（UTC+8），请调整起点或缩短曝光。', {
-        start: clockText(source.start),
-        end: clockText(source.end),
+        start: clockText(source.recordStart),
+        end: clockText(source.recordEnd),
       });
     else if (result.reason === 'setting')
       message = t('约在 {time} 落到地平线后，此起点最多可拍 {seconds} 秒。', {
@@ -318,7 +318,7 @@ export function mountExposureLab(root, sim, assets) {
       start =
         Number.isFinite(preferred) && preferred >= source.start && preferred < source.end
           ? preferred
-          : source.start;
+          : source.recordStart;
     try {
       const hours = Math.min(48, Math.ceil((source.end - start) / 3600000)),
         seconds = Number(q('seconds').value);
@@ -536,7 +536,7 @@ export function mountExposureLab(root, sim, assets) {
       const source =
         usesGround(params.mode) &&
         groundSource(params.data).recordEnd < params.start + params.seconds * 1000
-          ? t('短期轨道估算')
+          ? t('轨道延续演算')
           : startMode === 'interpolation' && endMode === 'interpolation'
             ? t('有效星历内的天宫轨道')
             : t('天宫端点轨道外推');

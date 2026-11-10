@@ -1,6 +1,7 @@
 import { restoreControlFocus } from './display-controls.js';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { mountPassPanel } from './pass-panel.js';
+import { validTime, stateAt } from './orbit.js';
 import { mountDockingPanel } from './docking-panel.js';
 import { mountExposureLab } from './exposure-lab.js';
 import { mountBalconyLab } from './balcony-lab.js';
@@ -353,8 +354,8 @@ export function installFlightLab(sim, assets) {
       }
     },
     previewPass(time) {
-      if (!Number.isFinite(time) || !sim.data || time < sim.start || time > sim.end) {
-        sim.api.toast('当前三维星历未覆盖此时刻，可查看天空轨迹图。');
+      if (!validTime(time) || !stateAt(sim.data, time)) {
+        sim.api.toast('轨道演算不可用');
         return;
       }
       close();

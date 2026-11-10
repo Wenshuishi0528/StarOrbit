@@ -4,6 +4,18 @@
 
 Development versions are listed newest first with concise Chinese and English notes; each completed update is added at the top. Early versions without separate evidence are explicitly marked unverified.
 
+## v1.40 — 2026-11-10 · 本机版 / Local build
+
+白天地表新增默认的2026 Q2原生500米级MODIS合成，采用分块AVIF并沿用各视图共用地球。海岸采用细分遮罩，海面和缺测区域使用连续海色与后备影像；1公里和NASA原版可切换。首次迁移默认图源，此后保留用户选择。
+
+**English:** Added a default native 500 m MODIS daytime atlas for 2026 Q2, encoded as AVIF tiles and shared by all Earth views. Fractional coast coverage preserves land detail; water and gaps use continuous fallback imagery. Existing 1 km and original NASA sources remain selectable. Defaults migrate once, then preserve explicit choices.
+
+轨道在原始星历区间外统一使用包含摄动的接续演算，修复轨道面停止进动，并统一主场景、小地图、受照及观测预测。小地图底图跟随地球图源；增加一天步进，以及独立于列表时长的上／下一次高仰角查询，默认≥60°、可调整，可选当地白天或黑夜。
+
+**English:** Unified perturbed orbit continuation beyond recorded ephemerides across the scene, maps, illumination and observation planners. The minimap shares the selected Earth base. Added one-day stepping and previous/next high-elevation searches independent of list duration, with an adjustable 60° default and local day/night selection.
+
+[数据来源与处理 / Data and processing](assets/earth/day-2026-q2-500m/README.md) · [本批验收 / Validation](docs/v1.40-validation.json)
+
 ## v1.39 — 2026-11-09
 
 星际导航图增加默认简易版和可记忆的完整版切换；简易版保留导航球、二维／三维、缩放、复位、目标距离与停止。主页面、世界模式和行星观测统一同步窗口尺寸、当前屏幕像素比例与完整渲染区域。

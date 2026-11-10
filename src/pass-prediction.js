@@ -1,13 +1,16 @@
-import { json2satrec, propagate, gstime } from 'satellite.js';
-import { dot, earthAxes, interpolate, sunPosition, sunlightFraction } from './orbit.js';
+import {
+  dot,
+  earthAxes,
+  stateAt,
+  MIN_TIME,
+  MAX_TIME,
+  sunPosition,
+  sunlightFraction,
+} from './orbit.js';
 import { validateGP } from './gp-orbit.js';
-import { DFH1_HISTORY } from './dfh1-history.js';
-import { OEM_ESTIMATE_LIMIT, oemEstimate } from './pass-oem-estimate.js';
 import bundledGP from '../assets/spacecraft/dfh1-gp.json' with { type: 'json' };
 
-const DEG = Math.PI / 180,
-  DAY = 86400000;
-export const PASS_GP_MAX_AGE = 7 * DAY;
+const DEG = Math.PI / 180;
 export const PASS_TIME_TOLERANCE = 250;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export function validateObserver(input) {
@@ -87,75 +90,49 @@ function matchingGP(data, archived) {
     throw Error('轨道根数与数据历元不一致');
   return { gp, epoch };
 }
-export function predictionSource(data, { allowEstimate = false, archived = false } = {}) {
+// The same stateAt supplies the rendered spacecraft, maps, illumination and every
+// observation planner. Record dates describe the source; they do not stop motion.
+export function predictionSource(data, { archived = false } = {}) {
   if (!data?.rows?.length) throw Error('此任务尚未配置轨道');
   const gp = matchingGP(data, archived);
-  if (gp) {
-    const satrec = json2satrec(gp.gp);
-    return {
-      kind: 'sgp4',
-      epoch: gp.epoch,
-      start: gp.epoch - PASS_GP_MAX_AGE,
-      end: gp.epoch + PASS_GP_MAX_AGE,
-      position(time, axes) {
-        const q = propagate(satrec, new Date(time));
-        if (!q?.position || satrec.error) throw Error('轨道传播失败');
-        const p = q.position,
-          a = gstime(new Date(time)),
-          c = Math.cos(a),
-          s = Math.sin(a),
-          fixed = [c * p.x + s * p.y, -s * p.x + c * p.y, p.z];
-        return {
-          fixed,
-          inertial: axes[0].map((_, i) => fixed.reduce((sum, v, j) => sum + v * axes[j][i], 0)),
-        };
-      },
-    };
-  }
-  const start = data.rows[0][0],
+  const recordStart = data.rows[0][0],
     recordEnd = data.rows.at(-1)[0];
-  const estimate =
-    allowEstimate && data.missionId === 'tiangong' && data.propagator !== 'SGP4'
-      ? oemEstimate(data)
-      : null;
   return {
-    kind: 'oem',
-    epoch: Date.parse(data.created) || start,
-    start,
+    kind: gp ? 'sgp4' : 'oem',
+    epoch: gp?.epoch ?? (Date.parse(data.created) || recordStart),
+    start: MIN_TIME,
+    end: MAX_TIME,
+    recordStart,
     recordEnd,
-    end: recordEnd + (estimate ? OEM_ESTIMATE_LIMIT : 0),
-    position(time, axes) {
-      const inertial =
-        time > recordEnd ? estimate?.position(time) : interpolate(data.rows, time)?.position;
-      if (!inertial) throw Error('预报时间超出有效轨道区间');
-      return { inertial, fixed: axes.map((axis) => dot(axis, inertial)) };
+    position(time, axes = earthAxes(time)) {
+      const state = stateAt(data, time);
+      if (!state) throw Error('轨道演算不可用');
+      return { inertial: state.position, fixed: axes.map((axis) => dot(axis, state.position)) };
     },
   };
 }
-export function predictionWindow(data, start, hours, { allowEstimate = false } = {}) {
+export function predictionWindow(data, start, hours, options = {}) {
   if (!Number.isFinite(start) || ![24, 48, 72].includes(hours)) throw Error('预报时间无效');
-  const source = predictionSource(data, { allowEstimate });
-  if (start < source.start || start >= source.end) {
-    // An actual archived OEM/GP can cover this era. The main scene's illustrative
-    // DFH reconstruction alone cannot supply a pass prediction.
-    if (data.missionId === 'dfh1' && start < DFH1_HISTORY.cutoff)
-      throw Error('历史示意轨道不能用于过境预报');
-    throw Error(source.kind === 'sgp4' ? '轨道根数已超出预报时效' : '预报时间超出有效轨道区间');
-  }
+  const source = predictionSource(data, options);
+  if (start < source.start || start >= source.end) throw Error('预报时间无效');
   const end = Math.min(start + hours * 3600000, source.end);
   const mode =
-    source.recordEnd === undefined || end <= source.recordEnd
+    start >= source.recordStart && end <= source.recordEnd
       ? 'catalog'
-      : start >= source.recordEnd
+      : end <= source.recordStart || start >= source.recordEnd
         ? 'estimate'
         : 'mixed';
   return { source, start, end, clipped: end < start + hours * 3600000, mode };
 }
+
 export function createPassSampler(source, observer) {
   const frame = observerFrame(observer),
     suns = new Map();
   const solar = (time) => {
-    if (!suns.has(time)) suns.set(time, sunPosition(time));
+    if (!suns.has(time)) {
+      suns.set(time, sunPosition(time));
+      if (suns.size > 256) suns.delete(suns.keys().next().value);
+    }
     return suns.get(time);
   };
   return (time) => {
@@ -347,7 +324,7 @@ export function predictPasses(
           signal?.removeEventListener('abort', abort);
           for (const pass of step.value)
             pass.estimated =
-              Number.isFinite(window.source.recordEnd) && pass.end > window.source.recordEnd;
+              pass.start < window.source.recordStart || pass.end > window.source.recordEnd;
           resolve({
             start: window.start,
             end: window.end,

@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit-source/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.39 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.40 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.39 adds a compact/full 2D/3D stellar navigator with observer, Sun, target, waypoints and a bounded travel trail; map controls are independent of the flight view. v1.37 adds Earth multispectral imagery, day/night land surface temperatures, elevation/bathymetry, and filterable USGS historical mineral records with comparisons and photo legends. Existing features include view-driven satellite imagery and terrain streaming, shared caches, adjustable coverage, a ground location map, and 2025 nominal 500 m night lights. Ground, Solar System, interstellar and main views use the same Earth and sky resources. [Procedures](使用说明.md#地表观测与太阳系) · [Implementation](docs/world-explorer.md) · [Verification](docs/verification.md).
+> v1.40 upgrades the daytime Earth to native 500 m MODIS composites for 2026 Q2, stored as AVIF tiles with one shared source and settings across Earth views. The 1 km and original NASA maps remain selectable. Fractional coast coverage preserves land detail; oceans use a continuous water background, with clouds, reflections and lighting rendered by the scene. Terrain/imagery streaming, 2025 500 m night lights, Earth science layers and the 2D/3D stellar navigator remain available. [Procedures](使用说明.md#地表观测与太阳系) · [Data sources](assets/earth/day-2026-q2-500m/README.md) · [Verification](docs/verification.md).
 
 <a id="interface-and-basic-controls"></a>
 
@@ -75,7 +75,7 @@ The modes share the main attitude and translation keys, but have different dynam
 
 ## Data and simulation models
 
-- **Orbits and time:** OEM records are interpolated inside their interval and continued using the supported model outside it. Modern satellites use public elements and SGP4. Pass forecasts apply separate validity checks. Interface date/time inputs use UTC+8; UTC observation times are labelled separately.
+- **Orbits and time:** OEM records are interpolated inside their interval and continued using the supported model outside it. Modern satellites use public elements and SGP4. Continuation includes orbital perturbations and is shared by the scene and planners. Previous/next high-elevation searches default to an adjustable 60° threshold. Interface date/time inputs use UTC+8; UTC observation times are labelled separately.
 - **History and training:** The historical DFH-1 orbit is a source-constrained reconstruction, and telemetry uses reference sensor models. Near-orbit flight and docking are educational/gameplay approximations.
 - **Illumination and terrain:** Array output is a geometric illumination fraction. Real terrain affects meshes and ground pointing, rather than adding terrain collisions or landing physics. Orbital altitude readings retain the existing spherical-Earth reference.
 - **Imagery and environment:** Surface imagery, night lights, clouds, elevations, sky images and SDO observations keep independent sources and dates. Moving simulation time does not generate real imagery for that date. Aurora and atmospheric phenomena include procedural visual models.

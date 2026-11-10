@@ -100,7 +100,8 @@ export class Environment {
     assetNode.remove();
     this.settings = {
       quality: 'high',
-      daySource: '2026-q2-1km',
+      daySource: '2026-q2-500m',
+      daySourceDefaultVersion: 1,
       nightSource: '2025-500m',
       nightSourceDefaultVersion: 1,
       stars: true,
@@ -147,7 +148,11 @@ export class Environment {
         if (typeof old?.[k] === 'boolean') this.settings[k] = old[k];
       // Adopt the new default once; later explicit on/off choices persist.
       if (old?.earthElevationDefaultVersion !== 1) this.settings.earthElevation = true;
-      if (this.assets.daySources?.[old?.daySource]) this.settings.daySource = old.daySource;
+      if (
+        this.assets.daySources?.[old?.daySource] &&
+        (old?.daySourceDefaultVersion === 1 || old.daySource !== '2026-q2-1km')
+      )
+        this.settings.daySource = old.daySource;
       if (old?.nightSourceDefaultVersion === 1 && this.assets.nightSources?.[old?.nightSource])
         this.settings.nightSource = old.nightSource;
       if (QUALITY[old?.quality]) this.settings.quality = old.quality;

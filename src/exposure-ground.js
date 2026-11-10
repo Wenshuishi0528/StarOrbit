@@ -1,15 +1,4 @@
-import {
-  cross,
-  dot,
-  earthAxes,
-  norm,
-  sub,
-  sunlightFraction,
-  sunPosition,
-  unit,
-  EARTH_RADIUS,
-} from './orbit.js';
-import { groundTrackAttitude } from './attitude.js';
+import { cross, dot, earthAxes, norm, sub, unit, EARTH_RADIUS } from './orbit.js';
 import {
   validateObserver,
   observerFrame,
@@ -83,29 +72,9 @@ export function groundSource(data) {
 }
 export function groundExposureState(data, source, time) {
   if (time < source.start || time > source.end) return null;
-  if (source.kind === 'oem' && time <= source.recordEnd) return exposureState(data, time);
-  // Handoffs in the short estimate must use the balcony's bounded propagation,
-  // not the main scene's general two-body extension. Build velocity in that frame.
-  const fixed = earthAxes(time),
-    position = source.position(time, fixed).inertial;
-  const lo = Math.max(source.start, time - 500),
-    hi = Math.min(source.end, time + 500);
-  if (!(hi > lo)) return null;
-  const a = source.position(lo, earthAxes(lo)).inertial,
-    b = source.position(hi, earthAxes(hi)).inertial;
-  const velocity = sub(b, a).map((v) => (v * 1000) / (hi - lo)),
-    sun = sunPosition(time),
-    sunDir = unit(sub(sun, position));
-  return groundTrackAttitude({
-    t: time,
-    earthAxes: fixed,
-    position,
-    velocity,
-    sun,
-    sunDir,
-    illumination: sunlightFraction(position, sun),
-  });
+  return exposureState(data, time);
 }
+
 export function siteElevation(source, site, time) {
   const state = source.position(time, earthAxes(time));
   const geometric = lookAngles(state.fixed, site.frame).elevation;
@@ -144,5 +113,5 @@ export function groundWindow(source, site, start, seconds) {
       seconds: Math.max(0, Math.floor((lo - start) / 1000)),
     };
   }
-  return { ok: true, estimated: source.recordEnd != null && end > source.recordEnd };
+  return { ok: true, estimated: start < source.recordStart || end > source.recordEnd };
 }

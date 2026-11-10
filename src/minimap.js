@@ -46,16 +46,20 @@ export class OrbitMinimap {
     onLanguageChange(() => {
       this.lastDraw = -Infinity;
     });
-    this.image = new Image();
-    this.image.onload = () => {
+    this.fallbackImage = new Image();
+    this.fallbackImage.onload = () => {
       this.lastDraw = -Infinity;
     };
-    this.image.src = sim.environment.assets.minimap || sim.environment.assets.simple.day;
+    this.fallbackImage.src = sim.environment.assets.minimap || sim.environment.assets.simple.day;
     this.resizeObserver = new ResizeObserver(() => {
       this.lastDraw = -Infinity;
     });
     this.resizeObserver.observe(this.canvas);
     this.bindPicking();
+  }
+  get image() {
+    const shared = this.sim.environment.uniforms?.dayMap?.value?.image;
+    return shared?.width > 1 && shared?.height > 1 && !shared.data ? shared : this.fallbackImage;
   }
   bindPicking() {
     const canvas = this.canvas;
@@ -222,7 +226,10 @@ export class OrbitMinimap {
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
     c.fillStyle = '#102b3e';
     c.fillRect(0, 0, w, h);
-    if (this.image.complete && this.image.naturalWidth) c.drawImage(this.image, 0, 0, w, h);
+    // Borrow the selected Earth's already-decoded base map. The old display map
+    // paints a permanent white polar band and must not override the shared Earth.
+    const image = this.image;
+    if (image?.width > 1 && image?.height > 1) c.drawImage(image, 0, 0, w, h);
     if (q) {
       // Same solar direction and Earth rotation as the 3D view; no new orbit model.
       const sun = q.earthAxes.map((a) => dot(unit(q.sun), a));

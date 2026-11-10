@@ -75,7 +75,7 @@ AIA 使用波段对应的伪彩显示，不是肉眼自然色。HMI 黑子观测
 
 新增 `scripts/solar_service.py`，由 `scripts/serve.py` 导入；便携包文件清单已包含它。同步运行目录后需重启本机服务，使新的 Python 接口生效；构建网页不会自动更新正在运行的旧进程。
 
-当前桌面启动器配置的资源目录为 `中国空间站_1比200_模块化/交互预览软件`。交付时应同时更新仓库的本地构建、该目录的本地构建及 `scripts/serve.py`、`scripts/solar_service.py`；`http_download.py` 已有受限 HTTPS 下载支持，无新增大型 Python/JavaScript 依赖。
+当前桌面启动器配置的资源目录与开发根统一为 `Tiangong-Orbit-Simulator`。交付时更新该根的本地构建及 `scripts/serve.py`、`scripts/solar_service.py`；`http_download.py` 已有受限 HTTPS 下载支持，无新增大型 Python/JavaScript 依赖。
 
 针对性检查：`node tests/solar-data.mjs`、`python3 tests/solar-service.py`、`python3 tests/solar-relay.py`。2026-11-06 另以真实官方接口完成 HMI 2K 的元数据、FITS 头、PNG 全链路下载：`imageId=193673944`，`DATE-OBS=2026-11-06T01:56:41.200Z`，`radiusFraction=0.7876930292101492`。
 

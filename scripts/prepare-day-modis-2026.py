@@ -1,4 +1,4 @@
-"""Prepare reproducible, QA-filtered 2026 Q2 MODIS NBAR 1km composites.
+"""Prepare reproducible QA-filtered 2026 Q2 MODIS native 500m or 1km composites.
 
 Python dependencies: numpy, rasterio, Pillow, requests. Anonymous Planetary
 Computer signing; no credentials. All source acquisition windows must lie
@@ -175,7 +175,7 @@ def run(tile,cache,out,centers=CENTERS):
     with np.load(out/(tile+'.npz')) as x:
         rgb=x['rgb'];quality=x['quality'];observations=x['observations'];tr=Affine(*x['transform'][:6]);crs=str(x['crs'])
     rgba=np.concatenate([encode(rgb).transpose(1,2,0),(quality>0)[...,None].astype('uint8')*255],axis=-1)
-    Image.fromarray(rgba).save(out/f'{tile}-q2-1km.png')
+    Image.fromarray(rgba).save(out/f'{tile}-q2-{"500m" if NATIVE_RESOLUTION else "1km"}.png')
     # A fixed, unchanged diagnostic region permits direct before/after comparison.
     region=np.full((3,1000,700),np.nan,dtype='float32')
     reproject(rgb,region,src_transform=tr,src_crs=crs,src_nodata=np.nan,
@@ -229,6 +229,7 @@ def global_inventory(cache, centers):
     return result
 
 
+NATIVE_RESOLUTION=False
 COMPOSITE_RULE='spatial-mean-then-temporal-qa-median-v1'
 
 def reduce_native(data):
@@ -243,7 +244,41 @@ def reduce_native(data):
                 transform=np.array(tuple(Affine(*data['transform'][:6])*Affine.scale(2))),crs=data['crs'])
 
 
+def compose_native_blocks(cubes, qualities):
+    """Same QA median as compose_blocks; sort only pixels with observations.
+
+    One quality mask applies to all three bands. Empty ocean columns therefore
+    do not enter median sorting, and full-QA pixels need no second fallback sort.
+    """
+    h,w=qualities[0].shape
+    rgb=np.full((3,h,w),np.nan,dtype='float32')
+    quality=np.zeros((h,w),dtype='uint8');counts=np.zeros((h,w),dtype='uint8')
+    histogram=np.zeros(3,dtype='int64');dates_hist=np.zeros(len(cubes)+1,dtype='int64')
+    for row in range(0,h,128):
+        end=min(row+128,h)
+        q=np.stack([x[row:end] for x in qualities]).reshape(len(cubes),-1)
+        count=(q>0).sum(axis=0)
+        dates_hist+=np.bincount(count,minlength=len(cubes)+1)
+        counts[row:end]=count.reshape(end-row,w)
+        valid=count>0
+        histogram[0]+=np.count_nonzero(~valid)
+        if not valid.any():continue
+        selected=q[:,valid];full=(selected==2).any(axis=0)
+        good=np.where(full[None,:],selected==2,selected>0)
+        n=good.sum(axis=0)
+        stack=np.stack([x[:,row:end].reshape(3,-1)[:,valid] for x in cubes])
+        stack=np.where(good[:,None,:],stack,np.inf)
+        stack.sort(axis=0)
+        lo=(n-1)//2;hi=n//2
+        median=(np.take_along_axis(stack,lo[None,None,:].repeat(3,axis=1),axis=0)[0]+np.take_along_axis(stack,hi[None,None,:].repeat(3,axis=1),axis=0)[0])*.5
+        block=rgb[:,row:end].reshape(3,-1);block[:,valid]=median
+        level=np.where(full,2,1).astype('uint8');quality[row:end].reshape(-1)[valid]=level
+        histogram+=np.bincount(level,minlength=3)
+    return rgb,quality,counts,histogram,dates_hist
+
+
 def compose_blocks(cubes, qualities):
+    if NATIVE_RESOLUTION:return compose_native_blocks(cubes,qualities)
     """Already spatially averaged 1km dates; bound temporary memory by rows."""
     h,w=cubes[0].shape[1:];rgb=np.full((3,h,w),np.nan,dtype='float32')
     quality=np.zeros((h,w),dtype='uint8');counts=np.zeros_like(quality)
@@ -278,7 +313,7 @@ def fetch_tile(tile, items, cache, out, centers):
     started=time.monotonic();cubes=[];qualities=[];transfers=[];reference=None
     for item in items:
         native,transfer=sample_item(item,cache,persist=False)
-        data=reduce_native(native);del native
+        data=native if NATIVE_RESOLUTION else reduce_native(native);del native
         current=(tuple(data['transform']),str(data['crs']))
         if reference is None: reference=current
         if current!=reference: raise ValueError('Source dates have incompatible grids')
@@ -293,7 +328,7 @@ def fetch_tile(tile, items, cache, out, centers):
           sourceMetadataSHA256=metadata_hash,transfers=transfers,
           bodyBytes=sum(t['bodyBytes'] for t in transfers),elapsedSeconds=time.monotonic()-started,
           outputQualityCounts=histogram.tolist(),outputValidDatesCounts=dates_hist.tolist(),
-          rule='Each date: native RGB valid and QA<=1 filter, linear 2x2 valid-pixel mean, any magnitude contribution marks lower QA; then 1km temporal median of full-QA dates, otherwise magnitude-QA median; no geographic/color balancing')
+          nativeResolutionMeters=500 if NATIVE_RESOLUTION else 1000,rule=('Each date: native 500m RGB and QA retained without spatial averaging; temporal median prefers full-QA dates, otherwise magnitude-QA dates; no geographic/color balancing' if NATIVE_RESOLUTION else 'Each date: native RGB valid and QA<=1 filter, linear 2x2 valid-pixel mean, any magnitude contribution marks lower QA; then 1km temporal median of full-QA dates, otherwise magnitude-QA median; no geographic/color balancing'))
     temp=report_path.with_suffix('.part.json');temp.write_text(json.dumps(report,indent=2));temp.replace(report_path)
     return dict(tile=tile,cached=False,bodyBytes=report['bodyBytes'],elapsedSeconds=report['elapsedSeconds'],qualityCounts=report['outputQualityCounts'])
 
@@ -308,7 +343,7 @@ def fetch(cache,out,centers,tiles=None,workers=4,metadata_only=False):
          metadataFile=str(cache/f'global-{len(centers)}dates-inventory.json'),
          qualityCodes={'0':'missing','1':'contains magnitude inversion fallback','2':'all contributing pixels full BRDF inversion'},
          sampling='Fixed dates; complete 16-day acquisition windows strictly within 2026 Q2; RGB bands 1,4,3',
-         processingRule=COMPOSITE_RULE,compositing='Per-date native QA filtering then linear 2x2 mean (any magnitude contribution marks lower QA); temporal median prefers full-QA 1km dates, otherwise magnitude-QA dates; no color adjustments')
+         processingRule=COMPOSITE_RULE,nativeResolutionMeters=500 if NATIVE_RESOLUTION else 1000,compositing=('Native 500m reflectance and QA retained; temporal median prefers full inversions, otherwise magnitude inversions; no spatial averaging or color adjustments' if NATIVE_RESOLUTION else 'Per-date native QA filtering then linear 2x2 mean (any magnitude contribution marks lower QA); temporal median prefers full-QA 1km dates, otherwise magnitude-QA dates; no color adjustments'))
     (out/'inventory.json').write_text(json.dumps(summary,indent=2))
     if metadata_only: return
     chosen=tiles or list(inventory['tiles']);errors={};started=time.monotonic();total=0
@@ -330,10 +365,13 @@ def fetch(cache,out,centers,tiles=None,workers=4,metadata_only=False):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--resolution',type=int,choices=[500,1000],default=1000)
     p.add_argument('--cadence',choices=['monthly','8day'],default='monthly');p.add_argument('--tile',default='h27v06')
     p.add_argument('--cache',type=Path,default=CACHE);p.add_argument('--out',type=Path,default=Path('/tmp/starorbit-modis-q2-sample'))
     p.add_argument('--fetch',action='store_true');p.add_argument('--inventory-only',action='store_true')
     p.add_argument('--tiles',help='Comma separated fixed validation tiles; omit for full inventory');p.add_argument('--workers',type=int,default=4)
     a=p.parse_args();centers=EIGHT_DAY_CENTERS if a.cadence=='8day' else CENTERS
+    NATIVE_RESOLUTION=a.resolution==500
+    if NATIVE_RESOLUTION: COMPOSITE_RULE='native500m-temporal-qa-median-v1'
     if a.fetch or a.inventory_only: fetch(a.cache,a.out,centers,a.tiles.split(',') if a.tiles else None,a.workers,a.inventory_only)
     else: run(a.tile,a.cache,a.out,centers)

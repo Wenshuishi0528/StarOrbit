@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {geodeticToEcf,ecfToLookAngles,json2satrec,propagate,eciToEcf,gstime} from 'satellite.js';
-import {validateObserver,observerFrame,lookAngles,predictionSource,predictionWindow,createPassSampler,scanPasses,predictPasses,passesToICS,PASS_GP_MAX_AGE} from '../src/pass-prediction.js';
+import {validateObserver,observerFrame,lookAngles,predictionSource,predictionWindow,createPassSampler,scanPasses,predictPasses,passesToICS} from '../src/pass-prediction.js';
 import {parseOfficialOrbit} from '../src/data-sources.js';
-import {earthAxes,interpolate,stateAt} from '../src/orbit.js';
-import {OEM_ESTIMATE_LIMIT} from '../src/pass-oem-estimate.js';
+import {earthAxes,interpolate,stateAt,ellipseFromState,ellipseState,MAX_TIME,MIN_TIME} from '../src/orbit.js';
 const degree=Math.PI/180,read=name=>JSON.parse(fs.readFileSync(new URL(name,import.meta.url)));
 const site={name:'北京',latitude:39.9042,longitude:116.4074,height:50},frame=observerFrame(site);
 const independentSite={latitude:site.latitude*degree,longitude:site.longitude*degree,height:site.height/1000};
@@ -34,14 +33,19 @@ const daylight=finish(scanPasses(t=>({...parabola(90000)(t),sunElevation:20}),0,
 const eclipsed=finish(scanPasses(t=>({...parabola(90000)(t),illumination:0}),0,180000));assert.equal(eclipsed[0].visible.length,0);
 const terminator=finish(scanPasses(t=>({...parabola(90000)(t),sunElevation:-6+(t-90000)/1000}),0,180000));assert.equal(terminator[0].visible.length,1);assert(Math.abs(terminator[0].visible[0].end-90000)<250);
 const oem={...read('../assets/orbit.json'),missionId:'tiangong'},dfh={...read('../assets/spacecraft/dfh1-orbit.json'),missionId:'dfh1'},gp=read('../assets/spacecraft/dfh1-gp.json')[0];
-const source=predictionSource(oem);assert.equal(source.kind,'oem');assert.throws(()=>predictionWindow(oem,source.end+1,24),/有效轨道/);assert.throws(()=>predictionWindow(oem,source.start-1,24),/有效轨道/);
-assert(predictionWindow(oem,source.end-3600000,24).clipped);
-const sgp=predictionSource(dfh);assert.equal(sgp.kind,'sgp4');assert.equal(sgp.end-sgp.epoch,PASS_GP_MAX_AGE);
-assert.throws(()=>predictionWindow(dfh,sgp.end,24),/时效/);assert.throws(()=>predictionWindow(dfh,Date.parse('1970-04-25'),24),/历史/);
+const source=predictionSource(oem);assert.equal(source.kind,'oem');
+assert.equal(source.recordStart,oem.rows[0][0]);assert.equal(source.recordEnd,oem.rows.at(-1)[0]);
+for(const start of [source.recordStart-864e5,source.recordEnd+30*864e5]){
+ const window=predictionWindow(oem,start,24);assert.equal(window.mode,'estimate');assert(!window.clipped);
+}
+assert.equal(source.start,MIN_TIME);assert.equal(source.end,MAX_TIME);
+const sgp=predictionSource(dfh);assert.equal(sgp.kind,'sgp4');assert.equal(sgp.recordEnd,dfh.rows.at(-1)[0]);
+assert.equal(predictionWindow(dfh,sgp.recordEnd+30*864e5,24).mode,'estimate');
+assert.equal(predictionWindow(dfh,Date.parse('1970-04-25'),24).mode,'estimate');
 assert.throws(()=>predictionSource({...dfh,gp,gpEpoch:'not a date'}),/历元/);assert.throws(()=>predictionSource({...dfh,gp:{...gp,NORAD_CAT_ID:48274}}),/编号/);
-assert(predictionWindow(dfh,sgp.end-3600000,24).clipped);
+assert(predictionWindow(dfh,MAX_TIME-3600000,24).clipped);
 const sample=createPassSampler(sgp,site),satrec=json2satrec(gp);
-for(const offset of [0,3600000,4*86400000]){
+for(const offset of [0,3600000,2*86400000]){
  const time=sgp.epoch+offset,q=propagate(satrec,new Date(time)),fixed=eciToEcf(q.position,gstime(new Date(time))),expected=ecfToLookAngles(independentSite,fixed),actual=sample(time);
  assert(Math.abs(actual.elevation-expected.elevation/degree)<1e-7);assert(Math.abs(actual.range-expected.rangeSat)<1e-6);
 }
@@ -57,22 +61,22 @@ const archived=parseOfficialOrbit(fs.readFileSync(new URL('../assets/official-or
 const cutoff=archived.rows[0][0]+2.93*86400000;
 const train={...archived,missionId:'tiangong',rows:archived.rows.filter(row=>row[0]<=cutoff)};
 const extrap=predictionSource(train,{allowEstimate:true}),last=train.rows.at(-1)[0];
-assert.equal(extrap.recordEnd,last);assert.equal(extrap.end,last+OEM_ESTIMATE_LIMIT);
+assert.equal(extrap.recordEnd,last);assert.equal(extrap.end,MAX_TIME);
 assert.deepEqual(extrap.position(last,earthAxes(last)).inertial,interpolate(train.rows,last).position);
 for(const hours of [24,48,72]){
  const t=last+hours*3600000,truth=interpolate(archived.rows,t).position;
  const error=p=>Math.hypot(...p.map((v,i)=>v-truth[i]));
- assert(error(extrap.position(t,earthAxes(t)).inertial)<error(stateAt(train,t).position)*.2,'recent-node fit improves this held-out ephemeris at '+hours+' h');
+ const frozen=ellipseState(ellipseFromState({t:last,position:train.rows.at(-1).slice(1,4),velocity:train.rows.at(-1).slice(4)}),t);
+ assert(error(extrap.position(t,earthAxes(t)).inertial)<error(frozen.position)*.2,'shared continuation improves held-out ephemeris at '+hours+' h');
+ assert.deepEqual(extrap.position(t,earthAxes(t)).inertial,stateAt(train,t).position);
 }
-assert.throws(()=>extrap.position(extrap.end+1,earthAxes(extrap.end)),/有效轨道/);
-assert.equal(predictionSource({...train,missionId:'other'},{allowEstimate:true}).end,last);
-assert.equal(predictionSource(dfh,{allowEstimate:true}).end,sgp.end);
-assert.throws(()=>predictionWindow(train,train.rows[0][0]-1,24,{allowEstimate:true}),/有效轨道/);
-assert.throws(()=>predictionWindow(train,extrap.end,24,{allowEstimate:true}),/有效轨道/);
+assert.throws(()=>extrap.position(MAX_TIME+1,earthAxes(last)),/演算/);
+assert.equal(predictionSource({...train,missionId:'other'},{allowEstimate:true}).end,MAX_TIME);
+assert.equal(predictionWindow(train,train.rows[0][0]-864e5,24).mode,'estimate');
 const mixed=await predictPasses(train,site,last-12*3600000,24,{minimumElevation:5,allowEstimate:true});
 assert.equal(mixed.mode,'mixed');assert(mixed.passes.some(p=>p.estimated)&&mixed.passes.some(p=>!p.estimated));
 const rough=await predictPasses(train,site,last+60*3600000,24,{minimumElevation:5,allowEstimate:true});
-assert(rough.clipped&&rough.mode==='estimate'&&rough.end===extrap.end);
+assert(!rough.clipped&&rough.mode==='estimate'&&rough.end===last+84*3600000);
 assert(rough.passes.length&&rough.passes.every(p=>p.estimated));
 assert(passesToICS(rough,'Station').includes('[Estimate]'));
-console.log('Pass prediction: WGS84/SGP4 cross-check, grazing/window boundaries, eclipse/twilight, data validity, cancellation and ICS passed', {passes:result.passes.length});
+console.log('Pass prediction: WGS84/SGP4 cross-check, grazing/window boundaries, eclipse/twilight, shared continuation and record provenance, cancellation and ICS passed', {passes:result.passes.length});

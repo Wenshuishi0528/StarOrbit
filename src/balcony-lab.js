@@ -79,7 +79,7 @@ const template = `
  <div class="bal-actions"><button type="button" class="bal-primary" data-id="predict" data-t="计算过境"></button><button type="button" data-id="saveSite" data-t="保存地点"></button><button type="button" data-id="locate" data-t="使用设备位置"></button><button type="button" data-id="beijing" data-t="北京示例"></button><button type="button" data-id="now" data-t="使用现在"></button></div>
  <p data-id="locationNote" role="status" class="bal-note" style="grid-column:1/-1" hidden></p>
  </div></details>
- <details class="bal-config" data-id="sourcePanel"><summary data-id="sourceSummary"></summary><div class="bal-actions bal-source-actions"><button type="button" data-id="update" data-t="更新轨道数据"></button><button type="button" data-id="latest" data-t="使用本机最新星历"></button><button type="button" data-id="importTarget" data-t="为此目标导入轨道"></button><input data-id="orbitFile" type="file" accept=".json,.txt,.oem,.csv" hidden><button type="button" data-id="estimate" data-t="用已有星历估算"></button></div><p class="bal-note" style="padding:0 12px;white-space:pre-line" data-id="coverageText"></p></details>
+ <details class="bal-config" data-id="sourcePanel"><summary data-id="sourceSummary"></summary><div class="bal-actions bal-source-actions"><button type="button" data-id="update" data-t="更新轨道数据"></button><button type="button" data-id="latest" data-t="使用本机最新星历"></button><button type="button" data-id="importTarget" data-t="为此目标导入轨道"></button><input data-id="orbitFile" type="file" accept=".json,.txt,.oem,.csv" hidden><button type="button" data-id="estimate" data-t="按当前数据计算"></button></div><p class="bal-note" style="padding:0 12px;white-space:pre-line" data-id="coverageText"></p></details>
  <p class="bal-status" data-id="updateStatus" role="status" hidden></p>
  <p class="bal-status" data-id="status" role="status"></p>
  <div data-id="scene" hidden>
@@ -192,7 +192,7 @@ export function mountBalconyLab(container, sim, assets) {
     onManual: () => setFollow(false),
     redraw: draw,
   });
-  const image = sim.minimap?.image || new Image();
+  let image = sim.minimap?.image || new Image();
   let texture = null;
   const refreshTexture = () => {
     texture = earthTexture(image);
@@ -218,15 +218,15 @@ export function mountBalconyLab(container, sim, assets) {
     if (data) {
       try {
         const s = predictionSource(data, { archived }),
-          start = clockText(s.start).slice(0, 10),
-          end = clockText(s.end).slice(0, 10);
+          start = clockText(s.recordStart).slice(0, 10),
+          end = clockText(s.recordEnd).slice(0, 10);
         el.sourceSummary.textContent +=
           ' · ' +
           t('数据历元') +
           ' ' +
           clockText(s.epoch).slice(0, 10) +
           ' · ' +
-          t(s.kind === 'sgp4' ? 'SGP4 有效区间' : '原始星历区间') +
+          t('原始星历区间') +
           ' ' +
           start +
           ' — ' +
@@ -235,8 +235,8 @@ export function mountBalconyLab(container, sim, assets) {
       } catch {}
     }
     el.update.disabled = updating.has(id) || !Object.hasOwn(MISSIONS, id) || !orbitSource(id);
-    el.estimate.hidden = id !== 'tiangong';
-    el.estimate.disabled = id !== 'tiangong' || !data;
+    el.estimate.hidden = !data;
+    el.estimate.disabled = !data;
     el.latest.disabled = el.importTarget.disabled = !Object.hasOwn(MISSIONS, id);
   }
   function setSiteForm(s) {
@@ -454,7 +454,7 @@ export function mountBalconyLab(container, sim, assets) {
       missionId: id,
       data,
       origin: 'balcony',
-      estimated: source.recordEnd !== undefined && time > source.recordEnd,
+      estimated: time < source.recordStart || time > source.recordEnd,
     });
   };
   function cancelSearch() {
@@ -547,7 +547,7 @@ export function mountBalconyLab(container, sim, assets) {
       ? '记录回放'
       : current
         ? current.estimated
-          ? '本地短期估算'
+          ? '轨道延续演算'
           : replay || current.end < Date.now()
             ? '原始星历回放'
             : '有效星历'
@@ -558,6 +558,14 @@ export function mountBalconyLab(container, sim, assets) {
   }
   function draw() {
     if (!active || disposed) return;
+    const sharedImage = sim.minimap?.image;
+    if (sharedImage && sharedImage !== image) {
+      image.removeEventListener('load', refreshTexture);
+      image = sharedImage;
+      image.addEventListener('load', refreshTexture);
+      texture = earthTexture(image);
+      diskCache.raster = null;
+    }
     context();
     el.scene.hidden = !site;
     el.pick.disabled = el.clear.disabled = el.savePoint.disabled = !site;
@@ -715,8 +723,7 @@ export function mountBalconyLab(container, sim, assets) {
       }
       if (!s) return;
       source = predictionSource(data, { allowEstimate: !history });
-      if (history && (start < source.start || start >= source.end))
-        start = source.kind === 'sgp4' ? source.epoch : source.start;
+      if (history && (start < source.start || start >= source.end)) start = source.epoch;
       time = observationStart = start;
       el.start.value = inputText(start);
       draw();

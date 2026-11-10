@@ -87,7 +87,8 @@ export async function installSessionMemory(sim, assembly) {
     if (typeof saved?.switches?.[id] === 'boolean') $(id).checked = saved.switches[id];
   await Promise.allSettled([sim.environment.ready, sim.environment.weather.ready]);
   if (saved) {
-    if ([1000, 60000, 600000, 3600000].includes(saved.timeStep)) sim.timeStep = saved.timeStep;
+    if ([1000, 60000, 600000, 3600000, 86400000].includes(saved.timeStep))
+      sim.timeStep = saved.timeStep;
     if ([1, 10, 60, 300, 1000].includes(saved.speed)) sim.speed = saved.speed;
     const now = Date.now(),
       valid = validTime;

@@ -1,0 +1,385 @@
+{
+  "version": "1.40",
+  "date": "2026-11-10",
+  "status": "passed",
+  "source": {
+    "baseCommit": "9e5eb411b24e80115c7d36286ea0c99e5dddabf6",
+    "workingTree": "Native 500m atlas, shared minimap, perturbed orbit continuation, one-day stepping and previous/next high-elevation searches; pre-existing local directory maintenance changes preserved"
+  },
+  "environment": {
+    "os": "macOS 15.7.9 (24G830)",
+    "node": "v25.9.0",
+    "dataPython": "Python 3.9.6; rasterio 1.4.3, numpy 2.0.2, Pillow 11.3",
+    "browser": "headed Chromium 156.0.8078.81, native window, viewport:null"
+  },
+  "automated": {
+    "existingRegression": {
+      "status": "passed",
+      "evidence": [
+        "output/release140/regression-final.log",
+        "output/release140/regression-remaining.log"
+      ],
+      "scope": "All npm test commands executed; old frozen-outline assertion updated to require physical plane evolution, then orbit-path and all remaining commands passed. New continuation/highpoint edge tests and changed observation modules rerun after final edits."
+    },
+    "nativeProcessing": {
+      "status": "passed",
+      "evidence": "output/release140/native-processing-tests.log",
+      "checks": [
+        "Same exact QA median for 1/2/3/10 dates",
+        "128-row block boundary equivalence",
+        "Native spatial samples retained; legacy 2x2 remains unchanged",
+        "Empty deep-water input remains missing"
+      ]
+    },
+    "docs": {
+      "status": "passed",
+      "evidence": "output/release140/docs-final.log"
+    },
+    "i18n": {
+      "status": "passed",
+      "evidence": "output/release140/i18n-final.log"
+    },
+    "orbitContinuation": {
+      "status": "passed",
+      "evidence": "output/release140/continuation-final.log",
+      "holdoutHours": [
+        24,
+        48,
+        72
+      ],
+      "holdoutErrorKm": [
+        15.22,
+        8.38,
+        12.47
+      ],
+      "oldTwoBodyErrorKm": [
+        1284,
+        2424,
+        3638
+      ],
+      "source": "CMSE/BACC ephemeris, held-out sample intervals; not a guarantee for unknown future maneuvers",
+      "planeDriftDegreesPerDay": -6.1032,
+      "independentPassReferenceMaxSeconds": 0.3717
+    },
+    "highPass": {
+      "status": "passed",
+      "evidence": "output/release140/high-pass-final.log",
+      "checks": [
+        "Default60 and customizable0-90 degrees",
+        "Ordered previous/next, local solar day/night",
+        "8.2-day forward/backward synthetic events beyond72hours",
+        "Overlapping chunk boundaries; continuous visibility; source-boundary clipping",
+        "Cancellation and bounded cache",
+        "Conservative polar geometric rejection",
+        "Exact90-degree fractional-millisecond peak and far-date stopping guards",
+        "Real CSS ephemeris outside original sample interval"
+      ]
+    },
+    "format": {
+      "status": "passed",
+      "scope": "Changed production JavaScript; git diff --check"
+    }
+  },
+  "data": {
+    "status": "passed",
+    "inventoryTiles": 307,
+    "source": "NASA MCD43A4.061 native 500m RGB 1/4/3, public Microsoft Planetary Computer mirror",
+    "period": [
+      "2026-04-01",
+      "2026-06-30"
+    ],
+    "acquisitionCenters": [
+      "2026-04-09",
+      "2026-04-17",
+      "2026-04-25",
+      "2026-05-03",
+      "2026-05-11",
+      "2026-05-19",
+      "2026-05-27",
+      "2026-06-04",
+      "2026-06-12",
+      "2026-06-20"
+    ],
+    "sample": {
+      "phase": "final-encoded-atlas",
+      "bbox": [
+        115,
+        39,
+        118,
+        41
+      ],
+      "width": 720,
+      "height": 480,
+      "tile": "39-6.avif",
+      "tileAVIFBytes": 573431,
+      "qualityCountsBeforeCoastMask": [
+        466,
+        20459,
+        324675
+      ],
+      "avifPSNR": 43.92732620239258
+    },
+    "codecComparison": [
+      {
+        "speed": 8,
+        "bytes": 962348,
+        "seconds": 1.7191019169999997,
+        "psnr": 43.441715240478516
+      },
+      {
+        "speed": 6,
+        "bytes": 916669,
+        "seconds": 0.9973299589999995,
+        "psnr": 43.59749221801758
+      }
+    ],
+    "atlasSize": [
+      86400,
+      43200
+    ],
+    "detailGrid": [
+      48,
+      24
+    ],
+    "displayFiles": 1156,
+    "displayAVIFBytes": 276680665,
+    "gutter": 8,
+    "provenance": "assets/earth/day-2026-q2-500m/provenance.json.gz",
+    "coast": "Natural Earth 1:10m polygons, fractional native-grid mask; not a measured 2026 coastline",
+    "validation": [
+      "1156 display-file SHA256 and dimensions",
+      "Native processing and QA median equivalence",
+      "Land/lake/ocean mask, wrapped/coincident gutters",
+      "7 decoded atlas regions and4 seam comparisons",
+      "Actual500m vs1km Beijing comparison with city streaming off"
+    ]
+  },
+  "browser": {
+    "status": "passed",
+    "engine": "headed Chromium 156.0.8078.81, native window, viewport:null",
+    "url": "http://127.0.0.1:8771/",
+    "nativeViewport": null,
+    "500mChecks": [
+      "Default migration and explicit selection persistence",
+      "1km/NASA2004/500m source controls and actual texture/grid",
+      "Ground100km comparison;20,000km full Earth and return10km city",
+      "41/41 Beijing10m city tiles complete",
+      "Solar/stellar/planetary Earth share500m resources",
+      "English source label; full canvas/native-window alignment; WebGL errors0"
+    ],
+    "500mEvidence": [
+      "output/release140/browser-ground-results.json",
+      "output/release140/browser-worlds-results.json",
+      "output/release140/browser-final.log"
+    ],
+    "passChecks": {
+      "next": {
+        "query": {
+          "referenceTime": 1794783600000,
+          "direction": 1,
+          "minimumPeakElevation": 60,
+          "daylight": "any",
+          "timeToleranceMs": 1
+        },
+        "status": "found",
+        "mode": "estimate",
+        "peak": {
+          "time": 1794791424481,
+          "azimuth": 166.4053921098125,
+          "elevation": 89.4742586795871,
+          "range": 386.03764327988205,
+          "sunElevation": 19.44535498639849,
+          "illumination": 1
+        },
+        "estimated": true,
+        "chunks": 1
+      },
+      "previousNight": {
+        "query": {
+          "referenceTime": 1794783600000,
+          "direction": -1,
+          "minimumPeakElevation": 70,
+          "daylight": "night",
+          "timeToleranceMs": 1
+        },
+        "status": "found",
+        "mode": "estimate",
+        "peak": {
+          "time": 1793697704836,
+          "azimuth": 9.182963649293015,
+          "elevation": 73.968725440809,
+          "range": 403.47132804395824,
+          "sunElevation": -2.9162355107854503,
+          "illumination": 1
+        },
+        "estimated": true,
+        "chunks": 13
+      },
+      "nextDay": {
+        "query": {
+          "referenceTime": 1794783600000,
+          "direction": 1,
+          "minimumPeakElevation": 60,
+          "daylight": "day",
+          "timeToleranceMs": 1
+        },
+        "status": "found",
+        "mode": "estimate",
+        "peak": {
+          "time": 1794791424481,
+          "azimuth": 166.4053921098125,
+          "elevation": 89.4742586795871,
+          "range": 386.03764327988205,
+          "sunElevation": 19.44535498639849,
+          "illumination": 1
+        },
+        "estimated": true,
+        "chunks": 1
+      },
+      "cancelled": {
+        "status": "已停止计算",
+        "enabled": true
+      },
+      "polar": {
+        "status": "unreachable",
+        "text": "下一次高仰角过境 · ≥60° · 白天\n基准时间：2026-11-16 07:00:00 UTC+8\n该轨道在此地点的仰角上限约为 -3.5°，请降低门槛或更换地点。"
+      },
+      "jump": {
+        "time": 1794791424481,
+        "view": "orbit",
+        "altitude": 384.46107077892066,
+        "errors": [],
+        "gl": 0
+      },
+      "target": 1794791424481,
+      "viewport": null
+    },
+    "orbitChecks": {
+      "before": {
+        "time": 1798734600000,
+        "paused": true
+      },
+      "forward": {
+        "time": 1798821000000,
+        "paused": true,
+        "label": "+1d",
+        "title": "前进 1 天"
+      },
+      "backward": 1798734600000,
+      "restored": {
+        "step": 86400000,
+        "radio": "86400000"
+      },
+      "scenes": [
+        {
+          "time": 1794438000000,
+          "raan": 143.67112882136055,
+          "beta": -58.55099450577495,
+          "altitude": 385.86062740465513,
+          "sharedImage": true,
+          "image": "http://127.0.0.1:8771/assets/high-0c30a92ee6376baf.avif",
+          "status": "轨道演算 · 摄动接续"
+        },
+        {
+          "time": 1796943600000,
+          "raan": -31.937123728220193,
+          "beta": 16.51462441066546,
+          "altitude": 393.86195789597423,
+          "sharedImage": true,
+          "image": "http://127.0.0.1:8771/assets/high-0c30a92ee6376baf.avif",
+          "status": "轨道演算 · 摄动接续"
+        }
+      ],
+      "legacyMap": "http://127.0.0.1:8771/assets/high-fd5ce835986e29a6.jpg",
+      "profile": "最高仰角门槛为 70°；进入和离开按地平线计算。",
+      "balcony": {
+        "visible": true,
+        "continued": true
+      },
+      "english": "High-elevation passes\n\nFind the nearest qualifying pass before or after the reference time, independently of the forecast duration.\n\nMinimum peak elevation (°)\nLocal daylight at culmination\nDay and night\nDaytime\nNighttime\nPrevious\nNext",
+      "errors": [],
+      "gl": 0,
+      "viewport": null
+    },
+    "screenshots": [
+      "high-pass-controls-visible.png",
+      "high-pass-chart.png",
+      "high-pass-balcony.png",
+      "orbit-november.png",
+      "orbit-december.png",
+      "minimap-1.png",
+      "minimap-2.png"
+    ],
+    "screenshotDirectory": "output/release140",
+    "standalone": {
+      "version": "v1.40",
+      "source": "2026-q2-500m",
+      "grid": [
+        48,
+        24
+      ],
+      "dayOption": true,
+      "gl": 0,
+      "inlineAssets": false,
+      "threshold": "60",
+      "search": {
+        "status": "found",
+        "peak": 89.82731772065458
+      },
+      "errors": [],
+      "viewport": null
+    },
+    "standaloneEvidence": "output/release140/browser-standalone-results.json"
+  },
+  "builds": {
+    "status": "passed",
+    "artifacts": {
+      "standalone": {
+        "path": "StarOrbit.html",
+        "bytes": 1079444542,
+        "sha256": "e292926df75fd8eb948d3dc331e0ea112a227804eda8f070f755c77b1d961cd8"
+      },
+      "localIndex": {
+        "path": "dist-local/index.html",
+        "bytes": 700887,
+        "sha256": "9797c0fa9ddbbb6d55797d19cf37a4536f508ffb4863d1d0ca4e6b662315268c"
+      },
+      "localScript": {
+        "path": "dist-local/assets/app.bundle-4b911202334c3e63.js",
+        "bytes": 20334896,
+        "sha256": "4b911202334c3e6302411b56a402c232ccd3f81340cee5442d217e73278bf169"
+      },
+      "version": {
+        "version": "1.40"
+      }
+    },
+    "web": "not built or deployed for this batch"
+  },
+  "desktop": {
+    "status": "passed",
+    "runtimeRoot": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator",
+    "backup": "output/release140/runtime-before (v1.39)",
+    "launcherVersion": "1.40",
+    "selfCheck": "READY http://127.0.0.1:8771/",
+    "signature": "codesign --verify --deep --strict passed",
+    "servedHashes": "Index and script SHA256 matched dist-local over127.0.0.1:8771"
+  },
+  "publication": {
+    "status": "deploying",
+    "authorized": "2026-11-10",
+    "version": "1.40"
+  },
+  "cleanup": {
+    "retainedBackup": "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release140/runtime-before",
+    "removed": [
+      "/tmp/starorbit-day500",
+      "/tmp/starorbit-day500-env",
+      "/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator/output/release139/runtime-before",
+      "/Applications/.StarOrbit-v139-replaced.app"
+    ],
+    "reason": "Own temporary raster-processing files/environment and superseded generated runtime backup; latest v1.39 rollback retained. Source assets and compact provenance retained."
+  },
+  "remaining": [
+    "No portable ZIP created; no Safari/Firefox/mobile test"
+  ]
+}

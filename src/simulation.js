@@ -240,7 +240,7 @@ export class Simulation {
         : mode === 'interpolation'
           ? '星历插值'
           : mode === 'propagation'
-            ? '轨道演算 · 开普勒椭圆'
+            ? '轨道演算 · 摄动接续'
             : '轨道演算不可用'
     );
   }

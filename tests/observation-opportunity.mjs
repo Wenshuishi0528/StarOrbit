@@ -21,8 +21,8 @@ assert.equal(observationOpportunity({...pass,visible:[],path:[{...point(0),sunEl
 assert.equal(observationOpportunity({...pass,visible:[],path:[{...point(0),illumination:0}]},point).reason,'shadow');
 assert.equal(preferredOpportunity([{windows:[]},split],8000),1);assert.equal(durationClock(3599990),'1:00:00');
 const data={...JSON.parse(readFileSync('assets/orbit.json')),missionId:'tiangong'},source=predictionSource(data),sample=createPassSampler(source,BEIJING_BALCONY);
-const {passes}=await predictPasses(data,BEIJING_BALCONY,source.start,48,{minimumElevation:10});
-const models=passes.map(p=>observationOpportunity(p,sample,EXAMPLE_HORIZON)),index=preferredOpportunity(models,source.start),real=models[index],p=passes[index];
+const {passes}=await predictPasses(data,BEIJING_BALCONY,source.recordStart,48,{minimumElevation:10});
+const models=passes.map(p=>observationOpportunity(p,sample,EXAMPLE_HORIZON)),index=preferredOpportunity(models,source.recordStart),real=models[index],p=passes[index];
 assert.ok(real.duration>0&&real.duration<=p.end-p.start);assert.ok(real.windows.every(w=>w.peak.time>=w.start&&w.peak.time<=w.end));
 assert.ok(models.some(m=>m.windows.some(w=>w.startReason==='roof'||w.endReason==='roof')));
 const saved=balconyRecord({site:BEIJING_BALCONY,profile:EXAMPLE_HORIZON,profileKind:'example',missionId:'tiangong',time:p.maximum.time,minimumElevation:10,pass:p,data,source});
