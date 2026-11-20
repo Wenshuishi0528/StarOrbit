@@ -461,7 +461,8 @@ export function mountResourcePanel(weather) {
       return;
     }
     void w.env.solarObservations.ready;
-    if (!document.getElementById('helpPanel')?.hidden)
+    const help = document.getElementById('helpPanel');
+    if (help && !help.hidden && help.dataset.helpView !== 'location')
       document.getElementById('closeHelp')?.click();
     if (sim.flightLab?.active) sim.flightLab.close();
     if (!dialog.open) {

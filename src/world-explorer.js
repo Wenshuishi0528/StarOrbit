@@ -738,7 +738,23 @@ export function installWorldExplorer(sim) {
           paintLabels(status.labels);
           lastLabels = wall;
         }
-        hud.textContent = `${state.site.name || t('地表')}  ·  ${state.site.latitude.toFixed(4)}°, ${state.site.longitude.toFixed(4)}°\n${t('海拔')} ${state.site.height.toFixed(1)} m  ·  ${state.speedMps.toFixed(1)} m/s  ·  ${t('方位')} ${state.azimuth.toFixed(1)}°  /  ${t('仰角')} ${state.elevation.toFixed(1)}°`;
+        const env = sim.environment;
+        let nightHint = '';
+        if (status.sunAltitude < -6 && env.quality !== 'simple' && !settings.seeThroughTerrain) {
+          const floor = surface.heightAt(state.site.latitude, state.site.longitude);
+          if (Number.isFinite(floor) && state.site.height - floor <= 500) {
+            const fineNight =
+              env.settings.nightSource === '2025-500m' &&
+              state.site.latitude >= -65 &&
+              state.site.latitude <= 75;
+            nightHint =
+              '\n' +
+              t('夜光图约{resolution}，近看时街区灯光会连在一起。点「高空」看城市轮廓。', {
+                resolution: t(fineNight ? '500 米' : '1 公里'),
+              });
+          }
+        }
+        hud.textContent = `${state.site.name || t('地表')}  ·  ${state.site.latitude.toFixed(4)}°, ${state.site.longitude.toFixed(4)}°\n${t('海拔')} ${state.site.height.toFixed(1)} m  ·  ${state.speedMps.toFixed(1)} m/s  ·  ${t('方位')} ${state.azimuth.toFixed(1)}°  /  ${t('仰角')} ${state.elevation.toFixed(1)}°${nightHint}`;
         const s = surface.status();
         $('[data-surface-status]').textContent =
           (s.detailed

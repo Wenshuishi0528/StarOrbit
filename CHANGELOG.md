@@ -1,5 +1,21 @@
 # Changelog / 更新记录
 
+## v1.48 · 2026-11-20
+
+- 网页版、便携版和本机版均默认开启本地生成的极光，沿用已有的极光来源设置。本次公开发布也包含 v1.46–v1.47 的双模式帮助、巡天示例与空间站组合更新。
+- Locally generated auroras are enabled by default across the web, portable and local editions. Saved source selections are retained. This release also includes the guided tour, searchable handbook, Xuntian examples and station assembly updates from v1.46–v1.47.
+
+## v1.47 · 2026-11-20 · 本机版 / Local build
+
+- 导览高亮同时涵盖控件与标签，卡片避开操作区；详细手册可从小节定位到相关入口，再回到原段落。
+- Guide cards leave controls and their labels visible. Handbook sections can point to the relevant controls and return readers to their place.
+
+## v1.46 · 2026-11-20 · 本机版 / Local build
+
+- 帮助增加 13 页简易导览与 11 章详细手册，支持相关章节切换、页码、目录、搜索和续读。
+- 巡天增加织女星与北京同刻取景示例及原场景恢复；完整组合包含两艘神舟与一艘天舟。
+- Added a 13-page tour and an 11-chapter searchable handbook with linked topics, page numbers and reading history. The Xuntian examples show Vega and Beijing at the same instant and restore the previous scene. The full assembly now includes two Shenzhou spacecraft and one Tianzhou.
+
 ## v1.45 · 2026-11-10
 
 - 恢复原仓库的源码公开，继续采用 CC BY-NC 4.0；更新中英文介绍，新增中国星官图像专节与三组九宫格。

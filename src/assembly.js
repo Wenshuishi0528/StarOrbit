@@ -1,6 +1,18 @@
 import { Matrix4 } from 'three';
 
 export const PORT_KEYS = ['TH_WENTIAN', 'TH_MENGTIAN', 'TH_FORWARD', 'TH_LOWER', 'TH_AFT'];
+export function assemblyPresetSlots(preset) {
+  const full = preset === 'full';
+  const withLabs = full || preset === 'labs';
+  return {
+    TH_WENTIAN: withLabs ? 'WT' : '',
+    TH_MENGTIAN: withLabs ? 'MT' : '',
+    TH_FORWARD: full ? 'SZ' : '',
+    TH_LOWER: full ? 'SZ' : '',
+    TH_AFT: full ? 'TZ' : '',
+  };
+}
+
 export const MODULE_TYPES = ['TH', 'WT', 'MT', 'TZ', 'SZ', 'XT'];
 const matrix = (rows) => new Matrix4().set(...rows.flat());
 const portId = (coreId, port) => (coreId === 'TH' ? port : `${coreId}/${port}`);

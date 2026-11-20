@@ -31,94 +31,6 @@
   min-width: 0;
   font-size: 13px;
 }
-#helpPanel {
-  position: fixed;
-  right: 22px;
-  top: 145px;
-  z-index: 20;
-  width: 340px;
-  max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 100px);
-  overflow: auto;
-  padding: 20px;
-  background: #101e30;
-  border: 1px solid #416176;
-  border-radius: 14px;
-  box-shadow: 0 15px 50px #0007;
-  scrollbar-width: thin;
-}
-#helpPanel[hidden],
-#helpSpotlight[hidden],
-#tourActions[hidden],
-#replayTour[hidden],
-#helpDirectory[hidden] {
-  display: none;
-}
-.help-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.help-heading h2 {
-  margin: 6px 0 14px;
-  font-size: 18px;
-}
-.help-heading button {
-  padding: 2px 8px;
-  font-size: 20px;
-  background: transparent;
-}
-#helpContents p {
-  margin: 10px 0;
-}
-.help-topic {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 10px;
-  text-align: left;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  padding: 13px 0;
-  font-size: 13px;
-}
-.help-topic span:last-child {
-  color: var(--cyan);
-}
-#tourActions {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-#tourActions button {
-  flex: 1;
-  font-size: 12px;
-  min-width: 0;
-}
-#replayTour {
-  width: 100%;
-  font-size: 12px;
-  margin-top: 16px;
-}
-#helpDirectory {
-  border: 0;
-  background: transparent;
-  color: var(--cyan);
-  font-size: 11px;
-  padding: 0;
-  margin: 0 0 6px;
-}
-#helpPanel.guiding {
-  right: auto;
-  max-height: min(350px, calc(100dvh - 100px));
-}
-#helpPanel:focus {
-  outline: none;
-}
 #helpSpotlight {
   position: fixed;
   inset: 0;
@@ -154,50 +66,322 @@ body.immersive.help-active .toolbar {
 body.help-active #musicWidget {
   transition: none;
 }
-@media (max-width: 760px) {
-  #helpPanel {
-    top: 114px;
-    right: 12px;
-    padding: 16px;
-    width: 320px;
-  }
-  .help-heading h2 {
-    font-size: 16px;
-  }
-  #helpContents p {
-    font-size: 12px;
-    line-height: 1.65;
-  }
-  #welcomeDialog {
-    padding: 22px;
-  }
-  #helpPanel.guiding {
-    width: min(300px, calc(100vw - 24px));
-    max-height: min(310px, calc(100dvh - 100px));
-  }
-  .help-topic {
-    padding: 11px 0;
-  }
-}
 
+#helpSpotlight[hidden] {
+  display: none;
+}
+/* Keep navigation available while only the card body scrolls. */
+#helpPanel {
+  position: fixed;
+  right: 22px;
+  z-index: 20;
+  border: 1px solid #416176;
+  border-radius: 14px;
+  background: #101e30;
+  box-shadow: 0 15px 50px #0007;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: min(400px, calc(100vw - 24px));
+  top: min(145px, 14dvh);
+  max-height: min(680px, calc(100dvh - min(145px, 14dvh) - 12px));
+  padding: 18px;
+  overflow: hidden;
+  color: #e2edf4;
+}
+#helpPanel [hidden],
+#helpPanel[hidden],
+#helpPanel[data-visiting] {
+  display: none !important;
+}
+#helpPanel.guiding {
+  width: min(352px, calc(100vw - 24px));
+  right: 12px;
+  max-height: min(430px, calc(100dvh - 90px));
+}
+#helpPanel.reading {
+  width: min(740px, calc(100vw - 24px));
+  top: min(92px, 10dvh);
+  max-height: min(780px, calc(100dvh - min(92px, 10dvh) - 12px));
+}
+#helpPanel .help-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: none;
+  gap: 10px;
+}
+#helpPanel .help-heading h2 {
+  margin: 4px 0 0;
+  line-height: 1.3;
+  font-size: 18px;
+}
+#helpPanel .help-heading-row button {
+  flex: none;
+  min-width: 34px;
+  min-height: 34px;
+}
+.help-heading .help-kicker {
+  line-height: 1.4;
+}
+#helpContents {
+  min-height: 0;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+#helpContents p {
+  margin: 8px 0;
+}
+#helpContents p:first-child {
+  margin-top: 0;
+}
+.help-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  flex: none;
+}
+.help-links:not(:has(button:not([hidden]))) {
+  display: none;
+}
+#helpPanel .help-links button,
+#helpPanel .help-inline-link {
+  display: inline-block;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  color: var(--cyan);
+  min-width: 0;
+  padding: 3px 0;
+  margin: 0;
+  text-align: start;
+}
+#helpPanel .help-links button:hover,
+#helpPanel .help-inline-link:hover {
+  text-decoration: underline;
+}
+#helpPanel button:focus-visible,
+#helpPanel summary:focus-visible,
+#helpPanel a:focus-visible {
+  outline: 2px solid #a4e8ed;
+  outline-offset: -2px;
+}
+#helpContents .help-topic {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  text-align: start;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 6px;
+  line-height: 1.5;
+  font-size: 13px;
+}
+.help-topic[aria-current] {
+  color: #b4f3f3;
+  background: #19354a;
+}
+.help-index {
+  padding: 2px;
+}
 .help-topic-group {
   border-bottom: 1px solid var(--line);
 }
 .help-topic-group > summary {
   cursor: pointer;
-  padding: 13px 0;
+  padding: 9px 3px;
+  color: #e3eff4;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.help-topic-group .help-topic {
+  padding-inline-start: 18px !important;
+}
+#helpSearch {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  background: #12263a;
+  z-index: 1;
+}
+.help-practice {
+  margin: 8px 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.help-practice summary {
+  cursor: pointer;
+  color: var(--cyan);
   font-size: 13px;
 }
-.help-topic-group > .help-topic {
-  padding-left: 14px;
+.help-practice ol {
+  padding-inline-start: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.help-practice li + li {
+  margin-top: 6px;
+}
+.help-example-actions,
+.help-modes,
+.help-locators {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.help-example-actions button {
+  font-size: 12px;
+  min-width: 0;
+}
+.help-modes {
+  margin: 12px 0;
+}
+#helpPanel .help-modes button {
+  flex: 1 1 100px;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  font-size: 14px;
+}
+.help-resume {
+  width: 100%;
+  margin: 2px 0 10px;
+  text-align: start;
+  font-size: 13px;
+}
+#helpContents .help-count,
+#helpContents .help-note,
+#helpContents .help-status {
+  font-size: 12px;
+  color: #abcbda;
+}
+.help-status:empty {
+  display: none;
+}
+#helpContents .help-night,
+#welcomeDialog .help-night {
+  border-left: 2px solid #cda05e;
+  padding-inline-start: 10px;
+  color: #e0daca;
   font-size: 12px;
 }
-.help-topic-group > .help-topic:last-child {
-  border-bottom: 0;
-}
 #tourActions {
-  position: sticky;
-  bottom: -1px;
-  padding: 8px 0 0;
-  background: #101e30;
+  display: flex;
+  gap: 8px;
+  flex: none;
+  position: static;
+  padding: 6px 0 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+#tourActions button {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+  min-height: 32px;
+  padding: 5px 6px;
+}
+.help-location-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 12px;
+  padding-block: 5px;
+  border-block: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+#helpPanel[data-help-view='location'] {
+  width: min(280px, calc(100vw - 24px));
+}
+#helpPanel[data-help-view='location'] #helpContents {
+  display: none;
+}
+.help-article {
+  font-size: 14px;
+  line-height: 1.72;
+}
+#helpContents .help-article p {
+  font-size: inherit;
+  line-height: inherit;
+}
+.help-article :is(ol, ul) {
+  padding-inline-start: 1.45em;
+}
+.help-article li + li {
+  margin-top: 5px;
+}
+.help-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 9px 0;
+  font-size: 13px;
+}
+.help-article td,
+.help-article th {
+  padding: 6px 8px;
+  text-align: start;
+  vertical-align: top;
+  border: 1px solid #3b5364;
+  overflow-wrap: anywhere;
+}
+.help-article th {
+  background: #1c3443;
+}
+.help-article a {
+  color: #9fecf0;
+  text-underline-offset: 2px;
+}
+.help-article code {
+  color: #c0eceb;
+  white-space: normal;
+}
+@media (max-width: 760px) {
+  #helpPanel {
+    right: 12px;
+    width: min(390px, calc(100vw - 24px));
+  }
+  #helpPanel.reading {
+    inset: 8px 8px auto;
+    width: auto;
+    max-width: none;
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  #helpPanel.reading #helpContents {
+    flex: 1;
+  }
+  #helpPanel.guiding {
+    max-height: min(350px, calc(100dvh - 90px));
+    padding: 13px;
+  }
+  #helpPanel .help-heading h2 {
+    font-size: 16px;
+  }
+  #welcomeDialog {
+    padding: 20px;
+  }
+  .help-article {
+    font-size: 13px;
+  }
+}
+@media (max-height: 410px) {
+  #helpPanel.guiding {
+    padding: 8px 12px;
+    max-height: calc(100dvh - 24px);
+    gap: 2px;
+  }
+}
+
+#helpPanel .help-heading {
+  flex: 1;
+  min-width: 0;
 }

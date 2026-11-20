@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.45 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.48 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools, with exploration extending to ground roaming, the Solar System and interstellar travel.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.45 brings together recent updates: native 500 m MODIS daytime imagery, Earth science layers, 2D/3D stellar navigation, shared filtered pass lists, date and day/night selection, high-elevation searches, and balcony building/tree obstruction controls. This release restores public source access in the original repository and updates the introduction and Chinese sky gallery. [Full changelog](CHANGELOG.md).
+> In v1.48, locally generated auroras are enabled by default. The guide leaves controls and labels visible, and handbook sections can point to the relevant controls. The help includes a 13-page guided tour and an 11-chapter searchable handbook with saved reading positions. Two Xuntian examples show Vega and Beijing at the same instant. The full station preset includes two Shenzhou spacecraft and one Tianzhou. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 

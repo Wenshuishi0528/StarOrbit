@@ -543,6 +543,7 @@ export class Environment {
     this.starUniforms.pixelRatio.value = ratio;
   }
   save() {
+    if (this.sim.helpExampleActive) return;
     try {
       localStorage.setItem('tiangong-environment-v1', JSON.stringify(this.settings));
     } catch {}

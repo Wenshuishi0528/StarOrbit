@@ -1,200 +1,189 @@
+import { placeGuide, readingBounds } from './help-placement.js';
 import { restoreControlFocus } from './display-controls.js';
-import { t, onLanguageChange } from './i18n.js';
-import { WEB_BUILD } from './runtime-assets.js';
-const KEY = 'tiangong-help-v1',
-  $ = (id) => document.getElementById(id),
-  clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const topics = [
-  {
-    title: '过境与阳台预测',
-    group: '观测与操纵',
-    text: '阳台观测与过境预报可分别独立查询。普通预报支持24、48、72小时或一周；高仰角可查上一次、下一次，或设置截止日期生成条件列表，按昼夜、最高仰角和目视条件筛选。点击表格时刻查看详情，阳台另外考虑遮挡。历史回放使用原始星历区间。',
-    target: '#openFlightLab',
-  },
-  {
-    title: '星际穿梭',
-    group: '观测与操纵',
-    text: '在世界视图选择星际穿梭，搜索恒星后前往；H/N 前后、J/L 左右、K/I 升降，空格停止。中西星图显示当前体系的可用三维连线，选中后高亮并可从侧面观察。太阳附近沿用主页插画和巡天图源；也可打开太阳视角参考。可保存航点、拍照，返回太阳附近或进入太阳系继续探索。',
-    target: '.world-entry',
-  },
-  {
-    title: '星际导航图',
-    group: '观测与操纵',
-    text: '右下角星际导航图默认简易版，保留导航图、二维／三维、缩放、复位与停止；切换完整版可查看详细距离、地图中心、航迹与连线选项。点击只选择目标，滚轮缩放地图，拖动旋转三维球；布局自动记忆。',
-    target: '.world-entry',
-  },
-  {
-    title: '天体观测',
-    group: '观测与操纵',
-    text: '从工具列打开天体观测，切换火星、地球、太阳或月球。火星支持真实地形、红外与地质图、着陆点和地球望远镜视角；地球可切换多光谱、昼夜地表温度和高程图，叠加筛选矿点，也可选点进入地表。展开对比观察比较图层或日期，查找天文事件，拍照保存画面与来源。太阳系中可查看主要卫星系统。',
-    target: '#openPlanetaryObservatory',
-  },
-  {
-    title: '地表与太阳系',
-    group: '观测与操纵',
-    text: '从观察方式下方进入地表或太阳系。搜索地点或输入坐标，自由移动并输入海拔；地形、城市影像和天空沿用主页资源。点击画面后用 H/N 前后、J/L 左右、K/I 升降，W/S 俯仰、A/D 转向，空格停止；速度随高度增加。高度按钮可平滑往返地面、高空、近地轨道和完整地球。三个模式共用时间、星空图源与标注，可收藏地点和拍照。天空与标注中可开启「透过地形看星空」，默认关闭；照片沿用当前设置。右侧位置地图显示朝向、附近地名和比例尺，可缩放或折叠。',
-    target: '.world-entry',
-  },
-  {
-    title: '观察模型',
-    text: '左键拖动旋转，右键拖动平移，滚轮缩放。可以直接试一试，说明会保持打开。',
-    target: '#stage',
-  },
-  {
-    title: '切换航天器',
-    text: '在这里选择中国空间站或东方红一号。切换后，模型和轨道会一起更新。',
-    target: '#missionSelect',
-  },
-  {
-    title: '控制时间',
-    text: '选择 1s／1m／10m／1h／1d（一天），再点击前进或后退。暂停与倍速在同一面板中，拖动小地图和时间轴也能定位时刻。',
-    target: '.time-step-row',
-  },
-  {
-    title: '选择整体画质',
-    group: '选择画质',
-    text: '整体画质决定常驻底图；靠近地球后会按视野加载细节。“白天地表”默认2026 Q2的500米级AVIF，也可选择1公里或NASA原版。海岸与连续海色自然衔接，云层和反光随场景计算。若操作不流畅，可调低整体画质。',
-    target: '#earthQuality',
-  },
-  {
-    title: '选择星空画质',
-    group: '选择画质',
-    text: '星空显示默认选择“观赏增强 · 16K 银河”，呈现更细致的银河背景。在箭头指向的下拉框中，也可以切换为“4K · 星表观赏”或摄影风格。',
-    target: '#skyExposure',
-  },
-  {
-    title: '探索地球与星空',
-    text: '在「星图标注」切换中西体系，用中国星官导航查看成员图并定位。「星官插画亮度」和「星座插画亮度」各自保存，默认100%；总览透明度独立调节。「星官插画」与适合广角的「总览插画」分别控制；图像保留原画，按天区和整体方向摆放。类别共享，主画面、取景和照片的显示开关各自独立。地球地点标识在同栏。赤道坐标网与黄道随模拟日期更新，中西体系共用。',
-    target: '#settings-annotations',
-  },
-  {
-    title: '播放音乐',
-    text: '点击播放按钮开始音乐。打开播放列表可以选曲、导入音乐、删除和调整顺序。',
-    target: '#musicExpanded',
-    music: true,
-  },
-  {
-    title: '隐藏航天器名称',
-    text: '取消勾选“显示航天器名称”，即可隐藏模型旁的名称，让画面更简洁。需要查看名称时，再次勾选即可。',
-    target: '#craftLabelsControl',
-  },
-  {
-    title: '数据与更新',
-    group: '数据与保存',
-    text: WEB_BUILD
-      ? '网页版默认使用内置轨道和云图。可导入轨道文件与云图快照；数据区间外继续椭圆轨道演算。'
-      : '桌面版支持内置数据、在线更新和文件导入。轨道区间外继续椭圆轨道演算，数据栏显示当前计算模式。',
-    target: '#openDataResources',
-  },
-  {
-    title: '云图库管理',
-    group: '数据与保存',
-    text: '在云图库选择已保存的版本，可使用、收藏、导出或删除。删除会同时移除当前浏览器副本和对应本机文件；最新版本与收藏也可确认删除。正在使用时先切换为内置静态云图。自动清理继续保护当前与收藏版本。',
-    target: '#openCloudHistory',
-  },
-  {
-    title: '生日星空卡',
-    group: '数据与保存',
-    text: '输入生日，制作十二星座与二十八宿纪念卡。正面可编辑祝福、赠予落款和插画；背面独立选择东方或西方天区，以及银河或 DSS 光学背景。插画、连线、星名、坐标网分别控制，可调亮度、缩放、平移与旋转。横版、竖版或与正面同尺寸，单面导出 PNG，双面保存 ZIP。未填出生时间时采用当天20:00；DSS影像首次加载需联网。',
-    target: '#openBirthdayCard',
-  },
-  {
-    title: '保存与分享',
-    group: '数据与保存',
-    text: '设置、导入模型和音乐保存在当前浏览器中。清除网站数据会删除这些内容；使用“场景分享”导出场景文件。桌面版与网页版的本地数据分别保存。',
-    target: '#exportScene',
-  },
-  {
-    title: '巡天取景与太阳观测',
-    text: '打开「巡天取景」，搜索天体或城市并拍照；太阳观测提供带观测日期的 SDO 实拍。改变模拟时间不会生成其它日期的太阳影像。打开取景会将主镜头聚焦巡天；十字线下可查看已知目标的实际距离。',
-    target: '#openXuntianMap',
-    group: '观测与操纵',
-  },
-  {
-    title: '主页面近轨操纵',
-    text: '在「航天器姿态」打开导航球，点击球面取得操纵焦点。W/S、A/D、Q/E 转向；R 切换 RCS，H/N、J/L、I/K 平移，T 切换 SAS。镜头目标与驾驶对象分别选择。',
-    target: '#attitudeNavball',
-    group: '观测与操纵',
-  },
-  {
-    title: '自由飞行与对接',
-    text: '从当前空间站组合选择神舟或天舟开始独立飞行，可保存后继续。任务实验室的交会对接训练使用独立教学场景；普通场景导出不包含自由飞行存档。',
-    target: '#openFreeFlight',
-    group: '观测与操纵',
-  },
-  {
-    title: '城市影像与真实地形',
-    text: '从城市库查看或下载影像，已内置北京和西雅图。在地表加载与缓存中开启随视野加载，卫星影像与高程半径分别默认120和160公里，可调20至400公里；主页地球复用缓存。清理漫游影像会保留离线城市包，清理后移动或点击继续加载恢复。真实地形按离地高度选择细节。',
-    target: '#openCityTerrain',
-    group: '地球与星空数据',
-  },
-  {
-    title: '高清星空与星座',
-    text: '放大天区后按需加载所选星空影像，主画面、巡天和照片共用。内置宇宙悬崖来自 2022 年 JWST 红外观测；联网图源在覆盖之外会回退。星座插画和星名可在「地理与星图」分别开关。',
-    target: '#skyDetailSource',
-    group: '地球与星空数据',
-  },
-  {
-    title: '缓存与离线保存',
-    text: '在「数据与资源」查看来源、日期与缓存。城市的完整离线下载不自动淘汰，天空与高程采用有上限的缓存；清除网站数据会影响本地保存。场景文件不包含用户模型、音乐和下载缓存。',
-    target: '#openDataResources',
-    group: '数据与保存',
-  },
-  {
-    title: '宇宙探索馆',
-    text: '从工具列打开宇宙探索馆，旋转查看黑洞、中子星、脉冲星、超新星和流星，调整参数或拖动演示进度。图像是教学示意；可保存带说明的示意图，或定位真实遗迹和宿主星系。演示时间独立于主场景。',
-    target: '#openCosmicLab',
-    group: '观测与操纵',
-  },
-  {
-    title: '月球观测',
-    text: '从月球设置、巡天月球专属卡片或任务实验室进入。按地点和独立时间观察月相、天平动与升落；三维月面支持完整正式地名搜索、着陆点与独立密度控制，中国任务用红星。顶部月面图层可切换中科院地质分区，在三维球上旋转查看；展开原图可对照图例与年代尺。高程为伪彩、图鉴有辅助照明；导出包含当前标注，巡天交接使用主场景时间。',
-    target: '#openLunarLab',
-    group: '观测与操纵',
-  },
-];
-const TOUR_LENGTH = 8;
+import { getLanguage, onLanguageChange, t } from './i18n.js';
+import { getHelpContent } from './help-content.js';
+import { manualLocations } from './help-locations.js';
+import { runHelpExample, restoreHelpExample, hasHelpExample } from './help-examples.js';
+
+const WELCOME_KEY = 'tiangong-help-v1';
+const READING_KEY = 'starorbit-help-reading-v1';
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function node(tag, text, className) {
+  const element = document.createElement(tag);
+  if (text !== undefined) element.textContent = text;
+  if (className) element.className = className;
+  return element;
+}
+
+function button(label, click, className) {
+  const el = node('button', label, className);
+  el.type = 'button';
+  el.onclick = click;
+  return el;
+}
+
+function readProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(READING_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
 export function installHelp(music) {
   const panel = $('helpPanel'),
-    welcome = $('welcomeDialog'),
-    spotlight = $('helpSpotlight');
-  let step = null,
-    touring = false,
-    marked = null,
-    restore = [],
+    contents = $('helpContents'),
+    welcome = $('welcomeDialog');
+  const spotlight = $('helpSpotlight'),
+    progress = readProgress();
+  let data = getHelpContent(getLanguage());
+  let sections = data.manualChapters.flatMap((ch) => ch.sections);
+  let view = 'home',
+    tourOrigin = null,
+    manualOrigin = null,
+    location = null,
+    directoryFocus = '',
+    search = '',
+    searchIndex;
+  let tourId = validTour(progress.tour)?.id || data.tourPages[0].id;
+  let sectionId = validSection(progress.section)?.id || sections[0].id;
+  let lastMode = ['tour', 'manual'].includes(progress.mode) ? progress.mode : '';
+  let visitedTour = !!progress.visitedTour || lastMode === 'tour';
+  let visitedManual = !!progress.visitedManual || lastMode === 'manual';
+  let manualOffset = Number.isFinite(progress.offset) ? Math.max(0, progress.offset) : 0;
+  let marked = null,
     returnFocus = null,
-    frame = 0;
-  const remember = () => {
+    restore = [],
+    frame = 0,
+    selector = '';
+  let busyExample = false,
+    statusMessage = '',
+    practiceOpen = false;
+  const openChapters = new Set();
+  const workspacePanels = 'dialog, .world-explorer, .planet-observatory, #xuntianScope';
+  const openWorkspaces = () =>
+    Array.from(document.querySelectorAll(workspacePanels)).filter((el) =>
+      el.tagName === 'DIALOG' ? el.open : !el.hidden
+    );
+  let previouslyOpen = new Set();
+  const dirScroll = { tourIndex: 0, manualIndex: 0 };
+
+  function validTour(id) {
+    return data.tourPages.find((page) => page.id === id);
+  }
+  function validSection(id) {
+    return sections.find((s) => s.id === id);
+  }
+  function chapterOf(id) {
+    return data.manualChapters.find((ch) => ch.sections.some((s) => s.id === id));
+  }
+  function saveProgress() {
+    if (!lastMode) return;
     try {
-      localStorage.setItem(KEY, 'seen');
+      localStorage.setItem(
+        READING_KEY,
+        JSON.stringify({
+          tour: tourId,
+          section: sectionId,
+          mode: lastMode,
+          offset: manualOffset,
+          visitedTour,
+          visitedManual,
+        })
+      );
     } catch {}
-  };
-  const beginMusic = () => {
-    if (music.settings.autoplay && music.audio.paused) music.play();
-  };
-  // Layout work is event-driven and coalesced: no animation-loop measurements.
-  const schedule = () => {
-    if (panel.hidden || step === null || frame) return;
-    frame = requestAnimationFrame(() => {
-      frame = 0;
-      place();
-    });
-  };
-  const observer = new ResizeObserver(schedule);
-  const clearTarget = () => {
+  }
+  function rememberPosition() {
+    if (view === 'manual') manualOffset = contents.scrollTop;
+    if (view === 'manualIndex' || view === 'tourIndex') dirScroll[view] = contents.scrollTop;
+    saveProgress();
+  }
+
+  function clearTarget() {
     observer.disconnect();
     cancelAnimationFrame(frame);
     frame = 0;
+    panel.style.maxHeight = '';
     marked?.classList.remove('tour-highlight');
     marked = null;
     spotlight.toggleAttribute('hidden', true);
     for (const fn of restore.reverse()) fn();
     restore = [];
-  };
-  function target() {
+  }
+  // Hidden collapsible sections and menus can be revealed without running their commands.
+  const revealable = '.settings-content, #toolbarActions, #viewActions, #musicExpanded';
+  function availableLocation(entry) {
+    const el = document.querySelector(entry.selector);
+    if (!el || el.matches(':disabled') || el.closest('[inert], [aria-disabled="true"]'))
+      return null;
+    for (let part = el; part && part !== document.body; part = part.parentElement) {
+      if (!part.matches(revealable) && (part.hidden || getComputedStyle(part).display === 'none'))
+        return null;
+    }
+    return el;
+  }
+  function revealLocationMenus(el) {
+    for (const [menuId, toggleId] of [
+      ['toolbarActions', 'toolsToggle'],
+      ['viewActions', 'viewMenuToggle'],
+    ]) {
+      const menu = $(menuId),
+        toggle = $(toggleId);
+      if (menu.contains(el) && menu.hidden) {
+        toggle.click();
+        restore.push(() => {
+          if (!menu.hidden && toggle.getAttribute('aria-expanded') === 'true') toggle.click();
+        });
+      }
+    }
+    const toolbar = el.closest('#toolbarActions');
+    if (toolbar && toolbar.scrollHeight > toolbar.clientHeight) {
+      const previous = toolbar.scrollTop;
+      el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      restore.push(() => {
+        toolbar.scrollTop = previous;
+      });
+    }
+  }
+  function findTarget() {
+    if (!selector) return null;
+    const el = document.querySelector(selector);
+    if (view === 'location') return availableLocation(location);
+    if (el?.hidden && el.id === 'openXuntianMap') return $('missionSelect');
+    if (el?.closest('#toolbarActions')?.hidden) return $('toolsToggle');
+    return el;
+  }
+  function schedule() {
+    if (
+      panel.hidden ||
+      panel.hasAttribute('data-visiting') ||
+      (view !== 'tour' && view !== 'location') ||
+      frame
+    )
+      return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (panel.hasAttribute('data-visiting')) return;
+      for (const control of contents.querySelectorAll('[data-help-port]')) {
+        control.disabled = !document.querySelector(control.dataset.helpPort);
+      }
+      if (view === 'location' && !findTarget()) {
+        returnToSection();
+        return;
+      }
+      if (findTarget() !== marked) highlight();
+      else place();
+    });
+  }
+  const observer = new ResizeObserver(schedule);
+  function highlight() {
     clearTarget();
-    const topic = topics[step];
-    if (topic.music) {
+    const el = findTarget();
+    if (!el) return;
+    if (view === 'location') revealLocationMenus(el);
+    if (el.closest('#musicExpanded')) {
       const expanded = music.dock.expanded;
       music.dock.guided = true;
       music.dock.expand();
@@ -203,25 +192,23 @@ export function installHelp(music) {
         if (!expanded) music.dock.collapse();
       });
     }
-    let el = document.querySelector(topic.target);
-    if (!el) return;
-    if (el.closest('#toolbarActions')?.hidden) el = $('toolsToggle');
     const content = el.closest('.settings-content');
     if (content?.hidden) {
       content.hidden = false;
-      const button = document.querySelector(`[aria-controls="${content.id}"]`);
-      button?.setAttribute('aria-expanded', 'true');
+      const trigger = document.querySelector(`[aria-controls="${content.id}"]`);
+      trigger?.setAttribute('aria-expanded', 'true');
       restore.push(() => {
         content.hidden = true;
-        button?.setAttribute('aria-expanded', 'false');
+        trigger?.setAttribute('aria-expanded', 'false');
       });
     }
-    for (let parent = el.parentElement; parent; parent = parent.parentElement)
+    for (let parent = el.parentElement; parent; parent = parent.parentElement) {
       if (parent.tagName === 'DETAILS' && !parent.open) {
         const detail = parent;
         detail.open = true;
         restore.push(() => (detail.open = false));
       }
+    }
     const aside = el.closest('aside');
     if (aside) {
       const scroll = aside.scrollTop;
@@ -232,16 +219,17 @@ export function installHelp(music) {
     el.classList.add('tour-highlight');
     observer.observe(el);
     observer.observe(panel);
-    for (const section of document.querySelectorAll('aside > section')) observer.observe(section);
     place();
   }
   function place() {
     if (!marked || panel.hidden) return;
     const w = innerWidth,
       h = innerHeight,
-      raw = marked.getBoundingClientRect(),
+      raw = readingBounds(marked),
       aside = marked.closest('aside'),
-      clip = aside?.getBoundingClientRect();
+      menu = marked.closest('#toolbarActions'),
+      scrollArea = aside || (menu?.clientHeight ? menu : null),
+      clip = scrollArea?.getBoundingClientRect();
     let left = Math.max(8, raw.left, clip?.left ?? 0),
       right = Math.min(w - 8, raw.right, clip?.right ?? w),
       top = Math.max(8, raw.top, clip?.top ?? 0),
@@ -257,29 +245,27 @@ export function installHelp(music) {
       bottom = cy + rh / 2;
     }
     if (right <= left || bottom <= top) {
+      panel.style.left = panel.style.top = panel.style.maxHeight = '';
       spotlight.toggleAttribute('hidden', true);
       return;
     }
     const r = { left: left - 4, right: right + 4, top: top - 4, bottom: bottom + 4 },
-      pw = panel.offsetWidth,
-      ph = panel.offsetHeight,
-      gap = 28,
       cx = (left + right) / 2,
       cy = (top + bottom) / 2;
-    const candidates = [
-      { x: r.right + gap, y: cy - ph / 2 },
-      { x: r.left - gap - pw, y: cy - ph / 2 },
-      { x: cx - pw / 2, y: r.top - gap - ph },
-      { x: cx - pw / 2, y: r.bottom + gap },
-    ];
-    const overlap = (p) =>
-      Math.max(0, Math.min(p.x + pw, r.right) - Math.max(p.x, r.left)) *
-      Math.max(0, Math.min(p.y + ph, r.bottom) - Math.max(p.y, r.top));
-    const positions = candidates.map((p) => ({
-      x: clamp(p.x, 12, w - pw - 12),
-      y: clamp(p.y, 80, h - ph - 12),
-    }));
-    const position = positions.reduce((best, p) => (overlap(p) < overlap(best) ? p : best));
+    // Measure the normal card again on resize, font reflow or a changed topic.
+    panel.style.maxHeight = '';
+    const workspace = scrollArea || marked.closest('.toolbar, #xuntianScope');
+    const position = placeGuide(
+      r,
+      workspace?.getBoundingClientRect(),
+      w,
+      h,
+      panel.offsetWidth,
+      panel.offsetHeight
+    );
+    panel.style.maxHeight = position.maxHeight + 'px';
+    const pw = panel.offsetWidth,
+      ph = panel.offsetHeight;
     panel.style.left = position.x + 'px';
     panel.style.top = position.y + 'px';
     spotlight.toggleAttribute('hidden', false);
@@ -318,131 +304,569 @@ export function installHelp(music) {
     }
     $('helpArrow').setAttribute('d', `M${a.join(' ')} L${b.join(' ')}`);
   }
-  function render() {
-    const selected = step !== null;
-    panel.classList.toggle('guiding', selected);
-    panel.style.left = panel.style.top = '';
-    $('helpProgress').textContent = touring ? `${step + 1} / ${TOUR_LENGTH}` : t('使用指南');
-    $('helpTitle').textContent = t(selected ? topics[step].title : '帮助与操作说明');
-    $('tourActions').hidden = !selected;
-    $('replayTour').hidden = selected;
-    $('helpDirectory').hidden = !selected;
-    $('tourPrevious').disabled = step === 0;
-    $('tourNext').textContent = t(
-      step === (touring ? TOUR_LENGTH : topics.length) - 1
-        ? touring
-          ? '完成导览'
-          : '完成介绍'
-        : '下一个'
+  const nightTip =
+    '画面很暗？空间站可能正飞过夜晚的海面。等它飞到阳光下，或把轨道时间轴拖到金色的日照段。';
+  function leaveExample() {
+    if (busyExample || hasHelpExample()) {
+      // The controller serializes restore even if the first target is still loading.
+      restoreHelpExample().catch((error) => console.warn('StarOrbit help example', error));
+    }
+  }
+  function go(nextView, id, options = {}) {
+    rememberPosition();
+    if (!(nextView === view && (nextView === 'tour' ? id === tourId : id === sectionId)))
+      leaveExample();
+    if (view === 'tour' && manualOrigin && nextView !== 'manual') manualOrigin = null;
+    if (nextView === 'home') {
+      tourOrigin = null;
+      manualOrigin = null;
+    }
+    clearTarget();
+    panel.removeAttribute('data-visiting');
+    if (nextView === 'location') previouslyOpen = new Set(openWorkspaces());
+    location = options.location || null;
+    selector = location?.selector || '';
+    view = nextView;
+    statusMessage = '';
+    practiceOpen = false;
+    if (view === 'tour') {
+      tourId = validTour(id)?.id || data.tourPages[0].id;
+      lastMode = 'tour';
+      visitedTour = true;
+    } else if (view === 'manual') {
+      if (sectionId !== id || !options.resume) manualOffset = 0;
+      sectionId = validSection(id)?.id || sections[0].id;
+      lastMode = 'manual';
+      visitedManual = true;
+    }
+    // Focus first so opening a compact toolbar can survive its outside-focus handler.
+    panel.focus({ preventScroll: true });
+    render();
+    saveProgress();
+    if (view === 'location') marked?.focus({ preventScroll: true });
+  }
+  function topicRow(parent, label, callback, key, id) {
+    const item = button(label, callback, 'help-topic');
+    item.dataset[key] = id;
+    if (directoryFocus === id) item.setAttribute('aria-current', 'location');
+    parent.append(item);
+    return item;
+  }
+  function home() {
+    contents.append(
+      node('p', t('第一次来，可以跟着简易导览边看边试。想查某项功能，打开详细手册。'))
     );
-    const contents = $('helpContents');
-    contents.replaceChildren();
-    if (selected) {
-      const p = document.createElement('p');
-      p.textContent = t(topics[step].text);
-      contents.append(p);
+    const modes = node('div', undefined, 'help-modes');
+    const start = button(t('简易导览'), () => go('tour', data.tourPages[0].id), 'primary');
+    start.id = 'replayTour';
+    const manual = button(t('详细手册'), () => {
+      tourOrigin = null;
+      go('manualIndex');
+    });
+    manual.id = 'helpManual';
+    modes.append(start, manual);
+    contents.append(modes);
+    if (lastMode) {
+      const isTour = lastMode === 'tour';
+      const label = isTour ? validTour(tourId).title : validSection(sectionId).title;
+      const resume = button(
+        t('继续上次：{title}', { title: label }),
+        () => {
+          tourOrigin = null;
+          go(isTour ? 'tour' : 'manual', isTour ? tourId : sectionId, { resume: true });
+        },
+        'help-resume'
+      );
+      resume.id = 'helpResume';
+      contents.append(resume);
+    }
+    contents.append(node('p', t(nightTip), 'help-night'));
+  }
+  function searchSections(query) {
+    if (!searchIndex) {
+      const parser = document.createElement('template');
+      searchIndex = new Map();
+      for (const chapter of data.manualChapters) {
+        for (const section of chapter.sections) {
+          parser.innerHTML = section.html;
+          searchIndex.set(
+            section.id,
+            (
+              chapter.title +
+              ' ' +
+              section.title +
+              ' ' +
+              parser.content.textContent
+            ).toLocaleLowerCase()
+          );
+        }
+      }
+    }
+    const terms = query.trim().toLocaleLowerCase().split(/\s+/);
+    return sections.filter((s) => terms.every((term) => searchIndex.get(s.id).includes(term)));
+  }
+  function indexResume(isTour) {
+    if (isTour ? !visitedTour : !visitedManual) return;
+    const page = isTour ? validTour(tourId) : validSection(sectionId);
+    const resume = button(
+      t('继续上次：{title}', { title: page.title }),
+      () => go(isTour ? 'tour' : 'manual', page.id, { resume: true }),
+      'help-resume'
+    );
+    contents.append(resume);
+  }
+  function manualIndex() {
+    const input = node('input');
+    input.type = 'search';
+    input.id = 'helpSearch';
+    input.placeholder = t('搜索按钮、功能或问题');
+    input.setAttribute('aria-label', input.placeholder);
+    input.value = search;
+    const list = node('div', undefined, 'help-index');
+    const addRow = (parent, section) =>
+      topicRow(
+        parent,
+        section.title,
+        () => {
+          directoryFocus = section.id;
+          go('manual', section.id);
+        },
+        'sectionId',
+        section.id
+      );
+    function showResults() {
+      list.replaceChildren();
+      if (search.trim()) {
+        const results = searchSections(search);
+        list.append(node('p', t('找到 {count} 个小节', { count: results.length }), 'help-count'));
+        for (const section of results) addRow(list, section);
+        return;
+      }
+      data.manualChapters.forEach((chapter, i) => {
+        const group = node('details', undefined, 'help-topic-group');
+        group.open = openChapters.has(chapter.id);
+        group.dataset.chapterId = chapter.id;
+        group.append(node('summary', i + 1 + '. ' + chapter.title));
+        for (const section of chapter.sections) addRow(group, section);
+        group.addEventListener('toggle', () => {
+          if (!group.isConnected) return;
+          if (group.open) openChapters.add(chapter.id);
+          else openChapters.delete(chapter.id);
+        });
+        list.append(group);
+      });
+    }
+    input.oninput = () => {
+      search = input.value;
+      contents.scrollTop = 0;
+      showResults();
+    };
+    indexResume(false);
+    contents.append(input, list);
+    showResults();
+  }
+
+  const locatorLinks = {
+    1: [['显示航天器名称', '#craftLabelsControl']],
+    2: [['播放音乐', '#musicExpanded']],
+    4: [['太阳翼控制', '#animate']],
+    7: [['地球地点标识', '#geographyEnabled']],
+    8: [
+      ['显示导航球', '#attitudeNavball'],
+      ['交会对接', '#openFlightLab'],
+    ],
+  };
+  function pointAt(css) {
+    selector = css;
+    highlight();
+  }
+  function examples() {
+    const actions = node('div', undefined, 'help-example-actions');
+    const note = node('p', statusMessage, 'help-status');
+    note.setAttribute('role', 'status');
+    const labels = { vega: '看织女星', beijing: '看北京', restore: '回到原场景' };
+    for (const [key, label] of Object.entries(labels)) {
+      const item = button(t(label), async () => {
+        if (busyExample) return;
+        if (view === 'manual' && key !== 'restore') {
+          // The compact guide leaves the telescope and its exterior view visible.
+          manualOrigin = { id: sectionId, offset: contents.scrollTop };
+          go('tour', 'xuntian');
+          contents.querySelector(`[data-help-example="${key}"]`)?.click();
+          return;
+        }
+        busyExample = true;
+        updateButtons();
+        note.textContent = t('正在准备…');
+        try {
+          if (key === 'restore') await restoreHelpExample();
+          else await runHelpExample(key);
+          if (item.isConnected) {
+            statusMessage =
+              key === 'restore' ? t('已回到原场景') : t('示例已暂停 · 2026-11-05 13:44（UTC+8）');
+            note.textContent = statusMessage;
+            if (view === 'tour')
+              pointAt(key === 'restore' ? validTour(tourId).target : '#xtCanvas');
+          }
+        } catch (error) {
+          note.textContent = t(error.message || '操作失败');
+        } finally {
+          busyExample = false;
+          updateButtons();
+          // A different help page may have been opened before loading finished.
+          updateExampleControls();
+        }
+      });
+      item.dataset.helpExample = key;
+      actions.append(item);
+    }
+    function updateButtons() {
+      for (const item of actions.children)
+        item.disabled =
+          busyExample || (item.dataset.helpExample === 'restore' && !hasHelpExample());
+    }
+    contents.append(actions, note);
+    updateButtons();
+  }
+  function updateExampleControls() {
+    for (const item of contents.querySelectorAll('[data-help-example]'))
+      item.disabled = busyExample || (item.dataset.helpExample === 'restore' && !hasHelpExample());
+  }
+  function tourPage(page, pageNumber) {
+    selector = page.target;
+    const text =
+      page.touchText && matchMedia('(pointer: coarse)').matches ? page.touchText : page.text;
+    for (const line of text.split('\n').filter(Boolean)) contents.append(node('p', line));
+    if (page.practice) {
+      const box = node('details', undefined, 'help-practice');
+      box.open = practiceOpen;
+      box.append(node('summary', page.practice.title));
+      const list = node('ol');
+      const ports = [
+        '#TH_FORWARD',
+        '[data-core="TH_FORWARD"] select[id="TH_FORWARD/TH_FORWARD"]',
+        '#TH_FORWARD',
+      ];
+      page.practice.steps.forEach((line, i) => {
+        const row = node('li', line);
+        const id = ports[i];
+        if (id) {
+          const locate = button(t('定位接口'), () => pointAt(id), 'help-inline-link');
+          locate.dataset.helpPort = id;
+          locate.disabled = !document.querySelector(id);
+          row.append(' ', locate);
+        }
+        list.append(row);
+      });
+      box.append(list);
+      box.ontoggle = () => {
+        practiceOpen = box.open;
+        schedule();
+      };
+      contents.append(box);
+    }
+    if (page.extra) contents.append(node('p', page.extra, 'help-note'));
+    if (pageNumber === 6) {
+      if ($('openXuntianMap')?.hidden)
+        contents.append(node('p', t('选择示例将进入中国空间站任务。'), 'help-note'));
+      examples();
+    }
+    const links = node('div', undefined, 'help-locators');
+    for (const [label, css] of locatorLinks[pageNumber] || []) {
+      if (document.querySelector(css))
+        links.append(button(t(label), () => pointAt(css), 'help-inline-link'));
+    }
+    if (links.children.length) contents.append(links);
+  }
+  function handleManualLinks(event) {
+    const a = event.target.closest('a[href]');
+    if (!a) return;
+    const hash = a.getAttribute('href');
+    if (!hash?.startsWith('#')) return;
+    event.preventDefault();
+    const id = hash.slice(1);
+    const section = validSection(id) || data.manualChapters.find((c) => c.id === id)?.sections[0];
+    if (section) go('manual', section.id);
+  }
+  const locationLinks = node('div', undefined, 'help-location-links');
+  locationLinks.setAttribute('role', 'group');
+  contents.before(locationLinks);
+  const locationAvailability = new MutationObserver(() => {
+    if (view === 'manual') refreshLocationButtons();
+    if (view === 'location') schedule();
+  });
+  // Let modules use their own controls and Escape handling. Return to the article
+  // after the last workspace opened during this location visit closes.
+  function workspaceChanged() {
+    if (view !== 'location' || panel.hidden) return;
+    const visiting = openWorkspaces().some((el) => !previouslyOpen.has(el));
+    if (visiting) {
+      panel.setAttribute('data-visiting', '');
+      spotlight.toggleAttribute('hidden', true);
+    } else if (panel.hasAttribute('data-visiting')) returnToSection();
+  }
+  const workspaceObserver = new MutationObserver(workspaceChanged);
+  document.addEventListener(
+    'toggle',
+    (e) => {
+      if (e.target.tagName === 'DIALOG') workspaceChanged();
+    },
+    true
+  );
+  function watchLocation(el) {
+    for (let part = el; part && part !== document.body; part = part.parentElement)
+      locationAvailability.observe(part, {
+        attributes: true,
+        attributeFilter: ['hidden', 'disabled', 'inert'],
+      });
+  }
+  function refreshLocationButtons() {
+    for (const action of locationLinks.querySelectorAll('[data-help-locate]'))
+      action.hidden = !availableLocation({ selector: action.dataset.helpLocate });
+    locationLinks.hidden = !locationLinks.querySelector('button:not([hidden])');
+  }
+  function addLocationLinks() {
+    const entries = manualLocations[sectionId] || [];
+    if (!entries.length) return;
+    const prompt = t('在界面中定位');
+    locationLinks.setAttribute('aria-label', prompt);
+    locationLinks.append(node('span', prompt));
+    for (const entry of entries) {
+      const action = button(
+        t(entry.label),
+        () => {
+          if (availableLocation(entry)) go('location', sectionId, { location: entry });
+          else refreshLocationButtons();
+        },
+        'help-inline-link'
+      );
+      action.setAttribute('aria-label', `${prompt} · ${t(entry.label)}`);
+      action.dataset.helpLocate = entry.selector;
+      locationLinks.append(action);
+      watchLocation(document.querySelector(entry.selector));
+    }
+    refreshLocationButtons();
+  }
+  function returnToSection() {
+    const previous = selector;
+    go('manual', sectionId, { resume: true });
+    Array.from(locationLinks.querySelectorAll('button'))
+      .find((button) => !button.hidden && button.dataset.helpLocate === previous)
+      ?.focus({ preventScroll: true });
+  }
+  function openIndex() {
+    if (view === 'location') {
+      returnToSection();
       return;
     }
-    const groups = new Map();
-    topics.forEach((topic, i) => {
-      let container = contents;
-      if (topic.group) {
-        if (!groups.has(topic.group)) {
-          const group = document.createElement('details'),
-            summary = document.createElement('summary');
-          group.className = 'help-topic-group';
-          summary.textContent = t(topic.group);
-          group.append(summary);
-          contents.append(group);
-          groups.set(topic.group, group);
-        }
-        container = groups.get(topic.group);
+    if (view === 'tour' || view === 'manual') {
+      directoryFocus = view === 'tour' ? tourId : sectionId;
+      if (view === 'manual') openChapters.add(chapterOf(sectionId).id);
+      go(view === 'tour' ? 'tourIndex' : 'manualIndex');
+    } else go('home');
+  }
+  function switchMode() {
+    if (view === 'tour') {
+      if (manualOrigin) {
+        const back = manualOrigin;
+        manualOrigin = null;
+        manualOffset = back.offset;
+        sectionId = back.id;
+        go('manual', back.id, { resume: true });
+        return;
       }
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'help-topic';
-      button.dataset.topic = String(i);
-      const label = document.createElement('span'),
-        arrow = document.createElement('span');
-      label.textContent = t(topic.title);
-      arrow.textContent = '↗';
-      arrow.setAttribute('aria-hidden', 'true');
-      button.append(label, arrow);
-      button.onclick = () => select(i, false);
-      container.append(button);
-    });
+      const page = validTour(tourId);
+      tourOrigin = tourId;
+      go('manual', page.section || data.manualChapters[page.chapter - 1].sections[0].id);
+    } else if (view === 'manual') {
+      const ch = data.manualChapters.indexOf(chapterOf(sectionId)) + 1;
+      const matching =
+        data.tourPages.find((p) => p.section === sectionId) ||
+        data.tourPages.find((p) => p.chapter === ch);
+      if (!tourOrigin) manualOrigin = { id: sectionId, offset: contents.scrollTop };
+      go('tour', tourOrigin || matching?.id || tourId);
+      tourOrigin = null;
+    } else go(view === 'tourIndex' ? 'manualIndex' : 'tourIndex');
   }
-  function select(index, tour) {
-    step = index;
-    touring = tour;
-    render();
-    target();
-    panel.focus({ preventScroll: true });
+  function render() {
+    const isTour = view === 'tour',
+      isManual = view === 'manual',
+      isLocation = view === 'location';
+    const ordered = isTour ? data.tourPages : sections;
+    const page = isTour ? validTour(tourId) : validSection(sectionId);
+    const i = ordered.indexOf(page),
+      chapter = isManual && chapterOf(sectionId);
+    const manualNumber = isManual && data.manualChapters.indexOf(chapter) + 1;
+    const tourLabel = t('实用指南');
+    locationAvailability.disconnect();
+    workspaceObserver.disconnect();
+    locationLinks.replaceChildren();
+    locationLinks.hidden = true;
+    panel.classList.toggle('guiding', isTour || isLocation);
+    panel.classList.toggle('reading', isManual || view === 'manualIndex');
+    panel.dataset.helpView = view;
+    panel.style.left = panel.style.top = '';
+    $('helpProgress').textContent = isLocation
+      ? page.title
+      : isTour
+        ? t('实用指南（{current}/{total}）', { current: i + 1, total: data.tourPages.length })
+        : isManual
+          ? t('详细手册（{current}/{total}）', {
+              current: manualNumber,
+              total: data.manualChapters.length,
+            }) +
+            ' · ' +
+            chapter.title +
+            ' (' +
+            (chapter.sections.indexOf(page) + 1) +
+            '/' +
+            chapter.sections.length +
+            ')'
+          : view === 'tourIndex'
+            ? tourLabel
+            : view === 'manualIndex'
+              ? t('详细手册')
+              : 'StarOrbit';
+    $('helpTitle').textContent = isLocation
+      ? t(location.label)
+      : isTour
+        ? i + 1 + '. ' + page.title
+        : isManual
+          ? page.title
+          : view === 'home'
+            ? t('星轨使用帮助')
+            : t(view === 'tourIndex' ? '简易导览目录' : '手册目录');
+    $('helpDirectory').hidden = view === 'home';
+    $('helpSwitch').hidden = view === 'home' || isLocation;
+    $('helpDirectory').textContent = isLocation
+      ? t('返回手册')
+      : view === 'tourIndex' || view === 'manualIndex'
+        ? t('帮助首页')
+        : t('返回目录');
+    $('helpSwitch').textContent = isTour
+      ? t(manualOrigin ? '返回手册' : '查看详细说明')
+      : isManual && tourOrigin
+        ? t('返回导览第 {n} 页', { n: data.tourPages.findIndex((p) => p.id === tourOrigin) + 1 })
+        : view === 'tourIndex'
+          ? t('详细手册')
+          : t('简易导览');
+    $('tourActions').hidden = !(isTour || isManual);
+    $('tourPrevious').disabled = i <= 0;
+    $('tourNext').textContent = t(
+      i === ordered.length - 1 ? (isTour ? '完成导览' : '完成阅读') : '下一页'
+    );
+    contents.replaceChildren();
+    if (view === 'home') home();
+    else if (view === 'tourIndex') {
+      indexResume(true);
+      data.tourPages.forEach((p, index) =>
+        topicRow(
+          contents,
+          index + 1 + '. ' + p.title,
+          () => {
+            directoryFocus = p.id;
+            go('tour', p.id);
+          },
+          'tourId',
+          p.id
+        )
+      );
+    } else if (view === 'manualIndex') manualIndex();
+    else if (isTour) tourPage(page, i + 1);
+    else if (isLocation) {
+      watchLocation(document.querySelector(selector));
+      for (const workspace of document.querySelectorAll(workspacePanels))
+        workspaceObserver.observe(workspace, {
+          attributes: true,
+          attributeFilter: ['open', 'hidden'],
+        });
+    } else {
+      addLocationLinks();
+      const article = node('article', undefined, 'help-article');
+      // HTML is generated from the bundled, reviewed handbook; no remote markup is used.
+      article.innerHTML = page.html;
+      for (const a of article.querySelectorAll('a[href^="https://"]')) {
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+      article.onclick = handleManualLinks;
+      contents.append(article);
+      if (sectionId === 's4-2') examples();
+    }
+    contents.scrollTop = isManual ? manualOffset : dirScroll[view] || 0;
+    if (isTour || (isLocation && !panel.hasAttribute('data-visiting'))) highlight();
   }
-  function close() {
-    clearTarget();
-    panel.hidden = true;
-    document.body.classList.remove('help-active');
-    $('helpToggle').setAttribute('aria-expanded', 'false');
-    step = null;
-    touring = false;
-    restoreControlFocus(returnFocus);
+  function advance(direction) {
+    const isTour = view === 'tour';
+    if (!isTour && view !== 'manual') return;
+    const list = isTour ? data.tourPages : sections;
+    const i = list.findIndex((p) => p.id === (isTour ? tourId : sectionId)) + direction;
+    if (i === list.length) {
+      close();
+      return;
+    }
+    if (list[i]) go(view, list[i].id);
   }
-  function open(tour = false) {
+  function open(mode = 'home') {
     returnFocus = document.activeElement;
     panel.hidden = false;
     document.body.classList.add('help-active');
     $('helpToggle').setAttribute('aria-expanded', 'true');
-    if (tour) select(0, true);
-    else {
-      step = null;
-      touring = false;
-      render();
-      panel.focus({ preventScroll: true });
-    }
+    tourOrigin = null;
+    manualOrigin = null;
+    go(mode, mode === 'tour' ? data.tourPages[0].id : undefined);
   }
-  function dismiss() {
-    remember();
-    welcome.close();
-    beginMusic();
+  function close() {
+    rememberPosition();
+    leaveExample();
+    clearTarget();
+    locationAvailability.disconnect();
+    workspaceObserver.disconnect();
+    panel.removeAttribute('data-visiting');
+    location = null;
+    view = 'home';
+    panel.hidden = true;
+    document.body.classList.remove('help-active');
+    $('helpToggle').setAttribute('aria-expanded', 'false');
+    restoreControlFocus(returnFocus);
   }
   $('helpToggle').onclick = () => (panel.hidden ? open() : close());
   $('closeHelp').onclick = close;
-  $('helpDirectory').onclick = () => {
-    clearTarget();
-    step = null;
-    touring = false;
-    render();
-    panel.focus({ preventScroll: true });
+  $('helpDirectory').onclick = openIndex;
+  $('helpSwitch').onclick = switchMode;
+  $('tourPrevious').onclick = () => advance(-1);
+  $('tourNext').onclick = () => advance(1);
+  const seen = () => {
+    try {
+      localStorage.setItem(WELCOME_KEY, 'seen');
+    } catch {}
   };
-  $('replayTour').onclick = () => select(0, true);
-  $('tourPrevious').onclick = () => {
-    if (step !== null && step > 0) select(step - 1, touring);
-  };
-  $('tourNext').onclick = () => {
-    if (step === null) return;
-    if (step === (touring ? TOUR_LENGTH : topics.length) - 1) {
-      remember();
-      close();
-    } else select(step + 1, touring);
-  };
-  $('startTour').onclick = () => {
-    dismiss();
-    open(true);
-    returnFocus = $('helpToggle');
-  };
-  $('skipTour').onclick = () => {
-    dismiss();
-    $('helpToggle').focus();
-  };
-  welcome.addEventListener('cancel', remember);
+  function dismissWelcome(mode) {
+    seen();
+    welcome.close();
+    if (music.settings.autoplay && music.audio.paused) music.play();
+    if (mode) {
+      open(mode);
+      returnFocus = $('helpToggle');
+    } else restoreControlFocus($('helpToggle'));
+  }
+  $('startTour').onclick = () => dismissWelcome('tour');
+  $('welcomeManual').onclick = () => dismissWelcome('manualIndex');
+  $('skipTour').onclick = () => dismissWelcome(null);
+  welcome.addEventListener('cancel', seen);
   document.addEventListener(
     'keydown',
     (e) => {
-      if (e.key === 'Escape' && !panel.hidden) {
+      if (
+        e.key === 'Escape' &&
+        !panel.hidden &&
+        !panel.hasAttribute('data-visiting') &&
+        !document.querySelector('dialog[open]')
+      ) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        close();
+        if (view === 'location') returnToSection();
+        else close();
       }
     },
     true
@@ -450,19 +874,27 @@ export function installHelp(music) {
   window.addEventListener('resize', schedule);
   document.addEventListener('scroll', schedule, true);
   document.addEventListener('click', schedule);
+  document.addEventListener('change', schedule);
   document.addEventListener('toggle', schedule, true);
+  window.addEventListener('pagehide', () => {
+    if (!panel.hidden) rememberPosition();
+  });
   onLanguageChange(() => {
+    data = getHelpContent(getLanguage());
+    sections = data.manualChapters.flatMap((c) => c.sections);
+    searchIndex = undefined;
     if (!panel.hidden) {
+      rememberPosition();
+      clearTarget();
       render();
-      schedule();
     }
   });
-  let seen = false;
+  let visited = false;
   try {
-    seen = localStorage.getItem(KEY) === 'seen';
+    visited = localStorage.getItem(WELCOME_KEY) === 'seen';
   } catch {}
   if (
-    !seen &&
+    !visited &&
     !$('flightLab')?.open &&
     !$('freeFlightLauncher')?.open &&
     !document.body.classList.contains('xt-scope-open')

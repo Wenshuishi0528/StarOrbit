@@ -35,6 +35,7 @@ const settingsKeys = [
   'starorbit-balcony-target-v1',
   'starorbit-hour-cycle-v1',
   'tiangong-help-v1',
+  'starorbit-help-reading-v1',
   'tiangong-timeline-v1',
   KEY,
   MISSION_MEMORY_KEY,
@@ -133,6 +134,7 @@ export async function installSessionMemory(sim, assembly) {
   const persist = () => {
     if (
       resetting ||
+      sim.helpExampleActive ||
       sim.freeFlight?.active ||
       sim.mainFlight?.active ||
       sim.missions?.busy ||

@@ -553,6 +553,21 @@ export function installMainFlight(sim) {
     }, 0);
   });
   return {
+    // A help demonstration borrows the reference orbit while the player's runs are parked.
+    checkpoint() {
+      const savedRuns = new Map(runs),
+        savedPrefs = structuredClone(preferences),
+        target = selected;
+      stop();
+      return () => {
+        stop();
+        preferences.clear();
+        for (const [id, settings] of savedPrefs) preferences.set(id, settings);
+        for (const [id, run] of savedRuns) runs.set(id, run);
+        selectTarget(target);
+        document.body.classList.toggle('main-flight-active', runs.size > 0);
+      };
+    },
     start,
     command,
     action,

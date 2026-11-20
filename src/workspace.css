@@ -72,6 +72,13 @@
   padding-top: 10px;
 }
 
+@media (min-width: 761px) {
+  #orbitMinimap:not([data-floating-moved]) {
+    right: var(--map-toolbar-inset, 22px);
+    max-width: var(--map-available-width, 336px);
+  }
+}
+
 @media (max-width: 760px) {
   .toolbar {
     left: auto;

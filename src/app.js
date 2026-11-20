@@ -17,6 +17,7 @@ import { installFlightLab } from './flight-lab.js';
 import { installVisitorCounter } from './visitor-widget.js';
 import { readPackedModel, hydrateOrbitData } from './runtime-assets.js';
 import { installHelp } from './help.js';
+import { installHelpExamples } from './help-examples.js';
 import { MusicPlayer } from './music-player.js';
 import { missionLibrary } from './mission-library.js';
 import { t, initLanguage, onLanguageChange, setText, getLanguage } from './i18n.js';
@@ -30,6 +31,7 @@ import * as THREE from 'three';
 import { createOrbitControls } from './camera-controls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
+  assemblyPresetSlots,
   describeAssembly,
   replaceAttachment,
   matingTransforms,
@@ -48,9 +50,8 @@ const $ = (id) => document.getElementById(id),
     TH_LOWER: '节点下方',
     TH_AFT: '天和尾端',
   },
-  defaults = { TH_WENTIAN: 'WT', TH_MENGTIAN: 'MT', TH_FORWARD: 'SZ', TH_LOWER: '', TH_AFT: 'TZ' },
   state = {
-    slots: { ...defaults },
+    slots: assemblyPresetSlots('full'),
     showXT: true,
     target: 'TH_WENTIAN',
     linked: false,
@@ -150,6 +151,7 @@ const labs = () => Object.keys(groups).filter((id) => ['WT', 'MT'].includes(type
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
+    if (sim?.helpExampleActive) return;
     try {
       localStorage.setItem('tiangong-viewer-v3', JSON.stringify(state));
     } catch {}
@@ -537,23 +539,17 @@ document.querySelectorAll('[data-view]').forEach(
 document.querySelectorAll('[data-preset]').forEach(
   (b) =>
     (b.onclick = () => {
-      state.slots = { ...defaults };
-      state.showXT = b.dataset.preset === 'full';
-      if (b.dataset.preset === 'labs') {
-        state.slots.TH_FORWARD = '';
-        state.slots.TH_AFT = '';
-      }
-      if (b.dataset.preset === 'core') {
-        Object.keys(state.slots).forEach((k) => (state.slots[k] = ''));
-        state.target = 'TH';
-      } else state.target = 'TH_WENTIAN';
+      const preset = b.dataset.preset;
+      state.slots = assemblyPresetSlots(preset);
+      state.showXT = preset === 'full';
+      state.target = preset === 'core' ? 'TH' : 'TH_WENTIAN';
       applyConfig();
       fit(null, [1, -1, 1.25]);
       save();
     })
 );
 $('reset').onclick = () => {
-  state.slots = { ...defaults };
+  state.slots = assemblyPresetSlots('full');
   state.showXT = true;
   state.target = 'TH_WENTIAN';
   state.linked = false;
@@ -703,6 +699,11 @@ async function boot() {
       fit,
       frameModels,
       instanceName,
+      isAnimating: () => playing,
+      setAnimating: (value) => {
+        playing = value;
+        $('animate').textContent = t(value ? 'Ⅱ 暂停演示' : '▶ 演示自转');
+      },
       stopAnimation: () => {
         playing = false;
         $('animate').textContent = t('▶ 演示自转');
@@ -765,6 +766,7 @@ async function boot() {
     sim.birthdayCard = installBirthdayCard(sim);
     sim.worldExplorer = installWorldExplorer(sim);
     sim.planetaryObservatory = installPlanetaryObservatory(sim);
+    installHelpExamples(sim);
     installHelp(music);
     installVisitorCounter();
   } catch (e) {

@@ -219,7 +219,7 @@ export class MissionController {
       };
   }
   save() {
-    if (this.busy || this.sim.mainFlight?.active) return;
+    if (this.busy || this.sim.helpExampleActive || this.sim.mainFlight?.active) return;
     this.capture();
     try {
       localStorage.setItem(
@@ -455,7 +455,7 @@ export class MissionController {
       weather.save();
       weather.render();
       this.syncUI();
-      this.api.music?.setMission(id);
+      if (!sim.helpExampleActive) this.api.music?.setMission(id);
     } finally {
       this.busy = false;
       this.syncUI();

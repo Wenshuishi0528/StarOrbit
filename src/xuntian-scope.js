@@ -656,7 +656,12 @@ export function installXuntianScope(sim) {
     const lunarTarget = mode === 'solar' && named?.body === 'Moon';
     const lunarCrosshair = lastResult?.identification?.body === 'Moon';
     $('xtLunarDiscovery').hidden = unavailable || !(lunarTarget || lunarCrosshair);
-    $('xtMarsDiscovery').hidden = unavailable || !((mode === 'solar' && named?.body === 'Mars') || lastResult?.identification?.body === 'Mars');
+    $('xtMarsDiscovery').hidden =
+      unavailable ||
+      !(
+        (mode === 'solar' && named?.body === 'Mars') ||
+        lastResult?.identification?.body === 'Mars'
+      );
     const sky =
         mode === 'solar' ||
         mode === 'sky' ||
@@ -1321,6 +1326,93 @@ export function installXuntianScope(sim) {
   return {
     open,
     close,
+    checkpoint() {
+      const wasActive = active,
+        restoreFormation = formation?.checkpoint();
+      const saved = {
+        mode,
+        named,
+        fieldId,
+        overviewArtworkId,
+        anchor,
+        freePose,
+        releaseNote,
+        pose: pose.clone(),
+        desired: desired?.clone(),
+        locked,
+        roll,
+        field,
+        ev,
+        aperture,
+        bookmark,
+        exterior,
+        query: $('xtSearch').value,
+        solar: solarControls.enabled,
+        channel: solarControls.channel,
+        survey: surveyMission?.target,
+        opened,
+      };
+      return () => {
+        if (wasActive) open();
+        else close();
+        restoreFormation?.();
+        if (saved.solar) solarControls.activate(saved.channel);
+        else solarControls.ordinary();
+        if (wasActive && saved.survey)
+          surveyMission.select(saved.survey.fieldId, saved.survey.tile);
+        mode = saved.mode;
+        named = saved.named;
+        fieldId = saved.fieldId;
+        overviewArtworkId = saved.overviewArtworkId;
+        anchor = saved.anchor;
+        freePose = saved.freePose;
+        releaseNote = saved.releaseNote;
+        bookmark = saved.bookmark;
+        pose.copy(saved.pose);
+        desired = saved.desired;
+        locked = saved.locked;
+        opened = saved.opened;
+        exterior = saved.exterior;
+        tracked = null;
+        setRoll(saved.roll, false);
+        setLens(saved.field);
+        setAperture(saved.aperture);
+        setEV(saved.ev);
+        axes = actualAxes();
+        $('xtSearch').value = saved.query;
+        $('xtNear').setAttribute('aria-pressed', String(exterior === 'near'));
+        $('xtFrameBoth').setAttribute('aria-pressed', String(exterior !== 'near'));
+        pausedFrame = '';
+        completedFrame = '';
+        lastDraw = -Infinity;
+        if (active) update(sim.current, performance.now());
+      };
+    },
+    showHelpTarget(id) {
+      open();
+      if (!active) return false;
+      restoreInitial();
+      update(sim.current, performance.now());
+      const target =
+        id === 'vega'
+          ? getXuntianTarget('hip:91262', getLanguage())
+          : cities.get('city:beijing', getLanguage());
+      if (!target) return false;
+      selectStar(target);
+      if (id === 'beijing') setLens(0.7);
+      setAperture(600);
+      setEV(id === 'beijing' ? 0.7 : 0);
+      if (desired) {
+        pose.copy(desired);
+        desired = null;
+        locked = true;
+      }
+      $('xtSearch').value = target.name;
+      update(sim.current, performance.now());
+      frameExternal('near');
+      hud();
+      return true;
+    },
     observeBody(body) {
       if (
         sim.missionId !== 'tiangong' ||

@@ -165,7 +165,9 @@ export function installFlightLab(sim, assets) {
   };
   const open = (name = activeTab) => {
     if (sim.sceneBusy || sim.missions?.busy) return;
-    if (!document.getElementById('helpPanel').hidden) document.getElementById('closeHelp').click();
+    const help = document.getElementById('helpPanel');
+    if (!help.hidden && help.dataset.helpView !== 'location')
+      document.getElementById('closeHelp').click();
     if (!dialog.open) dialog.showModal();
     return select(name);
   };

@@ -410,6 +410,16 @@ export function installXuntianFormation(sim) {
     restoreSuggested,
     mapShapes,
     getState,
+    checkpoint() {
+      const saved = { offset: [...offset], automatic, initialPlacement };
+      return () => {
+        offset = [...saved.offset];
+        automatic = saved.automatic;
+        initialPlacement = saved.initialPlacement;
+        update(sim.current);
+        notify('offset');
+      };
+    },
     getOffset: () => [...offset],
     getOptics: () =>
       disposed || !sim.current || sim.missionId !== 'tiangong' || !api.groups.freeXT?.visible

@@ -1,20 +1,28 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Matrix4,Vector3} from 'three';
-import {PORT_KEYS,describeAssembly,replaceAttachment,attachmentPort,placementMatrices} from '../src/assembly.js';
+import {PORT_KEYS,assemblyPresetSlots,describeAssembly,replaceAttachment,attachmentPort,placementMatrices} from '../src/assembly.js';
 
 const meta=JSON.parse(fs.readFileSync(new URL('../assets/model.json',import.meta.url)));
 const matrix=rows=>new Matrix4().set(...rows.flat());
 const position=m=>new Vector3().setFromMatrixPosition(m);
 const normal=m=>new Vector3(0,0,1).transformDirection(m);
 const close=(a,b,epsilon=1e-5)=>assert.ok(Math.abs(a-b)<epsilon,`${a} != ${b}`);
-const defaults={TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'};
-const legacy=describeAssembly(defaults),legacyPoses=placementMatrices(meta,legacy);
-assert.deepEqual(legacy.slots,defaults);
+const oldFull = {TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_LOWER:'',TH_AFT:'TZ'};
+assert.deepEqual(assemblyPresetSlots('full'), {...oldFull, TH_LOWER: 'SZ'});
+const labs = assemblyPresetSlots('labs');
+assert.deepEqual(labs, {...oldFull, TH_FORWARD: '', TH_AFT: ''});
+assert.deepEqual(assemblyPresetSlots('core'), Object.fromEntries(PORT_KEYS.map(key => [key, ''])));
+let tutorial = replaceAttachment(labs, 'TH_FORWARD', 'TH');
+tutorial = replaceAttachment(tutorial, 'TH_FORWARD/TH_FORWARD', 'TH');
+assert.equal(describeAssembly(tutorial).cores.length, 3);
+assert.deepEqual(replaceAttachment(tutorial, 'TH_FORWARD', ''), labs);
+const legacy=describeAssembly(oldFull),legacyPoses=placementMatrices(meta,legacy);
+assert.deepEqual(legacy.slots,oldFull);
 assert.equal(legacy.cores.length,1);
 // Every existing spacecraft keeps its original assembled pose.
 for(const type of ['WT','MT','TZ','SZ']){
- const id=Object.keys(defaults).find(key=>defaults[key]===type);
+ const id=Object.keys(oldFull).find(key=>oldFull[key]===type);
  legacyPoses.get(id).elements.forEach((value,index)=>close(value,matrix(meta.modules[type].matrix).elements[index]));
 }
 
@@ -62,7 +70,7 @@ const removed=replaceAttachment(slots,'TH_WENTIAN','');
 assert.ok(!Object.keys(removed).some(id=>id.startsWith('TH_WENTIAN/')));
 assert.equal(removed['TH_AFT/TH_WENTIAN'],'TZ');
 assert.deepEqual(replaceAttachment(slots,'TH_FORWARD/TH_AFT','SZ'),describeAssembly(slots).slots);
-assert.deepEqual(describeAssembly({...defaults,'TH_FORWARD/TH_LOWER':'WT','TH_LOWER':'unknown'}).slots,defaults);
+assert.deepEqual(describeAssembly({...oldFull,'TH_FORWARD/TH_LOWER':'WT','TH_LOWER':'unknown'}).slots,oldFull);
 assert.deepEqual(describeAssembly(null).slots,Object.fromEntries(PORT_KEYS.map(port=>[port,''])));
 
 // A longer chain remains data-driven, with no fixed instance-count/depth limit.

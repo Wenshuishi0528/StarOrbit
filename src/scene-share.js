@@ -4,14 +4,14 @@ import { t, setText } from './i18n.js';
 import { SCENE_FORMAT, MAX_SCENE_BYTES, DISPLAY_KEYS, validateScene } from './scene-format.js';
 
 const $ = (id) => document.getElementById(id);
-const cameraState = (camera, controls) => ({
+export const cameraState = (camera, controls) => ({
   position: camera.position.toArray(),
   target: controls.target.toArray(),
   up: camera.up.toArray(),
   fov: camera.fov,
   zoom: camera.zoom,
 });
-function restoreCamera(camera, controls, x) {
+export function restoreCamera(camera, controls, x) {
   controls.stopMotion();
   camera.position.fromArray(x.position);
   camera.up.fromArray(x.up).normalize();

@@ -1,0 +1,278 @@
+{
+  "zh": {
+    "view": {
+      "title": "转一转眼前的航天器",
+      "text": "按住鼠标左键拖动，绕着航天器看一圈；滚动滚轮可以拉近或拉远。双击模型，让它回到画面中央。想看清舱体外形，可以关掉「显示航天器名称」。",
+      "touchText": "单指拖动可以旋转，双指可以缩放或平移。想找回航天器，点「视角 → 重新居中」。关掉「显示航天器名称」，就能看清舱体外形。"
+    },
+    "mission": {
+      "title": "换一艘航天器，听听它的声音",
+      "text": "在「当前任务」切换中国空间站和东方红一号，看看模型和轨道有什么变化。左下角的音符可以打开播放器、播放音乐和选曲。切到东方红一号，还可以听历史录音或实时模拟的遥测声。"
+    },
+    "time": {
+      "title": "看看十分钟后飞到哪里",
+      "text": "把「观察方式」切到「地球轨道总览」，选 10m，再点 +10m。看看航天器在地球上空移到了哪里，也可以对照小地图看它经过的地方。点「回到现在」恢复当前时间。"
+    },
+    "assembly": {
+      "title": "搭空间站：从三舱组合到自由扩建",
+      "text": "打开「舱体组合」。「三舱组合」由天和、问天和梦天组成；选「完整组合」，还能看到两艘神舟飞船和一艘天舟货运飞船。",
+      "extra": "相关入口：太阳翼控制 → 演示自转",
+      "practice": {
+        "title": "试试接第二个天和",
+        "steps": [
+          "接上。先选「三舱组合」，在天和的「节点前端」选择「天和核心舱」。左栏会多出一组「天和核心舱 2」接口。",
+          "继续搭。在「天和核心舱 2」的「节点前端」再选一次「天和核心舱」，就接出了第三个。每个新天和都有接口，可以照这样接下去。",
+          "拆回去。回到「天和核心舱 1」，把它的「节点前端」改为「空置」。第二个天和和接在它后面的舱段会一起拆下，问天和梦天留在原位。"
+        ]
+      }
+    },
+    "sky-image": {
+      "title": "用不同的望远镜影像看星空",
+      "text": "在「星空影像」选「DSS 光学」，放大一片天区，再切到「Pan-STARRS 光学」，比较同一方向的星点和背景。想看韦布拍到的星云，展开「影像来源与波段」，点「查看宇宙悬崖」。"
+    },
+    "xuntian": {
+      "title": "用巡天看星空，也看城市",
+      "text": "打开「巡天取景」，点「看织女星」，看看取景窗中央的亮星。再点「看北京」，把镜头转向阳光下的城市。切换时留意主画面里的镜筒怎样转动。喜欢这个构图，就点「拍摄 PNG」。",
+      "extra": "示例时刻：北京时间 2026 年 11 月 5 日 13:44。窄屏入口：工具 → 巡天取景。"
+    },
+    "sky-chart": {
+      "title": "同一片星空，两种认星法",
+      "text": "打开「星图标注」，勾选「主画面显示星图标注」。在「中国传统星官」里，用「中国星官导航」选「紫微垣 → 北斗」，点「主画面定位」。保持这个方向，再切到「西方星座」，看看北斗七星在大熊座的什么位置。",
+      "extra": "可以分别打开「星官插画」和「星座图像 · 教学示意」对照图画。"
+    },
+    "flight": {
+      "title": "试试驾驶飞船",
+      "text": "转动航天器　打开「航天器姿态 → 显示导航球」，点击球面开始操纵。\n驾驶飞船离站　打开「自由飞行」，选择神舟或天舟，离开空间站后还可以飞回来。\n练习交会对接　进入「任务实验室 → 交会对接」，分阶段练习靠近、对准和对接。"
+    },
+    "world": {
+      "title": "从家乡地面走到星际",
+      "text": "打开「地表观测」，搜索家乡。先从地面看看周围，再点「高空」俯瞰这座城市。顶部的「太阳系」可以看行星，「星际穿梭」可以飞向恒星、用导航图找方向。点「返回轨道」回到航天器。",
+      "extra": "灯光连成了一片？默认夜光图的分辨率约为 500 米，近看时，相邻街区的灯光会融在一起。点「高空」，更容易看清整座城市的灯光轮廓。"
+    },
+    "pass": {
+      "title": "看看空间站几点飞过你家",
+      "text": "打开「任务实验室 → 过境预报」。可以先用默认的北京，也可以填入自己的地点和经纬度，再点「计算过境」。点开一条结果，看几点、朝哪个方向抬头。选「在阳台观测」，还能看看屋顶会不会挡住视线。",
+      "extra": "「轨道长曝光」可以拍出星迹，「巡天拍摄计划」可以安排一圈曝光、查看拼图。"
+    },
+    "observatory": {
+      "title": "看看月面、火星和黑洞",
+      "text": "想找月面着陆点，打开「月球观测」搜索地点。想看火星地形或比较地球影像，打开「天体观测」。进入「宇宙探索馆」，还可以选一个黑洞或脉冲星，拖动进度观看演示。"
+    },
+    "resources": {
+      "title": "找到轨道数据、云图和城市影像",
+      "text": "打开「数据与资源」，看看当前轨道数据来自哪一天。想换一幅云图，去「云图库」选择已保存的版本；想看哪些城市有高清地面影像，打开「城市高清地景库」。",
+      "extra": "相关入口：离线资源与缓存"
+    },
+    "share": {
+      "title": "留下一张照片，或带走整个场景",
+      "text": "打开「摄影与场景」。「保存截图」留下一张照片，「收藏环境与视角」记住喜欢的取景，「导出场景」可以把此刻的空间站组合和画面分享给别人。想送人一片星空，试试「生日星空卡」。"
+    }
+  },
+  "en": {
+    "view": {
+      "title": "Look around your spacecraft",
+      "text": "Drag with the left mouse button to orbit the spacecraft. Scroll to zoom. Double-click the model to center it. Turn off Spacecraft labels for a clear view of its shape.",
+      "touchText": "Drag with one finger to rotate. Use two fingers to pan or zoom. Choose Views → Recenter to find the spacecraft. Turn off Spacecraft labels for an unobstructed view."
+    },
+    "mission": {
+      "title": "Switch spacecraft and listen",
+      "text": "Use Current mission to switch between the China Space Station and Dongfanghong 1. Compare the model and orbit. Open the music note at the lower left to play or choose tracks. Dongfanghong 1 also offers its historical recording and simulated live telemetry."
+    },
+    "time": {
+      "title": "Look ten minutes ahead",
+      "text": "Set View mode to Orbit overview. Choose 10m, then +10m. Compare the spacecraft’s position over Earth with the ground track on the map. Select Live now to return to the present."
+    },
+    "assembly": {
+      "title": "Build and extend the station",
+      "text": "Open Module assembly. Three modules joins Tianhe, Wentian and Mengtian. Full assembly adds two Shenzhou crew vehicles and one Tianzhou cargo vehicle.",
+      "extra": "See also: Solar arrays → ▶ Animate rotation.",
+      "practice": {
+        "title": "Add a second Tianhe",
+        "steps": [
+          "Attach. Start with Three modules. At Tianhe’s Node forward port select Tianhe core. A second Tianhe port group appears in the sidebar.",
+          "Extend. At the second core’s forward port select Tianhe again to add a third core. Each new core offers more ports.",
+          "Detach. Set the first core’s forward port to Empty. The second core and its entire branch come off together; Wentian and Mengtian stay in place."
+        ]
+      }
+    },
+    "sky-image": {
+      "title": "Compare telescope surveys",
+      "text": "Choose DSS optical in Sky imagery and zoom into one field. Switch to Pan-STARRS optical to compare stars and background in the same direction. For Webb’s nebula image open Image sources and bands and choose View Cosmic Cliffs."
+    },
+    "xuntian": {
+      "title": "Aim Xuntian at a star and a city",
+      "text": "Open Xuntian viewfinder and choose View Vega. Find the bright star at the center. Choose View Beijing to point at the sunlit city. Watch the telescope turn in the main view, then use Capture PNG to save your composition.",
+      "extra": "Example time: 5 November 2026 at 13:44 (UTC+8). On a narrow screen open Tools → Xuntian viewfinder."
+    },
+    "sky-chart": {
+      "title": "Read one sky in two traditions",
+      "text": "Open Sky annotations and enable Show sky annotations in main view. Under Traditional Chinese asterisms use Explore Chinese asterisms to select the Purple Forbidden Enclosure and the Big Dipper. Click Locate in main view. Keep the same direction and switch to Western constellations to see where the seven stars lie in Ursa Major.",
+      "extra": "Compare the illustrations with Asterism illustrations and Constellation illustrations · teaching overlay."
+    },
+    "flight": {
+      "title": "Try piloting a spacecraft",
+      "text": "Rotate the spacecraft: enable Show navball under Spacecraft attitude and click the ball to take control.\nDepart the station: choose Shenzhou or Tianzhou in Free flight. You can fly back and dock again.\nPractice docking: open Mission lab → Rendezvous & docking to practice approach, alignment and contact in stages."
+    },
+    "world": {
+      "title": "Travel from home to the stars",
+      "text": "Open Ground observation and search for your hometown. Look around from the ground, then choose High altitude for an aerial view. Use Solar System for planets or Interstellar travel to navigate to a star. Return to orbit takes you back to the spacecraft.",
+      "extra": "City lights blending together at ground level? The default night map has a resolution of about 500 m. Choose High altitude to see the pattern of city lights."
+    },
+    "pass": {
+      "title": "Find the next station pass over your home",
+      "text": "Open Mission lab → Pass predictions. Try Beijing, or enter a site and coordinates, then choose Predict passes. Open a result for the time and direction. Select View from the balcony to check the line of sight against your roofline.",
+      "extra": "Try Orbital long exposure for star trails or Xuntian Imaging Plan to plan a full orbit of exposures and view the mosaic."
+    },
+    "observatory": {
+      "title": "Explore the Moon, Mars and black holes",
+      "text": "Search Lunar observatory for a lunar landing site. Open Celestial observatory to explore Mars terrain or compare Earth imagery. In Universe explorer choose a black hole or pulsar and drag the timeline through its demonstration."
+    },
+    "resources": {
+      "title": "Find orbits, cloud maps and city imagery",
+      "text": "Open Data & resources to check the date of the active orbit. Choose a saved map in Cloud library to change the clouds. Open the city imagery library to find places with high-resolution surface imagery.",
+      "extra": "See also: Offline resources and caches."
+    },
+    "share": {
+      "title": "Save a picture or the whole scene",
+      "text": "Open Photography & scenes. Use Save screenshot for a picture, Save environment & view for a favorite view, or Export scene to share this assembly and moment. For a gift, try Birthday sky card."
+    }
+  },
+  "fr": {
+    "view": {
+      "title": "Observer le véhicule sous tous les angles",
+      "text": "Faites glisser avec le bouton gauche pour tourner autour du véhicule. La molette règle le zoom. Un double-clic recentre la maquette. Décochez Noms des vaisseaux pour mieux voir les modules.",
+      "touchText": "Glissez un doigt pour tourner, deux doigts pour déplacer la vue ou zoomer. Retrouvez le véhicule avec Vues → Recentrer. Décochez Noms des vaisseaux pour observer sa forme."
+    },
+    "mission": {
+      "title": "Changer de véhicule et écouter",
+      "text": "Dans Mission actuelle, passez de la station spatiale chinoise à Dongfanghong 1. Observez la maquette et son orbite. La note en bas à gauche ouvre le lecteur. Avec Dongfanghong 1, écoutez aussi l’enregistrement historique ou la télémesure simulée en direct."
+    },
+    "time": {
+      "title": "Avancer de dix minutes",
+      "text": "Dans Mode de vue, choisissez Vue de l’orbite. Sélectionnez 10m puis +10m. Comparez la position du véhicule au-dessus de la Terre avec sa trace sur la carte. Maintenant rétablit l’heure actuelle."
+    },
+    "assembly": {
+      "title": "Assembler et agrandir la station",
+      "text": "Ouvrez Assemblage des modules. Trois modules réunit Tianhe, Wentian et Mengtian. Assemblage complet y ajoute deux vaisseaux habités Shenzhou et un cargo Tianzhou.",
+      "extra": "À essayer aussi : Panneaux solaires → ▶ Animer la rotation.",
+      "practice": {
+        "title": "Ajouter un deuxième Tianhe",
+        "steps": [
+          "Raccorder. Choisissez Trois modules. Au Port avant du nœud de Tianhe, sélectionnez Module central Tianhe. Les ports du deuxième Tianhe apparaissent dans le panneau.",
+          "Prolonger. Au port avant du deuxième module central, sélectionnez de nouveau Tianhe pour en ajouter un troisième. Chaque module offre de nouveaux ports.",
+          "Démonter. Au port avant du premier Tianhe, choisissez Vide. Le deuxième module et toute sa branche se détachent ; Wentian et Mengtian restent en place."
+        ]
+      }
+    },
+    "sky-image": {
+      "title": "Comparer des relevés du ciel",
+      "text": "Dans Images du ciel, choisissez DSS optique et zoomez sur un champ. Passez à Pan-STARRS optique pour comparer les étoiles et le fond. Pour voir une nébuleuse imagée par Webb, ouvrez Sources et bandes des images et choisissez Voir les Falaises cosmiques."
+    },
+    "xuntian": {
+      "title": "Pointer Xuntian vers une étoile et une ville",
+      "text": "Ouvrez Viseur Xuntian et choisissez Voir Véga. Repérez l’étoile brillante au centre. Avec Voir Pékin, pointez la ville éclairée par le Soleil. Observez le tube pivoter dans la vue principale et choisissez Prendre un PNG pour enregistrer le cadrage.",
+      "extra": "Exemple : 5 novembre 2026 à 13 h 44 (UTC+8). Sur petit écran : Outils → Viseur Xuntian."
+    },
+    "sky-chart": {
+      "title": "Lire un même ciel selon deux traditions",
+      "text": "Ouvrez Annotations célestes et cochez Afficher les annotations dans la vue principale. Dans Astérismes chinois traditionnels, utilisez Explorer les astérismes chinois pour choisir l’Enclos pourpre puis le Boisseau du Nord. Cliquez sur Localiser dans la vue principale. Passez à Constellations occidentales sans bouger la vue pour retrouver ces sept étoiles dans la Grande Ourse.",
+      "extra": "Comparez les dessins avec Illustrations des astérismes et Illustrations des constellations · pédagogie."
+    },
+    "flight": {
+      "title": "Essayer le pilotage",
+      "text": "Tourner le véhicule : dans Attitude du vaisseau, activez Afficher la boule de navigation et cliquez sur la sphère.\nQuitter la station : dans Vol libre, choisissez Shenzhou ou Tianzhou, puis revenez vous amarrer.\nS’entraîner : ouvrez Laboratoire de mission → Rendez-vous et amarrage pour travailler l’approche, l’alignement et le contact."
+    },
+    "world": {
+      "title": "Voyager de chez soi jusqu’aux étoiles",
+      "text": "Ouvrez Observation au sol et cherchez votre ville. Regardez autour de vous, puis cliquez sur Haute altitude pour la survoler. En haut, Système solaire montre les planètes et Voyage interstellaire permet de rejoindre les étoiles avec la carte. Retour à l’orbite ramène au véhicule.",
+      "extra": "Les lumières se confondent au sol ? La carte nocturne a une résolution d’environ 500 m. Cliquez sur Haute altitude pour distinguer la silhouette lumineuse de la ville."
+    },
+    "pass": {
+      "title": "Trouver un passage de la station depuis chez soi",
+      "text": "Ouvrez Laboratoire de mission → Prévisions de passage. Essayez Pékin ou entrez votre lieu et ses coordonnées, puis cliquez sur Prédire les passages. Ouvrez un résultat pour lire l’heure et la direction ; Voir depuis le balcon permet de vérifier le masque de votre toit.",
+      "extra": "Essayez Pose longue en orbite pour les filés d’étoiles ou Plan de prise de vue de Xuntian pour programmer une orbite de poses et voir la mosaïque."
+    },
+    "observatory": {
+      "title": "Explorer la Lune, Mars et les trous noirs",
+      "text": "Cherchez un site d’alunissage dans Observatoire lunaire. Ouvrez Observatoire des astres pour explorer le relief de Mars ou comparer des images de la Terre. Dans Explorer l’Univers, choisissez un trou noir ou un pulsar et déplacez le curseur de démonstration."
+    },
+    "resources": {
+      "title": "Retrouver orbites, nuages et images des villes",
+      "text": "Ouvrez Données et ressources pour voir la date des données orbitales. Dans Bibliothèque de nuages, choisissez une carte enregistrée pour changer les nuages. La bibliothèque d’images urbaines indique les villes disponibles en haute résolution.",
+      "extra": "Voir aussi : ressources hors ligne et caches."
+    },
+    "share": {
+      "title": "Enregistrer une photo ou toute la scène",
+      "text": "Ouvrez Photo et scènes. Enregistrer une image conserve une image, Enregistrer ambiance et vue mémorise votre cadrage et Exporter la scène partage la configuration de la station à cet instant. Pour offrir un ciel en cadeau, essayez Carte céleste d’anniversaire."
+    }
+  },
+  "ru": {
+    "view": {
+      "title": "Осмотрите аппарат со всех сторон",
+      "text": "Вращайте камеру левой кнопкой мыши и меняйте масштаб колёсиком. Дважды щёлкните по модели, чтобы вернуть её в центр. Отключите Подписи аппаратов, чтобы лучше рассмотреть модули.",
+      "touchText": "Вращайте вид одним пальцем, перемещайте и масштабируйте двумя. Найти аппарат можно через Виды → В центр. Чтобы видеть форму модулей, отключите Подписи аппаратов."
+    },
+    "mission": {
+      "title": "Смените аппарат и послушайте его сигнал",
+      "text": "В меню Текущая миссия переключитесь между китайской станцией и «Дунфанхун-1». Сравните модели и орбиты. Нота слева внизу открывает проигрыватель. Для «Дунфанхун-1» доступны историческая запись и синтезированный по телеметрии сигнал."
+    },
+    "time": {
+      "title": "Загляните на десять минут вперёд",
+      "text": "В меню Режим обзора выберите Обзор орбиты, затем 10m и +10m. Посмотрите, куда сместился аппарат, и сверьтесь с трассой на мини-карте. Кнопка Сейчас вернёт текущее время."
+    },
+    "assembly": {
+      "title": "Соберите и расширьте станцию",
+      "text": "Откройте Сборка модулей. Вариант Три модуля объединяет Тяньхэ, Вэньтянь и Мэнтянь. В варианте Полная сборка к ним пристыкованы два корабля Шэньчжоу и грузовой Тяньчжоу.",
+      "extra": "См. также: Солнечные панели → ▶ Вращать.",
+      "practice": {
+        "title": "Пристыкуйте второй Тяньхэ",
+        "steps": [
+          "Присоедините модуль. Выберите Три модуля. В списке Передний порт узла первого Тяньхэ укажите Базовый модуль Тяньхэ. Слева появятся порты второго модуля.",
+          "Удлините станцию. На передний порт второго Тяньхэ поставьте ещё один Тяньхэ. У каждого нового модуля есть свои порты.",
+          "Разберите ветвь. В списке переднего порта первого Тяньхэ выберите Пусто. Второй модуль отсоединится со всеми его ответвлениями, а Вэньтянь и Мэнтянь останутся."
+        ]
+      }
+    },
+    "sky-image": {
+      "title": "Сравните снимки разных обзоров неба",
+      "text": "В меню Изображения неба выберите DSS: оптика и увеличьте участок неба. Перейдите на Pan-STARRS: оптика и сравните звёзды и фон. Чтобы увидеть туманность глазами «Уэбба», откройте Источники и диапазоны и нажмите Открыть Космические скалы."
+    },
+    "xuntian": {
+      "title": "Наведите Сюньтянь на звезду и на город",
+      "text": "Откройте Видоискатель «Сюньтянь» и нажмите Посмотреть на Вегу. Найдите яркую звезду в центре кадра. Теперь нажмите Посмотреть на Пекин, чтобы навести камеру на освещённый город. Проследите за поворотом телескопа в основном окне и нажмите Снять PNG.",
+      "extra": "Пример: 5 ноября 2026 г., 13:44 (UTC+8). На узком экране: Инструменты → Видоискатель «Сюньтянь»."
+    },
+    "sky-chart": {
+      "title": "Посмотрите на один участок неба в двух традициях",
+      "text": "Откройте Подписи неба и включите Показывать небесные метки в главном окне. В системе Традиционные китайские астеризмы откройте Обзор китайских астеризмов, выберите Пурпурную ограду и Большой Ковш. Нажмите Показать в главном окне. Сохраняя направление, переключитесь на Западные созвездия и найдите эти семь звёзд в Большой Медведице.",
+      "extra": "Сравните изображения, включая Иллюстрации астеризмов и Рисунки созвездий · учебный слой."
+    },
+    "flight": {
+      "title": "Попробуйте управлять кораблём",
+      "text": "Изменить ориентацию: включите Показать навигационный шар в Ориентация аппарата и щёлкните по шару.\nОтойти от станции: в Свободный полёт выберите Шэньчжоу или Тяньчжоу. Затем можно вернуться и пристыковаться.\nПотренироваться: откройте Лаборатория полёта → Сближение и стыковка и отработайте сближение, выравнивание и стыковку."
+    },
+    "world": {
+      "title": "От родного города к звёздам",
+      "text": "В Наблюдение с поверхности найдите свой город. Осмотритесь с земли и нажмите Большая высота, чтобы взглянуть сверху. Вверху выберите Солнечная система для планет или Межзвёздное путешествие для полёта к звёздам по карте. Вернуться на орбиту вернёт к аппарату.",
+      "extra": "С земли огни сливаются? У ночной карты разрешение около 500 м. Нажмите Большая высота, чтобы увидеть рисунок городских огней."
+    },
+    "pass": {
+      "title": "Узнайте, когда станция пролетит над вашим домом",
+      "text": "Откройте Лаборатория полёта → Прогноз пролётов. Используйте Пекин или введите своё место и координаты, затем нажмите Рассчитать пролёты. В результате указаны время и направление. Через Посмотреть с балкона можно проверить, не закрывает ли обзор крыша.",
+      "extra": "В Орбитальная съёмка с длинной выдержкой можно снять звёздные треки, а в План съёмки «Сюньтянь» — спланировать экспозиции на витке и посмотреть мозаику."
+    },
+    "observatory": {
+      "title": "Исследуйте Луну, Марс и чёрные дыры",
+      "text": "В Лунная обсерватория найдите место посадки на Луне. Для рельефа Марса или сравнения снимков Земли откройте Наблюдение небесных тел. В Исследование Вселенной выберите чёрную дыру или пульсар и перемещайте ползунок демонстрации."
+    },
+    "resources": {
+      "title": "Найдите орбиты, карты облаков и снимки городов",
+      "text": "Откройте Данные и ресурсы и проверьте дату орбитальных данных. В Библиотека облаков выберите сохранённую карту облаков. В библиотеке городских снимков указаны города, для которых доступны снимки высокого разрешения.",
+      "extra": "См. также: автономные ресурсы и кеш."
+    },
+    "share": {
+      "title": "Сохраните снимок или всю сцену",
+      "text": "Откройте Фотосъёмка и сцены. Кнопка Сохранить снимок сохранит изображение, Сохранить среду и вид — ракурс и окружение, а Экспорт сцены позволит поделиться сборкой и выбранным моментом. Для подарка попробуйте Звёздная открытка ко дню рождения."
+    }
+  }
+}

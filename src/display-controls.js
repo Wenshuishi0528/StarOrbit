@@ -23,6 +23,27 @@ export function installDisplayControls() {
   const map = $('orbitMinimap'),
     mapToggle = $('toggleMinimap');
   const compact = matchMedia('(max-width:760px)');
+  // In a short desktop window the default map can rise over the Help button.
+  // Leave the toolbar and the sidebar clear while retaining dragged map positions.
+  const aside = document.querySelector('aside');
+  function fitMapBesideTools() {
+    map.style.removeProperty('--map-toolbar-inset');
+    map.style.removeProperty('--map-available-width');
+    if (compact.matches || map.hidden || map.hasAttribute('data-floating-moved')) return;
+    const rail = toolbar.getBoundingClientRect(),
+      mapRect = map.getBoundingClientRect();
+    if (rail.bottom + 8 > mapRect.top && rail.top < mapRect.bottom && mapRect.height) {
+      map.style.setProperty('--map-toolbar-inset', `${innerWidth - rail.left + 10}px`);
+      map.style.setProperty(
+        '--map-available-width',
+        `${Math.max(160, rail.left - aside.getBoundingClientRect().right - 20)}px`
+      );
+    }
+  }
+  const mapLayout = new ResizeObserver(fitMapBesideTools);
+  mapLayout.observe(toolbar);
+  mapLayout.observe(map);
+  window.addEventListener('resize', fitMapBesideTools);
   let visible = true,
     toolsOpen = false;
   try {
@@ -66,12 +87,17 @@ export function installDisplayControls() {
     // Keep focus owned by dialogs opened by the clicked action.
     setToolsOpen(false);
   });
-  document.addEventListener('pointerdown', (event) => {
-    if (!toolbar.contains(event.target)) setToolsOpen(false);
-  });
-  document.addEventListener('focusin', (event) => {
-    if (!toolbar.contains(event.target)) setToolsOpen(false);
-  });
+  const dismissOutside = (event) => {
+    // A locating card and its highlighted toolbar button are a single interaction.
+    // Closing the menu on pointerdown would move the card before the click lands.
+    if (
+      !toolbar.contains(event.target) &&
+      !event.target.closest?.('#helpPanel[data-help-view="location"]')
+    )
+      setToolsOpen(false);
+  };
+  document.addEventListener('pointerdown', dismissOutside);
+  document.addEventListener('focusin', dismissOutside);
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (!views.hidden) {

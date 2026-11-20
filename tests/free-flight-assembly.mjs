@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Box3, Matrix4, Quaternion, Vector3} from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {describeAssembly, placementMatrices} from '../src/assembly.js';
+import {assemblyPresetSlots, describeAssembly, placementMatrices} from '../src/assembly.js';
 import {createFreeFlightAssembly} from '../src/free-flight-assembly.js';
 import {FREE_FLIGHT_LIMITS} from '../src/free-flight-physics.js';
 import {VIEW_UNITS_PER_METRE} from '../src/missions.js';
@@ -11,9 +11,14 @@ const meta = JSON.parse(fs.readFileSync('assets/model.json'));
 const bytes = fs.readFileSync('assets/station.glb');
 const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
 const templates = Object.fromEntries(Object.keys(meta.modules).map(t => [t,gltf.scene.getObjectByName('module_' + t)]));
-const slots = {TH_WENTIAN:'WT',TH_MENGTIAN:'MT',TH_FORWARD:'SZ',TH_AFT:'TZ'};
+const slots = assemblyPresetSlots('full');
 const angles = {TH_WENTIAN:{roll:10,left:18,right:-20}};
 const scene = createFreeFlightAssembly(templates,meta,{slots,angles});
+assert.deepEqual(scene.definitions.map(({portId, type}) => [portId, type]), [
+  ['TH_FORWARD', 'SZ'],
+  ['TH_LOWER', 'SZ'],
+  ['TH_AFT', 'TZ'],
+]);
 const metre = 1 / VIEW_UNITS_PER_METRE;
 const initial = placementMatrices(meta,describeAssembly(slots));
 for (const definition of scene.definitions) {

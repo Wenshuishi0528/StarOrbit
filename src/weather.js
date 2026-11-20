@@ -90,7 +90,7 @@ export class Weather {
       autoClean: true,
       resourceChecks: {},
       cloud: 'builtin',
-      aurora: 'off',
+      aurora: 'local',
       cloudHistory: 'auto',
       auroraHistory: 'auto',
       seed: 'StarOrbit',
@@ -123,15 +123,14 @@ export class Weather {
     for (const kind of ['cloud', 'aurora'])
       if (
         ![
-          'builtin',
           'off',
           'latest',
           'history',
           'local',
-          ...(kind === 'cloud' ? ['satcorps'] : []),
+          ...(kind === 'cloud' ? ['builtin', 'satcorps'] : []),
         ].includes(this.settings[kind])
       )
-        this.settings[kind] = kind === 'cloud' ? 'builtin' : 'off';
+        this.settings[kind] = kind === 'cloud' ? 'builtin' : 'local';
     this.settings.limit = clamp(Number(this.settings.limit) || 200, 20, 2000);
     this.settings.auroraStrength = clamp(
       Number.isFinite(Number(this.settings.auroraStrength))
@@ -228,6 +227,7 @@ export class Weather {
     ));
   }
   save() {
+    if (this.sim.helpExampleActive) return;
     this.sim.orbits.save();
     try {
       localStorage.setItem('tiangong-weather-settings-v1', JSON.stringify(this.settings));
