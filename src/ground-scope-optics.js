@@ -1,29 +1,8 @@
 import { GROUND_TELESCOPE, groundEyepiece, groundEyepieceCameraFov } from './ground-stargazing.js';
-import { groundViewDirection } from './ground-world-math.js';
-import { cameraAxes, lookDirection, nudge } from './xuntian-pointing.js';
-import { opticalPose } from './xuntian-ground-target.js';
-import { skyAngles } from './balcony-sky-view-math.js';
-
 export const GROUND_FIELD_MIN = 0.006;
 export const GROUND_FIELD_MAX = 80;
 export const GROUND_SCOPE_DETAIL = 'ground-scope-detail';
 const bound = (x, min, max) => Math.max(min, Math.min(max, x));
-const DEG = Math.PI / 180;
-
-export function nudgeGroundScope(pose, rightDegrees, upDegrees) {
-  const a = pose.azimuth * DEG,
-    e = pose.elevation * DEG;
-  // At the zenith the mount's azimuth still determines the detector's right
-  // and up. The explicit tangent also remains defined at the pole itself.
-  const horizonUp = [-Math.sin(a) * Math.sin(e), -Math.cos(a) * Math.sin(e), Math.cos(e)];
-  const base = lookDirection(groundViewDirection(pose.azimuth, pose.elevation), horizonUp);
-  const rotated = nudge(opticalPose(base, pose.rollDegrees || 0), rightDegrees, upDegrees);
-  const next = skyAngles(cameraAxes(rotated).forward);
-  if (next.elevation > 90 - 1e-9) next.azimuth = pose.azimuth;
-  next.elevation = bound(next.elevation, 0, 90);
-  return next;
-}
-
 export function groundPresetField(ocular) {
   if (ocular === 'finder') return GROUND_TELESCOPE.finderFovDeg;
   const mm = Number(ocular);

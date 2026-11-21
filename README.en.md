@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.58 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.62 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools, with exploration extending to ground roaming, the Solar System and interstellar travel.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.58 reduces startup texture memory on iPhone and iPad. Fine quality streams surface detail for the current view. [Full changelog](CHANGELOG.md).
+> v1.62 Horizontal dragging keeps the horizon level in the main stargazing view and ground telescope. The main view stops at the zenith (90°). Release and drag again to cross it, or pan across in one motion through the telescope. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 

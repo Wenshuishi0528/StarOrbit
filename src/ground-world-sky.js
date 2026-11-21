@@ -1,3 +1,4 @@
+import { groundCameraRotation } from './ground-camera-pointing.js';
 import * as THREE from 'three';
 import { earthAxes, sunPosition, dot, sunlightFraction } from './orbit.js';
 import { enuFrame, WGS84_A, WGS84_F } from './ground-world-math.js';
@@ -217,11 +218,8 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
     camera.aspect = width / height;
     camera.fov = settings.fov || 65;
     camera.updateProjectionMatrix();
-    const a = pose.azimuth * D,
-      e = pose.elevation * D;
     camera.position.set(0, 0, 0);
-    camera.lookAt(Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e));
-    if (pose.rollDegrees) camera.rotateZ(pose.rollDegrees * D);
+    groundCameraRotation(pose, camera.quaternion);
     camera.updateMatrixWorld();
     const key = [site.latitude, site.longitude, site.height].join(',');
     // A second is enough for the natural sky; large time jumps are evaluated immediately.

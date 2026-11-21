@@ -255,6 +255,44 @@ assert.equal(mount.state.elevation, 0);
 assert.equal(gestures, 2);
 mount.dispose();
 
+// The main ground observer pans about the local vertical, including after a pole crossing.
+const observer = createGroundWorldInput({
+  canvas, fixedSite: () => true, restrictPitchToSky: () => false,
+});
+const head = observer.state;
+Object.assign(head, {azimuth:192.6, elevation:16.5, rollDegrees:0});
+fire(canvas, 'pointerdown', {button:0, pointerId:4, clientX:0, clientY:0});
+const dragTo = (x,y) => fire(canvas,'pointermove',{pointerId:4,clientX:x,clientY:y});
+for (let x=10;x<=240;x+=10) dragTo(x,0);
+close(head.azimuth,231); close(head.elevation,16.5); close(head.rollDegrees,0);
+dragTo(250,-500);
+close(head.elevation,90); close(head.azimuth,232.6); close(head.rollDegrees,0);
+dragTo(270,-550);
+close(head.elevation,90); close(head.azimuth,235.8);
+dragTo(270,-540);
+close(head.elevation,88.4); close(head.azimuth,235.8);
+dragTo(270,-560);
+fire(canvas,'pointerup',{pointerId:4});
+fire(canvas,'pointerdown',{button:0,pointerId:4,clientX:270,clientY:200});
+dragTo(270,150);
+close(head.elevation,82); close(head.azimuth,55.8); close(head.rollDegrees,0);
+dragTo(270,220);
+close(head.elevation,90); close(head.azimuth,55.8);
+fire(canvas,'pointerup',{pointerId:4});
+Object.assign(head,{azimuth:192.6,elevation:87.1});
+fire(canvas,'keydown',{code:'KeyD'});
+observer.update(0.2);
+close(head.azimuth,201.6); close(head.elevation,87.1); close(head.rollDegrees,0);
+fire(win,'keyup',{code:'KeyD'});
+fire(canvas,'keydown',{code:'KeyS'});
+observer.update(0.2); observer.update(0.2);
+close(head.elevation,90); close(head.azimuth,201.6);
+fire(win,'keyup',{code:'KeyS'});
+fire(canvas,'keydown',{code:'KeyS'});
+observer.update(0.2);
+close(head.elevation,81); close(head.azimuth,21.6);
+observer.dispose();
+
 const { groundSpeedLimit, MAX_GROUND_HEIGHT } = await import('../src/ground-world-math.js');
 assert.equal(createGroundState().mode, 'free');
 const standing = createGroundState({

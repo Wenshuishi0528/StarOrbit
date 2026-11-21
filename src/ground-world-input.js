@@ -31,15 +31,36 @@ export function createGroundWorldInput({
   let pointer = null,
     lastX = 0,
     lastY = 0,
+    pointerLook,
+    keyLook,
     disposed = false;
   const listen = (target, type, fn, options) => {
     target.addEventListener(type, fn, options);
     listeners.push(() => target.removeEventListener(type, fn, options));
   };
   const active = () => !disposed && enabled() && !doc.hidden && doc.activeElement === canvas;
+  function beginLook() {
+    return { overPole: false, canCrossZenith: state.elevation === 90 };
+  }
+  function turnObserver(yaw, pitch, gesture) {
+    const overPole = gesture.overPole;
+    let angle = (overPole ? 180 - state.elevation : state.elevation) + pitch;
+    if (restrictPitchToSky()) angle = Math.max(0, Math.min(180, angle));
+    // A drag arriving at the zenith stops there. A new drag starting there may
+    // pass through, while reversing the current drag moves away immediately.
+    if (!gesture.canCrossZenith) angle = overPole ? Math.max(90, angle) : Math.min(90, angle);
+    const wrapped = wrapGroundAzimuth(angle + 90) - 90;
+    const nextOverPole = wrapped === 90 || wrapped === -90 ? overPole : wrapped > 90;
+    state.azimuth = wrapGroundAzimuth(state.azimuth + yaw + (nextOverPole === overPole ? 0 : 180));
+    state.elevation = wrapped > 90 ? 180 - wrapped : wrapped;
+    state.rollDegrees = 0;
+    gesture.overPole = nextOverPole;
+    if (state.elevation !== 90) gesture.canCrossZenith = false;
+  }
   function stop() {
     keys.clear();
     taps.clear();
+    keyLook = null;
     state.velocity = [0, 0, 0];
     state.speedMps = 0;
     const id = pointer;
@@ -65,7 +86,10 @@ export function createGroundWorldInput({
     keys.add(event.code);
     if (!event.repeat) taps.add(event.code);
   });
-  listen(win, 'keyup', (event) => keys.delete(event.code));
+  listen(win, 'keyup', (event) => {
+    keys.delete(event.code);
+    if (PILOT_KEY_AXES[event.code]?.[0] === 'pitch') keyLook = null;
+  });
   listen(canvas, 'blur', stop);
   listen(win, 'blur', stop);
   listen(doc, 'visibilitychange', () => {
@@ -76,6 +100,7 @@ export function createGroundWorldInput({
     event.preventDefault();
     canvas.focus({ preventScroll: true });
     pointer = event.pointerId;
+    pointerLook = beginLook();
     lastX = event.clientX;
     lastY = event.clientY;
     canvas.setPointerCapture?.(pointer);
@@ -88,11 +113,13 @@ export function createGroundWorldInput({
     lastY = event.clientY;
     if (!dx && !dy) return;
     onManualPoint();
-    state.azimuth = wrapGroundAzimuth(state.azimuth + dx * 0.16 * (getFov() / 65));
-    state.elevation = Math.max(
-      restrictPitchToSky() ? 0 : -89.5,
-      Math.min(restrictPitchToSky() ? 90 : 89.5, state.elevation - dy * 0.16 * (getFov() / 65))
-    );
+    const scale = 0.16 * (getFov() / 65);
+    if (fixedSite()) {
+      turnObserver(dx * scale, -dy * scale, pointerLook);
+    } else {
+      state.azimuth = wrapGroundAzimuth(state.azimuth + dx * scale);
+      state.elevation = Math.max(-89.5, Math.min(89.5, state.elevation - dy * scale));
+    }
     onChange(state);
   });
   const endPointer = (event) => {
@@ -123,14 +150,14 @@ export function createGroundWorldInput({
         turnScale = getFov() / 65;
       if (fixedSite()) {
         axes.forward = axes.right = axes.up = 0;
-        if (axes.yaw || axes.pitch) onManualPoint();
-        state.elevation = Math.max(
-          restrictPitchToSky() ? 0 : -89.5,
-          Math.min(
-            restrictPitchToSky() ? 90 : 89.5,
-            state.elevation + axes.pitch * turnScale * 45 * Math.min(dt, 0.25)
-          )
-        );
+        if (!axes.pitch) keyLook = null;
+        if (axes.yaw || axes.pitch) {
+          onManualPoint();
+          const step = turnScale * 45 * Math.min(dt, 0.25);
+          keyLook ??= beginLook();
+          turnObserver(-axes.yaw * step, axes.pitch * step, keyLook);
+        }
+        axes.yaw = 0;
         axes.pitch = 0;
       }
       axes.yaw *= turnScale;

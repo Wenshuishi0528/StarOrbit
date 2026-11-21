@@ -1,3 +1,4 @@
+import { nudgeGroundScope } from './ground-camera-pointing.js';
 import { t, getLanguage } from './i18n.js';
 import { equatorial } from './environment-math.js';
 import { galleryCoordinates } from './sky-image-index.js';
@@ -23,7 +24,6 @@ import {
   groundFieldAtZoom,
   groundZoomAtField,
   groundScopeOptics,
-  nudgeGroundScope,
 } from './ground-scope-optics.js';
 import { createGroundStarInstrument } from './ground-star-instrument.js';
 import { groundScopeBodyLabels, paintGroundScopeBodyLabels } from './ground-scope-labels.js';
@@ -367,8 +367,9 @@ export function mountGroundStarPanel({
   }
   function nudge(rightDegrees, upDegrees) {
     if (![rightDegrees, upDegrees].every(Number.isFinite) || (!rightDegrees && !upDegrees)) return;
-    const next = nudgeGroundScope(state, rightDegrees, upDegrees);
+    const next = nudgeGroundScope(state, rightDegrees, upDegrees, field());
     control.manual(state, next.azimuth, next.elevation);
+    state.rollDegrees = next.rollDegrees;
     onViewChange();
     saveAfterGesture();
   }

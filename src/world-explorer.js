@@ -243,7 +243,7 @@ export function installWorldExplorer(sim) {
     starPanel.manual();
     scopeState.azimuth = state.azimuth;
     scopeState.elevation = Math.max(0, Math.min(90, state.elevation));
-    scopeState.rollDegrees = 0;
+    scopeState.rollDegrees = state.rollDegrees || 0;
     scopeView?.invalidate();
   }
   function setObserverSite(site) {

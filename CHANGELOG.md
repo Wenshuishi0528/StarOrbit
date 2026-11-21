@@ -1,5 +1,26 @@
 # Changelog / 更新记录
 
+## v1.62 · 2026-11-22
+
+星星观察主画面和地面望远镜横拖时保持地平线水平。主画面可停在天顶 90°，松开再拖可越过天顶；望远镜可连续拖过天顶。
+
+Horizontal dragging keeps the horizon level in the main stargazing view and ground telescope. The main view stops at the zenith (90°). Release and drag again to cross it, or pan across in one motion through the telescope.
+
+## v1.61 · 2026-11-22 · 本机版 / Local build
+
+- 星星观察主画面向上拖动可停在天顶 90°，松开再拖可看向另一侧。
+- Upward drags in the main stargazing view stop at the zenith. Release and drag up again to cross it.
+
+## v1.60 · 2026-11-21 · 本机版 / Local build
+
+- 星星观察主画面水平转头时保持仰角与地平线水平，上下拖动仍可越过天顶。
+- In the main stargazing view, horizontal drags maintain elevation and a level horizon. Vertical drags can cross the zenith.
+
+## v1.59 · 2026-11-21 · 本机版 / Local build
+
+- 星星观察的主画面和望远镜可连续拖过天顶，画面方向随拖动平滑变化。
+- The ground sky and telescope views pan smoothly across the zenith.
+
 ## v1.58 · 2026-11-21
 
 - 地表漫游中可架设望远镜，在独立小窗里跟踪天体、连续缩放和拍照。
