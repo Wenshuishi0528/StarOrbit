@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { pointMainCameraAtSky } from './sky-camera-pointing.js';
 import { getLanguage, onLanguageChange, t } from './i18n.js';
 import { getSkyCulture, cultureName } from './sky-cultures.js';
 import { getXuntianTarget } from './xuntian-catalog.js';
@@ -310,16 +310,7 @@ export function installSkyCultureControls(sim) {
       return;
     }
     const direction = equatorial(selected.ra, selected.dec);
-    const orbit = sim.view === 'orbit',
-      camera = orbit ? sim.spaceCamera : sim.api.camera;
-    const controls = orbit ? sim.orbitControls : sim.api.controls;
-    const local = orbit ? direction : sim.current.basis.map((axis) => dot(axis, direction));
-    const distance = Math.max(20, camera.position.distanceTo(controls.target));
-    controls.stopMotion();
-    controls.target.copy(camera.position).addScaledVector(new Vector3(...local), distance);
-    camera.lookAt(controls.target);
-    controls.update();
-    sim.cameraFocus?.resetAnchor();
+    pointMainCameraAtSky(sim, direction);
     env.settings.starChartEnabled = true;
     syncStarChartControls(env.settings);
     env.save();

@@ -135,7 +135,10 @@ export function installSceneShare(sim, replaceAssembly) {
       weather.normalizeCloudSelection(scene.simulation.time);
       weather.sync();
       weather.save();
-      Object.assign(env.settings, scene.environment);
+      Object.assign(env.settings, scene.environment, {
+        webbBackground: scene.environment.webbBackground ?? 'galaxy',
+      });
+      env.skyDetail.setArtwork(scene.environment.skyArtworkId || null);
       env.save();
       for (const [key, id] of Object.entries({
         moon: 'showMoon',

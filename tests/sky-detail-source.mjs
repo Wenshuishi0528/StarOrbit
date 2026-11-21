@@ -69,17 +69,29 @@ assert.ok(
   'automatic fallback remains available'
 );
 
+// Webb overlays keep their footprint while the optical base changes.
+const webbLayers = (v, base) => planSkyDetailSelection(providers, v, 'recent', null, base);
+assert.deepEqual(webbLayers(recent, 'galaxy').tiles, planSkyDetailSelection(providers, recent, 'recent').tiles);
+assert.deepEqual(new Set(webbLayers(recent, 'dss').tiles.map(t => t.provider.id)), new Set(['jwst-carina-2022', 'dss-color']));
+assert.deepEqual(new Set(webbLayers(north, 'panstarrs').tiles.map(t => t.provider.id)), new Set(['panstarrs']));
+assert.equal(webbLayers(recent, 'panstarrs').backgroundOutsideCoverage, true);
+assert(webbLayers(recent, 'panstarrs').tiles.every(t=>t.provider.tiles));
+assert.deepEqual(webbLayers(north, 'dss').tiles, planSkyDetailSelection(providers, north, 'dss').tiles);
+assert.deepEqual(planSkyDetailSelection(providers,north,'auto',null,'galaxy'), planSkyDetailSelection(providers,north,'auto',null,'dss'));
+
 // Exercise real control handlers with a small DOM surface; no browser/JSON-import dependency.
 const nodes = new Map(
   [
     'skyDetailEnabled',
     'skyDetailSource',
     'xtSkyDetailSource',
+    'webbBackground',
+    'xtWebbBackground',
     'skyDetailStatus',
     'skyDetailCredits',
     'viewSkyDetail',
     'xtSkyDetailTarget',
-  ].map((id) => [id, { value: '', checked: false, disabled: false, textContent: '' }])
+  ].map((id) => [id, { value: '', checked: false, disabled: false, textContent: '', parentElement: {} }])
 );
 let clock = 0,
   saves = 0,
@@ -182,6 +194,17 @@ mounted.update();
 nodes.get('xtSkyDetailTarget').onclick();
 assert.equal(observed, 1);
 assert.equal(manager.source, 'recent');
+assert.equal(nodes.get('xtWebbBackground').parentElement.hidden, false);
+assert.equal(nodes.get('xtWebbBackground').value, 'galaxy');
+nodes.get('xtWebbBackground').value = 'dss';
+nodes.get('xtWebbBackground').onchange();
+assert.equal(nodes.get('webbBackground').value, 'dss');
+nodes.get('skyDetailSource').value = 'auto';
+nodes.get('skyDetailSource').onchange();
+assert.equal(nodes.get('xtWebbBackground').parentElement.hidden, true);
+nodes.get('skyDetailSource').value = 'recent';
+nodes.get('skyDetailSource').onchange();
+assert.equal(nodes.get('xtWebbBackground').value, 'dss');
 assert.ok(saves > 0);
 
 // Export names the actual fallback and stacks above city captions; SDO has none.

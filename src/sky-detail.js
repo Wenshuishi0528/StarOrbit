@@ -1,9 +1,13 @@
+import { validSkyImageDimensions } from './webb-plate.js';
 import * as THREE from 'three';
+import { WEBB_PLATE_PROVIDERS } from './webb-gallery.js';
+import { SkyOffline } from './sky-offline.js';
 import { createSkyTileCache } from './sky-detail-cache.js';
 import { hipsTileUrl } from './sky-detail-math.js';
 import {
   planSkyDetailSelection,
   normalizeSkyDetailSource,
+  normalizeWebbBackground,
   SKY_TILE_BYTES,
   SKY_TILE_LIMIT,
 } from './sky-detail-plan.js';
@@ -66,11 +70,13 @@ export class SkyDetail {
       fetcher = globalThis.fetch,
       source = 'auto',
       wideField = false,
+      webbGallery = false,
       decode = (blob) =>
         createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }),
     } = {}
   ) {
     this.cache = cache;
+    this.offline = new SkyOffline(this, boundedBlob);
     this.fetcher = fetcher;
     this.decode = decode;
     this.providers = (manifest.providers || []).map((p) => ({
@@ -78,6 +84,9 @@ export class SkyDetail {
       revision: p.revision ?? manifest.version ?? 1,
       tiles: p.id === manifest.local?.providerId ? manifest.local.tiles : undefined,
     }));
+    if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS);
+    this.artworkId = null;
+    this.webbBackground = 'galaxy';
     this.views = new Map();
     this.entries = new Map();
     this.loading = new Map();
@@ -109,14 +118,32 @@ export class SkyDetail {
     }
     this.revision++;
   }
-  setSource(value) {
+  setArtwork(id) {
+    if (this.artworkId === id) return;
+    this.artworkId = id;
+    this.replanViews();
+  }
+  setSource(value, background = this.webbBackground) {
     const source = normalizeSkyDetailSource(value);
-    if (this.source === source) return;
+    const base = normalizeWebbBackground(background);
+    if (this.source === source && this.webbBackground === base) return;
     this.source = source;
+    this.webbBackground = base;
     this.failures.clear();
     this.lastError = null;
-    for (const view of this.views.values())
-      Object.assign(view, planSkyDetailSelection(this.providers, view.view, source));
+    this.replanViews();
+  }
+  plan(view) {
+    return planSkyDetailSelection(
+      this.offline.providersForView(view),
+      view,
+      this.source,
+      this.artworkId,
+      this.webbBackground
+    );
+  }
+  replanViews() {
+    for (const view of this.views.values()) Object.assign(view, this.plan(view.view));
     this.schedule();
     this.revision++;
   }
@@ -127,6 +154,8 @@ export class SkyDetail {
     }
     const photo = this.rank(id) === 0;
     const signature = [
+      this.offline.planRevision(),
+      globalThis.navigator?.onLine === false ? 1 : 0,
       view.fovY,
       view.aspect,
       view.pixelHeight,
@@ -152,7 +181,7 @@ export class SkyDetail {
         signature,
         at: now(),
         view: snapshot,
-        ...planSkyDetailSelection(this.providers, snapshot, this.source),
+        ...this.plan(snapshot),
       });
       this.schedule();
     } else this.pump();
@@ -235,6 +264,7 @@ export class SkyDetail {
       if (this.current(t, request)) {
         this.failures.set(t.key, now() + 60000);
         this.lastError = 'TimeoutError: Sky image request timed out';
+        this.offline.sourceFailed(t.provider);
         this.revision++;
       }
       request.controller.abort();
@@ -245,7 +275,7 @@ export class SkyDetail {
       let fetched = false;
       if (!t.provider.tiles) {
         try {
-          blob = await this.cache.get(t.key);
+          blob = (await this.offline.get(t.key)) || (await this.cache.get(t.key));
         } catch {
           /* Cache failure is a network miss. */
         }
@@ -254,7 +284,7 @@ export class SkyDetail {
       if (blob) {
         try {
           bitmap = await this.decode(blob);
-          if (bitmap.width !== 512 || bitmap.height !== 512)
+          if (!validSkyImageDimensions(t, bitmap.width, bitmap.height))
             throw Error('Invalid sky tile dimensions');
         } catch {
           bitmap?.close?.();
@@ -267,6 +297,7 @@ export class SkyDetail {
       if (!live()) return;
       if (!bitmap) {
         const url =
+          t.url ||
           t.provider.tiles?.[`${t.order}/${t.pixel}`] ||
           hipsTileUrl(t.provider.baseUrl, t.order, t.pixel, t.provider.format);
         // Native window.fetch rejects a SkyDetail receiver (Illegal invocation).
@@ -285,7 +316,7 @@ export class SkyDetail {
         fetched = true;
         if (!live()) return;
         bitmap = await this.decode(blob);
-        if (bitmap.width !== 512 || bitmap.height !== 512)
+        if (!validSkyImageDimensions(t, bitmap.width, bitmap.height))
           throw Error('Invalid sky tile dimensions');
       }
       if (!live()) return;
@@ -322,6 +353,7 @@ export class SkyDetail {
       if (live()) {
         this.failures.set(t.key, now() + 60000);
         this.lastError = errorSummary(error);
+        this.offline.sourceFailed(t.provider);
         this.revision++;
       }
     } finally {
@@ -336,8 +368,9 @@ export class SkyDetail {
       .filter(Boolean)
       .sort(
         (a, b) =>
-          (a.provider.tiles ? 2 : a.provider.id === 'panstarrs' ? 1 : 0) -
-            (b.provider.tiles ? 2 : b.provider.id === 'panstarrs' ? 1 : 0) || a.order - b.order
+          (a.provider.tiles || a.provider.plate ? 2 : a.provider.id === 'panstarrs' ? 1 : 0) -
+            (b.provider.tiles || b.provider.plate ? 2 : b.provider.id === 'panstarrs' ? 1 : 0) ||
+          a.order - b.order
       );
   }
   status(id) {
@@ -348,6 +381,9 @@ export class SkyDetail {
       enabled: this.enabled,
       source: this.source,
       active: this.views.has(id),
+      webbBackground: this.webbBackground,
+      hasWebbTiles: tiles.some((t) => t.provider.tiles || t.provider.plate),
+      backgroundOutsideCoverage: !!this.views.get(id)?.backgroundOutsideCoverage,
       fallback: this.views.get(id)?.fallback || (this.source === 'galaxy' ? 'background' : null),
       requested: tiles.length,
       ready: ready.length,
@@ -427,6 +463,7 @@ export class SkyDetail {
     this.dropAll();
     this.views.clear();
     this.allowed.clear();
+    this.offline.dispose();
     this.cache.dispose();
   }
 }

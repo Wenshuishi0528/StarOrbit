@@ -510,6 +510,7 @@ export function installXuntianScope(sim) {
     sim.environment.settings.milky = true;
     for (const id of ['showStars', 'showMilky', 'skyDetailEnabled']) $(id).checked = true;
     for (const id of ['skyDetailSource', 'xtSkyDetailSource']) if ($(id)) $(id).value = 'recent';
+    sim.environment.skyDetail.setArtwork('jwst-carina-2022');
     sim.environment.skyDetail.setSource('recent');
     sim.environment.skyDetail.setEnabled(true);
     sim.environment.save();
@@ -670,6 +671,13 @@ export function installXuntianScope(sim) {
         mode === 'pilot',
       center = lastResult?.center,
       city = anchor?.cityId ? cities.get(anchor.cityId, getLanguage()) : null;
+    $('xtSaveSkyField').hidden =
+      !sky ||
+      mode === 'solar' ||
+      unavailable ||
+      center?.kind === 'earth' ||
+      center?.kind === 'station' ||
+      sim.environment.settings.skyDetailSource === 'galaxy';
     if (active && surveyMission) surveyMission.paint(axes, field, sky, !unavailable && !capturing);
     const targetName =
       (mode === 'solar' ? solarLabel(named.body, getLanguage()) : null) ||
@@ -1439,7 +1447,7 @@ export function installXuntianScope(sim) {
       });
       return mode === 'solar' && named?.body === body;
     },
-    observeTarget(target, { annotations = false } = {}) {
+    observeTarget(target, { annotations = false, savedView = null } = {}) {
       if (sim.missionId !== 'tiangong' || !target?.direction) return false;
       open();
       if (!active) return false;
@@ -1450,6 +1458,15 @@ export function installXuntianScope(sim) {
         prefs();
       }
       selectStar(target);
+      if (savedView?.right && savedView?.up) {
+        const savedPose = attitudeQuaternion(savedView, true);
+        pose.copy(opticalPose(savedPose, -roll));
+        axes = actualAxes();
+        desired = null;
+        locked = true;
+        lastDraw = -Infinity;
+      }
+      $('xtSearch').value = target.name;
       return true;
     },
     observeRegion(target) {
@@ -1514,6 +1531,9 @@ export function installXuntianScope(sim) {
     clearPilot,
     beginExternalSteering,
     restoreRoute: route,
+    get skyViewId() {
+      return active ? renderer?.skyViewId : null;
+    },
     get active() {
       return active;
     },

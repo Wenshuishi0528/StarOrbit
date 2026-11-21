@@ -1,5 +1,19 @@
 # Changelog / 更新记录
 
+## v1.50 · 2026-11-21
+
+- **韦伯图集**收录 283 条官方观测记录，258 幅可在真实天区取景。从巡天取景或星图标注打开「浏览星空影像」，按天体名称、编号或作品名搜索。缩略图随浏览加载。
+- **离线下载**支持保存整幅韦伯作品、指定的 DSS 或 Pan-STARRS 天区，以及巡天当前视野。在「数据与资源 → 高清星空数据」查看、续传或删除下载。
+- **底图切换**在「星空影像」选择「韦伯红外（JWST）」后，可切换原银河、DSS 光学或 Pan-STARRS 光学底图。主画面、巡天取景和照片共用所选组合。
+
+Browse 283 official Webb observations and point the camera at 258 registered images. Save Webb images or optical survey fields for offline use. Choose a Milky Way, DSS or Pan-STARRS background for Webb imagery in the main view, Xuntian viewfinder and photos.
+
+## v1.49 · 2026-11-20 · 本机版 / Local build
+
+- 星空影像目录整合深空天体与韦伯观测作品，按需加载缩略图与高清影像；所选作品、光学天区和当前取景可保存离线。
+- Browse deep-sky objects and Webb observations in one catalogue. Previews and detailed imagery load on demand. Selected images and survey fields can be saved for offline observing.
+
+
 ## v1.48 · 2026-11-20
 
 - 网页版、便携版和本机版均默认开启本地生成的极光，沿用已有的极光来源设置。本次公开发布也包含 v1.46–v1.47 的双模式帮助、巡天示例与空间站组合更新。
@@ -270,7 +284,7 @@ Chrome/WebKit 实际渲染验证通过，覆盖反复切换地形及标注独立
 
 ## v1.15 — 2026-11-06 · 本机版 / Local build
 
-新增共享的按需高清星空：主画面、巡天取景和拍照共用 HEALPix 分块、分级加载与有界缓存；新增 2022 年韦布「宇宙悬崖」AVIF 天区，联网使用原 JPEG 格式的 Pan-STARRS 与 DSS，显示真实观测年代、波段和来源。磁盘缓存上限 1 GB，新增常驻 GPU 纹理上限 64 MiB，关闭后释放；拍照按输出尺寸准备素材，未齐时明确注明回退。固定十字线后的拖动与按键微调继续固定新落点，只有主动选择随轨道转动才解除。
+新增共享的按需高清星空：主画面、巡天取景和拍照共用 HEALPix 分块、分级加载与有界缓存；新增 2022 年韦伯「宇宙悬崖」AVIF 天区，联网使用原 JPEG 格式的 Pan-STARRS 与 DSS，显示真实观测年代、波段和来源。磁盘缓存上限 1 GB，新增常驻 GPU 纹理上限 64 MiB，关闭后释放；拍照按输出尺寸准备素材，未齐时明确注明回退。固定十字线后的拖动与按键微调继续固定新落点，只有主动选择随轨道转动才解除。
 
 **English:** Added shared on-demand HD sky tiles for the main view, Xuntian finder and photos, with HEALPix LOD and bounded caching. A small offline AVIF pack contains Webb’s 2022 Cosmic Cliffs; Pan-STARRS and DSS retain their original JPEG tiles with observation dates, bands and credits. Disk caching is capped at 1 GB and resident additional GPU textures at 64 MiB, released on close. Photos prepare imagery for their output size and explicitly report incomplete detail. Steering a pinned reticle now pins the new point; orbital motion resumes only through the explicit release control.
 

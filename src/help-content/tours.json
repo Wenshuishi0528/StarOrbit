@@ -28,7 +28,7 @@
     },
     "sky-image": {
       "title": "用不同的望远镜影像看星空",
-      "text": "在「星空影像」选「DSS 光学」，放大一片天区，再切到「Pan-STARRS 光学」，比较同一方向的星点和背景。想看韦布拍到的星云，展开「影像来源与波段」，点「查看宇宙悬崖」。"
+      "text": "在「星空影像」选「DSS 光学」，放大后切到「Pan-STARRS 光学」，比较同一天区。点「浏览星空影像」，搜索「宇宙悬崖」，查看韦伯拍到的星云。"
     },
     "xuntian": {
       "title": "用巡天看星空，也看城市",
@@ -97,7 +97,7 @@
     },
     "sky-image": {
       "title": "Compare telescope surveys",
-      "text": "Choose DSS optical in Sky imagery and zoom into one field. Switch to Pan-STARRS optical to compare stars and background in the same direction. For Webb’s nebula image open Image sources and bands and choose View Cosmic Cliffs."
+      "text": "Select DSS optical, zoom in, and switch to Pan-STARRS optical to compare the same field. Open Browse sky imagery and search for Cosmic Cliffs to see the Webb observation."
     },
     "xuntian": {
       "title": "Aim Xuntian at a star and a city",
@@ -166,7 +166,7 @@
     },
     "sky-image": {
       "title": "Comparer des relevés du ciel",
-      "text": "Dans Images du ciel, choisissez DSS optique et zoomez sur un champ. Passez à Pan-STARRS optique pour comparer les étoiles et le fond. Pour voir une nébuleuse imagée par Webb, ouvrez Sources et bandes des images et choisissez Voir les Falaises cosmiques."
+      "text": "Sélectionnez DSS optique, zoomez puis passez à Pan-STARRS optique pour comparer le même champ. Dans le catalogue d’images du ciel, recherchez « Cosmic Cliffs » pour voir cette observation de Webb."
     },
     "xuntian": {
       "title": "Pointer Xuntian vers une étoile et une ville",
@@ -235,7 +235,7 @@
     },
     "sky-image": {
       "title": "Сравните снимки разных обзоров неба",
-      "text": "В меню Изображения неба выберите DSS: оптика и увеличьте участок неба. Перейдите на Pan-STARRS: оптика и сравните звёзды и фон. Чтобы увидеть туманность глазами «Уэбба», откройте Источники и диапазоны и нажмите Открыть Космические скалы."
+      "text": "Выберите оптический обзор DSS, увеличьте масштаб и переключитесь на Pan-STARRS для сравнения того же участка неба. В каталоге изображений найдите Cosmic Cliffs, чтобы увидеть снимок телескопа «Уэбб»."
     },
     "xuntian": {
       "title": "Наведите Сюньтянь на звезду и на город",

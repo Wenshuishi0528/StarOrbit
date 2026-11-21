@@ -56,6 +56,11 @@ for(const source of ['auto','galaxy','dss','panstarrs','recent']){
  const roundtrip=validateScene(scene);assert.equal(roundtrip.environment.skyDetailSource,source);assert.equal(roundtrip.environment.skyDetail,source!=='galaxy');
 }
 for(const [key,value]of [['skyDetailSource','unknown'],['cityTerrain','true'],['cityAutoLoad',1]]){const bad=structuredClone(fixture);bad.environment[key]=value;assert.throws(()=>validateScene(bad));}
+const webbScene = structuredClone(fixture);
+webbScene.environment.webbBackground = 'panstarrs';
+assert.equal(validateScene(webbScene).environment.webbBackground, 'panstarrs');
+webbScene.environment.skyArtworkId = 'jwst-carina-2022';
+assert.equal(validateScene(webbScene).environment.skyArtworkId, 'jwst-carina-2022');
 const oldSources=structuredClone(fixture);delete oldSources.environment.skyDetailSource;oldSources.environment.skyDetail=false;assert.equal(validateScene(oldSources).environment.skyDetailSource,'galaxy');
 
 const elevationScene=structuredClone(fixture); elevationScene.environment.earthElevation=true; assert.equal(validateScene(elevationScene).environment.earthElevation,true); elevationScene.environment.earthElevation=false; assert.equal(validateScene(elevationScene).environment.earthElevation,false); delete elevationScene.environment.earthElevation; assert.equal(validateScene(elevationScene).environment.earthElevation,true); elevationScene.environment.earthElevation="yes"; assert.throws(()=>validateScene(elevationScene));

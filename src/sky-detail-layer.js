@@ -1,3 +1,4 @@
+import { webbPlateGeometry } from './webb-plate.js';
 import * as THREE from 'three';
 import { hipsDirection, hipsTileMesh } from './sky-detail-math.js';
 import { earthHit } from './xuntian-view-shaders.js';
@@ -23,6 +24,22 @@ const fragmentShader = `precision highp float;varying vec2 tileUV;varying vec3 c
   gl_FragColor=vec4(colour,pixel.a);
   #include <colorspace_fragment>
  }`;
+
+function hipsGeometry(entry) {
+  const data = hipsTileMesh(entry.order, entry.pixel, 8);
+  const origin = hipsDirection(entry.order, entry.pixel);
+  // Project a small tile-relative vector on the GPU. Subtracting almost
+  // parallel unit directions in float32 loses subpixel detail at 0.006°.
+  for (let i = 0; i < data.uvs.length / 2; i++) {
+    const point = hipsDirection(entry.order, entry.pixel, data.uvs[i * 2], data.uvs[i * 2 + 1]);
+    data.positions.set(
+      point.map((v, axis) => v - origin[axis]),
+      i * 3
+    );
+  }
+
+  return { ...data, origin };
+}
 
 // Geometry/materials belong to each view. The texture (and its decoded bitmap)
 // belongs to the one bounded manager, including during high-resolution export.
@@ -68,23 +85,9 @@ export class SkyDetailLayer {
     entries.forEach((entry, index) => {
       let mesh = this.meshes.get(entry.key);
       if (!mesh) {
-        const data = hipsTileMesh(entry.order, entry.pixel, 8),
-          geometry = new THREE.BufferGeometry();
-        const origin = hipsDirection(entry.order, entry.pixel);
-        // Project a small tile-relative vector on the GPU. Subtracting almost
-        // parallel unit directions in float32 loses subpixel detail at 0.006°.
-        for (let i = 0; i < data.uvs.length / 2; i++) {
-          const point = hipsDirection(
-            entry.order,
-            entry.pixel,
-            data.uvs[i * 2],
-            data.uvs[i * 2 + 1]
-          );
-          data.positions.set(
-            point.map((v, axis) => v - origin[axis]),
-            i * 3
-          );
-        }
+        const data = entry.provider.plate ? webbPlateGeometry(entry) : hipsGeometry(entry);
+        const origin = data.origin;
+        const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute(data.uvs, 2));
         geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));

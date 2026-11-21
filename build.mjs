@@ -94,7 +94,7 @@ environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py
 let html=fs.readFileSync('src/layout.html','utf8')
  .replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8'))
  .replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8'))
- .replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n'))
+ .replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','sky-image-gallery.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n'))
  .replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8'))
  .replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8'))
  .replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8'))

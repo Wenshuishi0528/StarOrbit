@@ -1,0 +1,192 @@
+dialog.sky-image-gallery {
+  box-sizing: border-box;
+  width: min(820px, calc(100vw - 28px));
+  max-width: calc(100vw - 12px);
+  height: min(680px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 16px);
+  padding: 17px;
+  margin: auto;
+  color: #e4edf5;
+  background: #101e2e;
+  border: 1px solid #48657a;
+  border-radius: 14px;
+  box-shadow: 0 16px 60px #0008;
+}
+.sky-image-gallery[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sky-image-gallery::backdrop {
+  background: #06101bcc;
+}
+.sky-image-gallery [hidden] {
+  display: none !important;
+}
+.sky-image-gallery :is(button, input, select) {
+  font: inherit;
+  color: inherit;
+  max-width: 100%;
+}
+.sky-image-gallery :is(button, select, input) {
+  border: 1px solid #365166;
+  background: #1a2d3e;
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.sky-image-gallery button {
+  cursor: pointer;
+}
+.sky-image-gallery button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.sky-image-gallery :is(button, input, select, a):focus-visible {
+  outline: 2px solid #83dcee;
+  outline-offset: 2px;
+}
+.sky-image-gallery a {
+  color: #8ed5e6;
+}
+.sig-head,
+.sig-tools,
+.sig-actions,
+.sig-pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sig-head {
+  justify-content: space-between;
+}
+.sig-head h2,
+.sig-info h3,
+.sig-feedback {
+  margin: 0;
+}
+.sig-head h2 {
+  font-size: 1.22rem;
+}
+.sig-tools input {
+  min-width: 0;
+  flex: 1;
+}
+.sig-tools select {
+  width: auto;
+}
+.sig-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 3px;
+}
+.sig-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(152px, 100%), 1fr));
+  gap: 10px;
+}
+.sky-image-gallery .sig-card {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  align-items: stretch;
+  min-width: 0;
+  padding: 0 0 9px;
+  overflow: hidden;
+}
+.sig-card strong,
+.sig-card small {
+  margin: 6px 8px 0;
+  overflow-wrap: anywhere;
+}
+.sig-card strong {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+.sig-card small,
+.sig-meta,
+.sig-credit,
+.sig-feedback {
+  font-size: 0.78rem;
+  color: #b7c9d8;
+  line-height: 1.4;
+}
+.sig-thumb {
+  aspect-ratio: 3/2;
+  display: grid;
+  place-content: stretch;
+  background: #0b1520;
+  min-width: 0;
+  overflow: hidden;
+}
+.sig-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  min-height: 0;
+}
+.sig-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sig-actions {
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.sky-image-gallery .sig-primary {
+  background: #225669;
+  border-color: #498296;
+}
+.sig-detail {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr);
+  align-items: start;
+  gap: 18px;
+  margin-top: 12px;
+}
+.sig-pager {
+  justify-content: center;
+  margin: 12px 0 4px;
+}
+.sig-pager:empty {
+  display: none;
+}
+@media (max-width: 520px) {
+  dialog.sky-image-gallery {
+    padding: 12px;
+    width: calc(100vw - 12px);
+    height: calc(100dvh - 16px);
+  }
+  .sig-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .sig-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sig-tools {
+    flex-wrap: wrap;
+  }
+  .sig-tools input {
+    flex: 1 1 140px;
+  }
+  .sig-tools select {
+    flex: 0 1 auto;
+  }
+}
+
+.sig-related {
+  margin-top: 12px;
+}
+.sig-related summary {
+  cursor: pointer;
+  color: #a5d8e8;
+}
+.sig-related button {
+  display: block;
+  text-align: start;
+  margin-top: 6px;
+  width: 100%;
+}

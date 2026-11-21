@@ -1,4 +1,5 @@
 import { t, setText, getLanguage } from './i18n.js';
+import { skyOfflineResourceList } from './sky-offline-controls.js';
 import { getXuntianTarget } from './xuntian-catalog.js';
 import { normalizeSkyDetailSource, resolveSkyDetailSource } from './sky-detail-plan.js';
 
@@ -8,14 +9,14 @@ const SOURCE_LABELS = {
   galaxy: '原银河背景',
   dss: 'DSS 光学',
   panstarrs: 'Pan-STARRS 光学',
-  recent: '近期精选（JWST 红外）',
+  recent: '韦伯红外（JWST）',
 };
 const SOURCE_NOTES = {
-  auto: '自动选用巡天与近期精选影像；未覆盖区域保留原银河背景。',
+  auto: '自动选择光学巡天和韦伯影像。',
   galaxy: '沿用当前银河与星表显示，不加载局部巡天影像。',
   dss: 'DSS 为历史摄影巡天的光学彩色合成。',
   panstarrs: 'Pan-STARRS 为 i / r / g 光学波段合成，并非全天天区覆盖。',
-  recent: '近期精选是有限天区的 JWST 红外合成影像，并非肉眼自然色。',
+  recent: '韦伯望远镜拍摄的红外合成影像只覆盖局部天区。',
 };
 export function skyDetailTarget(env) {
   const p = env.skyDetail.providers.find((p) => p.tiles && p.center);
@@ -26,10 +27,15 @@ export function skyDetailText(status) {
   const source = normalizeSkyDetailSource(status?.source);
   if (source === 'galaxy') return t('原银河背景 · 沿用当前星空显示');
   if (!status?.enabled) return t('高清星空已关闭');
+  if (status.backgroundOutsideCoverage) {
+    const note = t('Pan-STARRS 未覆盖此天区，底图显示原银河');
+    if (!status.hasWebbTiles) return note;
+    return skyDetailProgress(status, source) + ' · ' + note;
+  }
   if (status.fallback === 'outside-coverage')
     return t(
       source === 'recent'
-        ? '此天区没有近期精选影像，显示原银河背景'
+        ? '此天区没有韦伯影像，显示原银河背景'
         : '此视场超出 Pan-STARRS 覆盖范围，显示原银河背景'
     );
   if (
@@ -41,6 +47,11 @@ export function skyDetailText(status) {
     return source === 'auto'
       ? t('放大后自动加载高清天区')
       : t('放大后加载 {source}，当前显示原银河背景', { source: t(SOURCE_LABELS[source]) });
+  if (source === 'recent' && status.hasWebbTiles === false && status.ready)
+    return t('此天区显示 {source} 底图', { source: t(SOURCE_LABELS[status.webbBackground]) });
+  return skyDetailProgress(status, source);
+}
+function skyDetailProgress(status, source) {
   const progress = t('高清天区 {ready}/{total}', { ready: status.ready, total: status.requested });
   const state = status.complete ? t('已就绪') : status.loading ? t('加载中') : t('保留可用底图');
   return `${t(SOURCE_LABELS[source])} · ${progress} · ${state}`;
@@ -50,7 +61,7 @@ export function skyDetailCredits(status) {
   return [
     t(SOURCE_NOTES[source]),
     ...(status?.sources || []).map(
-      (p) => `${t(p.title)} · ${p.observed}\n${t(p.bands)}\n${p.credit}`
+      (p) => `${[t(p.title), p.observed].filter(Boolean).join(' · ')}\n${t(p.bands)}\n${p.credit}`
     ),
   ].join('\n\n');
 }
@@ -59,7 +70,7 @@ export function applySkyDetailSource(env, value, { save = true } = {}) {
   const source = normalizeSkyDetailSource(value);
   env.settings.skyDetailSource = source;
   env.settings.skyDetail = source !== 'galaxy';
-  env.skyDetail.setSource(source);
+  env.skyDetail.setSource(source, env.settings.webbBackground);
   env.skyDetail.setEnabled(
     env.settings.skyDetail &&
       env.settings.stars !== false &&
@@ -72,13 +83,19 @@ export function applySkyDetailSource(env, value, { save = true } = {}) {
 
 export function mountSkyDetailControls(env) {
   const boxes = ['skyDetailEnabled'].map($).filter(Boolean),
+    backgrounds = ['webbBackground', 'xtWebbBackground'].map($).filter(Boolean),
     selects = ['skyDetailSource', 'xtSkyDetailSource'].map($).filter(Boolean);
   function sync() {
     const source = resolveSkyDetailSource(env.settings),
       disabled = env.settings.stars === false || env.settings.milky === false;
     env.settings.skyDetailSource = source;
     env.settings.skyDetail = source !== 'galaxy';
-    env.skyDetail.setSource(source);
+    env.skyDetail.setSource(source, env.settings.webbBackground);
+    for (const select of backgrounds) {
+      select.parentElement.hidden = source !== 'recent';
+      select.value = env.settings.webbBackground ?? 'galaxy';
+      select.disabled = disabled;
+    }
     for (const box of boxes) {
       box.checked = env.settings.skyDetail;
       box.disabled = disabled;
@@ -105,6 +122,13 @@ export function mountSkyDetailControls(env) {
           : 'galaxy'
       );
   for (const select of selects) select.onchange = () => choose(select.value);
+  for (const select of backgrounds)
+    select.onchange = () => {
+      env.settings.webbBackground = select.value;
+      sync();
+      env.save();
+      env.sim.dirty = true;
+    };
   const observe = () => {
     choose('recent');
     env.sim.xuntian?.observeSkyDetail?.();
@@ -146,9 +170,10 @@ export function mountSkyDetailResourceCard({ env, parent, closeResources }) {
     <div class="resource-source" data-sky-sources></div><div class="resource-card-actions">
     <button type="button" id="resourceViewSkyDetail"></button><button type="button" id="clearSkyDetailCache"></button></div>`;
   parent.append(card);
+  const renderOffline = skyOfflineResourceList(env, card, closeResources);
   const sources = card.querySelector('[data-sky-sources]');
   const sourceRows = [];
-  for (const p of env.skyDetail.providers) {
+  for (const p of env.skyDetail.providers.filter((p) => !p.plate)) {
     const line = document.createElement('p'),
       link = document.createElement('a');
     link.href = p.sourceUrl;
@@ -187,7 +212,7 @@ export function mountSkyDetailResourceCard({ env, parent, closeResources }) {
     }
     card.querySelector('h3').textContent = t('高清星空数据');
     card.querySelector('[data-sky-policy]').textContent = t(
-      '主画面、巡天取景和照片共用。按需下载；磁盘最多 1 GB，新增纹理最多 64 MiB。韦布为红外合成，巡天底图为历史观测。'
+      '普通浏览按视野加载，临时缓存最多 1 GB。手动保存的影像在此管理。'
     );
     view.textContent = t('查看宇宙悬崖');
     view.disabled = env.sim.missionId !== 'tiangong';
@@ -195,6 +220,7 @@ export function mountSkyDetailResourceCard({ env, parent, closeResources }) {
     if (updating || performance.now() - last < 2000) return;
     last = performance.now();
     updating = true;
+    renderOffline();
     env.skyDetail.cache
       .stats()
       .then((s) => {
@@ -233,12 +259,15 @@ export function skyDetailCaptionLines(status) {
     galaxy: 'Original Milky Way background',
     dss: 'DSS2 optical colour composite',
     panstarrs: 'Pan-STARRS i/r/g optical composite',
-    recent: 'Recent selection: JWST infrared composite',
+    recent: 'Webb infrared (JWST)',
   };
   const sources = status.sources || [];
   const lines = [
     `Sky imagery selected: ${labels[source]}`,
-    ...sources.map((p) => `${p.id} · ${p.observed} · ${p.credit}`),
+    ...(source === 'recent'
+      ? [`Background selected: ${labels[status.webbBackground || 'galaxy']}`]
+      : []),
+    ...sources.map((p) => `${[p.id, p.observed, p.credit].filter(Boolean).join(' · ')}`),
   ];
   if (!sources.length) {
     lines.push('Rendered: original Milky Way / catalogue background');
@@ -250,6 +279,10 @@ export function skyDetailCaptionLines(status) {
   for (const p of sources.filter((p) => p.tiles)) {
     lines.push('JWST NIRCam · Infrared colour composite · Reprojected by StarOrbit');
     lines.push(`${p.sourceUrl.replace(/^https?:\/\//, '')} · ${p.license}`);
+  }
+  for (const p of sources.filter((p) => p.plate)) {
+    lines.push(p.bands);
+    lines.push(p.sourceUrl.replace(/^https?:\/\//, ''));
   }
   if (status.requested && !status.complete)
     lines.push('HD tiles incomplete · available imagery retained');

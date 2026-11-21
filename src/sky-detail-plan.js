@@ -1,3 +1,4 @@
+import { planWebbPlate } from './webb-plate.js';
 import { hipsDirection, hipsOrderForView, selectHipsTiles } from './sky-detail-math.js';
 
 export const SKY_GPU_BUDGET = 64 * 1024 * 1024;
@@ -8,6 +9,8 @@ export const normalizeSkyDetailSource = (source) =>
   SKY_DETAIL_SOURCES.includes(source) ? source : 'auto';
 export const resolveSkyDetailSource = (settings = {}) =>
   settings?.skyDetail === false ? 'galaxy' : normalizeSkyDetailSource(settings?.skyDetailSource);
+export const normalizeWebbBackground = (value) =>
+  value === 'dss' || value === 'panstarrs' ? value : 'galaxy';
 export const skyTileKey = (provider, order, pixel) =>
   `${provider.id}@${provider.revision ?? 1}/${order}/${pixel}.${provider.format || 'jpg'}`;
 
@@ -17,7 +20,13 @@ function tile(provider, order, pixel, priority) {
 
 // The panorama remains the wide-angle background. Only magnified views need a
 // photographic survey; small recent patches can also appear in the main sky.
-export function planSkyDetailSelection(providers, view, requestedSource = 'auto') {
+export function planSkyDetailSelection(
+  providers,
+  view,
+  requestedSource = 'auto',
+  artworkId = null,
+  webbBackground = 'galaxy'
+) {
   const source = normalizeSkyDetailSource(requestedSource);
   if (source === 'galaxy') return { source, tiles: [], fallback: 'background' };
   const plans = [],
@@ -27,19 +36,20 @@ export function planSkyDetailSelection(providers, view, requestedSource = 'auto'
     half = Math.atan(Math.tan((view.fovY * Math.PI) / 360) * Math.hypot(1, view.aspect)),
     dec = Math.asin(Math.max(-1, Math.min(1, view.forward[2]))) * (180 / Math.PI),
     ps1Covered = dec - half * (180 / Math.PI) > -28;
+  const optical = source === 'recent' ? normalizeWebbBackground(webbBackground) : source;
   const provider =
-    source === 'dss'
+    optical === 'dss'
       ? dss
-      : source === 'panstarrs'
+      : optical === 'panstarrs'
         ? ps1Covered
           ? ps1
           : null
-        : source === 'auto'
+        : optical === 'auto'
           ? ps1 && ps1Covered
             ? ps1
             : dss
           : null;
-  if ((view.fovY <= 18 || (view.wideField === true && source === 'dss')) && provider) {
+  if ((view.fovY <= 18 || (view.wideField === true && optical === 'dss')) && provider) {
     // Stay clear of PS1's irregular southern boundary. DSS is a complete parent
     // layer, including when an individual PS1 tile is missing or offline.
     // An explicit choice uses that same survey at every level. Automatic mode
@@ -108,15 +118,35 @@ export function planSkyDetailSelection(providers, view, requestedSource = 'auto'
     }
     plans.push(...parents.values(), ...available.map((t) => tile(local, t.order, t.pixel, 3)));
   }
+  if (source === 'auto' || source === 'recent') {
+    const hasLocal = plans.some((t) => t.provider === local);
+    if (!hasLocal || (artworkId && artworkId !== local?.id)) {
+      const overlay = planWebbPlate(providers, view, artworkId);
+      if (overlay.length && (!hasLocal || overlay[0].provider.id === artworkId)) {
+        // A chosen edition replaces the overlapping rendition in all shared views.
+        if (hasLocal)
+          for (let i = plans.length - 1; i >= 0; i--) {
+            if (plans[i].provider === local) plans.splice(i, 1);
+          }
+        plans.push(...overlay);
+      }
+    }
+  }
   const tiles = [...new Map(plans.map((t) => [t.key, t])).values()];
   let fallback = null;
   if (!tiles.length) {
-    if (source === 'recent') fallback = local ? 'outside-coverage' : 'unavailable';
+    if (source === 'recent')
+      fallback = local || providers.some((p) => p.plate) ? 'outside-coverage' : 'unavailable';
     else if (source === 'panstarrs' && !ps1Covered) fallback = 'outside-coverage';
     else if (!provider) fallback = 'unavailable';
     else fallback = 'wide';
   }
-  return { source, tiles, fallback };
+  return {
+    source,
+    tiles,
+    fallback,
+    backgroundOutsideCoverage: source === 'recent' && optical === 'panstarrs' && !ps1Covered,
+  };
 }
 
 export function planSkyDetail(providers, view, source = 'auto') {

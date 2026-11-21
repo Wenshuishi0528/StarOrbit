@@ -11,7 +11,9 @@
   <div id="xtTrackingInfo" hidden></div>
   <div id="xtSources" title="当前载入的地表、银河和取景窗实际像素"></div>
   <div id="xtCityTerrain" class="xt-hint" hidden><span id="xtCityStatus"></span> <button id="xtCityLibrary" type="button">城市地景库…</button></div>
-  <div id="xtSkyDetailControls" class="sky-detail-row"><label for="xtSkyDetailSource">星空影像</label><select id="xtSkyDetailSource" title="主画面、巡天取景和照片共用此影像选择"><option value="auto">自动</option><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="recent">近期精选（JWST 红外）</option></select></div>
+  <div id="xtSkyDetailControls" class="sky-detail-row"><label for="xtSkyDetailSource">星空影像</label><select id="xtSkyDetailSource" title="主画面、巡天取景和照片共用此影像选择"><option value="auto">自动</option><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="recent">韦伯红外（JWST）</option></select></div>
+<div class="sky-detail-row" hidden><label for="xtWebbBackground">底图</label><select id="xtWebbBackground"><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option></select></div>
+  <div class="angle-actions"><button id="xtSkyImageBrowse" type="button">浏览星空影像</button><button id="xtSaveSkyField" type="button">下载当前天区</button></div>
   <div id="xtSkyDetailStatus" class="xt-hint" role="status"></div><details id="xtSkyDetailInfo" class="xt-hint sky-detail-info"><summary>影像来源与波段</summary><p id="xtSkyDetailCredits"></p><button id="xtSkyDetailTarget" type="button">查看宇宙悬崖</button></details>
   <details id="xtSolarControls" class="xt-solar-controls" hidden><summary>太阳观测<span id="xtSolarMode"></span></summary>
    <div id="xtSolarChannels" role="group" aria-label="太阳观测波段"></div>

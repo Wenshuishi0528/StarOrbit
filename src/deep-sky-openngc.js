@@ -103,7 +103,7 @@ export const SKY_IMAGE_FIELDS = [
     id: 'JWST-CARINA-2022',
     name: '宇宙悬崖（JWST 影像）',
     englishName: 'Cosmic Cliffs (JWST image)',
-    aliases: ['宇宙悬崖', 'Cosmic Cliffs', 'JWST Carina', '韦布宇宙悬崖', 'jwst-carina-2022'],
+    aliases: ['宇宙悬崖', 'Cosmic Cliffs', 'JWST Carina', '韦伯宇宙悬崖', 'jwst-carina-2022'],
     ra: 159.21303687393092,
     dec: -58.62016558917656,
     type: 'image-field',

@@ -47,8 +47,9 @@ import { EARTH_RADIUS, stateAt, earthAxes } from './orbit.js';
 import { SolarObservations } from './solar-data.js';
 import { SkyDetail } from './sky-detail.js';
 import { SkyDetailLayer } from './sky-detail-layer.js';
+import { mountSkyImageBrowser } from './sky-image-browser.js';
 import { mountSkyDetailControls } from './sky-detail-controls.js';
-import { resolveSkyDetailSource } from './sky-detail-plan.js';
+import { normalizeWebbBackground, resolveSkyDetailSource } from './sky-detail-plan.js';
 import { CityTerrain } from './city-terrain.js';
 import { ConstellationArt } from './constellation-art.js';
 import { chineseSkyArtProvider } from './chinese-sky-art.js';
@@ -108,6 +109,7 @@ export class Environment {
       milky: true,
       skyDetail: true,
       skyDetailSource: 'auto',
+      webbBackground: 'galaxy',
       ...normalizeSurfaceStreamingSettings(),
       cityTerrain: true,
       cityAutoLoad: false,
@@ -162,6 +164,8 @@ export class Environment {
         if (Number.isFinite(old?.[k]))
           this.settings[k] = THREE.MathUtils.clamp(old[k], 0, k === 'cloudOpacity' ? 1 : 2);
       this.settings.skyDetailSource = resolveSkyDetailSource(old || {});
+      this.settings.webbBackground = normalizeWebbBackground(old?.webbBackground);
+      if (typeof old?.skyArtworkId === 'string') this.settings.skyArtworkId = old.skyArtworkId;
     } catch {}
     try {
       migrateStarDensityDefault(this.settings, localStorage);
@@ -337,8 +341,9 @@ export class Environment {
     this.buildStars();
     this.planets = new MainPlanets(this);
     this.buildMilkyWay();
-    this.skyDetail = new SkyDetail(this.assets.skyDetail);
-    this.skyDetail.setSource(resolveSkyDetailSource(this.settings));
+    this.skyDetail = new SkyDetail(this.assets.skyDetail, { webbGallery: true });
+    this.skyDetail.setArtwork(this.settings.skyArtworkId || null);
+    this.skyDetail.setSource(resolveSkyDetailSource(this.settings), this.settings.webbBackground);
     this.skyDetail.setEnabled(this.settings.skyDetail);
     this.skyDetailLayer = new SkyDetailLayer(this.skyDetail, 'main');
     this.backdrop.add(this.skyDetailLayer.group);
@@ -350,6 +355,7 @@ export class Environment {
     this.constellationArtLayer = new ConstellationArtLayer(this.constellationArt, 'main');
     this.backdrop.add(this.constellationArtLayer.group);
     this.skyDetailControls = mountSkyDetailControls(this);
+    this.skyImageBrowser = mountSkyImageBrowser(this);
     this.moon = new Moon(this);
     this.starChart = new StarChart(this);
     this.geography = new Geography(this);
@@ -545,6 +551,8 @@ export class Environment {
   save() {
     if (this.sim.helpExampleActive) return;
     try {
+      if (this.skyDetail?.artworkId) this.settings.skyArtworkId = this.skyDetail.artworkId;
+      else delete this.settings.skyArtworkId;
       localStorage.setItem('tiangong-environment-v1', JSON.stringify(this.settings));
     } catch {}
   }
@@ -881,7 +889,7 @@ export class Environment {
     this.starCamera.zoom = camera.zoom;
     this.starCamera.updateProjectionMatrix();
     const rotation = this.starCamera.quaternion;
-    this.skyDetail.setSource(resolveSkyDetailSource(s));
+    this.skyDetail.setSource(resolveSkyDetailSource(s), s.webbBackground);
     this.skyDetail.setEnabled(s.skyDetail && s.stars && s.milky && s.starBrightness > 0);
     const celestialView = {
       right: new THREE.Vector3(1, 0, 0).applyQuaternion(rotation).toArray(),

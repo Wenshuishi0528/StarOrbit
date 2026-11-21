@@ -147,6 +147,9 @@ export function validateScene(x) {
     e.cloudNightVisible === undefined ? false : bool(e.cloudNightVisible);
   environment.skyDetail = e.skyDetail === undefined ? true : bool(e.skyDetail);
   if (e.skyDetailSource !== undefined && !SKY_DETAIL_SOURCES.includes(e.skyDetailSource)) bad();
+  if (e.webbBackground !== undefined)
+    environment.webbBackground = choice(e.webbBackground, ['galaxy', 'dss', 'panstarrs']);
+  if (e.skyArtworkId !== undefined) environment.skyArtworkId = text(e.skyArtworkId, 160);
   environment.skyDetailSource = resolveSkyDetailSource(e);
   environment.skyDetail = environment.skyDetailSource !== 'galaxy';
   environment.cityTerrain = e.cityTerrain === undefined ? true : bool(e.cityTerrain);

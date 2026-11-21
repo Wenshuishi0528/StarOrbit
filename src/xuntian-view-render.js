@@ -795,6 +795,7 @@ export function createXuntianViewRenderer(
     if (!target.bytes[3]) throw Error('巡天取景图像生成失败');
   }
   return {
+    skyViewId,
     earthSource: earthView.source,
     groundPick: (eye, axes, q) => earthView.pick({ eyeKm: eye, axes, q }),
     earthAppearanceKey: earthView.appearanceKey,
