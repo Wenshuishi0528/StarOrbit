@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v1.52 · 2026-11-21
+
+- 修复 NASA 最新云图目录更新和云相图预览。
+- NASA 云图覆盖核查可同时处理 3 个时次，刷新目录复用有效结果，显示正在核查和排队数量。
+- 五种云图来源统一显示下载进度，已知大小时显示百分比，转换与保存阶段另行提示。
+- Restored the latest NASA cloud catalogue and preview. NASA coverage checks process up to three observations at once and reuse current results. All five cloud sources show transfer progress and separate processing status.
+
+## v1.51 · 2026-11-21 · 本机版 / Local build
+
+- 云图库改用 NASA 官方浏览器的时次目录。在「NASA 全球覆盖」点「查看 NASA 最新云图」，即可预览所选时次的云相图，再决定是否下载。
+- The cloud library now reads the NASA SatCORPS viewer’s observation catalogue. Open the latest maps from the NASA global coverage tab and preview cloud phase before downloading a frame.
+
 ## v1.50 · 2026-11-21
 
 - **韦伯图集**收录 283 条官方观测记录，258 幅可在真实天区取景。从巡天取景或星图标注打开「浏览星空影像」，按天体名称、编号或作品名搜索。缩略图随浏览加载。

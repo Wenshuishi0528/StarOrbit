@@ -1,5 +1,5 @@
 """Convert one exact SATCORPS frame; the service saves it in the shared library."""
-import datetime, hashlib, json, tempfile, time
+import datetime, hashlib, tempfile, time
 from pathlib import Path
 from satcorps import BASE, request, fetch_resuming, phase_coverage, acceptable, convert, write_cloud_png
 from cloud_quality import inspect_image, quality_ok, describe_reasons
@@ -31,17 +31,17 @@ def query(date, hour):
             'release': 'GCC V2A', 'rawBytes': size,
             'message': '时次文件存在，下载后检查覆盖和图像质量。科学字段最多下载 220 MB，最终云图以 30 MB 为目标，上限 50 MB。'}
 
-def build(date, hour, output, progress=lambda message: None):
+def build(date, hour, output, progress=lambda message: None, on_transfer=None):
     reference, url = selection(date, hour)
     output = Path(output); output.mkdir(parents=True, exist_ok=True)
     deadline = time.monotonic()+16*60
     with tempfile.TemporaryDirectory(prefix='fields-',dir=output) as tmp:
         path = Path(tmp)/'fields.nc'; reuse = {}
-        downloaded = fetch_resuming(url, path, lambda s:progress('观测覆盖：'+s), ('cloud_phase', 'lat'), reuse=reuse, deadline=deadline)
+        downloaded = fetch_resuming(url, path, lambda s:progress('观测覆盖：'+s), ('cloud_phase', 'lat'), reuse=reuse, deadline=deadline, on_transfer=on_transfer)
         progress('正在检查观测覆盖…');coverage=phase_coverage(path)
         if not 0 < coverage.get('coverage',0) <= 1:
             raise ValueError('该时次没有有效观测数据，请选择列表中的其他版本')
-        downloaded += fetch_resuming(url, path, lambda s:progress('云层数据：'+s), reuse=reuse, deadline=deadline)
+        downloaded += fetch_resuming(url, path, lambda s:progress('云层数据：'+s), reuse=reuse, deadline=deadline, on_transfer=on_transfer)
         progress('正在转换 8K 云图…');image, mask, meta = convert(path, reference)
     if not 0 < meta.get('coverage',0) <= 1:
         raise ValueError('该时次没有有效云层数据，不能加载')
@@ -63,10 +63,5 @@ def build(date, hour, output, progress=lambda message: None):
             'warnings':warnings,'manualEligible':True}
 
 if __name__ == '__main__':
-    import sys
-    try:
-        result = build(*sys.argv[1:4], progress=lambda s: print(json.dumps({'status': s}), flush=True))
-        print(json.dumps({'result': result}), flush=True)
-    except Exception as error:
-        print(json.dumps({'error': str(error), 'retryable': getattr(error, 'retryable', False)}), flush=True)
-        sys.exit(1)
+    from cloud_worker import run
+    run(build)

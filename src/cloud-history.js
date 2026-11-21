@@ -5,7 +5,7 @@ import { cloudTitle, cloudDate, cloudError } from './cloud-library.js';
 import { nasaCoverage, nasaCoverageEstimate, nasaMostlyGlobal } from './cloud-source.js';
 import { t, onLanguageChange } from './i18n.js';
 
-const css = `.cloud-history>.library-current{margin:10px 20px 0;flex-shrink:0}.cloud-history .library-current p{font-size:12px;line-height:1.45;margin:3px 0}.cloud-history .library-current details{font-size:13px}.cloud-history .library-current summary{cursor:pointer}.cloud-history .library-current .history-buttons{margin:8px 0 0}.cloud-history{box-sizing:border-box;width:min(1180px,97vw);height:92dvh;max-width:none;max-height:none;padding:0;background:#0b1826;color:#e4eff8;border:1px solid #385267;border-radius:14px}.cloud-history::backdrop{background:#020a13b8;backdrop-filter:blur(3px)}.cloud-history[open]{display:flex;flex-direction:column}.cloud-history header{position:static;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #32485e;gap:12px}.cloud-history h2{margin:0;font-size:20px}.cloud-history p{line-height:1.6;color:#b6cadb;margin:6px 0}.cloud-history .version-body{padding:16px 20px;overflow:auto;min-height:0}.cloud-history .history-controls,.cloud-history .history-buttons,.cloud-history .library-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}.cloud-history label{display:flex;gap:7px;align-items:center}.cloud-history button,.cloud-history input,.cloud-history select{font:inherit;width:auto;min-height:38px;max-width:100%;flex:none}.cloud-history input[type=month]{color-scheme:dark;min-width:145px}.cloud-history .version-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;margin-top:14px}.cloud-history .version-list{max-height:47dvh;overflow:auto;border:1px solid #30465a;border-radius:8px}.cloud-history .version-row{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #30465a;border-radius:0;background:#102336;padding:12px;line-height:1.6;white-space:normal}.cloud-history .version-row[aria-pressed=true]{background:#194658;box-shadow:inset 3px 0 #7ddfee}.cloud-history .version-row span{display:block;font-size:13px;color:#aac4d8;overflow-wrap:anywhere}.cloud-history .version-row .warning{color:#f1cc8c}.cloud-history .version-detail{min-width:0}.cloud-history .history-preview{display:block;width:100%;aspect-ratio:2;object-fit:contain;background:repeating-conic-gradient(#213344 0% 25%,#172836 0% 50%) 0 0/20px 20px;border:1px solid #32485e;border-radius:6px}.cloud-history [role=status]{white-space:pre-line;overflow-wrap:anywhere;font-size:13px}.cloud-history .coverage-metadata{white-space:pre-line}.cloud-history h3{font-size:16px;margin:0 0 10px}.cloud-history .version-warning{color:#f1cc8c;font-size:13px;white-space:pre-line}.cloud-history .library-current,.cloud-history .library-task{border:1px solid #345467;border-radius:9px;padding:12px 15px;background:#102b39}.cloud-history .library-current strong{display:block;color:#b3f0eb;font-size:16px}.cloud-history .library-current .history-buttons{margin-bottom:0}.cloud-history .library-task{margin-top:12px;background:#112537}.cloud-history .library-task[data-state=error]{border-color:#7e5142}.cloud-history .library-tabs{border-bottom:1px solid #32485e;padding-bottom:12px}.cloud-history .library-tabs [aria-pressed=true]{background:#245365;border-color:#6eabb7}.cloud-history .library-empty{padding:16px}.cloud-history .library-storage{font-size:13px}.cloud-history .download-cost{font-size:13px;color:#a9c1d5}.cloud-history [hidden]{display:none!important}.cloud-history button:focus-visible,.cloud-history select:focus-visible,.cloud-history input:focus-visible{outline:2px solid #83dcec;outline-offset:2px}@media(max-width:760px){.cloud-history{width:100vw;height:100dvh;border-radius:0}.cloud-history header,.cloud-history .version-body{padding:12px}.cloud-history .version-layout{grid-template-columns:1fr}.cloud-history .version-list{max-height:30dvh}.cloud-history .history-controls label{flex-wrap:wrap}.cloud-history .history-buttons{gap:7px}.cloud-history .history-buttons button{font-size:13px}.cloud-history header button{font-size:13px}}`;
+const css = `.cloud-history>.library-current{margin:10px 20px 0;flex-shrink:0}.cloud-history .library-current p{font-size:12px;line-height:1.45;margin:3px 0}.cloud-history .library-current details{font-size:13px}.cloud-history .library-current summary{cursor:pointer}.cloud-history .library-current .history-buttons{margin:8px 0 0}.cloud-history{box-sizing:border-box;width:min(1180px,97vw);height:92dvh;max-width:none;max-height:none;padding:0;background:#0b1826;color:#e4eff8;border:1px solid #385267;border-radius:14px}.cloud-history::backdrop{background:#020a13b8;backdrop-filter:blur(3px)}.cloud-history[open]{display:flex;flex-direction:column}.cloud-history header{position:static;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #32485e;gap:12px}.cloud-history h2{margin:0;font-size:20px}.cloud-history p{line-height:1.6;color:#b6cadb;margin:6px 0}.cloud-history .version-body{padding:16px 20px;overflow:auto;min-height:0}.cloud-history .history-controls,.cloud-history .history-buttons,.cloud-history .library-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}.cloud-history label{display:flex;gap:7px;align-items:center}.cloud-history button,.cloud-history input,.cloud-history select{font:inherit;width:auto;min-height:38px;max-width:100%;flex:none}.cloud-history input[type=month]{color-scheme:dark;min-width:145px}.cloud-history .version-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;margin-top:14px}.cloud-history .version-list{max-height:47dvh;overflow:auto;border:1px solid #30465a;border-radius:8px}.cloud-history .version-row{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #30465a;border-radius:0;background:#102336;padding:12px;line-height:1.6;white-space:normal}.cloud-history .version-row[aria-pressed=true]{background:#194658;box-shadow:inset 3px 0 #7ddfee}.cloud-history .version-row span{display:block;font-size:13px;color:#aac4d8;overflow-wrap:anywhere}.cloud-history .version-row .warning{color:#f1cc8c}.cloud-history .version-detail{min-width:0}.cloud-history .history-preview{display:block;width:100%;aspect-ratio:2;object-fit:contain;background:repeating-conic-gradient(#213344 0% 25%,#172836 0% 50%) 0 0/20px 20px;border:1px solid #32485e;border-radius:6px}.cloud-history [role=status]{white-space:pre-line;overflow-wrap:anywhere;font-size:13px}.cloud-history .coverage-metadata{white-space:pre-line}.cloud-history h3{font-size:16px;margin:0 0 10px}.cloud-history .version-warning{color:#f1cc8c;font-size:13px;white-space:pre-line}.cloud-history .library-current,.cloud-history .library-task{border:1px solid #345467;border-radius:9px;padding:12px 15px;background:#102b39}.cloud-history .library-current strong{display:block;color:#b3f0eb;font-size:16px}.cloud-history .library-current .history-buttons{margin-bottom:0}.cloud-history .library-task{margin-top:12px;background:#112537}.cloud-history .library-task progress{width:100%;height:8px;accent-color:#7ddfee}.cloud-history .library-task[data-state=error]{border-color:#7e5142}.cloud-history .library-tabs{border-bottom:1px solid #32485e;padding-bottom:12px}.cloud-history .library-tabs [aria-pressed=true]{background:#245365;border-color:#6eabb7}.cloud-history .library-empty{padding:16px}.cloud-history .library-storage{font-size:13px}.cloud-history .download-cost{font-size:13px;color:#a9c1d5}.cloud-history [hidden]{display:none!important}.cloud-history button:focus-visible,.cloud-history select:focus-visible,.cloud-history input:focus-visible{outline:2px solid #83dcec;outline-offset:2px}@media(max-width:760px){.cloud-history{width:100vw;height:100dvh;border-radius:0}.cloud-history header,.cloud-history .version-body{padding:12px}.cloud-history .version-layout{grid-template-columns:1fr}.cloud-history .version-list{max-height:30dvh}.cloud-history .history-controls label{flex-wrap:wrap}.cloud-history .history-buttons{gap:7px}.cloud-history .history-buttons button{font-size:13px}.cloud-history header button{font-size:13px}}`;
 
 const quickSources = {
   github: {
@@ -39,6 +39,7 @@ export function mountCloudHistory(w) {
     savedTab,
     globalTab,
     globalInfo,
+    latestNASA,
     newTab,
     filters,
     sourceBar,
@@ -55,6 +56,7 @@ export function mountCloudHistory(w) {
     coverageFilter,
     taskPanel,
     taskStatus,
+    taskProgress,
     cancelButton,
     retryButton,
     taskView,
@@ -62,6 +64,7 @@ export function mountCloudHistory(w) {
     list,
     detailTitle,
     image,
+    previewCaption,
     detailMeta,
     warning,
     license,
@@ -80,6 +83,7 @@ export function mountCloudHistory(w) {
     previewSerial = 0,
     previewKey = null,
     previewError = '',
+    previewController = null,
     listSignature = '',
     actionBusy = false,
     message = '',
@@ -127,13 +131,15 @@ export function mountCloudHistory(w) {
     if (previewURL) URL.revokeObjectURL(previewURL);
     previewURL = null;
   }
-  async function preview(row) {
+  async function preview(row, remotePreview) {
     if (!dialog.open) return;
-    const key = row && (row.record?.sha256 || row.diskRecord?.sha256);
+    const key = row && (row.record?.sha256 || row.diskRecord?.sha256 || remotePreview);
     if (key === previewKey) {
       if (row) image.alt = cloudTitle(row);
       return;
     }
+    previewController?.abort();
+    previewController = null;
     previewKey = key;
     previewError = '';
     const serial = ++previewSerial;
@@ -168,14 +174,25 @@ export function mountCloudHistory(w) {
           4e6
         ));
       }
+      if (!blob && remotePreview) {
+        previewController = new AbortController();
+        ({ blob } = await w.fetch(remotePreview, 4e6, {
+          timeout: 90000,
+          signal: previewController.signal,
+        }));
+        const signature = await blob.slice(0, 6).text();
+        if (!['GIF87a', 'GIF89a'].includes(signature)) throw Error(t('NASA 预览图暂不可用'));
+      }
       if (serial !== previewSerial || !dialog.open || !blob) return;
       previewURL = URL.createObjectURL(blob);
       image.src = previewURL;
       image.alt = cloudTitle(row);
       image.hidden = false;
+      if (remotePreview) previewCaption.textContent = t('NASA 官方云相预览');
     } catch (e) {
       if (serial === previewSerial) {
         previewError = t('预览暂不可用') + '：' + cloudError(e);
+        previewCaption.hidden = true;
         detailMeta.textContent += '\n' + previewError;
       }
     }
@@ -198,7 +215,7 @@ export function mountCloudHistory(w) {
     newTab.setAttribute('aria-pressed', String(view === 'catalog'));
     const globalRows = library.saved.filter((r) => nasaCoverage(rowMeta(r)) === 'global');
     globalTab.textContent = t('NASA 全球覆盖（{count}）', { count: globalRows.length });
-    globalInfo.hidden = view !== 'global';
+    globalInfo.hidden = latestNASA.hidden = view !== 'global';
     const quick = view === 'catalog' && sourceSelect.value !== 'satcorps';
     sourceBar.hidden = view !== 'catalog';
     filters.hidden = view !== 'catalog' || quick;
@@ -229,11 +246,15 @@ export function mountCloudHistory(w) {
     if (checks.length)
       catalogStatus.textContent +=
         '\n' +
-        t('自动覆盖核查：{done}/{total} 已完成 · {pending} 等待或核查中', {
-          done: checks.filter((c) => c.state === 'ready').length,
+        t('覆盖核查：{done}/{total} 已完成 · {running} 正在核查 · {pending} 排队', {
+          done: checks.filter((c) => ['ready', 'error'].includes(c.state)).length,
           total: checks.length,
-          pending: checks.filter((c) => ['queued', 'running'].includes(c.state)).length,
+          running: checks.filter((c) => c.state === 'running').length,
+          pending: checks.filter((c) => c.state === 'queued').length,
         });
+    const failedChecks = checks.filter((c) => c.state === 'error').length;
+    if (failedChecks)
+      catalogStatus.textContent += ' · ' + t('{count} 项失败，可重试', { count: failedChecks });
     if (catalog.coveragePollError) catalogStatus.textContent += '\n' + catalog.coveragePollError;
     const task = library.task;
     taskPanel.hidden = task.state === 'idle';
@@ -246,13 +267,17 @@ export function mountCloudHistory(w) {
             ? task.hour
             : String(task.hour).padStart(2, '0') + ':00') +
           ' UTC\n'
-        : '') + (task.message || '');
+        : '') + library.taskText;
+    taskProgress.hidden = task.state !== 'running';
+    if (library.downloadPercent === null) taskProgress.removeAttribute('value');
+    else taskProgress.value = library.downloadPercent;
     cancelButton.hidden = !library.downloading;
     cancelButton.textContent = t(task.state === 'cancelling' ? '重试取消下载' : '取消下载');
     retryButton.hidden =
       !['error', 'cancelled'].includes(task.state) || (!task.date && !quickSources[task.provider]);
     taskView.hidden = task.state !== 'ready';
     const remote = view === 'catalog' && catalog.month === month.value ? catalog.items : [];
+    const published = new Map(remote.map((r) => [versionKey(r), r]));
     rows = quick
       ? []
       : mergeCloudVersions(remote, w.items, library.disk).filter(
@@ -262,16 +287,17 @@ export function mountCloudHistory(w) {
               ? !!(r.record || r.diskRecord) && nasaCoverage(rowMeta(r)) === 'global'
               : view === 'saved'
                 ? !!(r.record || r.diskRecord)
-                : r.provider === 'satcorps' &&
+                : published.has(versionKey(r)) &&
+                  r.provider === 'satcorps' &&
                   (!day.value || new Date(r.time).toISOString().slice(0, 10) === day.value) &&
                   (coverageFilter.value !== 'global' || nasaMostlyGlobal(rowMeta(r))))
         );
     if (!rows.some((r) => r.key === selectedKey))
       selectedKey =
         rows.find(
-          (r) => selectedBase && versionKey(r) === selectedBase && r.record?.id === task.recordId
+          (r) => task.recordId && versionKey(r) === selectedBase && r.record?.id === task.recordId
         )?.key ||
-        rows.find((r) => r.record?.id === w.active.cloud)?.key ||
+        (view !== 'catalog' && rows.find((r) => r.record?.id === w.active.cloud)?.key) ||
         rows[0]?.key ||
         null;
     const row = selected();
@@ -460,7 +486,10 @@ export function mountCloudHistory(w) {
       w.busy ||
       (!r && !row?.diskRecord);
     status.textContent = message || library.libraryError || '';
-    preview(row);
+    const remotePreview = row && !r && !row.diskRecord && published.get(versionKey(row))?.preview;
+    preview(row, remotePreview);
+    previewCaption.hidden = !remotePreview || !!previewError;
+    previewCaption.textContent = t(image.hidden ? '正在加载 NASA 云相预览…' : 'NASA 官方云相预览');
     if (previewError) detailMeta.textContent += '\n' + previewError;
   }
   async function action(fn) {
@@ -484,6 +513,7 @@ export function mountCloudHistory(w) {
   }
   function refresh(force = false) {
     if (!dialog) create();
+    if (force && previewError) previewKey = null;
     return library.refreshCatalog(month.value, day.value, force);
   }
   function showCatalog() {
@@ -549,6 +579,9 @@ export function mountCloudHistory(w) {
     taskStatus = node('p', taskPanel);
     taskStatus.id = 'cloudDownloadStatus';
     taskStatus.setAttribute('role', 'status');
+    taskProgress = node('progress', taskPanel);
+    taskProgress.max = 100;
+    taskProgress.setAttribute('aria-labelledby', 'cloudDownloadStatus');
     const taskActions = node('div', taskPanel);
     taskActions.className = 'history-buttons';
     cancelButton = button(taskActions, '取消下载', () => library.cancel());
@@ -609,6 +642,37 @@ export function mountCloudHistory(w) {
       '这里单列已下载或导入且覆盖达标的 NASA 云图。全球有效覆盖至少 99.5%，南北极各至少 99%，观测足迹也须达标；少量缺测仍可能存在。质量提示单独保留，新增下载会自动归类。'
     );
     globalInfo.id = 'cloudGlobalInfo';
+    if (library.local) {
+      latestNASA = button(body, '查看 NASA 最新云图', async () => {
+        view = 'catalog';
+        sourceSelect.value = 'satcorps';
+        month.value = month.max = new Date().toISOString().slice(0, 7);
+        day.value = '';
+        coverageFilter.value = 'all';
+        selectedKey = selectedBase = null;
+        message = '';
+        const checking = refresh(true);
+        const initialSelection = selectedKey;
+        await checking;
+        if (
+          view === 'catalog' &&
+          sourceSelect.value === 'satcorps' &&
+          !day.value &&
+          library.catalog.month === month.max &&
+          selectedKey === initialSelection
+        ) {
+          selectedKey = rows[0]?.key;
+          render();
+        }
+      });
+    } else {
+      latestNASA = node('a', body, '查看 NASA 最新云图');
+      latestNASA.href =
+        'https://satcorps.larc.nasa.gov/cgi-bin/site/showdoc?docid=22&domain=GCC_GEO_LEO_V2A&product=cloud_phase_lo';
+      latestNASA.target = '_blank';
+      latestNASA.rel = 'noopener noreferrer';
+    }
+    latestNASA.id = 'cloudLatestNASA';
     sourceBar = node('div', body);
     sourceBar.className = 'history-controls';
     const sourceLabel = node('label', sourceBar, '图源');
@@ -695,6 +759,8 @@ export function mountCloudHistory(w) {
     image = node('img', detail);
     image.className = 'history-preview';
     image.hidden = true;
+    previewCaption = node('p', detail);
+    previewCaption.setAttribute('role', 'status');
     warning = node('p', detail);
     warning.className = 'version-warning';
     license = node('a', detail, '加拿大气象数据许可');
@@ -757,6 +823,7 @@ export function mountCloudHistory(w) {
     dialog.addEventListener('keydown', (e) => e.stopPropagation());
     dialog.addEventListener('close', () => {
       ++previewSerial;
+      previewController?.abort();
       previewKey = null;
       revoke();
       image.hidden = true;
@@ -794,6 +861,7 @@ export function mountCloudHistory(w) {
       unsubscribe();
       unlanguage();
       ++previewSerial;
+      previewController?.abort();
       revoke();
       dialog?.remove();
       sheet?.remove();

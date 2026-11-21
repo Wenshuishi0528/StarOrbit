@@ -1,4 +1,12 @@
 {
+  "正在下载 GitHub 云图…": "Téléchargement de la carte nuageuse GitHub…",
+  "下载进度 {percent}%": "Téléchargement à {percent} %",
+  "覆盖核查：{done}/{total} 已完成 · {running} 正在核查 · {pending} 排队": "Vérification de couverture : {done}/{total} terminées · {running} en cours · {pending} en attente",
+  "{count} 项失败，可重试": "{count} en échec, nouvel essai possible",
+  "查看 NASA 最新云图": "Voir la dernière carte nuageuse de la NASA",
+  "NASA 官方云相预览": "Aperçu NASA de la phase des nuages",
+  "正在加载 NASA 云相预览…": "Chargement de l’aperçu NASA de la phase des nuages…",
+  "NASA 预览图暂不可用": "Aperçu NASA temporairement indisponible",
   "恢复初始位置": "Rétablir la position initiale",
   "夜面也显示云层": "Afficher les nuages côté nuit",
   "月球": "Lune",

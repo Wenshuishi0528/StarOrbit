@@ -60,10 +60,10 @@ def write_cloud_png(path, opacity, mask):
     if max_error:info['warnings'] = [QUANTIZATION_NOTE]
     return info
 
-def request(url, byte_range=None, limit=2000000, deadline=None):
+def request(url, byte_range=None, limit=2000000, deadline=None, headers_out=None):
     budget=min(180,deadline-time.monotonic()) if deadline is not None else 180
     if budget<=0:raise DownloadError('timeout','本次 NASA 检查已到时间上限',retryable=True)
-    return download_bytes(url,byte_range=byte_range,limit=limit,timeout=budget,attempt_timeout=75)
+    return download_bytes(url,byte_range=byte_range,limit=limit,timeout=budget,attempt_timeout=75,headers_out=headers_out)
 
 # Use daily 12:00 UTC GEO+LEO composites, newest first, inside a rolling
 # 30-day window. A product name or a new timestamp does not establish coverage.
@@ -113,20 +113,35 @@ def candidates(now):
 def acceptable(info):
     return min(info['footprint'].values())>=.995 and info['coverage']>=.995 and min(info['polarCoverage'].values())>=.99
 
+def source_changed():
+    return DownloadError('changed','NASA 正在更新所选时次的文件，请稍后重试',retryable=True)
+
+
 class RangeFile(io.RawIOBase):
     def __init__(self,url,path,reuse=None,deadline=None):
         self.url=url;self.pos=0;self.blocks=set();self.chunks=set();self.bytes=0;self.reuse=reuse;self.deadline=deadline
+        self.revision=None
         if reuse and reuse.get('url')==url and Path(path).exists():
+            self.revision=reuse['revision']
             self.file=open(path,'r+b');self.size=reuse['size'];self.blocks=reuse['blocks'];self.chunks=reuse['chunks'];return
         self.file=open(path,'w+b')
         # HDF5 v0 superblock provides the EOF address; no 1.3 GB download.
         header=self.download((0,65535),65536)
         if header[:8]!=b'\x89HDF\r\n\x1a\n' or header[8]!=0 or header[13]!=8:raise ValueError('NASA 文件格式已变化')
-        self.size=int.from_bytes(header[40:48],'little')
-        if not 1000000<self.size<4_000_000_000:raise ValueError('NASA 文件大小无效')
+        size=int.from_bytes(header[40:48],'little')
+        if size!=self.revision['size']:raise source_changed()
+        if not 1000000<size<4_000_000_000:raise ValueError('NASA 文件大小无效')
+        self.size=size
         self.file.truncate(self.size);self.file.seek(0);self.file.write(header);self.blocks.add(0);self.bytes=len(header)
     def download(self,byte_range,limit):
-        return request(self.url,byte_range,limit,**({'deadline':self.deadline} if self.deadline is not None else {}))
+        headers={}
+        data=request(self.url,byte_range,limit,deadline=self.deadline,headers_out=headers)
+        # download_bytes has validated the returned Content-Range and byte count.
+        revision={'etag':headers.get('etag',''), 'lastModified':headers.get('last-modified',''),
+                  'size':int(headers['content-range'].rsplit('/',1)[1])}
+        if self.revision is None:self.revision=revision
+        elif self.revision!=revision:raise source_changed()
+        return data
     def readable(self):return True
     def seekable(self):return True
     def tell(self):return self.pos
@@ -145,7 +160,7 @@ class RangeFile(io.RawIOBase):
     def close(self):
         if not self.closed:
             if self.reuse is not None and hasattr(self,'size'):
-                self.reuse.update(url=self.url,size=self.size,blocks=self.blocks,chunks=self.chunks)
+                self.reuse.update(url=self.url,size=self.size,revision=self.revision,blocks=self.blocks,chunks=self.chunks)
                 self.reuse['downloaded']=self.reuse.get('downloaded',0)+self.bytes
             self.file.close()
         super().close()
@@ -196,16 +211,40 @@ def convert(path,reference,now=None):
         valid_image=Image.fromarray(valid_map).resize((8192,4096),Image.Resampling.NEAREST)
     return im,valid_image,{'provider':'satcorps','time':int(reference*1000),'observedStart':int(oldest*1000),'observedEnd':int(newest*1000),'coverage':coverage,'polarCoverage':polar,'footprint':footprint,'resolution':'8192×4096','nativeResolution':'12960×6480','channel':'red'}
 
-def fetch_frame(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
+def field_ranges(dataset):
+    """Combine adjacent compressed chunks of one field without reading any gaps."""
+    ranges = []
+    chunks = [dataset.id.get_chunk_info(i) for i in range(dataset.id.get_num_chunks())]
+    for chunk in sorted(chunks, key=lambda entry: entry.byte_offset):
+        offset, size = chunk.byte_offset, chunk.size
+        if ranges:
+            start, length = ranges[-1]
+            if start + length == offset and length + size <= 4 * 1024 * 1024:
+                ranges[-1] = (start, length + size)
+                continue
+        ranges.append((offset, size))
+    return ranges
+
+def fetch_frame(url,path,progress,fields=FIELDS,reuse=None,deadline=None,on_transfer=None):
     import h5py
     remote=RangeFile(url,path,reuse,deadline)
     try:
         with h5py.File(remote,'r') as f:
-            chunks=[]
-            for name in fields:
-                d=f[name]
-                for i in range(d.id.get_num_chunks()):
-                    c=d.id.get_chunk_info(i);chunks.append((c.byte_offset,c.size))
+            if on_transfer:
+                # Plan all selected scientific fields once, so coverage and
+                # cloud conversion share one byte total, including on a retry.
+                plan=reuse.get('field_ranges') if reuse is not None else None
+                if plan is None:
+                    plan={name:field_ranges(f[name]) for name in FIELDS}
+                    if reuse is not None: reuse['field_ranges']=plan
+                all_ranges={chunk for ranges in plan.values() for chunk in ranges}
+                transfer_total=sum(size for _,size in all_ranges)
+                if transfer_total>220_000_000:raise ValueError('NASA 必需字段超过下载预算')
+                transferred=sum(size for _,size in remote.chunks & all_ranges)
+                on_transfer(transferred,transfer_total)
+                chunks=[chunk for name in fields for chunk in plan[name]]
+            else:
+                chunks=[chunk for name in fields for chunk in field_ranges(f[name])]
             dict(f.attrs)
         total=sum(size for _,size in chunks)
         if total>220_000_000:raise ValueError('NASA 必需字段超过下载预算')
@@ -221,20 +260,23 @@ def fetch_frame(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
                     progress(f'下载 NASA 云层字段 {start+i+1}/{len(chunks)} · {(prior+remote.bytes+len(data))/1048576:.1f} MB')
                     remote.file.seek(offset);remote.file.write(data);remote.bytes+=len(data)
                     remote.chunks.add((offset,len(data)))
+                    if on_transfer:
+                        transferred+=len(data)
+                        on_transfer(transferred,transfer_total)
         remote.file.flush();return remote.bytes
     finally:remote.close()
 
-def fetch_resuming(url,path,progress,fields=FIELDS,reuse=None,deadline=None):
+def fetch_resuming(url,path,progress,fields=FIELDS,reuse=None,deadline=None,on_transfer=None):
     # Preserve validated chunks within this job if a later chunk loses its
     # connection. The same deadline still bounds both attempts.
     reuse={} if reuse is None else reuse
     before=reuse.get('downloaded',0)
     for attempt in range(2):
         try:
-            received=fetch_frame(url,path,progress,fields,reuse,deadline)
+            received=fetch_frame(url,path,progress,fields,reuse,deadline,**({'on_transfer':on_transfer} if on_transfer else {}))
             return reuse.get('downloaded',before+received)-before
         except DownloadError as error:
-            if attempt or not error.retryable or not reuse.get('chunks') or (deadline is not None and time.monotonic()+2>=deadline):raise
+            if attempt or error.code=='changed' or not error.retryable or not reuse.get('chunks') or (deadline is not None and time.monotonic()+2>=deadline):raise
             progress('连接中断，正在继续未完成的 NASA 分段…')
             time.sleep(2)
 

@@ -24,13 +24,32 @@ class VersionsTests(unittest.TestCase):
     (root/'checks.json').write_text(json.dumps(bad));self.assertEqual(len(v.known_checks(result,root)['items']),1)
  def test_catalog_only_reads_directories(self):
   v._cache.clear();calls=[]
-  def directory(url):
-   calls.append(url)
-   if url.endswith('/2026/10/'):return ['23','22','https://evil.example/21']
-   return [url+'satcorps-gcc.v02a.geoleo.glob-comp.2026296.1200.3km.nc',url+'../../evil.nc'] if url.endswith('/23/') else []
-  with patch.object(v,'directory',side_effect=directory):
+  from html import escape
+  from urllib.parse import urlparse,parse_qs
+  def upstream(url,**options):
+   path=urlparse(url);query=parse_qs(path.query);calls.append(query)
+   self.assertEqual(path.path,'/cgi-bin/site/showdoc')
+   self.assertEqual(query['c'],['ajax-dirlist']);self.assertEqual(query['type'],['P'])
+   self.assertEqual(query['domain'],['GCC_GEO_LEO_V2A'])
+   names=['23','22','../21'] if 'day' not in query else [
+    'satcorps-gcc.v02a.geoleo.glob-comp.2026296.1200.3km.nc',
+    'satcorps-gcc.v02a.geoleo.glob-comp.2026295.1200.3km.nc','../evil.nc']
+   listing='<a href="#">VISST Pixel NetCDF</a><a href="#">19</a>'
+   listing+=''.join('<li><a href="#">'+name+'</a></li>' for name in names)
+   return ('<html><dirarea>'+escape(listing)+'</dirarea></html>').encode()
+  with patch.object(v,'download_bytes',side_effect=upstream):
    result=v.catalog('2026-10','2026-10-23');again=v.catalog('2026-10','2026-10-23')
-  self.assertEqual(len(result['items']),1);self.assertEqual(len(calls),2);self.assertTrue(again['cached']);self.assertTrue(all(url.endswith('/') for url in calls))
+  self.assertEqual(len(result['items']),1);self.assertEqual(len(calls),2);self.assertTrue(again['cached'])
+  self.assertEqual(result['dates'],['2026-10-23','2026-10-22'])
+  row=result['items'][0];self.assertEqual(row['source'],h.selection('2026-10-23','12')[1])
+  self.assertEqual(row['preview'],v.IMAGE_BASE+'2026/10/23/SatCORPS.GCC.2026296.1200.cloud_phase_lo.gif')
+ def test_failed_day_does_not_replace_previous_catalog(self):
+  v._cache.clear()
+  with patch.object(v,'directory',return_value=['23']),patch.object(v,'day_items',return_value=[{'key':'ok'}]):
+   previous=v.catalog('2026-10')
+  with patch.object(v,'directory',return_value=['23']),patch.object(v,'day_items',side_effect=v.DownloadError('timeout','timeout')):
+   with self.assertRaises(v.DownloadError):v.catalog('2026-10',force=True)
+   self.assertEqual(v.catalog('2026-10')['items'],previous['items'])
  def test_warnings_are_saved_with_validity(self):
   from PIL import Image
   image=Image.new('L',(8,4),206);mask=Image.new('L',(8,4),1);mask.putpixel((0,0),0)

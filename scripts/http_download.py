@@ -25,7 +25,25 @@ def response_headers(text):
     return status, headers
 
 
-def download_bytes(url, *, byte_range=None, limit=6000000, timeout=40, attempts=3, attempt_timeout=25):
+def _fetch_with_progress(args, path, budget, limit, on_progress):
+    # The scientific file size is known from its official directory. Keep the
+    # transport's TLS, retry, size and time limits, and report bytes as they land.
+    with path.open('w+b') as body, subprocess.Popen(args, stdout=body, stderr=subprocess.DEVNULL) as process:
+        end=time.monotonic()+budget
+        try:
+            while process.poll() is None:
+                remaining=end-time.monotonic()
+                if remaining<=0: raise subprocess.TimeoutExpired(args,budget)
+                try: process.wait(timeout=min(.2,remaining))
+                except subprocess.TimeoutExpired: on_progress(min(body.tell(), limit-1))
+        finally:
+            if process.poll() is None: process.kill()
+        body.seek(0)
+        return subprocess.CompletedProcess(args,process.returncode,body.read(limit+1))
+
+
+def download_bytes(url, *, byte_range=None, limit=6000000, timeout=40, attempts=3, attempt_timeout=25,
+                   on_progress=None, headers_out=None):
     if not url.startswith('https://'):
         raise ValueError('Only HTTPS data sources are supported')
     deadline = time.monotonic() + timeout
@@ -49,7 +67,10 @@ def download_bytes(url, *, byte_range=None, limit=6000000, timeout=40, attempts=
             elif not python_transport:
                 args += ['--compressed']
             try:
-                result = subprocess.run(args + [url], capture_output=True, timeout=budget + 1)
+                if on_progress:
+                    result = _fetch_with_progress(args+[url],Path(tmp)/'body',budget+1,limit,on_progress)
+                else:
+                    result = subprocess.run(args + [url], capture_output=True, timeout=budget + 1)
                 status, headers = response_headers(header.read_text(errors='replace'))
                 if status >= 400:
                     error = DownloadError('http', f'数据源返回 HTTP {status}', status,
@@ -77,6 +98,8 @@ def download_bytes(url, *, byte_range=None, limit=6000000, timeout=40, attempts=
                         raise DownloadError('range', '数据源未返回正确的分段数据')
                 elif not 200 <= status < 300:
                     raise DownloadError('http', f'数据源返回 HTTP {status}', status)
+                if headers_out is not None: headers_out.update(headers)
+                if on_progress: on_progress(len(data))
                 return data
             except subprocess.TimeoutExpired:
                 last_error = DownloadError('timeout', '数据源连接超时', retryable=True)
@@ -114,9 +137,13 @@ def python_fetch(args):
         with response:
             Path(args.dump_header).write_text(f'HTTP/1.1 {response.status}\r\n'+str(response.headers))
             body=gzip.GzipFile(fileobj=response) if response.headers.get('Content-Encoding','').lower()=='gzip' else response
-            data=body.read(args.max_filesize+1)
-            if len(data)>args.max_filesize:return 63
-            sys.stdout.buffer.write(data)
+            remaining=args.max_filesize
+            while True:
+                data=body.read(min(65536,remaining+1))
+                if not data:break
+                if len(data)>remaining:return 63
+                sys.stdout.buffer.write(data)
+                remaining-=len(data)
         return 0
     except Exception as error:
         reason=getattr(error,'reason',error)

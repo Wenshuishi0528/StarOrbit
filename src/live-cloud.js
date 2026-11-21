@@ -1,3 +1,4 @@
+import { cloudTransfer } from './cloud-download-progress.js';
 // Matt Eason's Live Cloud Maps mirrors the outer eighth at each pole.
 // Keep the global projection, reserving alpha for the usable latitude band.
 import { CLOUD_JPEG, githubCloudOpacity, LIVE_CLOUD_PROCESSING } from './cloud-texture.js';
@@ -167,17 +168,13 @@ async function encodeCropped(bitmap, width, signal, onProgress) {
 
 export async function downloadLiveCloud(weather, { signal, onProgress = () => {} } = {}) {
   checkCancelled(signal);
-  let nextNotice = 0;
   const response = await weather.fetch(CLOUD_JPEG, LIVE_CLOUD_MAX_BYTES, {
     signal,
     timeout: 90000,
-    onProgress: ({ received, total }) => {
-      if (received < nextNotice && received !== total) return;
-      nextNotice = received + 500_000;
-      onProgress(t('正在下载 GitHub 云图… {mb} MB', { mb: (received / 1e6).toFixed(1) }));
-    },
+    onProgress: cloudTransfer(onProgress, t('正在下载 GitHub 云图…')),
   });
   checkCancelled(signal);
+  onProgress(t('正在校验数据…'), 100);
   const sourceSha256 = await weather.checkedCloudHash(response.blob);
   checkCancelled(signal);
   const saved = weather.items.find(

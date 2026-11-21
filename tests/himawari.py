@@ -112,7 +112,11 @@ class HimawariTests(unittest.TestCase):
             transferred.append(limit)
             return raw[start:end+1]
         with tempfile.TemporaryDirectory() as tmp,patch.object(h,'_listing',return_value=[item]),patch.object(h,'download_bytes',side_effect=request):
-            out = h.build(item['date'],item['slot'],tmp)
+            updates=[]
+            out = h.build(item['date'],item['slot'],tmp,on_transfer=lambda done,total:updates.append((done,total)))
+            self.assertEqual(updates[0][0],0)
+            self.assertEqual(updates[-1][0],updates[-1][1])
+            self.assertEqual(updates,sorted(updates))
             path = Path(tmp)/'image.png'
             self.assertEqual(out['sha256'],hashlib.sha256(path.read_bytes()).hexdigest())
             self.assertEqual(out['size'],path.stat().st_size)

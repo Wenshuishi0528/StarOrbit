@@ -1,3 +1,4 @@
+import { cloudTransfer } from './cloud-download-progress.js';
 import { fetchResource, blobHash } from './resource-fetch.js';
 import { CLOUD_MAX_BYTES } from './cloud-texture.js';
 
@@ -162,8 +163,9 @@ export async function downloadHistory(
       max: 8e6,
       timeout: 90000,
       signal,
-      onProgress: (p) => onProgress('下载 VIIRS：' + (p.received / 1048576).toFixed(2) + ' MB'),
+      onProgress: cloudTransfer(onProgress, '下载 VIIRS'),
     }));
+    onProgress('正在校验数据…', 100);
     const header = new Uint8Array(await blob.slice(0, 24).arrayBuffer());
     if (![137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => header[i] === v))
       throw Error('图源没有返回 PNG，未保存');
@@ -200,7 +202,7 @@ export async function downloadHistory(
     while (['running', 'cancelling'].includes(job.state)) {
       if (signal?.aborted) throw new DOMException('已取消', 'AbortError');
       onState(job);
-      onProgress(job.status || '下载并检查云图…');
+      onProgress(job.status || '下载并检查云图…', job.downloadPercent);
       if (Date.now() > deadline) throw Error('等待历史下载超时；可重试以查看本机任务结果');
       await new Promise((resolve, reject) => {
         if (signal?.aborted) {
@@ -231,7 +233,7 @@ export async function downloadHistory(
     )
       throw Error('返回的云图格式或有效数据无效');
     if (meta.time !== s.time) throw Error('返回的观测时次与选择不符，未保存');
-    onProgress('已保存到本机，正在校验浏览器副本…');
+    onProgress('已保存到本机，正在校验浏览器副本…', 100);
     ({ blob } = await fetchResource(
       '/api/cloud/history/image?' + new URLSearchParams({ id, sha256: meta.sha256 }),
       { max: CLOUD_MAX_BYTES, timeout: 60000, signal }
@@ -251,10 +253,10 @@ export async function downloadHistory(
   return record;
 }
 
-export async function cloudJSON(path, { method = 'GET', signal } = {}) {
+export async function cloudJSON(path, { method = 'GET', signal, timeout = 65000 } = {}) {
   const { blob } = await fetchResource('/api/cloud/' + path, {
     max: 2000000,
-    timeout: 65000,
+    timeout,
     signal,
     fetcher: (url, options) => fetch(url, { ...options, method }),
   });
@@ -271,8 +273,13 @@ export async function versionCatalog(provider, month, date = '', force = false, 
   if (provider === 'satcorps')
     return cloudJSON(
       'versions?' +
-        new URLSearchParams({ month, ...(date ? { date } : {}), force: force ? '1' : '0' }),
-      { signal }
+        new URLSearchParams({
+          month,
+          ...(date ? { date } : {}),
+          force: force ? '1' : '0',
+          coverage: 'auto',
+        }),
+      { signal, timeout: 90000 }
     );
   const dates = [],
     items = [],

@@ -48,6 +48,10 @@ export async function fetchResource(
       controller.abort();
       throw Error('数据超过大小限制');
     }
+    // For compressed responses the header measures wire bytes, while the reader
+    // below measures decoded bytes.
+    const encoding = response.headers.get('content-encoding');
+    const progressTotal = (!encoding || encoding === 'identity') && length > 0 ? length : null;
     const etag = response.headers.get('etag'),
       modified = response.headers.get('last-modified');
     const validators = {
@@ -82,7 +86,7 @@ export async function fetchResource(
           throw Error('数据超过大小限制');
         }
         chunks.push(value);
-        onProgress({ received, total: length || null });
+        onProgress({ received, total: progressTotal });
       }
       blob = new Blob(chunks, {
         type: response.headers.get('content-type') || 'application/octet-stream',
@@ -90,7 +94,7 @@ export async function fetchResource(
     } else {
       blob = await response.blob();
       if (blob.size > max) throw Error('数据超过大小限制');
-      onProgress({ received: blob.size, total: length || null });
+      onProgress({ received: blob.size, total: progressTotal });
     }
     return { blob, r: response, unchanged: false, http: validators };
   } catch (error) {

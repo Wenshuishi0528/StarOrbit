@@ -17,7 +17,7 @@ def result(coverage=1):
             'checkedAt':int(time.time()*1000),'validatedAt':int(time.time()*1000),'sourceRevision':{'etag':'v1','lastModified':'today','size':100}}
 def settle(service):
     until=time.monotonic()+3
-    while service.thread is not None:
+    while service.workers:
         if time.monotonic()>until:raise AssertionError('coverage worker did not settle')
         time.sleep(.005)
 
@@ -41,13 +41,22 @@ class CoverageTests(unittest.TestCase):
         self.assertEqual(estimated['polarCoverage']['north'],0)
         self.assertEqual(estimated['classification'],'partial','whole missing polar cap must not pass the filter')
         self.assertEqual(estimated['sampleCount'],64800)
+    def test_field_ranges_skip_gaps_and_bound_merged_reads(self):
+        from types import SimpleNamespace
+        blocks=[(50,7),(10,4),(14,4),(57,4*1024*1024)]
+        info=[SimpleNamespace(byte_offset=offset,size=size) for offset,size in blocks]
+        dataset=SimpleNamespace(id=SimpleNamespace(get_num_chunks=lambda:len(info),get_chunk_info=info.__getitem__))
+        self.assertEqual(c.field_ranges(dataset),[(10,8),(50,7),(57,4*1024*1024)])
     def test_only_exact_official_directory_urls_are_accepted(self):
         c.validate_item(item())
         for patch_value in [{'source':'https://example.org/file.nc'},{'slot':'24'},{'key':'x'}]:
             with self.assertRaises((ValueError,TypeError)):c.validate_item({**item(),**patch_value})
     def test_range_budget_prevents_network_before_exceeding_limit(self):
         header=bytearray(65536);header[:8]=b'\x89HDF\r\n\x1a\n';header[13]=8;header[40:48]=(2000000).to_bytes(8,'little')
-        with tempfile.TemporaryDirectory() as tmp,patch('satcorps.request',return_value=bytes(header)) as request,patch.object(c,'BYTE_LIMIT',65536):
+        def part(url,byte_range,limit,deadline=None,headers_out=None):
+            headers_out['content-range']='bytes 0-65535/2000000'
+            return bytes(header)
+        with tempfile.TemporaryDirectory() as tmp,patch('satcorps.request',side_effect=part) as request,patch.object(c,'BYTE_LIMIT',65536):
             remote=c.BoundedRangeFile(item()['source'],Path(tmp)/'sample.nc',time.monotonic()+1)
             try:
                 with self.assertRaises(DownloadError):remote.download((65536,65599),64)
@@ -63,12 +72,44 @@ class CoverageTests(unittest.TestCase):
             self.assertLess(time.monotonic()-start,.2)
             self.assertEqual(first['coverageStatus']['pending']+first['coverageStatus']['running'],2)
             gate.set();settle(service)
-            self.assertEqual(calls,['12','15'])
+            self.assertCountEqual(calls,['12','15'])
             self.assertEqual(service.snapshot('2026-10')['coverageStatus']['ready'],2)
             again=c.CoverageService(tmp,lambda *_:self.fail('fresh persisted result should not refetch'))
             self.assertEqual(again.submit({'items':[item(12)]})['items'][0]['coverageCheck']['coverage'],1)
-            self.assertIsNone(again.thread)
+            self.assertFalse(again.workers)
             self.assertTrue(again.snapshot('2026-10','2026-10-23')['items'])
+    def test_parallel_limit_dedup_and_directory_switch(self):
+        gate=threading.Event();started=threading.Event();calls=[];lock=threading.Lock()
+        def delayed(candidate,previous):
+            with lock:
+                calls.append(candidate['slot'])
+                if len(calls)==c.FRAME_WORKERS: started.set()
+            gate.wait(3)
+            return result()
+        with tempfile.TemporaryDirectory() as tmp:
+            service=c.CoverageService(tmp,delayed)
+            rows={'items':[item(h) for h in [7,8,12,0,18,13]]}
+            service.submit(rows);self.assertTrue(started.wait(2))
+            self.assertEqual(set(calls),{'12','0','18'})
+            counts=service.submit(rows,retry_errors=True)['coverageStatus']
+            self.assertEqual((counts['running'],counts['pending']),(3,3))
+            service.submit({'items':[item(12),item(13)]})
+            gate.set();settle(service)
+            self.assertCountEqual(calls,['12','0','18','13'])
+            service.records[item(13)['key']]={'state':'error','checkedAt':int(time.time()*1000)}
+            service.submit({'items':[item(12),item(13)]},retry_errors=True);settle(service)
+            self.assertEqual(calls.count('12'),1)
+            self.assertEqual(calls.count('13'),2)
+    def test_changed_source_is_rejected_before_mixing_any_bytes(self):
+        header=bytearray(65536);header[:8]=b'\x89HDF\r\n\x1a\n';header[13]=8;header[40:48]=(2000000).to_bytes(8,'little')
+        def part(url,byte_range,limit,deadline=None,headers_out=None):
+            start,end=byte_range
+            headers_out.update({'content-range':f'bytes {start}-{end}/2000000','etag':'v1' if start==0 else 'v2'})
+            return bytes(header) if start==0 else bytes(end-start+1)
+        with tempfile.TemporaryDirectory() as tmp,patch('satcorps.request',side_effect=part):
+            with c.BoundedRangeFile(item()['source'],Path(tmp)/'fields',time.monotonic()+1) as remote:
+                with self.assertRaises(DownloadError) as error: remote.download((65536,65599),64)
+                self.assertEqual(error.exception.code,'changed')
     def test_force_rechecks_same_version_and_errors_remain_unknown(self):
         calls=[]
         def probe(candidate,previous):

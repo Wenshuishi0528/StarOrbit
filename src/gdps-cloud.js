@@ -1,3 +1,4 @@
+import { cloudTransfer } from './cloud-download-progress.js';
 // ECCC GeoMet renders a forecast field. The issue time and valid time are both
 // required to identify a frame; a new run may revise the same forecast hour.
 import { t } from './i18n.js';
@@ -181,12 +182,18 @@ export async function downloadGdpsCloud(weather, { signal, onProgress = () => {}
   const frame = selectFrame(await xml.text(), Date.now()),
     source = mapURL(frame);
   cancelled(signal);
-  onProgress(t('正在下载 GDPS 全球总云量预报…'));
+  const downloading = t('正在下载 GDPS 全球总云量预报…');
+  onProgress(downloading);
   // The WMS renders the scalar texture on demand. This global grid contains
   // only 2.88M pixels; keep its lossless PNG, with a 30 MB transfer/storage cap.
-  const { blob } = await weather.fetch(source, 30_000_000, { signal, timeout: 60000 });
+  const { blob } = await weather.fetch(source, 30_000_000, {
+    signal,
+    timeout: 60000,
+    onProgress: cloudTransfer(onProgress, downloading),
+  });
   if (blob.size > 30_000_000) throw Error(t('数据超过大小限制'));
   cancelled(signal);
+  onProgress(t('正在校验数据…'), 100);
   const digest = await weather.checkedCloudHash(blob);
   const saved = weather.items.find(
     (r) =>

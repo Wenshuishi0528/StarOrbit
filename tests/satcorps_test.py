@@ -29,8 +29,8 @@ class Clouds(unittest.TestCase):
   return dict(provider='satcorps',time=t*1000,coverage=.999,polarCoverage=dict(north=.999,south=.999),footprint=dict(global_=1,north=1,south=1))
  def test_skips_phase_and_full_retrieval_gaps(self):
   now=1800000000;rows=list(candidates(now))[:3];bad=self.info(rows[0][0]);bad['coverage']=.8
-  good=self.info(rows[2][0]);image=Image.new('L',(2,1))
-  with tempfile.TemporaryDirectory() as out,patch('satcorps.candidates',return_value=iter(rows)),patch('satcorps.fetch_frame',return_value=10) as fetch,patch('satcorps.phase_coverage',side_effect=[bad,good,good]),patch('satcorps.convert',side_effect=[(image,None,bad),(image,None,good)]):
+  good=self.info(rows[2][0]);image=Image.new('L',(8,4),80);mask=Image.new('L',image.size,255)
+  with tempfile.TemporaryDirectory() as out,patch('satcorps.candidates',return_value=iter(rows)),patch('satcorps.fetch_frame',return_value=10) as fetch,patch('satcorps.phase_coverage',side_effect=[bad,good,good]),patch('satcorps.convert',side_effect=[(image,mask,bad),(image,mask,good)]):
    result=build(out,now=now)
    self.assertEqual(result['time'],rows[2][0]*1000);self.assertEqual(result['source'],rows[2][1]);self.assertEqual(result['release'],'GCC V2A')
    self.assertEqual(fetch.call_count,5)
@@ -38,13 +38,13 @@ class Clouds(unittest.TestCase):
  def test_failed_refresh_preserves_cached_image(self):
   now=1800000000;previous=self.info(now-31*DAY)
   with tempfile.TemporaryDirectory() as out:
-   image=Path(out)/'previous.png';image.write_bytes(b'previous')
+   image=Path(out)/'previous.png';Image.new('L',(8,4),80).save(image);original=image.read_bytes()
    previous['sha256']=hashlib.sha256(image.read_bytes()).hexdigest();image.with_suffix('.json').write_text(json.dumps(previous))
    for ext in ['.png','.json']:(Path(out)/('20240630T1200-v1a'+ext)).write_text('retired')
    with patch('satcorps.fetch_frame',side_effect=RuntimeError('offline')):
     result=build(out,now=now)
-   self.assertEqual(result['time'],previous['time']);self.assertIn('保留',result['updateMessage']);self.assertEqual(image.read_bytes(),b'previous')
-   self.assertFalse((Path(out)/'20240630T1200-v1a.png').exists())
+   self.assertEqual(result['time'],previous['time']);self.assertIn('保留',result['updateMessage']);self.assertEqual(image.read_bytes(),original)
+   self.assertEqual((Path(out)/'20240630T1200-v1a.png').read_text(),'retired')
  def test_rejection_cache_expires(self):
   now=1800000000;row=next(candidates(now));bad=self.info(row[0]);bad['coverage']=.8
   with tempfile.TemporaryDirectory() as out,patch('satcorps.candidates',side_effect=lambda now:iter([row])),patch('satcorps.phase_coverage',return_value=bad),patch('satcorps.fetch_frame',return_value=10) as fetch:

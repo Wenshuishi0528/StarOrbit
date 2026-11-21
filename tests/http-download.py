@@ -57,6 +57,15 @@ class Downloads(unittest.TestCase):
         self.assertEqual(response_headers('HTTP/1.1 301\r\nLocation: somewhere\r\n\r\nHTTP/2 206\r\nContent-Range: bytes 0-3/10\r\n'),
                          (206, {'content-range': 'bytes 0-3/10'}))
 
+    def test_transfer_reports_real_bytes_then_validated_length(self):
+        import sys
+        from http_download import _fetch_with_progress
+        updates=[]
+        script='import sys,time;sys.stdout.buffer.write(b"a"*8);sys.stdout.flush();time.sleep(.65);sys.stdout.buffer.write(b"b"*8)'
+        with tempfile.TemporaryDirectory() as tmp:
+            result=_fetch_with_progress([sys.executable,'-c',script],Path(tmp)/'body',3,16,updates.append)
+        self.assertIn(8,updates)
+        self.assertEqual(result.stdout,b'a'*8+b'b'*8)
     def test_python_compression_is_bounded(self):
         for limit,expected in [(20,0),(5,63)]:
             response=io.BytesIO(gzip.compress(b'official orbit'))

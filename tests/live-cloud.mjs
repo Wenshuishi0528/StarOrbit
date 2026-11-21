@@ -31,7 +31,11 @@ globalThis.OffscreenCanvas=class{
  }
 };
 const weather={items:saved,pendingRecords:new Set(),
- fetch:async(url,max,options)=>{assert(url.endsWith('8192x4096/clouds.jpg'));assert.equal(max,50_000_000);return {blob:input};},
+ fetch:async(url,max,options)=>{
+  assert(url.endsWith('8192x4096/clouds.jpg'));assert.equal(max,50_000_000);
+  options.onProgress({received:1_000_000,total:0});
+  return {blob:input};
+ },
  checkedCloudHash:async blob=>createHash('sha256').update(Buffer.from(await blob.arrayBuffer())).digest('hex'),
  async store(kind,blob,meta){
   assert.equal(meta.contentHash,await this.checkedCloudHash(blob));
@@ -39,7 +43,10 @@ const weather={items:saved,pendingRecords:new Set(),
   saved.push(rec);this.pendingRecords.add(rec.id);return rec;
  }
 };
-const record=await downloadLiveCloud(weather);
+const progress=[];
+const record=await downloadLiveCloud(weather,{onProgress:(message,percent)=>progress.push({message,percent})});
+assert(progress.some(({message,percent})=>message.includes('1.0 MB')&&percent===null));
+assert(progress.some(({percent})=>percent===100));
 assert.equal(record.time,null);assert.equal(record.processing,'live-cloud-cropped-v1');
 assert.equal(record.channel,'validity');assert.equal(record.attribution,'Contains modified EUMETSAT data');
 assert.equal(record.blob.type,'image/png');assert(record.blob.size<=30_000_000);

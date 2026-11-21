@@ -3,18 +3,19 @@
 Only compressed cloud_phase / relative_time and latitude fields are fetched.
 The optical-depth retrieval and image-quality checks remain part of full import.
 """
-import datetime, json, subprocess, tempfile, threading, time
+import datetime, json, subprocess, sys, tempfile, threading, time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from http_download import DownloadError, response_headers
-from satcorps import BASE, RangeFile
+from satcorps import BASE, RangeFile, field_ranges
 
 METHOD = 'phase-time-stratified-v1'
 BYTE_LIMIT = 48 * 1024 * 1024
-TIME_LIMIT = 150
+TIME_LIMIT = 8 * 60
 CACHE_TTL = 24 * 3600
 RECENT_TTL = 15 * 60
 ERROR_TTL = 5 * 60
+FRAME_WORKERS = 3
 
 
 def validate_item(item):
@@ -34,7 +35,7 @@ def source_revision(url, deadline=None):
     """Official validators distinguish an upstream replacement at the same URL."""
     remaining = TIME_LIMIT if deadline is None else deadline-time.monotonic()
     if remaining <= 0: raise DownloadError('timeout','NASA 覆盖预核查达到时间上限',retryable=True)
-    budget = min(18, remaining)
+    budget = min(60, remaining)
     result = subprocess.run(['curl','--silent','--show-error','--head','--location',
         '--proto','=https','--proto-redir','=https','--connect-timeout',str(min(8,budget)),'--max-time',str(budget),url],
         capture_output=True, timeout=budget+1)
@@ -42,10 +43,8 @@ def source_revision(url, deadline=None):
     if result.returncode or status != 200:
         raise DownloadError('revision','NASA 源版本暂不可核查',status or None,retryable=True)
     size = headers.get('content-length','')
-    revision = {'etag':headers.get('etag',''), 'lastModified':headers.get('last-modified',''),
-                'size':int(size) if size.isdigit() else None}
-    # With no validator, don't reuse an estimate without sampling again.
-    return revision
+    return {'etag':headers.get('etag',''), 'lastModified':headers.get('last-modified',''),
+            'size':int(size) if size.isdigit() else None}
 
 
 class BoundedRangeFile(RangeFile):
@@ -84,17 +83,19 @@ def probe(item, previous=None):
     import h5py
     import numpy as np
     url, reference = validate_item(item)
-    started = time.monotonic(); deadline = started+TIME_LIMIT; revision = source_revision(url, deadline)
-    if previous and previous.get('state') == 'ready' and previous.get('method') == METHOD and \
-       (revision['etag'] or revision['lastModified']) and previous.get('sourceRevision') == revision:
-        return {**previous, 'validatedAt':int(time.time()*1000), 'cached':True}
+    started = time.monotonic(); deadline = started+TIME_LIMIT
+    if previous and previous.get('state') == 'ready' and previous.get('method') == METHOD:
+        revision = source_revision(url, deadline)
+        if (revision['etag'] or revision['lastModified']) and previous.get('sourceRevision') == revision:
+            return {**previous, 'validatedAt':int(time.time()*1000), 'cached':True}
     remote = None
     with tempfile.TemporaryDirectory(prefix='starorbit-coverage-') as tmp:
         path = Path(tmp)/'sample.nc'
         try:
             remote = BoundedRangeFile(url, path, deadline)
-            if revision['size'] is not None and revision['size'] != remote.size:
-                raise DownloadError('changed','NASA 源文件仍在更新，稍后重新核查',retryable=True)
+            # The validated first 206 has the version and the full size. A cold
+            # observation does not need a separate HEAD before requesting it.
+            revision = remote.revision
             with h5py.File(remote,'r') as data:
                 stamp = data.attrs['reference_time']
                 if isinstance(stamp,bytes): stamp=stamp.decode()
@@ -105,22 +106,23 @@ def probe(item, previous=None):
                     field=data[name]
                     expected=(6480,) if name=='lat' else (1,6480,12960)
                     if field.shape != expected: raise ValueError('NASA 覆盖网格已变化')
-                    for index in range(field.id.get_num_chunks()):
-                        chunk=field.id.get_chunk_info(index)
-                        chunks.append((chunk.byte_offset,chunk.size))
+                    chunks.extend(field_ranges(field))
                 # This is intentionally not a full NetCDF fetch. Large HDF chunks
                 # mean even sparse spatial samples need these compressed fields.
                 if sum(size for _,size in chunks)+remote.network_bytes > BYTE_LIMIT:
                     raise DownloadError('budget','NASA 覆盖字段超出预核查预算',retryable=False)
                 dict(data['relative_time'].attrs); dict(data['cloud_phase'].attrs)
-            def read_chunk(chunk):
-                offset,size=chunk
-                return offset,remote.download((offset,offset+size-1),size)
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                for start in range(0,len(chunks),2):
-                    for offset,payload in pool.map(read_chunk,chunks[start:start+2]):
-                        remote.file.seek(offset);remote.file.write(payload)
             remote.file.flush()
+            def write_chunk(chunk):
+                offset,size=chunk
+                payload=remote.download((offset,offset+size-1),size)
+                # Independent handles allow the next range to start as soon as
+                # either worker finishes, without buffering the full field.
+                with path.open('r+b') as output:
+                    output.seek(offset)
+                    output.write(payload)
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                for _ in pool.map(write_chunk,chunks): pass
             with h5py.File(path,'r') as data:
                 phase=data['cloud_phase'][0,18::36,18::36]
                 relative=data['relative_time'][0,18::36,18::36]
@@ -139,11 +141,25 @@ def probe(item, previous=None):
             if remote is not None: remote.close()
 
 
+def probe_in_worker(item, previous):
+    # h5py holds a process-wide lock even while a file-object read is waiting
+    # on HTTPS. Give simultaneous observations independent HDF5 readers.
+    run = subprocess.run([sys.executable, str(Path(__file__).resolve()), '--probe'],
+                         input=json.dumps([item,previous]), text=True, capture_output=True,
+                         timeout=TIME_LIMIT+10)
+    if run.returncode or not run.stdout:
+        raise DownloadError('worker','NASA 覆盖检查进程中断',retryable=True)
+    reply=json.loads(run.stdout)
+    if 'error' in reply:
+        raise DownloadError('probe',reply['error'],retryable=reply['retryable'])
+    return reply['result']
+
+
 class CoverageService:
     def __init__(self, cache, probe_fn=None):
         self.path=Path(cache)/'coverage-estimates.json'
-        self.lock=threading.RLock();self.items={};self.records={};self.queue=[];self.active=None;self.thread=None
-        self.probe=probe_fn or probe
+        self.lock=threading.RLock();self.items={};self.records={};self.queue=[];self.active=set();self.workers=set()
+        self.probe=probe_fn or probe_in_worker
         try:
             saved=json.loads(self.path.read_text())
             if saved.get('method')==METHOD:
@@ -158,7 +174,7 @@ class CoverageService:
         ttl=ERROR_TTL if record.get('state')=='error' else RECENT_TTL if time.time()-item['time']/1000 < 2*86400 else CACHE_TTL
         stamp=record.get('validatedAt',record.get('checkedAt',0))
         return isinstance(stamp,(int,float)) and 0 <= time.time()-stamp/1000 < ttl
-    def submit(self, result, force=False):
+    def submit(self, result, force=False, retry_errors=False):
         valid=[]
         for item in result.get('items',[]):
             if item.get('provider')!='satcorps':continue
@@ -172,22 +188,28 @@ class CoverageService:
             self.queue=[key for key in self.queue if key in keys]
             for item in valid:
                 key=item['key'];self.items[key]=dict(item)
-                if key!=self.active and key not in self.queue and (force or not self.fresh(item,self.records.get(key))):
+                record = self.records.get(key)
+                retry = retry_errors and record and record['state']=='error'
+                if key not in self.active and key not in self.queue and (force or retry or not self.fresh(item,record)):
                     self.queue.append(key)
             def priority(key):
                 item=self.items[key];hour=int(item['slot'])
-                return (0 if hour==12 else 1 if hour==0 else 2 if hour in (6,18) else 3,-item['time'])
+                return (self.records.get(key,{}).get('state')=='ready',
+                        0 if hour==12 else 1 if hour==0 else 2 if hour in (6,18) else 3,-item['time'])
             self.queue.sort(key=priority);self.queue=self.queue[:96]
-            if self.queue and (self.thread is None or not self.thread.is_alive()):
-                self.thread=threading.Thread(target=self.run,daemon=True,name='cloud-coverage');self.thread.start()
+            count = min(FRAME_WORKERS - len(self.workers), len(self.queue))
+            for _ in range(count):
+                worker=threading.Thread(target=self.run,daemon=True,name='cloud-coverage')
+                self.workers.add(worker)
+                worker.start()
             enriched=[]
             for item in result.get('items',[]):
                 enriched.append({**item,**({'coverageCheck':self.record(item['key'])} if item.get('key') in keys else {})})
             return {**result,'items':enriched,'coverageStatus':self.counts(keys)}
     def record(self,key):
-        if key==self.active:return self.pending('running')
+        if key in self.active:return self.pending('running')
         if key in self.queue:return self.pending('queued')
-        return self.records.get(key,self.pending('queued'))
+        return self.records.get(key,self.pending('idle'))
     def counts(self,keys):
         states=[self.record(key)['state'] for key in keys]
         return {'pending':states.count('queued'),'running':states.count('running'),'ready':states.count('ready'),'error':states.count('error')}
@@ -206,14 +228,18 @@ class CoverageService:
     def run(self):
         while True:
             with self.lock:
-                if not self.queue:self.active=None;self.thread=None;return
-                key=self.queue.pop(0);self.active=key;item=self.items[key];previous=self.records.get(key)
+                if not self.queue:
+                    self.workers.remove(threading.current_thread())
+                    return
+                key=self.queue.pop(0)
+                self.active.add(key)
+                item=self.items[key];previous=self.records.get(key)
             try:record=self.probe(item,previous)
             except Exception as error:
                 record={**self.pending('error'),'checkedAt':int(time.time()*1000),'error':str(error),
                         'retryable':getattr(error,'retryable',True)}
             with self.lock:
-                self.records[key]=record;self.active=None
+                self.records[key]=record;self.active.remove(key)
                 try:self.save()
                 except OSError:pass
 
@@ -223,3 +249,11 @@ def coverage_service(cache):
     with _services_lock:
         if key not in _services:_services[key]=CoverageService(cache)
         return _services[key]
+
+
+if __name__=='__main__' and sys.argv[1:]==['--probe']:
+    try:
+        reply={'result':probe(*json.load(sys.stdin))}
+    except Exception as error:
+        reply={'error':str(error),'retryable':getattr(error,'retryable',True)}
+    print(json.dumps(reply))

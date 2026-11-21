@@ -2,9 +2,7 @@
 import datetime as dt
 import hashlib
 import io
-import json
 import re
-import sys
 import tempfile
 import threading
 import time
@@ -211,15 +209,16 @@ def _convert(raw, record, width=WIDTH, height=HEIGHT):
     }
 
 
-def build(date, hour, output, progress=lambda s: None):
+def build(date, hour, output, progress=lambda s: None, on_transfer=None):
     from PIL import Image
     from cloud_quality import inspect_image
 
     progress('正在核对 NOAA 小时目录…')
     record = _hour_record(date, hour)
     progress('正在下载 NOAA 长波红外文件…')
+    if on_transfer: on_transfer(0,record['rawBytes'])
     raw = download_bytes(record['source'], limit=record['rawBytes'], timeout=95, attempts=3,
-                         attempt_timeout=40)
+                         attempt_timeout=40, on_progress=(lambda n:on_transfer(n,record['rawBytes'])) if on_transfer else None)
     if len(raw) != record['rawBytes'] or not raw.startswith(b'\x89HDF\r\n\x1a\n'):
         raise ValueError('NOAA 原始文件尺寸或格式不匹配，未保存')
     progress('正在定位红外像元并裁去无效区域…')
@@ -242,9 +241,5 @@ def build(date, hour, output, progress=lambda s: None):
 
 
 if __name__ == '__main__':
-    try:
-        result = build(*sys.argv[1:4], progress=lambda s: print(json.dumps({'status': s}), flush=True))
-        print(json.dumps({'result': result}), flush=True)
-    except Exception as error:
-        print(json.dumps({'error': str(error), 'retryable': getattr(error, 'retryable', False)}), flush=True)
-        sys.exit(1)
+    from cloud_worker import run
+    run(build)

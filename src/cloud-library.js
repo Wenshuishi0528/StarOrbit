@@ -115,6 +115,19 @@ export class CloudLibrary {
   get downloading() {
     return ['running', 'cancelling'].includes(this.task.state);
   }
+  get downloadPercent() {
+    if (this.task.state === 'ready') return 100;
+    const value = this.task.downloadPercent;
+    return this.task.state === 'running' && Number.isInteger(value) && value >= 0 && value <= 100
+      ? value
+      : null;
+  }
+  get taskText() {
+    const percent = this.downloadPercent;
+    return [percent === null ? '' : t('下载进度 {percent}%', { percent }), this.task.message]
+      .filter(Boolean)
+      .join(' · ');
+  }
   subscribe(fn) {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
@@ -290,11 +303,14 @@ export class CloudLibrary {
       provider,
       date: row.date,
       hour: row.slot ?? row.hour,
+      downloadPercent: resumeJob?.downloadPercent,
       id: resumeJob?.id || (browserDownload ? null : crypto.randomUUID().replaceAll('-', '')),
       message: t(resumeJob ? '已接回本机下载进度…' : '正在连接所选云图…'),
     };
-    const onProgress = (message) => {
+    const onProgress = (message, percent = this.task.downloadPercent) => {
       if (this.taskGeneration !== generation || signal.aborted) return;
+      if (message === this.task.message && percent === this.task.downloadPercent) return;
+      this.task.downloadPercent = percent;
       this.task.message = message;
       this.notify();
     };

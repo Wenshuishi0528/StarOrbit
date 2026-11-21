@@ -320,10 +320,14 @@ export function mountResourcePanel(weather) {
         card.current.value.textContent = library.currentText;
         card.checked.label.parentElement.hidden = true;
         card.progress.hidden = !(library.downloading || checking);
+        card.progress.max = 100;
+        if (!library.downloading || library.downloadPercent === null)
+          card.progress.removeAttribute('value');
+        else card.progress.value = library.downloadPercent;
         card.message.textContent =
           (checking || catalogFailed) && !library.downloading
             ? library.catalog.message
-            : library.task.message || t('已保存云图可直接使用；下载新图不会改变当前画面。');
+            : library.taskText || t('已保存云图可直接使用；下载新图不会改变当前画面。');
         card.hint.textContent = t('选择、预览、下载和使用都在同一个云图库中完成。');
         card.check.disabled = !!(sim.sceneBusy || sim.missions?.busy);
         continue;

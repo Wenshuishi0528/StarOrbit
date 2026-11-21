@@ -4,9 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import datetime as dt
 import hashlib
 import io
-import json
 import re
-import sys
 import tempfile
 import threading
 import time
@@ -199,7 +197,7 @@ class _RangeReader(io.RawIOBase):
             self.pos += n
         return written
 
-    def preload(self, dataset, progress):
+    def preload(self, dataset, progress, on_transfer=None):
         chunk_shape = dataset.chunks
         if not chunk_shape or dataset.dtype.name != 'int8' or dataset.compression != 'gzip':
             raise ValueError('向日葵云分类分块格式已变化')
@@ -228,11 +226,16 @@ class _RangeReader(io.RawIOBase):
             ranges = sorted(chunks)
             if self.reserved + 2 * sum(e-s for s,e in ranges) > TRANSFER_LIMIT:
                 raise ValueError('向日葵必要字段超过 30 MB 分段传输预算')
+        total = sum(end-start for start,end in ranges)
+        transferred = 0
+        if on_transfer: on_transfer(0,total)
         with ThreadPoolExecutor(max_workers=WORKERS) as pool:
             for i in range(0, len(ranges), WORKERS):
                 batch = ranges[i:i+WORKERS]
                 for (s,e), data in zip(batch, pool.map(lambda pair:self.fetch(*pair), batch)):
                     self.groups.append((s,e,data))
+                    transferred += len(data)
+                    if on_transfer: on_transfer(transferred,total)
                 progress(f'读取向日葵云分类 {len(self.groups)}/{len(ranges)}，已读 {self.received/1e6:.1f} MB')
         self.starts = [g[0] for g in self.groups]
 
@@ -254,7 +257,7 @@ def _project(lat, lon):
     return row, col, dx*x - y*y - z*z/(1-ecc) > 0
 
 
-def _read_mask(reader, record, progress):
+def _read_mask(reader, record, progress, on_transfer=None):
     import h5py
     import numpy as np
     reader.seek(0)
@@ -280,7 +283,7 @@ def _read_mask(reader, record, progress):
             r, c, visible = _project(latitude, longitude)
             if not visible or not np.isfinite(r+c) or abs(r-row) > 1 or abs(c-col) > 1:
                 raise ValueError('向日葵实际导航网格与投影不符')
-        reader.preload(ds, progress)
+        reader.preload(ds, progress, on_transfer)
         pixels = ds[:]
     if not np.all((pixels == -128) | ((pixels >= 0) & (pixels <= 3))):
         raise ValueError('向日葵返回未知云分类值')
@@ -313,7 +316,7 @@ def _render(mask, width=WIDTH, height=HEIGHT):
             'nativeResolution': '5500×5500', 'resolution': f'{width}×{height}', 'channel': 'validity'}
 
 
-def build(date, slot, output, progress=lambda s: None):
+def build(date, slot, output, progress=lambda s: None, on_transfer=None):
     now = dt.datetime.now(UTC)
     nominal = selection(date,slot,now)
     progress('正在核对向日葵十分钟观测目录…')
@@ -322,7 +325,7 @@ def build(date, slot, output, progress=lambda s: None):
         raise ValueError('该时次没有已发布的向日葵云分类图')
     record = _newest(rows)
     with _RangeReader(record) as reader:
-        mask = _read_mask(reader,record,progress)
+        mask = _read_mask(reader,record,progress,on_transfer)
         received = reader.received
     progress('正在重投影向日葵云分类并保存…')
     image, meta = _render(mask)
@@ -342,9 +345,5 @@ def build(date, slot, output, progress=lambda s: None):
 
 
 if __name__ == '__main__':
-    try:
-        data = build(*sys.argv[1:4],progress=lambda s:print(json.dumps({'status':s}),flush=True))
-        print(json.dumps({'result':data}),flush=True)
-    except Exception as error:
-        print(json.dumps({'error':str(error),'retryable':getattr(error,'retryable',False)}),flush=True)
-        sys.exit(1)
+    from cloud_worker import run
+    run(build)

@@ -43,10 +43,12 @@ globalThis.OffscreenCanvas=class{
 const fakeHeader=new Uint8Array(33);fakeHeader.set([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);
 const dims=new DataView(fakeHeader.buffer);dims.setUint32(16,width);dims.setUint32(20,height);
 let image=new Blob([fakeHeader],{type:'image/png'}),lastURL;
-const weather={items:[],pendingRecords:new Set(),fetch:async(url,max)=>{
+const weather={items:[],pendingRecords:new Set(),fetch:async(url,max,options)=>{
  const p=new URL(url).searchParams;
  if(p.get('REQUEST')==='GetCapabilities'){assert.equal(p.get('LAYER'),layer);return {blob:new Blob(['fixture'])};}
- assert.equal(max,30_000_000);lastURL=p;return {blob:image};
+ assert.equal(max,30_000_000);lastURL=p;
+ options.onProgress({received:3,total:10});
+ return {blob:image};
 },checkedCloudHash:async blob=>{
  return createHash('sha256').update(new Uint8Array(await blob.arrayBuffer())).digest('hex');
 },
@@ -56,7 +58,9 @@ const weather={items:[],pendingRecords:new Set(),fetch:async(url,max)=>{
   this.pendingRecords.add(row.id);return row;
  }};
 try{
- const record=await downloadGdpsCloud(weather);
+ const progress=[];
+ const record=await downloadGdpsCloud(weather,{onProgress:(_message,percent)=>progress.push(percent)});
+ assert(progress.includes(30));assert(progress.includes(100));
  assert.equal(record.forecastRun,Date.parse(run1));assert.equal(record.time,Date.parse(valid));
  assert.equal(record.channel,'validity');assert.equal(record.productType,'forecast');assert.equal(record.coverage,1);
  assert.deepEqual(record.polarCoverage,{north:1,south:1});

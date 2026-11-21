@@ -106,7 +106,8 @@ class Handler(SimpleHTTPRequestHandler):
     try:
      force=args.get('force',['0'])[0]=='1'
      result=known_checks(cloud_catalog(args.get('month',[''])[0],args.get('date',[None])[0],force),clouds.cache)
-     self.send_json(coverage_service(clouds.cache).submit(result,force=force))
+     recheck_all=force and args.get('coverage',['force'])[0]!='auto'
+     self.send_json(coverage_service(clouds.cache).submit(result,force=recheck_all,retry_errors=force))
     except ValueError as error:self.send_json({'error':str(error)},400)
     except DownloadError as error:self.send_json({'error':{'code':'UPSTREAM_'+error.code.upper(),'message':'NASA 目录查询失败：'+str(error)+'。已保存云图仍可使用。','retryable':error.retryable}},502)
     except Exception:self.send_json({'error':'官方目录暂不可访问；已保存云图仍可使用，请稍后重试'},502)

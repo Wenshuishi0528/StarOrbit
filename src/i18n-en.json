@@ -1,4 +1,12 @@
 {
+  "正在下载 GitHub 云图…": "Downloading the GitHub cloud map…",
+  "下载进度 {percent}%": "Download {percent}%",
+  "覆盖核查：{done}/{total} 已完成 · {running} 正在核查 · {pending} 排队": "Coverage checks: {done}/{total} finished · {running} running · {pending} queued",
+  "{count} 项失败，可重试": "{count} failed; retry available",
+  "查看 NASA 最新云图": "View the latest NASA cloud map",
+  "NASA 官方云相预览": "NASA cloud phase preview",
+  "正在加载 NASA 云相预览…": "Loading NASA cloud phase preview…",
+  "NASA 预览图暂不可用": "NASA preview currently unavailable",
   "恢复初始位置": "Restore initial position",
   "夜面也显示云层": "Show clouds on the night side",
   "月球": "Moon",

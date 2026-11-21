@@ -145,13 +145,16 @@ with tempfile.TemporaryDirectory() as temp:
   def __exit__(self,*args):pass
   def __getitem__(self,name):return Dataset(offsets[name])
  header=bytearray(65536);header[:8]=b'\x89HDF\r\n\x1a\n';header[13]=8;header[40:48]=(2000000).to_bytes(8,'little');requests=[]
- def request(url,byte_range,limit):
+ def request(url,byte_range,limit,deadline=None,headers_out=None):
+  headers_out.update({'content-range':f'bytes {byte_range[0]}-{byte_range[1]}/2000000','etag':'v1'})
   requests.append(byte_range)
   return bytes(header) if byte_range==(0,65535) else bytes([byte_range[0]//65536])*(byte_range[1]-byte_range[0]+1)
  path=Path(temp)/'fields.nc';reuse={}
  with patch.dict(sys.modules,{'h5py':types.SimpleNamespace(File=HDF)}),patch('satcorps.request',side_effect=request):
-  first=fetch_frame('https://example.invalid/data',path,lambda _:None,('cloud_phase','lat'),reuse=reuse)
-  second=fetch_frame('https://example.invalid/data',path,lambda _:None,reuse=reuse)
+  updates=[]
+  first=fetch_frame('https://example.invalid/data',path,lambda _:None,('cloud_phase','lat'),reuse=reuse,on_transfer=lambda n,t:updates.append((n,t)))
+  second=fetch_frame('https://example.invalid/data',path,lambda _:None,reuse=reuse,on_transfer=lambda n,t:updates.append((n,t)))
+ assert updates==[(0,40),(8,40),(16,40),(16,40),(24,40),(32,40),(40,40)]
  assert first==65536+16 and second==24 and len(requests)==6 and len(set(requests))==6
  with path.open('rb') as file:
   for offset in offsets.values():file.seek(offset);assert file.read(8)==bytes([offset//65536])*8
