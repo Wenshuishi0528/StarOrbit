@@ -46,7 +46,7 @@ import { mountScopeSearch } from './xuntian-search.js';
 import { makeScopeGuide } from './xuntian-guide.js';
 import { normalizeStarChartSettings, syncStarChartControls } from './star-chart-settings.js';
 import { mountXuntianSolarControls } from './xuntian-solar-controls.js';
-import { skyDetailTarget, skyDetailText, skyDetailCredits } from './sky-detail-controls.js';
+import { skyDetailTarget, skyDetailText, skyDetailCredits, updateHubbleCredit } from './sky-detail-controls.js';
 import { cityTerrainText } from './city-terrain-controls.js';
 
 const $ = (id) => document.getElementById(id),
@@ -787,6 +787,7 @@ export function installXuntianScope(sim) {
     $('xtSkyDetailStatus').hidden = solarControls.enabled;
     if ($('xtSkyDetailControls')) $('xtSkyDetailControls').hidden = solarControls.enabled;
     $('xtSkyDetailInfo').hidden = solarControls.enabled;
+    updateHubbleCredit($('xtHubbleCredit'), solarControls.enabled ? null : lastResult?.skyDetail);
     setText($('xtSkyDetailCredits'), skyDetailCredits(lastResult?.skyDetail));
     $('xtCityTerrain').hidden = solarControls.enabled || center?.kind !== 'earth';
     setText($('xtCityStatus'), cityTerrainText(lastResult?.cityTerrain));

@@ -124,6 +124,12 @@ test('wide ground views discover stable regions by radius, dateline and zoom', (
   );
 });
 
+test('orbital detail threshold follows projected surface pixels near the limb', () => {
+  assert(streamingAnchor(view(10, 40, 400, -90, 30)));
+  assert.equal(streamingAnchor(view(10, 40, 400, -27, 30)), null);
+  assert(streamingAnchor(view(10, 40, 400, -27, 2)));
+});
+
 test('mixedLOD keeps ancestors and nearby detail under a bounded atlas', () => {
   const input = view(),
     regions = planStreamingRegions(input).map((r) => ({
@@ -167,8 +173,12 @@ test('manager discovers from65degree views without UI update, deduplicates and c
     assert.equal(manager.status('ground').streaming.paused, true);
     assert.equal(manager.cities.size, 0);
     const count = calls.length;
-    manager.setView('ground', view(), 4, true);
+    manager.setView('scope', view(), 2, true);
+    manager.release('ground');
+    manager.streamChecked = -Infinity;
+    manager.setView('main', view(), 1, true);
     await turn();
+    assert.equal(manager.status('scope').streaming.paused, true);
     assert.equal(calls.length, count, 'deletion cannot immediately recreate current region');
     assert(ids.every((id) => removed.includes(id)));
     manager.resumeStreaming();

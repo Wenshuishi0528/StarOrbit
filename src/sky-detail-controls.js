@@ -4,12 +4,14 @@ import { getXuntianTarget } from './xuntian-catalog.js';
 import { normalizeSkyDetailSource, resolveSkyDetailSource } from './sky-detail-plan.js';
 
 const $ = (id) => document.getElementById(id);
+const artworkSource = (source) => source === 'recent' || source === 'hubble';
 const SOURCE_LABELS = {
   auto: '自动',
   galaxy: '原银河背景',
   dss: 'DSS 光学',
   panstarrs: 'Pan-STARRS 光学',
   recent: '韦伯红外（JWST）',
+  hubble: '哈勃望远镜',
 };
 const SOURCE_NOTES = {
   auto: '自动选择光学巡天和韦伯影像。',
@@ -17,6 +19,7 @@ const SOURCE_NOTES = {
   dss: 'DSS 为历史摄影巡天的光学彩色合成。',
   panstarrs: 'Pan-STARRS 为 i / r / g 光学波段合成，并非全天天区覆盖。',
   recent: '韦伯望远镜拍摄的红外合成影像只覆盖局部天区。',
+  hubble: '哈勃影像按观测画幅叠加在底图上。',
 };
 export function skyDetailTarget(env) {
   const p = env.skyDetail.providers.find((p) => p.tiles && p.center);
@@ -27,11 +30,16 @@ export function skyDetailText(status) {
   const source = normalizeSkyDetailSource(status?.source);
   if (source === 'galaxy') return t('原银河背景 · 沿用当前星空显示');
   if (!status?.enabled) return t('高清星空已关闭');
+  const hasArtwork = source === 'hubble' ? status.hasHubbleTiles : status.hasWebbTiles;
   if (status.backgroundOutsideCoverage) {
     const note = t('Pan-STARRS 未覆盖此天区，底图显示原银河');
-    if (!status.hasWebbTiles) return note;
+    if (!hasArtwork) return note;
     return skyDetailProgress(status, source) + ' · ' + note;
   }
+  if (source === 'hubble' && status.fallback === 'outside-coverage')
+    return t('此天区显示 {source} 底图', {
+      source: t(SOURCE_LABELS.galaxy),
+    });
   if (status.fallback === 'outside-coverage')
     return t(
       source === 'recent'
@@ -47,7 +55,7 @@ export function skyDetailText(status) {
     return source === 'auto'
       ? t('放大后自动加载高清天区')
       : t('放大后加载 {source}，当前显示原银河背景', { source: t(SOURCE_LABELS[source]) });
-  if (source === 'recent' && status.hasWebbTiles === false && status.ready)
+  if (artworkSource(source) && hasArtwork === false && status.ready)
     return t('此天区显示 {source} 底图', { source: t(SOURCE_LABELS[status.webbBackground]) });
   return skyDetailProgress(status, source);
 }
@@ -56,6 +64,20 @@ function skyDetailProgress(status, source) {
   const state = status.complete ? t('已就绪') : status.loading ? t('加载中') : t('保留可用底图');
   return `${t(SOURCE_LABELS[source])} · ${progress} · ${state}`;
 }
+export function updateHubbleCredit(link, status) {
+  if (!link) return;
+  const work = status?.sources?.find((p) => p.id.startsWith('hubble-'));
+  if (!work) {
+    link.hidden = true;
+    return;
+  }
+  if (link.getAttribute('href') !== work.sourceUrl) {
+    link.href = work.sourceUrl;
+    link.textContent = work.credit;
+  }
+  link.hidden = false;
+}
+
 export function skyDetailCredits(status) {
   const source = normalizeSkyDetailSource(status?.source);
   return [
@@ -91,8 +113,10 @@ export function mountSkyDetailControls(env) {
     env.settings.skyDetailSource = source;
     env.settings.skyDetail = source !== 'galaxy';
     env.skyDetail.setSource(source, env.settings.webbBackground);
+    for (const id of ['viewSkyDetail', 'xtSkyDetailTarget'])
+      if ($(id)) $(id).hidden = source === 'hubble';
     for (const select of backgrounds) {
-      select.parentElement.hidden = source !== 'recent';
+      select.parentElement.hidden = !artworkSource(source);
       select.value = env.settings.webbBackground ?? 'galaxy';
       select.disabled = disabled;
     }
@@ -152,6 +176,7 @@ export function mountSkyDetailControls(env) {
             : skyDetailText(status);
       if ($('skyDetailStatus')?.textContent !== message && $('skyDetailStatus'))
         setText('skyDetailStatus', message);
+      updateHubbleCredit($('mainHubbleCredit'), status);
       const credits = $('skyDetailCredits');
       if (credits) {
         const text = skyDetailCredits(status);
@@ -260,11 +285,12 @@ export function skyDetailCaptionLines(status) {
     dss: 'DSS2 optical colour composite',
     panstarrs: 'Pan-STARRS i/r/g optical composite',
     recent: 'Webb infrared (JWST)',
+    hubble: 'Hubble Space Telescope',
   };
   const sources = status.sources || [];
   const lines = [
     `Sky imagery selected: ${labels[source]}`,
-    ...(source === 'recent'
+    ...(artworkSource(source)
       ? [`Background selected: ${labels[status.webbBackground || 'galaxy']}`]
       : []),
     ...sources.map((p) => `${[p.id, p.observed, p.credit].filter(Boolean).join(' · ')}`),
@@ -290,16 +316,31 @@ export function skyDetailCaptionLines(status) {
 }
 
 export function paintSkyDetailCaption(canvas, status, bottomInset = 0) {
-  const lines = skyDetailCaptionLines(status);
+  let lines = skyDetailCaptionLines(status);
   if (!lines.length) return 0;
   const ctx = canvas.getContext('2d'),
     size = Math.max(11, Math.round(canvas.width / 120));
+  ctx.save();
+  ctx.font = `${size}px sans-serif`;
+  if (status?.sources?.some((p) => p.id.startsWith('hubble-'))) {
+    lines = lines.flatMap((line) => {
+      const wrapped = [''];
+      for (const word of String(line).split(/\s+/)) {
+        const i = wrapped.length - 1;
+        const next = wrapped[i] ? wrapped[i] + ' ' + word : word;
+        if (wrapped[i] && ctx.measureText(next).width > canvas.width - 16) wrapped.push(word);
+        else wrapped[i] = next;
+      }
+      return wrapped;
+    });
+  }
   const bottom = Math.max(0, canvas.height - Math.max(0, Number(bottomInset) || 0)),
     height = Math.min(bottom, lines.length * (size + 5) + 10),
     top = bottom - height;
-  if (!height) return 0;
-  ctx.save();
-  ctx.font = `${size}px sans-serif`;
+  if (!height) {
+    ctx.restore();
+    return 0;
+  }
   ctx.fillStyle = 'rgba(2,8,15,.76)';
   ctx.fillRect(0, top, canvas.width, height);
   ctx.fillStyle = '#d0dce8';

@@ -4,7 +4,14 @@ import { hipsDirection, hipsOrderForView, selectHipsTiles } from './sky-detail-m
 export const SKY_GPU_BUDGET = 64 * 1024 * 1024;
 export const SKY_TILE_BYTES = ((4 * 512 * 512 - 1) / 3) * 4;
 export const SKY_TILE_LIMIT = Math.floor(SKY_GPU_BUDGET / SKY_TILE_BYTES);
-export const SKY_DETAIL_SOURCES = Object.freeze(['auto', 'galaxy', 'dss', 'panstarrs', 'recent']);
+export const SKY_DETAIL_SOURCES = Object.freeze([
+  'auto',
+  'galaxy',
+  'dss',
+  'panstarrs',
+  'recent',
+  'hubble',
+]);
 export const normalizeSkyDetailSource = (source) =>
   SKY_DETAIL_SOURCES.includes(source) ? source : 'auto';
 export const resolveSkyDetailSource = (settings = {}) =>
@@ -18,6 +25,23 @@ function tile(provider, order, pixel, priority) {
   return { provider, order, pixel, priority, key: skyTileKey(provider, order, pixel) };
 }
 
+const groups = new WeakMap();
+function groupProviders(providers) {
+  if (!groups.has(providers)) {
+    const plates = { hubble: [], recent: [] };
+    for (const p of providers) {
+      if (p.plate) plates[p.source === 'hubble' ? 'hubble' : 'recent'].push(p);
+    }
+    groups.set(providers, {
+      plates,
+      local: providers.find((p) => p.tiles),
+      dss: providers.find((p) => p.id === 'dss-color'),
+      ps1: providers.find((p) => p.id === 'panstarrs'),
+    });
+  }
+  return groups.get(providers);
+}
+
 // The panorama remains the wide-angle background. Only magnified views need a
 // photographic survey; small recent patches can also appear in the main sky.
 export function planSkyDetailSelection(
@@ -29,14 +53,14 @@ export function planSkyDetailSelection(
 ) {
   const source = normalizeSkyDetailSource(requestedSource);
   if (source === 'galaxy') return { source, tiles: [], fallback: 'background' };
+  const family = source === 'hubble' ? 'hubble' : 'recent';
+  const { local, dss, ps1, plates } = groupProviders(providers);
   const plans = [],
-    local = providers.find((p) => p.tiles),
-    dss = providers.find((p) => p.id === 'dss-color'),
-    ps1 = providers.find((p) => p.id === 'panstarrs'),
     half = Math.atan(Math.tan((view.fovY * Math.PI) / 360) * Math.hypot(1, view.aspect)),
     dec = Math.asin(Math.max(-1, Math.min(1, view.forward[2]))) * (180 / Math.PI),
     ps1Covered = dec - half * (180 / Math.PI) > -28;
-  const optical = source === 'recent' ? normalizeWebbBackground(webbBackground) : source;
+  const artworkSource = source === 'recent' || source === 'hubble';
+  const optical = artworkSource ? normalizeWebbBackground(webbBackground) : source;
   const provider =
     optical === 'dss'
       ? dss
@@ -118,10 +142,10 @@ export function planSkyDetailSelection(
     }
     plans.push(...parents.values(), ...available.map((t) => tile(local, t.order, t.pixel, 3)));
   }
-  if (source === 'auto' || source === 'recent') {
+  if (source === 'auto' || artworkSource) {
     const hasLocal = plans.some((t) => t.provider === local);
     if (!hasLocal || (artworkId && artworkId !== local?.id)) {
-      const overlay = planWebbPlate(providers, view, artworkId);
+      const overlay = planWebbPlate(plates[family], view, artworkId);
       if (overlay.length && (!hasLocal || overlay[0].provider.id === artworkId)) {
         // A chosen edition replaces the overlapping rendition in all shared views.
         if (hasLocal)
@@ -135,8 +159,11 @@ export function planSkyDetailSelection(
   const tiles = [...new Map(plans.map((t) => [t.key, t])).values()];
   let fallback = null;
   if (!tiles.length) {
-    if (source === 'recent')
-      fallback = local || providers.some((p) => p.plate) ? 'outside-coverage' : 'unavailable';
+    if (artworkSource)
+      fallback =
+        (family === 'recent' && local) || plates[family].length
+          ? 'outside-coverage'
+          : 'unavailable';
     else if (source === 'panstarrs' && !ps1Covered) fallback = 'outside-coverage';
     else if (!provider) fallback = 'unavailable';
     else fallback = 'wide';
@@ -145,7 +172,7 @@ export function planSkyDetailSelection(
     source,
     tiles,
     fallback,
-    backgroundOutsideCoverage: source === 'recent' && optical === 'panstarrs' && !ps1Covered,
+    backgroundOutsideCoverage: artworkSource && optical === 'panstarrs' && !ps1Covered,
   };
 }
 

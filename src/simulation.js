@@ -1,9 +1,11 @@
+import { restoreMainSkyLens, updateMainSkyPointing } from './sky-camera-pointing.js';
 import { DFH1_HISTORY, orbitSegment } from './dfh1-history.js';
 import { sampleOrbitPath } from './orbit-path.js';
 import { missionLibrary } from './mission-library.js';
 import { installDisplayControls } from './display-controls.js';
 import { t, setText, onLanguageChange } from './i18n.js';
 import * as THREE from 'three';
+import { installOverviewGroundZoom, overviewGroundTarget } from './overview-ground-view.js';
 import { createOrbitControls } from './camera-controls.js';
 import { parseMissionOrbit } from './gp-orbit.js';
 import {
@@ -82,6 +84,12 @@ export class Simulation {
     this.orbitControls.maxDistance = 60000;
     this.sky.background = null;
     this.environment = new Environment(this);
+    this.overviewZoom = installOverviewGroundZoom(
+      this.spaceCamera,
+      this.orbitControls,
+      () => this.overviewNearViewEnabled(),
+      () => this.earth.quaternion
+    );
     this.minimap = new OrbitMinimap(this);
     this.timeline = new EventTimeline(this);
     this.marker = new THREE.Mesh(
@@ -437,6 +445,9 @@ export class Simulation {
   setView(view) {
     if (view === 'orbit' && this.orbitStatus !== 'ready') view = 'follow';
     if (view === this.view) return;
+    restoreMainSkyLens(this);
+    this.overviewZoom.reset();
+    this.orbitControls.stopMotion();
     this.view = view;
     const overview = view === 'orbit';
     this.api.controls.enabled = !overview;
@@ -452,6 +463,23 @@ export class Simulation {
     $('viewMode').value = view;
     this.api.resize();
   }
+  overviewNearViewEnabled() {
+    return (
+      this.view === 'orbit' &&
+      this.environment.quality === 'high' &&
+      !this.worldExplorer?.active &&
+      !this.freeFlight?.active
+    );
+  }
+  overviewGroundTarget(terrain = false) {
+    if (!this.overviewNearViewEnabled() || !this.current || !this.orbitControls.enabled)
+      return null;
+    return overviewGroundTarget(
+      this.spaceCamera,
+      this.earth.quaternion,
+      terrain ? (eye, direction) => this.environment.elevation.pick(eye, direction, 'main') : null
+    );
+  }
   overviewPosition() {
     const q = this.current;
     if (q) {
@@ -464,6 +492,9 @@ export class Simulation {
   }
   fit() {
     if (this.view !== 'orbit') return false;
+    restoreMainSkyLens(this);
+    this.overviewZoom.reset();
+    this.orbitControls.stopMotion();
     this.overviewPosition();
     this.orbitControls.target.set(0, 0, 0);
     this.orbitControls.update();
@@ -634,6 +665,7 @@ export class Simulation {
       scene.background = null;
       return;
     }
+    updateMainSkyPointing(this);
     this.spaceCamera.aspect = camera.aspect;
     this.spaceCamera.fov = camera.fov;
     if (!overview && q) {
@@ -652,7 +684,15 @@ export class Simulation {
           .applyMatrix4(rot)
           .add(V(q.sceneOrigin || q.position))
       );
-    } else if (overview) this.orbitControls.update();
+    } else if (overview) {
+      if (
+        this.environment.quality &&
+        this.environment.quality !== 'high' &&
+        this.spaceCamera.zoom > 1
+      )
+        this.overviewZoom.reset();
+      this.orbitControls.update();
+    }
     this.marker.visible = overview && !!q;
     this.orbitLine.visible = overview && $('orbitPath').checked;
     this.sunArrow.visible = overview && $('sunVector').checked;

@@ -1,11 +1,12 @@
 import { t } from './i18n.js';
 import { equatorial } from './environment-math.js';
 import { cameraAxes, lookDirection } from './xuntian-pointing.js';
-import { pointMainCameraAtSky } from './sky-camera-pointing.js';
+import { frameSkyArtwork, pointMainCameraAtSky } from './sky-camera-pointing.js';
 import { applySkyDetailSource } from './sky-detail-controls.js';
 import { mountSkyImageGallery } from './sky-image-gallery.js';
 import { openSkyOfflineDownload } from './sky-offline-controls.js';
 import { WEBB_ARTWORKS } from './webb-gallery.js';
+import { HUBBLE_ARTWORKS } from './hubble-gallery.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -25,19 +26,31 @@ export function mountSkyImageBrowser(env) {
   function locate(entry, context, savedView) {
     if (!canLocate(entry, context)) return false;
     const direction = equatorial(entry.raDeg, entry.decDeg);
+    const provider = providerFor(entry);
+    const framing =
+      savedView ||
+      (entry.work &&
+        frameSkyArtwork(
+          provider,
+          direction,
+          context === 'xuntian' ? 1.6 : sim.api.camera.aspect,
+          entry.fov
+        ));
     if (context === 'xuntian') {
       const target = {
         id: entry.id,
         type: 'deep-sky',
         direction,
-        fov: entry.fov,
+        fov: framing?.fovY ?? entry.fov,
         name: entry.title,
       };
-      if (!sim.xuntian?.observeTarget(target, { savedView })) return false;
+      if (!sim.xuntian?.observeTarget(target, { savedView: framing })) return false;
     } else {
-      pointMainCameraAtSky(sim, direction);
+      if (sim.xuntian?.active) sim.xuntian.close();
+      pointMainCameraAtSky(sim, direction, framing);
     }
-    if (entry.source === 'recent') skyDetail.setArtwork(entry.providerId);
+    if (entry.source === 'recent' || entry.source === 'hubble')
+      skyDetail.setArtwork(entry.providerId);
     env.settings.stars = true;
     env.settings.milky = true;
     for (const id of ['showStars', 'showMilky']) $(id).checked = true;
@@ -49,12 +62,14 @@ export function mountSkyImageBrowser(env) {
 
   function saveEntry(entry, context, thumbnailBlob) {
     const direction = equatorial(entry.raDeg, entry.decDeg);
-    const view = {
-      ...cameraAxes(lookDirection(direction)),
-      fovY: entry.fov,
-      aspect: 1.6,
-      pixelHeight: 1024,
-    };
+    const view = entry.work
+      ? { ...frameSkyArtwork(providerFor(entry), direction, 1.6, entry.fov), pixelHeight: 1024 }
+      : {
+          ...cameraAxes(lookDirection(direction)),
+          fovY: entry.fov,
+          aspect: 1.6,
+          pixelHeight: 1024,
+        };
     const info = {
       id: entry.id,
       targetId: entry.id,
@@ -74,7 +89,7 @@ export function mountSkyImageBrowser(env) {
 
   const browser = mountSkyImageGallery({
     providers: skyDetail.providers,
-    works: WEBB_ARTWORKS,
+    works: [...WEBB_ARTWORKS, ...HUBBLE_ARTWORKS],
     onLocate: locate,
     canLocate,
     onSave: saveEntry,
@@ -92,7 +107,9 @@ export function mountSkyImageBrowser(env) {
     $(id).onclick = () =>
       browser.open({
         context,
-        source: env.settings.skyDetailSource === 'recent' ? 'recent' : undefined,
+        source: ['recent', 'hubble'].includes(env.settings.skyDetailSource)
+          ? env.settings.skyDetailSource
+          : undefined,
       });
   }
   $('xtSaveSkyField').onclick = (event) => {

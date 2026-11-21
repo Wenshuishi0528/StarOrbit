@@ -10,7 +10,7 @@
 - 筛选规则完全固定：保留具有坐标的 `G/GPair/GTrpl/GGroup/OCl/GCl/Cl+N/*Ass/PN/HII/Neb/EmN/RfN/SNR/DrkN`，不导入 `Dup/NonEx/Other/*/**/Nova`。这是深空目录，不把恒星、未知分类、重复及不存在条目混入。原来的 M40 光学双星、M73 星群仍保留其 Messier 身份。12,159 条有效输入先按原有 Messier/精选项的编号及别名合并，再加入影像天区。NGC2244 等重复编号仍能搜索到其主条目；原有 M51、M76 的组合别名约定保持不变。
 - [OpenNGC 字段说明](https://github.com/mattiaverga/OpenNGC/blob/be3cd6c5498806a2fbb2f7e0452ef802dbb02be0/NGC_guide.txt)明确规定：RA/Dec 是 J2000；长短径单位为角分；PA 从北向东计量；`V-Mag` 是总 V 星等，中央恒星亮度另有 `Cstar V-Mag` 列。本软件仅导入总 V 列，不把中央恒星亮度当作整个星云亮度，也不以这些不同口径的总星等冒充表面亮度。
 
-新增紧凑源数据为 **602,375 bytes**，没有图像。所有目录源码合计小于 750 KB；不再为每条记录展开成冗长的 JS 对象字面量。源 CSV 是构建输入，不打包第二份。
+紧凑源数据为 **658,414 bytes**，包含星座、星系形态和星图使用的四语星座名称。所有目录源码合计小于 750 KB；不再为每条记录展开成冗长的 JS 对象字面量。源 CSV 是构建输入，不打包第二份。
 
 ```sh
 python3 scripts/prepare-deep-sky-catalog.py /path/to/pinned/csvs
@@ -26,6 +26,14 @@ python3 scripts/prepare-deep-sky-catalog.py /path/to/pinned/csvs
 - **NGC3324 与“宇宙悬崖”不是同一个中心。** NGC3324 条目保留 OpenNGC 的星团/星云中心与 4.8′ 目录直径。另有 `JWST-CARINA-2022`，类型是“影像天区”，以 [ESA/Webb weic2205a](https://esawebb.org/images/weic2205a/)对应的真实 TAN/ICRS AVM 四角为足迹。其中心严格等于现有高清资源 manifest 的 RA 159.21303687393092°、Dec −58.62016558917656°，并链接 provider `jwst-carina-2022`。搜索“NGC3324”找目录对象；搜索“宇宙悬崖/Cosmic Cliffs”及资源按钮找影像天区。画面范围是图像覆盖，不是假称整幅红外照片都是一颗星团。
 
 影像四角用 `assets/sky-detail/manifest.json` 的参考维度、参考像素、比例、旋转与 10K 栅格边界转换；遵循 [PyAVM 的 WCS 转换](https://github.com/astrofrog/pyavm/blob/main/pyavm/avm.py)及 FITS CDELT/CROTA→TAN 约定，和已有图片重投影保持一致。区域判断用球面四边形，不把外接圆角误当作有图像覆盖。
+
+## 影像详情中的天体与巡天说明
+
+12,161 个可浏览的深空天体共用中、英、俄、法四语解说。星座取自同一固定版本 OpenNGC 的 `Const`，沿用星图的本地化名称。`Hubble` 列提供 10,177 个星系的形态，其中 `S?` 和 `E?` 共 74 个，简介保留到星系一级。目录所列的视大小是从地球看见的角尺寸。大小未知时，详情只给观察线索。
+
+精选天体按实际对象撰写，参考 [NASA 梅西耶目录](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/)、[ESA/Hubble 的 NGC 346 观测](https://esahubble.org/images/heic0514a/)和 [ESA/Webb 的 NGC 3324 观测](https://esawebb.org/images/weic2205a/)。例如，M16 的简介同时说明年轻星团和附近柱体，M51 的简介分别标出主星系和伴星系。
+
+DSS 使用地面巡天的照相底片扫描图，彩色图通常取红、蓝两组底片并以平均值合成绿色通道。Pan-STARRS1 的当前图层用 i、r、g 三个波段合成红、绿、蓝通道。图源产品说明见 [DSSColor](https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor/properties) 和 [Pan-STARRS DR1](https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/PanSTARRS/properties)。
 
 ## 范围识别与遮挡
 

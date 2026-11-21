@@ -37,8 +37,23 @@ function summary(record) {
   return [
     t(offlineSourceLabel(record.source)),
     center,
-    record.source === 'webb' ? t('整幅作品') : extent,
-    record.source === 'webb'
+    record.source === 'webb' || (record.source === 'hubble' && !record.fieldOnly)
+      ? t('整幅作品')
+      : extent,
+    record.source === 'hubble'
+      ? t('影像层级 {order}（{width} × {height}）', {
+          order: record.order,
+          width: record.imageWidth,
+          height: record.imageHeight,
+        })
+      : '',
+    record.source === 'hubble' && !record.fieldOnly && record.nativeWidth > record.imageWidth
+      ? t('原图 {width} × {height}，放大后可下载当前天区的原图细节。', {
+          width: record.nativeWidth,
+          height: record.nativeHeight,
+        })
+      : '',
+    record.source === 'webb' || record.source === 'hubble'
       ? ''
       : t('约 {value} 角秒/像素', {
           value: (
@@ -78,7 +93,8 @@ export function openSkyOfflineDownload(env, initialPlan, { opener = document.act
     opt.value = value;
     select.append(opt);
   }
-  select.hidden = initialPlan.source === 'webb' || !initialPlan.order;
+  select.hidden =
+    initialPlan.source === 'webb' || initialPlan.source === 'hubble' || !initialPlan.order;
   let timer = 0,
     request = 0;
   const save = button('下载离线', async () => {

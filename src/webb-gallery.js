@@ -1,5 +1,5 @@
 import records from './webb-gallery-data.json' with { type: 'json' };
-import { createWebbPlate } from './webb-plate.js';
+import { buildImageArchive } from './space-image-archive.js';
 
 const archive = 'https://cdn.esawebb.org/archives/images';
 const editions = {
@@ -16,58 +16,13 @@ const editions = {
   weic2601a: ['螺旋星云（近红外）'],
 };
 
-export const WEBB_PLATE_PROVIDERS = [];
-export const WEBB_ARTWORKS = records.map((record) => {
-  const { id, title, credit, released } = record;
-  const edition = editions[id] || [];
-  const plate = record.plate && createWebbPlate(record.plate);
-  const builtin = id === 'weic2205a';
-  const sourceUrl = `https://esawebb.org/images/${id}/`;
-  const thumbnailUrl = `${archive}/thumb300y/${id}.jpg`;
-  const providerId = builtin ? 'jwst-carina-2022' : plate ? 'webb-' + id : null;
-  const center = builtin
-    ? { raDeg: 159.21303687393092, decDeg: -58.62016558917656 }
-    : plate
-      ? {
-          raDeg: ((Math.atan2(plate.direction[1], plate.direction[0]) * 180) / Math.PI + 360) % 360,
-          decDeg: (Math.asin(plate.direction[2]) * 180) / Math.PI,
-        }
-      : null;
-  const fieldSizeArcmin = builtin ? [7.29, 4.22] : plate ? plate.fieldSizeArcmin : null;
-  const bands = record.bands || 'ESA/Webb';
-  if (plate && !builtin)
-    WEBB_PLATE_PROVIDERS.push({
-      id: providerId,
-      artworkSlug: id,
-      thumbnailUrl,
-      title,
-      format: 'jpg',
-      revision: released,
-      plate,
-      minOrder: 0,
-      maxOrder: plate.levels.length - 1,
-      baseUrl: `${archive}/zoomable/${id}`,
-      center,
-      fieldSizeArcmin,
-      sourceUrl,
-      credit,
-      bands,
-      observed: '',
-      released,
-      licenseUrl: 'https://esawebb.org/copyright/',
-    });
-  return {
-    id,
-    title,
-    titleZh: edition[0],
-    aliases: [...record.aliases, ...edition.slice(1)],
-    credit,
-    bands,
-    released,
-    thumbnailUrl,
-    sourceUrl,
-    center,
-    fieldSizeArcmin,
-    providerId,
-  };
-});
+export const { providers: WEBB_PLATE_PROVIDERS, artworks: WEBB_ARTWORKS } = buildImageArchive(
+  records,
+  {
+    source: 'recent',
+    site: 'https://esawebb.org',
+    archive,
+    prefix: 'webb',
+    editions,
+  }
+);

@@ -173,6 +173,7 @@ export function createGroundSky({ environment, renderer }) {
       e = pose.elevation * D;
     camera.position.set(0, 0, 0);
     camera.lookAt(Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e));
+    if (pose.rollDegrees) camera.rotateZ(pose.rollDegrees * D);
     camera.updateMatrixWorld();
     const key = [site.latitude, site.longitude, site.height].join(',');
     // A second is enough for the natural sky; large time jumps are evaluated immediately.

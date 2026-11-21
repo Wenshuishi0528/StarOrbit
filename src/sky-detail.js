@@ -1,5 +1,6 @@
 import { validSkyImageDimensions } from './webb-plate.js';
 import * as THREE from 'three';
+import { HUBBLE_PLATE_PROVIDERS } from './hubble-gallery.js';
 import { WEBB_PLATE_PROVIDERS } from './webb-gallery.js';
 import { SkyOffline } from './sky-offline.js';
 import { createSkyTileCache } from './sky-detail-cache.js';
@@ -12,6 +13,12 @@ import {
   SKY_TILE_LIMIT,
 } from './sky-detail-plan.js';
 
+// Opening either registered edition gives the other telescope a matching first view.
+// A player-selected edition from that telescope takes precedence.
+const comparisonEdition = new Map([
+  ['hubble-heic1501a', 'webb-weic2216b'],
+  ['webb-weic2216b', 'hubble-heic1501a'],
+]);
 const MAX_FILE_BYTES = 2_000_000;
 const now = () => performance.now();
 const errorSummary = (error) =>
@@ -84,8 +91,9 @@ export class SkyDetail {
       revision: p.revision ?? manifest.version ?? 1,
       tiles: p.id === manifest.local?.providerId ? manifest.local.tiles : undefined,
     }));
-    if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS);
+    if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS, ...HUBBLE_PLATE_PROVIDERS);
     this.artworkId = null;
+    this.artworkBySource = { recent: null, hubble: null };
     this.webbBackground = 'galaxy';
     this.views = new Map();
     this.entries = new Map();
@@ -121,6 +129,8 @@ export class SkyDetail {
   setArtwork(id) {
     if (this.artworkId === id) return;
     this.artworkId = id;
+    if (id) this.artworkBySource[id.startsWith('hubble-') ? 'hubble' : 'recent'] = id;
+    else this.artworkBySource = { recent: null, hubble: null };
     this.replanViews();
   }
   setSource(value, background = this.webbBackground) {
@@ -138,7 +148,8 @@ export class SkyDetail {
       this.offline.providersForView(view),
       view,
       this.source,
-      this.artworkId,
+      this.artworkBySource[this.source === 'hubble' ? 'hubble' : 'recent'] ||
+        (this.source !== 'auto' && comparisonEdition.get(this.artworkId)),
       this.webbBackground
     );
   }
@@ -382,7 +393,10 @@ export class SkyDetail {
       source: this.source,
       active: this.views.has(id),
       webbBackground: this.webbBackground,
-      hasWebbTiles: tiles.some((t) => t.provider.tiles || t.provider.plate),
+      hasWebbTiles: tiles.some(
+        (t) => t.provider.tiles || (t.provider.plate && t.provider.source !== 'hubble')
+      ),
+      hasHubbleTiles: tiles.some((t) => t.provider.source === 'hubble'),
       backgroundOutsideCoverage: !!this.views.get(id)?.backgroundOutsideCoverage,
       fallback: this.views.get(id)?.fallback || (this.source === 'galaxy' ? 'background' : null),
       requested: tiles.length,

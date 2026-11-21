@@ -639,6 +639,7 @@ function tick(wall) {
   }
   if (sim) {
     sim.render();
+    sim.worldExplorer?.updateOverviewAction(wall);
     sim.xuntian?.draw(wall);
   } else renderer.render(scene, camera);
 }
@@ -765,6 +766,10 @@ async function boot() {
     sim.skyCultureControls = installSkyCultureControls(sim);
     sim.birthdayCard = installBirthdayCard(sim);
     sim.worldExplorer = installWorldExplorer(sim);
+    $('overviewDescend').onclick = () => {
+      const target = sim.overviewGroundTarget(true);
+      if (target) sim.worldExplorer.openGround(target, { ...target, fromOverview: true });
+    };
     sim.planetaryObservatory = installPlanetaryObservatory(sim);
     installHelpExamples(sim);
     installHelp(music);

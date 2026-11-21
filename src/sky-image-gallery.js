@@ -1,12 +1,20 @@
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { deepSkyTypeName } from './deep-sky-catalog.js';
-import { createSkyImageIndex, galleryEntry, panstarrsCovers } from './sky-image-index.js';
+import { artworkNotes } from './sky-artwork-notes.js';
+import { describeSkyObject, describeSurveyImage } from './sky-object-reading.js';
+import {
+  createSkyImageIndex,
+  galleryCoordinates,
+  galleryEntry,
+  panstarrsCovers,
+} from './sky-image-index.js';
 import { loadGalleryThumbnail } from './sky-image-thumbnail.js';
 
 const filters = [
   ['featured', '精选'],
   ['all', '全部影像'],
   ['recent', '韦伯图集'],
+  ['hubble', '哈勃图集'],
   ['dss', 'DSS 光学'],
   ['panstarrs', 'Pan-STARRS 光学'],
 ];
@@ -25,6 +33,15 @@ const button = (label, click, cls) => {
   return el;
 };
 const keyOf = (entry) => entry.source + ':' + entry.id;
+const bandNames = {
+  Optical: '可见光',
+  Infrared: '红外',
+  Ultraviolet: '紫外',
+  'X-ray': 'X 射线',
+  Radio: '射电',
+  Millimeter: '毫米波',
+};
+const bandLabel = (value) => (bandNames[value] ? t(bandNames[value]) : value);
 
 // Every thumbnail job belongs to a visible card in the open dialog. Network and
 // decoded image lifetimes are independent of the simulation's HD tile manager.
@@ -47,12 +64,13 @@ function visibleThumbnails(root, load, failed) {
       const controller = new AbortController();
       slot.controller = controller;
       active++;
-      load(slot.entry, controller.signal)
+      load(slot.entry, controller.signal, slot.detail)
         .then((blob) => {
           if (controller.signal.aborted || slots.get(img) !== slot) return;
-          const key = keyOf(slot.entry);
-          memory.set(key, blob);
-          if (memory.size > 40) memory.delete(memory.keys().next().value);
+          if (!slot.detail) {
+            memory.set(slot.key, blob);
+            if (memory.size > 40) memory.delete(memory.keys().next().value);
+          }
           draw(img, blob);
           observer.unobserve(slot.target);
         })
@@ -80,7 +98,7 @@ function visibleThumbnails(root, load, failed) {
           slot.controller?.abort();
           continue;
         }
-        const cached = memory.get(keyOf(slot.entry));
+        const cached = memory.get(slot.key);
         if (cached) {
           draw(img, cached);
           observer.unobserve(item.target);
@@ -95,7 +113,7 @@ function visibleThumbnails(root, load, failed) {
     { root }
   );
   return {
-    add(entry) {
+    add(entry, detail = false) {
       const frame = make('div', 'sig-thumb'),
         img = make('img');
       img.alt = '';
@@ -103,6 +121,8 @@ function visibleThumbnails(root, load, failed) {
       frame.append(img);
       slots.set(img, {
         entry,
+        detail: detail && !!entry.work?.previewUrl,
+        key: keyOf(entry) + (detail && entry.work?.previewUrl ? ':detail' : ''),
         target: frame,
         visible: false,
         queued: false,
@@ -145,7 +165,7 @@ export function mountSkyImageGallery({
     page = 0,
     savedScroll = 0,
     selected = null,
-    parentTarget = null,
+    trail = [],
     selectedSource = 'dss',
     opener = null,
     lastCardId = null,
@@ -182,7 +202,16 @@ export function mountSkyImageGallery({
   }
   const images = visibleThumbnails(
     scroller,
-    async (entry, signal) => {
+    async (entry, signal, detail) => {
+      if (detail && navigator.onLine !== false) {
+        try {
+          return await loadGalleryThumbnail(entry, providers, signal, true);
+        } catch {
+          signal.throwIfAborted();
+        }
+      }
+      const cardImage = detail && images.get(entry);
+      if (cardImage) return cardImage;
       let saved;
       try {
         saved = await getSavedPreview?.(entry);
@@ -199,7 +228,7 @@ export function mountSkyImageGallery({
   );
   function setLabels() {
     title.textContent = t('浏览星空影像');
-    closeButton.textContent = t('关闭');
+    closeButton.textContent = t('关闭图集');
     search.placeholder = t('搜索天体、编号或作品');
     search.setAttribute('aria-label', search.placeholder);
     filter.setAttribute('aria-label', t('筛选影像'));
@@ -215,7 +244,10 @@ export function mountSkyImageGallery({
   }
   function caption(entry) {
     if (entry.work)
-      return ['ESA/Webb', entry.work.bands]
+      return [
+        entry.source === 'hubble' ? 'ESA/Hubble' : 'ESA/Webb',
+        entry.work.bands?.split(' / ').map(bandLabel).join(' / '),
+      ]
         .filter((s, i, a) => s && a.indexOf(s) === i)
         .join(' · ');
     const type = deepSkyTypeName(entry.object.type, getLanguage());
@@ -229,19 +261,19 @@ export function mountSkyImageGallery({
     failed = false;
     updateStatus();
   }
-  function showDetails(row) {
+  function showDetails(row, restore) {
     selected = row;
-    const entry = galleryEntry(row, selectedSource, getLanguage());
+    const language = getLanguage();
+    const entry = galleryEntry(row, selectedSource, language);
     clearContent();
     tool.hidden = true;
     const back = button(
-      parentTarget ? t('返回天体') : t('返回目录'),
+      trail.length ? t(trail.at(-1).row.work ? '返回作品' : '返回天体') : t('返回影像目录'),
       () => {
-        if (parentTarget) {
-          const previous = parentTarget;
-          parentTarget = null;
+        const previous = trail.pop();
+        if (previous) {
           selectedSource = previous.source;
-          showDetails(previous.row);
+          showDetails(previous.row, previous);
           return;
         }
         selected = null;
@@ -252,8 +284,44 @@ export function mountSkyImageGallery({
       },
       'sig-back'
     );
+    function relatedButton(item, label) {
+      const next = galleryEntry(item, 'dss', language);
+      const id = keyOf(next);
+      const link = button(label, () => {
+        const earlier = trail.findIndex((frame) => frame.row === item);
+        if (earlier >= 0) {
+          const [previous] = trail.splice(earlier);
+          selectedSource = previous.source;
+          showDetails(item, previous);
+          return;
+        }
+        trail.push({ row, source: selectedSource, scroll: scroller.scrollTop, focus: id });
+        selectedSource = next.source;
+        showDetails(item);
+      });
+      link.dataset.related = id;
+      return link;
+    }
     const detail = make('article', 'sig-detail');
-    const picture = images.add(entry);
+    const picture = images.add(entry, true);
+    picture.querySelector('img').alt = entry.title;
+    let visual = picture;
+    if (entry.work?.previewUrl) {
+      const toggle = button(
+        '',
+        () => {
+          const expanded = detail.classList.toggle('sig-expanded');
+          toggle.setAttribute('aria-expanded', String(expanded));
+          toggle.title = toggle.ariaLabel = t(expanded ? '收起预览' : '放大预览');
+          if (!expanded) toggle.scrollIntoView({ block: 'nearest' });
+        },
+        'sig-expand'
+      );
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.title = toggle.ariaLabel = t('放大预览');
+      toggle.append(picture);
+      visual = toggle;
+    }
     const text = make('div', 'sig-info'),
       name = make('h3', null, entry.title);
     const provider = providers.find(
@@ -266,6 +334,17 @@ export function mountSkyImageGallery({
             : entry.providerId)
     );
     text.append(name, make('p', 'sig-meta', caption(entry)));
+    const subjects = row.subjects || [];
+    const object = entry.object || row.primarySubject?.object;
+    const narrative = entry.work
+      ? artworkNotes(entry.work, language)
+      : describeSurveyImage(entry.object, entry.source, language);
+    function passage(label, content) {
+      const section = make('section', 'sig-passage');
+      section.append(make('h4', null, t(label)), make('p', null, content));
+      return section;
+    }
+    text.append(passage('这幅影像', entry.work ? narrative.image : narrative.look));
     if (entry.object && panstarrsCovers(entry.object)) {
       const selector = make('select');
       selector.setAttribute('aria-label', t('星空影像'));
@@ -281,16 +360,6 @@ export function mountSkyImageGallery({
         textFocus();
       };
       text.append(selector);
-    }
-    const credit = entry.work?.credit || provider?.credit;
-    if (credit) text.append(make('p', 'sig-credit', credit));
-    const href = entry.work?.sourceUrl || provider?.sourceUrl;
-    if (href) {
-      const link = make('a', null, t('影像来源'));
-      link.href = href;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      text.append(link);
     }
     const actions = make('div', 'sig-actions'),
       status = make('p', 'sig-meta');
@@ -328,29 +397,101 @@ export function mountSkyImageGallery({
       }
     } else status.textContent = t('此作品提供图像预览。');
     text.append(actions, status);
+    const locations = make('dl', 'sig-positions');
+    function addPosition(label, value) {
+      if (!value) return;
+      const field = make('dd');
+      for (const component of value.split('　')) field.append(make('span', null, component));
+      locations.append(make('dt', null, label), field);
+    }
+    const coordinates = (ra, dec) => galleryCoordinates(ra, dec, t('赤经'), t('赤纬'));
+    if (entry.work) addPosition(t('影像中心（J2000）'), coordinates(entry.raDeg, entry.decDeg));
+    if (object) {
+      const label = entry.work
+        ? t('天体位置（{name}）', { name: object.id })
+        : t('天体位置（J2000）');
+      addPosition(entry.work ? label + ' · J2000' : label, coordinates(object.ra, object.dec));
+    }
+    if (entry.work?.fieldSizeArcmin) {
+      const fmt = new Intl.NumberFormat(language, { maximumFractionDigits: 2 });
+      addPosition(
+        t('影像视场'),
+        entry.work.fieldSizeArcmin.map((v) => fmt.format(v) + '′').join(' × ')
+      );
+    }
+    const figure = make('div', 'sig-figure');
+    figure.append(visual);
+    if (locations.childElementCount) figure.append(locations);
+    detail.append(figure, text);
+    const reading = make('div', 'sig-reading');
+    const about = passage(
+      '关于天体',
+      (object && describeSkyObject(object, language)) || narrative.subject
+    );
+    for (const subject of subjects) {
+      const target = galleryEntry(subject, 'dss', language);
+      const link = relatedButton(subject, target.title);
+      link.className = 'sig-subject-link';
+      about.append(link);
+    }
+    reading.append(about, passage('如何拍摄', narrative.method));
+    detail.append(reading);
+
+    const provenance = make('div', 'sig-provenance');
+    if (entry.work) {
+      const metadata = [
+        entry.id,
+        entry.work.released && t('发布于 {date}', { date: entry.work.released }),
+        ...(entry.work.instruments || []),
+      ].filter(Boolean);
+      provenance.append(make('p', 'sig-meta', metadata.join(' · ')));
+    }
+    if (entry.work?.filters?.length) {
+      const filters = make('details', 'sig-filters');
+      filters.append(make('summary', null, t('仪器与滤镜')));
+      for (const filter of entry.work.filters)
+        filters.append(make('p', 'sig-meta', filter.filter(Boolean).map(bandLabel).join(' · ')));
+      provenance.append(filters);
+    }
+    const credit = entry.work?.credit || provider?.credit;
+    if (credit) provenance.append(make('p', 'sig-credit', credit));
+    const href = entry.work?.sourceUrl || provider?.sourceUrl;
+    if (href) {
+      const link = make('a', null, t('影像来源'));
+      link.href = href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      provenance.append(link);
+    }
     if (entry.object) {
       const linked = searchIndex.related(entry.object);
       if (linked.length) {
-        const group = make('details', 'sig-related'),
-          summary = make('summary', null, t('相关韦伯影像（{count}）', { count: linked.length }));
-        group.append(summary);
-        for (const item of linked) {
-          const linkedEntry = galleryEntry(item, 'recent', getLanguage());
-          group.append(
-            button(linkedEntry.title, () => {
-              parentTarget = { row, source: selectedSource };
-              selectedSource = 'recent';
-              showDetails(item);
-            })
-          );
+        const group = make('details', 'sig-related');
+        group.append(make('summary', null, t('相关作品（{count}）', { count: linked.length })));
+        function fillRelated() {
+          if (!group.open || group.childElementCount > 1) return;
+          for (const item of linked) {
+            const work = galleryEntry(item, null, language);
+            group.append(relatedButton(item, sourceLabel(work.source) + ' · ' + work.title));
+          }
         }
-        text.append(group);
+        group.addEventListener('toggle', fillRelated);
+        if (restore?.focus) {
+          group.open = true;
+          fillRelated();
+        }
+        reading.append(group);
       }
     }
-    detail.append(picture, text);
+    detail.append(provenance);
     scroller.append(back, detail);
-    scroller.scrollTop = 0;
-    back.focus({ preventScroll: true });
+    scroller.scrollTop = restore?.scroll || 0;
+    const focus =
+      restore &&
+      [...detail.querySelectorAll('[data-related]')].find(
+        (el) => el.dataset.related === restore.focus
+      );
+    (focus || back).focus({ preventScroll: true });
   }
   function textFocus() {
     scroller.querySelector('.sig-info select')?.focus({ preventScroll: true });
@@ -380,7 +521,11 @@ export function mountSkyImageGallery({
       card.append(
         images.add(entry),
         make('strong', null, entry.title),
-        make('small', null, caption(entry))
+        make(
+          'small',
+          null,
+          entry.work && !entry.providerId ? `${t('仅预览')} · ${caption(entry)}` : caption(entry)
+        )
       );
       list.append(card);
     }
@@ -453,7 +598,7 @@ export function mountSkyImageGallery({
       }
       opener = options.opener || document.activeElement;
       selected = null;
-      parentTarget = null;
+      trail = [];
       setLabels();
       dialog.showModal();
       renderList();

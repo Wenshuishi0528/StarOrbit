@@ -190,3 +190,133 @@ dialog.sky-image-gallery {
   margin-top: 6px;
   width: 100%;
 }
+
+.sky-image-gallery .sig-expand {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.sig-expanded {
+  grid-template-columns: minmax(0, 1fr);
+}
+.sky-image-gallery .sig-expanded .sig-expand {
+  cursor: zoom-out;
+}
+.sig-expanded .sig-thumb {
+  aspect-ratio: auto;
+}
+.sig-expanded .sig-thumb img {
+  height: auto;
+}
+.sig-filters summary {
+  cursor: pointer;
+}
+
+.sig-figure {
+  min-width: 0;
+}
+.sig-passage {
+  padding: 0;
+  border: 0;
+}
+.sig-passage h4 {
+  color: #b1e0eb;
+  font-size: 0.94rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.sig-passage p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.sig-info select {
+  margin-top: 10px;
+}
+.sig-info :is(.sig-actions, .sig-meta):empty {
+  display: none;
+}
+.sig-positions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: baseline;
+  padding-top: 9px;
+  margin: 12px 0 0;
+  border-top: 1px solid #304657;
+  line-height: 1.45;
+  font-size: 0.78rem;
+}
+.sig-positions dt {
+  color: #b7c9d8;
+}
+.sig-positions dd {
+  display: flex;
+  gap: 0 0.7em;
+  flex-wrap: wrap;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.sig-positions dd span {
+  white-space: nowrap;
+}
+.sig-reading,
+.sig-provenance {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.sig-reading {
+  display: grid;
+  gap: 14px 22px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 12px;
+  border-top: 1px solid #304657;
+}
+.sig-reading .sig-related {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+.sky-image-gallery .sig-subject-link {
+  display: inline-block;
+  margin: 4px 12px 0 0;
+  padding: 3px 0;
+  color: #8ed5e6;
+  background: transparent;
+  border: 0;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sig-provenance {
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+.sig-provenance :is(.sig-credit, .sig-meta) {
+  margin: 4px 0;
+}
+@media (max-width: 520px) {
+  .sig-detail,
+  .sig-reading {
+    gap: 12px;
+  }
+  .sig-reading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sig-figure {
+    display: contents;
+  }
+  .sig-detail > .sig-info {
+    grid-row: 2;
+  }
+  .sig-figure .sig-positions {
+    margin: 0;
+  }
+  .sig-detail:not(.sig-expanded) .sig-thumb {
+    max-height: min(28dvh, 170px);
+    width: 100%;
+  }
+}

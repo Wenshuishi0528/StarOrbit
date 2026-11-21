@@ -42,6 +42,7 @@ export class CityTerrain {
     } catch {}
     this.loads = new Map();
     this.downloads = new Map();
+    this.removals = new Map();
     this.payloads = new Map();
     this.failures = new Map();
     this.generation = new Map();
@@ -61,6 +62,7 @@ export class CityTerrain {
     this.catalogReady = false;
     this.lastError = '';
     this.lastPlan = -Infinity;
+    this.handoffUntil = 0;
     this.texture = this.makeTexture(1);
     this.canvas = null;
     this.ready = this.cache
@@ -201,7 +203,7 @@ export class CityTerrain {
       this.streamContext = context;
     }
     if (this.streamPausedAt !== null) {
-      if (this.streamPausedAt === context) return;
+      if (!context || this.streamPausedAt === context) return;
       this.streamPausedAt = null;
     }
     const wanted = new Map();
@@ -223,6 +225,7 @@ export class CityTerrain {
       if (this.streamJobs.size >= 1) break;
       if (
         this.cities.has(id) ||
+        this.removals.has(id) ||
         this.streamJobs.has(id) ||
         this.streamDismissed.get(id) === context ||
         (this.streamFailures.get(id) || 0) > now
@@ -291,9 +294,21 @@ export class CityTerrain {
           ...input.forward,
           ...input.up,
           ...input.right,
-        ].join(',')
-      : '';
-    if (view.signature !== signature || force) {
+        ]
+      : null;
+    // Tiny Earth-fixed roundoff should not replan stationary views. At terrain
+    // scale one centimetre of eye motion and a nanoradian of rotation are ample.
+    const changed =
+      !!signature !== !!view.signature ||
+      (signature &&
+        signature.some(
+          (value, i) => Math.abs(value - view.signature[i]) > (i >= 3 && i < 6 ? 1e-5 : 1e-9)
+        ));
+    if (changed || view.priority !== priority || force) {
+      if (view.input && !input) {
+        this.handoffUntil = performance.now() + 150;
+        view.plan = [];
+      }
       view.input = input;
       view.signature = signature;
       view.priority = priority;
@@ -303,6 +318,7 @@ export class CityTerrain {
     return this.status(id);
   }
   release(id) {
+    if (this.views.get(id)?.input) this.handoffUntil = performance.now() + 150;
     this.views.delete(id);
     this.revision++;
     this.schedule(true);
@@ -314,23 +330,34 @@ export class CityTerrain {
     else this.scheduled = setTimeout(() => this.reconcile(), delay);
   }
   reconcile() {
-    this.lastPlan = performance.now();
+    const now = performance.now();
+    // The next scene installs its camera on its first frame. Retain in-flight
+    // tiles briefly across that gap so identical requests can finish once.
+    if (this.enabled && now < this.handoffUntil && ![...this.views.values()].some((v) => v.input)) {
+      clearTimeout(this.scheduled);
+      this.scheduled = setTimeout(() => this.reconcile(), this.handoffUntil - now + 1);
+      return;
+    }
+    this.lastPlan = now;
     this.updateStreaming();
     const wanted = new Set(),
-      available = [...this.cities.values()].filter((c) => !this.disabled.has(c.id));
+      available = [...this.cities.values()].filter(
+        (c) => !this.disabled.has(c.id) && !this.removals.has(c.id)
+      );
     for (const view of [...this.views.values()].sort(
       (a, b) => b.priority - a.priority || a.id.localeCompare(b.id)
     )) {
       let plan = [];
       if (this.enabled && view.input) {
+        const anchor = streamingAnchor(view.input);
+        const regions =
+          view.id === 'main' && !anchor ? available.filter((c) => !c.streaming) : available;
+        const planner = regions.some((c) => c.streaming) ? planStreamedCityTiles : planCityTiles;
         for (const budget of [CITY_DRAW_LIMIT, 48, 32, 24, 16, 8, 4, 2, 1]) {
-          const planner = available.some((c) => c.streaming)
-            ? planStreamedCityTiles
-            : planCityTiles;
-          plan = planner(available, view.input, {
+          plan = planner(regions, view.input, {
             maxTiles: budget,
             rangeKm: this.streaming.rangeKm,
-            center: streamingAnchor(view.input)?.center,
+            center: anchor?.center,
           });
           if (new Set([...wanted, ...plan.map(keyOf)]).size <= CITY_GPU_LAYERS) break;
           plan = [];
@@ -455,7 +482,7 @@ export class CityTerrain {
   sharedPayload(meta, tile, signal) {
     const key = meta.id + '/' + tile.key + '@' + (this.generation.get(meta.id) || 0);
     let entry = this.payloads.get(key);
-    if (!entry) {
+    if (!entry || entry.controller.signal.aborted) {
       const controller = new AbortController();
       entry = { controller, users: new Set() };
       entry.promise = this.source.tile(meta, tile, controller.signal).finally(() => {
@@ -606,14 +633,17 @@ export class CityTerrain {
     }
     // A freshly loaded photo tile must reach full opacity before the shutter.
     while (this.status(id).complete && performance.now() < until && this.enabled) {
+      const now = performance.now();
       const remaining = (this.views.get(id)?.plan || []).reduce((wait, tile) => {
         const entry = this.entries.get(keyOf(tile));
-        return Math.max(wait, entry ? FADE_MS - (performance.now() - entry.born) : 0);
+        return Math.max(wait, entry ? FADE_MS - (now - entry.born) : 0);
       }, 0);
       if (remaining <= 0) break;
       await new Promise((resolve) => setTimeout(resolve, Math.min(remaining + 1, 100)));
       this.writeUniforms();
     }
+    // The last fade can finish between a uniform update and the time check above.
+    this.writeUniforms();
     return this.status(id);
   }
   saveDismissed() {
@@ -641,7 +671,9 @@ export class CityTerrain {
       if (this.disposed || generation !== (this.generation.get(id) || 0)) throw abortError();
     };
     current();
+    if (this.removals.get(id)) throw abortError();
     if (!automatic) {
+      if (this.removals.delete(id)) this.schedule(true);
       this.allowedOnline.add(id);
       this.autoDismissed?.delete(id);
       this.saveDismissed();
@@ -706,6 +738,8 @@ export class CityTerrain {
   }
   async removeCity(id) {
     if (this.cities.get(id)?.builtin) return;
+    const pending = this.removals.get(id);
+    if (pending) return pending;
     this.generation.set(id, (this.generation.get(id) || 0) + 1);
     this.cancelDownload(id);
     this.allowedOnline.delete(id);
@@ -721,12 +755,20 @@ export class CityTerrain {
       this.saveDismissed();
     }
     for (const [key, load] of this.loads) if (key.startsWith(id + '/')) load.controller.abort();
-    this.cities.delete(id);
+    // Hide it from the renderer immediately. The library row remains selectable
+    // until the database transaction commits, including after a failed deletion.
+    const work = this.cache.remove(id);
+    this.removals.set(id, work);
     this.revision++;
     this.schedule(true);
     try {
-      await this.cache.remove(id);
+      await work;
+      this.cities.delete(id);
+      this.removals.delete(id);
+      if (pending === null) this.lastError = '';
+      this.revision++;
     } catch (error) {
+      this.removals.set(id, null);
       this.lastError = error.message;
       this.revision++;
       throw error;

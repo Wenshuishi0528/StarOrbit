@@ -54,14 +54,15 @@ const settingsKeys = [
 ];
 const vector = (a) =>
   Array.isArray(a) && a.length === 3 && a.every((v) => Number.isFinite(v) && Math.abs(v) < 1e7);
-function restoreCamera(camera, controls, s) {
+function restoreCamera(camera, controls, s, overview = false) {
   if (!s || !vector(s.position) || !vector(s.target)) return;
   if (Math.hypot(...s.position.map((v, i) => v - s.target[i])) < 1e-9) return;
   controls.stopMotion();
   camera.position.fromArray(s.position);
   controls.target.fromArray(s.target);
   if (vector(s.up) && Math.hypot(...s.up) > 0.1) camera.up.fromArray(s.up).normalize();
-  if (Number.isFinite(s.fov)) camera.fov = Math.max(10, Math.min(100, s.fov));
+  if (Number.isFinite(s.fov)) camera.fov = Math.max(0.006, Math.min(100, s.fov));
+  if (overview) camera.zoom = Number.isFinite(s.zoom) ? Math.max(1, Math.min(128, s.zoom)) : 1;
   camera.updateProjectionMatrix();
   controls.update();
 }
@@ -70,6 +71,7 @@ const cameraState = (camera, controls) => ({
   target: controls.target.toArray(),
   up: camera.up.toArray(),
   fov: camera.fov,
+  zoom: camera.zoom,
 });
 export async function installSessionMemory(sim, assembly) {
   let saved = null,
@@ -105,7 +107,8 @@ export async function installSessionMemory(sim, assembly) {
     sim.setView(saved.view === 'orbit' ? 'orbit' : 'follow');
     if ((saved.missionId || DEFAULT_MISSION) === sim.missionId)
       restoreCamera(api.camera, api.controls, saved.camera);
-    if (sim.view === 'orbit') restoreCamera(sim.spaceCamera, sim.orbitControls, saved.spaceCamera);
+    if (sim.view === 'orbit')
+      restoreCamera(sim.spaceCamera, sim.orbitControls, saved.spaceCamera, true);
     assembly.setPlaying(sim.capabilities.solarArrays && !!saved.playing && !sim.auto);
     document.querySelectorAll('aside details[data-memory-key]').forEach((el) => {
       const key = el.dataset.memoryKey,

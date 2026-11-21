@@ -14,7 +14,7 @@ export function cityCameraView(camera, earthQuaternion, width, height) {
     right: [e[0], e[1], e[2]],
     up: [e[4], e[5], e[6]],
     forward: [-e[8], -e[9], -e[10]],
-    fovY: camera.fov,
+    fovY: camera.getEffectiveFOV(),
     aspect: width / height,
     width,
     height,

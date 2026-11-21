@@ -1474,6 +1474,10 @@ function sharedObjects() {
     return {
       ...object,
       positionAngleDeg: primary?.positionAngleDeg ?? null,
+      // Pinned OpenNGC entries M040, Mel022 and NGC6994 supply these missing matches.
+      constellation:
+        primary?.constellation ?? ({ M40: 'UMa', M45: 'Tau', M73: 'Aqr' }[object.id] || null),
+      morphology: primary?.morphology ?? null,
       aliases: [...new Set([...object.aliases, ...(primary?.aliases || [])])],
     };
   });

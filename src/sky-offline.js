@@ -2,10 +2,20 @@ import { createSkyOfflineStore } from './sky-offline-store.js';
 import { hipsPixel, hipsTileUrl, selectHipsTiles } from './sky-detail-math.js';
 import { skyTileKey } from './sky-detail-plan.js';
 import { deepSkyRegionMatch, DEEP_SKY_OBJECTS } from './deep-sky-catalog.js';
-import { webbPlateRay, webbPlateTiles, validSkyImageDimensions } from './webb-plate.js';
+import {
+  offlinePlateField,
+  webbPlateRay,
+  webbPlateTiles,
+  validSkyImageDimensions,
+} from './webb-plate.js';
 
 const degree = Math.PI / 180;
-const labels = { dss: 'DSS 光学', panstarrs: 'Pan-STARRS 光学', webb: 'JWST 红外' };
+const labels = {
+  dss: 'DSS 光学',
+  panstarrs: 'Pan-STARRS 光学',
+  webb: 'JWST 红外',
+  hubble: '哈勃望远镜',
+};
 export const offlineSourceLabel = (source) => labels[source] || source;
 const opticalId = (source) => (source === 'panstarrs' ? 'panstarrs' : 'dss-color');
 
@@ -111,6 +121,7 @@ export class SkyOffline {
     this.catalogueRead = null;
     this.revision = 0;
     this.failedSources = new Map();
+    this.lastProviderLimit = null;
   }
   planField(spec) {
     return planSkyOfflineField(this.manager.providers, spec);
@@ -127,42 +138,81 @@ export class SkyOffline {
       .reverse()
       .find((tile) => coversReticle(tile, view.forward));
     let provider = visible?.provider;
+    const artworkSource = source === 'recent' || source === 'hubble';
     if (
-      source === 'recent' &&
+      artworkSource &&
       !(provider?.plate || provider?.tiles) &&
       (!this.manager.webbBackground || this.manager.webbBackground === 'galaxy')
     ) {
-      provider = entry.tiles?.find((t) => t.provider.plate || t.provider.tiles)?.provider;
+      provider = entry.tiles?.find(
+        (t) => (t.provider.plate || t.provider.tiles) && coversReticle(t, view.forward)
+      )?.provider;
     }
-    if (source === 'recent' || source === 'auto') {
+    if (artworkSource || source === 'auto') {
       if (provider?.plate)
         return this.planArtwork({
           provider,
           view,
           thumbnailUrl: provider.thumbnailUrl,
-          thumbnailKey: provider.artworkSlug && 'thumbnail:recent:' + provider.artworkSlug,
+          thumbnailKey:
+            provider.artworkSlug &&
+            'thumbnail:' + (provider.source || 'recent') + ':' + provider.artworkSlug,
+          fieldOnly: provider.source === 'hubble',
         });
       if (provider?.tiles)
         return { builtin: true, title: provider.title, source: 'webb', providerId: provider.id };
-      if (source === 'recent') source = this.manager.webbBackground || 'galaxy';
+      if (artworkSource) source = this.manager.webbBackground || 'galaxy';
       if (provider?.id === 'dss-color') source = 'dss';
       if (provider?.id === 'panstarrs') source = 'panstarrs';
     }
     if (!entry.tiles?.some(({ provider }) => !provider.tiles && !provider.plate)) return null;
     return this.planField({ source, view });
   }
-  planArtwork({ provider, title, thumbnailKey, thumbnailUrl, thumbnailBlob, view }) {
+  planArtwork({
+    provider,
+    title,
+    thumbnailKey,
+    thumbnailUrl,
+    thumbnailBlob,
+    view,
+    fieldOnly = false,
+    order,
+  }) {
     if (!provider?.plate) return null;
-    const items = webbPlateTiles(provider);
+    const source = provider.source === 'hubble' ? 'hubble' : 'webb';
+    let highest = Math.min(order ?? provider.maxOrder, provider.maxOrder);
+    // Whole Hubble mosaics can comprise tens of thousands of images. Limit
+    // the whole-image edition before allocating a tile array; local fields
+    // can still save native-resolution details.
+    if (!fieldOnly && source === 'hubble') {
+      while (highest > 0) {
+        const level = provider.plate.levels[highest];
+        if (level.offset + level.rows * level.cols <= 1024) break;
+        highest--;
+      }
+    }
+    const items = fieldOnly
+      ? offlinePlateField(provider, view, highest)
+      : webbPlateTiles(provider, highest);
     if (!items.length) return null;
+    highest = items.at(-1).order;
+    const version = provider.id + '@' + (provider.revision ?? 1);
+    const id = fieldOnly
+      ? 'art-field:' + version + ':' + fieldKey(view) + ':' + highest
+      : 'art:' + version + (highest < provider.maxOrder ? ':' + highest : '');
     return {
-      id: 'art:' + provider.id + '@' + (provider.revision ?? 1),
+      id,
       title: title || provider.title,
-      source: 'webb',
+      source,
       providerId: provider.id,
       targetId: provider.id,
       view,
-      order: provider.maxOrder,
+      fieldOnly,
+      order: highest,
+      imageWidth: provider.plate.levels[highest].width,
+      imageHeight: provider.plate.levels[highest].height,
+      nativeWidth: provider.plate.width,
+      nativeHeight: provider.plate.height,
       items,
       estimatedBytes: items.length * 20000,
       thumbnailKey: thumbnailKey || (thumbnailUrl && 'thumbnail:' + thumbnailUrl),
@@ -173,7 +223,7 @@ export class SkyOffline {
   planRecord(record) {
     const provider = this.manager.providers.find((p) => p.id === record.providerId);
     const plan =
-      record.source === 'webb'
+      record.source === 'webb' || record.source === 'hubble'
         ? this.planArtwork({ ...record, provider })
         : this.planField({ ...record, id: record.targetId });
     return plan?.id === record.id ? plan : null;
@@ -200,6 +250,10 @@ export class SkyOffline {
     const levels = new Map();
     for (const field of this.fields) {
       if (!offline && !this.failedSources.has(field.providerId)) continue;
+      if (field.source === 'hubble' && !field.fieldOnly) {
+        levels.set(field.providerId, Math.max(levels.get(field.providerId) ?? 0, field.order));
+        continue;
+      }
       const saved = field.view;
       const axis = dot(view.forward, saved.forward);
       if (axis <= 0) continue;
@@ -212,12 +266,22 @@ export class SkyOffline {
       levels.set(field.providerId, Math.max(levels.get(field.providerId) ?? 0, field.order));
     }
     if (!levels.size) return providers;
-    return providers.map((p) =>
-      levels.has(p.id) ? { ...p, maxOrder: Math.min(p.maxOrder, levels.get(p.id)) } : p
-    );
+    const key = [...levels]
+      .sort()
+      .map(([id, order]) => id + ':' + order)
+      .join('|');
+    if (key !== this.lastProviderLimit?.key) {
+      this.lastProviderLimit = {
+        key,
+        providers: providers.map((p) =>
+          levels.has(p.id) ? { ...p, maxOrder: Math.min(p.maxOrder, levels.get(p.id)) } : p
+        ),
+      };
+    }
+    return this.lastProviderLimit.providers;
   }
   sourceFailed(provider) {
-    if (provider.plate || provider.tiles) return;
+    if (provider.tiles || (provider.plate && provider.source !== 'hubble')) return;
     this.catalogueRead ??= this.list().catch(() => []);
     if (!this.failedSources.has(provider.id)) this.revision++;
     this.failedSources.set(provider.id, performance.now() + 60000);

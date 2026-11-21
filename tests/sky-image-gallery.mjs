@@ -71,3 +71,138 @@ for (const entry of [
 console.log(
   'Sky image gallery: catalogue aliases, colour sources, artwork centres, target framing and HiPS thumbnail projection passed.'
 );
+
+// A four-work integration fixture must never replace the distributable catalogue.
+const { HUBBLE_ARTWORKS, HUBBLE_PLATE_PROVIDERS } = await import('../src/hubble-gallery.js');
+assert(HUBBLE_ARTWORKS.length >= 2500);
+assert.equal(new Set(HUBBLE_ARTWORKS.map((work) => work.id)).size, HUBBLE_ARTWORKS.length);
+const providerIds = new Set(HUBBLE_PLATE_PROVIDERS.map((provider) => provider.id));
+for (const artwork of HUBBLE_ARTWORKS) {
+  assert(artwork.title && artwork.credit && artwork.released, artwork.id);
+  assert.equal(artwork.sourceUrl, `https://esahubble.org/images/${artwork.id}/`);
+  for (const link of [artwork.thumbnailUrl, artwork.previewUrl])
+    assert.match(link, /^https:\/\/(?:cdn\.)?esahubble\.org\//);
+  assert.equal(Boolean(artwork.providerId), !artwork.reason, artwork.id);
+  if (artwork.providerId) assert(providerIds.has(artwork.providerId), artwork.id);
+}
+const archive = createSkyImageIndex(HUBBLE_ARTWORKS);
+for (const [query, id] of [
+  ['M31', 'heic1502a'],
+  ['M51', 'heic0506a'],
+  ['创生之柱', 'heic1501a'],
+])
+  assert(archive(query, 'hubble').some(({ work }) => work.id === id && work.providerId));
+assert.equal(HUBBLE_ARTWORKS.find((work) => work.id === 'heic1410a').providerId, null);
+
+const hstM31 = {
+  id: 'hst-M31',
+  source: 'hubble',
+  title: 'A PHAT mosaic',
+  aliases: ['NGC 0224'],
+  providerId: 'hubble-hst-M31',
+};
+const hstPillars = {
+  id: 'hst-pillars',
+  source: 'hubble',
+  title: 'Pillars of Creation — visible',
+  aliases: ['Messier 16'],
+  providerId: 'hubble-hst-pillars',
+};
+const combined = createSkyImageIndex([
+  work,
+  pillars,
+  hstM31,
+  hstPillars,
+  { id: 'eagle-spire', source: 'hubble', title: 'Eagle Nebula spire', aliases: ['M16'] },
+  { id: 'hst-x', source: 'hubble', title: 'M310 test', aliases: [] },
+]);
+const m31Preview = { ...hstM31, id: 'preview', providerId: null };
+const m31Featured = { ...hstM31, id: 'featured', titleZh: '仙女座星系（拼接图）' };
+const ranked = createSkyImageIndex([m31Preview, hstM31, m31Featured]);
+const matches = ranked('M31');
+assert.equal(matches[0].object.id, 'M31');
+assert.deepEqual(
+  matches.slice(1).map((row) => row.work),
+  [m31Featured, hstM31, m31Preview]
+);
+assert.deepEqual(ranked.related(matches[0].object), matches.slice(1));
+assert.equal(combined('M31', 'hubble').length, 1);
+assert.equal(combined('仙女座星系', 'hubble')[0].work, hstM31);
+assert.equal(combined('NGC224', 'hubble')[0].work, hstM31);
+assert.deepEqual(
+  combined('创生之柱', 'hubble').map((row) => row.work),
+  [hstPillars]
+);
+assert.equal(combined('M16', 'hubble').length, 2);
+assert.equal(combined('创生之柱', 'recent')[0].work, pillars);
+assert.equal(galleryEntry(combined('鹰状星云', 'hubble')[0], 'all').source, 'hubble');
+const { frameSkyArtwork, pointMainCameraAtSky, updateMainSkyPointing, restoreMainSkyLens } =
+  await import('../src/sky-camera-pointing.js');
+const { createWebbPlate, webbPlateRay } = await import('../src/webb-plate.js');
+const { PerspectiveCamera, Vector3, EventDispatcher } = await import('three');
+const plate = createWebbPlate([
+  256, 128, 256, 128, 125, 8, 58, 100, -0.0005, 0.0004, 0.0004, 0.0005, 1,
+]);
+for (const aspect of [0.45, 1.6, 2.4]) {
+  const fit = frameSkyArtwork({ plate }, plate.direction, aspect, 1);
+  const camera = new PerspectiveCamera(38, aspect, 0.1, 4000);
+  const controls = Object.assign(new EventDispatcher(), {
+    target: new Vector3(),
+    rotateSpeed: 1,
+    panSpeed: 1,
+    stopMotion() {},
+    update() {
+      camera.lookAt(this.target);
+    },
+  });
+  camera.position.set(100, 100, 100);
+  const sim = {
+    view: 'follow',
+    api: { camera, controls },
+    current: {
+      basis: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+    },
+  };
+  pointMainCameraAtSky(sim, plate.direction, fit);
+  const tangent = Math.tan((fit.fovY * Math.PI) / 360);
+  for (const [u, v] of [
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1],
+  ]) {
+    const ray = new Vector3(...webbPlateRay(plate, u, v));
+    const depth = ray.dot(new Vector3(...fit.forward));
+    assert(depth > 0);
+    assert(Math.abs(ray.dot(new Vector3(...fit.up)) / depth) < tangent);
+    assert(Math.abs(ray.dot(new Vector3(...fit.right)) / depth) < tangent * aspect);
+  }
+  sim.current.basis = [
+    [0, 1, 0],
+    [-1, 0, 0],
+    [0, 0, 1],
+  ];
+  updateMainSkyPointing(sim);
+  const actual = camera.getWorldDirection(new Vector3()).toArray();
+  const dir = plate.direction;
+  assert(Math.hypot(actual[0] - dir[1], actual[1] + dir[0], actual[2] - dir[2]) < 1e-10);
+  controls.dispatchEvent({ type: 'start' });
+  const target = controls.target.clone();
+  sim.current.basis = [
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+  ];
+  updateMainSkyPointing(sim);
+  assert(target.equals(controls.target));
+  restoreMainSkyLens(sim);
+  assert.equal(camera.fov, 38);
+  assert.equal(controls.panSpeed, 1);
+}
+console.log(
+  'Hubble and Webb catalogue associations, source routing, four-corner framing, inertial pointing and optics recovery passed.'
+);

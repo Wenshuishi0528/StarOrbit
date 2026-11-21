@@ -1,4 +1,4 @@
-// ESA/Webb Zoomify pyramids retain their original image orientation. AVM
+// ESA/Hubble and ESA/Webb pyramids retain their original image orientation. AVM
 // describes FITS pixels (1-based, +Y upwards); texture UVs start at top left.
 const rad = Math.PI / 180;
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -17,28 +17,52 @@ export function createWebbPlate(record) {
   const topLeft = reference.map((v, i) => v + x[i] * (0.5 - px) + y[i] * (refH + 0.5 - py));
   const across = x.map((v) => v * refW),
     down = y.map((v) => -v * refH);
-  function pyramid(round) {
-    const levels = [];
-    for (
-      let w = width, h = height;
-      ;
-      w = Math.max(1, round(w / 2)), h = Math.max(1, round(h / 2))
-    ) {
-      levels.push({ width: w, height: h, cols: Math.ceil(w / 256), rows: Math.ceil(h / 256) });
+  function measure(round, build = false) {
+    let w = width,
+      h = height,
+      total = 0,
+      maxOrder = 0;
+    const levels = build ? [] : null;
+    for (;;) {
+      const cols = Math.ceil(w / 256),
+        rows = Math.ceil(h / 256);
+      total += cols * rows;
+      if (build) levels.push({ width: w, height: h, cols, rows });
       if (Math.max(w, h) <= 256) break;
+      w = Math.max(1, round(w / 2));
+      h = Math.max(1, round(h / 2));
+      maxOrder++;
     }
-    levels.reverse();
-    let offset = 0;
-    for (const level of levels) {
-      level.offset = offset;
-      offset += level.cols * level.rows;
+    if (build) {
+      let offset = 0;
+      for (const level of levels.reverse()) {
+        level.offset = offset;
+        offset += level.cols * level.rows;
+      }
     }
-    return offset === count ? levels : null;
+    return { total, maxOrder, levels };
   }
-  // Zoomify producers differ on the final odd pixel. Match the archive count.
-  const levels = pyramid(Math.ceil) || pyramid(Math.floor);
-  if (!levels) return null;
-  const plate = { width, height, topLeft, across, down, levels };
+  // Zoomify archives round odd pixels differently. Validate the count while
+  // keeping only a tier number for plates the user has not viewed.
+  let round = Math.ceil,
+    measured = measure(round);
+  if (measured.total !== count) {
+    round = Math.floor;
+    measured = measure(round);
+  }
+  if (measured.total !== count) return null;
+  let levels;
+  const plate = {
+    width,
+    height,
+    topLeft,
+    across,
+    down,
+    maxOrder: measured.maxOrder,
+    get levels() {
+      return (levels ??= measure(round, true).levels);
+    },
+  };
   plate.direction = normalize(webbPlateRay(plate, 0.5, 0.5));
   plate.fieldSizeArcmin = [refW * Math.hypot(cd11, cd21) * 60, refH * Math.hypot(cd12, cd22) * 60];
   plate.radius = (Math.hypot(...plate.fieldSizeArcmin) * rad) / 120;
@@ -93,7 +117,7 @@ export function webbPlateTiles(provider, maxOrder = provider.maxOrder) {
   return tiles;
 }
 
-function visibleBounds(plate, view, tangent) {
+function visiblePolygon(plate, view, tangent) {
   // In a TAN plane the four perspective-frustum side planes clip linearly.
   let polygon = [
     [0, 0],
@@ -126,52 +150,149 @@ function visibleBounds(plate, view, tangent) {
       if (!polygon.length) return null;
     }
   }
-  const u = polygon.map((p) => p[0]),
-    v = polygon.map((p) => p[1]);
-  return [Math.min(...u), Math.min(...v), Math.max(...u), Math.max(...v)];
+  return polygon;
+}
+
+// Intersect each tile row with the convex projected viewport. A rotated
+// rectangle's empty corners can otherwise force a lower tier in large mosaics.
+function visibleTier(provider, order, polygon, limit) {
+  const tier = provider.plate.levels[order];
+  const rowOf = (value) =>
+    Math.min(tier.rows - 1, Math.max(0, Math.floor((value * tier.height) / 256)));
+  const colOf = (value) =>
+    Math.min(tier.cols - 1, Math.max(0, Math.floor((value * tier.width) / 256)));
+  const top = rowOf(Math.min(...polygon.map((p) => p[1]))),
+    bottom = rowOf(Math.max(...polygon.map((p) => p[1])));
+  if (bottom - top + 1 > limit) return null;
+  const spans = [];
+  let count = 0;
+  for (let y = top; y <= bottom; y++) {
+    const lo = (y * 256) / tier.height,
+      hi = ((y + 1) * 256) / tier.height;
+    let left = Infinity,
+      right = -Infinity;
+    for (let i = 0; i < polygon.length; i++) {
+      const a = polygon[i],
+        b = polygon[(i + 1) % polygon.length];
+      if (a[1] >= lo && a[1] <= hi) {
+        left = Math.min(left, a[0]);
+        right = Math.max(right, a[0]);
+      }
+      for (const edge of [lo, hi]) {
+        if (a[1] < edge === b[1] < edge) continue;
+        const x = a[0] + ((b[0] - a[0]) * (edge - a[1])) / (b[1] - a[1]);
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+      }
+    }
+    if (left > right) continue;
+    left = colOf(left);
+    right = colOf(right);
+    count += right - left + 1;
+    if (count > limit) return null;
+    spans.push([y, left, right]);
+  }
+  const tiles = [];
+  for (const [y, left, right] of spans)
+    for (let x = left; x <= right; x++)
+      tiles.push(webbPlateTile(provider, order, y * tier.cols + x));
+  return tiles;
+}
+
+// Clip before enumerating. Even a gigapixel mosaic only needs local tiles and
+// their lower-resolution coverage for offline panning and zooming back out.
+export function offlinePlateField(provider, view, maxOrder = provider.maxOrder) {
+  const bounds = visiblePolygon(provider.plate, view, Math.tan((view.fovY * rad) / 2));
+  if (!bounds) return [];
+  const tiles = [];
+  for (let order = 0; order <= Math.min(maxOrder, provider.maxOrder); order++) {
+    const tier = visibleTier(provider, order, bounds, 150);
+    if (!tier) break;
+    tiles.push(...tier);
+  }
+  return tiles;
+}
+
+const plateBuckets = new WeakMap();
+function indexPlates(providers) {
+  let bins = plateBuckets.get(providers);
+  if (bins) return bins;
+  const byCell = new Map();
+  for (const p of providers) {
+    const plate = p.plate;
+    if (!plate) continue;
+    const d = plate.direction;
+    const lonBin = Math.floor((Math.atan2(d[1], d[0]) / rad + 180) / 10) % 36;
+    const latBin = Math.min(17, Math.floor((Math.asin(d[2]) / rad + 90) / 10));
+    const key = latBin * 36 + lonBin;
+    let bin = byCell.get(key);
+    if (!bin) {
+      const a = (lonBin * 10 - 175) * rad,
+        b = (latBin * 10 - 85) * rad;
+      bin = {
+        axis: [Math.cos(b) * Math.cos(a), Math.cos(b) * Math.sin(a), Math.sin(b)],
+        radius: 0,
+        size: 0,
+        items: [],
+      };
+      byCell.set(key, bin);
+    }
+    bin.radius = Math.max(
+      bin.radius,
+      Math.acos(Math.max(-1, Math.min(1, dot(bin.axis, d)))) + plate.radius
+    );
+    const width = Math.hypot(...plate.across),
+      size = Math.max(width, Math.hypot(...plate.down));
+    bin.size = Math.max(bin.size, size);
+    bin.items.push({ provider: p, width, size });
+  }
+  bins = [...byCell.values()];
+  plateBuckets.set(providers, bins);
+  return bins;
 }
 
 export function planWebbPlate(providers, view, preferredId) {
   const tangent = Math.tan((view.fovY * rad) / 2);
   const half = Math.atan(tangent * Math.hypot(view.aspect, 1));
-  const candidates = [];
-  for (const provider of providers) {
-    const plate = provider.plate;
-    if (!plate) continue;
-    const alignment = dot(view.forward, plate.direction);
-    if (alignment < Math.cos(Math.min(Math.PI, half + plate.radius))) continue;
-    const pxPerRad = view.pixelHeight / (2 * tangent);
-    // Subpixel plates do not need a network request in the all-sky view.
-    const neededWidth = Math.hypot(...plate.across) * pxPerRad;
-    if (Math.max(neededWidth, Math.hypot(...plate.down) * pxPerRad) < 8) continue;
-    candidates.push({ provider, alignment, neededWidth });
-  }
-  candidates.sort(
-    (a, b) =>
-      Number(b.provider.id === preferredId) - Number(a.provider.id === preferredId) ||
-      b.alignment - a.alignment
-  );
-  for (const { provider, neededWidth } of candidates) {
-    const plate = provider.plate,
-      bounds = visibleBounds(plate, view, tangent);
-    if (!bounds) continue;
-    const first = plate.levels.findIndex((t) => t.width >= neededWidth);
-    for (let order = first < 0 ? provider.maxOrder : first; order >= 0; order--) {
-      const tier = plate.levels[order];
-      const range = (n, pixels, cells) =>
-        Math.max(0, Math.min(cells - 1, Math.floor((n * pixels) / 256)));
-      const left = range(bounds[0], tier.width, tier.cols),
-        right = range(bounds[2], tier.width, tier.cols);
-      const top = range(bounds[1], tier.height, tier.rows),
-        bottom = range(bounds[3], tier.height, tier.rows);
-      if ((right - left + 1) * (bottom - top + 1) > 18) continue;
-      const tiles = order ? [webbPlateTile(provider, 0, 0)] : [];
-      for (let y = top; y <= bottom; y++)
-        for (let x = left; x <= right; x++) {
-          tiles.push(webbPlateTile(provider, order, y * tier.cols + x));
-        }
-      return tiles;
+  const pxPerRad = view.pixelHeight / (2 * tangent);
+  let best = null,
+    bestBounds = null,
+    bestAlignment = -Infinity;
+  outer: for (const bin of indexPlates(providers)) {
+    if (
+      bin.size * pxPerRad < 8 ||
+      dot(bin.axis, view.forward) < Math.cos(Math.min(Math.PI, half + bin.radius))
+    )
+      continue;
+    for (const item of bin.items) {
+      if (item.size * pxPerRad < 8) continue;
+      const { plate, id } = item.provider,
+        alignment = dot(view.forward, plate.direction);
+      if (
+        alignment < Math.cos(Math.min(Math.PI, half + plate.radius)) ||
+        (id !== preferredId && alignment <= bestAlignment)
+      )
+        continue;
+      const bounds = visiblePolygon(plate, view, tangent);
+      if (!bounds) continue;
+      best = item;
+      bestAlignment = alignment;
+      bestBounds = bounds;
+      if (id === preferredId) break outer;
     }
+  }
+  if (!best) return [];
+  const provider = best.provider,
+    plate = provider.plate;
+  const first = plate.levels.findIndex((t) => t.width >= best.width * pxPerRad);
+  for (
+    let order = first < 0 ? provider.maxOrder : Math.min(provider.maxOrder, first);
+    order >= 0;
+    order--
+  ) {
+    const tiles = visibleTier(provider, order, bestBounds, 18);
+    if (!tiles) continue;
+    return order ? [webbPlateTile(provider, 0, 0), ...tiles] : tiles;
   }
   return [];
 }

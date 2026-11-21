@@ -61,7 +61,7 @@ export class SunView {
     camera.updateMatrixWorld();
     this.projected.copy(this.mesh.position).project(camera);
     const e = camera.matrixWorld.elements,
-      sy = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)),
+      sy = Math.tan(THREE.MathUtils.degToRad(camera.getEffectiveFOV() / 2)),
       sx = sy * camera.aspect;
     uniforms.sunViewRays.value.set(
       e[0] * sx,
@@ -85,9 +85,7 @@ export class SunView {
     const front = direction.dot(camera.getWorldDirection(new THREE.Vector3()));
     if (front > 0) {
       uniforms.sunPosition.value.set(this.projected.x * 0.5 + 0.5, this.projected.y * 0.5 + 0.5);
-      uniforms.sunRadius.value =
-        Math.tan(appearance.radius) /
-        (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * front);
+      uniforms.sunRadius.value = Math.tan(appearance.radius) / (2 * sy * front);
       uniforms.sunGlow.value.fromArray(appearance.rgb).multiplyScalar(SUN_RADIANCE * moonVisible);
     }
     // The station can also receive reddened light at orbital sunrise. Power/orbit

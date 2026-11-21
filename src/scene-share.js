@@ -1,3 +1,4 @@
+import { restoreMainSkyLens } from './sky-camera-pointing.js';
 import { syncGeographyControls } from './geography-settings.js';
 import { syncStarChartControls } from './star-chart-settings.js';
 import { t, setText } from './i18n.js';
@@ -168,6 +169,7 @@ export function installSceneShare(sim, replaceAssembly) {
       sim.seek(scene.simulation.time);
       sim.speed = scene.simulation.speed;
       sim.setView(scene.simulation.view);
+      restoreMainSkyLens(sim);
       sim.cameraFocus?.restore(scene.cameras.focus);
       restoreCamera(api.camera, api.controls, scene.cameras.follow);
       restoreCamera(sim.spaceCamera, sim.orbitControls, scene.cameras.overview);

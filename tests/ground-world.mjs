@@ -9,9 +9,28 @@ import {
   createGroundState,
   stepGroundMotion,
   GROUND_SPEEDS,
+  overviewDescentPose,
 } from '../src/ground-world-math.js';
 import { pilotAxes } from '../src/pilot-controls.js';
 const close = (a, b, t = 1e-6) => assert.ok(Math.abs(a - b) < t, `${a} versus ${b}`);
+{
+  const start = { latitude: 29, longitude: 179.8, height: 280000, azimuth: 90, elevation: -50, rollDegrees: -20, fov: 25 };
+  const target = { latitude: 29, longitude: -179.2 };
+  for (const key of ['latitude', 'longitude', 'height', 'azimuth', 'elevation', 'rollDegrees', 'fov'])
+    close(overviewDescentPose(start, target, 1201.7, 0)[key], start[key]);
+  let previousHeight = start.height;
+  for (let i = 1; i <= 100; i++) {
+    const pose = overviewDescentPose(start, target, 1201.7, i / 100);
+    assert(Math.abs(pose.longitude) > 179 && pose.height < previousHeight && pose.height >= 1201.7 - 1e-6);
+    previousHeight = pose.height;
+  }
+  const arrival = overviewDescentPose(start, target, 1201.7, 1);
+  for (const [key, value] of Object.entries({ ...target, height: 1201.7, elevation: 5, rollDegrees: 0, fov: 65 })) close(arrival[key], value);
+  const nadir = { ...start, latitude: 89.995, elevation: -90, azimuth: 327 };
+  const pose = overviewDescentPose(nadir, nadir, 1.7, 0);
+  close(pose.azimuth, 327);
+  close(pose.elevation, -90, 2e-6);
+}
 for (const latitude of [-90, -78, -35, 0, 39.9042, 80, 90])
   for (const longitude of [-180, -122, 0, 116.4074, 179.999]) {
     const s = { latitude, longitude, height: 1543.7 },

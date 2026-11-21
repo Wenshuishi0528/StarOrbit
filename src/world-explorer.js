@@ -2,7 +2,7 @@ import { resizeRenderSurface } from './render-surface.js';
 import * as THREE from 'three';
 import { Equator, Horizon, Observer } from 'astronomy-engine';
 import atlas from '../assets/geography/atlas.json';
-import { createGroundState, normalizeGroundSite } from './ground-world-math.js';
+import { createGroundState, normalizeGroundSite, overviewDescentPose } from './ground-world-math.js';
 import { createGroundWorldInput } from './ground-world-input.js';
 import {
   createSharedWorldEarth,
@@ -69,7 +69,9 @@ export function installWorldExplorer(sim) {
   const { renderer, controls } = sim.api,
     canvas = renderer.domElement;
   const originalParent = canvas.parentNode;
-  let previousControlsEnabled = controls.enabled;
+  const overviewDescend = document.getElementById('overviewDescend');
+  let nextGroundTargetCheck = 0;
+  let previousControlsEnabled = controls.enabled, previousOrbitEnabled = false;
   const style = document.createElement('style');
   style.textContent = css;
   document.head.append(style);
@@ -246,6 +248,7 @@ export function installWorldExplorer(sim) {
       return;
     }
     heightFlight = null;
+    state.rollDegrees = 0;
     request?.abort();
     request = null;
     // Position requests carry MSL altitude; attach to the new terrain before setting eye height.
@@ -371,6 +374,7 @@ export function installWorldExplorer(sim) {
       return;
     }
     heightFlight = null;
+    state.rollDegrees = 0;
     input?.stop();
     state.site.height = h;
     state.terrainReady = false;
@@ -382,6 +386,7 @@ export function installWorldExplorer(sim) {
     (button) =>
       (button.onclick = () => {
         input?.stop();
+        state.rollDegrees = 0;
         heightFlight = { from: state.site.height, target: button.dataset.altitude, elapsed: 0 };
         state.elevation = button.dataset.altitude === 'ground' ? 5 : -89.5;
         canvas.focus();
@@ -409,6 +414,7 @@ export function installWorldExplorer(sim) {
   };
   for (const key of ['appearance', 'fov']) {
     $(`[data-${key}]`).onchange = (e) => {
+      if (key === 'fov' && heightFlight?.descent) cancelDescent();
       settings[key] = key === 'fov' ? Number(e.target.value) : e.target.value;
       if (key === 'appearance' && settings.appearance === 'dss')
         applyWorldSkySettings(sim.environment, { source: 'dss' });
@@ -492,16 +498,21 @@ export function installWorldExplorer(sim) {
   const wheel = (e) => {
     if (mode !== 'ground') return;
     e.preventDefault();
+    if (heightFlight?.descent) cancelDescent();
     settings.fov = Math.max(0.006, Math.min(100, settings.fov * Math.exp(e.deltaY * 0.001)));
     $('[data-fov]').value = settings.fov;
   };
   canvas.addEventListener('wheel', wheel, { passive: false });
+  function cancelDescent() {
+    heightFlight = null;
+    state.rollDegrees = 0;
+  }
   const cancelHeightFlight = (e) => {
     if (
       mode === 'ground' &&
       (/^Key[HNIJKLWASD]$/.test(e.code) || e.code === 'Space' || e.type === 'pointerdown')
     )
-      heightFlight = null;
+      cancelDescent();
   };
   canvas.addEventListener('keydown', cancelHeightFlight);
   canvas.addEventListener('pointerdown', cancelHeightFlight);
@@ -533,8 +544,11 @@ export function installWorldExplorer(sim) {
       host.hidden = false;
       stage.prepend(canvas);
       previousControlsEnabled = controls.enabled;
+      previousOrbitEnabled = sim.orbitControls.enabled;
       controls.stopMotion?.();
       controls.enabled = false;
+      sim.orbitControls.stopMotion?.();
+      sim.orbitControls.enabled = false;
       sim.environment.cityTerrain.setView('main', null, 1, true);
       for (const manager of [
         sim.environment.elevation,
@@ -543,7 +557,7 @@ export function installWorldExplorer(sim) {
       ])
         manager?.release('main');
     }
-    heightFlight = null;
+    cancelDescent();
     Object.assign(settings, readWorldSkySettings(sim.environment));
     syncSkyUI();
     const departure = next === 'stellar' && mode === 'solar' ? solar.navigationPose() : null;
@@ -632,6 +646,8 @@ export function installWorldExplorer(sim) {
     originalParent.prepend(canvas);
     controls.stopMotion?.();
     controls.enabled = previousControlsEnabled;
+    sim.orbitControls.enabled = previousOrbitEnabled;
+    cancelDescent();
     sim.lastWall = performance.now();
     sim.dirty = true;
     sim.snap = true;
@@ -690,7 +706,19 @@ export function installWorldExplorer(sim) {
         renderer.clear();
         solar.update(sim.time, dt);
       } else {
-        if (heightFlight) {
+        if (heightFlight?.descent) {
+          const flight = heightFlight;
+          const floor = surface.heightAt(flight.target.latitude, flight.target.longitude) ?? 0;
+          const pose = overviewDescentPose(flight.start, flight.target, floor + state.eyeHeight, flight.elapsed / 5);
+          Object.assign(state.site, { latitude: pose.latitude, longitude: pose.longitude, height: pose.height });
+          state.azimuth = pose.azimuth;
+          state.elevation = pose.elevation;
+          state.rollDegrees = pose.rollDegrees;
+          settings.fov = pose.fov;
+          $('[data-fov]').value = settings.fov;
+          if (flight.elapsed >= 5) cancelDescent();
+          else flight.elapsed += Math.min(0.1, dt);
+        } else if (heightFlight) {
           heightFlight.elapsed += Math.min(0.1, dt);
           const u = Math.min(1, heightFlight.elapsed / 3),
             ease = u * u * (3 - 2 * u);
@@ -924,8 +952,36 @@ export function installWorldExplorer(sim) {
     get interstellar() {
       return stellar;
     },
+    updateOverviewAction(wall) {
+      if (sim.view !== 'orbit' || sim.xuntian?.active) {
+        if (!overviewDescend.hidden) overviewDescend.hidden = true;
+        nextGroundTargetCheck = 0;
+      } else if (wall >= nextGroundTargetCheck) {
+        const hidden = !sim.overviewGroundTarget();
+        if (overviewDescend.hidden !== hidden) overviewDescend.hidden = hidden;
+        nextGroundTargetCheck = wall + 150;
+      }
+    },
     openGround(site, options = {}) {
+      if (options.fromOverview && !safeSite(site)) return;
       open('ground');
+      if (options.fromOverview) {
+        const start = {
+          ...site,
+          latitude: options.observerLatitude ?? site.latitude,
+          longitude: options.observerLongitude ?? site.longitude,
+          azimuth: options.azimuth ?? 0, elevation: options.elevation ?? -90,
+          fov: Math.max(0.006, Math.min(100, options.fov ?? 65)), rollDegrees: options.rollDegrees || 0,
+        };
+        locate(start);
+        heightFlight = { descent: true, start, target: site, elapsed: 0 };
+        state.azimuth = start.azimuth;
+        state.elevation = start.elevation;
+        state.rollDegrees = start.rollDegrees;
+        settings.fov = start.fov;
+        $('[data-fov]').value = settings.fov;
+        return;
+      }
       locate(site);
       if (['Sun', 'Moon'].includes(options.body)) {
         const date = new Date(sim.time);

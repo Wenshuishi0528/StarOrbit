@@ -59,7 +59,21 @@ export function canonicalDeepSkyId(value) {
 
 export function openNGCObjects() {
   return OPENNGC_ROWS.split('\n').map((line) => {
-    const [rawId, sourceType, ra, dec, major, minor, pa, mag, ngc, ic, common] = line.split('\t');
+    const [
+      rawId,
+      sourceType,
+      ra,
+      dec,
+      major,
+      minor,
+      pa,
+      mag,
+      constellation,
+      morphology,
+      ngc = '',
+      ic = '',
+      common,
+    ] = line.split('\t');
     const id = canonicalDeepSkyId(rawId),
       authored = names[id],
       commonNames = common ? common.split(',') : [];
@@ -90,6 +104,8 @@ export function openNGCObjects() {
       magnitudeUncertain: false,
       source: 'openngc',
       sourceId: rawId,
+      constellation: /^Se[12]$/.test(constellation) ? 'Ser' : constellation,
+      morphology: morphology || null,
     };
   });
 }

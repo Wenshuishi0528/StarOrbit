@@ -1,6 +1,6 @@
 # 开发、发布与维护
 
-适用版本：v1.52。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
+适用版本：v1.55。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
 
 ## 公开源码与统一发布
 
@@ -15,6 +15,10 @@
 地表／太阳系改动的专项入口是 `tests/ground-world.mjs`、`tests/ground-surface.mjs`、`tests/solar-world.mjs`、`tests/ground-sky.mjs`，均并入默认回归。浏览器需检查共用 canvas 的进入／返回、时间连续性、地形异步加载、输入焦点和截图；运行结果写入版本验收记录，不能仅用数值测试推断图形交互通过。
 
 v1.45 使用原始源码仓库的 Pages 工作流，配置为 workflow；在 CI 中测试和构建后上传 dist。部署等待上限 30 分钟、部署作业 40 分钟，用于完整地表图集同步；完成后仍须核对线上入口与脚本摘要。
+
+## 更新哈勃作品目录
+
+使用安装了 `beautifulsoup4` 和 `Pillow` 的 Python 运行 `python3 scripts/prepare-hubble-gallery.py --cache /tmp/starorbit-hubble-YYYYMMDD`。新一批数据使用新的缓存目录，网络中断后复用同一目录续传。按官方作品编号核对全部搜索页，再核对作品署名、天球定位与分块尺寸。输出 `src/hubble-gallery-data.json` 只含文字和数值。用 `node tests/pillar-astrometry.mjs` 检验创生之柱的定位，用 `node tests/webb-plates.mjs` 检验实际视场选片。
 
 ## 本机统一目录
 
@@ -119,7 +123,7 @@ node tests/web-build.mjs dist
 
 每批已授权修改遵守仓库 `AGENTS.md`：版本只递增一次，同时更新 package.json 的 version/displayVersion、package-lock.json 项目版本、README 当前版本及构建页面版本；CHANGELOG 顶部保留简短中英总结，详细证据放稳定文档或版本记录。
 
-当前显示版本使用 v1.52，对应包元数据采用项目既有的 `1.0.52` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
+当前显示版本使用 v1.55，对应包元数据采用项目既有的 `1.0.55` 规则。不要直接把二者当作同一字符串，也不要只改一个页面上的可见文本。使用手册和现行工程文档应标明适用版本；已归档历史说明保持原版次。
 
 本地版本递增不自动代表已上线或已发布下载包。记录中应分别说明源码、本机运行、网页版和 Release 的已核验状态。检查失败或未执行时保留明确结果，不把“准备发布”写成“正式发布”。
 

@@ -28,13 +28,13 @@ const text = (x, max = 120) => (typeof x === 'string' && x.length <= max ? x : b
 const choice = (x, values) => (values.includes(x) ? x : bad());
 const vector = (x) =>
   Array.isArray(x) && x.length === 3 ? x.map((v) => number(v, -1e7, 1e7)) : bad();
-function camera(x) {
+function camera(x, maxZoom = 20) {
   if (!object(x)) bad();
   const position = vector(x.position),
     target = vector(x.target),
     up = vector(x.up);
   if (Math.hypot(...position.map((v, i) => v - target[i])) < 1e-9 || Math.hypot(...up) < 0.1) bad();
-  return { position, target, up, fov: number(x.fov, 10, 100), zoom: number(x.zoom, 0.1, 20) };
+  return { position, target, up, fov: number(x.fov, 0.006, 100), zoom: number(x.zoom, 0.1, maxZoom) };
 }
 function reference(x) {
   if (x === null) return null;
@@ -201,7 +201,7 @@ export function validateScene(x) {
     cameras: {
       ...(x.cameras.focus === undefined ? {} : { focus: text(x.cameras.focus, 160) }),
       follow: camera(x.cameras.follow),
-      overview: camera(x.cameras.overview),
+      overview: camera(x.cameras.overview, 128),
       home: x.cameras.home ? camera(x.cameras.home) : null,
     },
     orbit,

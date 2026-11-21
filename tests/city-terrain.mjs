@@ -79,6 +79,68 @@ function harness(options = {}) {
   return { manager, calls };
 }
 
+test('sub-centimetre Earth-fixed drift leaves a stationary tile plan alone', async () => {
+  const { manager } = harness();
+  try {
+    await manager.ready;
+    manager.setView('main', camera(), 1, true);
+    let plans = 0;
+    manager.schedule = () => plans++;
+    for (const delta of [1e-10, -1e-10, 1e-12]) {
+      const input = camera();
+      input.eyeKm[0] += delta;
+      input.forward[1] += delta;
+      manager.setView('main', input);
+    }
+    assert.equal(plans, 0);
+    const next = camera();
+    next.eyeKm[0] += 0.001;
+    manager.setView('main', next);
+    assert.equal(plans, 1);
+  } finally {
+    manager.dispose();
+  }
+});
+
+test('an in-flight tile survives the frame between overview, ground and optical observers', async () => {
+  const tile = deferred(),
+    { manager, calls } = harness({
+      manifest: { cities: [city()] },
+      load: () => tile.promise,
+    });
+  try {
+    await manager.ready;
+    manager.setView('main', camera(), 1, true);
+    assert.equal(calls.length, 1);
+    manager.setView('main', null, 1, true);
+    await turn();
+    manager.setView('world-ground-earth', camera(), 4, true);
+    manager.setView('scope', camera(), 2, true);
+    assert.equal(calls[0].signal.aborted, false);
+    tile.resolve(new Uint8Array(512 * 512 * 4));
+    await until(() => manager.status('world-ground-earth').ready === 1);
+    assert.equal(manager.status('scope').ready, 1);
+    assert.equal(calls.length, 1);
+  } finally {
+    manager.dispose();
+  }
+});
+
+test('distant overview leaves stored streaming regions on disk until detail is visible', async () => {
+  const { manager, calls } = harness();
+  try {
+    await manager.ready;
+    manager.cities.set('region', { ...city('region'), streaming: true });
+    manager.setView('main', { ...camera(), eyeKm: [20000, 0, 0], fovY: 38 }, 1, true);
+    assert.equal(calls.length, 0);
+    manager.setView('main', camera(), 1, true);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].tile.cityId, 'region');
+  } finally {
+    manager.dispose();
+  }
+});
+
 test('main, scope and photo share one bounded atlas and photo waits for tile fades', async () => {
   const { manager, calls } = harness({ manifest: { cities: [city('test', 0, 1)] } });
   try {
@@ -194,6 +256,12 @@ test('storage deletion failure cannot retain ghost terrain or undefined source c
     assert.equal(manager.uniforms('scope').cityCount.value, 0);
     assert.deepEqual(manager.status('scope').sources, []);
     assert.match(manager.lastError, /disk unavailable/);
+    assert(manager.cities.has('test'), 'the failed row remains available for retry');
+    manager.setView('scope', camera(), 2, true);
+    assert.equal(manager.views.get('scope').plan.length, 0);
+    storage.remove = async () => {};
+    await manager.removeCity('test');
+    assert.equal(manager.cities.has('test'), false);
   } finally {
     manager.dispose();
   }
@@ -330,7 +398,10 @@ test('shared source work survives one consumer cancellation and stops when none 
     const pending = manager.sharedPayload(city(), tile, last.signal).catch((error) => error);
     last.abort();
     assert.equal(sourceSignal.aborted, true);
+    manager.source.tile = async () => pixels;
+    const retry = manager.sharedPayload(city(), tile, new AbortController().signal);
     cancelled.reject(new DOMException('Cancelled', 'AbortError'));
+    assert.equal(await retry, pixels, 'a view returning to an aborted tile starts a fresh request');
     assert.equal((await pending).name, 'AbortError');
     await turn();
     assert.equal(manager.payloads.size, 0);

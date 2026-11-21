@@ -33,8 +33,21 @@ async function fetchImage(url, signal) {
   return blob;
 }
 
-export async function loadGalleryThumbnail(entry, providers, signal) {
-  if (entry.work?.thumbnailUrl) return fetchImage(entry.work.thumbnailUrl, signal);
+export async function loadGalleryThumbnail(entry, providers, signal, detail = false) {
+  if (detail && entry.work?.previewUrl) return fetchImage(entry.work.previewUrl, signal);
+  if (entry.work?.thumbnailUrl) {
+    try {
+      return await fetchImage(entry.work.thumbnailUrl, signal);
+    } catch (error) {
+      signal.throwIfAborted();
+      if (
+        !entry.work.thumbnailFallbackUrl ||
+        entry.work.thumbnailFallbackUrl === entry.work.thumbnailUrl
+      )
+        throw error;
+      return fetchImage(entry.work.thumbnailFallbackUrl, signal);
+    }
+  }
   const provider = providers.find(
     (p) => p.id === (entry.source === 'panstarrs' ? 'panstarrs' : 'dss-color')
   );

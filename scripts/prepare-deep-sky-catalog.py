@@ -7,6 +7,7 @@ The upstream CSVs remain build inputs, not duplicate application resources.
 import argparse
 import csv
 import hashlib
+import json
 from pathlib import Path
 
 
@@ -38,20 +39,26 @@ def main():
             if row["Type"] not in TYPES or not row["RA"] or not row["Dec"]:
                 continue
             fields = [row["Name"], row["Type"], angle(row["RA"], True), angle(row["Dec"])]
-            fields += [row[k] for k in ["MajAx", "MinAx", "PosAng", "V-Mag", "NGC", "IC", "Common names"]]
+            fields += [row[k] for k in ["MajAx", "MinAx", "PosAng", "V-Mag", "Const", "Hubble", "NGC", "IC", "Common names"]]
             if any("\t" in field or "\n" in field for field in fields):
                 raise ValueError("Unexpected field delimiter")
-            records.append("\t".join(fields))
+            records.append("\t".join(fields).rstrip("\t"))
     payload = "\n".join(records).replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")
     header = f"""// Generated compact facts from OpenNGC {COMMIT}.
 // Mattia Verga and contributors; adapted under CC BY-SA 4.0.
 // https://creativecommons.org/licenses/by-sa/4.0/ — docs/deep-sky-catalog.md
 // Reproduce: python3 scripts/prepare-deep-sky-catalog.py /path/to/pinned/csvs
 // {len(records)} real deep-sky rows; duplicate/nonexistent/stellar/unknown types excluded.
-// Columns: id,type,RAdeg,Decdeg,major/minor arcmin,PA north-east deg,V,NGC,IC,names.
+// Columns: id,type,RAdeg,Decdeg,major/minor arcmin,PA north-east deg,V,constellation,Hubble morphology,NGC,IC,names.
 // Empty values stay unknown. Data is compact TSV, not thousands of JS objects.
 export const OPENNGC_ROWS = `"""
     result = header + payload + "`;\n"
+    # Use the same localized names as the star chart without importing its line geometry.
+    chart = Path(__file__).resolve().parents[1] / "assets/star-chart.json"
+    names = {row["id"]: [row[lang] for lang in ("zh", "en", "ru", "fr")]
+             for row in json.loads(chart.read_text())["constellations"]}
+    result += "\n// Names from assets/star-chart.json (d3-celestial, BSD-3-Clause). Languages: zh, en, ru, fr.\n// prettier-ignore\n"
+    result += "export const SKY_CONSTELLATION_NAMES = " + json.dumps(names, ensure_ascii=False, separators=(",", ":")) + ";\n"
     if len(result.encode()) > 700000:
         raise ValueError("Compact catalogue exceeds the 700 KB budget")
     args.output.write_text(result)

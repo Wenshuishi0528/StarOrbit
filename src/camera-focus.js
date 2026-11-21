@@ -1,3 +1,4 @@
+import { restoreMainSkyLens } from './sky-camera-pointing.js';
 import { Vector3, Raycaster, Vector2 } from 'three';
 import { t, onLanguageChange, setText } from './i18n.js';
 import { spacecraft } from './missions.js';
@@ -86,6 +87,7 @@ export function installCameraFocus(sim) {
       !sim.sceneBusy &&
       !sim.missions?.busy,
     prepare: () => {
+      restoreMainSkyLens(sim);
       sim.environment.moon.savedView = null;
       setText('lookMoon', '望向月球');
       sim.setView('follow');

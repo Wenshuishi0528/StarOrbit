@@ -17,8 +17,8 @@ export function streamingAnchor(view) {
   if (altitude < -0.01) return null;
   // A globe overview already has an appropriate global map. Zooming in enables
   // regional imagery according to projected ground pixels, not altitude alone.
-  const pixelMeters =
-    (2000 * Math.max(0.001, altitude) * Math.tan((view.fovY * DEG) / 2)) / Math.max(1, view.height);
+  const pixelAngle = (2000 * Math.tan((view.fovY * DEG) / 2)) / Math.max(1, view.height);
+  let pixelMeters = pixelAngle * Math.max(0.001, altitude);
   if (pixelMeters > 300) return null;
   let center = lonLat(view.eyeKm);
   if (altitude > 20) {
@@ -27,6 +27,10 @@ export function streamingAnchor(view) {
     if (discriminant < 0) return null;
     const distance = -b - Math.sqrt(discriminant);
     if (distance <= 0) return null;
+    // At an oblique angle each vertical footprint spans more ground. The
+    // incidence cosine at the first sphere intersection is sqrt(D) / R.
+    pixelMeters = (distance * pixelAngle * R) / Math.max(1e-9, Math.sqrt(discriminant));
+    if (pixelMeters > 300) return null;
     center = lonLat(view.eyeKm.map((x, i) => x + distance * view.forward[i]));
   }
   return { center, altitude, pixelMeters };
@@ -101,20 +105,22 @@ export function planStreamingRegions(view, { rangeKm = 120, maxRegions = 48 } = 
 }
 
 export function streamingViewKey(views) {
-  return views
+  const footprints = new Set();
+  const active = views
     .filter((v) => v.input)
     .sort((a, b) => b.priority - a.priority)
-    .slice(0, 3)
-    .map((v) => {
-      const a = streamingAnchor(v.input);
-      if (!a) return v.id + ':overview';
-      return [
-        v.id,
+    .slice(0, 3);
+  for (const view of active) {
+    const a = streamingAnchor(view.input);
+    if (!a) continue;
+    footprints.add(
+      [
         ...a.center.map((x) => Math.round(x * 20)),
         Math.round(Math.log2(Math.max(0.05, a.altitude)) * 4),
-        Math.round(v.input.fovY),
-        ...v.input.forward.map((x) => Math.round(x * 20)),
-      ].join(':');
-    })
-    .join('|');
+        Math.round(view.input.fovY),
+        ...view.input.forward.map((x) => Math.round(x * 20)),
+      ].join(':')
+    );
+  }
+  return [...footprints].sort().join('|');
 }

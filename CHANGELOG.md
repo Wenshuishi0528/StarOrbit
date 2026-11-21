@@ -1,5 +1,22 @@
 # Changelog / 更新记录
 
+## v1.55 · 2026-11-21
+
+- 星空影像详情加入中文、英文、俄文和法文短文，介绍画面、天体和拍摄方法。已配准作品显示画面中心，深空天体显示星表坐标。
+- Sky image details now describe the image, its subject and how it was made in Chinese, English, Russian and French. Registered images show their field centre and deep-sky objects show their catalogue position.
+
+## v1.54 · 2026-11-21 · 本机版 / Local build
+
+- 新增 ESA/Hubble 哈勃图集，主画面和巡天共用目录，可按天体、作品名称或编号搜索，预览及定位。
+- 已配准作品沿用分级高清瓦片、可选底图与离线天区管理，同一视角可切换哈勃、韦伯和 DSS。
+- Browse ESA/Hubble in the shared sky gallery, compare registered Hubble, Webb and DSS images in the same field, and save high-resolution fields for offline viewing.
+
+## v1.53 · 2026-11-21 · 本机版 / Local build
+
+- 8K 地球轨道总览可放大地景、下降至地表观测并返回原视角。总览、地表和巡天共用影像缓存。
+- 地景库支持卡片和列表，勾选或拖选多项后可批量删除。
+- Zoom into the 8K orbit overview, descend to ground observation and return to the same view. All three Earth views share terrain imagery. The terrain library supports card and list layouts and bulk deletion.
+
 ## v1.52 · 2026-11-21
 
 - 修复 NASA 最新云图目录更新和云相图预览。

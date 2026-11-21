@@ -1,3 +1,4 @@
+import { mountCityTerrainSelection } from './city-terrain-selection.js';
 import {
   mountSurfaceStreamingControls,
   applySurfaceStreamingSettings,
@@ -67,9 +68,11 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     rows = new Map();
   let last = -Infinity,
     busy = false,
+    refreshPending = false,
     disposed = false,
     language = null,
     message = '';
+  const selection = mountCityTerrainSelection(list, (id) => manager.removeCity(id), () => render(true));
   enabled.onchange = () => {
     env.settings.cityTerrain = enabled.checked;
     manager.setEnabled(enabled.checked);
@@ -136,9 +139,10 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
   search.oninput = searchResults;
   card.querySelector('[data-city-clear]').onclick = async () => {
     try {
+      await manager.clearStreaming();
       const stored = new Map((await manager.cache.list()).map((row) => [row.id, row]));
-      for (const city of manager.cities.values())
-        if (!city.builtin && !stored.get(city.id)?.pinned && !manager.downloads.has(city.id)) {
+      for (const city of [...manager.cities.values()])
+        if (!city.builtin && !city.streaming && !stored.get(city.id)?.pinned && !manager.downloads.has(city.id)) {
           await manager.removeCity(city.id);
         }
       message = t('临时城市缓存已清理');
@@ -179,7 +183,6 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
         manager.revision++;
         manager.schedule(true);
       } else {
-        manager.autoDismissed.add(city.id);
         try {
           await manager.removeCity(city.id);
         } catch (error) {
@@ -202,12 +205,18 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     element.append(title, info, progress, buttons, sources);
     list.append(element);
     row = { element, title, info, progress, view, download, remove, summary };
+    if (!city.builtin) row.select = selection.add(city.id, element);
     rows.set(city.id, row);
     return row;
   }
   async function render(force = false) {
     const now = performance.now();
-    if (disposed || busy || (!force && now - last < 700)) return;
+    if (disposed) return;
+    if (busy) {
+      if (force) refreshPending = true;
+      return;
+    }
+    if (!force && now - last < 700) return;
     last = now;
     busy = true;
     try {
@@ -219,7 +228,7 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
         '[data-city-enabled]': '显示卫星影像与城市地景',
         '[data-city-auto]': '随视野自动加载卫星影像',
         '[data-city-policy]':
-          '漫游按视野加载并缓存卫星影像。内置与手动保存的城市包继续保留，可逐个管理。',
+          '轨道总览、地表观测与巡天取景共用地景缓存。手动保存的城市包可单独管理。',
         '[data-city-search-label]': '搜索城市',
         '[data-city-clear]': '清理临时缓存',
       }))
@@ -249,6 +258,7 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
           cache = stored.get(city.id),
           job = manager.downloads.get(city.id);
         writeText(row.title, names(city));
+        if (row.select) row.select.setAttribute('aria-label', t('选择 {name}', { name: names(city) }));
         writeText(
           row.info,
           `${city.year} · ${Number(city.pixelSizeMeters).toFixed(1)} m/px · ${city.extentKm} × ${city.extentKm} km · ${t(city.builtin ? '内置离线' : cache?.complete ? '已离线保存' : '临时或未完成')} · ${megabytes(city.builtin ? city.bytes || 0 : cache?.bytes || 0)}`
@@ -277,7 +287,9 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
         if (!manager.cities.has(id)) {
           row.element.remove();
           rows.delete(id);
+          selection.forget(id);
         }
+      selection.paint();
       const stats = await manager.cache.stats();
       writeText(
         card.querySelector('[data-city-storage]'),
@@ -294,6 +306,10 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
       );
     } finally {
       busy = false;
+      if (refreshPending) {
+        refreshPending = false;
+        void render(true);
+      }
     }
   }
   return {
