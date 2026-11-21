@@ -29,10 +29,10 @@ export class EarthDetail {
     this.env = env;
     this.slots = Array.from({ length: 4 }, () => ({ key: null, texture: null, born: 0 }));
     this.wanted = [];
+    this.views = new Map();
     this.failed = new Set();
     this.pending = false;
     this.epoch = 0;
-    this.lastCheck = -Infinity;
     this.inverse = new THREE.Quaternion();
     this.origin = new THREE.Vector3();
     this.point = new THREE.Vector3();
@@ -50,7 +50,6 @@ export class EarthDetail {
     this.tiles = tiles;
     this.columns = columns;
     this.rows = rows;
-    this.lastCheck = -Infinity;
   }
   release(i) {
     const slot = this.slots[i];
@@ -66,15 +65,37 @@ export class EarthDetail {
   }
   clear() {
     this.epoch++;
+    this.views.clear();
     this.wanted = [];
     for (let i = 0; i < 4; i++) this.release(i);
   }
-  update(camera, pixelHeight) {
+  releaseView(id) {
+    if (this.views.delete(id)) this.reconcileViews();
+  }
+  reconcileViews() {
+    // Share the same four textures. Give each camera its strongest intersected
+    // tile first, then fill the remaining slots with its neighbours.
+    const cells = new Map();
+    for (let rank = 0; rank < this.slots.length; rank++) {
+      for (const view of this.views.values()) {
+        const cell = view.cells[rank];
+        if (cell && cells.size < this.slots.length) cells.set(cell.key, cell);
+      }
+    }
+    this.wanted = [...cells.values()];
+    for (let i = 0; i < this.slots.length; i++) {
+      if (this.slots[i].key && !cells.has(this.slots[i].key)) this.release(i);
+    }
+  }
+  update(camera, pixelHeight, { id = 'main', earthRotation, sun, daylightTerrain = false } = {}) {
     const now = performance.now(),
       e = this.env;
+    if (!(e.quality && e.quality !== 'simple') || !(this.tiles || e.assets[this.prefix])) {
+      if (this.views.size || this.wanted.length || this.slots.some((s) => s.key)) this.clear();
+      return;
+    }
     if (
-      !(e.quality && e.quality !== 'simple') ||
-      !(this.tiles || e.assets[this.prefix]) ||
+      (this.night && daylightTerrain) ||
       !detailNeeded(
         camera.position.length(),
         camera.projectionMatrix.elements[5],
@@ -82,19 +103,20 @@ export class EarthDetail {
         e.uniforms[this.night ? 'nightMap' : 'dayMap'].value.image.width
       )
     ) {
-      if (this.wanted.length || this.slots.some((s) => s.key)) this.clear();
+      this.releaseView(id);
       return;
     }
     for (let i = 0; i < 4; i++)
       e.uniforms[`${this.prefix}Fade${i}`].value = this.slots[i].texture
         ? Math.min(1, (now - this.slots[i].born) / 400)
         : 0;
-    if (now - this.lastCheck < 250) return;
-    this.lastCheck = now;
+    const previous = this.views.get(id);
+    if (previous && previous.daylightTerrain === daylightTerrain && now - previous.time < 250)
+      return;
     camera.updateMatrixWorld();
-    this.inverse.copy(e.earth.quaternion).invert();
+    this.inverse.copy(earthRotation ?? e.earth.quaternion).invert();
     this.origin.copy(camera.position).applyQuaternion(this.inverse);
-    this.sunDirection.copy(e.uniforms.sun.value).applyQuaternion(this.inverse);
+    this.sunDirection.copy(sun ?? e.uniforms.sun.value).applyQuaternion(this.inverse);
     const votes = new Map();
     // Sample the actual view, not just the sub-satellite point (also works at the horizon).
     for (let iy = -2; iy <= 2; iy++)
@@ -112,7 +134,7 @@ export class EarthDetail {
         if (distance < 0) continue;
         this.point.copy(this.origin).addScaledVector(this.direction, distance).normalize();
         const illumination = this.point.dot(this.sunDirection);
-        if (this.night ? illumination > 0.1 : illumination < -0.15) continue;
+        if (!daylightTerrain && (this.night ? illumination > 0.1 : illumination < -0.15)) continue;
         const cell = detailCell(
           (Math.atan2(this.point.y, this.point.x) * 180) / Math.PI,
           (Math.asin(this.point.z) * 180) / Math.PI,
@@ -122,14 +144,9 @@ export class EarthDetail {
         const old = votes.get(cell.key);
         votes.set(cell.key, { ...cell, vote: (old?.vote || 0) + 1 / (1 + ix * ix + iy * iy) });
       }
-    this.wanted = [...votes.values()].sort((a, b) => b.vote - a.vote).slice(0, 4);
-    if (!this.wanted.length) {
-      this.clear();
-      return;
-    }
-    for (let i = 0; i < 4; i++)
-      if (this.slots[i].key && !this.wanted.some((c) => c.key === this.slots[i].key))
-        this.release(i);
+    const cells = [...votes.values()].sort((a, b) => b.vote - a.vote).slice(0, this.slots.length);
+    this.views.set(id, { cells, time: now, daylightTerrain });
+    this.reconcileViews();
     this.loadNext();
   }
   async loadNext() {

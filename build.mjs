@@ -94,7 +94,7 @@ environmentAssets.sky=Object.fromEntries([4,8,16].map(size=>[size,['px','nx','py
 let html=fs.readFileSync('src/layout.html','utf8')
  .replace('__EVENT_TIMELINE_CSS__',()=>fs.readFileSync('src/event-timeline.css','utf8'))
  .replace('__EVENT_TIMELINE_UI__',()=>fs.readFileSync('src/event-timeline.html','utf8'))
- .replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','sky-image-gallery.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n'))
+ .replace('__WORKSPACE_CSS__',()=>['workspace.css','floating-windows.css','free-flight-layout.css','free-flight.css','free-flight-instruments.css','xuntian-scope.css','sky-image-gallery.css','ground-star-panel.css','ground-scope-window.css','observation-journal.css'].map(f=>fs.readFileSync('src/'+f,'utf8')).join('\n'))
  .replace('__XUNTIAN_UI__',()=>fs.readFileSync('src/xuntian-scope.html','utf8'))
  .replace('__HELP_CSS__',()=>fs.readFileSync('src/help.css','utf8'))
  .replace('__HELP_UI__',()=>fs.readFileSync('src/help.html','utf8'))
@@ -138,7 +138,7 @@ html=html.replace('</head>','<!-- Atmospheric spectral reference license\n'+fs.r
 html=html.replace('</head>','<!-- Earth observation sources\n'+fs.readFileSync('assets/earth/observation/README.md','utf8').replaceAll('-->','-- >')+' -->\n</head>');
 // Keep the complete document and environment payload out of any single V8 string.
 // Writes are atomic; failed size checks preserve the previous runnable build.
-const bytes=writeTemplatePayloads(split?out+'/index.html':'StarOrbit.html',html,payloads,{maxBytes:1200e6});
+const bytes=writeTemplatePayloads(split?out+'/index.html':'StarOrbit.html',html,payloads);
 if(split){fs.writeFileSync(out+'/.nojekyll','');fs.writeFileSync(out+'/version.json',JSON.stringify({version:app.displayVersion}));console.log('Built '+(web?'web':'local')+' index',bytes,'bytes; assets',Math.round([...emitted.values()].reduce((a,b)=>a+b,0)/1e6),'MB');}else{fs.writeFileSync('天宫空间站交互预览.html','<!doctype html><meta charset="UTF-8"><title>星轨 · StarOrbit</title><meta http-equiv="refresh" content="0;url=StarOrbit.html"><a href="StarOrbit.html">打开星轨 · Open StarOrbit</a>');console.log('Built offline HTML',Math.round(bytes/1e6)+' MB / '+Math.round(bytes/1024/1024)+' MiB');}
 
 if(split){fs.mkdirSync(out+'/assets/earth/observation',{recursive:true});for(const file of ['README.md','manifest.json'])fs.copyFileSync('assets/earth/observation/'+file,out+'/assets/earth/observation/'+file);}

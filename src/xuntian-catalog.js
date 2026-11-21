@@ -475,6 +475,7 @@ function localTarget(r, language, skyCulture = 'western') {
     id: r.id,
     type: r.type,
     name: cultureLabel || objectLabel || r.names[language] || r.names.en || r.identifier,
+    ...(r.type === 'star' && Number.isFinite(r.mag) ? {magnitude:r.mag} : {}),
     identifier: group ? group[language] || group.en || group.zh : r.identifier,
     direction: r.direction,
     ra: r.ra,
@@ -536,6 +537,7 @@ export function getXuntianTarget(id, language = 'zh', skyCulture = 'western') {
   return {
     id: p.id,
     type: 'star',
+    magnitude: p.mag,
     name: identifier,
     identifier,
     direction: p.direction,

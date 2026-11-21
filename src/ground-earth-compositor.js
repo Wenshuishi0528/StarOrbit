@@ -7,6 +7,9 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
   let distance = null,
     translucent = null;
   const size = new THREE.Vector2(),
+    viewport = new THREE.Vector4(),
+    configuredViewport = new THREE.Vector4(),
+    configuredScissor = new THREE.Vector4(),
     clearColor = new THREE.Color(),
     pixel = new Uint8Array(4);
   const screen = new THREE.Scene();
@@ -35,18 +38,45 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
     render(seeThrough, effects) {
       const previous = renderer.getRenderTarget(),
         auto = renderer.autoClear;
+      const face = renderer.getActiveCubeFace?.() ?? 0,
+        mip = renderer.getActiveMipmapLevel?.() ?? 0;
       const alpha = renderer.getClearAlpha();
       renderer.getClearColor(clearColor);
-      // Respect export/render-target dimensions as well as the live canvas DPR.
-      if (previous) size.set(previous.width, previous.height);
-      else renderer.getDrawingBufferSize(size);
+      // This is the active viewport in physical pixels, including its origin on
+      // a scissored canvas or render target. The distance pass starts at (0,0).
+      if (renderer.getCurrentViewport) renderer.getCurrentViewport(viewport);
+      else if (previous) viewport.copy(previous.viewport);
+      else {
+        renderer.getDrawingBufferSize(size);
+        viewport.set(0, 0, size.x, size.y);
+      }
+      size.set(Math.max(1, viewport.z), Math.max(1, viewport.w));
       distance = target(distance);
       uniforms.terrainViewport.value.copy(size);
       uniforms.terrainFar.value = camera.far;
       const visible = root.children.map((child) => [child, child.visible]);
       const terrain = new Set(surfaces());
+      // setViewport/setScissor after binding a target can differ from the
+      // target's configured rectangles. Three re-applies those rectangles on
+      // every bind, so preserve the active state across the two private passes.
+      const customViewport = previous && !previous.viewport.equals(viewport);
+      const scissorTest = previous?.scissorTest;
+      const scissorContext =
+        previous && (customViewport || scissorTest || renderer.getScissorTest?.())
+          ? renderer.getContext?.()
+          : null;
       renderer.autoClear = false;
       try {
+        if (customViewport) {
+          configuredViewport.copy(previous.viewport);
+          previous.viewport.copy(viewport);
+        }
+        if (scissorContext) {
+          configuredScissor.copy(previous.scissor);
+          previous.scissorTest = scissorContext.isEnabled(scissorContext.SCISSOR_TEST);
+          if (previous.scissorTest)
+            previous.scissor.fromArray(scissorContext.getParameter(scissorContext.SCISSOR_BOX));
+        }
         for (const [child] of visible) if (!terrain.has(child)) child.visible = false;
         uniforms.surfaceDepthPass.value = 1;
         uniforms.terrainOcclusion.value = 0;
@@ -58,16 +88,20 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
         for (const [child, value] of visible) child.visible = value;
         uniforms.terrainDistance.value = distance.texture;
         uniforms.terrainOcclusion.value = 1;
+        uniforms.terrainViewportOrigin.value.set(
+          seeThrough ? 0 : viewport.x,
+          seeThrough ? 0 : viewport.y
+        );
         if (seeThrough) {
           translucent = target(translucent);
           renderer.setRenderTarget(translucent);
           renderer.setClearColor(0, 0);
           renderer.clear();
-        } else renderer.setRenderTarget(previous);
+        } else renderer.setRenderTarget(previous, face, mip);
         renderer.render(scene, camera);
         effects();
         if (seeThrough) {
-          renderer.setRenderTarget(previous);
+          renderer.setRenderTarget(previous, face, mip);
           material.uniforms.image.value = translucent.texture;
           renderer.render(screen, camera);
         } else if (translucent) {
@@ -79,7 +113,12 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
         for (const [child, value] of visible) child.visible = value;
         uniforms.surfaceDepthPass.value = 0;
         uniforms.terrainOcclusion.value = 0;
-        renderer.setRenderTarget(previous);
+        renderer.setRenderTarget(previous, face, mip);
+        if (customViewport) previous.viewport.copy(configuredViewport);
+        if (scissorContext) {
+          previous.scissor.copy(configuredScissor);
+          previous.scissorTest = scissorTest;
+        }
         renderer.setClearColor(clearColor, alpha);
         renderer.autoClear = auto;
       }

@@ -16,6 +16,9 @@ export function createGroundWorldInput({
   sampleHeight,
   getFov = () => 65,
   enabled = () => true,
+  fixedSite = () => false,
+  restrictPitchToSky = fixedSite,
+  onManualPoint = () => {},
   onChange = () => {},
 }) {
   const doc = canvas.ownerDocument,
@@ -83,10 +86,12 @@ export function createGroundWorldInput({
       dy = event.clientY - lastY;
     lastX = event.clientX;
     lastY = event.clientY;
+    if (!dx && !dy) return;
+    onManualPoint();
     state.azimuth = wrapGroundAzimuth(state.azimuth + dx * 0.16 * (getFov() / 65));
     state.elevation = Math.max(
-      -89.5,
-      Math.min(89.5, state.elevation - dy * 0.16 * (getFov() / 65))
+      restrictPitchToSky() ? 0 : -89.5,
+      Math.min(restrictPitchToSky() ? 90 : 89.5, state.elevation - dy * 0.16 * (getFov() / 65))
     );
     onChange(state);
   });
@@ -116,6 +121,18 @@ export function createGroundWorldInput({
       const held = new Set([...keys, ...taps]);
       const axes = pilotAxes(held),
         turnScale = getFov() / 65;
+      if (fixedSite()) {
+        axes.forward = axes.right = axes.up = 0;
+        if (axes.yaw || axes.pitch) onManualPoint();
+        state.elevation = Math.max(
+          restrictPitchToSky() ? 0 : -89.5,
+          Math.min(
+            restrictPitchToSky() ? 90 : 89.5,
+            state.elevation + axes.pitch * turnScale * 45 * Math.min(dt, 0.25)
+          )
+        );
+        axes.pitch = 0;
+      }
       axes.yaw *= turnScale;
       axes.pitch *= turnScale;
       stepGroundMotion(state, axes, dt, sampleHeight);

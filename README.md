@@ -6,7 +6,7 @@
 
 [**在线体验**](https://wenshuishi0528.github.io/StarOrbit/) · [下载已发布便携版](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [使用手册](使用说明.md) · [文档导航](docs/README.md) · [更新记录](CHANGELOG.md)
 
-**作者：Wenshuishi · 当前源码：v1.55 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
+**作者：Wenshuishi · 当前源码：v1.58 · 原创内容许可：[CC BY-NC 4.0](LICENSING.md)**
 
 星轨是一款在浏览器中运行的三维航天与轨道模拟软件。它把自制中国空间站模型、轨道运动、太阳翼与姿态、地球和星空放进同一场景，并提供航天器导入、近轨操纵、自由飞行、交会对接训练和观测摄影工具；探索视野也延伸到地表漫游、太阳系与星际穿梭。
 
@@ -14,7 +14,7 @@
 
 ![中国空间站、独立巡天、轨道读数与地面轨迹](docs/hero.jpg)
 
-> v1.55 在星空影像详情中加入四语图解。从主画面或巡天取景打开一幅影像，就能读到画面看点、天体背景和拍摄方法，查看天球坐标。[完整更新记录](CHANGELOG.md)。
+> v1.58 优化了 iPhone 和 iPad 的启动加载，精细画质按视野补充地表细节。[完整更新记录](CHANGELOG.md)。
 
 <a id="界面与基本操作"></a>
 

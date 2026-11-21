@@ -249,7 +249,9 @@ export function mountExposureLab(root, sim, assets) {
             : t(['catalog', 'off'].includes(sky.status) ? '仅星表或已关闭' : '普通银河');
       q('sources').textContent = [
         galaxy,
-        qualityLabel[earth.quality] && t(qualityLabel[earth.quality]),
+        earth.quality === 'high' && earth.baseMapTier === 'standard'
+          ? t('精细 · 4K 底图')
+          : qualityLabel[earth.quality] && t(qualityLabel[earth.quality]),
         earth.day?.source,
         earth.night?.source,
         shown.source.globalEarth && t('软件图形模式采用全球底图与简化云层、大气。'),

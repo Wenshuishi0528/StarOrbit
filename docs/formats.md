@@ -1,6 +1,6 @@
 # 数据格式与本机接口
 
-适用版本：v1.55。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：v1.58。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
@@ -20,9 +20,9 @@
 
 ## 地表与太阳系状态
 
-浏览器键 `starorbit-world-v1` 保存 `{site, bookmarks, navigation, settings}`；地点字段为 `name`、`latitude`、`longitude`、`height`，经纬度为度、height为海拔米数，收藏最多30条。入口恢复最后地点，缺省时读取原观察者地点再回退北京。`navigation` 包括 `mode`（grounded/free）、`speed`（slow/normal/fast）、`azimuth`、`elevation`、`eyeHeight`；`settings` 包括 `culture`、`appearance`、连线／名称／插画／坐标网／黄道布尔开关、`fov:5..100` 与 `artBrightness:0..2`。恢复时按白名单和数值范围规范化。世界时间与主 `Simulation` 共用，瞬时移动速度、按键状态和太阳系相机不写入该键。此内部偏好不是场景JSON导入格式。
+浏览器键 `starorbit-world-v1` 保存 `{site, bookmarks, navigation, settings, stargazing, observatory}`；地点字段为 `name`、`latitude`、`longitude`、`height`，经纬度为度、height为海拔米数，收藏最多30条。入口恢复最后地点，缺省时读取原观察者地点再回退北京。`navigation` 包括 `mode`（grounded/free）、`speed`（slow/normal/fast）、`azimuth`、`elevation`、`eyeHeight`；`settings` 包括 `culture`、`appearance`、连线／名称／插画／坐标网／黄道布尔开关、`fov:5..100` 与 `artBrightness:0..2`。恢复时按白名单和数值范围规范化。`stargazing` 保存望远镜视场、口径、曝光、图源及卫星筛选等偏好。`observatory` 保存寻星增强、日间地景、离地 50 米、视场框及独立站点。旧存档缺少这些字段时使用默认值。世界时间与主 `Simulation` 共用，瞬时移动速度、按键状态和太阳系相机不写入该键。此内部偏好不是场景JSON导入格式。
 
-地表与太阳系可导出当前画面的 PNG，包含地点／天体视图与 UTC+8 时间落款。更多坐标、高程基准与几何星历字段见[计算口径](world-explorer.md)。
+地表与太阳系可导出当前画面的 PNG。地面目镜照片通过 UTF-8 iTXt 的 Title、Description、Source 保存地点、时刻、指向与来源。启用标注时显示单行落款，关闭标注时保留完整原画幅。更多坐标、高程基准与几何星历字段见[计算口径](world-explorer.md)。
 
 ## 格式与交换能力总表
 
@@ -86,6 +86,9 @@
 | `format` | 必须 `tiangong-mission-1` |
 | `id` | 2–63 位小写字母、数字、连字符，首字母为字母；不得与已注册任务重复 |
 | `name` | 非空字符串，最长 120 字符；category 缺省为“卫星” |
+| `satelliteGroup` | 可选。地表卫星标注分组可写 `internet`（低轨互联网星座）或 `regular`（常规）。旧配置可按已有类别和已知星座的载荷名称识别。 |
+| `satelliteCatalog` | 可选。元数据字段 `objectType`（payload / rocket-body / debris / unknown）、`purpose`（communications / navigation / weather / earth-observation / science / crewed / technology / other / unknown）、`owner`（编目归属国家或组织）、`launchDate`（YYYY-MM-DD）、`constellation`（星座名）。无日期时可从国际编号提取发射年份。 |
+| `satellitePhotometry` | 可选。`magnitude` 是标定视星等，`rangeKm` 为正的参考斜距，`phaseDeg` 为日－星－观测者相位角（0° 满相，须小于 180°），`source` 为出处。只有完整标定才会参与亮度估算。 |
 | `planet` / `center` | 省略时规范成“地球”/`EARTH`；提供时只接受这两个值 |
 | `model.file` | 独立 `.glb` 文件名，最长 160 字符，不含路径分隔符和控制字符 |
 | `model.metresPerUnit` | 每源单位对应的米数，有限正数且 ≤ 1,000,000；米制为 1，毫米制为 0.001 |

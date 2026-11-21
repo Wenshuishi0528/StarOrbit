@@ -142,6 +142,25 @@ assert(
   )
 );
 const offline = new SkyOffline({ providers }, null, { list: async () => [] });
+// A foreground work that is loading retains its explicit download target,
+// even while its DSS background is the only layer that has arrived.
+const pendingView = {
+  ...m31View,
+  detailSelection: { source: 'hubble', artworkId: hubble.id, background: 'dss' },
+};
+const pending = new SkyOffline(
+  {
+    providers,
+    views: new Map([
+      ['ground-scope-detail', { source: 'hubble', view: pendingView, tiles: hst.tiles }],
+    ]),
+    ready: () => [],
+    webbBackground: 'dss',
+  },
+  null,
+  { list: async () => [] }
+);
+assert.equal(pending.planCurrent('ground-scope-detail').providerId, hubble.id);
 const native = offline.planArtwork({ provider: hubble, fieldOnly: true, view: m31View });
 assert.equal(native.order, 9);
 assert(native.items.length < 100 && native.items.length >= hst.tiles.length);

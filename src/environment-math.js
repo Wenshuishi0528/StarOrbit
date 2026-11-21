@@ -21,3 +21,17 @@ export function qualityFor(requested, maxTextureSize) {
     ) || 'simple'
   );
 }
+
+// The maximum WebGL texture dimension alone does not describe the memory available
+// for a complete globe, six sky faces and the scene's render targets together.
+export function deviceTextureLimits(device, capabilities) {
+  const mobileApple =
+    /iPhone|iPad|iPod/.test(device.userAgent) ||
+    (device.platform === 'MacIntel' && device.maxTouchPoints > 1);
+  return {
+    staged: mobileApple,
+    earthWidth: Math.min(capabilities.maxTextureSize, mobileApple ? 4096 : Infinity),
+    cubeFace: Math.min(capabilities.maxCubemapSize, mobileApple ? 1024 : Infinity),
+    pixelRatio: mobileApple ? 1.5 : Infinity,
+  };
+}

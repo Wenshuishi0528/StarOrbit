@@ -27,4 +27,18 @@ const resources={items:[{id:'A',missionId:template.id,kind:'orbit',blob:{text:()
 const repo=new OrbitRepository({missionId:template.id,bundledOrbits:{},api:{toast(){}}},resources,{orbitRecords:{[template.id]:'A'}});
 const pending=repo.resolve(template.id);repo.records[template.id]='B';release(JSON.stringify(data));assert.equal((await pending).data.source,'B');
 repo.save();assert.equal(new OrbitRepository(repo.sim,resources,{}).selected,'B');unregisterMissionPackage(template.id);
+const labelled = {...MISSION_TEMPLATE, id:'test-internet-group', satelliteGroup:'internet',
+  satelliteCatalog:{objectType:'payload',purpose:'communications',owner:'US',launchDate:'2020-01-07'},
+  satellitePhotometry:{magnitude:6,rangeKm:1000,phaseDeg:90,source:'Synthetic calibration for the round trip'}};
+const restoredGroup = registerMissionPackage(JSON.parse(JSON.stringify(validateMissionPackage(labelled))));
+assert.equal(mission(restoredGroup.id).satelliteGroup, 'internet');
+assert.deepEqual(mission(restoredGroup.id).satelliteCatalog,labelled.satelliteCatalog);
+assert.deepEqual(mission(restoredGroup.id).satellitePhotometry,labelled.satellitePhotometry);
+assert.throws(()=>validateMissionPackage({...labelled,satelliteCatalog:{purpose:'typo'}}));
+assert.throws(()=>validateMissionPackage({...labelled,satelliteCatalog:{launchDate:'2026-02-30'}}));
+assert.throws(()=>validateMissionPackage({...labelled,satellitePhotometry:{magnitude:6}}));
+unregisterMissionPackage(restoredGroup.id);
+assert.equal(validateMissionPackage({...labelled,satelliteGroup:'regular'}).satelliteGroup,'regular');
+assert.throws(()=>validateMissionPackage({...labelled,satelliteGroup:'unknown'}));
+assert.equal(validateMissionPackage(MISSION_TEMPLATE).satelliteGroup,undefined);
 console.log('Mission manifest, all 24 axis mappings, GLB, generic orbit provider and independent repository race/persistence passed');

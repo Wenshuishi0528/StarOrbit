@@ -14,18 +14,43 @@ import {
 import { pilotAxes } from '../src/pilot-controls.js';
 const close = (a, b, t = 1e-6) => assert.ok(Math.abs(a - b) < t, `${a} versus ${b}`);
 {
-  const start = { latitude: 29, longitude: 179.8, height: 280000, azimuth: 90, elevation: -50, rollDegrees: -20, fov: 25 };
+  const start = {
+    latitude: 29,
+    longitude: 179.8,
+    height: 280000,
+    azimuth: 90,
+    elevation: -50,
+    rollDegrees: -20,
+    fov: 25,
+  };
   const target = { latitude: 29, longitude: -179.2 };
-  for (const key of ['latitude', 'longitude', 'height', 'azimuth', 'elevation', 'rollDegrees', 'fov'])
+  for (const key of [
+    'latitude',
+    'longitude',
+    'height',
+    'azimuth',
+    'elevation',
+    'rollDegrees',
+    'fov',
+  ])
     close(overviewDescentPose(start, target, 1201.7, 0)[key], start[key]);
   let previousHeight = start.height;
   for (let i = 1; i <= 100; i++) {
     const pose = overviewDescentPose(start, target, 1201.7, i / 100);
-    assert(Math.abs(pose.longitude) > 179 && pose.height < previousHeight && pose.height >= 1201.7 - 1e-6);
+    assert(
+      Math.abs(pose.longitude) > 179 && pose.height < previousHeight && pose.height >= 1201.7 - 1e-6
+    );
     previousHeight = pose.height;
   }
   const arrival = overviewDescentPose(start, target, 1201.7, 1);
-  for (const [key, value] of Object.entries({ ...target, height: 1201.7, elevation: 5, rollDegrees: 0, fov: 65 })) close(arrival[key], value);
+  for (const [key, value] of Object.entries({
+    ...target,
+    height: 1201.7,
+    elevation: 5,
+    rollDegrees: 0,
+    fov: 65,
+  }))
+    close(arrival[key], value);
   const nadir = { ...start, latitude: 89.995, elevation: -90, azimuth: 327 };
   const pose = overviewDescentPose(nadir, nadir, 1.7, 0);
   close(pose.azimuth, 327);
@@ -199,6 +224,37 @@ console.log(
 );
 
 // Free flight is the single default; rising to orbital altitude remains navigable.
+// An alt-az mount stays at its site. A manual turn releases tracking, while a
+// translation key, a click without movement and a passive frame leave it locked.
+let gestures = 0;
+const mount = createGroundWorldInput({
+  canvas,
+  sampleHeight: floor,
+  fixedSite: () => true,
+  onManualPoint: () => gestures++,
+  getFov: () => 1,
+});
+mount.setMode('grounded');
+canvas.focus();
+const tripodSite = { ...mount.state.site };
+fire(canvas, 'keydown', { code: 'KeyH' });
+mount.update(0.2);
+assert.equal(gestures, 0);
+close(mount.state.site.latitude, tripodSite.latitude);
+close(mount.state.site.longitude, tripodSite.longitude);
+assert.equal(mount.state.speedMps, 0);
+fire(canvas, 'pointerdown', { button: 0, isPrimary: true, pointerId: 3, clientX: 10, clientY: 20 });
+fire(canvas, 'pointermove', { pointerId: 3, clientX: 10, clientY: 20 });
+assert.equal(gestures, 0);
+fire(canvas, 'pointermove', { pointerId: 3, clientX: 15, clientY: 20 });
+assert.equal(gestures, 1);
+mount.state.elevation = 0;
+fire(canvas, 'keydown', { code: 'KeyW' });
+mount.update(0.2);
+assert.equal(mount.state.elevation, 0);
+assert.equal(gestures, 2);
+mount.dispose();
+
 const { groundSpeedLimit, MAX_GROUND_HEIGHT } = await import('../src/ground-world-math.js');
 assert.equal(createGroundState().mode, 'free');
 const standing = createGroundState({

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+export const MAX_DISTRIBUTION_BYTES = 1_200_000_000;
 export const EMBEDDED_ASSET_FORMAT = 'starorbit-embedded-assets-v1';
 const escapeScript = (text) => text.replaceAll('<', '\\u003c');
 
@@ -98,7 +99,7 @@ export function* embeddedAssetScripts(
 }
 
 /** Atomic output; only the small HTML template is scanned/replaced in memory. */
-export function writeTemplatePayloads(filename, template, payloads, { maxBytes = 1200e6 } = {}) {
+export function writeTemplatePayloads(filename, template, payloads, { maxBytes = MAX_DISTRIBUTION_BYTES } = {}) {
   const keys = Object.keys(payloads);
   const expression = new RegExp(
     keys.map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),

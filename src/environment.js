@@ -42,7 +42,7 @@ import {
   skyCultureArtOptions,
   skyCultureArtEnabled,
 } from './star-chart-settings.js';
-import { QUALITY, equatorial, qualityFor } from './environment-math.js';
+import { QUALITY, deviceTextureLimits, equatorial, qualityFor } from './environment-math.js';
 import { EARTH_RADIUS, stateAt, earthAxes } from './orbit.js';
 import { SolarObservations } from './solar-data.js';
 import { SkyDetail } from './sky-detail.js';
@@ -86,6 +86,7 @@ export class Environment {
   constructor(sim) {
     this.sim = sim;
     this.api = sim.api;
+    this.textureLimits = deviceTextureLimits(navigator, this.api.renderer.capabilities);
     this.starCatalogueStats = {
       base: baseCatalogue.length,
       additional: catalogue.length - baseCatalogue.length,
@@ -374,10 +375,16 @@ export class Environment {
     this.earth.add(this.groundMarker);
     this.solarObservations = new SolarObservations();
     this.bind();
-    this.setSkyStyle();
-    this.ready = this.setQuality(this.settings.quality);
     this.bindImmersive();
     this.weather = new Weather(this);
+    if (this.textureLimits.staged) {
+      // A legacy cloud check may decode its original 8K bitmap. Finish it before
+      // allocating globe textures; the sky follows the first interactive frame.
+      this.queue = this.weather.ready;
+      setText('mobileEarthQuality', '精细 · 4K 底图');
+      setText('mobileSkyExposure', '观赏增强 · 4K 银河');
+    } else this.setSkyStyle();
+    this.ready = this.setQuality(this.settings.quality);
     this.phenomena = new Phenomena(this);
     onLanguageChange(() => {
       this.skyStatus();
@@ -472,7 +479,7 @@ export class Environment {
       .catch(() => {})
       .then(async () => {
         if (ticket !== this.skyTicket) return;
-        const max = this.api.renderer.capabilities.maxCubemapSize;
+        const max = this.textureLimits.cubeFace;
         if (max < 1024) {
           this.skyUnsupported = true;
           this.skyLoading = false;
@@ -534,14 +541,22 @@ export class Environment {
       setText('skyStatus', '高清星空载入失败，已保留普通星空，请重新选择重试。');
       return;
     }
-    setText('skyStatus', this.skySize === 16 ? '' : '当前设备：六面 {size}K 天空', {
-      size: this.skySize / 4,
-    });
+    setText(
+      'skyStatus',
+      !this.skySize || this.skySize === 16 ? '' : '当前设备：六面 {size}K 天空',
+      {
+        size: this.skySize / 4,
+      }
+    );
   }
   updatePixelRatio() {
     this.devicePixelRatio = devicePixelRatio;
     const tier = this.quality || this.settings.quality;
-    const ratio = Math.min(devicePixelRatio, QUALITY[tier].pixelRatio);
+    const ratio = Math.min(
+      devicePixelRatio,
+      QUALITY[tier].pixelRatio,
+      this.textureLimits.pixelRatio
+    );
     if (this.api.renderer.getPixelRatio() !== ratio) {
       this.api.renderer.setPixelRatio(ratio);
       this.api.resize();
@@ -610,6 +625,7 @@ export class Environment {
     this.loading = true;
     setText('qualityStatus', '正在准备画质素材…');
     const tier = qualityFor(requested, this.api.renderer.capabilities.maxTextureSize);
+    const baseTier = qualityFor(tier, this.textureLimits.earthWidth);
     const nightSource = this.assets.nightSources?.[requestedNight] ? requestedNight : '2016';
     const night = this.assets.nightSources?.[nightSource];
     const daySource = this.assets.daySources?.[requestedDay] ? requestedDay : '2004',
@@ -621,42 +637,51 @@ export class Environment {
         if (ticket !== this.ticket) return;
         let loaded = [];
         try {
-          const sameQuality = tier === this.quality,
-            changeDay = !sameQuality || daySource !== this.settings.daySource,
-            changeNight = !sameQuality || nightSource !== this.settings.nightSource;
-          const maps = sameQuality ? {} : { ...this.assets[tier] };
-          if (changeDay) maps.day = day?.base[tier] || this.assets[tier].day;
-          const nightURL = night?.base[tier] || this.assets[tier].night;
+          const sameBaseMaps = baseTier === this.baseMapTier,
+            changeDay = !sameBaseMaps || daySource !== this.settings.daySource,
+            changeNight = !sameBaseMaps || nightSource !== this.settings.nightSource;
+          const maps = sameBaseMaps ? {} : { ...this.assets[baseTier] };
+          if (changeDay) maps.day = day?.base[baseTier] || this.assets[baseTier].day;
+          const nightURL = night?.base[baseTier] || this.assets[baseTier].night;
           if (changeNight && tier !== 'simple' && nightURL) maps.night = nightURL;
           else delete maps.night;
           const entries = Object.entries(maps),
-            changedKeys = sameQuality ? Object.keys(maps) : ['day', 'night', 'cloud', 'ocean'];
+            changedKeys = sameBaseMaps ? Object.keys(maps) : ['day', 'night', 'cloud', 'ocean'];
           const previous = new Set(changedKeys.map((key) => this.uniforms[key + 'Map'].value));
-          const results = await Promise.allSettled(
-            entries.map(async ([key, url]) => {
-              startupStatus('texture-' + key, 'Earth ' + key);
-              const t = await new THREE.TextureLoader().loadAsync(url);
-              startupStatus('texture-' + key, null);
-              t.wrapS = THREE.RepeatWrapping;
-              t.wrapT = THREE.ClampToEdgeWrapping;
-              t.colorSpace = ['day', 'night'].includes(key)
+          const textures = {};
+          const loadMap = async ([key, url]) => {
+            startupStatus('texture-' + key, 'Earth ' + key);
+            try {
+              const texture = await new THREE.TextureLoader().loadAsync(url);
+              loaded.push(texture);
+              texture.wrapS = THREE.RepeatWrapping;
+              texture.wrapT = THREE.ClampToEdgeWrapping;
+              texture.colorSpace = ['day', 'night'].includes(key)
                 ? THREE.SRGBColorSpace
                 : THREE.NoColorSpace;
-              t.anisotropy = Math.min(
+              texture.anisotropy = Math.min(
                 tier === 'high' ? 16 : 2,
                 this.api.renderer.capabilities.getMaxAnisotropy()
               );
-              loaded.push(t);
-              return [key, t];
-            })
-          );
-          const failure = results.find((r) => r.status === 'rejected');
-          if (failure) throw failure.reason;
+              textures[key] = texture;
+            } finally {
+              startupStatus('texture-' + key, null);
+            }
+          };
+          if (this.textureLimits.staged) {
+            for (const entry of entries) {
+              if (ticket !== this.ticket) break;
+              await loadMap(entry);
+            }
+          } else {
+            const results = await Promise.allSettled(entries.map(loadMap));
+            const failure = results.find((result) => result.status === 'rejected');
+            if (failure) throw failure.reason;
+          }
           if (ticket !== this.ticket) {
             loaded.forEach((t) => t.dispose());
             return;
           }
-          const textures = Object.fromEntries(results.map((r) => r.value));
           for (const [key, uniform] of Object.entries({
             day: 'dayMap',
             night: 'nightMap',
@@ -665,11 +690,11 @@ export class Environment {
           }))
             if (changedKeys.includes(key))
               this.uniforms[uniform].value = textures[key] || this.fallback;
-          if (!sameQuality) {
+          if (!sameBaseMaps) {
             this.builtinCloud = textures.cloud || this.fallback;
             this.uniforms.cloudTemplateMap.value = this.builtinCloud;
           }
-          const obsolete = sameQuality
+          const obsolete = sameBaseMaps
             ? this.textures.filter((t) => previous.has(t))
             : this.textures;
           obsolete.forEach((t) => {
@@ -677,10 +702,11 @@ export class Environment {
             t.image = null;
           });
           this.textures = [
-            ...(sameQuality ? this.textures.filter((t) => !previous.has(t)) : []),
+            ...(sameBaseMaps ? this.textures.filter((t) => !previous.has(t)) : []),
             ...loaded,
           ];
           this.quality = tier;
+          this.baseMapTier = baseTier;
           this.settings.quality = tier;
           this.settings.daySource = daySource;
           if (changeDay)
@@ -765,7 +791,7 @@ export class Environment {
           for (const id of ['showClouds', 'cloudOpacity', 'cloudNightVisible'])
             $(id).disabled = tier === 'simple';
           this.save();
-          if (this.weather && !sameQuality && this.sim.initialized)
+          if (this.weather && !sameBaseMaps && this.sim.initialized)
             await this.weather
               .apply('cloud')
               .catch((e) => console.warn('Cloud refresh failed:', e.message || String(e)));

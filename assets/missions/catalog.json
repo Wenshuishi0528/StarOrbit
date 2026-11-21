@@ -35,7 +35,13 @@
       "attitude": "ground-track",
       "attitudeNote": "地面轨迹定向：+X 沿地面轨迹前进，−Z 朝地；已计入地球自转。",
       "orbitAsset": "assets/orbit.json",
-      "updateSource": "cmse"
+      "updateSource": "cmse",
+      "satelliteCatalog": {
+        "objectType": "payload",
+        "purpose": "crewed",
+        "owner": "PRC",
+        "launchDate": "2021-04-29"
+      }
     },
     "dfh1": {
       "name": "东方红一号",
@@ -50,7 +56,19 @@
       "orbitAsset": "assets/spacecraft/dfh1-orbit.json",
       "updateSource": "celestrak",
       "noradId": 4382,
-      "objectId": "1970-034A"
+      "objectId": "1970-034A",
+      "satelliteCatalog": {
+        "objectType": "payload",
+        "purpose": "technology",
+        "owner": "PRC",
+        "launchDate": "1970-04-24"
+      },
+      "satellitePhotometry": {
+        "magnitude": 6.5,
+        "rangeKm": 1000,
+        "phaseDeg": 0,
+        "source": "Mike McCants · QuickSat, 04382 (Mao 1), 2026-10-06 · https://www.mmccants.org/programs/index.html"
+      }
     }
   }
 }

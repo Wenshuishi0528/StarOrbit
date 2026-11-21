@@ -104,6 +104,7 @@ function sourceInfo(env) {
     cloud = texture((local ? s.cloudTemplateMap : s.cloudMap).value);
   return {
     quality: env.quality || null,
+    baseMapTier: env.baseMapTier || env.quality || null,
     day: day && { ...day, source: env.settings.daySource },
     night: night && { ...night, source: env.settings.nightSource },
     cloud: cloud && {

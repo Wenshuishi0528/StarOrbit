@@ -15,7 +15,7 @@ import {
   selectCloud,
   validateNASA,
   completeNASA,
-  retireNASA,
+  retiredNASA,
   protectedCloudIds,
   cloudUnavailableReason,
   GITHUB_CLOUD_UNAVAILABLE,
@@ -26,7 +26,7 @@ import {
   CLOUD_MAX_BYTES,
   CLOUD_SNAPSHOT_MAX_BYTES,
   cloudChannel,
-  cloudDecodeSize,
+  decodeCloudBitmap,
   cloudTone,
   fixedCloudField,
   textureChannel,
@@ -184,17 +184,14 @@ export class Weather {
   async restore() {
     try {
       startupStatus('weather', 'Cloud cache open');
-      const retired = await retireNASA(this.cache);
-      if (retired.includes(this.settings.cloudHistory)) {
+      await this.reload();
+      const chosen = this.items.find((row) => row.id === this.settings.cloudHistory);
+      if (retiredNASA(chosen) && !manualCloudUsable(chosen)) {
         this.settings.cloudHistory = 'auto';
         if (this.settings.cloud === 'history') this.settings.cloud = 'satcorps';
         this.sync();
       }
-      await this.reload();
-      if (
-        this.settings.cloud === 'history' &&
-        this.items.find((r) => r.id === this.settings.cloudHistory)?.provider === 'viirs'
-      ) {
+      if (this.settings.cloud === 'history' && chosen?.provider === 'viirs') {
         this.settings.cloud = 'builtin';
         this.settings.cloudHistory = 'auto';
         this.sync();
@@ -1109,18 +1106,13 @@ export class Weather {
         throw Object.assign(Error('云图缓存完整性校验失败，请重新下载'), {
           code: 'CLOUD_CACHE_INTEGRITY',
         });
-      let bitmap = await createImageBitmap(record.blob, {
-        imageOrientation: 'flipY',
-        premultiplyAlpha: 'none',
-        colorSpaceConversion: 'none',
-      });
+      const { bitmap, size } = await decodeCloudBitmap(
+        record.blob,
+        this.env.quality,
+        this.env.textureLimits?.earthWidth ?? this.env.api.renderer.capabilities.maxTextureSize,
+        cloudTone(record) === 1
+      );
       try {
-        const size = cloudDecodeSize(
-          bitmap.width,
-          bitmap.height,
-          this.env.quality,
-          this.env.api.renderer.capabilities.maxTextureSize
-        );
         let tex;
         if (cloudTone(record) === 1) {
           const { output, width, height } = await prepareGithubCloud(
@@ -1135,17 +1127,6 @@ export class Weather {
           tex.userData.cloudChannel = 0;
           tex.userData.cloudTone = 0;
         } else {
-          if (size.width !== bitmap.width) {
-            bitmap.close();
-            bitmap = await createImageBitmap(record.blob, {
-              imageOrientation: 'flipY',
-              premultiplyAlpha: 'none',
-              colorSpaceConversion: 'none',
-              resizeWidth: size.width,
-              resizeHeight: size.height,
-              resizeQuality: 'high',
-            });
-          }
           if (cloudChannel(record) === 'validity') {
             const width = bitmap.width,
               height = bitmap.height,
@@ -1232,7 +1213,8 @@ export class Weather {
         record = null;
     }
     this.pendingApply ??= {};
-    const key = record ? record.id + '|' + (k === 'cloud' ? this.env.quality : '') : mode + '|none';
+    const cloudTier = this.env.baseMapTier || this.env.quality;
+    const key = record ? record.id + '|' + (k === 'cloud' ? cloudTier : '') : mode + '|none';
     if (this.pendingApply[k]?.key === key && this.pendingApply[k].token === this.tokens[k])
       return this.pendingApply[k].promise;
     const token = ++this.tokens[k],
@@ -1240,7 +1222,7 @@ export class Weather {
         if (
           record &&
           this.active[k] === record.id &&
-          !(k === 'cloud' && this.cloudTier !== this.env.quality)
+          !(k === 'cloud' && this.cloudTier !== cloudTier)
         ) {
           if (k === 'cloud') this.bindCloud();
           this.status(k);
@@ -1276,7 +1258,7 @@ export class Weather {
           this.release(k);
           this[k + 'Texture'] = tex;
           this.active[k] = record.id;
-          this.cloudTier = this.env.quality;
+          this.cloudTier = cloudTier;
           if (k === 'cloud') this.cloudRecord = record;
         } else {
           const had = !!this.active[k];

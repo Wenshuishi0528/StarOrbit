@@ -126,23 +126,34 @@ export class SkyOffline {
   planField(spec) {
     return planSkyOfflineField(this.manager.providers, spec);
   }
-  planCurrent(id = 'scope', source = this.manager.source) {
+  planCurrent(id = 'scope', source) {
     const viewId = this.manager.views.has(id)
       ? id
       : [...this.manager.views.keys()].reverse().find((key) => key.startsWith(id + '-'));
     const entry = this.manager.views.get(viewId);
     if (!entry) return null;
     const { view } = entry;
+    source ??= entry.source ?? this.manager.source;
+    const background = view.detailSelection?.background ?? this.manager.webbBackground;
     const visible = this.manager
       .ready(viewId)
       .reverse()
       .find((tile) => coversReticle(tile, view.forward));
     let provider = visible?.provider;
     const artworkSource = source === 'recent' || source === 'hubble';
+    // A deliberately selected plate may still be streaming above its ready
+    // background. The download button should save the work the player framed.
+    const selected = artworkSource && view.detailSelection?.artworkId;
+    if (selected) {
+      const plate = entry.tiles?.find(
+        (tile) => tile.provider.id === selected && coversReticle(tile, view.forward)
+      );
+      if (plate) provider = plate.provider;
+    }
     if (
       artworkSource &&
       !(provider?.plate || provider?.tiles) &&
-      (!this.manager.webbBackground || this.manager.webbBackground === 'galaxy')
+      (!background || background === 'galaxy')
     ) {
       provider = entry.tiles?.find(
         (t) => (t.provider.plate || t.provider.tiles) && coversReticle(t, view.forward)
@@ -161,7 +172,7 @@ export class SkyOffline {
         });
       if (provider?.tiles)
         return { builtin: true, title: provider.title, source: 'webb', providerId: provider.id };
-      if (artworkSource) source = this.manager.webbBackground || 'galaxy';
+      if (artworkSource) source = background || 'galaxy';
       if (provider?.id === 'dss-color') source = 'dss';
       if (provider?.id === 'panstarrs') source = 'panstarrs';
     }

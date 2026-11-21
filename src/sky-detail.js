@@ -116,13 +116,14 @@ export class SkyDetail {
     if (this.enabled === enabled) return;
     this.enabled = enabled;
     if (!enabled) {
-      this.generation++;
-      this.views.clear();
-      this.allowed.clear();
-      this.cancelLoads();
-      this.dropAll();
-      this.failures.clear();
-      this.lastError = null;
+      // A ground eyepiece may explicitly select a survey even when the main
+      // panorama is disabled. Keep the tile budget and in-flight work shared.
+      for (const [id, entry] of this.views) if (!entry.view.detailSelection) this.views.delete(id);
+      this.schedule();
+      if (!this.views.size) {
+        this.generation++;
+        this.lastError = null;
+      }
     }
     this.revision++;
   }
@@ -144,22 +145,29 @@ export class SkyDetail {
     this.replanViews();
   }
   plan(view) {
+    const choice = view.detailSelection;
+    const source = choice?.source ?? this.source;
+    const artwork = choice
+      ? choice.artworkId
+      : this.artworkBySource[source === 'hubble' ? 'hubble' : 'recent'] ||
+        (source !== 'auto' && comparisonEdition.get(this.artworkId));
     return planSkyDetailSelection(
       this.offline.providersForView(view),
       view,
-      this.source,
-      this.artworkBySource[this.source === 'hubble' ? 'hubble' : 'recent'] ||
-        (this.source !== 'auto' && comparisonEdition.get(this.artworkId)),
-      this.webbBackground
+      source,
+      artwork,
+      choice ? choice.background : this.webbBackground
     );
   }
   replanViews() {
-    for (const view of this.views.values()) Object.assign(view, this.plan(view.view));
+    for (const view of this.views.values())
+      if (!view.view.detailSelection) Object.assign(view, this.plan(view.view));
     this.schedule();
     this.revision++;
   }
   update(id, view, enabled = true) {
-    if (this.disposed || this.clearing || !this.enabled || !enabled) {
+    const choice = view.detailSelection;
+    if (this.disposed || this.clearing || (!this.enabled && !choice) || !enabled) {
       this.release(id);
       return this.status(id);
     }
@@ -178,17 +186,24 @@ export class SkyDetail {
       .map((v) => (photo ? Number(v) : Number(v).toPrecision(10)))
       .join('/');
     const old = this.views.get(id);
+    const selection = choice ? [choice.source, choice.artworkId, choice.background].join('|') : '';
     // Re-evaluate at most ten times per second while dragging; texture completion
     // is immediate and does not need another geometric tile query.
-    if (!old || (old.signature !== signature && (photo || now() - old.at >= 100))) {
+    if (
+      !old ||
+      old.selection !== selection ||
+      (old.signature !== signature && (photo || now() - old.at >= 100))
+    ) {
       const snapshot = {
         ...view,
+        ...(choice && { detailSelection: { ...choice } }),
         wideField: view.wideField ?? this.wideField,
         forward: [...view.forward],
         right: [...view.right],
         up: [...view.up],
       };
       this.views.set(id, {
+        selection,
         signature,
         at: now(),
         view: snapshot,
@@ -227,7 +242,8 @@ export class SkyDetail {
     this.pump();
   }
   rank(id) {
-    return id.includes('photo') ? 0 : id.includes('scope') ? 1 : 2;
+    if (id.includes('photo')) return 0;
+    return id.includes('scope') || this.views.get(id)?.view.detailSelection ? 1 : 2;
   }
   pending() {
     return (
@@ -240,7 +256,7 @@ export class SkyDetail {
     );
   }
   pump() {
-    if (!this.enabled || this.disposed || this.clearing) return;
+    if (!this.allowed.size || this.disposed || this.clearing) return;
     for (const t of this.pending()) {
       const local = !!t.provider.tiles;
       const active = [...this.activeLoads].filter((request) => request.local === local).length;
@@ -260,7 +276,6 @@ export class SkyDetail {
   }
   current(t, request) {
     return (
-      this.enabled &&
       !this.disposed &&
       !this.clearing &&
       request.generation === this.generation &&
@@ -385,24 +400,27 @@ export class SkyDetail {
       );
   }
   status(id) {
-    const tiles = this.views.get(id)?.tiles || [],
+    const entry = this.views.get(id),
+      enabled = this.enabled || !!entry?.view.detailSelection,
+      source = entry?.source ?? this.source,
+      tiles = entry?.tiles || [],
       ready = this.ready(id);
     const failed = tiles.filter((t) => (this.failures.get(t.key) || 0) > now()).length;
     return {
-      enabled: this.enabled,
-      source: this.source,
-      active: this.views.has(id),
-      webbBackground: this.webbBackground,
+      enabled,
+      source,
+      active: !!entry,
+      webbBackground: entry?.view.detailSelection?.background ?? this.webbBackground,
       hasWebbTiles: tiles.some(
         (t) => t.provider.tiles || (t.provider.plate && t.provider.source !== 'hubble')
       ),
       hasHubbleTiles: tiles.some((t) => t.provider.source === 'hubble'),
-      backgroundOutsideCoverage: !!this.views.get(id)?.backgroundOutsideCoverage,
-      fallback: this.views.get(id)?.fallback || (this.source === 'galaxy' ? 'background' : null),
+      backgroundOutsideCoverage: !!entry?.backgroundOutsideCoverage,
+      fallback: entry?.fallback || (source === 'galaxy' ? 'background' : null),
       requested: tiles.length,
       ready: ready.length,
       loading:
-        this.enabled &&
+        enabled &&
         !this.clearing &&
         tiles.some(
           (t) =>
@@ -424,7 +442,7 @@ export class SkyDetail {
   async prepare(id, view, enabled, timeout = 10000) {
     this.update(id, view, enabled);
     const start = now();
-    while (this.enabled && !this.disposed && now() - start < timeout) {
+    while (this.views.has(id) && !this.disposed && now() - start < timeout) {
       const status = this.status(id);
       if (!status.requested || status.complete || !status.loading) break;
       await new Promise((resolve) => setTimeout(resolve, 80));

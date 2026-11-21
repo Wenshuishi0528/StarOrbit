@@ -739,7 +739,11 @@ async function boot() {
     sim.update(performance.now());
     $('loading').classList.add('hidden');
     document.body.dataset.ready = 'true';
-    setTimeout(() => sim.environment.weather.restoreTextures(), 0);
+    setTimeout(async () => {
+      const env = sim.environment;
+      if (env.textureLimits.staged) await env.setSkyStyle();
+      await env.weather.restoreTextures();
+    }, 0);
     window.viewer = {
       music,
       state,

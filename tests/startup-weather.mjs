@@ -3,9 +3,9 @@ import {build} from 'esbuild';
 const bundle=await build({entryPoints:['src/weather.js'],bundle:true,platform:'node',format:'esm',write:false});
 const {Weather}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
 globalThis.document={getElementById:()=>null};
-const w=Object.create(Weather.prototype);let applied=0;const releases=[];
-Object.assign(w,{items:[],settings:{cloud:'builtin'},cache:{all:async()=>[]},reload:async()=>{},migrateCloudCache:async()=>{},normalizeCloudSelection(){},sync(){},save(){},render(){},restoreCloudLibrary:async()=>{},sim:{orbits:{restore:async()=>{}}},messages:{},apply:()=>{applied++;return new Promise(r=>releases.push(r));}});
-await w.restore();assert.equal(applied,0,'startup metadata must finish without starting or waiting for texture decode');
+const w=Object.create(Weather.prototype);let applied=0, historyReads=0;const releases=[];
+Object.assign(w,{items:[],settings:{cloud:'builtin'},cache:{all:async()=>{historyReads++;return [];}},migrateCloudCache:async()=>{},normalizeCloudSelection(){},sync(){},save(){},render(){},restoreCloudLibrary:async()=>{},sim:{orbits:{restore:async()=>{}}},messages:{},apply:()=>{applied++;return new Promise(r=>releases.push(r));}});
+await w.restore();assert.equal(historyReads,1);assert.equal(applied,0,'startup metadata must finish without starting or waiting for texture decode');
 const restore=w.restoreTextures();assert.equal(applied,2);assert.equal(w.restoreTextures(),restore,'background restore starts once');
 for(const release of releases)release();await restore;
 // Exercise the actual NASA validity texture path with rows distinguishable at

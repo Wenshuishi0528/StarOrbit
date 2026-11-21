@@ -62,3 +62,33 @@ try{
  d.clear();assert.equal(bitmapClosed,2);
 }finally{globalThis.fetch=oldFetch;globalThis.createImageBitmap=oldBitmap;}
 console.log({night2024:'pass',switchDuringDecode:'pass',staleFailureIsolation:'pass',standardQualityDetail:'pass'});
+
+// An eyepiece over the night side can request the daytime map. A finder looking
+// away from Earth cannot evict it. Both still use four slots and the real Sun.
+const localSun = new THREE.Vector3(0, 0, -1);
+const dayMap = { value: { image: { width: 8192 } } };
+const multiEnv = { uniforms: { dayMap, nightMap: dayMap, sun: { value: localSun } },
+  quality: 'standard', earth: { quaternion: new THREE.Quaternion() },
+  assets: { detail: {}, nightDetail: {} }, fallback: {} };
+const groundDay = new EarthDetail(multiEnv), groundNight = new EarthDetail(multiEnv, true);
+groundDay.loadNext = groundNight.loadNext = () => {};
+function atLocation(lat, lon) {
+  const camera = new THREE.PerspectiveCamera(4, 1, .001, 30000);
+  const phi=lat*Math.PI/180, lambda=lon*Math.PI/180;
+  camera.position.set(Math.cos(phi)*Math.cos(lambda), Math.cos(phi)*Math.sin(lambda), Math.sin(phi)).multiplyScalar(6371.1);
+  camera.lookAt(0,0,0);
+  return camera;
+}
+const wideCam=atLocation(40,115), scopeCam=atLocation(63,-106);
+groundDay.update(wideCam,600,{id:'finder'});
+assert.equal(groundDay.wanted.length,0);
+groundDay.update(wideCam,600,{id:'finder',daylightTerrain:true});
+groundDay.update(scopeCam,240,{id:'scope',daylightTerrain:true});
+assert.deepEqual(new Set(groundDay.wanted.map(c=>c.key)),new Set([detailCell(115,40).key,detailCell(-106,63).key]));
+groundNight.update(scopeCam,240,{id:'scope',daylightTerrain:true});
+assert.equal(groundNight.wanted.length,0);
+assert.deepEqual(localSun.toArray(),[0,0,-1]);
+groundDay.releaseView('finder');
+assert.deepEqual(groundDay.wanted.map(c=>c.key),[detailCell(-106,63).key]);
+groundDay.releaseView('scope');
+assert.equal(groundDay.wanted.length,0);

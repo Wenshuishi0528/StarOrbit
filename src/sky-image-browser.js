@@ -17,7 +17,7 @@ export function mountSkyImageBrowser(env) {
     Number.isFinite(entry.raDeg) &&
     Number.isFinite(entry.decDeg) &&
     (entry.kind !== 'work' || !!providerFor(entry)) &&
-    !!sim.current &&
+    (context === 'ground' ? sim.worldExplorer?.canAimStarImage(entry) : !!sim.current) &&
     !sim.freeFlight?.active &&
     !sim.sceneBusy &&
     !sim.missions?.busy &&
@@ -27,6 +27,10 @@ export function mountSkyImageBrowser(env) {
     if (!canLocate(entry, context)) return false;
     const direction = equatorial(entry.raDeg, entry.decDeg);
     const provider = providerFor(entry);
+    if (context === 'ground') {
+      const field = entry.work && frameSkyArtwork(provider, direction, 1, entry.fov, true);
+      return sim.worldExplorer.aimStarImage(entry, field?.fovY);
+    }
     const framing =
       savedView ||
       (entry.work &&

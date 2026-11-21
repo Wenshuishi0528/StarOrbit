@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import { MAX_DISTRIBUTION_BYTES } from '../scripts/build-payload.mjs';
 const file = process.argv[2] || 'StarOrbit.html';
-assert(fs.statSync(file).size <= 900e6, 'standalone distribution budget');
+assert(fs.statSync(file).size <= MAX_DISTRIBUTION_BYTES, 'standalone distribution budget');
 const manifest = JSON.parse(fs.readFileSync('assets/earth/night-2025-500m/manifest.json', 'utf8'));
 const earthManifest = JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json','utf8'));
 const earthFiles = new Set([...Object.values(earthManifest.layers).map(r=>r.file),earthManifest.layers.earthElevation.heightFile,earthManifest.minerals.file]);

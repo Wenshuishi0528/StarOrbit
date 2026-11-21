@@ -370,22 +370,33 @@ export function mountSkyImageGallery({
         const available = !!onLocate && canLocate?.(entry, view) !== false;
         if (!available && !primary) return;
         const aim = button(
-          view === 'xuntian' ? t('巡天取景') : t('主画面定位'),
+          view === 'ground'
+            ? t('地面望远镜定位')
+            : view === 'xuntian'
+              ? t('巡天取景')
+              : t('主画面定位'),
           async () => {
             const ok = await onLocate(entry, view);
             if (ok !== false) dialog.close();
-            else status.textContent = t('当前视角暂时无法定位。');
+            else
+              status.textContent = t(
+                view === 'ground' ? '目标在当地地平线下。' : '当前视角暂时无法定位。'
+              );
           },
           primary ? 'sig-primary' : undefined
         );
         aim.disabled = !available;
         if (!available)
           status.textContent =
-            view === 'xuntian' ? t('巡天取景需切换至中国空间站。') : t('当前视角暂时无法定位。');
+            view === 'ground'
+              ? t('目标在当地地平线下。')
+              : view === 'xuntian'
+                ? t('巡天取景需切换至中国空间站。')
+                : t('当前视角暂时无法定位。');
         actions.append(aim);
       };
       addPointing(context, true);
-      addPointing(context === 'xuntian' ? 'main' : 'xuntian', false);
+      if (context !== 'ground') addPointing(context === 'xuntian' ? 'main' : 'xuntian', false);
       if (canSave?.(entry) !== false && onSave) {
         const save = button(t(entry.work ? '下载这幅影像' : '下载此天区'), async () => {
           const result = await onSave(entry, context, images.get(entry));

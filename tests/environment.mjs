@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {equatorial,geographicUV,qualityFor} from '../src/environment-math.js';
+import {equatorial,geographicUV,qualityFor,deviceTextureLimits} from '../src/environment-math.js';
 import {snapshot,validateOrbit} from '../src/orbit.js';
 const close=(a,b,t=1e-10)=>assert.ok(Math.abs(a-b)<t,`${a} != ${b}`);
 const stars=JSON.parse(fs.readFileSync(new URL('../assets/stars.json',import.meta.url)));
@@ -11,6 +11,17 @@ for(const [ra,dec,expected] of [[0,0,[1,0,0]],[90,0,[0,1,0]],[0,90,[0,0,1]],[180
 assert.deepEqual(geographicUV(0,0),[.5,.5]);assert.deepEqual(geographicUV(-180,90),[0,1]);assert.deepEqual(geographicUV(180,-90),[1,0]);
 close(geographicUV(116.4,39.9)[0],.8233333333333334);close(geographicUV(116.4,39.9)[1],.7216666666666667);
 assert.equal(qualityFor('high',4096),'standard');assert.equal(qualityFor('high',8192),'high');
+const caps = {maxTextureSize: 16384, maxCubemapSize: 8192};
+const appleTouch = {staged: true, earthWidth: 4096, cubeFace: 1024, pixelRatio: 1.5};
+for (const device of [
+  {userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5},
+  {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X)', platform: 'MacIntel', maxTouchPoints: 5},
+]) assert.deepEqual(deviceTextureLimits(device, caps), appleTouch);
+for (const device of [
+  {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X)', platform: 'MacIntel', maxTouchPoints: 0},
+  {userAgent: 'Mozilla/5.0 (Linux; Android)', platform: 'Linux', maxTouchPoints: 5},
+]) assert.deepEqual(deviceTextureLimits(device, caps), {staged:false, earthWidth:16384, cubeFace:8192, pixelRatio:Infinity});
+assert.deepEqual(deviceTextureLimits({userAgent:'iPad'}, {maxTextureSize:2048,maxCubemapSize:512}), {...appleTouch,earthWidth:2048,cubeFace:512});
 const data=validateOrbit(JSON.parse(fs.readFileSync(new URL('../assets/orbit.json',import.meta.url))));
 const q=snapshot(data,data.rows[0][0]+600000),r=q.position.map(v=>v/Math.hypot(...q.position));
 const local=q.earthAxes.map(a=>a.reduce((s,v,i)=>s+v*r[i],0));

@@ -30,6 +30,54 @@ export function cloudDecodeSize(width, height, tier, maxSize) {
   return { width: w, height: w / 2 };
 }
 
+// Read the source dimensions rather than trusting an archived metadata record.
+export async function decodeCloudBitmap(blob, tier, maxSize, keepSourceGrid) {
+  const options = {
+    imageOrientation: 'flipY',
+    premultiplyAlpha: 'none',
+    colorSpaceConversion: 'none',
+  };
+  const header = new Uint8Array(await blob.slice(0, 24).arrayBuffer());
+  let size;
+  if (
+    header.length === 24 &&
+    [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82].every((v, i) => header[i] === v)
+  ) {
+    const view = new DataView(header.buffer);
+    const width = view.getUint32(16);
+    size = cloudDecodeSize(width, view.getUint32(20), tier, maxSize);
+    if (!keepSourceGrid && size.width < width) {
+      const bitmap = await createImageBitmap(blob, {
+        ...options,
+        resizeWidth: size.width,
+        resizeHeight: size.height,
+        resizeQuality: 'high',
+      });
+      if (bitmap.width === size.width && bitmap.height === size.height) return { bitmap, size };
+      bitmap.close();
+      throw Error('云图尺寸无效');
+    }
+  }
+  let bitmap = await createImageBitmap(blob, options);
+  try {
+    size = cloudDecodeSize(bitmap.width, bitmap.height, tier, maxSize);
+    if (!keepSourceGrid && size.width < bitmap.width) {
+      bitmap.close();
+      bitmap = await createImageBitmap(blob, {
+        ...options,
+        resizeWidth: size.width,
+        resizeHeight: size.height,
+        resizeQuality: 'high',
+      });
+      if (bitmap.width !== size.width || bitmap.height !== size.height) throw Error('云图尺寸无效');
+    }
+    return { bitmap, size };
+  } catch (error) {
+    bitmap.close();
+    throw error;
+  }
+}
+
 // This provider exports display-enhanced IR/dust/visible intensity, not physical
 // cloud opacity. Counter its gamma-2 display lift, then softly suppress the weak floor.
 // This is a conservative display approximation, NOT a retrieved clear-sky mask:

@@ -114,12 +114,23 @@ vec3 nightColor(vec2 uv){
  return c.r*vec3(1.,.72,.38);
 }`;
 export const earthSurfaceRadiance = `${radiometryGLSL}uniform sampler2D dayMap,nightMap;uniform vec3 sun,localSun;uniform float detailed,gloss;
+#ifdef GROUND_TERRAIN
+uniform float daylightTerrain;uniform mat3 earthInverse;
+#endif
 ${mapping}${clouds}${detail}
 vec3 earthSurfaceColour(vec3 localN,vec3 worldN,vec3 worldP){vec3 n=normalize(worldN),s=normalize(sun),eye=normalize(cameraPosition-worldP);vec2 uv=mapUV(localN);float mu=dot(n,s),day=max(mu,0.);vec3 albedo=groundColor(uv);
 // NASA land composite has nearly black open water. Apply a water reflectance only
 // to dark ocean texels; retain land/coast colours and the existing solar glint.
 float ocean=smoothstep(.2,.8,sampleMap(oceanMap,uv).r);
 if(enhanced>.5){float water=ocean*(1.-smoothstep(.015,.06,max(albedo.r,max(albedo.g,albedo.b))));albedo=mix(albedo,max(albedo,vec3(.008,.038,.12)),water);}
+#ifdef GROUND_TERRAIN
+// Reference terrain uses the daytime map and terrain normals with cartographic
+// northwest hillshade. Sky, clouds and ephemerides retain the actual Sun.
+if(daylightTerrain>.5){vec3 up=normalize(localN);float lon=(uv.x-.5)*6.28318530718;
+ vec3 east=vec3(-sin(lon),cos(lon),0.);vec3 northwest=cross(up,east)-east;
+ float relief=max(0.,dot(earthInverse*n,normalize(up+.55*northwest)));
+ return albedo*(.34+.48*relief);}
+#endif
 float solarMu=mu,groundAltitude=0.;
 #ifdef EARTH_ELEVATION
 solarMu=dot(normalize(worldP),s);groundAltitude=max(0.,length(worldP)-6371.);

@@ -1,0 +1,230 @@
+.world-ground-panel [hidden],
+.ground-eye-overlay[hidden] {
+  display: none;
+}
+.ground-eye-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.world-ground-panel [data-ground-deploy] {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.ground-mode-pair {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  margin: 0 0 12px;
+  background: #07121d;
+  border: 1px solid #2c4355;
+  border-radius: 8px;
+}
+.world-ground-panel .ground-mode-pair button {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #a4b9ca;
+}
+.world-ground-panel .ground-mode-pair [aria-pressed='true'],
+.world-ground-panel [data-star-track][aria-pressed='true'] {
+  background: #244f62;
+  color: #ddf9fa;
+}
+.world-explorer.ground-stargazing .world-ground-panel {
+  max-height: calc(100% - 50px);
+  scrollbar-width: thin;
+}
+.world-ground-panel .ground-star-site {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #d7e4e9;
+  margin: 0 0 12px;
+}
+.world-ground-panel .ground-star-site button {
+  background: transparent;
+  padding: 0;
+  border: 0;
+  color: #88d3df;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.world-ground-panel [data-ground-site-controls]:not([hidden]) {
+  margin-bottom: 9px;
+}
+.world-ground-panel .star-results {
+  display: grid;
+  margin-top: 5px;
+  gap: 2px;
+  max-height: 133px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.world-ground-panel .star-results button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  text-align: left;
+  gap: 10px;
+  padding: 5px 7px;
+  color: #d6e4ee;
+  background: #122332;
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+.world-ground-panel .star-results button:hover,
+.world-ground-panel .star-results button:focus-visible {
+  border-color: #5293a6;
+}
+.world-ground-panel .star-results button span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.world-ground-panel .star-results small {
+  color: #a1c3cb;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.world-ground-panel .star-current {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 14px 0 7px;
+}
+.star-current strong {
+  color: #e5d5b3;
+  overflow-wrap: anywhere;
+}
+.star-current span,
+.star-angle output {
+  color: #b7cddd;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.star-action-row,
+.ground-star-pair,
+.star-angle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.world-ground-panel .star-action-row button {
+  flex: 1;
+  padding: 6px;
+}
+.world-ground-panel .ground-star-pair {
+  flex-wrap: wrap;
+}
+.world-ground-panel .ground-star-pair select {
+  flex: 1;
+  min-width: 0;
+}
+.world-ground-panel .ground-star-pair button {
+  max-width: 50%;
+  line-height: 1.25;
+}
+.world-ground-panel .star-crosshair {
+  display: grid;
+  gap: 3px;
+}
+.world-ground-panel .star-crosshair strong {
+  color: #d4edee;
+}
+.world-ground-panel [data-star-credit] {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.world-ground-panel [data-star-source-links] a {
+  display: block;
+  color: #94d7e0;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.world-ground-panel [data-star-download-notice]:empty {
+  display: none;
+}
+.world-ground-panel [data-star-panel] button:disabled,
+.world-ground-panel [data-star-panel] select:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.world-ground-panel .star-options {
+  border-top: 1px solid #2b4050;
+  padding-top: 9px;
+  margin-top: 12px;
+}
+.world-ground-panel .star-options summary {
+  color: #bfdbdf;
+}
+.world-ground-panel .star-angle input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  accent-color: #81beca;
+}
+.star-angle output {
+  min-width: 3em;
+  text-align: right;
+}
+.world-ground-panel canvas[data-star-model] {
+  height: 150px;
+  display: block;
+  background: #0b1722;
+  margin-top: 8px;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.world-ground-panel [data-star-night],
+.world-ground-panel .pair + .star-action-row {
+  margin-top: 10px;
+}
+.world-ground-panel [data-star-notice]:empty {
+  display: none;
+}
+@media (max-width: 700px) {
+  .world-explorer.ground-stargazing .world-ground-panel {
+    box-sizing: border-box;
+    width: min(330px, calc(100% - 16px));
+    top: auto;
+    bottom: 8px;
+    max-height: 38%;
+  }
+}
+
+.world-ground-panel section[data-star-panel] {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+.world-ground-panel [data-star-density-hint] {
+  margin: 4px 0 8px;
+  font-size: 11px;
+}
+.world-ground-panel [data-star-filters] {
+  margin: 9px 0;
+}
+.world-ground-panel [data-star-filter-count] {
+  margin-inline-start: 4px;
+  color: #a1c3cb;
+  font-size: 11px;
+}
+.world-ground-panel [data-star-filters] label {
+  margin-top: 8px;
+}
+.world-ground-panel [data-star-clear-filters] {
+  margin-top: 8px;
+}
+.world-ground-panel [data-star-list] {
+  padding-left: 18px;
+  line-height: 1.5;
+  color: #b8cdda;
+  font-size: 12px;
+}

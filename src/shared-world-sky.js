@@ -69,7 +69,36 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
   const scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(65, 1, 0.1, 3000);
   const chartScene = new THREE.Scene();
+  const referenceScene = new THREE.Scene();
   const stars = new THREE.Points(environment.stars.geometry, environment.stars.material.clone());
+  // Magnitudes are sorted in the shared catalogue. A ground eyepiece can draw
+  // its own prefix without changing the orbit camera's draw range or copying GPU buffers.
+  const fullStarGeometry = stars.geometry;
+  let limitedStarGeometry = null,
+    previousLimit = null;
+  function setStarLimit(limit) {
+    const magnitudes = fullStarGeometry.getAttribute('mag');
+    if (!Number.isFinite(limit) || !magnitudes) {
+      stars.geometry = fullStarGeometry;
+      return;
+    }
+    if (!limitedStarGeometry) {
+      limitedStarGeometry = new THREE.BufferGeometry();
+      for (const [name, attribute] of Object.entries(fullStarGeometry.attributes))
+        limitedStarGeometry.setAttribute(name, attribute);
+    }
+    stars.geometry = limitedStarGeometry;
+    if (limit === previousLimit) return;
+    let lo = 0,
+      hi = magnitudes.count;
+    while (lo < hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (magnitudes.getX(mid) <= limit) lo = mid + 1;
+      else hi = mid;
+    }
+    limitedStarGeometry.setDrawRange(0, lo);
+    previousLimit = limit;
+  }
   stars.frustumCulled = false;
   stars.renderOrder = 2;
   scene.add(stars);
@@ -105,6 +134,7 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
   return {
     scene,
     camera,
+    stars,
     chart,
     detail,
     art,
@@ -135,22 +165,26 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
       };
       adapter.settings = s;
       adapter.skyCultureFocus = options.focusTargetId || null;
+      const pixelRatio = options.pixelRatio ?? renderer.getPixelRatio();
       const view = {
         right: axis.set(1, 0, 0).applyQuaternion(camera.quaternion).toArray(),
         up: axis.set(0, 1, 0).applyQuaternion(camera.quaternion).toArray(),
         forward: axis.set(0, 0, -1).applyQuaternion(camera.quaternion).toArray(),
         fovY: (2 * Math.atan(Math.tan((camera.fov * Math.PI) / 360) / camera.zoom) * 180) / Math.PI,
         aspect: camera.aspect,
-        pixelHeight: height * renderer.getPixelRatio(),
+        pixelHeight: height * pixelRatio,
         wideField: options.wideField === true,
       };
+      if (options.detailSelection) view.detailSelection = options.detailSelection;
+      setStarLimit(options.starMagnitudeLimit);
       stars.visible = options.showStars !== false && s.stars !== false;
       stars.material.uniforms.brightness.value = brightness;
-      stars.material.uniforms.pixelRatio.value = renderer.getPixelRatio();
+      stars.material.uniforms.pixelRatio.value = pixelRatio;
       stars.material.uniforms.high.value = s.exposure === 'cinematic' ? 1 : 0;
       galaxy.visible = options.showGalaxy !== false && s.milky !== false;
       galaxy.material.uniforms.skyMap.value = environment.galaxyTexture || null;
-      galaxy.material.uniforms.textured.value = environment.galaxyTexture ? 1 : 0;
+      galaxy.material.uniforms.textured.value =
+        options.texturedGalaxy !== false && environment.galaxyTexture ? 1 : 0;
       galaxy.material.uniforms.brightness.value = brightness;
       showChart = options.showChart !== false;
       if (showChart) chart.update(camera);
@@ -168,24 +202,40 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
         }
       );
       showDetail = options.showDetail !== false;
+      // Keep archival photography legible on top of the local sky colour.
+      // Only the live catalogue uses astronomical visibility and the star limit.
+      const overlay = options.catalogueOverlay === true;
+      const starScene = overlay ? referenceScene : scene;
+      if (stars.parent !== starScene) starScene.add(stars);
+      const detailScene = overlay && showDetail ? referenceScene : detail.scene;
+      if (detail.group.parent !== detailScene) detailScene.add(detail.group);
       // One manager/source for every observer. Leaving a mode releases only its
       // demand; it never shuts down or disposes the shared cache.
-      environment.skyDetail.setSource(resolveSkyDetailSource(s), s.webbBackground);
-      if (showDetail && s.skyDetail !== false && !environment.skyDetail.enabled)
-        environment.skyDetail.setEnabled(true);
-      detail.update(
+      if (options.detailSelection === undefined) {
+        environment.skyDetail.setSource(resolveSkyDetailSource(s), s.webbBackground);
+        if (showDetail && s.skyDetail !== false && !environment.skyDetail.enabled)
+          environment.skyDetail.setEnabled(true);
+      }
+      const demand = !!options.detailSelection || (s.stars !== false && brightness > 0);
+      detail.update(view, showDetail && s.skyDetail !== false && demand, {
+        skyGain: options.detailBrightness ?? brightness,
+      });
+      return {
         view,
-        showDetail && s.skyDetail !== false && s.stars !== false && brightness > 0,
-        {
-          skyGain: brightness,
-        }
-      );
-      return { view, labels: chart.shown, detail: environment.skyDetail.status(id + '-detail') };
+        starCount: Math.min(
+          stars.geometry.drawRange.count,
+          stars.geometry.attributes.mag?.count ?? 0
+        ),
+        labels: chart.shown,
+        detail: environment.skyDetail.status(id + '-detail'),
+      };
     },
-    render() {
+    render(beforeDetail) {
       if (disposed) return;
       renderer.render(scene, camera);
-      if (showDetail) renderer.render(detail.scene, camera);
+      beforeDetail?.();
+      if (stars.parent === referenceScene) renderer.render(referenceScene, camera);
+      else if (showDetail) renderer.render(detail.scene, camera);
       if (showArt && art) renderer.render(art.scene, camera);
       if (showChart) renderer.render(chartScene, camera);
     },
@@ -194,6 +244,11 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
       disposed = true;
       detail.dispose();
       art?.dispose();
+      if (limitedStarGeometry) {
+        for (const name of Object.keys(limitedStarGeometry.attributes))
+          limitedStarGeometry.deleteAttribute(name);
+        limitedStarGeometry.dispose();
+      }
       stars.material.dispose();
       galaxy.material.dispose();
       const geometries = new Set(),
@@ -206,6 +261,7 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
       for (const m of materials) m.dispose();
       chart.texture?.dispose();
       chartScene.clear();
+      referenceScene.clear();
       scene.clear();
     },
   };

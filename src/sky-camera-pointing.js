@@ -8,7 +8,7 @@ const vector = (xyz) => new Vector3(...xyz);
 
 // Frame the actual celestial footprint: the plate centre may be displaced from
 // the WCS reference pixel or the associated object's catalogue coordinates.
-export function frameSkyArtwork(provider, direction, aspect, fallbackFov) {
+export function frameSkyArtwork(provider, direction, aspect, fallbackFov, circular = false) {
   const forward = vector(direction).normalize();
   const plate = provider?.plate;
   const axes = cameraAxes(lookDirection(direction));
@@ -25,11 +25,10 @@ export function frameSkyArtwork(provider, direction, aspect, fallbackFov) {
     const ray = vector(webbPlateRay(plate, u, v)),
       depth = ray.dot(forward);
     if (depth <= 0) return { ...axes, fovY: fallbackFov, aspect };
-    tangent = Math.max(
-      tangent,
-      Math.abs(ray.dot(up)) / depth,
-      Math.abs(ray.dot(right)) / (depth * aspect)
-    );
+    const y = ray.dot(up) / depth,
+      x = ray.dot(right) / depth;
+    const extent = circular ? Math.hypot(x, y) : Math.max(Math.abs(y), Math.abs(x) / aspect);
+    tangent = Math.max(tangent, extent);
   }
   const fovY = Math.max(MIN_FOV, Math.min(100, (2 * Math.atan(1.05 * tangent)) / radians));
   return { forward: forward.toArray(), right: right.toArray(), up: up.toArray(), fovY, aspect };

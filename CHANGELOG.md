@@ -1,5 +1,25 @@
 # Changelog / 更新记录
 
+## v1.58 · 2026-11-21
+
+- 地表漫游中可架设望远镜，在独立小窗里跟踪天体、连续缩放和拍照。
+- 优化手机 Safari 启动，地球、银河和已选云图分阶段加载，降低内存峰值。
+
+- Set up a ground telescope to track, zoom and photograph the sky in its own window.
+- Mobile Safari loads Earth, the Milky Way and saved cloud imagery in stages to reduce peak memory.
+
+## v1.57 · 2026-11-21 · 本机版 / Local build
+
+- 地表漫游可就地架设望远镜。小窗与大取景共用跟踪、连续缩放、图集、离线天区和拍照。设置中可调寻星增强、日间地景和离地高度。
+- 漫游与星星观察共用可缩放、平移和确认坐标的大地图。独立观测点可与漫游位置切换。
+- Set up a ground telescope in a separate tracking window or open its expanded view. Both share continuous zoom, survey imagery, offline fields and photography. A shared site picker supports panning, zooming and precise coordinates.
+
+## v1.56 · 2026-11-21 · 本机版 / Local build
+
+- 地表新增「星星观察」，可按地点和时刻寻星、跟踪、切换目镜，或用共享图集查看同一天区。经纬式望远镜模型随镜头转动。
+- 恒星可按视星等显示。卫星支持分级标注、低轨互联网星座分组，以及类型、用途、归属和发射年代筛选；有标定资料时显示估算亮度。
+- The new ground telescope tracks the local sky with a wide finder, three eyepieces, shared survey imagery and a moving alt-az mount. Satellite markers follow local passes with adjustable elevation and density. Filter stars by magnitude and satellites by group, type, purpose, ownership and launch decade. Calibrated satellites show estimated brightness.
+
 ## v1.55 · 2026-11-21
 
 - 星空影像详情加入中文、英文、俄文和法文短文，介绍画面、天体和拍摄方法。已配准作品显示画面中心，深空天体显示星表坐标。

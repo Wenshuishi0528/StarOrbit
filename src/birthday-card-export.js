@@ -1,20 +1,10 @@
+import { crc32 } from './crc32.js';
+
 // PNGs are already compressed. A small STORE archive lets browsers download
 // both sides together without a compressor or a second download permission.
 const ZIP_ERROR = '生日卡打包失败，请重新生成预览';
 const MAX_PNG_BYTES = 128 * 1024 * 1024;
 const UTF8_NAMES = 0x0800;
-const crcTable = Uint32Array.from({ length: 256 }, (_, index) => {
-  let value = index;
-  for (let bit = 0; bit < 8; bit++) value = (value >>> 1) ^ (value & 1 ? 0xedb88320 : 0);
-  return value >>> 0;
-});
-
-function crc32(bytes) {
-  let crc = 0xffffffff;
-  for (const byte of bytes) crc = (crc >>> 8) ^ crcTable[(crc ^ byte) & 0xff];
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
 function header(length, signature) {
   const bytes = new Uint8Array(length);
   const view = new DataView(bytes.buffer);

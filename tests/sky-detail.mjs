@@ -121,6 +121,37 @@ const settle = (manager) =>
 const tileUrl = (tile) =>
   hipsTileUrl(tile.provider.baseUrl, tile.order, tile.pixel, tile.provider.format);
 
+// A surface eyepiece owns only its pointing and source choice. Main/scope
+// controls, in-flight requests, and manually saved survey data stay shared.
+{
+  const h = harness({ source: 'panstarrs' }),
+    m = h.manager;
+  const ground = { ...view(), detailSelection: { source: 'dss', background: 'galaxy' } };
+  m.update('main', view());
+  m.update('ground', ground);
+  assert.ok(m.rank('ground') < m.rank('main'));
+  assert.equal(m.status('main').source, 'panstarrs');
+  assert.equal(m.status('ground').source, 'dss');
+  m.setSource('galaxy');
+  assert.equal(m.status('ground').source, 'dss');
+  m.setEnabled(false);
+  assert.equal(m.status('main').active, false);
+  assert.equal(m.status('ground').enabled, true);
+  await until(() => m.status('ground').complete);
+  assert.equal(m.offline.planCurrent('ground')?.source, 'dss');
+  m.update('main', view());
+  assert.equal(m.status('main').active, false);
+  // A source change at the same position takes effect immediately.
+  m.update('ground', { ...ground, detailSelection: { source: 'panstarrs', background: 'galaxy' } });
+  assert.equal(m.status('ground').source, 'panstarrs');
+  assert.equal(m.source, 'galaxy');
+  m.update('ground', view(), false);
+  await settle(m);
+  assert.equal(m.entries.size, 0);
+  assert.equal(m.enabled, false);
+  m.dispose();
+}
+
 assert.equal(SKY_TILE_BYTES, ((4 * 512 ** 2 - 1) / 3) * 4);
 assert.equal(SKY_TILE_LIMIT, 48);
 assert.ok(SKY_TILE_LIMIT * SKY_TILE_BYTES <= SKY_GPU_BUDGET);

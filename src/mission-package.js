@@ -1,4 +1,6 @@
 import { MISSIONS, SPACECRAFT } from './missions.js';
+import { SATELLITE_OBJECT_TYPES, SATELLITE_PURPOSES } from './satellite-catalog.js';
+import { validSatellitePhotometry } from './satellite-photometry.js';
 const axes = ['+X', '-X', '+Y', '-Y', '+Z', '-Z'];
 const label = (value, name) => {
   if (typeof value !== 'string' || !value.trim() || value.length > 120)
@@ -10,6 +12,37 @@ const filename = (x) =>
   x.length <= 160 &&
   !/[\\/\u0000-\u001f]/.test(x) &&
   !['.', '..', ''].includes(x);
+function missionSatelliteCatalog(raw) {
+  if (raw == null) return null;
+  const fail = () => {
+    throw Error('卫星目录元数据无效');
+  };
+  if (typeof raw !== 'object' || Array.isArray(raw)) fail();
+  const info = {};
+  for (const [key, choices] of [
+    ['objectType', SATELLITE_OBJECT_TYPES],
+    ['purpose', SATELLITE_PURPOSES],
+  ]) {
+    if (raw[key] == null) continue;
+    if (!choices.includes(raw[key])) fail();
+    info[key] = raw[key];
+  }
+  for (const key of ['owner', 'constellation']) {
+    if (raw[key] == null) continue;
+    if (typeof raw[key] !== 'string' || !raw[key].trim() || raw[key].length > 120) fail();
+    info[key] = raw[key].trim();
+  }
+  if (raw.launchDate != null) {
+    const text = raw.launchDate,
+      stamp =
+        typeof text === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(text)
+          ? Date.parse(text + 'T00:00:00Z')
+          : NaN;
+    if (!Number.isFinite(stamp) || new Date(stamp).toISOString().slice(0, 10) !== text) fail();
+    info.launchDate = text;
+  }
+  return info;
+}
 export function validateMissionPackage(input) {
   if (!input || input.format !== 'tiangong-mission-1')
     throw Error('配置格式应为 tiangong-mission-1');
@@ -22,8 +55,13 @@ export function validateMissionPackage(input) {
     ['constructor', 'prototype', '__proto__'].includes(x.id)
   )
     throw Error('任务 ID 使用 2–63 位小写字母、数字和连字符');
+  const satelliteCatalog = missionSatelliteCatalog(x.satelliteCatalog);
+  if (x.satellitePhotometry != null && !validSatellitePhotometry(x.satellitePhotometry))
+    throw Error('卫星亮度标定资料无效');
   x.name = label(x.name, '名称');
   x.category = label(x.category || '卫星', '类别');
+  if (x.satelliteGroup != null && !['regular', 'internet'].includes(x.satelliteGroup))
+    throw Error('卫星标注分组应为 regular 或 internet');
   if (
     (x.center !== undefined && x.center !== 'EARTH') ||
     (x.planet !== undefined && x.planet !== '地球')
@@ -65,6 +103,16 @@ export function validateMissionPackage(input) {
     id: x.id,
     name: x.name,
     category: x.category,
+    ...(x.satelliteGroup && { satelliteGroup: x.satelliteGroup }),
+    ...(satelliteCatalog && { satelliteCatalog }),
+    ...(x.satellitePhotometry && {
+      satellitePhotometry: {
+        magnitude: x.satellitePhotometry.magnitude,
+        rangeKm: x.satellitePhotometry.rangeKm,
+        phaseDeg: x.satellitePhotometry.phaseDeg,
+        source: x.satellitePhotometry.source.trim(),
+      },
+    }),
     planet: '地球',
     center: 'EARTH',
     model: {
@@ -100,6 +148,9 @@ export function registerMissionPackage(input) {
     name: x.name,
     planet: x.planet,
     category: x.category,
+    ...(x.satelliteGroup && { satelliteGroup: x.satelliteGroup }),
+    ...(x.satelliteCatalog && { satelliteCatalog: x.satelliteCatalog }),
+    ...(x.satellitePhotometry && { satellitePhotometry: x.satellitePhotometry }),
     center: x.center,
     spacecraft: x.id,
     attitude: 'velocity-axis',

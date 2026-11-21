@@ -31,6 +31,22 @@ export function run(){
  const outer=view.group.children.find(o=>o.userData.halfSize===64000);
  checks.contactHole=outer.material.uniforms.nearHalfSize.value;
  checks.patchHoleIndependent=outer.material.uniforms.nearHalfSize!==view.uniforms.nearHalfSize;
+ const scope=createSharedWorldEarth({environment:env,renderer,id:'ground-scope-earth'});
+ const scopePose=groundRenderPose({...nearPatch.site,height:50},time,new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),.2));
+ scope.update({time,...scopePose,width:320,height:240,nearPatch,daylightTerrain:true,hideGeography:true,finderEnhanced:true});
+ const scopeOuter=scope.group.children.find(o=>o.userData.halfSize===64000);
+ checks.sharedLocalMesh=scopeOuter.geometry===outer.geometry && scopeOuter.material!==outer.material;
+ let patchDisposals=0;
+ outer.geometry.addEventListener('dispose',()=>patchDisposals++);
+ checks.viewTerrainOnly=scope.uniforms.daylightTerrain.value===1 && view.uniforms.daylightTerrain.value===0 && !env.uniforms.daylightTerrain;
+ checks.geographyLocal=!scope.group.getObjectByName('world-geography').visible && view.group.getObjectByName('world-geography').visible;
+ checks.realSun=scope.uniforms.sun.value.equals(view.uniforms.sun.value) && env.uniforms.sun.value.equals(new THREE.Vector3(1,0,0));
+ checks.scopeSources=scopeOuter.material.uniforms.dayMap===outer.material.uniforms.dayMap && scopeOuter.material.fragmentShader.includes('#define GROUND_TERRAIN');
+ scope.render();view.render();
+ checks.separateDepth=scope.uniforms.terrainDistance.value!==view.uniforms.terrainDistance.value;
+ scope.update({time,...scopePose,width:320,height:240,nearPatch});
+ checks.restoresDisplay=scope.uniforms.daylightTerrain.value===0 && scope.group.getObjectByName('world-geography').visible;
+ scope.dispose();checks.survivingGeometry=patchDisposals===0;
  view.update({time,...pose,width:1200,height:800,nearPatch:{...nearPatch,data:null}});
  checks.contactReleased=outer.material.uniforms.hasNearHole.value===0;
  const host=new THREE.PerspectiveCamera();host.position.set(1.01,0,0);view.update({time,camera:host,earthPosition:[1,0,0],unitsPerKm:1/149597870.7,width:1200,height:800});checks.cloudOutside=cloud.material.side===THREE.FrontSide;checks.scaledEye=view.uniforms.worldEyeKm.value.x;checks.rootPosition=view.group.position.x;
@@ -38,7 +54,7 @@ export function run(){
  env.settings.clouds=false;view.update({time,...pose,width:1200,height:800});checks.sharedCloudToggle=!cloud.visible&&!volume.visible;
  env.settings.clouds=true;env.quality='high';env.weather={settings:{volume:true},update(){}};view.update({time,...pose,width:1200,height:800});checks.sharedCloudQuality=!cloud.visible&&volume.visible;
  env.uniforms.cloudMap.value=new THREE.Texture();checks.sharedCloudReplacement=cloud.material.uniforms.cloudMap.value===env.uniforms.cloudMap.value;
- view.dispose();view.dispose();checks.disposedGeometry=disposedGeometry;checks.disposedTexture=disposedTexture;checks.childrenAfter=view.scene.children.length;
+ view.dispose();view.dispose();checks.finalPatchRelease=patchDisposals===1;checks.disposedGeometry=disposedGeometry;checks.disposedTexture=disposedTexture;checks.childrenAfter=view.scene.children.length;
  return checks;
 }`,
   },
@@ -55,6 +71,7 @@ assert(
   'ground pose matches renderer sphere plus measured altitude'
 );
 for (const key of [
+  'sharedLocalMesh','viewTerrainOnly','geographyLocal','realSun','scopeSources','separateDepth','restoresDisplay','survivingGeometry','finalPatchRelease',
   'cloudAfterAir',
   'finiteCloudPath',
   'hostCloudDepth',
@@ -90,7 +107,7 @@ assert(c.contactReleased);
 assert.equal(c.disposedGeometry, 0);
 assert.equal(c.disposedTexture, 0);
 assert.equal(c.childrenAfter, 0);
-assert.equal(c.calls.filter((c) => c[0] === 'releaseCity').length, 1);
+assert.equal(c.calls.filter((c) => c[0] === 'releaseCity').length, 2);
 assert(c.calls.some((c) => c[0] === 'city' && Math.hypot(...c[2]) > 6371));
 console.log(
   'Shared Earth: same textures/geometry, coordinate adaptation, shader frame, city/elevation consumers and safe disposal passed'
