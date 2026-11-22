@@ -508,8 +508,9 @@ export function createXuntianViewRenderer(
     screenCamera = new THREE.Camera();
   const skyViewId = `scope-${++skyDetailSequence}`,
     skyPhotoId = `photo-${skyDetailSequence}`;
-  const skyDetailLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyViewId, true),
-    skyPhotoLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyPhotoId, true);
+  const byteSensor = !renderer.extensions.has('EXT_color_buffer_float');
+  const skyDetailLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyViewId, true, byteSensor),
+    skyPhotoLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyPhotoId, true, byteSensor);
   const artLayer =
       env.constellationArt && new ConstellationArtLayer(env.constellationArt, skyViewId, true, 2),
     artPhotoLayer =
@@ -738,6 +739,7 @@ export function createXuntianViewRenderer(
       renderer.setRenderTarget(target.film);
       renderer.clear(true, false, false);
       renderer.render(film.scene, screenCamera);
+      detailLayer?.resolveByteFilm(renderer, screenCamera, target, sensor);
       solarObservation = solarView.drawObservation(
         renderer,
         screenCamera,

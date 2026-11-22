@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v1.63 · 2026-11-22
+
+哈勃和韦伯图集按官方发布图校色，主画面、巡天取景和照片共用作品配色。高清瓦片和已保存的离线影像可继续使用。
+
+Hubble and Webb imagery uses colour calibration based on the official releases across the main view, viewfinder and photos. Existing offline downloads retain their original resolution.
+
 ## v1.62 · 2026-11-22
 
 星星观察主画面和地面望远镜横拖时保持地平线水平。主画面可停在天顶 90°，松开再拖可越过天顶；望远镜可连续拖过天顶。

@@ -8,6 +8,13 @@ export const { providers: HUBBLE_PLATE_PROVIDERS, artworks: HUBBLE_ARTWORKS } = 
     site: 'https://esahubble.org',
     archive: 'https://cdn.esahubble.org/archives/images',
     prefix: 'hubble',
+    // These Zoomify pyramids differ spatially or tonally from the publication.
+    // Their official large renditions retain every native pixel at the registered WCS.
+    nativeImages: {
+      heic0513d: { bytes: 99928, profile: 'srgb' },
+      heic0608d: { bytes: 87785, profile: 'srgb' },
+      heic0816a: { bytes: 910819, profile: 'adobe' },
+    },
     editions: {
       heic1501a: ['创生之柱（哈勃可见光）', '创造之柱', 'M16', '鹰状星云'],
       heic1502a: ['仙女座星系 M31（PHAT 拼接图）', 'Andromeda', 'NGC 224'],

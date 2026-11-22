@@ -3,6 +3,7 @@ import { hipsPixel, hipsTileUrl, selectHipsTiles } from './sky-detail-math.js';
 import { skyTileKey } from './sky-detail-plan.js';
 import { deepSkyRegionMatch, DEEP_SKY_OBJECTS } from './deep-sky-catalog.js';
 import {
+  nativePlateTile,
   offlinePlateField,
   webbPlateRay,
   webbPlateTiles,
@@ -188,9 +189,12 @@ export class SkyOffline {
     view,
     fieldOnly = false,
     order,
+    savedPyramid = false,
   }) {
     if (!provider?.plate) return null;
     const source = provider.source === 'hubble' ? 'hubble' : 'webb';
+    const native = !savedPyramid && provider.nativeImage;
+    if (native) fieldOnly = false;
     let highest = Math.min(order ?? provider.maxOrder, provider.maxOrder);
     // Whole Hubble mosaics can comprise tens of thousands of images. Limit
     // the whole-image edition before allocating a tile array; local fields
@@ -202,12 +206,14 @@ export class SkyOffline {
         highest--;
       }
     }
-    const items = fieldOnly
-      ? offlinePlateField(provider, view, highest)
-      : webbPlateTiles(provider, highest);
+    const items = native
+      ? [nativePlateTile(provider)]
+      : fieldOnly
+        ? offlinePlateField(provider, view, highest)
+        : webbPlateTiles(provider, highest);
     if (!items.length) return null;
     highest = items.at(-1).order;
-    const version = provider.id + '@' + (provider.revision ?? 1);
+    const version = provider.id + '@' + (provider.revision ?? 1) + (native ? ':large' : '');
     const id = fieldOnly
       ? 'art-field:' + version + ':' + fieldKey(view) + ':' + highest
       : 'art:' + version + (highest < provider.maxOrder ? ':' + highest : '');
@@ -219,13 +225,14 @@ export class SkyOffline {
       targetId: provider.id,
       view,
       fieldOnly,
+      ...(native && { nativeImage: true }),
       order: highest,
       imageWidth: provider.plate.levels[highest].width,
       imageHeight: provider.plate.levels[highest].height,
       nativeWidth: provider.plate.width,
       nativeHeight: provider.plate.height,
       items,
-      estimatedBytes: items.length * 20000,
+      estimatedBytes: native ? native.bytes : items.length * 20000,
       thumbnailKey: thumbnailKey || (thumbnailUrl && 'thumbnail:' + thumbnailUrl),
       thumbnailUrl,
       thumbnailBlob,
@@ -235,7 +242,7 @@ export class SkyOffline {
     const provider = this.manager.providers.find((p) => p.id === record.providerId);
     const plan =
       record.source === 'webb' || record.source === 'hubble'
-        ? this.planArtwork({ ...record, provider })
+        ? this.planArtwork({ ...record, provider, savedPyramid: !record.nativeImage })
         : this.planField({ ...record, id: record.targetId });
     return plan?.id === record.id ? plan : null;
   }
@@ -295,15 +302,22 @@ export class SkyOffline {
     if (provider.tiles || (provider.plate && provider.source !== 'hubble')) return;
     this.catalogueRead ??= this.list().catch(() => []);
     if (!this.failedSources.has(provider.id)) this.revision++;
-    this.failedSources.set(provider.id, performance.now() + 60000);
+    const offline = globalThis.navigator?.onLine === false;
+    this.failedSources.set(
+      provider.id,
+      provider.nativeImage && offline ? Infinity : performance.now() + 60000
+    );
   }
   planRevision() {
-    const now = performance.now();
+    const now = performance.now(),
+      offline = globalThis.navigator?.onLine === false;
     for (const [id, until] of this.failedSources) {
-      if (until > now) continue;
+      if (until > now && !(until === Infinity && !offline) && !(this.wasOffline && !offline))
+        continue;
       this.failedSources.delete(id);
       this.revision++;
     }
+    this.wasOffline = offline;
     return this.revision;
   }
   get(key) {

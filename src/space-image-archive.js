@@ -1,7 +1,11 @@
+import { archiveColorProfile } from './sky-archive-color.js';
 import { registeredPlate } from './pillar-astrometry.js';
 import { createWebbPlate } from './webb-plate.js';
 
-export function buildImageArchive(records, { source, site, archive, prefix, editions = {} }) {
+export function buildImageArchive(
+  records,
+  { source, site, archive, prefix, editions = {}, nativeImages = {} }
+) {
   const providers = [];
   const artworks = records.map((record) => {
     const { id, title, credit, released } = record;
@@ -26,6 +30,10 @@ export function buildImageArchive(records, { source, site, archive, prefix, edit
       providers.push({
         source,
         id: providerId,
+        archiveProfile: archiveColorProfile(providerId),
+        ...(nativeImages[id] && {
+          nativeImage: { url: `${archive}/large/${id}.jpg`, ...nativeImages[id] },
+        }),
         artworkSlug: id,
         thumbnailUrl,
         title,

@@ -1,3 +1,4 @@
+import { archiveColorProfile, archiveUsesSRGBTransfer } from './sky-archive-color.js';
 import { validSkyImageDimensions } from './webb-plate.js';
 import * as THREE from 'three';
 import { HUBBLE_PLATE_PROVIDERS } from './hubble-gallery.js';
@@ -21,6 +22,9 @@ const comparisonEdition = new Map([
 ]);
 const MAX_FILE_BYTES = 2_000_000;
 const now = () => performance.now();
+// Reserve decoded and mipmapped space in units of one 512px survey tile.
+const textureSlots = (tile) =>
+  tile.nativeImage ? Math.ceil((tile.width * tile.height) / (512 * 512)) : 1;
 const errorSummary = (error) =>
   `${error?.name || 'Error'}: ${error?.message || 'Image unavailable'}`
     .replace(/(?:https?:\/\/|data:)[^\s]+/gi, '[image]')
@@ -89,14 +93,17 @@ export class SkyDetail {
     this.providers = (manifest.providers || []).map((p) => ({
       ...p,
       revision: p.revision ?? manifest.version ?? 1,
+      ...(p.id === 'jwst-carina-2022' && { archiveProfile: archiveColorProfile(p.id) }),
       tiles: p.id === manifest.local?.providerId ? manifest.local.tiles : undefined,
     }));
     if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS, ...HUBBLE_PLATE_PROVIDERS);
     this.artworkId = null;
+    this.savedPyramidOrder = undefined;
     this.artworkBySource = { recent: null, hubble: null };
     this.webbBackground = 'galaxy';
     this.views = new Map();
     this.entries = new Map();
+    this.usedTextureSlots = 0;
     this.loading = new Map();
     // Aborted image decodes cannot be interrupted. Keep them in the concurrency
     // count until their promise settles, even after removing their view request.
@@ -127,8 +134,9 @@ export class SkyDetail {
     }
     this.revision++;
   }
-  setArtwork(id) {
-    if (this.artworkId === id) return;
+  setArtwork(id, savedPyramidOrder) {
+    if (this.artworkId === id && this.savedPyramidOrder === savedPyramidOrder) return;
+    this.savedPyramidOrder = savedPyramidOrder;
     this.artworkId = id;
     if (id) this.artworkBySource[id.startsWith('hubble-') ? 'hubble' : 'recent'] = id;
     else this.artworkBySource = { recent: null, hubble: null };
@@ -156,12 +164,19 @@ export class SkyDetail {
       view,
       source,
       artwork,
-      choice ? choice.background : this.webbBackground
+      choice ? choice.background : this.webbBackground,
+      (id) =>
+        (this.artworkId === id ? this.savedPyramidOrder : undefined) ??
+        (this.offline.failedSources.has(id) ? Infinity : undefined)
     );
   }
-  replanViews() {
-    for (const view of this.views.values())
-      if (!view.view.detailSelection) Object.assign(view, this.plan(view.view));
+  replanViews(failedKey) {
+    for (const entry of this.views.values()) {
+      if (
+        failedKey ? entry.tiles.some((tile) => tile.key === failedKey) : !entry.view.detailSelection
+      )
+        Object.assign(entry, this.plan(entry.view));
+    }
     this.schedule();
     this.revision++;
   }
@@ -216,9 +231,15 @@ export class SkyDetail {
   schedule() {
     const ranked = [...this.views].sort(([a], [b]) => this.rank(a) - this.rank(b));
     const wanted = new Map();
+    let reserved = 0;
     for (const [, view] of ranked) {
       for (const t of [...view.tiles].sort((a, b) => a.priority - b.priority)) {
-        if (!wanted.has(t.key) && wanted.size < SKY_TILE_LIMIT) wanted.set(t.key, t);
+        if (wanted.has(t.key)) continue;
+        const slots = textureSlots(t);
+        if (reserved + slots <= SKY_TILE_LIMIT) {
+          wanted.set(t.key, t);
+          reserved += slots;
+        }
       }
     }
     this.allowed = wanted;
@@ -286,13 +307,15 @@ export class SkyDetail {
   async load(t, request) {
     const signal = request.controller.signal;
     const live = () => this.current(t, request) && !signal.aborted;
+    const fail = (reason) => {
+      this.failures.set(t.key, now() + 60000);
+      this.lastError = reason;
+      if (!t.cacheOnly) this.offline.sourceFailed(t.provider);
+      if (t.nativeImage) this.replanViews(t.key);
+      this.revision++;
+    };
     const timer = setTimeout(() => {
-      if (this.current(t, request)) {
-        this.failures.set(t.key, now() + 60000);
-        this.lastError = 'TimeoutError: Sky image request timed out';
-        this.offline.sourceFailed(t.provider);
-        this.revision++;
-      }
+      if (this.current(t, request)) fail('TimeoutError: Sky image request timed out');
       request.controller.abort();
     }, 12000);
     let bitmap;
@@ -322,6 +345,8 @@ export class SkyDetail {
       }
       if (!live()) return;
       if (!bitmap) {
+        if (t.cacheOnly || (t.nativeImage && globalThis.navigator?.onLine === false))
+          throw Error('Sky image unavailable offline');
         const url =
           t.url ||
           t.provider.tiles?.[`${t.order}/${t.pixel}`] ||
@@ -346,21 +371,24 @@ export class SkyDetail {
           throw Error('Invalid sky tile dimensions');
       }
       if (!live()) return;
-      // Keep at most 48 decoded 512px images and their mipmapped GPU textures.
-      // Cold entries are evicted before allocating the next texture.
-      while (this.entries.size >= SKY_TILE_LIMIT) {
+      const slots = textureSlots(t);
+      // Evict before allocating the next bitmap's GPU texture.
+      while (this.usedTextureSlots + slots > SKY_TILE_LIMIT) {
         const cold = [...this.entries.keys()].find((key) => !this.allowed.has(key));
         if (!cold) return;
         this.drop(cold);
       }
       const texture = new THREE.Texture(bitmap);
-      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.colorSpace = archiveUsesSRGBTransfer(t.archiveProfile ?? t.provider.archiveProfile)
+        ? THREE.SRGBColorSpace
+        : THREE.NoColorSpace;
       texture.flipY = false;
       texture.generateMipmaps = true;
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       texture.magFilter = THREE.LinearFilter;
       texture.needsUpdate = true;
       this.entries.set(t.key, { ...t, texture, bitmap });
+      this.usedTextureSlots += slots;
       bitmap = null;
       this.failures.delete(t.key);
       this.revision++;
@@ -376,12 +404,7 @@ export class SkyDetail {
     } catch (error) {
       // A stale request may share its key with a replacement request. Its
       // rejection must never suppress the new request or its ready texture.
-      if (live()) {
-        this.failures.set(t.key, now() + 60000);
-        this.lastError = errorSummary(error);
-        this.offline.sourceFailed(t.provider);
-        this.revision++;
-      }
+      if (live()) fail(errorSummary(error));
     } finally {
       clearTimeout(timer);
       bitmap?.close?.();
@@ -433,8 +456,8 @@ export class SkyDetail {
       limited: tiles.some((t) => !this.allowed.has(t.key)),
       complete: tiles.length > 0 && ready.length === tiles.length,
       sources: [...new Map(ready.map((t) => [t.provider.id, t.provider])).values()],
-      gpuBytes: this.entries.size * SKY_TILE_BYTES,
-      decodedBytes: this.entries.size * 512 * 512 * 4,
+      gpuBytes: this.usedTextureSlots * SKY_TILE_BYTES,
+      decodedBytes: this.usedTextureSlots * 512 * 512 * 4,
       textureCount: this.entries.size,
       revision: this.revision,
     };
@@ -462,6 +485,7 @@ export class SkyDetail {
     entry.texture.dispose();
     entry.bitmap.close?.();
     this.entries.delete(key);
+    this.usedTextureSlots -= textureSlots(entry);
     this.revision++;
   }
   dropAll() {

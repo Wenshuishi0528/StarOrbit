@@ -49,7 +49,8 @@ export function planSkyDetailSelection(
   view,
   requestedSource = 'auto',
   artworkId = null,
-  webbBackground = 'galaxy'
+  webbBackground = 'galaxy',
+  savedPyramidOrder
 ) {
   const source = normalizeSkyDetailSource(requestedSource);
   if (source === 'galaxy') return { source, tiles: [], fallback: 'background' };
@@ -145,7 +146,7 @@ export function planSkyDetailSelection(
   if (source === 'auto' || artworkSource) {
     const hasLocal = plans.some((t) => t.provider === local);
     if (!hasLocal || (artworkId && artworkId !== local?.id)) {
-      const overlay = planWebbPlate(plates[family], view, artworkId);
+      const overlay = planWebbPlate(plates[family], view, artworkId, savedPyramidOrder);
       if (overlay.length && (!hasLocal || overlay[0].provider.id === artworkId)) {
         // A chosen edition replaces the overlapping rendition in all shared views.
         if (hasLocal)

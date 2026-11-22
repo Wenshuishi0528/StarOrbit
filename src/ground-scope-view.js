@@ -15,10 +15,11 @@ export function createGroundScopeView({
 }) {
   const sky = createGroundSky({ environment, renderer, id: 'ground-scope' });
   const earth = createSharedWorldEarth({ environment, renderer, id: 'ground-scope-earth' });
+  const floatTarget = renderer.extensions.has('EXT_color_buffer_float');
   const target = new THREE.WebGLRenderTarget(1, 1, {
-    type: renderer.extensions.has('EXT_color_buffer_float')
-      ? THREE.HalfFloatType
-      : THREE.UnsignedByteType,
+    type: floatTarget ? THREE.HalfFloatType : THREE.UnsignedByteType,
+    // Hardware sRGB storage preserves shadow detail in the eight-bit eyepiece and photo.
+    colorSpace: floatTarget ? THREE.NoColorSpace : THREE.SRGBColorSpace,
     depthBuffer: true,
   });
   const quadScene = new THREE.Scene(),

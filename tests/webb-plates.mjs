@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import records from '../src/webb-gallery-data.json' with { type: 'json' };
 import { WEBB_ARTWORKS, WEBB_PLATE_PROVIDERS } from '../src/webb-gallery.js';
+import { HUBBLE_PLATE_PROVIDERS } from '../src/hubble-gallery.js';
+import profileIndex from '../src/sky-archive-color-data.json' with { type: 'json' };
 import {
   createWebbPlate,
   webbPlateRay,
@@ -31,6 +33,39 @@ for (const p of sources.values()) {
   const l = p.plate.levels.at(-1);
   assert.ok(webbPlateTile(p, p.maxOrder, l.cols * l.rows - 1).width > 0);
 }
+// A calibration belongs to one released artwork, including when two editions
+// image the same object. Neither the optical frame nor persisted tile IDs change.
+const byId = new Map([...HUBBLE_PLATE_PROVIDERS, ...WEBB_PLATE_PROVIDERS].map((p) => [p.id, p]));
+const calibrated = new Set();
+for (const [profile, ids] of Object.entries(profileIndex)) {
+  for (const id of ids) {
+    assert.ok(!calibrated.has(id), 'Multiple profiles for ' + id);
+    calibrated.add(id);
+    assert.equal(byId.get(id)?.archiveProfile, profile, id);
+  }
+}
+for (const [id, profile] of [
+  ['hubble-heic1608a', 'prophoto'],
+  ['hubble-heic1501a', 'srgb'],
+  ['hubble-heic2018a', 'adobe'],
+  ['hubble-heic1112a', 'lstar'],
+  ['hubble-heic0709b', 'eci188'],
+  ['hubble-heic0701h', 'mono'],
+  ['hubble-heic0701g', 'dot15'],
+  ['webb-weic2216b', 'prophoto'],
+  ['webb-weic2205b', 'prophoto'],
+  ['webb-weic2207b', 'srgb'],
+])
+  assert.equal(byId.get(id).archiveProfile, profile, id);
+assert.equal(
+  webbPlateTile(byId.get('hubble-heic1608a'), 2, 1).key,
+  'hubble-heic1608a@2016-04-21/2/1.jpg'
+);
+assert.equal(
+  webbPlateTile(byId.get('webb-weic2216b'), 2, 1).key,
+  'webb-weic2216b@2022-10-19/2/1.jpg'
+);
+
 // Held-out astropy corners of the original 10K resampling, within 0.04 arcsec.
 const carina = createWebbPlate(records.find((x) => x.id === 'weic2205a').plate);
 for (const [i, [u, v]] of [

@@ -1,6 +1,6 @@
 # 数据格式与本机接口
 
-适用版本：v1.62。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本：v1.63。作者：Wenshuishi。核对日期：2026-11-08。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
@@ -71,7 +71,7 @@
 
 相机向量使用各自渲染空间的坐标，follow 与 overview 的数值尺度不同；不能把它们当作通用地心位置。导入场景涉及任务和资源切换；导出前的软件状态与导入后的实时推进也可能不同。
 
-场景的可选环境字段 `skyArtworkId` 标识选中的哈勃或韦伯作品。离线影像保存在当前入口的本地数据库中。
+场景的可选环境字段 `skyArtworkId` 标识选中的哈勃或韦伯作品。离线影像保存在当前入口的本地数据库中。色彩校准随应用提供，已有离线包继续使用原来的作品编号、图源版本和瓦片键。三幅按官网原尺寸 JPEG 取景的哈勃作品分别保存新旧图源，数据面板可单独回看或删除。
 
 天气引用仅含 `id/source/provider/time`，没有嵌入对应天气大图。接收端缺图时按内置云图/关闭极光等规则回退，并提示缺失；跨设备应另行导出快照和自定义模型。独立自由飞行、全部下载库、音乐库和所有观测记录不属于场景文件的完整备份范围。
 

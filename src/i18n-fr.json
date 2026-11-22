@@ -12,6 +12,7 @@
   "原图 {width} × {height}，放大后可下载当前天区的原图细节。": "Image originale de {width} × {height}. Zoomez pour télécharger ce champ à pleine résolution.",
   "官方资料未列出仪器": "Instrument non précisé par la source",
   "官方资料未列出波段": "Bande spectrale non précisée par la source",
+  "官方原图（{width} × {height}）": "Original officiel ({width} × {height})",
   "影像层级 {order}（{width} × {height}）": "Niveau {order} ({width} × {height})",
   "下降到此处": "Descendre ici",
   "轨道总览、地表观测与巡天取景共用地景缓存。手动保存的城市包可单独管理。": "La vue orbitale, l’observation au sol et Xuntian partagent le cache des images du terrain. Les villes enregistrées se gèrent individuellement.",

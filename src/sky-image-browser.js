@@ -54,7 +54,7 @@ export function mountSkyImageBrowser(env) {
       pointMainCameraAtSky(sim, direction, framing);
     }
     if (entry.source === 'recent' || entry.source === 'hubble')
-      skyDetail.setArtwork(entry.providerId);
+      skyDetail.setArtwork(entry.providerId, entry.savedPyramidOrder);
     env.settings.stars = true;
     env.settings.milky = true;
     for (const id of ['showStars', 'showMilky']) $(id).checked = true;
@@ -132,6 +132,8 @@ export function mountSkyImageBrowser(env) {
         id: record.targetId || record.id,
         title: record.title,
         providerId: record.providerId,
+        savedPyramidOrder:
+          providerFor(record)?.nativeImage && !record.nativeImage ? record.order : undefined,
         source,
         raDeg: ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360,
         decDeg: (Math.asin(Math.min(1, Math.max(-1, z))) * 180) / Math.PI,

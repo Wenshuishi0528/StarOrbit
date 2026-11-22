@@ -97,8 +97,27 @@ export function webbPlateTile(provider, order, pixel) {
   };
 }
 
+// A complete, small native JPEG uses the same astrometry as its pyramid and
+// an independent cache key and the colour encoding of the official original.
+export function nativePlateTile(provider) {
+  const { width, height, maxOrder } = provider.plate;
+  return {
+    provider,
+    order: maxOrder,
+    pixel: 0,
+    width,
+    height,
+    bounds: [0, 0, 1, 1],
+    priority: 1,
+    nativeImage: true,
+    archiveProfile: provider.nativeImage.profile,
+    key: provider.id + '@' + provider.revision + '/large.jpg',
+    url: provider.nativeImage.url,
+  };
+}
+
 export function validSkyImageDimensions(tile, width, height) {
-  if (!(tile.provider?.plate || tile.zoomify)) {
+  if (tile.nativeImage || !(tile.provider?.plate || tile.zoomify)) {
     return width === (tile.width ?? 512) && height === (tile.height ?? 512);
   }
   const match = (actual, expected) =>
@@ -251,7 +270,7 @@ function indexPlates(providers) {
   return bins;
 }
 
-export function planWebbPlate(providers, view, preferredId) {
+export function planWebbPlate(providers, view, preferredId, savedPyramidOrder) {
   const tangent = Math.tan((view.fovY * rad) / 2);
   const half = Math.atan(tangent * Math.hypot(view.aspect, 1));
   const pxPerRad = view.pixelHeight / (2 * tangent);
@@ -284,15 +303,16 @@ export function planWebbPlate(providers, view, preferredId) {
   if (!best) return [];
   const provider = best.provider,
     plate = provider.plate;
+  const savedOrder = provider.nativeImage ? savedPyramidOrder?.(provider.id) : undefined;
+  if (provider.nativeImage && savedOrder === undefined) return [nativePlateTile(provider)];
+  const limit = Math.min(provider.maxOrder, savedOrder ?? provider.maxOrder);
   const first = plate.levels.findIndex((t) => t.width >= best.width * pxPerRad);
-  for (
-    let order = first < 0 ? provider.maxOrder : Math.min(provider.maxOrder, first);
-    order >= 0;
-    order--
-  ) {
+  for (let order = first < 0 ? limit : Math.min(limit, first); order >= 0; order--) {
     const tiles = visibleTier(provider, order, bestBounds, 18);
     if (!tiles) continue;
-    return order ? [webbPlateTile(provider, 0, 0), ...tiles] : tiles;
+    if (order) tiles.unshift(webbPlateTile(provider, 0, 0));
+    if (provider.nativeImage) for (const tile of tiles) tile.cacheOnly = true;
+    return tiles;
   }
   return [];
 }

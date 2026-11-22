@@ -41,11 +41,16 @@ function summary(record) {
       ? t('整幅作品')
       : extent,
     record.source === 'hubble'
-      ? t('影像层级 {order}（{width} × {height}）', {
-          order: record.order,
-          width: record.imageWidth,
-          height: record.imageHeight,
-        })
+      ? t(
+          record.nativeImage
+            ? '官方原图（{width} × {height}）'
+            : '影像层级 {order}（{width} × {height}）',
+          {
+            order: record.order,
+            width: record.imageWidth,
+            height: record.imageHeight,
+          }
+        )
       : '',
     record.source === 'hubble' && !record.fieldOnly && record.nativeWidth > record.imageWidth
       ? t('原图 {width} × {height}，放大后可下载当前天区的原图细节。', {

@@ -1,6 +1,15 @@
-// Gaia DR3 field-star fits to the original ESA Zoomify pixels. See the local
-// v1.54 verification record. Apply only to the exact calibrated plate revision.
+// Field-star fits and verified orientation for the original ESA Zoomify pixels.
+// Apply only to the exact calibrated plate revision.
 const fields = {
+  heic0614a: {
+    // This Zoomify pyramid is upside down relative to the published AVM frame.
+    // Three independent Pan-STARRS DR2 sources locate the native tiles on sky.
+    published: [
+      1706, 1706, 1706, 1706, 175.201450944, -26.4856830717, 853, 853,
+      6.90973302554452e-6, 6.045233077258017e-7, 6.045233077258017e-7, -6.90973302554452e-6, 70,
+    ],
+    halfTurn: true,
+  },
   heic1501a: {
     published: [
       6780, 7071, 6780.0, 7071.0, 274.719656784, -13.8394365494, 3390.0, 3535.0,
@@ -29,6 +38,14 @@ export function registeredPlate(id, plate) {
   )
     return plate;
   const corrected = [...plate];
+  if (fit.halfTurn) {
+    // FITS reference pixels are one-based. Mirror both axes about the image
+    // centre, preserving each existing tile and its offline identity.
+    corrected[6] = plate[2] + 1 - plate[6];
+    corrected[7] = plate[3] + 1 - plate[7];
+    for (let i = 8; i < 12; i++) corrected[i] = -plate[i];
+    return corrected;
+  }
   corrected.splice(4, 2, ...fit.center);
   corrected.splice(8, 4, ...fit.cd);
   return corrected;

@@ -991,13 +991,15 @@ export class Environment {
     this.atmosphereTransmission.visible = !!linear;
     // Catalogue/panorama values were authored for direct display. Apply the same
     // modest radiance normalization to both before the new shared ACES pass.
-    const skyGain =
-      this.settings.starBrightness *
-      (this.settings.exposure === 'photo' ? 0.025 : 1) *
-      (linear ? 2 : 1);
+    const userSkyGain = this.settings.starBrightness * (this.settings.exposure === 'photo' ? 0.025 : 1);
+    const skyGain = userSkyGain * (linear ? 2 : 1);
     this.starUniforms.brightness.value = skyGain;
     this.milky.material.uniforms.brightness.value = skyGain;
-    this.skyDetailLayer.uniforms.skyGain.value = skyGain;
+    const detail = this.skyDetailLayer.uniforms;
+    detail.skyGain.value = skyGain;
+    detail.archiveGain.value = userSkyGain;
+    detail.mainSkyHDR.value = linear ? 1 : 0;
+    detail.toneMappingExposure.value = this.api.renderer.toneMappingExposure;
     return linear;
   }
   finishFrame() {

@@ -12,6 +12,7 @@
   "原图 {width} × {height}，放大后可下载当前天区的原图细节。": "Original image {width} × {height}. Zoom in to download this field at full resolution.",
   "官方资料未列出仪器": "Instrument not specified by the source",
   "官方资料未列出波段": "Band not specified by the source",
+  "官方原图（{width} × {height}）": "Official original ({width} × {height})",
   "影像层级 {order}（{width} × {height}）": "Image level {order} ({width} × {height})",
   "下降到此处": "Descend here",
   "轨道总览、地表观测与巡天取景共用地景缓存。手动保存的城市包可单独管理。": "Orbit overview, ground observation and Xuntian share terrain imagery. You can manage saved city packs individually.",

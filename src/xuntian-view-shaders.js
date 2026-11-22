@@ -68,13 +68,19 @@ export const starFragment = `precision highp float;varying vec3 starTint;varying
   float psf=.94*c.x*c.y+.06*w.x*w.y;
   gl_FragColor=vec4(starTint*(flux*psf),1.);
  }`;
-export const sensorFragment = `precision highp float;varying vec2 film;uniform sampler2D image,earthImage;uniform float gain,earthOn,earthExposure;
- void main(){vec2 uv=film*.5+.5;vec4 foreground=texture2D(image,uv);
+// Shared with the RGBA8 archive pass so station and terrain coverage, aperture
+// and the sensor's display curve are identical in previews and photographs.
+export const sensorResponse = `vec4 exposeSensor(vec4 foreground, vec4 surface, float gain, float earthExposure){
   vec3 light=max(foreground.rgb*gain,vec3(0.));
-  if(earthOn>.5){vec4 surface=texture2D(earthImage,uv);float gap=1.-clamp(foreground.a,0.,1.);
-   light=light*(1.-surface.a*gap)+surface.rgb*earthExposure*gap;}
-  vec3 mapped=1.-exp(-light);vec3 rgb=mix(12.92*mapped,1.055*pow(mapped,vec3(1./2.4))-.055,step(vec3(.0031308),mapped));
-  gl_FragColor=vec4(rgb,1.);
+  float gap=1.-clamp(foreground.a,0.,1.);
+  light=light*(1.-surface.a*gap)+surface.rgb*earthExposure*gap;
+  return sRGBTransferOETF(vec4(1.-exp(-light),1.));
+ }`;
+export const sensorFragment = `precision highp float;varying vec2 film;uniform sampler2D image,earthImage;uniform float gain,earthOn,earthExposure;
+ ${sensorResponse}
+ void main(){vec2 uv=film*.5+.5;
+  vec4 surface=earthOn>.5?texture2D(earthImage,uv):vec4(0.);
+  gl_FragColor=exposeSensor(texture2D(image,uv),surface,gain,earthExposure);
  }`;
 
 export const guideVertex = `uniform mat3 inertialToCamera;uniform vec2 lens;

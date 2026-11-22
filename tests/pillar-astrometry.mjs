@@ -8,6 +8,13 @@ import { createWebbPlate, webbPlateRay } from '../src/webb-plate.js';
 // Actual image centroids and held-out Gaia DR3 coordinates propagated to
 // the observing epochs. Each row contains image u,v and reference RA,Dec.
 const checks = {
+  // Native Spiderweb Galaxy zoom tiles and independent Pan-STARRS DR2
+  // objects 76221751951810455, 76211752080812654 and 76211752004952585.
+  heic0614a: [
+    [0.949877390, 0.253519056, 175.1952411048, -26.4832435496],
+    [0.030394604, 0.877025830, 175.2080580399, -26.4896409762],
+    [0.606130844, 0.832794348, 175.2004360197, -26.4897154841],
+  ],
   heic1501a: [
     [0.6592920354, 0.1220022624, 274.6922223658, -13.8231842114],
     [0.4093973873, 0.3154088559, 274.7170829903, -13.8247864544],
@@ -90,7 +97,7 @@ for (const [id, sample] of Object.entries(checks)) {
   const changed = [...raw];
   changed[4] += 0.003;
   assert.equal(registeredPlate(id, changed), changed);
-  console.log(id, sample.length, 'held-out stars, 90th-percentile arcsec', p90.toFixed(3));
+  console.log(id, sample.length, 'reference objects, 90th-percentile arcsec', p90.toFixed(3));
 }
 
 const manager = new SkyDetail({}, { webbGallery: true });
