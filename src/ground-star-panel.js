@@ -860,7 +860,7 @@ export function mountGroundStarPanel({
       blocked,
     });
   }
-  function sampleAnnotations(width, height, status, blocked, reserved, depthCache) {
+  function sampleAnnotations(width, height, status, blocked, reserved) {
     const names = groundScopeBodyLabels({
       status,
       width,
@@ -871,13 +871,7 @@ export function mountGroundStarPanel({
       reserved,
       hidden(row, x, y) {
         if (!blocked) return false;
-        const prior = depthCache?.get(row.bodyId);
-        // Reuse a current terrain pixel until its anchor moves or the next
-        // terrain refresh. Exports always sample their own rendered depth.
-        if (prior && Math.hypot(x - prior.x, y - prior.y) < 1) return prior.hidden;
-        const hidden = blocked((2 * x) / width - 1, 1 - (2 * y) / height);
-        depthCache?.set(row.bodyId, { x, y, hidden });
-        return hidden;
+        return blocked((2 * x) / width - 1, 1 - (2 * y) / height) !== false;
       },
     });
     const rows = sampleSatellites(width, height, status, blocked, [
@@ -949,9 +943,11 @@ export function mountGroundStarPanel({
   function identifyCentre(status, width, height, rows, blocked) {
     const view = status.view;
     const coordinates = 'J2000 · ' + galleryCoordinates(reading.raDeg, reading.decDeg);
-    let hit;
+    let hit, terrain;
     if (!view?.forward) hit = { kind: 'unavailable', name: '—' };
-    else if (blocked?.(0, 0)) hit = { kind: 'terrain', name: t('地形') };
+    else if (blocked && (terrain = blocked(0, 0)) === null)
+      hit = { kind: 'unavailable', name: '—' };
+    else if (terrain) hit = { kind: 'terrain', name: t('地形') };
     else {
       const sat = rows
         .filter((row) => Math.hypot(row.x - width / 2, row.y - height / 2) <= 5)
@@ -1022,14 +1018,10 @@ export function mountGroundStarPanel({
     const refresh =
       wall - lastRefresh >= 240 || lastFrame?.width !== width || lastFrame.height !== height;
     const rects = refresh ? avoidRects(reserved || [hud], width, height) : lastFrame.rects;
-    const depthCache =
-      refresh || Math.abs(date() - lastFrame.time) > 1500 ? new Map() : lastFrame.depthCache;
-    const content = annotations
-      ? sampleAnnotations(width, height, status, blocked, rects, depthCache)
-      : null;
+    const content = annotations ? sampleAnnotations(width, height, status, blocked, rects) : null;
     const rows = content?.rows || [];
     drawOverlay(ctx, width, height, content);
-    lastFrame = { width, height, status, blocked, rects, depthCache, time: date() };
+    lastFrame = { width, height, status, blocked, rects, time: date() };
     updateMount();
     if (!refresh) return;
     lastRefresh = wall;

@@ -99,7 +99,7 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
     bodiesScene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 3000);
   camera.up.set(0, 0, 1);
-  const shared = createSharedWorldSky({ environment, renderer, id });
+  const shared = createSharedWorldSky({ environment, renderer, id, groundObserver: true });
   // In stargazing mode the catalogue stays above any archival imagery. Apply
   // the local sky's transmission to each point so toggling a survey, including
   // its loading/fallback frames, cannot brighten stars outside its coverage.
@@ -287,6 +287,7 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
       texturedGalaxy: !stargazing,
       starMagnitudeLimit,
       catalogueOverlay: stargazing,
+      cacheCatalogue: stargazing && settings.photoAnnotations === undefined,
       showChart: settings.photoAnnotations !== false,
       showArt: settings.photoAnnotations !== false,
       wideField: stargazing
@@ -445,6 +446,10 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
     },
   };
   function renderAtmosphere() {
-    renderer.render(atmosphere, camera);
+    if (
+      airUniforms.airVisibility.value > 0 &&
+      (airUniforms.day.value > 0 || airUniforms.twilight.value > 0)
+    )
+      renderer.render(atmosphere, camera);
   }
 }

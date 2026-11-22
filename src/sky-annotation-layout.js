@@ -96,6 +96,7 @@ export function buildSkyAnnotationLayout({
   height,
   language = 'zh',
   blocked = () => false,
+  textWidth = skyAnnotationTextWidth,
   showMoon = true,
   focusTargetId = null,
   verticalInset = 0,
@@ -157,7 +158,7 @@ export function buildSkyAnnotationLayout({
     if (blocked(dir)) return;
     const font = item.kind === 'reference' ? 11 : item.kind === 'constellation' ? 14 : 13;
     const text =
-      item.regionOnly && skyAnnotationTextWidth(item.text, font) + 4 > width - 10
+      item.regionOnly && textWidth(item.text, font) + 4 > width - 10
         ? deepSkyRegionLabel(item.object.id, language)
         : item.text;
     // The outline is already a capped locator. Leave one text row above and
@@ -183,7 +184,7 @@ export function buildSkyAnnotationLayout({
       centered: item.kind === 'constellation',
       x: ((x + 1) * width) / 2,
       y: ((1 - y) * height) / 2,
-      w: skyAnnotationTextWidth(text, font) + 4,
+      w: textWidth(text, font) + 4,
       h: font + 7,
     });
     return true;
@@ -298,19 +299,29 @@ export function buildSkyAnnotationLayout({
       });
     }
   if (settings.deepSkyObjects) {
-    const regions = [];
+    const regions = [],
+      fieldCos = Math.cos(radius * DEG) - 1e-12;
     for (const object of DEEP_SKY_OBJECTS) {
       if (deepSkyInScope(object, settings.deepSkyScope)) {
-        const shown = add({
-          key: 'deep-' + object.id,
-          targetId: 'deep-sky:' + object.id.toLowerCase(),
-          kind: 'deep',
-          direction: object.direction,
-          object,
-          text: deepSkyLabel(object, language),
-          priority: 2.4,
-        });
-        if (!shown && deepSkyRegionMatch(object, axes.forward)?.withinRegion) regions.push(object);
+        const alignment = dot(object.direction, axes.forward);
+        if (alignment < fieldCos && alignment < object.regionCos) continue;
+        const shown =
+          alignment >= fieldCos &&
+          add({
+            key: 'deep-' + object.id,
+            targetId: 'deep-sky:' + object.id.toLowerCase(),
+            kind: 'deep',
+            direction: object.direction,
+            object,
+            text: deepSkyLabel(object, language),
+            priority: 2.4,
+          });
+        if (
+          !shown &&
+          alignment >= object.regionCos &&
+          deepSkyRegionMatch(object, axes.forward)?.withinRegion
+        )
+          regions.push(object);
       }
     }
     // A resolved, extended object does not stop existing when its catalogue

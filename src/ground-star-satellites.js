@@ -479,15 +479,22 @@ export function createGroundSatelliteOverlay(sim, missions = MISSIONS) {
         if (selected[group].length >= cap) break;
         if (blocked) {
           const entry = entries.get(row.id);
-          if (!terrainSampleValid(entry.terrain, row, site, time, now, view.focal)) {
+          if (
+            entry.terrain?.query !== blocked ||
+            entry.terrain?.revision !== blocked.revision ||
+            !terrainSampleValid(entry.terrain, row, site, time, now, view.focal)
+          ) {
             if (status.terrainReads >= terrainLimit) {
               deferred[group].push(row.id);
               continue;
             }
             const hidden = blocked((2 * row.x) / width - 1, 1 - (2 * row.y) / height);
             status.terrainReads++;
+            if (hidden === null) continue;
             entry.terrain = {
               hidden,
+              query: blocked,
+              revision: blocked.revision,
               direction: row.direction,
               latitude: site.latitude,
               longitude: site.longitude,

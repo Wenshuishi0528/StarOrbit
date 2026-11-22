@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v1.65 · 2026-11-22
+
+星星观察主画面大幅转头时，小地图复用本站点的裁图，取景框只绘制可见部分。优化云层、大气和密集天区标注，保留星点、星图和山脊轮廓的清晰度。
+
+The ground finder reuses the local map crop and draws only the visible eyepiece outline during wide pans. Atmosphere, clouds and dense sky labels render more efficiently while stars, charts and mountain silhouettes retain their resolution.
+
+## v1.64 · 2026-11-22 · 本机版 / Local build
+
+地表漫游与观星复用实测地形，仰望纯天空时跳过山体绘制。主画面与望远镜各自按山脊遮挡标注，目镜拖动和缩放随画面刷新。
+
+Ground views reuse terrain at a fixed site and skip it when the sky fills the frame. Both cameras use the mountain silhouette for labels. Telescope panning and zooming follow the display refresh.
+
 ## v1.63 · 2026-11-22
 
 哈勃和韦伯图集按官方发布图校色，主画面、巡天取景和照片共用作品配色。高清瓦片和已保存的离线影像可继续使用。

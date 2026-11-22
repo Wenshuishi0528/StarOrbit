@@ -192,11 +192,34 @@ export function createSiteMapImagery(environment, redraw) {
     return image;
   }
 
+  let miniBase, miniSource, miniFrame;
+  function drawMiniBase(context, frame, image) {
+    // WebKit can re-decode the entire 8K AVIF on drawImage, even when the
+    // requested town occupies only a few source pixels. Retain that crop
+    // separately so changes to city tiles or the compass never decode it again.
+    const width = context.canvas.width,
+      height = context.canvas.height;
+    const key = [frame.west, frame.east, frame.south, frame.north, width, height].join('|');
+    if (miniSource !== image || miniFrame !== key) {
+      miniBase ??= document.createElement('canvas');
+      miniBase.width = width;
+      miniBase.height = height;
+      const ctx = miniBase.getContext('2d');
+      ctx.setTransform(width / frame.width, 0, 0, height / frame.height, 0, 0);
+      drawImage(ctx, frame, image, WORLD);
+      miniFrame = key;
+      miniSource = image;
+    }
+    context.drawImage(miniBase, 0, 0, frame.width, frame.height);
+  }
+
   function draw(context, frame, large) {
     context.fillStyle = '#101c28';
     context.fillRect(0, 0, frame.width, frame.height);
     const base = environment.uniforms?.dayMap?.value?.image;
-    drawImage(context, frame, base?.width > 1 ? base : (fallback ??= atlasFallback()), WORLD);
+    const baseImage = base?.width > 1 ? base : (fallback ??= atlasFallback());
+    if (large) drawImage(context, frame, baseImage, WORLD);
+    else drawMiniBase(context, frame, baseImage);
     const detail = environment.detail;
     for (const record of images.values())
       if (large && record.day && detailSource === detail?.tiles)
@@ -351,6 +374,8 @@ export function createSiteMapImagery(environment, redraw) {
       reset();
       resident.clear();
       if (fallback) fallback.width = fallback.height = 1;
+      if (miniBase) miniBase.width = miniBase.height = 1;
+      miniBase = miniSource = miniFrame = null;
     },
   };
 }

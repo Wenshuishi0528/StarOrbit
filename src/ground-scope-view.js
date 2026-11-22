@@ -38,8 +38,13 @@ export function createGroundScopeView({
   let status,
     view,
     lastPaint = -Infinity,
-    lastRect;
-  const blocked = (x, y) => earth.terrainBlocksScreen(x, y);
+    lastRect,
+    lastPose,
+    lastTime = -Infinity,
+    interactiveUntil = -Infinity;
+  const blocked = (x, y) => earth.terrainBlocksScreen(x, y, true);
+  const photoBlocked = (x, y) => earth.terrainBlocksScreen(x, y);
+  Object.defineProperty(blocked, 'revision', { get: () => earth.maskRevision });
   function render(buffer, time, settings, observatory, sample, width, height, dpr) {
     const previous = renderer.getRenderTarget();
     try {
@@ -61,6 +66,14 @@ export function createGroundScopeView({
         height,
         pixelRatio: dpr,
         nearPatch: surface.getPatch(),
+        landscapeView:
+          buffer === target
+            ? {
+                site: pose.site,
+                rotation: sky.camera.quaternion,
+                clearSky: surface.clearsSky(pose.site, pose.elevation, view.fov, width / height),
+              }
+            : null,
         daylightTerrain: observatory.daylightTerrain,
         hideGeography: true,
         finderEnhanced: observatory.finderEnhanced,
@@ -96,7 +109,7 @@ export function createGroundScopeView({
     photoHasGround() {
       for (const y of [-0.98, -0.7, 0, 0.7, 0.98]) {
         for (const x of [-0.98, -0.7, 0, 0.7, 0.98]) {
-          if (blocked(x, y)) return true;
+          if (photoBlocked(x, y)) return true;
         }
       }
       return false;
@@ -104,14 +117,34 @@ export function createGroundScopeView({
     get view() {
       return view;
     },
+    clearsSky() {
+      const { width, height } = window.frame.getBoundingClientRect();
+      return (
+        width > 0 &&
+        height > 0 &&
+        surface.clearsSky(
+          pose.site,
+          pose.elevation,
+          panel.cameraField(width, height),
+          width / height
+        )
+      );
+    },
+    interacting(wall) {
+      return wall < interactiveUntil;
+    },
     invalidate() {
+      interactiveUntil = performance.now() + 150;
       lastPaint = -Infinity;
     },
     update(wall, time, settings, observatory, reading) {
       const rect = window.frame.getBoundingClientRect();
       if (rect.width < 1 || rect.height < 1) return;
+      const currentPose = [pose.azimuth, pose.elevation, pose.rollDegrees, panel.field].join('|');
       if (
-        wall - lastPaint >= 32 ||
+        wall < interactiveUntil ||
+        currentPose !== lastPose ||
+        wall - lastPaint >= (Math.abs(time - lastTime) > 150 ? 32 : 100) ||
         rect.width !== lastRect?.width ||
         rect.height !== lastRect?.height
       ) {
@@ -134,6 +167,8 @@ export function createGroundScopeView({
           blocked,
           hud: window.hud,
         });
+        lastTime = time;
+        lastPose = currentPose;
         lastPaint = wall;
         lastRect = rect;
       }
@@ -176,7 +211,7 @@ export function createGroundScopeView({
           height,
           annotations: panel.prefs.photoAnnotations,
           status,
-          blocked,
+          blocked: photoBlocked,
         });
         quad.material = encode;
         renderer.setRenderTarget(encoded);

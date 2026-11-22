@@ -1,3 +1,4 @@
+import { createGroundFinderBackdrop } from './ground-finder-backdrop.js';
 import { resizeRenderSurface } from './render-surface.js';
 import * as THREE from 'three';
 import { Equator, Horizon, Observer } from 'astronomy-engine';
@@ -146,6 +147,7 @@ export function installWorldExplorer(sim) {
     sky = null,
     surface = null,
     groundEarth = null,
+    finderBackdrop = null,
     input = null,
     solar = null,
     stellar = null,
@@ -362,6 +364,8 @@ export function installWorldExplorer(sim) {
     } else {
       starPanel.setActive(false);
       scopeWindow.setLayout('');
+      finderBackdrop?.dispose();
+      finderBackdrop = null;
       scopeView?.dispose();
       scopeView = null;
       rig?.dispose();
@@ -879,33 +883,34 @@ export function installWorldExplorer(sim) {
     sim.snap = true;
     sim.timeUI();
   }
-  const tmp = new THREE.Vector3();
+  const tmp = new THREE.Vector3(),
+    labelForward = new THREE.Vector3();
   function paintLabels(labels) {
-    labelRoot.replaceChildren();
+    const width = stage.clientWidth,
+      height = stage.clientHeight;
+    labelForward.set(0, 0, -1).applyQuaternion(groundCamera.quaternion);
     let count = 0;
     for (const row of labels) {
       if (count >= 45) break;
       tmp.fromArray(row.direction);
-      if (tmp.dot(new THREE.Vector3(0, 0, -1).applyQuaternion(groundCamera.quaternion)) <= 0)
-        continue;
-      const point = tmp
-        .clone()
-        .multiplyScalar(100000)
-        .add(groundCamera.position)
-        .project(groundCamera);
+      if (tmp.dot(labelForward) <= 0) continue;
+      const point = tmp.multiplyScalar(100000).add(groundCamera.position).project(groundCamera);
       if (Math.abs(point.x) > 0.95 || Math.abs(point.y) > 0.92) continue;
       if (
         (starPanel.active || !settings.seeThroughTerrain) &&
-        groundEarth.terrainBlocksScreen(point.x, point.y)
+        groundEarth.terrainBlocksScreen(point.x, point.y, starPanel.active) !== false
       )
         continue;
-      const el = document.createElement('span');
-      el.textContent = row.text;
-      el.style.left = (point.x * 0.5 + 0.5) * stage.clientWidth + 'px';
-      el.style.top = (-point.y * 0.5 + 0.5) * stage.clientHeight + (row.offsetY || 0) + 'px';
-      labelRoot.append(el);
-      count++;
+      let el = labelRoot.children[count++];
+      if (!el) {
+        el = document.createElement('span');
+        labelRoot.append(el);
+      }
+      if (el.textContent !== row.text) el.textContent = row.text;
+      el.style.left = (point.x * 0.5 + 0.5) * width + 'px';
+      el.style.top = (-point.y * 0.5 + 0.5) * height + (row.offsetY || 0) + 'px';
     }
+    while (labelRoot.childElementCount > count) labelRoot.lastElementChild.remove();
   }
   const recovery = $('[data-graphics-recovery]');
   let graphicsLost = false,
@@ -921,6 +926,9 @@ export function installWorldExplorer(sim) {
     graphicsLost = false;
     recovery.hidden = true;
     reduceGroundResolution = true;
+    finderBackdrop?.invalidate();
+    groundEarth?.invalidateLandscape();
+    scopeView?.earth.invalidateLandscape();
     scopeView?.invalidate();
     lastLabels = 0;
     sim.dirty = true;
@@ -932,7 +940,8 @@ export function installWorldExplorer(sim) {
     persist();
     window.location.reload();
   };
-  let lastLabels = 0;
+  let lastLabels = 0,
+    lastLabelPose;
   function tick(wall, dt) {
     if (!mode || graphicsLost) return;
     sim.lastWall = wall;
@@ -1002,55 +1011,98 @@ export function installWorldExplorer(sim) {
             ) - offset;
           if (u === 1) heightFlight = null;
         }
-        surface.update(state.site, sim.time);
         input.update(dt);
-        surface.update(state.site, sim.time);
         Object.assign(settings, readWorldSkySettings(sim.environment));
         const observing = starPanel.active;
         scopeState.site = state.site;
         if (observing && !locationMap.pickerOpen) scopeWindow.input.step(dt);
         const reading = observing ? starPanel.tick() : null;
         const expanded = scopeWindow.layout === 'expanded';
+        const mainClear =
+          !expanded && surface.clearsSky(state.site, state.elevation, settings.fov, w / h);
+        // At a fixed site both instruments can be looking entirely above the
+        // hills. Resume tile planning and patch generation when either needs land.
+        if (!observing || (!expanded && !mainClear) || !scopeView.clearsSky())
+          surface.update(state.site, sim.time);
         let status;
         if (!expanded) {
-          const outerSettings = observing
-            ? {
-                ...settings,
-                stargazing: true,
-                finderEnhanced: observatory.finderEnhanced,
-                referenceSource: null,
-                seeThroughTerrain: false,
-                eyeCircleDiameter: 0,
-              }
-            : settings;
-          status = sky.update(state.site, sim.time, state, outerSettings, w, h, reading?.sky);
-          locationMap.update(state.site, state.azimuth, settings.fov);
-          groundCamera.near = Math.max(0.1, Math.min(1000, state.site.height * 0.00001));
-          groundCamera.far = Math.max(30000000, state.site.height + 20000000);
-          groundCamera.position.set(0, 0, state.site.height);
-          groundCamera.quaternion.copy(sky.camera.quaternion);
-          groundCamera.aspect = w / h;
-          groundCamera.fov = settings.fov;
-          groundCamera.updateProjectionMatrix();
-          groundCamera.updateMatrixWorld();
-          light.position.fromArray(status.sunDirection).multiplyScalar(10000);
-          light.intensity = Math.max(0, Math.min(3, status.sunAltitude / 5));
-          ambient.intensity = 0.025 + Math.max(0, Math.min(0.7, (status.sunAltitude + 12) / 40));
-          sky.render();
-          groundEarth.update({
-            time: sim.time,
-            ...groundRenderPose(state.site, sim.time, groundCamera.quaternion),
-            fov: settings.fov,
-            aspect: w / h,
-            width: w,
-            height: h,
-            nearPatch: surface.getPatch(),
-            daylightTerrain: observing && observatory.daylightTerrain,
-            hideGeography: observing,
-            finderEnhanced: observing && observatory.finderEnhanced,
-          });
-          renderer.clearDepth();
-          groundEarth.render({ seeThroughTerrain: outerSettings.seeThroughTerrain });
+          const poseKey = [
+            state.azimuth,
+            state.elevation,
+            state.rollDegrees,
+            state.site.latitude,
+            state.site.longitude,
+            state.site.height,
+            settings.fov,
+            w,
+            h,
+            renderer.getPixelRatio(),
+          ].join('|');
+          const shareFrame = observing && scopeView.interacting(wall);
+          if (shareFrame) {
+            finderBackdrop ??= createGroundFinderBackdrop(renderer);
+            // Keep sidereal motion in the wide field below a quarter pixel.
+            status = finderBackdrop.show(
+              poseKey,
+              sim.time,
+              wall,
+              Math.min(500, (60000 * settings.fov) / (h * renderer.getPixelRatio()))
+            );
+          } else finderBackdrop?.invalidate();
+          if (!status) {
+            const outerSettings = observing
+              ? {
+                  ...settings,
+                  stargazing: true,
+                  finderEnhanced: observatory.finderEnhanced,
+                  referenceSource: null,
+                  seeThroughTerrain: false,
+                  eyeCircleDiameter: 0,
+                }
+              : settings;
+            status = sky.update(state.site, sim.time, state, outerSettings, w, h, reading?.sky);
+            locationMap.update(state.site, state.azimuth, settings.fov);
+            groundCamera.near = Math.max(0.1, Math.min(1000, state.site.height * 0.00001));
+            groundCamera.far = Math.max(30000000, state.site.height + 20000000);
+            groundCamera.position.set(0, 0, state.site.height);
+            groundCamera.quaternion.copy(sky.camera.quaternion);
+            groundCamera.aspect = w / h;
+            groundCamera.fov = settings.fov;
+            groundCamera.updateProjectionMatrix();
+            groundCamera.updateMatrixWorld();
+            light.position.fromArray(status.sunDirection).multiplyScalar(10000);
+            light.intensity = Math.max(0, Math.min(3, status.sunAltitude / 5));
+            ambient.intensity = 0.025 + Math.max(0, Math.min(0.7, (status.sunAltitude + 12) / 40));
+            sky.render();
+            const clearSky = mainClear;
+            groundEarth.update({
+              time: sim.time,
+              ...groundRenderPose(state.site, sim.time, groundCamera.quaternion),
+              fov: settings.fov,
+              aspect: w / h,
+              width: w,
+              height: h,
+              nearPatch: surface.getPatch(),
+              // Translation changes foreground parallax. Draw the native
+              // field directly while walking instead of building a new cache.
+              landscapeView:
+                !outerSettings.seeThroughTerrain &&
+                (clearSky || observing || state.speedMps < 0.001)
+                  ? {
+                      site: state.site,
+                      rotation: groundCamera.quaternion,
+                      clearSky,
+                      finder: observing,
+                    }
+                  : null,
+              daylightTerrain: observing && observatory.daylightTerrain,
+              hideGeography: observing,
+              finderEnhanced: observing && observatory.finderEnhanced,
+            });
+            renderer.clearDepth();
+            groundEarth.render({ seeThroughTerrain: outerSettings.seeThroughTerrain });
+            if (shareFrame) finderBackdrop.capture(poseKey, sim.time, wall, status);
+          }
           if (observing) {
             rig.root.position.z =
               surface.heightAt(state.site.latitude, state.site.longitude) ??
@@ -1059,7 +1111,9 @@ export function installWorldExplorer(sim) {
             renderer.clearDepth();
             renderer.render(rigScene, groundCamera);
           }
-          if (wall - lastLabels > 250) {
+          const labelPose = poseKey + groundEarth.maskRevision;
+          if ((observing && labelPose !== lastLabelPose) || wall - lastLabels > 250) {
+            lastLabelPose = labelPose;
             paintLabels(status.labels);
             lastLabels = wall;
           }

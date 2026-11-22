@@ -189,6 +189,32 @@ console.log(
   'Site picker: date-line and polar zoom anchoring, visible tile budgets, shared resident imagery, disk-only reads and cancel/reopen races passed'
 );
 
+// Turning at a fixed site should never decode the whole day map when newly
+// resident detail tiles repaint. A new site or a new day source needs a crop.
+{
+  const base = { width: 8192, height: 4096 };
+  const environment = { uniforms: { dayMap: { value: { image: base } } } };
+  const doc = globalThis.document;
+  const crops = [];
+  globalThis.document = {createElement: () => ({
+    getContext: () => ({setTransform(){}, drawImage(source){crops.push(source);}})
+  })};
+  try {
+    const imagery = createSiteMapImagery(environment, () => {});
+    const context = {canvas:{width:480,height:320},fillRect(){},drawImage(){}};
+    const frame = locationMapFrame({latitude:39.9,longitude:116.4},80,240,160);
+    imagery.draw(context, frame, false);
+    imagery.draw(context, frame, false);
+    assert.deepEqual(crops,[base]);
+    imagery.draw(context,locationMapFrame({latitude:40,longitude:116.4},80,240,160),false);
+    assert.equal(crops.length,2);
+    environment.uniforms.dayMap.value.image = {...base};
+    imagery.draw(context,frame,false);
+    assert.equal(crops.length,3);
+    imagery.dispose();
+  } finally {if (doc) globalThis.document=doc; else delete globalThis.document;}
+}
+
 // The app styles bare header/section globally (80px absolute toolbar,
 // section padding, last-child border removal, immersive-header hiding).
 // The minimap must not create any of those host-owned structural elements.

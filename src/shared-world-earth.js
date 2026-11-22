@@ -23,11 +23,17 @@ function acquirePatchGeometry(data) {
   let entry = patchGeometries.get(data);
   if (!entry) {
     const geometry = new THREE.BufferGeometry();
-    const positions = Float32Array.from(data.positions, (value) => value / 1000);
+    const positions = data.kilometres || Float32Array.from(data.positions, (value) => value / 1000);
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('uv', new THREE.BufferAttribute(data.uv, 2));
     geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));
-    geometry.computeVertexNormals();
+    if (data.normals) geometry.setAttribute('normal', new THREE.BufferAttribute(data.normals, 3));
+    else geometry.computeVertexNormals();
+    if (data.sphere)
+      geometry.boundingSphere = new THREE.Sphere(
+        new THREE.Vector3().fromArray(data.sphere),
+        data.sphere[3]
+      );
     entry = { geometry, users: 0 };
     patchGeometries.set(data, entry);
   }
@@ -95,6 +101,7 @@ export function createSharedWorldEarth({ environment: env, renderer, id, scene =
     nearHalfSize: { value: 0 },
     hasNearHole: { value: 0 },
     surfaceDepthPass: { value: 0 },
+    terrainUvProjection: { value: new THREE.Matrix3() },
     terrainDistance: { value: null },
     terrainViewport: { value: new THREE.Vector2(1, 1) },
     terrainViewportOrigin: { value: new THREE.Vector2() },
@@ -164,9 +171,13 @@ export function createSharedWorldEarth({ environment: env, renderer, id, scene =
     clouds = borrow(env.clouds),
     atmosphere = borrow(env.atmosphere),
     volume = borrow(env.volumeClouds);
+  const terrainUV = `uniform mat3 terrainUvProjection;
+vec2 terrainUVAtPixel(){vec2 ndc=2.*(gl_FragCoord.xy-terrainViewportOrigin)/terrainViewport-1.;
+vec3 uv=terrainUvProjection*vec3(ndc,1.);return .5+.5*uv.xy/uv.z;}`;
   atmosphere.material.fragmentShader =
     `#include <packing>
 uniform sampler2D terrainDistance;uniform vec2 terrainViewport,terrainViewportOrigin;uniform float terrainFar,terrainOcclusion,finderAirScale;
+${terrainUV}
 ` +
     atmosphere.material.fragmentShader
       .replaceAll(
@@ -176,12 +187,13 @@ uniform sampler2D terrainDistance;uniform vec2 terrainViewport,terrainViewportOr
       .replace(
         'if(ground.x>0.)end=min(end,ground.x);',
         `if(ground.x>0.)end=min(end,ground.x);
-     if(terrainOcclusion>.5){float terrainEnd=unpackRGBAToDepth(texture2D(terrainDistance,(gl_FragCoord.xy-terrainViewportOrigin)/terrainViewport))*terrainFar;
+     if(terrainOcclusion>.5){float terrainEnd=unpackRGBAToDepth(texture2D(terrainDistance,terrainUVAtPixel()))*terrainFar;
        if(terrainEnd<terrainFar*.9999){end=min(end,terrainEnd);ground.x=terrainEnd;}}`
       );
   const terrainDistanceGLSL = `#include <packing>
 uniform sampler2D terrainDistance;uniform vec2 terrainViewport,terrainViewportOrigin;uniform float terrainFar,terrainOcclusion;
-float terrainStop(){return unpackRGBAToDepth(texture2D(terrainDistance,(gl_FragCoord.xy-terrainViewportOrigin)/terrainViewport))*terrainFar;}
+${terrainUV}
+float terrainStop(){return unpackRGBAToDepth(texture2D(terrainDistance,terrainUVAtPixel()))*terrainFar;}
 `;
   volume.material.fragmentShader =
     terrainDistanceGLSL +
@@ -386,6 +398,52 @@ vec3 worldCloudAerial(vec3 p,vec3 color,vec3 s){
         surfaces: () => [earth, elevation.group, ...Object.values(patches).filter(Boolean)],
       })
     : null;
+  let landscape;
+  function landscapeKey(site, time, daylight, nearPatch) {
+    const values = [
+      site.latitude,
+      site.longitude,
+      site.height,
+      env.quality,
+      daylight,
+      nearPatch?.revision,
+      nearPatch?.surround?.revision,
+      earth.geometry.id,
+      elevation.group.visible,
+      elevation.base.geometry.id,
+      env.cityTerrain.revision,
+      uniforms.enhanced?.value,
+    ];
+    for (const m of elevation.tiles.values())
+      values.push(m.geometry.id, Math.floor(m.material.uniforms.terrainFade.value * 10));
+    for (const name of [
+      'dayMap',
+      'oceanMap',
+      ...(daylight ? [] : ['nightMap', 'cloudMap', 'cloudTemplateMap']),
+    ]) {
+      const tex = uniforms[name]?.value;
+      values.push(tex?.id, tex?.version);
+    }
+    for (const prefix of daylight ? ['detail'] : ['detail', 'nightDetail']) {
+      for (let i = 0; i < 4; i++)
+        values.push(
+          uniforms[prefix + 'Map' + i]?.value?.id,
+          Math.floor((uniforms[prefix + 'Fade' + i]?.value || 0) * 10)
+        );
+    }
+    for (let i = 0; i < (uniforms.cityCount?.value || 0); i++) {
+      const p = uniforms.cityParams.value[i];
+      values.push(p.x, Math.floor(p.y * 10));
+    }
+    if (!daylight)
+      values.push(
+        Math.floor(time / 10000),
+        uniforms.cloudAmount.value,
+        uniforms.cloudMode?.value,
+        uniforms.gloss?.value
+      );
+    return values.join('|');
+  }
   function renderEffects() {
     if (disposed || !root.visible) return;
     // The active modes use the same WebGL renderer and the same aurora targets.
@@ -414,6 +472,7 @@ vec3 worldCloudAerial(vec3 p,vec3 color,vec3 s){
       unitsPerKm = 1,
       displayScale = 1,
       nearPatch = null,
+      landscapeView = null,
     }) {
       if (disposed) return;
       const scale = unitsPerKm * displayScale;
@@ -463,23 +522,25 @@ vec3 worldCloudAerial(vec3 p,vec3 color,vec3 s){
       uniforms.finderAirScale.value = finderEnhanced
         ? 1 - 0.85 * THREE.MathUtils.smoothstep(solarElevationSin, -0.2, 0.12)
         : 1;
-      const detailView = { id, earthRotation, sun: uniforms.sun.value, daylightTerrain };
-      env.detail.update(camera, height * pixelRatio, detailView);
-      env.nightDetail.update(camera, height * pixelRatio, detailView);
+      if (!landscapeView?.clearSky) {
+        const detailView = { id, earthRotation, sun: uniforms.sun.value, daylightTerrain };
+        env.detail.update(camera, height * pixelRatio, detailView);
+        env.nightDetail.update(camera, height * pixelRatio, detailView);
 
-      const view = cityCameraView(camera, earthRotation, width * pixelRatio, height * pixelRatio);
-      applySurfaceStreamingSettings(env);
-      env.cityTerrain.setEnabled(env.settings.cityTerrain);
-      env.cityTerrain.autoEnabled = env.settings.cityAutoLoad;
-      env.cityTerrain.setView(id, view, 4);
-      env.elevation.setEnabled(env.settings.earthElevation);
-      env.elevation.setView(id, view, 4);
-      elevation.update(earthRotation);
-      adapt(elevation.base.material, true);
-      for (const mesh of elevation.tiles.values()) adapt(mesh.material, true);
-      earth.visible = !elevation.group.visible;
-      earth.quaternion.copy(earthRotation);
-      earth.geometry = env.earth.geometry;
+        const view = cityCameraView(camera, earthRotation, width * pixelRatio, height * pixelRatio);
+        applySurfaceStreamingSettings(env);
+        env.cityTerrain.setEnabled(env.settings.cityTerrain);
+        env.cityTerrain.autoEnabled = env.settings.cityAutoLoad;
+        env.cityTerrain.setView(id, view, 4);
+        env.elevation.setEnabled(env.settings.earthElevation);
+        env.elevation.setView(id, view, 4);
+        elevation.update(earthRotation);
+        adapt(elevation.base.material, true);
+        for (const mesh of elevation.tiles.values()) adapt(mesh.material, true);
+        earth.visible = !elevation.group.visible;
+        earth.quaternion.copy(earthRotation);
+        earth.geometry = env.earth.geometry;
+      }
       clouds.geometry = env.clouds.geometry;
       const detailed = !!env.quality && env.quality !== 'simple',
         volumetric = env.quality === 'high' && !!env.weather?.settings.volume;
@@ -514,7 +575,7 @@ vec3 worldCloudAerial(vec3 p,vec3 color,vec3 s){
         mesh.visible = !!env.aurora?.visible && !env.auroraCurtains?.volumeMaterial;
         mesh.quaternion.copy(earthRotation);
       }
-      setPatch(env.settings.earthElevation ? nearPatch : null);
+      if (!landscapeView?.clearSky) setPatch(env.settings.earthElevation ? nearPatch : null);
       geographicAnchor.quaternion.copy(earthRotation);
       geographicAnchor.visible = !hideGeography;
       viewport = { clientWidth: width, clientHeight: height };
@@ -523,13 +584,28 @@ vec3 worldCloudAerial(vec3 p,vec3 color,vec3 s){
           geography = createGeography();
         geography?.update({}, camera);
       }
+      landscape = landscapeView && {
+        clearSky: landscapeView.clearSky,
+        // The fallback aurora shells add light directly to the scene.
+        finder: landscapeView.finder && !aurora.some((mesh) => mesh.visible),
+        rotation: landscapeView.rotation,
+        key: landscapeView.clearSky
+          ? null
+          : landscapeKey(landscapeView.site, time, daylightTerrain, nearPatch),
+      };
       scene.updateMatrixWorld(true);
     },
     render({ seeThroughTerrain = false } = {}) {
-      if (!disposed && ownScene) compositor.render(seeThroughTerrain, renderEffects);
+      if (!disposed && ownScene) compositor.render(seeThroughTerrain, renderEffects, landscape);
     },
-    terrainBlocksScreen(x, y) {
-      return compositor?.blocksScreen(x, y) ?? false;
+    invalidateLandscape() {
+      compositor?.invalidate();
+    },
+    get maskRevision() {
+      return compositor?.maskRevision;
+    },
+    terrainBlocksScreen(x, y, defer = false) {
+      return compositor ? compositor.blocksScreen(x, y, defer) : false;
     },
     renderEffects,
     dispose() {

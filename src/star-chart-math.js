@@ -20,43 +20,59 @@ export function placeSkyLabels(
         ? Math.max(8, Math.round(((width * height) / 9000) * (0.15 + 4 * density * density)))
         : Math.round(18 + density * 78),
     edgeY = Math.max(5, verticalInset),
-    cell = 64,
-    buckets = new Map(),
+    cell = 32,
+    cols = Math.max(1, Math.ceil(width / cell)),
+    rows = Math.max(1, Math.ceil(height / cell)),
+    buckets = [],
     placed = [];
-  const cells = (rect) => {
-    const out = [];
-    for (let x = Math.floor(rect.x / cell); x <= Math.floor((rect.x + rect.w) / cell); x++)
-      for (let y = Math.floor(rect.y / cell); y <= Math.floor((rect.y + rect.h) / cell); y++)
-        out.push(x + ':' + y);
-    return out;
-  };
-  const overlaps = (a, b) =>
-    a.x < b.x + b.w + gap &&
-    a.x + a.w + gap > b.x &&
-    a.y < b.y + b.h + gap &&
-    a.y + a.h + gap > b.y;
+  function scan(rect, register) {
+    const pad = register ? 0 : gap;
+    const left = Math.min(cols - 1, Math.max(0, Math.floor((rect.x - pad) / cell)));
+    const right = Math.max(0, Math.min(cols - 1, Math.floor((rect.x + rect.w + pad) / cell)));
+    const top = Math.min(rows - 1, Math.max(0, Math.floor((rect.y - pad) / cell)));
+    const bottom = Math.max(0, Math.min(rows - 1, Math.floor((rect.y + rect.h + pad) / cell)));
+    for (let y = top; y <= bottom; y++)
+      for (let x = left; x <= right; x++) {
+        const key = y * cols + x;
+        if (register) {
+          (buckets[key] ??= []).push(rect);
+          continue;
+        }
+        if (!buckets[key]) continue;
+        for (const other of buckets[key]) {
+          if (
+            rect.x < other.x + other.w + gap &&
+            rect.x + rect.w + gap > other.x &&
+            rect.y < other.y + other.h + gap &&
+            rect.y + rect.h + gap > other.y
+          )
+            return true;
+        }
+      }
+    return false;
+  }
+  function tryPlace(item, dx, dy) {
+    const x = item.x + dx,
+      y = item.y + dy;
+    if (x < 5 || y < edgeY || x + item.w > width - 5 || y + item.h > height - edgeY) return false;
+    const rect = { x, y, w: item.w, h: item.h };
+    if (scan(rect, false)) return false;
+    scan(rect, true);
+    placed.push({ ...item, dx, dy, rect });
+    return true;
+  }
+  // Thousands of deep-sky symbols may reserve label space in a single wide
+  // field. Look up only the cells a candidate touches, including its margin.
+  if (!all) for (const rect of reserved) scan(rect, true);
   for (const item of candidates) {
     if (placed.length >= limit) break;
     const anchor = Math.max(
       8,
       Number.isFinite(item.anchorRadius) && item.anchorRadius > 0 ? item.anchorRadius + gap + 2 : 8
     );
-    const verticalAnchor = Math.max(8, (item.symbol?.height || 0) / 2 + gap + 2);
-    const centeredX = Math.max(5 - item.x, Math.min(width - 5 - item.w - item.x, -item.w / 2));
-    const positions = item.centered
-      ? [[-item.w / 2, -item.h / 2]]
-      : [
-          [anchor, -item.h / 2],
-          [-item.w - anchor, -item.h / 2],
-          [anchor, -item.h - 7],
-          [anchor, 7],
-          [-item.w - anchor, -item.h - 7],
-          [-item.w - anchor, 7],
-          [centeredX, -item.h - verticalAnchor],
-          [centeredX, verticalAnchor],
-        ];
     if (all) {
-      const [initialX, initialY] = positions[0],
+      const initialX = item.centered ? -item.w / 2 : anchor,
+        initialY = -item.h / 2,
         x = Math.max(0, Math.min(width - item.w, item.x + initialX)),
         y = Math.max(verticalInset, Math.min(height - verticalInset - item.h, item.y + initialY));
       placed.push({
@@ -67,31 +83,18 @@ export function placeSkyLabels(
       });
       continue;
     }
-    for (const [dx, dy] of positions) {
-      const rect = { x: item.x + dx, y: item.y + dy, w: item.w, h: item.h };
-      if (
-        rect.x < 5 ||
-        rect.y < edgeY ||
-        rect.x + rect.w > width - 5 ||
-        rect.y + rect.h > height - edgeY
-      )
-        continue;
-      if (reserved.some((other) => overlaps(rect, other))) continue;
-      const keys = cells({
-        x: rect.x - gap,
-        y: rect.y - gap,
-        w: rect.w + gap * 2,
-        h: rect.h + gap * 2,
-      });
-      if (keys.some((key) => (buckets.get(key) || []).some((other) => overlaps(rect, other))))
-        continue;
-      for (const key of keys) {
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(rect);
-      }
-      placed.push({ ...item, dx, dy, rect });
-      break;
+    const verticalAnchor = Math.max(8, (item.symbol?.height || 0) / 2 + gap + 2);
+    const centeredX = Math.max(5 - item.x, Math.min(width - 5 - item.w - item.x, -item.w / 2));
+    if (item.centered) {
+      tryPlace(item, -item.w / 2, -item.h / 2);
+      continue;
     }
+    const left = -item.w - anchor;
+    if (tryPlace(item, anchor, -item.h / 2) || tryPlace(item, left, -item.h / 2)) continue;
+    if (tryPlace(item, anchor, -item.h - 7) || tryPlace(item, anchor, 7)) continue;
+    if (tryPlace(item, left, -item.h - 7) || tryPlace(item, left, 7)) continue;
+    if (!tryPlace(item, centeredX, -item.h - verticalAnchor))
+      tryPlace(item, centeredX, verticalAnchor);
   }
   return placed;
 }

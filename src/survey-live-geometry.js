@@ -74,8 +74,8 @@ export function targetEdges(target, axes, fovY, aspect) {
       dot(v, axes.forward),
     ]),
     segments = [];
-  for (let i = 0; i < 4; i++) {
-    const clipped = clipLine(pts[i], pts[(i + 1) % 4], planes);
+  for (let i = 0; i < pts.length; i++) {
+    const clipped = clipLine(pts[i], pts[(i + 1) % pts.length], planes);
     if (clipped)
       segments.push(
         clipped.map(([x, y, z]) => [0.5 + (0.5 * x) / (z * kx), 0.5 - (0.5 * y) / (z * ky)])

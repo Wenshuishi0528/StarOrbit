@@ -1,3 +1,5 @@
+import { createTerrainPatchWorker } from './ground-terrain-patch-client.js';
+import { terrainCeiling, skyClearsTerrain } from './ground-terrain-horizon.js';
 import * as THREE from 'three';
 import { ELEVATION_SOURCE } from './earth-elevation-source.js';
 import { elevationTile, sampleElevationBase, sampleElevationMesh } from './earth-elevation-math.js';
@@ -332,6 +334,79 @@ export function sampleGroundRaster(base, latitude, longitude) {
   );
 }
 
+export function makeMeasuredSampler(sourceGrids, sourceLevels, base) {
+  return (lat, lon) => {
+    for (const z of sourceLevels) {
+      const rows = 2 ** z,
+        step = 180 / rows;
+      const x = Math.floor((wrap(lon) + 180) / step),
+        y = Math.min(rows - 1, Math.floor((90 - lat) / step));
+      const grid = sourceGrids.get(`${z}/${x}/${y}`);
+      if (!grid) continue;
+      const h = sampleGroundGrid(grid, lat, lon);
+      if (h !== null) return h;
+    }
+    const original = sampleGroundRaster(base, lat, lon);
+    if (original !== null) return original;
+    return base?.nodeHeights
+      ? sampleGroundGrid(
+          {
+            heights: base.nodeHeights,
+            bounds: base.bounds,
+            columns: base.columns,
+            rows: base.rows,
+          },
+          lat,
+          lon
+        )
+      : null;
+  };
+}
+
+function displayHeight(lat, lon, records, base, sample) {
+  for (const record of records) {
+    const surface = sampleElevationMesh(record.data, lon, lat);
+    if (!surface) continue;
+    const fade = record.fade;
+    if (fade === 1) return surface.heightMeters;
+    const from = sampleElevationMesh(
+      { ...record.data, positions: record.data.basePositions },
+      lon,
+      lat
+    );
+    if (from)
+      return (
+        (Math.hypot(
+          ...surface.position.map((v, i) => from.position[i] + (v - from.position[i]) * fade)
+        ) -
+          6371) *
+        1000
+      );
+  }
+  // The outer boundary meets the actual rendered globe, including its triangular chord sag.
+  return base?.positions
+    ? (sampleElevationBase(base, lon, lat)?.heightMeters ?? 0)
+    : (sample(lat, lon) ?? 0);
+}
+export function terrainPatchSampler(sample, base, records, surround, anchor, options) {
+  return (lat, lon, east, north) => {
+    const measured = sample(lat, lon) ?? 0;
+    const contact = !options.spacingScale;
+    const start = contact ? 0.875 : 0.8;
+    const edge = clamp(
+      (Math.max(Math.abs(east), Math.abs(north)) / options.halfSize - start) / (1 - start),
+      0,
+      1
+    );
+    if (!edge || (contact && !surround)) return measured;
+    const outer = contact
+      ? sampleGroundPatch(surround, anchor, lat, lon)
+      : displayHeight(lat, lon, records, base, sample);
+    const blend = edge * edge * (3 - 2 * edge);
+    return outer == null ? measured : measured * (1 - blend) + outer * blend;
+  };
+}
+
 // This service owns only a local contact mesh. SharedWorldEarth owns its rendering
 // with the main Earth material, full globe and the same imagery/terrain managers.
 export function createGroundSurface({
@@ -344,6 +419,35 @@ export function createGroundSurface({
   const elevation = environment.elevation,
     group = new THREE.Group();
   scene?.add(group);
+  const worker = createTerrainPatchWorker();
+  let contactJob = null;
+  function buildPatch(kind, anchor, options, liveRecords = []) {
+    const records = liveRecords.map((r) => ({ data: r.data, fade: elevation.fade?.(r) ?? 1 }));
+    const sampler = terrainPatchSampler(
+      measuredSampler,
+      elevation.base,
+      records,
+      surround,
+      surroundSite,
+      options
+    );
+    const fallback = () => buildGroundPatchAsync(anchor, sampler, options, () => !disposed);
+    if (worker)
+      return worker
+        .build({
+          kind,
+          site: anchor,
+          options,
+          records,
+          base: elevation.base,
+          grids,
+          levels,
+          surround,
+          surroundSite,
+        })
+        .catch(() => (disposed ? null : fallback()));
+    return kind === 'contact' ? buildGroundPatch(anchor, sampler, options) : fallback();
+  }
   let site = null,
     patch = null,
     patchSite = null,
@@ -368,7 +472,7 @@ export function createGroundSurface({
   function entries() {
     if (cachedRevision !== elevation?.revision) {
       sortedEntries = [...(elevation?.entries?.values() || [])]
-        .filter((entry) => entry.heights)
+        .filter((entry) => entry.heights && entry.valid !== 0)
         .sort((a, b) => b.tile.z - a.tile.z);
       levels = [...new Set(sortedEntries.map((entry) => entry.tile.z))];
       grids = new Map(
@@ -382,62 +486,9 @@ export function createGroundSurface({
     }
     return sortedEntries;
   }
-  function makeMeasuredSampler(sourceGrids, sourceLevels, base) {
-    return (lat, lon) => {
-      for (const z of sourceLevels) {
-        const rows = 2 ** z,
-          step = 180 / rows;
-        const x = Math.floor((wrap(lon) + 180) / step),
-          y = Math.min(rows - 1, Math.floor((90 - lat) / step));
-        const grid = sourceGrids.get(`${z}/${x}/${y}`);
-        if (!grid) continue;
-        const h = sampleGroundGrid(grid, lat, lon);
-        if (h !== null) return h;
-      }
-      const original = sampleGroundRaster(base, lat, lon);
-      if (original !== null) return original;
-      return base?.nodeHeights
-        ? sampleGroundGrid(
-            {
-              heights: base.nodeHeights,
-              bounds: base.bounds,
-              columns: base.columns,
-              rows: base.rows,
-            },
-            lat,
-            lon
-          )
-        : null;
-    };
-  }
   function measuredHeight(lat, lon) {
     entries();
     return measuredSampler?.(lat, lon) ?? null;
-  }
-  function displayHeight(lat, lon, records) {
-    for (const record of records) {
-      const surface = sampleElevationMesh(record.data, lon, lat);
-      if (!surface) continue;
-      const fade = elevation.fade?.(record) ?? 1;
-      if (fade === 1) return surface.heightMeters;
-      const from = sampleElevationMesh(
-        { ...record.data, positions: record.data.basePositions },
-        lon,
-        lat
-      );
-      if (from)
-        return (
-          (Math.hypot(
-            ...surface.position.map((v, i) => from.position[i] + (v - from.position[i]) * fade)
-          ) -
-            6371) *
-          1000
-        );
-    }
-    // The outer boundary meets the actual rendered globe, including its triangular chord sag.
-    return elevation?.base?.positions
-      ? (sampleElevationBase(elevation.base, lon, lat)?.heightMeters ?? 0)
-      : (measuredHeight(lat, lon) ?? 0);
   }
   const displaced = (a, b) =>
     !a || !b
@@ -445,8 +496,39 @@ export function createGroundSurface({
       : Math.hypot(
           ...localFromECEF(enuFrame({ ...a, height: 0 }).origin, enuFrame({ ...b, height: 0 }))
         );
+  let nextPoll = -Infinity,
+    pollKey;
+  function measuredKey(site, halfSize) {
+    const latSpan = (1.5 * halfSize) / 110000,
+      pole = Math.min(90, Math.abs(site.latitude) + latSpan);
+    const lonSpan = Math.min(180, latSpan / Math.cos(pole * DEG));
+    return entries()
+      .filter(({ tile }) => {
+        const [w, s, e, n] = tile.bounds;
+        const lon = site.longitude + 360 * Math.round(((w + e) * 0.5 - site.longitude) / 360);
+        return (
+          s <= site.latitude + latSpan &&
+          n >= site.latitude - latSpan &&
+          w <= lon + lonSpan &&
+          e >= lon - lonSpan
+        );
+      })
+      .map((e) => e.tile.key + ':' + (e.revision ?? 0))
+      .join(',');
+  }
   function update(next) {
     if (disposed) return;
+    const now = performance.now();
+    const poll = [
+      next.latitude,
+      next.longitude,
+      next.height,
+      environment.settings?.surfaceElevationRangeKm,
+      elevation?.revision,
+    ].join('|');
+    if (worker && poll === pollKey && now < nextPoll) return;
+    nextPoll = now + 120;
+    pollKey = poll;
     site = { ...next };
     const rangeKm = clamp(Number(environment.settings?.surfaceElevationRangeKm) || 160, 20, 400);
     const halfSize = rangeKm * 1000;
@@ -472,7 +554,7 @@ export function createGroundSurface({
       planKey = nextPlanKey;
     }
     elevation?.setSamplingTiles?.(id, planned, 5);
-    const now = performance.now();
+    const contactKey = site.height <= 20000 ? measuredKey(site, contactHalfSize) : null;
     if (site.height > 20000) {
       if (patch) {
         patch = null;
@@ -484,34 +566,32 @@ export function createGroundSurface({
       (!patch ||
         Math.abs(patch.halfSize - contactHalfSize) > Math.max(500, contactHalfSize * 0.15) ||
         displaced(site, patchSite) > 500 ||
-        (lastRevision !== elevation.revision && now - lastBuild > 700))
+        (lastRevision !== contactKey && now - lastBuild > 700))
     ) {
-      patch = buildGroundPatch(
-        site,
-        (lat, lon, east, north) => {
-          const measured = measuredHeight(lat, lon) ?? 0;
-          const edge = clamp(
-            (Math.max(Math.abs(east), Math.abs(north)) / contactHalfSize - 0.875) / 0.125,
-            0,
-            1
-          );
-          if (!edge || !surround) return measured;
-          const outer = sampleGroundPatch(surround, surroundSite, lat, lon);
-          if (outer === null) return measured;
-          const blend = edge * edge * (3 - 2 * edge);
-          return measured * (1 - blend) + outer * blend;
-        },
-        {
+      if (!contactJob) {
+        const anchor = { ...site },
+          sourceRevision = contactKey,
+          ring = surround;
+        const result = buildPatch('contact', anchor, {
           segments: 256,
           halfSize: contactHalfSize,
           geoidUndulation,
           sphereRadius: 6371000,
+        });
+        function install(data) {
+          if (!data || disposed || site.height > 20000 || displaced(site, anchor) > 500) return;
+          patch = data;
+          patchSite = anchor;
+          lastRevision = ring === surround ? sourceRevision : -1;
+          lastBuild = performance.now();
+          revision++;
         }
-      );
-      patchSite = { ...site };
-      lastRevision = elevation.revision;
-      lastBuild = now;
-      revision++;
+        if (worker)
+          contactJob = result.then(install).finally(() => {
+            contactJob = null;
+          });
+        else install(result);
+      }
     }
     if (site.height > 200000) {
       if (surroundBuild) {
@@ -527,9 +607,7 @@ export function createGroundSurface({
     }
     const records = elevation?.records?.(renderViewId) || [];
     const sourceKey =
-      entries()
-        .map((e) => `${e.tile.key}:${e.revision || 0}`)
-        .join(',') +
+      measuredKey(site, halfSize) +
       '|' +
       records.map((r) => `${r.tile.key}:${Math.floor((elevation.fade?.(r) ?? 1) * 4)}`).join(',');
     const needsBuild =
@@ -541,27 +619,16 @@ export function createGroundSurface({
     if (
       needsBuild &&
       (!surroundBuild ||
-        surroundBuild.halfSize !== halfSize ||
-        displaced(site, surroundBuild.site) > 4000)
+        (!worker &&
+          (surroundBuild.halfSize !== halfSize || displaced(site, surroundBuild.site) > 4000)))
     ) {
       const buildSite = { ...site },
         generation = ++buildGeneration;
-      const sample = measuredSampler;
       const job = { site: buildSite, halfSize, promise: null };
       surroundBuild = job;
-      job.promise = buildGroundPatchAsync(
+      job.promise = buildPatch(
+        'surround',
         buildSite,
-        (lat, lon, east, north) => {
-          const measured = sample(lat, lon) ?? 0;
-          const edge = clamp(
-            (Math.max(Math.abs(east), Math.abs(north)) / halfSize - 0.8) / 0.2,
-            0,
-            1
-          );
-          if (!edge) return measured;
-          const blend = edge * edge * (3 - 2 * edge);
-          return measured * (1 - blend) + displayHeight(lat, lon, records) * blend;
-        },
         {
           segments: 768,
           halfSize,
@@ -569,10 +636,16 @@ export function createGroundSurface({
           geoidUndulation,
           sphereRadius: 6371000,
         },
-        () => !disposed && generation === buildGeneration
+        records
       )
         .then((data) => {
-          if (!data || disposed || generation !== buildGeneration) return;
+          if (
+            !data ||
+            disposed ||
+            generation !== buildGeneration ||
+            displaced(site, buildSite) > 4000
+          )
+            return;
           surround = data;
           surroundSite = buildSite;
           surroundSourceKey = sourceKey;
@@ -613,9 +686,27 @@ export function createGroundSurface({
       credit: ready?.length ? ELEVATION_SOURCE.credit : 'NOAA NCEI ETOPO 2022',
     };
   }
+  let ceilingKey, ceiling;
+  function clearsSky(observer, elevationAngle, fov, aspect) {
+    const elevated = !!(environment.settings.earthElevation && elevation?.baseGeometry);
+    const key = [
+      observer.latitude,
+      observer.longitude,
+      observer.height,
+      elevated,
+      revision,
+      surroundRevision,
+    ].join('|');
+    if (key !== ceilingKey) {
+      ceiling = terrainCeiling(observer, { data: patch, surround: { data: surround } }, elevated);
+      ceilingKey = key;
+    }
+    return skyClearsTerrain(elevationAngle, fov, aspect, ceiling);
+  }
   return {
+    clearsSky,
     update,
-    whenReady: () => surroundBuild?.promise ?? Promise.resolve(),
+    whenReady: () => Promise.all([contactJob, surroundBuild?.promise]),
     measuredHeight,
     heightAt: measuredHeight,
     group,
@@ -634,6 +725,7 @@ export function createGroundSurface({
     dispose() {
       if (disposed) return;
       disposed = true;
+      worker?.dispose();
       buildGeneration++;
       surroundBuild = null;
       elevation?.release?.(id);

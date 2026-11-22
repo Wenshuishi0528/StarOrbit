@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createGroundChartLayer } from './ground-chart-layer.js';
 import { StarChart } from './star-chart.js';
 import { SkyDetailLayer } from './sky-detail-layer.js';
 import { ConstellationArtLayer } from './constellation-art-layer.js';
@@ -65,7 +66,12 @@ export function applyWorldSkySettings(environment, patch) {
 // Only view geometry/material uniforms belong to this consumer. Physical Earth,
 // planets and terrain are drawn afterwards by the caller, so no geocentric mask
 // is applied to this centered sky pass.
-export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }) {
+export function createSharedWorldSky({
+  environment,
+  renderer,
+  id = 'world-sky',
+  groundObserver = false,
+}) {
   const scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(65, 1, 0.1, 3000);
   const chartScene = new THREE.Scene();
@@ -115,6 +121,7 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
     backdrop: chartScene,
     settings: {},
     skyOnly: true,
+    groundObserver,
     quality: environment.quality,
     api: { stage, camera },
     moon: { mesh: { position: new THREE.Vector3(), visible: false } },
@@ -125,6 +132,8 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
   const art = environment.constellationArt
     ? new ConstellationArtLayer(environment.constellationArt, id + '-art', false, 4)
     : null;
+  let denseLayer,
+    cacheText = false;
   let disposed = false,
     lastTime = NaN,
     showChart = true,
@@ -187,7 +196,20 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
         options.texturedGalaxy !== false && environment.galaxyTexture ? 1 : 0;
       galaxy.material.uniforms.brightness.value = brightness;
       showChart = options.showChart !== false;
+      adapter.bufferCatalogue = groundObserver && options.cacheCatalogue;
       if (showChart) chart.update(camera);
+      cacheText =
+        adapter.bufferCatalogue &&
+        !options.focusTargetId &&
+        s.catalogStarLabels &&
+        s.starLabelDensity === 1 &&
+        chart.group.visible &&
+        chart.labels.visible &&
+        chart.labels.geometry.instanceCount > 8000;
+      if (!cacheText && denseLayer) {
+        denseLayer.dispose();
+        denseLayer = null;
+      }
       showArt = options.showArt !== false;
       art?.update(
         view,
@@ -237,11 +259,21 @@ export function createSharedWorldSky({ environment, renderer, id = 'world-sky' }
       if (stars.parent === referenceScene) renderer.render(referenceScene, camera);
       else if (showDetail) renderer.render(detail.scene, camera);
       if (showArt && art) renderer.render(art.scene, camera);
-      if (showChart) renderer.render(chartScene, camera);
+      if (showChart && cacheText) {
+        chart.labels.visible = false;
+        try {
+          renderer.render(chartScene, camera);
+        } finally {
+          chart.labels.visible = true;
+        }
+        denseLayer ??= createGroundChartLayer(renderer);
+        denseLayer.draw(chart, camera);
+      } else if (showChart) renderer.render(chartScene, camera);
     },
     dispose() {
       if (disposed) return;
       disposed = true;
+      denseLayer?.dispose();
       detail.dispose();
       art?.dispose();
       if (limitedStarGeometry) {

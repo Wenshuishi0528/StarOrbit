@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { targetEdges } from './survey-live-geometry.js';
 import { t } from './i18n.js';
 import { mountScopeInput } from './xuntian-input.js';
 
@@ -15,7 +16,18 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
   guide.classList.add('ground-scope-guide');
   guide.setAttribute('aria-hidden', 'true');
   const outline = document.createElementNS(guide.namespaceURI, 'path');
-  guide.append(outline);
+  outline.id = 'ground-scope-guide-outline';
+  const defs = document.createElementNS(guide.namespaceURI, 'defs');
+  defs.append(outline);
+  guide.append(defs);
+  // Stroke the same short segments twice for contrast. An SVG blur allocates
+  // an intermediate surface as large as the finder while it is moving.
+  for (const layer of ['halo', 'line']) {
+    const use = document.createElementNS(guide.namespaceURI, 'use');
+    use.setAttribute('href', '#' + outline.id);
+    use.classList.add(layer);
+    guide.append(use);
+  }
   stage.append(guide, root);
   const node = (s) => root.querySelector(s),
     frame = node('.ground-scope-frame'),
@@ -46,57 +58,40 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
       h = stage.clientHeight;
     const fw = frame.clientWidth,
       fh = frame.clientHeight;
-    const projection = [];
-    let previous = false;
-    const add = (x, y) => {
-      dir.set(x, y, 0).unproject(scopeCamera).sub(scopeCamera.position);
-      dir.applyMatrix4(mainCamera.matrixWorldInverse);
-      if (dir.z >= -1e-7) {
-        previous = false;
-        return;
-      }
-      dir.applyMatrix4(mainCamera.projectionMatrix);
-      const px = ((1 + dir.x) * w) / 2,
-        py = ((1 - dir.y) * h) / 2;
-      if (!Number.isFinite(px + py)) {
-        previous = false;
-        return;
-      }
-      projection.push((previous ? 'L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1));
-      previous = true;
-    };
+    if (!(w > 0 && h > 0 && fw > 0 && fh > 0)) {
+      outline.removeAttribute('d');
+      return;
+    }
+    const corners = [];
+    const ray = (x, y) =>
+      dir.set(x, y, 0).unproject(scopeCamera).sub(scopeCamera.position).toArray();
     if (diameter > 0) {
-      for (let i = 0; i <= 48; i++) {
-        const a = (i * Math.PI) / 24;
-        const dx = Math.cos(a),
-          dy = Math.sin(a);
+      for (let i = 0; i < 48; i++) {
+        const angle = (i * Math.PI) / 24,
+          dx = Math.cos(angle),
+          dy = Math.sin(angle);
         const radius = Math.min(diameter / 2, fw / (2 * Math.abs(dx)), fh / (2 * Math.abs(dy)));
-        add((dx * radius * 2) / fw, (dy * radius * 2) / fh);
+        corners.push(ray((2 * dx * radius) / fw, (2 * dy * radius) / fh));
       }
-    } else {
-      const corners = [
-        [-1, 1],
-        [1, 1],
-        [1, -1],
-        [-1, -1],
-        [-1, 1],
-      ];
-      for (let i = 0; i < 4; i++)
-        for (let j = 0; j < 9; j++) {
-          const a = corners[i],
-            b = corners[i + 1];
-          add(a[0] + ((b[0] - a[0]) * j) / 8, a[1] + ((b[1] - a[1]) * j) / 8);
-        }
+    } else corners.push(ray(-1, 1), ray(1, 1), ray(1, -1), ray(-1, -1));
+    const axis = (x, y, z) => dir.set(x, y, z).applyQuaternion(mainCamera.quaternion).toArray();
+    const axes = { right: axis(1, 0, 0), up: axis(0, 1, 0), forward: axis(0, 0, -1) };
+    // Clip before perspective division. At the side of the finder, even a
+    // normal field can otherwise produce a dashed path millions of pixels long.
+    const edges = targetEdges({ corners }, axes, mainCamera.getEffectiveFOV(), mainCamera.aspect);
+    const point = ([x, y]) => (x * w).toFixed(1) + ' ' + (y * h).toFixed(1);
+    const path = edges.map(([a, b]) => 'M' + point(a) + 'L' + point(b));
+    dir.fromArray(ray(0, 0)).applyMatrix4(mainCamera.matrixWorldInverse);
+    if (dir.z < 0) {
+      dir.applyMatrix4(mainCamera.projectionMatrix);
+      if (Math.abs(dir.x) < 1 && Math.abs(dir.y) < 1) {
+        const x = ((1 + dir.x) * w) / 2,
+          y = ((1 - dir.y) * h) / 2;
+        path.push(`M${x - 7} ${y}h4m6 0h4M${x} ${y - 7}v4m0 6v4`);
+      }
     }
-    // A cross remains visible when a high-power field is smaller than a screen pixel.
-    previous = false;
-    add(0, 0);
-    if (previous && Math.abs(dir.x) < 1 && Math.abs(dir.y) < 1) {
-      const x = ((1 + dir.x) * w) / 2,
-        y = ((1 - dir.y) * h) / 2;
-      projection.push(`M${x - 7} ${y}h4m6 0h4M${x} ${y - 7}v4m0 6v4`);
-    }
-    outline.setAttribute('d', projection.join(' '));
+    const d = path.join(' ');
+    if (outline.getAttribute('d') !== d) outline.setAttribute('d', d);
   }
   return {
     frame,

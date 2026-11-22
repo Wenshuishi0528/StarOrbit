@@ -11,3 +11,11 @@ for(const density of [0,.55,1]){
 const crowded=placeSkyLabels([{key:'bright',x:100,y:100,w:60,h:24},{key:'faint',x:100,y:100,w:60,h:24}],200,200,.55);
 assert.equal(crowded[0].key,'bright');assert.ok(crowded.length<=2);
 console.log('Sky label occlusion, on-screen placement, priorities, overlap and density budget: passed');
+
+// Keep the margin between labels and reserved symbols even across a 64px
+// grid boundary, including symbols centered just outside the finder.
+const centered=(x,y)=>[{key:'target',x,y,w:10,h:10,centered:true}];
+const marker={x:64,y:27,w:4,h:4};
+assert.equal(placeSkyLabels(centered(57,30),180,90,1,[marker]).length,0);
+assert.equal(placeSkyLabels(centered(54,30),180,90,1,[marker]).length,1);
+assert.equal(placeSkyLabels(centered(13,30),180,90,1,[{x:-2,y:29,w:7,h:3}]).length,0);

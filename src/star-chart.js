@@ -33,7 +33,7 @@ varying vec2 texUV;varying vec3 color;varying float alpha;
 void main(){vec3 dir=normalize(anchor);bool hidden=dot(dir,earthDisc.xyz)>earthDisc.w||dot(dir,moonDisc.xyz)>moonDisc.w;
 alpha=hidden?0.:smoothstep(lifetime.x,lifetime.x+.18,clock)*(1.-smoothstep(lifetime.y,lifetime.y+.18,clock));
 color=tint;texUV=glyphRect.xy+uv*glyphRect.zw;vec4 p=projectionMatrix*modelViewMatrix*vec4(anchor,1.);
-p.xy+=(glyphOffset+position.xy*32.*glyphScale)*2./viewport*p.w;gl_Position=p;}`;
+p.xy+=(glyphOffset+position.xy*glyphRect.zw*glyphScale)*2./viewport*p.w;gl_Position=p;}`;
 const glyphAttributes = {
   anchor: 3,
   glyphOffset: 2,
@@ -323,8 +323,9 @@ export class StarChart {
       this.labels
     );
   }
-  ensureAtlas(language) {
-    if (this.language === language) return;
+  ensureAtlas(language, catalogueRuns) {
+    if (this.language === language && this.catalogueRuns === catalogueRuns) return;
+    this.catalogueRuns = catalogueRuns;
     const labels = this.constellations,
       chars = [
         ...new Set([
@@ -348,20 +349,53 @@ export class StarChart {
     ]) {
       for (const c of solarLabel(id, language)) if (!chars.includes(c)) chars.push(c);
     }
-    const side = 2 ** Math.ceil(Math.log2(Math.ceil(Math.sqrt(chars.length)) * CELL)),
-      canvas = document.createElement('canvas');
+    // Thousands of HIP labels reuse the same prefix and the same three-digit
+    // groups. Atlas these once and draw a few quads per number.
+    const runs = catalogueRuns
+      ? [
+          'HIP',
+          'NGC',
+          ...Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0')),
+          ...Array.from({ length: 1000 }, (_, i) => String(i).padStart(3, '0')),
+        ]
+      : [];
+    const entries = [...chars, ...runs];
+    const cells = chars.length + 2 * runs.length;
+    const side =
+      2 **
+      Math.ceil(Math.log2(Math.ceil(Math.sqrt(cells + 2 * Math.ceil(Math.sqrt(cells)))) * CELL));
+    const canvas = document.createElement('canvas');
     canvas.width = canvas.height = side;
     const ctx = canvas.getContext('2d');
     ctx.font = `500 ${FONT}px "PingFang SC","Microsoft YaHei",sans-serif`;
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = 'white';
     this.glyphs.clear();
-    chars.forEach((char, i) => {
-      const x = (i % (side / CELL)) * CELL,
-        y = Math.floor(i / (side / CELL)) * CELL;
-      ctx.fillText(char, x + 3, y + 25);
-      this.glyphs.set(char, { x, y, advance: ctx.measureText(char).width });
-    });
+    let x = 0,
+      y = 0;
+    for (const [index, entry] of entries.entries()) {
+      const width = index >= chars.length ? CELL * 2 : CELL;
+      if (x + width > side) {
+        x = 0;
+        y += CELL;
+      }
+      ctx.fillText(entry, x + 3, y + 25);
+      const metrics = ctx.measureText(entry);
+      const left = Math.max(0, Math.floor(3 - metrics.actualBoundingBoxLeft) - 1);
+      const right = Math.min(width, Math.ceil(3 + metrics.actualBoundingBoxRight) + 1);
+      const top = Math.max(0, Math.floor(25 - metrics.actualBoundingBoxAscent) - 1);
+      const bottom = Math.min(CELL, Math.ceil(25 + metrics.actualBoundingBoxDescent) + 1);
+      this.glyphs.set(entry, {
+        x: x + left,
+        y: y + bottom,
+        left,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+        advance: metrics.width,
+      });
+      x += width;
+    }
     this.texture?.dispose();
     this.texture = new THREE.CanvasTexture(canvas);
     this.texture.generateMipmaps = false;
@@ -496,7 +530,10 @@ export class StarChart {
       this.geometryKey = '';
       this.upload();
     }
-    this.ensureAtlas(language);
+    this.ensureAtlas(
+      language,
+      !!(this.env.groundObserver && s.catalogStarLabels && s.starLabelDensity === 1)
+    );
     this.uniforms.viewport.value.set(width, height);
     this.uniforms.clock.value = now;
     this.uniforms.brightness.value = brightness;
@@ -536,15 +573,54 @@ export class StarChart {
       hasMoon,
       follow,
       s.earthElevation,
+      this.env.bufferCatalogue,
     ].join('|');
+    // At full density the ground catalogue explicitly allows overlapping
+    // labels. Their celestial anchors already pan in the vertex shader. Keep
+    // a border around the visible field instead of re-uploading every glyph
+    // for small head movements and sidereal rotation.
+    const buffered = this.catalogueRuns && this.env.bufferCatalogue && !focusTargetId;
+    const margin = buffered ? (width < 640 ? 2.5 : 2) : 1;
+    const tanY = Math.tan((camera.fov * Math.PI) / 360) / camera.zoom;
     const changed = key !== this.lastKey;
+    // Celestial anchors move on the GPU. In a still ground eyepiece, tiny
+    // sidereal shifts do not require a fresh collision/layout pass.
+    const groundLive = this.env.groundObserver && this.env.bufferCatalogue;
+    const pixelAngle = (2 * tanY) / height;
+    const rotationTolerance = groundLive ? Math.min(0.001, pixelAngle / 4) : 0;
+    let rotationChanged =
+      1 - Math.abs(camera.quaternion.dot(this.lastQuaternion)) >
+      Math.max(1e-12, 1 - Math.cos(rotationTolerance / 2));
+    if (buffered && !changed && rotationChanged) {
+      const relative = new THREE.Quaternion()
+        .copy(this.lastQuaternion)
+        .invert()
+        .multiply(camera.quaternion);
+      const corner = new THREE.Vector3(),
+        tanX = tanY * camera.aspect;
+      rotationChanged = false;
+      for (const x of [-tanX, tanX])
+        for (const y of [-tanY, tanY]) {
+          corner.set(x, y, -1).applyQuaternion(relative);
+          if (
+            Math.abs(corner.x) > -corner.z * tanX * margin ||
+            Math.abs(corner.y) > -corner.z * tanY * margin
+          )
+            rotationChanged = true;
+        }
+    }
     const moved =
-      1 - Math.abs(camera.quaternion.dot(this.lastQuaternion)) > 1e-12 ||
+      rotationChanged ||
       camera.position.distanceToSquared(this.lastPosition) > 1e-6 ||
       (hasMoon && this.env.moon.mesh.position.distanceToSquared(this.lastMoon) > 1e-6);
     const epoch = sim.current?.t,
       skyMoved =
-        (s.solarSystemLabels || s.equatorialGrid || s.eclipticLine) && epoch !== this.labelEpoch;
+        (s.solarSystemLabels || s.equatorialGrid || s.eclipticLine) &&
+        (buffered
+          ? Math.abs(epoch - this.labelEpoch) > 60000
+          : groundLive
+            ? Math.abs(epoch - this.labelEpoch) > Math.min(1000, rotationTolerance / 7.3e-8)
+            : epoch !== this.labelEpoch);
     const terrainKey = this.env.elevation?.key('main'),
       terrainMoved = terrainKey !== this.lastTerrainKey;
     if (
@@ -589,37 +665,51 @@ export class StarChart {
       axes,
       eyeKm: camera.position.toArray(),
       q: sim.current,
-      fovY: fov,
-      width,
-      height,
+      fovY: buffered ? (2 * Math.atan(margin * tanY) * 180) / Math.PI : fov,
+      width: width * margin,
+      height: height * margin,
       language,
       focusTargetId,
       showMoon: hasMoon,
       occludeBodies: !this.env.skyOnly,
-      blocked: (direction) =>
-        (terrainEye && this.env.elevation.skyOccluded(terrainEye, earthFixed(direction), 'main')) ||
-        this.hiddenBySpacecraft(new THREE.Vector3(...direction)),
+      // Use the actual glyph advances in the full-density atlas. Measuring
+      // thousands of new HIP identifiers on Canvas can stall a quick pan.
+      textWidth: buffered
+        ? (text, font) => {
+            let advance = 0;
+            for (const char of text) advance += this.glyphs.get(char)?.advance ?? 0;
+            return (advance * font) / FONT;
+          }
+        : undefined,
+      blocked:
+        terrainEye || follow
+          ? (direction) =>
+              (terrainEye &&
+                this.env.elevation.skyOccluded(terrainEye, earthFixed(direction), 'main')) ||
+              (follow && this.hiddenBySpacecraft(new THREE.Vector3(...direction)))
+          : undefined,
     });
-    const placed = layout.labels.map((label) => ({
-      ...label,
-      dir: new THREE.Vector3(...label.direction),
-    }));
     this.stats.candidates = layout.candidates;
     this.stats.visible = layout.total;
     this.stats.deepSky = layout.stats.deepSky;
     this.stats.scanned = layout.stats.scanned;
     this.stats.unfiltered = layout.unfiltered;
-    const next = new Map(
-      placed.map((p) => [
-        p.key,
-        {
-          ...p,
-          born:
-            this.shown.get(p.key)?.out === undefined ? (this.shown.get(p.key)?.born ?? now) : now,
-        },
-      ])
-    );
+    const next = new Map();
+    for (const label of layout.labels) {
+      label.dir = new THREE.Vector3(...label.direction);
+      const prior = this.shown.get(label.key);
+      // New entries of a buffered field arrive outside the screen. They can
+      // be installed in one upload, without a second pass to retire old glyphs.
+      label.born = buffered ? now - 0.2 : prior && prior.out === undefined ? prior.born : now;
+      next.set(label.key, label);
+    }
     this.retireAt = Infinity;
+    if (buffered) {
+      this.shown = next;
+      this.geometryKey = '';
+      this.upload();
+      return;
+    }
     for (const [key, previous] of this.shown)
       if (!next.has(key)) {
         const out = previous.out ?? now;
@@ -649,8 +739,14 @@ export class StarChart {
     this.upload();
   }
   upload() {
-    const indices = [0, 1, 2, 0, 2, 3],
-      count = [...this.shown.values()].reduce((sum, label) => sum + [...label.text].length, 0);
+    const indices = [0, 1, 2, 0, 2, 3];
+    let count = 0;
+    for (const label of this.shown.values()) {
+      label.glyphRun = this.catalogueRuns
+        ? label.text.match(/HIP|NGC|[0-9]{1,3}|./gu) || []
+        : label.text;
+      count += label.glyphRun.length;
+    }
     if (!this.glyphCapacity || count > this.glyphCapacity) {
       this.glyphCapacity = 2 ** Math.ceil(Math.log2(Math.max(32, count)));
       this.labels.geometry.dispose();
@@ -668,23 +764,29 @@ export class StarChart {
       symbolType: [],
       symbolSize: [],
     };
+    const colours = new Map(),
+      anchor = new THREE.Vector3();
+    function colour(value) {
+      if (!colours.has(value)) colours.set(value, new THREE.Color(value));
+      return colours.get(value);
+    }
     for (const label of this.shown.values()) {
       let pen = label.dx;
       const scale = label.font / FONT,
-        color = new THREE.Color(
+        color = colour(
           label.selected
             ? '#ffe5b3'
             : label.color ||
-              (label.kind === 'constellation'
-                ? '#d0c09a'
-                : label.kind === 'solar'
-                  ? '#ffdcab'
-                  : label.symbol?.labelColor || '#c8dce8')
+                (label.kind === 'constellation'
+                  ? '#d0c09a'
+                  : label.kind === 'solar'
+                    ? '#ffdcab'
+                    : label.symbol?.labelColor || '#c8dce8')
         );
-      const anchor = label.dir.clone().multiplyScalar(RADIUS);
+      anchor.copy(label.dir).multiplyScalar(RADIUS);
       if (label.symbol) {
         const symbol = label.symbol,
-          symbolColor = new THREE.Color(symbol.color),
+          symbolColor = colour(symbol.color),
           w = symbol.width / 2,
           h = symbol.height / 2;
         const corners = [
@@ -701,7 +803,7 @@ export class StarChart {
           ];
         const kind = symbol.shape === 'box' ? 1 : symbol.shape === 'cross-circle' ? 2 : 0;
         for (const index of indices) {
-          symbols.position.push(...label.dir.clone().multiplyScalar(RADIUS).toArray());
+          symbols.position.push(anchor.x, anchor.y, anchor.z);
           symbols.offset.push(...corners[index]);
           symbols.uv.push(...uv[index]);
           symbols.tint.push(symbolColor.r, symbolColor.g, symbolColor.b);
@@ -710,19 +812,27 @@ export class StarChart {
           symbols.symbolSize.push(symbol.width, symbol.height);
         }
       }
-      for (const char of label.text) {
+      for (const char of label.glyphRun) {
         const g = this.glyphs.get(char);
         if (!g) continue;
+        if (/^\s$/u.test(char)) {
+          pen += g.advance * scale;
+          continue;
+        }
         attributes.anchor.setXYZ(glyphIndex, anchor.x, anchor.y, anchor.z);
-        attributes.glyphOffset.setXY(glyphIndex, pen - 3 * scale, -label.dy - 25 * scale);
+        attributes.glyphOffset.setXY(
+          glyphIndex,
+          pen + (g.left - 3) * scale,
+          -label.dy + (CELL - g.bottom - 25) * scale
+        );
         attributes.glyphRect.setXYZW(
           glyphIndex,
           g.x / this.atlasSide,
-          1 - (g.y + CELL) / this.atlasSide,
-          CELL / this.atlasSide,
-          CELL / this.atlasSide
+          1 - g.y / this.atlasSide,
+          g.width / this.atlasSide,
+          g.height / this.atlasSide
         );
-        attributes.glyphScale.setX(glyphIndex, scale);
+        attributes.glyphScale.setX(glyphIndex, scale * this.atlasSide);
         attributes.tint.setXYZ(glyphIndex, color.r, color.g, color.b);
         attributes.lifetime.setXY(glyphIndex, label.born, label.out ?? 1e12);
         glyphIndex++;

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
+import {patchBoxes, skyClearsTerrain, terrainCeiling} from '../src/ground-terrain-horizon.js';
 import { elevationBaseMesh, sampleElevationBase } from '../src/earth-elevation-math.js';
 import {
   sampleGroundGrid,
@@ -10,6 +11,24 @@ import {
   buildGroundPatch,
   createGroundSurface,
 } from '../src/ground-world-surface.js';
+
+// Clip only if the entire rotated field clears the highest possible ridge.
+const localSite = { latitude: 0, longitude: 0, height: 50 };
+const mountain = { data: {
+  sphereRadius: 6371000, segments: 32, halfSize: 250000,
+  frame: {origin: [6371000,0,0], east:[0,1,0], north:[0,0,1], up:[1,0,0]},
+  horizonBoxes: [1000,1100,0,100,1050],
+} };
+const ceiling = terrainCeiling(localSite, mountain, true);
+assert(ceiling >= Math.PI / 4);
+assert.equal(skyClearsTerrain(50, 20, 1.6, ceiling), false);
+assert.equal(skyClearsTerrain(90, 20, 1.6, ceiling), true);
+assert.equal(skyClearsTerrain(8, 10, 2, 0), false);
+assert.equal(terrainCeiling(localSite, null, true), Math.PI / 2);
+assert.equal(terrainCeiling(localSite, null, false), 0);
+const bump = {segments:2, positions:new Float32Array(27)};
+bump.positions[14]=99; // interior peak, absent from all four corners
+assert.equal(patchBoxes(bump)[4], 99);
 
 const grid = {
   bounds: [-1, -1, 1, 1],

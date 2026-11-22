@@ -109,12 +109,15 @@
   z-index: 2;
   overflow: hidden;
 }
-.ground-scope-guide path {
+.ground-scope-guide use {
   fill: none;
   stroke: #83dbe3;
   stroke-width: 1.25;
   stroke-dasharray: 5 3;
-  filter: drop-shadow(0 1px 1px #000);
+}
+.ground-scope-guide .halo {
+  stroke: #091421bf;
+  stroke-width: 3;
 }
 .world-stage.has-ground-scope .world-panel-toggle {
   right: auto;

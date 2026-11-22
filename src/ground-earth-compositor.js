@@ -1,3 +1,5 @@
+import { createGroundAirPass } from './ground-air-pass.js';
+import { createGroundTerrainCache } from './ground-terrain-cache.js';
 import * as THREE from 'three';
 
 // A cheap distance pass uses the *same* terrain meshes, tile holes and camera.
@@ -34,8 +36,88 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
     if (old.width !== size.x || old.height !== size.y) old.setSize(size.x, size.y);
     return old;
   }
+  let cache,
+    air,
+    maskMode = 'direct';
+  function renderLandscape(landscape, effects) {
+    const prior = renderer.getRenderTarget(),
+      auto = renderer.autoClear,
+      alpha = renderer.getClearAlpha();
+    renderer.getClearColor(clearColor);
+    renderer.getCurrentViewport(viewport);
+    // Large export targets need not stay resident during normal observation.
+    if (distance && distance.width * distance.height > 2 * viewport.z * viewport.w) {
+      distance.dispose();
+      distance = null;
+    }
+    if (translucent) {
+      translucent.dispose();
+      translucent = null;
+      material.uniforms.image.value = null;
+    }
+    const children = root.children.map((o) => [o, o.visible]),
+      terrain = new Set(surfaces());
+    function showTerrain(onlyTerrain) {
+      for (const [o, visible] of children) o.visible = visible && terrain.has(o) === onlyTerrain;
+    }
+    renderer.autoClear = false;
+    try {
+      maskMode = landscape.clearSky ? 'sky' : 'cache';
+      uniforms.terrainOcclusion.value = 0;
+      if (!landscape.clearSky) {
+        cache ??= createGroundTerrainCache(renderer);
+        cache.paint(
+          camera,
+          landscape.rotation,
+          landscape.key,
+          viewport.z,
+          viewport.w,
+          (capture, depth, colour) => {
+            showTerrain(true);
+            uniforms.terrainFar.value = capture.far;
+            uniforms.terrainDistance.value = null;
+            uniforms.surfaceDepthPass.value = 1;
+            renderer.setRenderTarget(depth);
+            renderer.setClearColor(0xffffff, 1);
+            renderer.clear();
+            renderer.render(scene, capture);
+            uniforms.surfaceDepthPass.value = 0;
+            renderer.setRenderTarget(colour);
+            renderer.setClearColor(0, 0);
+            renderer.clear();
+            renderer.render(scene, capture);
+            renderer.setRenderTarget(prior);
+          }
+        );
+        uniforms.terrainDistance.value = cache.distance;
+        uniforms.terrainUvProjection.value.copy(cache.projection);
+        uniforms.terrainViewport.value.set(viewport.z, viewport.w);
+        uniforms.terrainViewportOrigin.value.set(viewport.x, viewport.y);
+        uniforms.terrainOcclusion.value = 1;
+      }
+      showTerrain(false);
+      if (landscape.finder) {
+        air ??= createGroundAirPass(renderer, uniforms);
+        air.draw(viewport.z, viewport.w, () => renderer.render(scene, camera));
+      } else renderer.render(scene, camera);
+      effects();
+    } finally {
+      for (const [o, v] of children) o.visible = v;
+      uniforms.surfaceDepthPass.value = uniforms.terrainOcclusion.value = 0;
+      uniforms.terrainUvProjection.value.identity();
+      renderer.setRenderTarget(prior);
+      renderer.setClearColor(clearColor, alpha);
+      renderer.autoClear = auto;
+    }
+  }
   return {
-    render(seeThrough, effects) {
+    invalidate() {
+      cache?.invalidate();
+      maskMode = 'sky';
+    },
+    render(seeThrough, effects, landscape) {
+      if (landscape && !seeThrough) return renderLandscape(landscape, effects);
+      maskMode = 'direct';
       const previous = renderer.getRenderTarget(),
         auto = renderer.autoClear;
       const face = renderer.getActiveCubeFace?.() ?? 0,
@@ -80,6 +162,7 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
         for (const [child] of visible) if (!terrain.has(child)) child.visible = false;
         uniforms.surfaceDepthPass.value = 1;
         uniforms.terrainOcclusion.value = 0;
+        uniforms.terrainDistance.value = null;
         renderer.setRenderTarget(distance);
         renderer.setClearColor(0xffffff, 1);
         renderer.clear();
@@ -123,7 +206,12 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
         renderer.autoClear = auto;
       }
     },
-    blocksScreen(x, y) {
+    get maskRevision() {
+      return maskMode === 'cache' ? cache.maskRevision : maskMode;
+    },
+    blocksScreen(x, y, defer) {
+      if (maskMode === 'sky') return false;
+      if (maskMode === 'cache') return cache.blocked(x, y, defer);
       if (!distance) return false;
       renderer.readRenderTargetPixels(
         distance,
@@ -137,6 +225,8 @@ export function createGroundEarthCompositor({ renderer, scene, camera, root, uni
       return pixel[0] !== 255 || pixel[1] !== 255 || pixel[2] !== 255 || pixel[3] !== 255;
     },
     dispose() {
+      air?.dispose();
+      cache?.dispose();
       distance?.dispose();
       translucent?.dispose();
       quad.geometry.dispose();

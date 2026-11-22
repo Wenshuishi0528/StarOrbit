@@ -65,3 +65,30 @@ assert.deepEqual(original.scissor.toArray(),[0,0,800,600]);
 assert.equal(original.scissorTest,false);
 eyepiece.dispose();background.dispose();
 console.log('Ground compositor: opaque default, opt-in composite, terrain masks, export sizing, allocation reuse/release and exception restoration passed');
+
+// A photo or the other camera can read pixels before the live mask fence resolves.
+const {createGroundTerrainCache}=await import('../src/ground-terrain-cache.js');
+let packBound=false, finishRead, drawCount=0, activeTarget=null;
+const fakeGL={PIXEL_PACK_BUFFER:0x88eb,bindBuffer(type,buffer){
+  assert.equal(type,this.PIXEL_PACK_BUFFER);packBound=buffer!==null;
+}};
+const landscape=createGroundTerrainCache({
+  capabilities:{maxTextureSize:128},getContext:()=>fakeGL,
+  render(){},getRenderTarget:()=>activeTarget,setRenderTarget(t){activeTarget=t;},
+  readRenderTargetPixelsAsync(t,x,y,w,h,bytes){
+    packBound=true;
+    return new Promise(resolve=>{finishRead=()=>resolve(bytes.fill(255));});
+  },
+  readRenderTargetPixels(t,x,y,w,h,bytes){assert.equal(packBound,false);bytes.fill(0);},
+});
+const lens=new THREE.PerspectiveCamera(50,1,.01,2000);
+const paint=stamp=>landscape.paint(lens,lens.quaternion,stamp,32,32,()=>drawCount++);
+paint('first');paint('first');assert.equal(drawCount,1);
+assert.equal(landscape.blocked(0,0,true),null);
+assert.equal(packBound,false);
+paint('replacement');
+assert.equal(landscape.blocked(0,0,false),false);
+finishRead();
+await new Promise(resolve=>setImmediate(resolve));
+assert.equal(landscape.blocked(0,0,true),false,'retired mask must not replace the current one');
+landscape.dispose();
