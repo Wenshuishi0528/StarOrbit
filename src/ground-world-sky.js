@@ -280,11 +280,6 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
       pixelRatio,
       brightness: brightness * opticalGain * (environment.settings.starBrightness ?? 1),
       detailBrightness: reference ? opticalGain : undefined,
-      // At eyepiece scale even the full all-sky cubemap spans many pixels per
-      // texel. Keep the smooth galactic band and the resolved catalogue stars.
-      // In natural stargazing the catalogue owns every point source, so a
-      // photographed star cannot remain visible after its magnitude is filtered.
-      texturedGalaxy: !stargazing,
       starMagnitudeLimit,
       catalogueOverlay: stargazing,
       cacheCatalogue: stargazing && settings.photoAnnotations === undefined,
@@ -309,7 +304,7 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
           : null
         : undefined,
       settings: stargazing
-        ? { skyDetail: !!reference, skyCulture: culture, stars: true, milky: true }
+        ? { skyDetail: !!reference, skyCulture: culture }
         : { skyCulture: culture },
     });
     const view = sharedStatus.view;

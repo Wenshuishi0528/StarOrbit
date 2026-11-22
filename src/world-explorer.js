@@ -165,7 +165,7 @@ export function installWorldExplorer(sim) {
     : [];
   const settings = {
     ...readWorldSkySettings(sim.environment),
-    appearance: 'natural',
+    appearance: 'galaxy',
     fov: 65,
     seeThroughTerrain: saved?.settings?.seeThroughTerrain === true,
   };
@@ -642,12 +642,20 @@ export function installWorldExplorer(sim) {
       if (key === 'appearance' && settings.appearance === 'dss')
         applyWorldSkySettings(sim.environment, { source: 'dss' });
       if (key === 'appearance' && settings.appearance === 'galaxy') {
-        sim.environment.settings.milky = true;
-        sim.environment.save();
+        enableGroundGalaxy();
       }
       syncSkyUI();
       persist();
     };
+  }
+  function enableGroundGalaxy() {
+    const env = sim.environment;
+    Object.assign(env.settings, { stars: true, milky: true, exposure: 'cinematic' });
+    document.getElementById('skyExposure').value = 'cinematic';
+    document.getElementById('showStars').checked = true;
+    document.getElementById('showMilky').checked = true;
+    applyWorldSkySettings(env, { source: 'galaxy', chart: env.settings.starChartEnabled });
+    if (!env.galaxyTexture && !env.skyLoading) env.setSkyStyle();
   }
   function syncSkyUI() {
     skyControls.refresh();
@@ -786,6 +794,12 @@ export function installWorldExplorer(sim) {
         manager?.release('main');
     }
     cancelDescent();
+    const env = sim.environment;
+    if (next === 'ground' && env.settings.groundSkyDefaultsVersion !== 1) {
+      env.settings.starChartEnabled = true;
+      env.settings.groundSkyDefaultsVersion = 1;
+      enableGroundGalaxy();
+    }
     Object.assign(settings, readWorldSkySettings(sim.environment));
     syncSkyUI();
     const departure = next === 'stellar' && mode === 'solar' ? solar.navigationPose() : null;
@@ -1055,7 +1069,7 @@ export function installWorldExplorer(sim) {
                   ...settings,
                   stargazing: true,
                   finderEnhanced: observatory.finderEnhanced,
-                  referenceSource: null,
+                  referenceSource: settings.source === 'galaxy' ? null : settings.source,
                   seeThroughTerrain: false,
                   eyeCircleDiameter: 0,
                 }
@@ -1143,7 +1157,7 @@ export function installWorldExplorer(sim) {
           const credits = sim.environment.skyDetail.status('ground-scope-detail').sources || [];
           const attribution = [
             ...new Set([
-              'StarOrbit · Hipparcos / Gaia',
+              'StarOrbit · Hipparcos / Gaia · NASA/Goddard SVS',
               ...credits.map((p) => p.credit).filter(Boolean),
             ]),
           ].join(' · ');
@@ -1249,7 +1263,7 @@ export function installWorldExplorer(sim) {
       const sources = [
         photoMode === 'ground'
           ? starPanel.active
-            ? 'StarOrbit · Hipparcos / Gaia'
+            ? 'StarOrbit · Hipparcos / Gaia · NASA/Goddard SVS'
             : credit.textContent
           : photoMode === 'stellar'
             ? 'StarOrbit · Hipparcos / van Leeuwen 2007 · J2000 · d3-celestial · Stellarium CC BY-SA 4.0 · NASA/Goddard SVS'

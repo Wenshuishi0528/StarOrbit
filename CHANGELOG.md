@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v1.66 · 2026-11-22
+
+地表漫游、观星主画面和地面望远镜默认开启星图标注，并按设备能力加载最高 16K 的银河。天体观测支持切换星图体系、标注和图源。
+
+Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources.
+
 ## v1.65 · 2026-11-22
 
 星星观察主画面大幅转头时，小地图复用本站点的裁图，取景框只绘制可见部分。优化云层、大气和密集天区标注，保留星点、星图和山脊轮廓的清晰度。

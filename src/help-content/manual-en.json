@@ -145,7 +145,7 @@
       {
         "id": "s5-4",
         "title": "5.4 Observe and photograph the sky from the ground",
-        "html": "<p>Enter a date and time in UTC+8 and choose “Go to time”, or use “Now” for the present. Pause or advance by a minute, an hour or a day per second. Reverse playback is available at an hour per second. Ground and Solar System views share the selected time.\nUnder “Sky &amp; annotations” select the natural sky for local daylight and darkness. The enhanced Milky Way and DSS survey settings show stellar imagery. Use “See the sky through terrain” to locate a constellation behind a mountain. “Take photo” saves the current sky, location and time, including your labels and terrain visibility. See <a href=\"#ch6\">sky-chart controls</a>.</p>"
+        "html": "<p>Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources.</p>\n<p>Enter a date and time in UTC+8 and choose “Go to time”, or use “Now” for the present. Pause or advance by a minute, an hour or a day per second. Reverse playback is available at an hour per second. Ground and Solar System views share the selected time.\nUnder “Sky &amp; annotations” select the natural sky for local daylight and darkness. The enhanced Milky Way and DSS survey settings show stellar imagery. Use “See the sky through terrain” to locate a constellation behind a mountain. “Take photo” saves the current sky, location and time, including your labels and terrain visibility. See <a href=\"#ch6\">sky-chart controls</a>.</p>"
       },
       {
         "id": "s5-5",

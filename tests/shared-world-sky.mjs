@@ -232,6 +232,10 @@ const enhanced = finder.update(site, noon, pose, { ...base, finderEnhanced: true
 assert.equal(enhanced.night, natural.night);
 assert.deepEqual(enhanced.sunDirection, natural.sunDirection);
 assert.equal(starMaterial(finder).uniforms.brightness.value, 1);
+function renderedGalaxy() {
+  return draws.flatMap(({scene}) => scene.children).find(o => o.material?.uniforms?.skyMap);
+}
+assert.equal(renderedGalaxy().material.uniforms.textured.value, 1, 'finder uses the photographic Milky Way');
 const optics = {
   ...base,
   finderEnhanced: true,
@@ -251,6 +255,7 @@ assert.equal(magnified.starCount, 4);
 assert.equal(magnified.view.pixelHeight, 250);
 assert.equal(magnified.view.aspect, 1.2);
 assert.equal(starMaterial(scope).uniforms.brightness.value, 8);
+assert.equal(renderedGalaxy().material.uniforms.textured.value, 1, 'eyepiece retains the photographic Milky Way');
 assert.equal(starMaterial(scope).uniforms.pixelRatio.value, 1.25);
 assert.equal(starMaterial(finder).uniforms.brightness.value, 1);
 const scopeRequest = requests.findLast((request) => request.id === 'ground-scope-detail');

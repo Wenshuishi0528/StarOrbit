@@ -1,6 +1,7 @@
 import { resizeRenderSurface } from './render-surface.js';
 import { installEarthObservationControls } from './earth-observation-controls.js';
 import { sampleElevationBase } from './earth-elevation-math.js';
+import { createSharedWorldSky, mountWorldSkyControls } from './shared-world-sky.js';
 import { createPlanetaryRenderer } from './planetary-renderer.js';
 import { findPlanetaryEvents, planetaryComparisonDates } from './planetary-events.js';
 import { MARS_FEATURES } from './mars-catalog.js';
@@ -39,6 +40,7 @@ export function installPlanetaryObservatory(sim) {
     panel = $('.planet-panel'),
     labels = $('.planet-overlay'),
     status = $('.planet-status');
+  const skyControls = mountWorldSkyControls(panel, sim.environment);
   const earthObservation = installEarthObservationControls({
     host,
     environment: sim.environment,
@@ -251,12 +253,14 @@ export function installPlanetaryObservatory(sim) {
       view = createPlanetaryRenderer({
         renderer,
         environment: sim.environment,
+        sky: createSharedWorldSky({ environment: sim.environment, renderer, id: 'planetary-sky' }),
         onPick: (pick) => selectFeature({ ...pick, name: t('已选地点') }),
         onMineralPick: (group) => {
           earthObservation.showSelection(group);
         },
       });
     }
+    skyControls.refresh();
     target = body;
     if (body === 'Earth') earthObservation.open();
     selection = null;
@@ -823,6 +827,7 @@ export function installPlanetaryObservatory(sim) {
     dispose() {
       close();
       off();
+      skyControls.dispose();
       earthObservation.dispose();
       entry.remove();
       host.remove();

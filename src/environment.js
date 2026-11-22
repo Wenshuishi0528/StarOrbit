@@ -134,6 +134,7 @@ export class Environment {
         normalizeGeographySettings(old),
         normalizeSurfaceStreamingSettings(old)
       );
+      if (old?.groundSkyDefaultsVersion === 1) this.settings.groundSkyDefaultsVersion = 1;
       if (old?.starChartCatalogDefaultVersion === 1)
         this.settings.starChartCatalogDefaultVersion = 1;
       for (const k of [

@@ -318,7 +318,7 @@ export function mountWorldSkyControls(host, environment, { onChange = () => {} }
     ['chineseSymbolArt', '总览插画 · 四象、三垣'],
   ];
   root.innerHTML =
-    '<summary data-key="星图与画面"></summary><label data-key="星空体系"></label><select data-setting="skyCulture"><option value="western" data-key="西方星座"></option><option value="chinese" data-key="中国星官"></option></select><label data-key="星空图源"></label><select data-setting="skyDetailSource"><option value="auto">Auto · DSS / Pan-STARRS</option><option value="galaxy" data-key="银河"></option><option value="dss">DSS2 Color</option><option value="panstarrs">Pan-STARRS</option><option value="recent" data-key="韦伯红外（JWST）"></option><option value="hubble" data-key="哈勃望远镜"></option></select>' +
+    '<summary data-key="星图与画面"></summary><label data-key="星空体系"></label><select data-setting="skyCulture"><option value="western" data-key="西方星座"></option><option value="chinese" data-key="中国星官"></option></select><label data-key="星空显示"></label><select data-setting="exposure"><option value="cinematic" data-key="观赏增强 · 16K 银河"></option><option value="view" data-key="4K · 星表观赏"></option><option value="photo" data-key="摄影风格 · 弱星空"></option></select><label data-key="星空图源"></label><select data-setting="skyDetailSource"><option value="auto">Auto · DSS / Pan-STARRS</option><option value="galaxy" data-key="银河"></option><option value="dss">DSS2 Color</option><option value="panstarrs">Pan-STARRS</option><option value="recent" data-key="韦伯红外（JWST）"></option><option value="hubble" data-key="哈勃望远镜"></option></select>' +
     checks
       .map(
         ([key, label]) =>
@@ -329,7 +329,10 @@ export function mountWorldSkyControls(host, environment, { onChange = () => {} }
   host.append(root);
   function refresh() {
     for (const el of root.querySelectorAll('[data-setting]')) {
-      const value = environment.settings[el.dataset.setting];
+      const value =
+        el.dataset.setting === 'skyDetailSource'
+          ? resolveSkyDetailSource(environment.settings)
+          : environment.settings[el.dataset.setting];
       if (el.type === 'checkbox') el.checked = !!value;
       else if (document.activeElement !== el) el.value = value;
     }
@@ -343,8 +346,26 @@ export function mountWorldSkyControls(host, environment, { onChange = () => {} }
     if (!key) return;
     environment.settings[key] =
       el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+    if (['exposure', 'milky', 'stars'].includes(key)) {
+      const main = document.getElementById(
+        { exposure: 'skyExposure', milky: 'showMilky', stars: 'showStars' }[key]
+      );
+      if (main && key === 'exposure') main.value = el.value;
+      else if (main) main.checked = el.checked;
+      environment.setSkyStyle();
+    }
     if (key === 'skyDetailSource') environment.settings.skyDetail = el.value !== 'galaxy';
-    if (key !== 'starChartEnabled') environment.settings.starChartEnabled = true;
+    if (
+      ![
+        'starChartEnabled',
+        'exposure',
+        'stars',
+        'milky',
+        'skyDetailSource',
+        'starBrightness',
+      ].includes(key)
+    )
+      environment.settings.starChartEnabled = true;
     syncStarChartControls(environment.settings);
     environment.skyDetailControls?.update?.();
     environment.save?.();

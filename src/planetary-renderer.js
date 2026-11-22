@@ -72,12 +72,14 @@ export function configurePlanetaryObservationCamera(camera, observation, fovArcs
 export function createPlanetaryRenderer({
   renderer,
   environment,
+  sky,
   onPick = () => {},
   onMineralPick = () => {},
 }) {
   const canvas = renderer.domElement,
     scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x030810);
+  const skyCamera = new THREE.PerspectiveCamera();
+  const basis = new THREE.Matrix4();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 100);
   camera.up.set(0, 0, 1);
   camera.position.set(3, -3, 1.8);
@@ -357,6 +359,18 @@ export function createPlanetaryRenderer({
     mesh.updateMatrixWorld(true);
     renderer.setViewport(rect.x, rect.y, rect.width, rect.height);
     renderer.setScissor(rect.x, rect.y, rect.width, rect.height);
+    if (sky) {
+      const axes = observation?.axes ?? earthAxes(settings.time);
+      skyCamera.fov = camera.fov;
+      skyCamera.quaternion
+        .setFromRotationMatrix(basis.makeBasis(...axes.map(vec)))
+        .multiply(camera.quaternion);
+      renderer.autoClear = false;
+      renderer.clear();
+      sky.update(skyCamera, settings.time, rect.width, rect.height);
+      sky.render();
+      renderer.clearDepth();
+    }
     renderer.render(scene, camera);
     return { observation, camera: camera.clone(), rect, settings: { ...settings } };
   }
@@ -523,6 +537,7 @@ export function createPlanetaryRenderer({
     dispose() {
       disposed = true;
       terrainRequest?.abort();
+      sky?.dispose();
       controls.dispose();
       canvas.removeEventListener('pointerdown', start);
       canvas.removeEventListener('pointerup', pick);

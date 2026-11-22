@@ -1,12 +1,14 @@
 # 开发、发布与维护
 
-适用版本：v1.65。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
+适用版本：v1.66。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
 
 ## 公开源码与统一发布
 
 原始仓库 `Wenshuishi0528/StarOrbit` 统一保存源码、开发历史、标签、Release 和便携附件，原创内容采用 CC BY-NC 4.0。Pages 由 `.github/workflows/pages.yml` 从 main 构建，地址保持 https://wenshuishi0528.github.io/StarOrbit/ 。
 
 2026-11-09 建立的临时展示仓库保留为私有 `Wenshuishi0528/StarOrbit-showcase-archive`；本机独立副本位于 `publish/public`，仅用于回溯，不参与正常发布。恢复公开沿用原始仓库身份与历史，不合并展示仓库的独立提交和重建标签。
+
+制作含双架构 macOS 启动器的便携包时，可在对应版本标签上手动运行 Build portable release。工作流构建独立 HTML 和启动器、核验 ZIP 文档与完整性，再将 ZIP 和 SHA-256 上传至草稿 Release。确认 Pages 部署和下载校验后发布草稿。
 
 授权发布时，在原始源码仓库完成检查与构建后推送 main，等待 Pages 工作流通过并读回线上版本及脚本；便携包、校验值和中英文说明发布到同一仓库的版本 Release。本次切换与验证记录见 [v1.45 发布记录](v1.45-release.md)。
 

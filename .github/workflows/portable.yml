@@ -1,0 +1,38 @@
+name: Build portable release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  portable:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Build and validate the tagged portable package
+        run: |
+          version=$(node -p "require('./package.json').displayVersion")
+          test "$GITHUB_REF_NAME" = "v$version"
+          npm run test:docs
+          node build.mjs
+          mkdir -p output/release
+          python3 scripts/create-macos-launcher.py --root . --output output/StarOrbit.app --portable
+          zip="output/release/StarOrbit-$GITHUB_REF_NAME-portable.zip"
+          python3 scripts/package-portable.py "$zip" --macos-launcher output/StarOrbit.app
+          python3 scripts/check-docs.py --package "$zip"
+          cd output/release
+          shasum -a 256 *.zip > SHA256SUMS.txt
+      - name: Stage download and checksum for publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk '/^## v/{if (found) exit; found=1; next} found' CHANGELOG.md > output/release-notes.md
+          gh release create "$GITHUB_REF_NAME" --verify-tag --draft --title "StarOrbit $GITHUB_REF_NAME" --notes-file output/release-notes.md output/release/*.zip output/release/SHA256SUMS.txt
