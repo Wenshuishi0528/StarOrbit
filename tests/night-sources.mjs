@@ -1,3 +1,4 @@
+import { STAR_CHART_DEFAULTS } from '../src/star-chart-settings.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -63,9 +64,9 @@ assert.deepEqual([...selector.matchAll(/value="([^"]+)"/g)].map(match => match[1
 const environment = fs.readFileSync('src/environment.js', 'utf8');
 const settings = environment.slice(environment.indexOf('    this.settings = {'), environment.indexOf('    try {\n      migrateStarDensityDefault'));
 assert(settings.includes('nightSourceDefaultVersion'), 'migration block located');
-const initialize = new Function('localStorage', 'normalizeStarChartSettings', 'normalizeGeographySettings', 'normalizeSurfaceStreamingSettings', 'QUALITY', 'THREE', 'resolveSkyDetailSource', settings + '\nreturn this.settings;');
+const initialize = new Function('STAR_CHART_DEFAULTS', 'localStorage', 'normalizeStarChartSettings', 'normalizeGeographySettings', 'normalizeSurfaceStreamingSettings', 'QUALITY', 'THREE', 'resolveSkyDetailSource', settings + '\nreturn this.settings;');
 function restored(old) {
-  return initialize.call({ assets }, { getItem: () => JSON.stringify(old) }, () => ({}), () => ({}), () => ({}), { high: {}, standard: {}, simple: {} }, { MathUtils: { clamp: (n,a,b) => Math.max(a, Math.min(b,n)) } }, () => 'auto');
+  return initialize.call({ assets }, STAR_CHART_DEFAULTS, { getItem: () => JSON.stringify(old) }, () => ({}), () => ({}), () => ({}), { high: {}, standard: {}, simple: {} }, { MathUtils: { clamp: (n,a,b) => Math.max(a, Math.min(b,n)) } }, () => 'auto');
 }
 for (const old of [null, {}, {nightSource:'2024-1km'}, {nightSource:'2016'}, {nightSourceDefaultVersion:1,nightSource:'missing'}]) {
   const result = restored(old);

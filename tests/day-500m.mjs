@@ -1,3 +1,4 @@
+import { STAR_CHART_DEFAULTS } from '../src/star-chart-settings.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -34,9 +35,9 @@ e.setSource({},24,12);let disposed=0;e.slots[0]={key:'19-3',texture:{dispose(){d
 e.setSource({},48,24);assert.equal(disposed,1);assert.equal(e.slots.length,4);
 assert.deepEqual(detailCell(116.4,39.9,48,24),{key:'39-6',x:39,y:6});assert.equal(detailRect({x:39,y:6},48,24)[2],1/48);
 const env=fs.readFileSync('src/environment.js','utf8');const settings=env.slice(env.indexOf('    this.settings = {'),env.indexOf('    try {\n      migrateStarDensityDefault'));
-const init=new Function('localStorage','normalizeStarChartSettings','normalizeGeographySettings','normalizeSurfaceStreamingSettings','QUALITY','THREE','resolveSkyDetailSource',settings+'\nreturn this.settings;');
+const init=new Function('STAR_CHART_DEFAULTS', 'localStorage','normalizeStarChartSettings','normalizeGeographySettings','normalizeSurfaceStreamingSettings','QUALITY','THREE','resolveSkyDetailSource',settings+'\nreturn this.settings;');
 const assets={daySources:Object.fromEntries(['2004','2026-q2-1km','2026-q2-500m'].map(k=>[k,{}]))};
-const restore=old=>init.call({assets},{getItem:()=>JSON.stringify(old)},()=>({}),()=>({}),()=>({}),{high:{}},{MathUtils:{clamp:(n,a,b)=>Math.max(a,Math.min(b,n))}},()=>'auto');
+const restore=old=>init.call({assets},STAR_CHART_DEFAULTS,{getItem:()=>JSON.stringify(old)},()=>({}),()=>({}),()=>({}),{high:{}},{MathUtils:{clamp:(n,a,b)=>Math.max(a,Math.min(b,n))}},()=>'auto');
 for(const old of [null,{}, {daySource:'2026-q2-1km'},{daySource:'unknown'}])assert.equal(restore(old).daySource,'2026-q2-500m');
 assert.equal(restore({daySource:'2004'}).daySource,'2004');
 for(const id of Object.keys(assets.daySources))assert.equal(restore({daySource:id,daySourceDefaultVersion:1}).daySource,id);
