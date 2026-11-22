@@ -1,5 +1,5 @@
 export const GEOGRAPHY_DEFAULTS = Object.freeze({
-  geographyEnabled: false,
+  geographyEnabled: true,
   geoCountries: true,
   geoCapitals: true,
   geoCities: true,

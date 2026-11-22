@@ -1110,7 +1110,6 @@ export function installWorldExplorer(sim) {
                     }
                   : null,
               daylightTerrain: observing && observatory.daylightTerrain,
-              hideGeography: observing,
               finderEnhanced: observing && observatory.finderEnhanced,
             });
             renderer.clearDepth();

@@ -12,10 +12,10 @@ export const STAR_CHART_DEFAULTS = Object.freeze({
   chineseSymbolOpacity: 0.2,
   constellationLines: true,
   constellationBoundaries: false,
-  equatorialGrid: false,
-  eclipticLine: false,
+  equatorialGrid: true,
+  eclipticLine: true,
   deepSkyObjects: true,
-  deepSkyScope: 'featured',
+  deepSkyScope: 'all',
   starLabelDensity: 0.95,
 });
 const checkboxIds = {

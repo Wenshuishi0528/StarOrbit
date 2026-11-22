@@ -20,7 +20,8 @@ jobs:
       - name: Build and validate the tagged portable package
         run: |
           version=$(node -p "require('./package.json').displayVersion")
-          test "$GITHUB_REF_NAME" = "v$version"
+          revision=${GITHUB_REF_NAME#"v$version"}
+          [[ "$GITHUB_REF_NAME" == "v$version" || "$revision" =~ ^-r[0-9]+$ ]]
           npm run test:docs
           node build.mjs
           mkdir -p output/release
@@ -29,10 +30,15 @@ jobs:
           python3 scripts/package-portable.py "$zip" --macos-launcher output/StarOrbit.app
           python3 scripts/check-docs.py --package "$zip"
           cd output/release
-          shasum -a 256 *.zip > SHA256SUMS.txt
+          shasum -a 256 *.zip > "SHA256SUMS-$GITHUB_REF_NAME.txt"
       - name: Stage download and checksum for publication
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           awk '/^## v/{if (found) exit; found=1; next} found' CHANGELOG.md > output/release-notes.md
+          if [[ "$GITHUB_REF_NAME" == *-r* ]]; then
+            gh release upload "${GITHUB_REF_NAME%-r*}" output/release/*.zip output/release/SHA256SUMS-*.txt
+            exit 0
+          fi
+          mv "output/release/SHA256SUMS-$GITHUB_REF_NAME.txt" output/release/SHA256SUMS.txt
           gh release create "$GITHUB_REF_NAME" --verify-tag --draft --title "StarOrbit $GITHUB_REF_NAME" --notes-file output/release-notes.md output/release/*.zip output/release/SHA256SUMS.txt

@@ -75,7 +75,7 @@ export function createGroundScopeView({
               }
             : null,
         daylightTerrain: observatory.daylightTerrain,
-        hideGeography: true,
+        hideGeography: settings.photoAnnotations === false,
         finderEnhanced: observatory.finderEnhanced,
       });
       renderer.clearDepth();

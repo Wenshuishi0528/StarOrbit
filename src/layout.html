@@ -109,7 +109,7 @@ __WORKSPACE_CSS__
 <button id="immersiveMode">进入沉浸全屏</button>
 <details data-memory-key="credits"><summary>素材与署名</summary><p class="small">地球：NASA Blue Marble / Black Marble 2016；Solar System Scope / INOVE，CC BY 4.0。星表：d3-celestial / XHIP，保留 BSD 3-Clause 声明。星空与示意银河改编自 Wenshuishi / StarSky Studio，CC BY 4.0。</p><a class="footer-link" href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer">地球素材 ↗</a> · <a class="footer-link" href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/" target="_blank" rel="noreferrer">NASA 地表 ↗</a> · <a class="footer-link" href="https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/" target="_blank" rel="noreferrer">NASA 夜光 ↗</a> · <a class="footer-link" href="https://github.com/Wenshuishi0528/StarSkyStudio" target="_blank" rel="noreferrer">星野来源 ↗</a> · <a class="footer-link" href="https://svs.gsfc.nasa.gov/4851/" target="_blank" rel="noreferrer">NASA 银河 ↗</a> · <a class="footer-link" href="https://svs.gsfc.nasa.gov/4720/" target="_blank" rel="noreferrer">NASA 月面 ↗</a><p class="small">云图：EUMETSAT / Live Cloud Maps。极光：NOAA SWPC OVATION。</p></details>
 </div></section><section data-settings-module="annotations"><h2 class="settings-heading"><button type="button" class="settings-toggle" aria-expanded="true" aria-controls="settings-annotations"><span>地理与星图</span><span class="settings-chevron" aria-hidden="true"></span></button></h2><div class="settings-content" id="settings-annotations"><details class="annotation-settings" data-memory-key="geography"><summary>地球地点标识</summary>
-<label class="check"><input id="geographyEnabled" type="checkbox">启用地球地点标识</label>
+<label class="check"><input id="geographyEnabled" type="checkbox" checked>启用地球地点标识</label>
 <div class="geography-options">
 <label class="check"><input id="geoCountries" type="checkbox" checked>国家名称</label>
 <label class="check"><input id="geoCapitals" type="checkbox" checked>首都</label>
@@ -152,11 +152,11 @@ __WORKSPACE_CSS__
 <label class="check"><input id="constellationNames" type="checkbox" checked><span id="skyCultureNamesLabel">星座名称</span></label>
 <label class="check"><input id="constellationLines" type="checkbox" checked><span id="skyCultureLinesLabel">星座连线</span></label>
 <label class="check"><input id="constellationBoundaries" type="checkbox">星座边界</label>
-<label class="check"><input id="equatorialGrid" type="checkbox">赤道坐标网 · 所选日期</label>
-<label class="check"><input id="eclipticLine" type="checkbox">黄道 · 所选日期</label>
+<label class="check"><input id="equatorialGrid" type="checkbox" checked>赤道坐标网 · 所选日期</label>
+<label class="check"><input id="eclipticLine" type="checkbox" checked>黄道 · 所选日期</label>
 <p class="small">赤道网与黄道随模拟日期更新，中西星图共用。赤经以小时、赤纬以度表示。</p>
 <label class="check"><input id="deepSkyObjects" type="checkbox" checked>深空目标 · 星云、星系与星团</label>
-<div class="row"><label for="deepSkyScope">深空目录</label><select id="deepSkyScope"><option value="featured">精选深空目标</option><option value="messier">梅西耶目录</option><option value="all">全部已收录目标</option></select></div>
+<div class="row"><label for="deepSkyScope">深空目录</label><select id="deepSkyScope"><option value="featured">精选深空目标</option><option value="messier">梅西耶目录</option><option value="all" selected>全部已收录目标</option></select></div>
 <p class="small">深空轮廓用于角尺度定位，不是摄影图像；星系用椭圆、星云用方框、星团用圆环。</p>
 <label class="small" for="starLabelDensity">标注密度</label><input id="starLabelDensity" type="range" min="0" max="1" step=".05" value=".95">
 <div class="star-chart-density"><span>少</span><span id="starDensityAuto">自动避让</span><span id="starDensityAll" hidden>全部（允许重叠）</span></div>

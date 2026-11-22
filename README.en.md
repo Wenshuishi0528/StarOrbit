@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.66 Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources. [Full changelog](CHANGELOG.md).
+> v1.66 Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources. Geographic and Xuntian finder labels default on. Opening the finder frames the telescope in the main view, with an 8× exterior field guide by default. The star chart defaults to the equatorial grid, ecliptic, full deep-sky catalog and 0.95 label density. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 

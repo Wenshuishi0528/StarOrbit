@@ -135,7 +135,7 @@ export function installXuntianScope(sim) {
     if (Number.isFinite(prefs.aperture)) aperture = clamp(prefs.aperture, 25, 2000);
     if (Number.isFinite(prefs.ev)) ev = clamp(prefs.ev, -3, 3);
     if (PHOTO_WIDTHS.includes(prefs.photoWidth)) photoWidth = prefs.photoWidth;
-    $('xtNames').checked = !!prefs.previewNames;
+    $('xtNames').checked = prefs.previewNamesDefaultVersion !== 1 || prefs.previewNames !== false;
     $('xtPhotoNames').checked = !!prefs.photoNames;
     $('xtShowGuide').checked = prefs.guide !== false;
     $('xtSkyCompass').checked = prefs.compass !== false;
@@ -148,6 +148,7 @@ export function installXuntianScope(sim) {
           aperture,
           ev,
           photoWidth,
+          previewNamesDefaultVersion: 1,
           previewNames: $('xtNames').checked,
           photoNames: $('xtPhotoNames').checked,
           guide: $('xtShowGuide').checked,
@@ -917,7 +918,7 @@ export function installXuntianScope(sim) {
     formation.refresh();
     update(sim.current, performance.now());
     sim.rebuild({ poseOnly: true });
-    needsFrame = true;
+    frameExternal('near');
     hud();
     canvas.focus({ preventScroll: true });
   }
@@ -1004,10 +1005,7 @@ export function installXuntianScope(sim) {
     optics = formation.update(q, axes);
     unavailable = !optics;
     if (!active) return;
-    if (needsFrame && optics) {
-      needsFrame = false;
-      frameExternal('near');
-    }
+    if (needsFrame && optics) frameExternal(exterior);
     if ($('xtShowGuide').checked && sim.view !== 'orbit') guide.update(optics, field, ASPECT);
     else guide.hide();
   }
@@ -1016,8 +1014,7 @@ export function installXuntianScope(sim) {
     const close = which === 'near';
     $('xtNear').setAttribute('aria-pressed', String(close));
     $('xtFrameBoth').setAttribute('aria-pressed', String(!close));
-    if (close) formation?.frameTelescope(panel);
-    else formation?.frameBoth(panel);
+    needsFrame = !(optics && (close ? formation.frameTelescope(panel) : formation.frameBoth(panel)));
   }
   const frame = () => ({
     ...solarControls.frame(),

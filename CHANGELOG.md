@@ -2,9 +2,9 @@
 
 ## v1.66 · 2026-11-22
 
-地表漫游、观星主画面和地面望远镜默认开启星图标注，并按设备能力加载最高 16K 的银河。天体观测支持切换星图体系、标注和图源。
+地表漫游、观星主画面和地面望远镜默认开启星图标注，并按设备能力加载最高 16K 的银河。天体观测支持切换星图体系、标注和图源。地理标注和巡天取景天体标注默认开启。打开巡天取景时主相机近看望远镜，外景视锥默认 8×。星图默认显示赤道坐标网、黄道及全部已收录深空目标，标注密度为 0.95。
 
-Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources.
+Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources. Geographic and Xuntian finder labels default on. Opening the finder frames the telescope in the main view, with an 8× exterior field guide by default. The star chart defaults to the equatorial grid, ecliptic, full deep-sky catalog and 0.95 label density.
 
 ## v1.65 · 2026-11-22
 

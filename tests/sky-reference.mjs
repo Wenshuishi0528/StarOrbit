@@ -14,8 +14,8 @@ const dot = (a,b) => a.reduce((s,v,i)=>s+v*b[i],0);
 const sph = (a,d) => [Math.cos(a*D)*Math.cos(d*D), Math.sin(a*D)*Math.cos(d*D), Math.sin(d*D)];
 const close = (a,b,eps=1e-11) => assert(Math.hypot(...a.map((v,i)=>v-b[i])) < eps, `${a} != ${b}`);
 const settings = normalizeStarChartSettings({ equatorialGrid:true, eclipticLine:true });
-assert.equal(normalizeStarChartSettings().equatorialGrid, false);
-assert.equal(normalizeStarChartSettings().eclipticLine, false);
+assert.equal(normalizeStarChartSettings().equatorialGrid, true);
+assert.equal(normalizeStarChartSettings().eclipticLine, true);
 for (const key of ['equatorialGrid','eclipticLine']) assert.throws(()=>normalizeStarChartSettings({[key]:'yes'}, {strict:true}));
 for (const year of [1600, 2000, 2026, 2100, 3000]) {
  const time = Date.UTC(year, 6, 1, 12, 34, 56), date = new Date(time), frames = skyReferenceFrames(time);

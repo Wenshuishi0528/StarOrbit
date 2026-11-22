@@ -1,6 +1,7 @@
 import { BufferGeometry, BufferAttribute, LineBasicMaterial, LineSegments } from 'three';
 import { onLanguageChange, t } from './i18n.js';
 
+const DEFAULT_SCALE = 8;
 const SCALES = [0.25, 0.5, 1, 2, 4, 8];
 const SCALE_KEY = 'starorbit-xuntian-guide-scale-v1';
 function mountScaleControl(toggle, setScale) {
@@ -11,7 +12,7 @@ function mountScaleControl(toggle, setScale) {
   select.id = 'xtGuideScale';
   label.append(caption, select);
   for (const value of SCALES) select.add(new Option(value + '×', String(value)));
-  let saved = 1;
+  let saved = DEFAULT_SCALE;
   try {
     const stored = Number(localStorage.getItem(SCALE_KEY));
     if (SCALES.includes(stored)) saved = stored;
@@ -65,7 +66,7 @@ export function makeScopeGuide(scene, toggle) {
   guide.frustumCulled = false;
   guide.name = 'Xuntian field of view';
   scene.add(guide);
-  let scale = 1,
+  let scale = DEFAULT_SCALE,
     current = null;
   function update(optics, fov, aspect) {
     if (!optics) {
@@ -98,7 +99,7 @@ export function makeScopeGuide(scene, toggle) {
     guide.visible = false;
   }
   function setScale(value) {
-    scale = SCALES.includes(value) ? value : 1;
+    scale = SCALES.includes(value) ? value : DEFAULT_SCALE;
     if (current) update(current.optics, current.fov, current.aspect);
   }
   const removeControl = toggle ? mountScaleControl(toggle, setScale) : null;

@@ -35,6 +35,7 @@ import { Geography } from './geography.js';
 import { normalizeGeographySettings, bindGeographyControls } from './geography-settings.js';
 import { StarChart } from './star-chart.js';
 import {
+  STAR_CHART_DEFAULTS,
   normalizeStarChartSettings,
   bindStarChartControls,
   migrateStarDensityDefault,
@@ -119,6 +120,8 @@ export class Environment {
       moon: true,
       ...normalizeStarChartSettings(),
       ...normalizeGeographySettings(),
+      geographyDefaultVersion: 1,
+      chartReferenceDefaultVersion: 1,
       clouds: true,
       cloudNightVisible: false,
       cloudOpacity: 0.85,
@@ -134,6 +137,11 @@ export class Environment {
         normalizeGeographySettings(old),
         normalizeSurfaceStreamingSettings(old)
       );
+      if (old?.chartReferenceDefaultVersion !== 1) {
+        for (const key of ['equatorialGrid', 'eclipticLine', 'deepSkyScope'])
+          this.settings[key] = STAR_CHART_DEFAULTS[key];
+      }
+      if (old?.geographyDefaultVersion !== 1) this.settings.geographyEnabled = true;
       if (old?.groundSkyDefaultsVersion === 1) this.settings.groundSkyDefaultsVersion = 1;
       if (old?.starChartCatalogDefaultVersion === 1)
         this.settings.starChartCatalogDefaultVersion = 1;

@@ -13,6 +13,8 @@ const square=[[0,0],[10,0],[10,10],[0,10],[0,0]],hole=[[4,4],[6,4],[6,6],[4,6],[
 assert.ok(ringContains(square,1,1));assert.ok(!ringContains(square,12,2));
 assert.ok(!regionContains({parts:[{box:[0,0,10,10],rings:[square,hole]}]},5,5));
 assert.deepEqual(normalizeGeographySettings(),GEOGRAPHY_DEFAULTS);
+assert.equal(normalizeGeographySettings().geographyEnabled,true);
+assert.equal(normalizeGeographySettings({geographyEnabled:false}).geographyEnabled,false);
 assert.deepEqual(normalizeGeographySettings({geoDensity:NaN,geoBorders:'yes'}),GEOGRAPHY_DEFAULTS);
 assert.throws(()=>normalizeGeographySettings({geoDensity:2},{strict:true}));
 assert.throws(()=>normalizeGeographySettings({geoCapitals:'yes'},{strict:true}));

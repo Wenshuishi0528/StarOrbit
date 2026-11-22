@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {STAR_CHART_DEFAULTS,normalizeStarChartSettings,syncStarChartControls,bindStarChartControls} from '../src/star-chart-settings.js';
 assert.deepEqual(normalizeStarChartSettings(),STAR_CHART_DEFAULTS);
+assert.equal(STAR_CHART_DEFAULTS.deepSkyScope,'all');
 assert.deepEqual(normalizeStarChartSettings(Object.create({starLabels:true})),STAR_CHART_DEFAULTS);
 assert.deepEqual(normalizeStarChartSettings({starLabels:false}),STAR_CHART_DEFAULTS);
 const legacy=normalizeStarChartSettings({starLabels:true});assert.equal(legacy.starChartEnabled,true);assert.equal(legacy.starLabels,true);assert.equal(legacy.catalogStarLabels,false);assert(!Object.hasOwn(legacy,'starLabelScope'));

@@ -3,8 +3,11 @@ async page=>{
  if(await page.locator('#welcomeDialog').evaluate(e=>e.open))await page.locator('#skipTour').click();
  await page.evaluate(()=>{const s=viewer.sim;s.seek(s.data.rows[Math.floor(s.data.rows.length/2)][0]);s.xuntian.open();});
  await page.waitForFunction(()=>viewer.sim.xuntian.optics&&viewer.sim.xuntian.result&&document.getElementById('xtGuideScale'));
- await page.locator('#xtMore').evaluate(el=>{el.open=true;});await page.locator('#xtNear').click();
- const scale=page.locator('#xtGuideScale');if(await scale.inputValue()!=='1')throw Error('The guide should start at its original size');
+ await page.locator('#xtMore').evaluate(el=>{el.open=true;});
+ await page.waitForFunction(()=>viewer.sim.cameraFocus.selected==='xuntian');
+ const scale=page.locator('#xtGuideScale');if(await scale.inputValue()!=='8')throw Error('The guide should start at 8×');
+ if(!await page.locator('#xtNames').isChecked()||await page.locator('#xtPhotoNames').isChecked())throw Error('Unexpected annotation defaults');
+ await scale.selectOption('1');
  const frames=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
  const focal=page.locator('#xtFocal');
  await focal.evaluate(el=>{el.value=String(Math.round(1000*Math.log(30/110)/Math.log(.35/110)));el.dispatchEvent(new Event('input',{bubbles:true}));});
