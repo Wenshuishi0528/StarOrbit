@@ -1,6 +1,7 @@
 import { resizeRenderSurface } from '../src/render-surface.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { advanceClock, invalidate, resumeClock } from '../src/sim-clock.js';
 import vm from 'node:vm';
 import { dateTimeText, dateTimeValue, stepDateTime } from '../src/date-time-input.js';
 // Exercise the actual UI lifecycle with a small DOM/canvas harness; astronomy and GPU
@@ -78,7 +79,14 @@ const presets = [],
   routes = [];
 const sim = {
   api: {
-    renderer: { domElement: canvas, getPixelRatio: () => 1, getSize: v => v.set(800, 600), setSize() {}, setViewport() {}, setScissorTest() {} },
+    renderer: {
+      domElement: canvas,
+      getPixelRatio: () => 1,
+      getSize: (v) => v.set(800, 600),
+      setSize() {},
+      setViewport() {},
+      setScissorTest() {},
+    },
     controls: { enabled: true, stopMotion() {} },
     toast() {},
   },
@@ -122,6 +130,9 @@ const sim = {
 };
 const sandbox = {
   resizeRenderSurface,
+  advanceClock,
+  invalidate,
+  resumeClock,
   document,
   window: { matchMedia: () => ({ matches: false }) },
   Option: class extends Element {
@@ -147,14 +158,26 @@ const sandbox = {
   rememberObserver: () => true,
   sampleElevationBase: () => null,
   searchWorldPlaces: () => [],
-  atlas: { labels: [] },
+  geographyAtlas: () => ({ labels: [] }),
+  loadGeographyAtlas: async () => ({ labels: [] }),
   geologyLegend: { units: [] },
   MARS_FEATURES: [],
   findPlanetaryEvents: (args) => new Promise((resolve) => eventSearches.push({ args, resolve })),
   planetaryComparisonDates: (args) => new Promise((resolve) => presets.push({ args, resolve })),
-  installEarthObservationControls: () => ({ labels: {}, translate() {}, source: () => '', legend() {}, update() {}, open() {}, close() {}, dispose() {}, paintLegend() {}, settings: () => ({}) }),
+  installEarthObservationControls: () => ({
+    labels: {},
+    translate() {},
+    source: () => '',
+    legend() {},
+    update() {},
+    open() {},
+    close() {},
+    dispose() {},
+    paintLegend() {},
+    settings: () => ({}),
+  }),
   createSharedWorldSky: () => ({}),
-  mountWorldSkyControls: () => ({refresh() {}, dispose() {}}),
+  mountWorldSkyControls: () => ({ refresh() {}, dispose() {} }),
   createPlanetaryRenderer: () => ({
     loading: false,
     focus() {},

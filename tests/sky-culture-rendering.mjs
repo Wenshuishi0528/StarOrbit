@@ -53,30 +53,51 @@ function manager() {
 }
 
 test('Four Symbols and asterism illustrations switch independently and keep a frozen photo', async () => {
-  const art = new ConstellationArt({images:[]}, {chinese:{images:[
-    {...image,imageId:'four-symbol',kind:'symbols'},
-    {...image,imageId:'individual',kind:'asterisms'},
-  ]}});
+  const art = new ConstellationArt(
+    { images: [] },
+    {
+      chinese: {
+        images: [
+          { ...image, imageId: 'four-symbol', kind: 'symbols' },
+          { ...image, imageId: 'individual', kind: 'asterisms' },
+        ],
+      },
+    }
+  );
   art.setCulture('chinese');
-  const input = {...view(art.frames[0]),fovY:110};
+  const input = { ...view(art.frames[0]), fovY: 110 };
   art.load = async () => resource();
   try {
-    art.update('main',input,true,1,{symbols:false,asterisms:true});
+    art.update('main', input, true, 1, { symbols: false, asterisms: true });
     await until(() => art.status('main').complete);
-    assert.deepEqual(art.status('main').images,['chinese:individual']);
-    await art.prepare('photo',input,true,2500,{culture:'chinese',symbols:true,asterisms:false});
-    assert.deepEqual(art.status('photo').images,['chinese:four-symbol']);
-    art.update('main',input,true,1,{symbols:true,asterisms:true});
+    assert.deepEqual(art.status('main').images, ['chinese:individual']);
+    await art.prepare('photo', input, true, 2500, {
+      culture: 'chinese',
+      symbols: true,
+      asterisms: false,
+    });
+    assert.deepEqual(art.status('photo').images, ['chinese:four-symbol']);
+    art.update('main', input, true, 1, { symbols: true, asterisms: true });
     await until(() => art.status('main').complete);
-    assert.equal(art.status('main').ready,2);
-    art.update('main',{...input,fovY:4},true,1,{symbols:true,asterisms:false});
-    assert.equal(art.status('main').requested,1,'explicit overview stays visible in narrow fields');
-    assert.deepEqual(art.status('photo').images,['chinese:four-symbol'],'photo owns its captured layer choices');
+    assert.equal(art.status('main').ready, 2);
+    art.update('main', { ...input, fovY: 4 }, true, 1, { symbols: true, asterisms: false });
+    assert.equal(
+      art.status('main').requested,
+      1,
+      'explicit overview stays visible in narrow fields'
+    );
+    assert.deepEqual(
+      art.status('photo').images,
+      ['chinese:four-symbol'],
+      'photo owns its captured layer choices'
+    );
     art.release('photo');
-    assert.equal(art.entries.size,1,'main still owns its visible overview');
+    assert.equal(art.entries.size, 1, 'main still owns its visible overview');
     art.release('main');
-    assert.equal(art.entries.size,0);
-  } finally {art.dispose();}
+    assert.equal(art.entries.size, 0);
+  } finally {
+    art.dispose();
+  }
 });
 
 test('culture artwork uses namespaces and a frozen photo retains its own source and texture', async () => {
@@ -163,7 +184,7 @@ const compiled = await build({
   stdin: {
     contents: `
       export { StarChart } from './src/star-chart.js';
-      export { getSkyCulture } from './src/sky-cultures.js';
+      export { getSkyCulture, ensureSkyCulture } from './src/sky-cultures.js';
       export { buildSkyAnnotationLayout, getSkyConstellationLines, getSkyConstellationBoundaries } from './src/sky-annotation-layout.js';
       export { snapshot, validateOrbit } from './src/orbit.js';
       export { Group } from 'three';
@@ -179,6 +200,8 @@ const compiled = await build({
 const api = await import(
   'data:text/javascript;base64,' + Buffer.from(compiled.outputFiles[0].contents).toString('base64')
 );
+// Views switch to the Chinese culture only after its catalogue has loaded.
+await api.ensureSkyCulture('chinese');
 
 test('real Chinese catalogue replaces chart geometry without retaining western boundaries or old labels', () => {
   const env = { settings: {}, backdrop: new api.Group() },

@@ -2,7 +2,7 @@ import catalog from '../assets/stellar-distances/catalog.json';
 
 // IAU parsec definition and Julian light-year; catalogue estimates are static,
 // heliocentric distances, not a fictitious range to the rendered sky sphere.
-const PARSEC_LIGHT_YEARS = 3.2615637771674336;
+const PARSEC_LIGHT_YEARS = 3.2615637771674337;
 const AU_KM = 149597870.7;
 const parallaxes = new Map(
   catalog.rows.map(([hip, parallax, error]) => [hip, { parallax, error }])

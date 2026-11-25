@@ -111,6 +111,7 @@ export class CloudLibrary {
         (r) =>
           r.provider === result.provider && r.time === result.time && r.sha256 === result.sha256
       );
+    return undefined;
   }
   get downloading() {
     return ['running', 'cancelling'].includes(this.task.state);

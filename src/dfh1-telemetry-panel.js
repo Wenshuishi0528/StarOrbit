@@ -1,6 +1,7 @@
 import { TelemetryAudio, telemetryGate } from './dfh1-telemetry-audio.js';
 import { sampleSensors } from './dfh1-telemetry-core.js';
 import { t } from './i18n.js';
+import { play } from './sim-clock.js';
 const $ = (id) => document.getElementById(id);
 const channelName = (channel) =>
   t({ sun: '太阳角计', earth: '红外地平仪', reference: '参考电平' }[channel] || '实验路序');
@@ -32,10 +33,7 @@ export class TelemetryPanel {
     };
     $('dfh1Run').onclick = () => {
       if (!this.sim || this.sim.missionId !== 'dfh1' || !this.sim.current) return;
-      this.sim.mode = 'custom';
-      this.sim.speed = 1;
-      this.sim.paused = false;
-      this.sim.timeUI();
+      play(this.sim, 1);
       player.play();
     };
     document.addEventListener('visibilitychange', () => {

@@ -192,9 +192,12 @@ export function skyOfflineResourceList(env, parent, closeResources) {
       return;
     }
     if (!list.isConnected) return;
+    // 未完成的哈勃影像需要按需加载的哈勃档案才能“继续下载”；档案就绪后重绘列表。
+    if (rows.some((r) => r.source === 'hubble' && !r.complete)) env.skyDetail.requestHubble?.();
     const key =
       JSON.stringify(rows.map((r) => [r.id, r.count, r.complete, offline.jobs.has(r.id)])) +
       message +
+      !!env.skyDetail.hubbleArchive +
       t('离线星空影像');
     if (key === signature) return;
     signature = key;

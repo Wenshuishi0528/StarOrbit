@@ -71,13 +71,28 @@ assert.ok(
 
 // Webb overlays keep their footprint while the optical base changes.
 const webbLayers = (v, base) => planSkyDetailSelection(providers, v, 'recent', null, base);
-assert.deepEqual(webbLayers(recent, 'galaxy').tiles, planSkyDetailSelection(providers, recent, 'recent').tiles);
-assert.deepEqual(new Set(webbLayers(recent, 'dss').tiles.map(t => t.provider.id)), new Set(['jwst-carina-2022', 'dss-color']));
-assert.deepEqual(new Set(webbLayers(north, 'panstarrs').tiles.map(t => t.provider.id)), new Set(['panstarrs']));
+assert.deepEqual(
+  webbLayers(recent, 'galaxy').tiles,
+  planSkyDetailSelection(providers, recent, 'recent').tiles
+);
+assert.deepEqual(
+  new Set(webbLayers(recent, 'dss').tiles.map((t) => t.provider.id)),
+  new Set(['jwst-carina-2022', 'dss-color'])
+);
+assert.deepEqual(
+  new Set(webbLayers(north, 'panstarrs').tiles.map((t) => t.provider.id)),
+  new Set(['panstarrs'])
+);
 assert.equal(webbLayers(recent, 'panstarrs').backgroundOutsideCoverage, true);
-assert(webbLayers(recent, 'panstarrs').tiles.every(t=>t.provider.tiles));
-assert.deepEqual(webbLayers(north, 'dss').tiles, planSkyDetailSelection(providers, north, 'dss').tiles);
-assert.deepEqual(planSkyDetailSelection(providers,north,'auto',null,'galaxy'), planSkyDetailSelection(providers,north,'auto',null,'dss'));
+assert(webbLayers(recent, 'panstarrs').tiles.every((t) => t.provider.tiles));
+assert.deepEqual(
+  webbLayers(north, 'dss').tiles,
+  planSkyDetailSelection(providers, north, 'dss').tiles
+);
+assert.deepEqual(
+  planSkyDetailSelection(providers, north, 'auto', null, 'galaxy'),
+  planSkyDetailSelection(providers, north, 'auto', null, 'dss')
+);
 
 // Exercise real control handlers with a small DOM surface; no browser/JSON-import dependency.
 const nodes = new Map(
@@ -91,7 +106,10 @@ const nodes = new Map(
     'skyDetailCredits',
     'viewSkyDetail',
     'xtSkyDetailTarget',
-  ].map((id) => [id, { value: '', checked: false, disabled: false, textContent: '', parentElement: {} }])
+  ].map((id) => [
+    id,
+    { value: '', checked: false, disabled: false, textContent: '', parentElement: {} },
+  ])
 );
 let clock = 0,
   saves = 0,
@@ -252,10 +270,20 @@ console.log(
 );
 
 // A birthday postcard opts into full-field DSS; ordinary finder policy stays unchanged.
-const wideProviders = [{id:'dss-color',minOrder:0,maxOrder:9,format:'jpg'}];
-const wideView = {forward:[1,0,0],right:[0,1,0],up:[0,0,1],fovY:65,aspect:1.6,pixelHeight:1500};
-const widePlan = planSkyDetailSelection(wideProviders,{...wideView,wideField:true},'dss');
-assert(widePlan.tiles.length>0 && widePlan.tiles.length<=36);
-assert(widePlan.tiles.every(t=>t.provider.id==='dss-color'));
-assert.equal(planSkyDetailSelection(wideProviders,wideView,'dss').fallback,'wide');
-assert.equal(planSkyDetailSelection(wideProviders,{...wideView,wideField:true},'galaxy').tiles.length,0);
+const wideProviders = [{ id: 'dss-color', minOrder: 0, maxOrder: 9, format: 'jpg' }];
+const wideView = {
+  forward: [1, 0, 0],
+  right: [0, 1, 0],
+  up: [0, 0, 1],
+  fovY: 65,
+  aspect: 1.6,
+  pixelHeight: 1500,
+};
+const widePlan = planSkyDetailSelection(wideProviders, { ...wideView, wideField: true }, 'dss');
+assert(widePlan.tiles.length > 0 && widePlan.tiles.length <= 36);
+assert(widePlan.tiles.every((t) => t.provider.id === 'dss-color'));
+assert.equal(planSkyDetailSelection(wideProviders, wideView, 'dss').fallback, 'wide');
+assert.equal(
+  planSkyDetailSelection(wideProviders, { ...wideView, wideField: true }, 'galaxy').tiles.length,
+  0
+);

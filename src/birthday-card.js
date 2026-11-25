@@ -6,6 +6,7 @@ import { renderBirthdayBack } from './birthday-card-back.js';
 import { birthdayCardZip } from './birthday-card-export.js';
 import { birthdaySkyMoment } from './birthday-sky-frame.js';
 import { getXuntianTarget } from './xuntian-catalog.js';
+import { resumeClock } from './sim-clock.js';
 
 const css = `.birthday-dialog{box-sizing:border-box;width:min(1320px,96vw);max-width:none;height:92dvh;max-height:96dvh;padding:0;border:1px solid #425264;border-radius:18px;background:#0b1422;color:#e8eff7}.birthday-dialog::backdrop{background:#030915bc;backdrop-filter:blur(5px)}.birthday-dialog[open]{display:flex;flex-direction:column}.birthday-dialog header{position:static;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 22px;border-bottom:1px solid #334354}.birthday-dialog h2{margin:0;font-size:21px}.birthday-dialog h3{margin:0 0 6px;font-size:16px;color:#e2ce9e}.birthday-dialog button,.birthday-dialog input,.birthday-dialog select,.birthday-dialog textarea{font:inherit;box-sizing:border-box;min-height:38px}.birthday-dialog button{width:auto}.birthday-dialog .birthday-body{display:grid;grid-template-columns:330px minmax(0,1fr);min-height:0;flex:1}.birthday-dialog .birthday-controls{padding:18px 20px;overflow:auto;border-right:1px solid #334354}.birthday-dialog .birthday-controls label{display:block;margin:12px 0 5px;font-size:13px;color:#bdd0e1}.birthday-dialog .birthday-controls input:not([type=checkbox]),.birthday-dialog .birthday-controls select,.birthday-dialog textarea{width:100%}.birthday-dialog input[type=date],.birthday-dialog input[type=time]{color-scheme:dark}.birthday-dialog textarea{resize:vertical;min-height:78px;line-height:1.6;padding:8px;background:#101f31;border:1px solid #3d526a;border-radius:6px;color:#e8eff7}.birthday-dialog .birthday-check{display:flex!important;align-items:center;gap:8px}.birthday-dialog .birthday-check input{min-height:auto}.birthday-dialog p{font-size:13px;line-height:1.7;color:#b4c6d7;margin:7px 0}.birthday-dialog details{margin:14px 0}.birthday-dialog summary{cursor:pointer;font-size:13px;color:#d8c493}.birthday-dialog a{color:#9fdbe4}.birthday-dialog .birthday-result{padding:12px 14px;margin:12px 0;background:#14243a;border:1px solid #35495d;border-radius:10px}.birthday-dialog .birthday-result p{white-space:pre-line}.birthday-dialog .birthday-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.birthday-dialog .birthday-primary{background:#294b60;border-color:#77a8b5;flex:1}.birthday-dialog .birthday-preview{display:flex;flex-direction:column;min-width:0;min-height:0;padding:20px;gap:12px;background:radial-gradient(ellipse at 50% 25%,#1c2a3d,#070f1b)}.birthday-dialog .birthday-image-area{display:flex;align-items:center;justify-content:center;overflow:auto;min-height:0;flex:1;border-radius:10px}.birthday-dialog .birthday-preview img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;box-shadow:0 12px 40px #0008}.birthday-dialog .birthday-placeholder{max-width:420px;text-align:center;padding:40px 20px}.birthday-dialog .birthday-placeholder strong{font-size:23px;display:block;color:#e2ce9e;margin-bottom:15px}.birthday-dialog .birthday-tabs{display:flex;gap:6px;align-self:center;padding:4px;background:#0a1423;border:1px solid #35495d;border-radius:12px}.birthday-dialog .birthday-tabs button{border:0;background:transparent;color:#aabed1;padding:8px 20px}.birthday-dialog .birthday-tabs button[aria-selected=true]{background:#294052;color:#efdbb2}.birthday-dialog [role=status]{min-height:1.7em;white-space:pre-line}.birthday-dialog [hidden]{display:none!important}.birthday-dialog button:focus-visible,.birthday-dialog input:focus-visible,.birthday-dialog select:focus-visible,.birthday-dialog textarea:focus-visible,.birthday-dialog summary:focus-visible{outline:2px solid #95dbe8;outline-offset:3px}@media(max-width:760px){.birthday-dialog{width:100vw;height:100dvh;max-height:100dvh;border-radius:0}.birthday-dialog .birthday-body{display:block;overflow:auto}.birthday-dialog .birthday-controls{overflow:visible;border-right:0}.birthday-dialog .birthday-preview{min-height:460px}.birthday-dialog .birthday-image-area{min-height:320px}.birthday-dialog .birthday-preview img{max-height:75vh}.birthday-dialog header{padding:12px 16px}}`;
 
@@ -189,8 +190,17 @@ export function installBirthdayCard(sim) {
       status.textContent = t(error.message);
     }
   }
-  function visit(culture) {
+  async function visit(culture) {
     const item = selected()[culture === 'western' ? 'western' : 'mansion'];
+    // A mansion opens in the Chinese culture: wait for its catalogue and art.
+    // A failed load is logged and leaves the dialog open for another try.
+    if (item && culture !== 'western')
+      try {
+        await sim.environment.loadSkyCulture(culture);
+        if (!dialog.open) return;
+      } catch {
+        return;
+      }
     const target = item && getXuntianTarget(item.targetId, getLanguage(), culture);
     if (!target || !sim.xuntian?.observeTarget(target, { annotations: true })) {
       status.textContent = t('巡天取景需选择中国空间站任务。');
@@ -285,6 +295,14 @@ export function installBirthdayCard(sim) {
     downloadPair.disabled = true;
     const options = { ...snapshot(), signal: abort.signal };
     try {
+      // The eastern panels use the Chinese catalogue and its registered art.
+      if (
+        sides.some((side) =>
+          side === 'front' ? options.mode !== 'western' : options.backCulture === 'chinese'
+        )
+      )
+        await sim.environment.loadSkyCulture('chinese');
+      if (token !== generation || sequence !== renderSequence || !dialog.open) return false;
       for (const side of sides) {
         if (pages[side]) continue;
         status.textContent = t(
@@ -687,7 +705,7 @@ export function installBirthdayCard(sim) {
       preview.hidden = true;
       placeholder.hidden = false;
       opener.focus({ preventScroll: true });
-      sim.lastWall = performance.now();
+      resumeClock(sim);
     });
   }
   function open() {

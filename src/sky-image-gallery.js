@@ -158,7 +158,11 @@ export function mountSkyImageGallery({
   canSave,
   getSavedPreview,
 }) {
+  // providers / works 可为数组或返回当前数组的函数（哈勃档案按需加载后会更换数组）。
+  const providerList = () => (typeof providers === 'function' ? providers() : providers);
+  const workList = () => (typeof works === 'function' ? works() : works);
   let searchIndex,
+    indexedWorks,
     context = 'main',
     source = 'featured',
     query = '',
@@ -205,7 +209,7 @@ export function mountSkyImageGallery({
     async (entry, signal, detail) => {
       if (detail && navigator.onLine !== false) {
         try {
-          return await loadGalleryThumbnail(entry, providers, signal, true);
+          return await loadGalleryThumbnail(entry, providerList(), signal, true);
         } catch {
           signal.throwIfAborted();
         }
@@ -219,7 +223,7 @@ export function mountSkyImageGallery({
         /* A blocked local store still permits online previews. */
       }
       signal.throwIfAborted();
-      return saved || loadGalleryThumbnail(entry, providers, signal);
+      return saved || loadGalleryThumbnail(entry, providerList(), signal);
     },
     () => {
       failed = true;
@@ -324,7 +328,7 @@ export function mountSkyImageGallery({
     }
     const text = make('div', 'sig-info'),
       name = make('h3', null, entry.title);
-    const provider = providers.find(
+    const provider = providerList().find(
       (p) =>
         p.id ===
         (entry.source === 'panstarrs'
@@ -509,7 +513,10 @@ export function mountSkyImageGallery({
   }
   function renderList() {
     tool.hidden = false;
-    searchIndex ??= createSkyImageIndex(works);
+    if (indexedWorks !== workList()) {
+      indexedWorks = workList();
+      searchIndex = createSkyImageIndex(indexedWorks);
+    }
     const results = searchIndex(query, source);
     const count = results.length,
       pages = Math.max(1, Math.ceil(count / pageSize));

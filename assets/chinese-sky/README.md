@@ -47,7 +47,7 @@ python3 scripts/prepare-chinese-sky.py --check
 node tests/sky-cultures.mjs
 ```
 
-正常生成只读随包保存的来源记录，可离线重复。明确需要重新请求来源时才使用 `--refresh-source`；输出中的 SHA-256、固定提交及每个请求地址用于核对输入。来源更新必须人工重新核对，不能仅把固定提交号换成 `master`。
+脚本同时生成 `catalog.json` 与 `physical-stars.json`。后者只列出各星空体系都要显示的额外 HIP 与 Gaia 恒星，供主星表、巡天和星际目录在启动时使用；完整目录在选择中国体系时才加载。正常生成只读随包保存的来源记录，可离线重复。明确需要重新请求来源时才使用 `--refresh-source`；输出中的 SHA-256、固定提交及每个请求地址用于核对输入。来源更新必须人工重新核对，不能仅把固定提交号换成 `master`。
 
 ## 原始记录与许可
 

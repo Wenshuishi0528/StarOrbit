@@ -1,3 +1,4 @@
+/* global citySourceCheck -- installed in the page by the injected harness */
 // Run with PLAYWRIGHT_MODULE pointing to an installed Playwright module.
 // CITY_TEST_ENGINE=webkit also checks Safari's browser engine.
 import { build } from 'esbuild';

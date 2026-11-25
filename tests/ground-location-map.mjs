@@ -196,23 +196,37 @@ console.log(
   const environment = { uniforms: { dayMap: { value: { image: base } } } };
   const doc = globalThis.document;
   const crops = [];
-  globalThis.document = {createElement: () => ({
-    getContext: () => ({setTransform(){}, drawImage(source){crops.push(source);}})
-  })};
+  globalThis.document = {
+    createElement: () => ({
+      getContext: () => ({
+        setTransform() {},
+        drawImage(source) {
+          crops.push(source);
+        },
+      }),
+    }),
+  };
   try {
     const imagery = createSiteMapImagery(environment, () => {});
-    const context = {canvas:{width:480,height:320},fillRect(){},drawImage(){}};
-    const frame = locationMapFrame({latitude:39.9,longitude:116.4},80,240,160);
+    const context = { canvas: { width: 480, height: 320 }, fillRect() {}, drawImage() {} };
+    const frame = locationMapFrame({ latitude: 39.9, longitude: 116.4 }, 80, 240, 160);
     imagery.draw(context, frame, false);
     imagery.draw(context, frame, false);
-    assert.deepEqual(crops,[base]);
-    imagery.draw(context,locationMapFrame({latitude:40,longitude:116.4},80,240,160),false);
-    assert.equal(crops.length,2);
-    environment.uniforms.dayMap.value.image = {...base};
-    imagery.draw(context,frame,false);
-    assert.equal(crops.length,3);
+    assert.deepEqual(crops, [base]);
+    imagery.draw(
+      context,
+      locationMapFrame({ latitude: 40, longitude: 116.4 }, 80, 240, 160),
+      false
+    );
+    assert.equal(crops.length, 2);
+    environment.uniforms.dayMap.value.image = { ...base };
+    imagery.draw(context, frame, false);
+    assert.equal(crops.length, 3);
     imagery.dispose();
-  } finally {if (doc) globalThis.document=doc; else delete globalThis.document;}
+  } finally {
+    if (doc) globalThis.document = doc;
+    else delete globalThis.document;
+  }
 }
 
 // The app styles bare header/section globally (80px absolute toolbar,

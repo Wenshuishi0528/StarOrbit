@@ -7,10 +7,12 @@ import {
 import * as THREE from 'three';
 import { HelioVector } from 'astronomy-engine';
 import {
+  ensureInterstellarCatalog,
   interstellarCatalog,
   spatialStarName,
   spatialFormationName,
 } from './interstellar-catalog.js';
+import { isSkyCultureLoaded } from './sky-cultures.js';
 import {
   AU_LY,
   LY_KM,
@@ -29,6 +31,9 @@ import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { galaxyVertex, galaxyFragment } from './sky-shaders.js';
 
 const STORE = 'starorbit-interstellar-v1';
+// The world's formations and search cover both cultures; enter after loading.
+export const interstellarWorldReady = () => isSkyCultureLoaded('chinese');
+export const loadInterstellarWorld = () => ensureInterstellarCatalog();
 const relativeGLSL = `attribute vec3 positionLow;uniform vec3 observerHigh,observerLow;
 vec3 relativePosition(){return (position-observerHigh)+(positionLow-observerLow);}`;
 const pointVertex = `${relativeGLSL}
@@ -325,18 +330,31 @@ export function createInterstellarWorld({
     aim(getPosition(index));
     labelElapsed = 1;
   }
-  function restore(pose) {
+  // The shared sky shows a culture only once the environment has its art, so
+  // this world follows the applied culture rather than the menu value.
+  function chooseCulture(next, after = () => {}) {
+    const done = () => {
+      if (disposed) return;
+      culture = next;
+      $('[data-culture]').value = culture;
+      formationsMenu();
+      after();
+    };
+    applyWorldSkySettings(environment, { culture: next }, done).then((applied) => {
+      if (!applied && !disposed) $('[data-culture]').value = culture;
+    });
+  }
+  function restore(pose, cultureApplied = false) {
     if (!validPose(pose)) return;
+    // The saved figure and camera follow once the saved culture is shown.
+    if (!cultureApplied && ['western', 'chinese'].includes(pose.culture)) {
+      chooseCulture(pose.culture, () => restore(pose, true));
+      return;
+    }
     stop();
     referenceView = false;
     referenceTarget = null;
     referenceLabel.querySelector('input').checked = false;
-    if (['western', 'chinese'].includes(pose.culture)) {
-      culture = pose.culture;
-      applyWorldSkySettings(environment, { culture });
-      $('[data-culture]').value = culture;
-      formationsMenu();
-    }
     if (Object.hasOwn(pose, 'formation'))
       setFormation(catalog.formations.find((f) => f.id === pose.formation) || null);
     navigationMap?.resetTrail();
@@ -463,13 +481,12 @@ export function createInterstellarWorld({
     stop();
     persist();
   };
-  $('[data-culture]').onchange = (e) => {
-    culture = e.target.value;
-    applyWorldSkySettings(environment, { culture });
-    setFormation(null);
-    formationsMenu();
-    persist();
-  };
+  $('[data-culture]').onchange = (e) =>
+    chooseCulture(e.target.value, () => {
+      setFormation(null);
+      formationsMenu();
+      persist();
+    });
   $('[data-formation]').onchange = (e) =>
     setFormation(catalog.formations.find((f) => f.id === e.target.value) || null);
   $('[data-lines]').onchange = (e) => {
@@ -507,14 +524,11 @@ export function createInterstellarWorld({
   panel
     .querySelectorAll('[data-shortcut]')
     .forEach((button) => (button.onclick = () => focus(catalog.byId.get(button.dataset.shortcut))));
-  $('[data-dipper]').onclick = () => {
-    culture = 'chinese';
-    applyWorldSkySettings(environment, { culture });
-    $('[data-culture]').value = culture;
-    formationsMenu();
-    setFormation(catalog.formations.find((f) => f.culture === 'chinese' && f.item.zh === '北斗'));
-    home();
-  };
+  $('[data-dipper]').onclick = () =>
+    chooseCulture('chinese', () => {
+      setFormation(catalog.formations.find((f) => f.culture === 'chinese' && f.item.zh === '北斗'));
+      home();
+    });
   $('[data-save]').onclick = () => {
     if (bookmarks.length >= 12) {
       $('[data-message]').textContent = t('最多保存 12 个航点，请先删除一个');
@@ -570,14 +584,11 @@ export function createInterstellarWorld({
             camera.updateProjectionMatrix();
             $('[data-fov]').value = camera.fov;
             labelElapsed = 1;
-          } else {
-            culture = item.culture;
-            applyWorldSkySettings(environment, { culture });
-            $('[data-culture]').value = culture;
-            formationsMenu();
-            setFormation(item);
-            home();
-          }
+          } else
+            chooseCulture(item.culture, () => {
+              setFormation(item);
+              home();
+            });
         };
         results.append(button);
         if (++count >= 8) break;

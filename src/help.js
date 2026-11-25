@@ -1,7 +1,7 @@
 import { placeGuide, readingBounds } from './help-placement.js';
 import { restoreControlFocus } from './display-controls.js';
 import { getLanguage, onLanguageChange, t } from './i18n.js';
-import { getHelpContent } from './help-content.js';
+import { helpTourPages, loadHelpContent, loadedHelpContent } from './help-content.js';
 import { manualLocations } from './help-locations.js';
 import { runHelpExample, restoreHelpExample, hasHelpExample } from './help-examples.js';
 
@@ -38,7 +38,11 @@ export function installHelp(music) {
     welcome = $('welcomeDialog');
   const spotlight = $('helpSpotlight'),
     progress = readProgress();
-  let data = getHelpContent(getLanguage());
+  // 导览页随启动包提供；详细手册在首次打开帮助时才按当前语言载入。
+  let data = loadedHelpContent(getLanguage()) || {
+    tourPages: helpTourPages(getLanguage()),
+    manualChapters: [],
+  };
   let sections = data.manualChapters.flatMap((ch) => ch.sections);
   let view = 'home',
     tourOrigin = null,
@@ -48,7 +52,8 @@ export function installHelp(music) {
     search = '',
     searchIndex;
   let tourId = validTour(progress.tour)?.id || data.tourPages[0].id;
-  let sectionId = validSection(progress.section)?.id || sections[0].id;
+  // 各语言小节 ID 相同；手册载入后再校验上次阅读位置。
+  let sectionId = validSection(progress.section)?.id || sections[0]?.id || progress.section;
   let lastMode = ['tour', 'manual'].includes(progress.mode) ? progress.mode : '';
   let visitedTour = !!progress.visitedTour || lastMode === 'tour';
   let visitedManual = !!progress.visitedManual || lastMode === 'manual';
@@ -60,7 +65,9 @@ export function installHelp(music) {
     selector = '';
   let busyExample = false,
     statusMessage = '',
-    practiceOpen = false;
+    practiceOpen = false,
+    loadTicket = 0,
+    opening = null;
   const openChapters = new Set();
   const workspacePanels = 'dialog, .world-explorer, .planet-observatory, #xuntianScope';
   const openWorkspaces = () =>
@@ -312,7 +319,59 @@ export function installHelp(music) {
       restoreHelpExample().catch((error) => console.warn('StarOrbit help example', error));
     }
   }
+  function useContent(content) {
+    if (content === data) return;
+    data = content;
+    sections = data.manualChapters.flatMap((c) => c.sections);
+    searchIndex = undefined;
+    tourId = validTour(tourId)?.id || data.tourPages[0].id;
+    sectionId = validSection(sectionId)?.id || sections[0].id;
+  }
+  function showLoadState(message, retry) {
+    clearTarget();
+    locationAvailability.disconnect();
+    workspaceObserver.disconnect();
+    locationLinks.replaceChildren();
+    locationLinks.hidden = true;
+    panel.classList.remove('guiding', 'reading');
+    panel.dataset.helpView = 'loading';
+    panel.style.left = panel.style.top = '';
+    $('helpProgress').textContent = 'StarOrbit';
+    $('helpTitle').textContent = t('星轨使用帮助');
+    $('helpDirectory').hidden = $('helpSwitch').hidden = $('tourActions').hidden = true;
+    const note = node('p', t(message), 'help-status');
+    note.setAttribute('role', retry ? 'alert' : 'status');
+    contents.replaceChildren(note);
+    if (retry) contents.append(button(t('重试'), retry, 'primary'));
+    panel.focus({ preventScroll: true });
+  }
+  // 取得当前语言的手册后再执行 done；过期的载入结果（已关闭、重新打开或又切换语言）丢弃。
+  // quiet 用于帮助已打开时切换语言：新手册就绪前保留现有内容，失败时也不打断阅读。
+  function withContent(done, quiet = false) {
+    const language = getLanguage(),
+      ticket = ++loadTicket,
+      ready = loadedHelpContent(language);
+    if (ready) {
+      useContent(ready);
+      done();
+      return;
+    }
+    if (!quiet) showLoadState('正在载入…');
+    loadHelpContent(language).then(
+      (content) => {
+        if (ticket !== loadTicket || panel.hidden) return;
+        useContent(content);
+        done();
+      },
+      (error) => {
+        console.error('StarOrbit help manual', language, error);
+        if (ticket !== loadTicket || panel.hidden || quiet) return;
+        showLoadState('帮助内容未能载入，请检查网络后重试。', () => withContent(done));
+      }
+    );
+  }
   function go(nextView, id, options = {}) {
+    if (!sections.length) return;
     rememberPosition();
     if (!(nextView === view && (nextView === 'tour' ? id === tourId : id === sectionId)))
       leaveExample();
@@ -807,6 +866,13 @@ export function installHelp(music) {
     }
     if (list[i]) go(view, list[i].id);
   }
+  function showMode(mode) {
+    opening = mode;
+    withContent(() => {
+      opening = null;
+      go(mode, mode === 'tour' ? data.tourPages[0].id : undefined);
+    });
+  }
   function open(mode = 'home') {
     returnFocus = document.activeElement;
     panel.hidden = false;
@@ -814,9 +880,10 @@ export function installHelp(music) {
     $('helpToggle').setAttribute('aria-expanded', 'true');
     tourOrigin = null;
     manualOrigin = null;
-    go(mode, mode === 'tour' ? data.tourPages[0].id : undefined);
+    showMode(mode);
   }
   function close() {
+    opening = null;
     rememberPosition();
     leaveExample();
     clearTarget();
@@ -880,14 +947,15 @@ export function installHelp(music) {
     if (!panel.hidden) rememberPosition();
   });
   onLanguageChange(() => {
-    data = getHelpContent(getLanguage());
-    sections = data.manualChapters.flatMap((c) => c.sections);
-    searchIndex = undefined;
-    if (!panel.hidden) {
-      rememberPosition();
-      clearTarget();
-      render();
-    }
+    // 帮助关闭时不载入；下次打开时取当前语言的手册。
+    if (panel.hidden) return;
+    if (opening) showMode(opening);
+    else
+      withContent(() => {
+        rememberPosition();
+        clearTarget();
+        render();
+      }, true);
   });
   let visited = false;
   try {

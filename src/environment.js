@@ -27,10 +27,11 @@ import { Phenomena, flashUniforms } from './phenomena.js';
 import { Moon } from './moon.js';
 import { MainPlanets } from './main-planets.js';
 import { EarthDetail } from './earth-detail.js';
-import { t, setText, onLanguageChange } from './i18n.js';
+import { setText, onLanguageChange } from './i18n.js';
 import * as THREE from 'three';
-import baseCatalogue from '../assets/stars.json';
-import { getSkyCulture } from './sky-cultures.js';
+import baseCatalogue from '../assets/stars.json' with { type: 'json' };
+import chinesePhysicalStars from '../assets/chinese-sky/physical-stars.json' with { type: 'json' };
+import { ensureSkyCulture, isSkyCultureLoaded, normalizeSkyCulture } from './sky-cultures.js';
 import { Geography } from './geography.js';
 import { normalizeGeographySettings, bindGeographyControls } from './geography-settings.js';
 import { StarChart } from './star-chart.js';
@@ -38,6 +39,7 @@ import {
   STAR_CHART_DEFAULTS,
   normalizeStarChartSettings,
   bindStarChartControls,
+  syncStarChartControls,
   migrateStarDensityDefault,
   migrateCatalogStarDefault,
   skyCultureArtOptions,
@@ -53,7 +55,7 @@ import { mountSkyDetailControls } from './sky-detail-controls.js';
 import { normalizeWebbBackground, resolveSkyDetailSource } from './sky-detail-plan.js';
 import { CityTerrain } from './city-terrain.js';
 import { ConstellationArt } from './constellation-art.js';
-import { chineseSkyArtProvider } from './chinese-sky-art.js';
+import { chineseSkyArtProvider, loadChineseSkyArt } from './chinese-sky-art.js';
 import { ConstellationArtLayer } from './constellation-art-layer.js';
 import { cityCameraView } from './city-terrain-view.js';
 import { mountCityTerrainControls } from './city-terrain-controls.js';
@@ -66,9 +68,10 @@ const $ = (id) => document.getElementById(id),
 // Historical group membership may identify a few stars outside the original
 // display catalogue. Add their measured positions once, independent of culture;
 // existing stars keep their coordinates and the magnitude prefix stays sorted.
+// Only these physical rows ship eagerly; names and figures load with the culture.
 const catalogue = (() => {
   const existing = new Set(baseCatalogue.map((row) => row[0])),
-    culture = getSkyCulture('chinese'),
+    culture = chinesePhysicalStars,
     additional = [
       ...(culture.additionalStars || []),
       ...(culture.otherStars || []).map((star) => [
@@ -122,6 +125,7 @@ export class Environment {
       ...normalizeGeographySettings(),
       geographyDefaultVersion: 1,
       chartReferenceDefaultVersion: 1,
+      starChartDefaultVersion: 1,
       clouds: true,
       cloudNightVisible: false,
       cloudOpacity: 0.85,
@@ -142,6 +146,8 @@ export class Environment {
           this.settings[key] = STAR_CHART_DEFAULTS[key];
       }
       if (old?.geographyDefaultVersion !== 1) this.settings.geographyEnabled = true;
+      // v1.67 turns the main-view star chart on once for existing browsers.
+      if (old?.starChartDefaultVersion !== 1) this.settings.starChartEnabled = true;
       if (old?.groundSkyDefaultsVersion === 1) this.settings.groundSkyDefaultsVersion = 1;
       if (old?.starChartCatalogDefaultVersion === 1)
         this.settings.starChartCatalogDefaultVersion = 1;
@@ -181,6 +187,14 @@ export class Environment {
       migrateStarDensityDefault(this.settings, localStorage);
       migrateCatalogStarDefault(this.settings, localStorage);
     } catch {}
+    // A saved culture other than the bundled western one is applied after its
+    // data loads (end of constructor). Until then the western sky stays
+    // visible, and save() keeps the stored choice.
+    const savedSkyCulture = this.settings.skyCulture;
+    this.chineseSkyArt = null;
+    this.skyCultureTicket = 0;
+    this.skyCulturePending = null;
+    if (!this.skyCultureReady(savedSkyCulture)) this.settings.skyCulture = 'western';
     this.fallback = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
     this.fallback.needsUpdate = true;
     this.climateMap = new THREE.DataTexture(climatePixels(), 512, 256, THREE.RGBAFormat);
@@ -357,10 +371,7 @@ export class Environment {
     this.skyDetail.setEnabled(this.settings.skyDetail);
     this.skyDetailLayer = new SkyDetailLayer(this.skyDetail, 'main');
     this.backdrop.add(this.skyDetailLayer.group);
-    this.chineseSkyArt = chineseSkyArtProvider(this.assets.chineseConstellationArt);
-    this.constellationArt = new ConstellationArt(this.assets.constellationArt, {
-      chinese: this.chineseSkyArt,
-    });
+    this.constellationArt = new ConstellationArt(this.assets.constellationArt);
     this.constellationArt.setCulture(this.settings.skyCulture);
     this.constellationArtLayer = new ConstellationArtLayer(this.constellationArt, 'main');
     this.backdrop.add(this.constellationArtLayer.group);
@@ -398,12 +409,62 @@ export class Environment {
     onLanguageChange(() => {
       this.skyStatus();
     });
+    // A failed startup load keeps the saved choice stored until the user picks again.
+    if (savedSkyCulture !== this.settings.skyCulture)
+      this.selectSkyCulture(savedSkyCulture, undefined, { keepOnFailure: true });
+  }
+  // Ready means every view can draw the culture: its catalogue is parsed and,
+  // for the Chinese sky, the registered art and explorer metadata are present.
+  skyCultureReady(id) {
+    return (
+      normalizeSkyCulture(id) === 'western' || (isSkyCultureLoaded(id) && !!this.chineseSkyArt)
+    );
+  }
+  loadSkyCulture(id) {
+    if (this.skyCultureReady(id)) return Promise.resolve();
+    this.skyCultureLoad ??= Promise.all([ensureSkyCulture('chinese'), loadChineseSkyArt()])
+      .then(([, art]) => {
+        if (this.chineseSkyArt) return;
+        this.chineseSkyArt = chineseSkyArtProvider(this.assets.chineseConstellationArt, art);
+        this.constellationArt.addCulture('chinese', this.chineseSkyArt);
+      })
+      .finally(() => {
+        this.skyCultureLoad = null;
+      });
+    return this.skyCultureLoad;
+  }
+  /** The only way to change the displayed culture. A ready culture applies at
+   * once; otherwise the current one stays visible until the data arrives. The
+   * latest request wins, and a failed load keeps the current culture so the
+   * user can simply choose again. Resolves true once applied. */
+  selectSkyCulture(id, onApplied = () => {}, { keepOnFailure = false } = {}) {
+    const culture = normalizeSkyCulture(id),
+      ticket = ++this.skyCultureTicket;
+    const apply = () => {
+      if (ticket !== this.skyCultureTicket) return false;
+      this.skyCulturePending = null;
+      this.settings.skyCulture = culture;
+      syncStarChartControls(this.settings);
+      this.save();
+      this.sim.dirty = true;
+      onApplied();
+      return true;
+    };
+    if (this.skyCultureReady(culture)) return Promise.resolve(apply());
+    this.skyCulturePending = culture;
+    return this.loadSkyCulture(culture).then(apply, () => {
+      if (ticket === this.skyCultureTicket) {
+        if (!keepOnFailure) this.skyCulturePending = null;
+        syncStarChartControls(this.settings);
+      }
+      return false;
+    });
   }
   buildStars() {
     const positions = [],
       colors = [],
       mags = [];
-    for (const [id, ra, dec, mag, bv] of catalogue) {
+    for (const [, ra, dec, mag, bv] of catalogue) {
       const dir = V(equatorial(ra, dec));
       positions.push(...dir.clone().multiplyScalar(1000).toArray());
       mags.push(mag);
@@ -577,11 +638,17 @@ export class Environment {
     try {
       if (this.skyDetail?.artworkId) this.settings.skyArtworkId = this.skyDetail.artworkId;
       else delete this.settings.skyArtworkId;
-      localStorage.setItem('tiangong-environment-v1', JSON.stringify(this.settings));
+      // A culture that is still loading stays the stored choice.
+      const stored = this.skyCulturePending
+        ? { ...this.settings, skyCulture: this.skyCulturePending }
+        : this.settings;
+      localStorage.setItem('tiangong-environment-v1', JSON.stringify(stored));
     } catch {}
   }
   bind() {
-    bindStarChartControls(this.settings, () => this.save());
+    bindStarChartControls(this.settings, () => this.save(), {
+      selectCulture: (id) => this.selectSkyCulture(id),
+    });
     bindGeographyControls(this.settings, () => this.save());
     const ids = {
       moon: 'showMoon',
@@ -1000,7 +1067,8 @@ export class Environment {
     this.atmosphereTransmission.visible = !!linear;
     // Catalogue/panorama values were authored for direct display. Apply the same
     // modest radiance normalization to both before the new shared ACES pass.
-    const userSkyGain = this.settings.starBrightness * (this.settings.exposure === 'photo' ? 0.025 : 1);
+    const userSkyGain =
+      this.settings.starBrightness * (this.settings.exposure === 'photo' ? 0.025 : 1);
     const skyGain = userSkyGain * (linear ? 2 : 1);
     this.starUniforms.brightness.value = skyGain;
     this.milky.material.uniforms.brightness.value = skyGain;

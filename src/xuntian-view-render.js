@@ -497,7 +497,7 @@ export function createXuntianViewRenderer(
   sim,
   canvas,
   {
-    cityFinder = createCityFinder(sim.environment.geography?.items || []),
+    cityFinder = createCityFinder(() => sim.environment.geography?.places?.()),
     skyOnly = false,
     captions = true,
   } = {}
@@ -509,8 +509,10 @@ export function createXuntianViewRenderer(
   const skyViewId = `scope-${++skyDetailSequence}`,
     skyPhotoId = `photo-${skyDetailSequence}`;
   const byteSensor = !renderer.extensions.has('EXT_color_buffer_float');
-  const skyDetailLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyViewId, true, byteSensor),
-    skyPhotoLayer = env.skyDetail && new SkyDetailLayer(env.skyDetail, skyPhotoId, true, byteSensor);
+  const skyDetailLayer =
+      env.skyDetail && new SkyDetailLayer(env.skyDetail, skyViewId, true, byteSensor),
+    skyPhotoLayer =
+      env.skyDetail && new SkyDetailLayer(env.skyDetail, skyPhotoId, true, byteSensor);
   const artLayer =
       env.constellationArt && new ConstellationArtLayer(env.constellationArt, skyViewId, true, 2),
     artPhotoLayer =

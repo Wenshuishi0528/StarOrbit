@@ -474,6 +474,14 @@ def refresh():
         (SOURCE / filename).write_bytes(fetched.stdout)
 
 
+PHYSICAL_KEYS = ("id", "physicalId", "ra", "dec", "mag", "bv", "colorUnavailable", "epoch")
+
+
+def physical_stars(product):
+    """Positions the shared star field shows in every culture, without names or membership."""
+    return {"schema": 1, "culture": "chinese", "note": "Derived from catalog.json by scripts/prepare-chinese-sky.py. The application star field and Xuntian star index include these stars in every sky culture; the full culture catalogue loads only when names, figures or search need it.", "additionalStars": product["additionalStars"], "otherStars": [{key: star[key] for key in PHYSICAL_KEYS if key in star} for star in product["otherStars"]]}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--refresh-source", action="store_true")
@@ -482,13 +490,13 @@ def main():
     if args.refresh_source:
         refresh()
     product = build()
-    target = OUT / "catalog.json"
     content = dump(product)
-    if args.check:
-        if target.read_text() != content:
-            raise SystemExit("Chinese culture generated file differs: rerun the preparer")
-    else:
-        target.write_text(content)
+    for target, text in ((OUT / "catalog.json", content), (OUT / "physical-stars.json", dump(physical_stars(product)))):
+        if args.check:
+            if not target.exists() or target.read_text() != text:
+                raise SystemExit("Chinese culture generated file differs: rerun the preparer")
+        else:
+            target.write_text(text)
     print(json.dumps({"bytes": len(content.encode()), **product["stats"]}, ensure_ascii=False, indent=2))
 
 

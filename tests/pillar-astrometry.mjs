@@ -11,8 +11,8 @@ const checks = {
   // Native Spiderweb Galaxy zoom tiles and independent Pan-STARRS DR2
   // objects 76221751951810455, 76211752080812654 and 76211752004952585.
   heic0614a: [
-    [0.949877390, 0.253519056, 175.1952411048, -26.4832435496],
-    [0.030394604, 0.877025830, 175.2080580399, -26.4896409762],
+    [0.94987739, 0.253519056, 175.1952411048, -26.4832435496],
+    [0.030394604, 0.87702583, 175.2080580399, -26.4896409762],
     [0.606130844, 0.832794348, 175.2004360197, -26.4897154841],
   ],
   heic1501a: [
@@ -101,6 +101,7 @@ for (const [id, sample] of Object.entries(checks)) {
 }
 
 const manager = new SkyDetail({}, { webbGallery: true });
+assert.equal(await manager.loadHubble(), manager.hubbleArchive);
 const hst = manager.providers.find((provider) => provider.id === 'hubble-heic1501a');
 const view = { ...frameSkyArtwork(hst, hst.plate.direction, 1.6, 0.08), pixelHeight: 598 };
 manager.setArtwork(hst.id);

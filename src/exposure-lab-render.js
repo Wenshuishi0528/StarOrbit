@@ -411,7 +411,7 @@ export function createExposureCamera(sim) {
             ? (pos) => groundCamera(first, geometryAt(first, pose, pos).eyeKm, site, cameraSettings)
             : null,
         });
-        for (const m of drawModes) {
+        for (let i = 0; i < drawModes.length; i++) {
           const target = new THREE.WebGLRenderTarget(width, height, {
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,

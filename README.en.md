@@ -6,7 +6,7 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.66 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.67 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools, with exploration extending to ground roaming, the Solar System and interstellar travel.
 
@@ -14,7 +14,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> v1.66 Ground exploration, the finder and the telescope eyepiece default to chart labels and up to a 16K Milky Way. The planetary observatory now offers sky cultures, labels and imagery sources. Geographic and Xuntian finder labels default on. Opening the finder frames the telescope in the main view, with an 8× exterior field guide by default. The star chart defaults to the equatorial grid, ecliptic, full deep-sky catalog and 0.95 label density. [Full changelog](CHANGELOG.md).
+> v1.67 The main view shows star chart labels by default, and spacecraft labels now move aside instead of overlapping each other or the readout card. The web and local entry script and its static dependencies total about 7.33 MB. Geographic labels are enabled by default and request a further 4.30 MB atlas. Chinese sky data, the Hubble archive, Russian and French translations, help manuals and lab tabs load on demand. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 

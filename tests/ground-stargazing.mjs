@@ -263,7 +263,8 @@ for (const elevation of [0, 16.5, 65, 87, 89.99]) {
     const start = { azimuth: 1, elevation, rollDegrees: 0 };
     let pose = start;
     for (const direction of [-1, 1]) {
-      for (let i = 0; i < 50; i++) pose = nudgeGroundScope(pose, direction * field / 100, 0, field);
+      for (let i = 0; i < 50; i++)
+        pose = nudgeGroundScope(pose, (direction * field) / 100, 0, field);
       near(pose.elevation, elevation);
       near(pose.rollDegrees, 0);
     }
@@ -274,12 +275,15 @@ near(nudgeGroundScope({ ...highPose, rollDegrees: 25 }, 0.5, 0).rollDegrees, 25)
 near(nudgeGroundScope({ ...highPose, elevation: 0 }, 0, -0.04).elevation, 0);
 
 // One-degree steps land on the pole, cross it, then retrace the same line.
-let crossing = {azimuth: 33, elevation: 85, rollDegrees: 0};
-for (let i=0; i<10; i++) crossing=nudgeGroundScope(crossing,0,1);
-near(crossing.elevation,85); near(crossing.azimuth,213);
-near(Math.abs(crossing.rollDegrees),180);
-for (let i=0; i<10; i++) crossing=nudgeGroundScope(crossing,0,-1);
-near(crossing.azimuth,33); near(crossing.elevation,85); near(crossing.rollDegrees,0);
+let crossing = { azimuth: 33, elevation: 85, rollDegrees: 0 };
+for (let i = 0; i < 10; i++) crossing = nudgeGroundScope(crossing, 0, 1);
+near(crossing.elevation, 85);
+near(crossing.azimuth, 213);
+near(Math.abs(crossing.rollDegrees), 180);
+for (let i = 0; i < 10; i++) crossing = nudgeGroundScope(crossing, 0, -1);
+near(crossing.azimuth, 33);
+near(crossing.elevation, 85);
+near(crossing.rollDegrees, 0);
 
 // A circular eyepiece spans its stated field in both landscape and portrait.
 for (const [i, magnification] of [24, 60, 100].entries()) {

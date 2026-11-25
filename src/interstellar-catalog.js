@@ -1,14 +1,23 @@
-import stars from '../assets/stars.json';
+import stars from '../assets/stars.json' with { type: 'json' };
 import distances from '../assets/stellar-distances/catalog.json';
-import { getSkyCulture, cultureStarName, cultureObjectLabel } from './sky-cultures.js';
+import chinesePhysicalStars from '../assets/chinese-sky/physical-stars.json' with { type: 'json' };
+import {
+  ensureSkyCulture,
+  getSkyCulture,
+  cultureStarName,
+  cultureObjectLabel,
+} from './sky-cultures.js';
 import { buildSpatialCatalog } from './interstellar-math.js';
 
 let cached;
+// Both cultures' figures and names belong to this world, whichever is shown.
+export const ensureInterstellarCatalog = () =>
+  ensureSkyCulture('chinese').then(interstellarCatalog);
 // Shared immutable buffers are built only on first entry, never per frame/view.
+// Call after ensureInterstellarCatalog() has resolved.
 export function interstellarCatalog() {
   if (cached) return cached;
-  const chinese = getSkyCulture('chinese');
-  const extra = chinese.additionalStars || [];
+  const extra = chinesePhysicalStars.additionalStars;
   const rows = [...stars, ...extra];
   const data = buildSpatialCatalog(rows, distances.rows);
   const key = (ra, dec) => `${(((ra % 360) + 360) % 360).toFixed(4)},${dec.toFixed(4)}`;

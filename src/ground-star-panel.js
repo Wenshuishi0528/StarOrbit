@@ -8,6 +8,7 @@ import { normalizeWebbBackground } from './sky-detail-plan.js';
 import { SURVEY_FIELDS } from './survey-lab-math.js';
 import { dot } from './orbit.js';
 import { identifyCelestialCrosshair } from './celestial-crosshair.js';
+import { xuntianCatalogComplete } from './xuntian-catalog.js';
 import { crosshairDistanceText } from './xuntian-distance.js';
 import { wrapRoll } from './xuntian-ground-target.js';
 import { scopeWheelLogDelta } from './xuntian-input.js';
@@ -253,6 +254,8 @@ export function mountGroundStarPanel({
       getLanguage(),
       culture(),
       showAllResults,
+      // Chinese names join the search index when the catalogue first loads.
+      xuntianCatalogComplete(),
     ].join('|');
     if (!force && stamp === searchStamp) return;
     searchStamp = stamp;

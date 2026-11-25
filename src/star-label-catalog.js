@@ -1,4 +1,4 @@
-import chart from '../assets/star-chart.json';
+import chart from '../assets/star-chart.json' with { type: 'json' };
 import aliases from '../assets/xuntian-star-aliases.json';
 import { cultureStarName, cultureGlyphText, normalizeSkyCulture } from './sky-cultures.js';
 

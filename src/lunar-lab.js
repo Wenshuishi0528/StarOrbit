@@ -15,7 +15,6 @@ import {
   parseLunarUTC,
   lunarUTCInput,
   lunarResolution,
-  LUNAR_MIN_TIME,
   LUNAR_MAX_TIME,
   LUNAR_DAY,
 } from './lunar-state.js';

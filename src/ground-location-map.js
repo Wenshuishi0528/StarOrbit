@@ -15,6 +15,8 @@ export {
   locationMapImageRects,
 } from './ground-site-map-projection.js';
 
+const NO_PLACES = [];
+
 export function mountGroundLocationMap({ host, environment, onPick, search, onPickerChange }) {
   const root = document.createElement('div');
   root.className = 'ground-location-map';
@@ -33,12 +35,23 @@ export function mountGroundLocationMap({ host, environment, onPick, search, onPi
   const sector = root.querySelector('[data-fov-sector]');
   let picker, mapKey, sectorFov, compassHeading;
   const imagery = createSiteMapImagery(environment, () => picker?.repaint());
-  const places = (environment.geography?.items || []).filter(
-    (p) =>
-      (p.kind === 'city' || p.kind === 'capital' || p.kind === 'landform') &&
-      Number.isFinite(p.lat) &&
-      Number.isFinite(p.lon)
-  );
+  // 地名来自按需加载的地理图集；加载完成后的下一次刷新会重绘地图标注。
+  let places = NO_PLACES,
+    placeSource = NO_PLACES;
+  function currentPlaces() {
+    const items = environment.geography?.places?.() || NO_PLACES;
+    if (items !== placeSource) {
+      placeSource = items;
+      places = items.filter(
+        (p) =>
+          (p.kind === 'city' || p.kind === 'capital' || p.kind === 'landform') &&
+          Number.isFinite(p.lat) &&
+          Number.isFinite(p.lon)
+      );
+      mapKey = null;
+    }
+    return places;
+  }
   let site = null,
     heading = 0,
     fov = 65,
@@ -83,6 +96,7 @@ export function mountGroundLocationMap({ host, environment, onPick, search, onPi
     const text = `${site.latitude.toFixed(4)}°, ${wrap(site.longitude).toFixed(4)}° · ${Math.round(site.height || 0)} m`;
     if (text !== caption.textContent) caption.textContent = text;
     if (collapsed || picker?.open) return;
+    currentPlaces();
     const frame = locationMapFrame(
       site,
       widthKm,
@@ -151,7 +165,7 @@ export function mountGroundLocationMap({ host, environment, onPick, search, onPi
       : { x: width / 2, y: height / 2 };
     const language = getLanguage(),
       occupied = [{ x: marker.x - 10, y: marker.y - 10, w: 20, h: 20 }];
-    const candidates = places
+    const candidates = currentPlaces()
       .map((p) => ({ p, ...projectLocation(frame, p.lat, p.lon) }))
       .filter((p) => p.x > 8 && p.x < width - 8 && p.y > 14 && p.y < height - 22)
       .sort(

@@ -164,10 +164,16 @@ async (page) => {
   await q('#skyGallerySearch').fill('heic1502a');
   await q('#skyImageGallery .sig-card').first().click();
   check((await state()).scopeAz === positionBeforeGallery.scopeAz, 'Browsing moved telescope');
-  await q('#skyImageGallery').getByText('地面望远镜定位', {exact:true}).click();
-  await page.waitForFunction(()=>viewer.sim.environment.skyDetail.status('ground-scope-detail').source==='hubble' && viewer.sim.worldExplorer.ground.stargazing?.tracking);
-  const imageStatus = await page.evaluate(()=>viewer.sim.environment.skyDetail.status('ground-scope-detail'));
-  check(imageStatus.requested>0, 'Hubble field did not submit tiles');
+  await q('#skyImageGallery').getByText('地面望远镜定位', { exact: true }).click();
+  await page.waitForFunction(
+    () =>
+      viewer.sim.environment.skyDetail.status('ground-scope-detail').source === 'hubble' &&
+      viewer.sim.worldExplorer.ground.stargazing?.tracking
+  );
+  const imageStatus = await page.evaluate(() =>
+    viewer.sim.environment.skyDetail.status('ground-scope-detail')
+  );
+  check(imageStatus.requested > 0, 'Hubble field did not submit tiles');
   await q('.world-bar [data-exit]').click();
   await page.setViewportSize({ width: 390, height: 844 });
   await q('.world-mode-entry > button').first().click();
@@ -186,4 +192,4 @@ async (page) => {
   await q('.world-bar [data-exit]').click();
   check(!errors.length, 'Browser errors: ' + errors.join('\n'));
   return { before, fields, tracked, turned, optics, enlarged, low, secondSite, back, errors };
-}
+};

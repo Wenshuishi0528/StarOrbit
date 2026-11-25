@@ -20,6 +20,7 @@ const defaults = {
   autoPause: false,
 };
 import { shortClock as clock, shortDate as date } from './time-format.js';
+import { play, resumeClock, invalidate } from './sim-clock.js';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export class EventTimeline {
   constructor(sim) {
@@ -67,9 +68,7 @@ export class EventTimeline {
     $('watchOrbitEvent').onclick = () => {
       if (!this.selected) return;
       this.jump(this.selected.time - 30000);
-      sim.speed = 1;
-      sim.paused = false;
-      sim.timeUI();
+      play(sim, 1);
       sim.sessionMemory?.save();
     };
     $('closeOrbitEvent').onclick = () => {
@@ -158,8 +157,8 @@ export class EventTimeline {
   finish() {
     if (!this.dragging) return;
     this.dragging = false;
-    this.sim.lastWall = performance.now();
-    this.sim.dirty = this.sim.snap = true;
+    resumeClock(this.sim);
+    invalidate(this.sim);
     const rail = $('eventRail');
     if (rail.hasPointerCapture(this.pointerId)) rail.releasePointerCapture(this.pointerId);
     this.sim.sessionMemory?.save();

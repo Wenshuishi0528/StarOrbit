@@ -78,7 +78,8 @@ for (let i = 0; i < 200; i++) stepTravel(pos, velocity, [0, 0, 0], 0.1, 2);
 assert(Math.hypot(...velocity) < 1e-15);
 const bundled = await build({
   stdin: {
-    contents: "export {interstellarCatalog} from './src/interstellar-catalog.js'",
+    contents:
+      "export {interstellarCatalog, ensureInterstellarCatalog} from './src/interstellar-catalog.js'",
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -86,12 +87,13 @@ const bundled = await build({
   format: 'esm',
   write: false,
 });
-const { interstellarCatalog } = await import(
+const { interstellarCatalog, ensureInterstellarCatalog } = await import(
   'data:text/javascript;base64,' + Buffer.from(bundled.outputFiles[0].text).toString('base64')
 );
 let full;
 try {
-  full = interstellarCatalog();
+  // The world is entered only after both cultures' figures have loaded.
+  full = await ensureInterstellarCatalog();
 } catch (error) {
   console.error(error.message);
   process.exit(1);

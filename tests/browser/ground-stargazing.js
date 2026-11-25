@@ -28,7 +28,8 @@ async (page) => {
   const clock = control('.world-bar [data-time]');
   await clock.fill('2026-11-21 12:15:00');
   await control('.world-bar [data-jump]').click();
-  if (!(await page.evaluate(() => viewer.sim.paused))) await control('.world-bar [data-play]').click();
+  if (!(await page.evaluate(() => viewer.sim.paused)))
+    await control('.world-bar [data-play]').click();
   await control('[data-star-night]').click();
   await page.waitForFunction(() => document.querySelector('[data-star-night]').hidden);
   await page.waitForFunction(() =>
@@ -37,4 +38,4 @@ async (page) => {
   const dusk = await clock.inputValue();
   await control('.world-bar [data-exit]').click();
   return { angles, dusk };
-}
+};

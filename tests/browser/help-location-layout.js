@@ -104,7 +104,10 @@ async (page, output = 'output/playwright/help-layout') => {
       const count = await links.count();
       if (count) linkedSections++;
       for (let k = 0; k < count; k++) {
-        const before = await byId('helpContents').evaluate(el => { el.scrollTop = 80; return el.scrollTop; });
+        const before = await byId('helpContents').evaluate((el) => {
+          el.scrollTop = 80;
+          return el.scrollTop;
+        });
         if (width === 1360 && name.startsWith('6.2') && k === 0)
           await page.screenshot({ path: `${output}/manual-6-2.png` });
         await links.nth(k).click();
@@ -113,9 +116,13 @@ async (page, output = 'output/playwright/help-layout') => {
         if (name.startsWith('6.2') && k === 0)
           await page.screenshot({ path: `${output}/manual-location-${width}.png` });
         await byId('helpDirectory').click();
-        const after = await byId('helpContents').evaluate(el=>el.scrollTop);
+        const after = await byId('helpContents').evaluate((el) => el.scrollTop);
         const title = await byId('helpTitle').innerText();
-        check(title===name && Math.abs(after-before)<2, `${width} ${name} returns to the saved paragraph`,{before,after,title});
+        check(
+          title === name && Math.abs(after - before) < 2,
+          `${width} ${name} returns to the saved paragraph`,
+          { before, after, title }
+        );
       }
       if (i < 56) await byId('tourNext').press('Enter');
     }
@@ -127,4 +134,4 @@ async (page, output = 'output/playwright/help-layout') => {
     await byId('closeHelp').click();
   }
   return checks;
-}
+};

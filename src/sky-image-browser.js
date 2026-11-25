@@ -6,7 +6,6 @@ import { applySkyDetailSource } from './sky-detail-controls.js';
 import { mountSkyImageGallery } from './sky-image-gallery.js';
 import { openSkyOfflineDownload } from './sky-offline-controls.js';
 import { WEBB_ARTWORKS } from './webb-gallery.js';
-import { HUBBLE_ARTWORKS } from './hubble-gallery.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -91,9 +90,17 @@ export function mountSkyImageBrowser(env) {
     openSkyOfflineDownload(env, plan, { opener: document.activeElement });
   }
 
+  // 哈勃作品随档案按需加载：首次打开图集前加载，完成后并入作品列表。
+  let works = WEBB_ARTWORKS;
+  function loadHubble() {
+    return skyDetail.loadHubble().then((archive) => {
+      if (archive && works === WEBB_ARTWORKS) works = [...WEBB_ARTWORKS, ...archive.artworks];
+      return archive;
+    });
+  }
   const browser = mountSkyImageGallery({
-    providers: skyDetail.providers,
-    works: [...WEBB_ARTWORKS, ...HUBBLE_ARTWORKS],
+    providers: () => skyDetail.providers,
+    works: () => works,
     onLocate: locate,
     canLocate,
     onSave: saveEntry,
@@ -103,6 +110,12 @@ export function mountSkyImageBrowser(env) {
       (entry.kind !== 'work' || !!providerFor(entry)?.plate),
     getSavedPreview: (entry) => skyDetail.offline.get('thumbnail:' + entry.source + ':' + entry.id),
   });
+  // 打开图集前等待哈勃档案；加载失败时仍打开其余影像，下次打开再重试。
+  const openGallery = browser.open;
+  browser.open = (options = {}) => {
+    const opener = options.opener || document.activeElement;
+    return loadHubble().then(() => openGallery({ ...options, opener }));
+  };
   for (const [id, context] of [
     ['xtSkyImageBrowse', 'xuntian'],
     ['skyImageBrowse', 'main'],
@@ -122,7 +135,12 @@ export function mountSkyImageBrowser(env) {
     if (plan) openSkyOfflineDownload(env, plan, { opener: event.currentTarget });
     else $('xtSkyDetailStatus').textContent = t('当前天区没有可下载的影像');
   };
-  env.openOfflineSkyField = (record) => {
+  // 哈勃离线影像需要档案中的影像源（用于原生分辨率与层级判断），先加载档案再定位。
+  env.openOfflineSkyField = (record) =>
+    record.source === 'hubble' && !skyDetail.hubbleArchive
+      ? loadHubble().then(() => openOfflineField(record))
+      : openOfflineField(record);
+  function openOfflineField(record) {
     const view = record.view;
     if (!view?.forward) return false;
     const [x, y, z] = view.forward;
@@ -142,6 +160,6 @@ export function mountSkyImageBrowser(env) {
       sim.missionId === 'tiangong' ? 'xuntian' : 'main',
       view
     );
-  };
+  }
   return browser;
 }

@@ -1,5 +1,10 @@
 import { t, getLanguage } from './i18n.js';
-import { getXuntianTarget, searchXuntianTargets } from './xuntian-catalog.js';
+import {
+  ensureXuntianCatalog,
+  getXuntianTarget,
+  searchXuntianTargets,
+  xuntianCatalogComplete,
+} from './xuntian-catalog.js';
 import { searchSolarTargets } from './solar-targets.js';
 
 const exampleGroups = [
@@ -81,6 +86,9 @@ export function mountScopeSearch(
     const query = input.value.trim();
     list.replaceChildren();
     if (query) {
+      // Chinese names are searchable in every culture. Until their catalogue
+      // has loaded (the scope refreshes then), each query retries the load.
+      if (!xuntianCatalogComplete()) ensureXuntianCatalog().catch(() => {});
       const stars = searchXuntianTargets(query, getLanguage(), 7, skyCulture()),
         cities = cityFinder.search(query, getLanguage());
       const bodies = searchSolarTargets(query, getLanguage());

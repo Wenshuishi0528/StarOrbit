@@ -21,7 +21,7 @@ export function cityTerrainText(status) {
 
 export function mountCityTerrainControls(env) {
   const manager = env.cityTerrain,
-    finder = createCityFinder(env.geography.items);
+    finder = createCityFinder(() => env.geography.places());
   let last = -Infinity;
   const open = () => {
     env.weather?.resourcePanel?.open();
@@ -72,7 +72,11 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
     disposed = false,
     language = null,
     message = '';
-  const selection = mountCityTerrainSelection(list, (id) => manager.removeCity(id), () => render(true));
+  const selection = mountCityTerrainSelection(
+    list,
+    (id) => manager.removeCity(id),
+    () => render(true)
+  );
   enabled.onchange = () => {
     env.settings.cityTerrain = enabled.checked;
     manager.setEnabled(enabled.checked);
@@ -106,7 +110,15 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
   }
   function searchResults() {
     result.replaceChildren();
-    for (const city of finder.search(search.value, getLanguage(), 6)) {
+    const query = search.value;
+    // 城市名来自按需加载的地理图集：加载完成前不提示“未找到”，完成后重新检索。
+    if (query.trim() && !env.geography.ready) {
+      env.geography
+        .load()
+        .then(() => !disposed && env.geography.ready && search.value === query && searchResults());
+      return;
+    }
+    for (const city of finder.search(query, getLanguage(), 6)) {
       const row = document.createElement('div');
       row.className = 'city-resource-row';
       const label = document.createElement('span');
@@ -142,7 +154,12 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
       await manager.clearStreaming();
       const stored = new Map((await manager.cache.list()).map((row) => [row.id, row]));
       for (const city of [...manager.cities.values()])
-        if (!city.builtin && !city.streaming && !stored.get(city.id)?.pinned && !manager.downloads.has(city.id)) {
+        if (
+          !city.builtin &&
+          !city.streaming &&
+          !stored.get(city.id)?.pinned &&
+          !manager.downloads.has(city.id)
+        ) {
           await manager.removeCity(city.id);
         }
       message = t('临时城市缓存已清理');
@@ -258,7 +275,8 @@ export function mountCityTerrainResourceCard({ env, parent, closeResources }) {
           cache = stored.get(city.id),
           job = manager.downloads.get(city.id);
         writeText(row.title, names(city));
-        if (row.select) row.select.setAttribute('aria-label', t('选择 {name}', { name: names(city) }));
+        if (row.select)
+          row.select.setAttribute('aria-label', t('选择 {name}', { name: names(city) }));
         writeText(
           row.info,
           `${city.year} · ${Number(city.pixelSizeMeters).toFixed(1)} m/px · ${city.extentKm} × ${city.extentKm} km · ${t(city.builtin ? '内置离线' : cache?.complete ? '已离线保存' : '临时或未完成')} · ${megabytes(city.builtin ? city.bytes || 0 : cache?.bytes || 0)}`

@@ -44,9 +44,15 @@ import { xuntianSkySource } from './xuntian-view-sky.js';
 import { mountScopeInput } from './xuntian-input.js';
 import { mountScopeSearch } from './xuntian-search.js';
 import { makeScopeGuide } from './xuntian-guide.js';
-import { normalizeStarChartSettings, syncStarChartControls } from './star-chart-settings.js';
+import { normalizeStarChartSettings } from './star-chart-settings.js';
+import { onSkyCultureLoaded } from './sky-cultures.js';
 import { mountXuntianSolarControls } from './xuntian-solar-controls.js';
-import { skyDetailTarget, skyDetailText, skyDetailCredits, updateHubbleCredit } from './sky-detail-controls.js';
+import {
+  skyDetailTarget,
+  skyDetailText,
+  skyDetailCredits,
+  updateHubbleCredit,
+} from './sky-detail-controls.js';
 import { cityTerrainText } from './city-terrain-controls.js';
 
 const $ = (id) => document.getElementById(id),
@@ -129,7 +135,7 @@ export function installXuntianScope(sim) {
     releaseNote = '',
     roll = 0,
     rollTimer = 0;
-  const cities = createCityFinder(sim.environment.geography.items);
+  const cities = createCityFinder(() => sim.environment.geography.places());
   try {
     const prefs = JSON.parse(localStorage.getItem(KEY)) || {};
     if (Number.isFinite(prefs.aperture)) aperture = clamp(prefs.aperture, 25, 2000);
@@ -276,14 +282,27 @@ export function installXuntianScope(sim) {
     if (!eye || !sim.current) return null;
     return solarApparent(sim.current, eye).find((entry) => entry.id === body);
   }
+  // A Chinese asterism is shown in its own culture, whose catalogue and art
+  // load first. Meanwhile the scope keeps its current target; any later
+  // selection supersedes the pending one.
+  let cultureTicket = 0;
+  function whenCultureReady(target, run) {
+    const ticket = ++cultureTicket;
+    if (target?.type !== 'asterism' || sim.environment.skyCultureReady('chinese')) return run();
+    sim.environment.loadSkyCulture('chinese').then(
+      () => ticket === cultureTicket && run(),
+      () => {}
+    );
+    return true;
+  }
   function selectStar(target) {
+    whenCultureReady(target, () => selectReadyStar(target));
+  }
+  function selectReadyStar(target) {
     const nextCulture =
       target.type === 'asterism' ? 'chinese' : target.type === 'constellation' ? 'western' : null;
-    if (nextCulture && sim.environment.settings.skyCulture !== nextCulture) {
-      sim.environment.settings.skyCulture = nextCulture;
-      syncStarChartControls(sim.environment.settings);
-      sim.environment.save();
-    }
+    if (nextCulture && sim.environment.settings.skyCulture !== nextCulture)
+      sim.environment.selectSkyCulture(nextCulture);
     if (target.type === 'asterism') {
       sim.environment.skyCultureFocus = target.id;
       sim.skyCultureControls?.select?.(target.id);
@@ -325,6 +344,27 @@ export function installXuntianScope(sim) {
     selectedAt = performance.now();
     hud();
     canvas.focus({ preventScroll: true });
+  }
+  function observeReadyTarget(target, { annotations = false, savedView = null } = {}) {
+    open();
+    if (!active) return false;
+    if (annotations) {
+      $('xtNames').checked = true;
+      pausedFrame = '';
+      lastDraw = -Infinity;
+      prefs();
+    }
+    selectReadyStar(target);
+    if (savedView?.right && savedView?.up) {
+      const savedPose = attitudeQuaternion(savedView, true);
+      pose.copy(opticalPose(savedPose, -roll));
+      axes = actualAxes();
+      desired = null;
+      locked = true;
+      lastDraw = -Infinity;
+    }
+    $('xtSearch').value = target.name;
+    return true;
   }
   function recommend(snap = false) {
     beginExternalSteering();
@@ -893,6 +933,13 @@ export function installXuntianScope(sim) {
       mountXuntianFormationPanel($('xtFormationPanel'), formation);
     }
     active = true;
+    // 城市名、地面目标和城市搜索使用按需加载的地理图集；加载后刷新目标名和搜索结果。
+    if (!sim.environment.geography.ready)
+      sim.environment.geography.load().then(() => {
+        if (!active) return;
+        search.refresh();
+        hud();
+      });
     panel.hidden = false;
     document.body.classList.add('xt-scope-open');
     if (
@@ -1014,7 +1061,9 @@ export function installXuntianScope(sim) {
     const close = which === 'near';
     $('xtNear').setAttribute('aria-pressed', String(close));
     $('xtFrameBoth').setAttribute('aria-pressed', String(!close));
-    needsFrame = !(optics && (close ? formation.frameTelescope(panel) : formation.frameBoth(panel)));
+    needsFrame = !(
+      optics && (close ? formation.frameTelescope(panel) : formation.frameBoth(panel))
+    );
   }
   const frame = () => ({
     ...solarControls.frame(),
@@ -1323,6 +1372,19 @@ export function installXuntianScope(sim) {
       hud();
     }
   });
+  // Chinese names join the catalogue in every culture when it first loads.
+  // Renew shown names and results without replacing text the user is typing.
+  onSkyCultureLoaded(() => {
+    const culture = sim.environment.settings.skyCulture,
+      shown = !!named && $('xtSearch').value === named.name;
+    if (named) named = getXuntianTarget(named.id, getLanguage(), culture) || named;
+    if (bookmark?.named)
+      bookmark.named =
+        getXuntianTarget(bookmark.named.id, getLanguage(), culture) || bookmark.named;
+    if (shown) $('xtSearch').value = named.name;
+    search.refresh();
+    if (active) hud();
+  });
   setLens(field);
   setAperture(aperture);
   setEV(ev);
@@ -1445,27 +1507,9 @@ export function installXuntianScope(sim) {
       });
       return mode === 'solar' && named?.body === body;
     },
-    observeTarget(target, { annotations = false, savedView = null } = {}) {
+    observeTarget(target, options = {}) {
       if (sim.missionId !== 'tiangong' || !target?.direction) return false;
-      open();
-      if (!active) return false;
-      if (annotations) {
-        $('xtNames').checked = true;
-        pausedFrame = '';
-        lastDraw = -Infinity;
-        prefs();
-      }
-      selectStar(target);
-      if (savedView?.right && savedView?.up) {
-        const savedPose = attitudeQuaternion(savedView, true);
-        pose.copy(opticalPose(savedPose, -roll));
-        axes = actualAxes();
-        desired = null;
-        locked = true;
-        lastDraw = -Infinity;
-      }
-      $('xtSearch').value = target.name;
-      return true;
+      return whenCultureReady(target, () => observeReadyTarget(target, options));
     },
     observeRegion(target) {
       if (sim.missionId !== 'tiangong' || !target?.direction?.every(Number.isFinite)) return false;

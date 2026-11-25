@@ -2,7 +2,7 @@ import { createGroundFinderBackdrop } from './ground-finder-backdrop.js';
 import { resizeRenderSurface } from './render-surface.js';
 import * as THREE from 'three';
 import { Equator, Horizon, Observer } from 'astronomy-engine';
-import atlas from '../assets/geography/atlas.json';
+import { geographyAtlas, loadGeographyAtlas } from './geography-atlas.js';
 import {
   createGroundState,
   normalizeGroundSite,
@@ -23,7 +23,11 @@ import { createGroundScopeView } from './ground-scope-view.js';
 import { createGroundStarMount } from './ground-star-instrument.js';
 import { createGroundSky } from './ground-world-sky.js';
 import { createSolarWorld } from './solar-world.js';
-import { createInterstellarWorld } from './interstellar-world.js';
+import {
+  createInterstellarWorld,
+  interstellarWorldReady,
+  loadInterstellarWorld,
+} from './interstellar-world.js';
 import {
   readWorldSkySettings,
   applyWorldSkySettings,
@@ -34,9 +38,9 @@ import { lastObserver } from './observer-settings.js';
 import { dateTimeText, dateTimeValue, stepDateTime } from './date-time-input.js';
 import { t, getLanguage, onLanguageChange, errorText } from './i18n.js';
 
-import { clampTime } from './orbit.js';
 import { ELEVATION_SOURCE } from './earth-elevation-source.js';
 import { skyCulturePhotoCredit } from './sky-culture-caption.js';
+import { advanceClock, invalidate, play, resumeClock } from './sim-clock.js';
 
 const KEY = 'starorbit-world-v1';
 const css = `
@@ -53,7 +57,10 @@ const fold = (s) =>
 export function searchWorldPlaces(query, language = 'zh') {
   const key = fold(query);
   if (!key) return [];
-  return atlas.labels
+  // 内置地名来自按需加载的地理图集；加载前返回空结果，调用方可在加载后重新检索。
+  const labels = geographyAtlas()?.labels;
+  if (!labels) return [];
+  return labels
     .map((p) => ({
       p,
       score: Math.min(
@@ -528,9 +535,22 @@ export function installWorldExplorer(sim) {
   $('[data-search]').oninput = () => {
     request?.abort();
     request = null;
-    results(searchWorldPlaces($('[data-search]').value, getLanguage()));
+    const query = $('[data-search]').value;
+    results(searchWorldPlaces(query, getLanguage()));
+    if (query.trim() && !geographyAtlas())
+      loadGeographyAtlas().then(
+        () =>
+          !disposed &&
+          !request &&
+          $('[data-search]').value === query &&
+          results(searchWorldPlaces(query, getLanguage())),
+        (error) => console.error('地理图集加载失败', error)
+      );
   };
   async function searchSites(query, { online = false, signal, language = getLanguage() } = {}) {
+    // 内置地名按需加载；加载失败时仍可使用在线地名和坐标。
+    if (query.trim())
+      await loadGeographyAtlas().catch((error) => console.error('地理图集加载失败', error));
     const local = searchWorldPlaces(query, language);
     if (!online || !query.trim()) return local;
     const signals = [AbortSignal.timeout(10000)];
@@ -718,10 +738,7 @@ export function installWorldExplorer(sim) {
   $('[data-speed]').onchange = (e) => {
     const speed = Number(e.target.value);
     if (![1, 60, 3600, 86400, -3600].includes(speed)) return;
-    sim.mode = 'custom';
-    sim.speed = speed;
-    sim.paused = false;
-    sim.timeUI();
+    play(sim, speed);
   };
   $('[data-exit]').onclick = close;
   host.querySelectorAll('[data-mode]').forEach((b) => (b.onclick = () => open(b.dataset.mode)));
@@ -767,8 +784,21 @@ export function installWorldExplorer(sim) {
     labelRoot.replaceChildren();
     groundScene = null;
   }
+  let openTicket = 0;
   function open(next, options = {}) {
-    if (disposed || mode === next || !['ground', 'solar', 'stellar'].includes(next)) return;
+    if (disposed || !['ground', 'solar', 'stellar'].includes(next)) return;
+    const ticket = ++openTicket;
+    // Selecting the visible mode also cancels a pending switch away from it.
+    if (mode === next) return;
+    // Interstellar figures need the culture catalogue. Keep the current view
+    // until it has loaded; a later open/close supersedes this request.
+    if (next === 'stellar' && !interstellarWorldReady()) {
+      loadInterstellarWorld().then(
+        () => ticket === openTicket && open(next, options),
+        () => {}
+      );
+      return;
+    }
     sim.planetaryObservatory?.close();
     request?.abort();
     request = null;
@@ -880,6 +910,7 @@ export function installWorldExplorer(sim) {
     canvas.focus();
   }
   function close() {
+    openTicket++;
     if (!mode) return;
     request?.abort();
     request = null;
@@ -892,9 +923,8 @@ export function installWorldExplorer(sim) {
     controls.enabled = previousControlsEnabled;
     sim.orbitControls.enabled = previousOrbitEnabled;
     cancelDescent();
-    sim.lastWall = performance.now();
-    sim.dirty = true;
-    sim.snap = true;
+    resumeClock(sim);
+    invalidate(sim);
     sim.timeUI();
   }
   const tmp = new THREE.Vector3(),
@@ -945,8 +975,8 @@ export function installWorldExplorer(sim) {
     scopeView?.earth.invalidateLandscape();
     scopeView?.invalidate();
     lastLabels = 0;
-    sim.dirty = true;
-    sim.lastWall = performance.now();
+    invalidate(sim, { snap: false });
+    resumeClock(sim);
   }
   canvas.addEventListener('webglcontextlost', graphicsInterrupted);
   canvas.addEventListener('webglcontextrestored', graphicsRestored);
@@ -958,13 +988,7 @@ export function installWorldExplorer(sim) {
     lastLabelPose;
   function tick(wall, dt) {
     if (!mode || graphicsLost) return;
-    sim.lastWall = wall;
-    if (sim.mode === 'real') sim.time = Date.now();
-    else if (!sim.paused) {
-      const next = sim.time + Math.max(0, Math.min(0.25, dt)) * sim.speed * 1000;
-      sim.time = clampTime(next);
-      if (sim.time !== next) sim.paused = true;
-    }
+    advanceClock(sim, wall, dt);
     const w = stage.clientWidth,
       h = stage.clientHeight;
     if (w < 1 || h < 1) return;

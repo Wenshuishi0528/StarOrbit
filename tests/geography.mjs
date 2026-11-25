@@ -1,71 +1,155 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import {geographicVector,ringContains,regionContains,angularDistance,GeographyIndex} from '../src/geography-math.js';
-import {GEOGRAPHY_DEFAULTS,normalizeGeographySettings,cityLabelEnabled} from '../src/geography-settings.js';
-const data=JSON.parse(fs.readFileSync(new URL('../assets/geography/atlas.json',import.meta.url)));
-assert.equal(data.format,'tiangong-geography-1');
-assert.deepEqual(geographicVector(0,0,1),[1,0,0]);
-assert.ok(Math.abs(geographicVector(90,0,1)[1]-1)<1e-12);
-assert.ok(Math.abs(geographicVector(0,90,1)[2]-1)<1e-12);
-assert.ok(angularDistance(179,0,-179,0)<.035);
-const square=[[0,0],[10,0],[10,10],[0,10],[0,0]],hole=[[4,4],[6,4],[6,6],[4,6],[4,4]];
-assert.ok(ringContains(square,1,1));assert.ok(!ringContains(square,12,2));
-assert.ok(!regionContains({parts:[{box:[0,0,10,10],rings:[square,hole]}]},5,5));
-assert.deepEqual(normalizeGeographySettings(),GEOGRAPHY_DEFAULTS);
-assert.equal(normalizeGeographySettings().geographyEnabled,true);
-assert.equal(normalizeGeographySettings({geographyEnabled:false}).geographyEnabled,false);
-assert.deepEqual(normalizeGeographySettings({geoDensity:NaN,geoBorders:'yes'}),GEOGRAPHY_DEFAULTS);
-assert.throws(()=>normalizeGeographySettings({geoDensity:2},{strict:true}));
-assert.throws(()=>normalizeGeographySettings({geoCapitals:'yes'},{strict:true}));
-assert.equal(normalizeGeographySettings({geographyEnabled:true,geoDensity:0}).geoDensity,0);
-const official=data.sources.find(s=>s.provider?.includes('天地图'));
-assert.equal(official.url,'https://cloudcenter.tianditu.gov.cn/api/portal/region/map?gb=156000000&level=2');
-assert.equal(official.sha256,crypto.createHash('sha256').update(fs.readFileSync(new URL('../assets/geography/china-tianditu-20261026.bin.gz',import.meta.url))).digest('hex'));
-assert.ok(data.lines.offshore.fine.length>=10);
-assert.equal(new Set(data.labels.map(p=>p.id)).size,data.labels.length);
-const beijing=data.labels.find(p=>p.id==='beijing');assert.equal(beijing.marker,'star');assert.equal(beijing.zh,'北京');assert.equal(beijing.en,'Beijing');assert.equal(beijing.kind,'capital');
-assert.ok(data.labels.some(p=>p.zh==='珠穆朗玛峰'));
-assert.ok(data.labels.some(p=>p.zh==='天山山脉'));
-assert.ok(data.labels.some(p=>p.zh==='维多利亚湖'));
-assert.ok(!data.countries.some(c=>['country-TWN','country-HKG','country-MAC'].includes(c.id)));
-for(const l of data.labels){assert.ok(l.en&&l.zh);assert.ok(Number.isFinite(l.lon)&&l.lon>=-180&&l.lon<=180);assert.ok(Number.isFinite(l.lat)&&l.lat>=-90&&l.lat<=90);}
-for(const layer of Object.values(data.lines))for(const tier of Object.values(layer))for(const path of tier)for(const p of path)assert.ok(p.length===2&&p.every(Number.isFinite));
-const index=new GeographyIndex(data);
-for(const [lon,lat]of [[116.4074,39.9042],[121,24],[114.17,22.32],[113.55,22.2],[110,19],[78.5,35],[95,28]])assert.equal(index.locate(lon,lat).country?.id,'country-CHN',`official China coverage at ${lon},${lat}`);
-assert.equal(index.locate(116.4074,39.9042).nearby.id,'beijing');
-assert.equal(index.locate(91,32).physical.zh,'青藏高原');
-assert.equal(index.locate(65,15).physical.zh,'阿拉伯海');
-for(const lon of [179,-179,181])assert.equal(index.locate(lon,0).physical.zh,'太平洋');
-assert.equal(index.locate(2.35,48.85).country.en,'France');
-assert.equal(index.locate(NaN,0),null);
-const start=performance.now();for(let i=0;i<1000;i++)index.locate(i%360-180,Math.sin(i)*70);const ms=performance.now()-start;
-assert.ok(ms<2000,`lookup budget: ${ms} ms per 1000 positions`);
-console.log('Geography: settings, official source hash, Beijing, coordinates, boundaries, location lookup passed; 1000 lookups:',ms.toFixed(1),'ms');
+import {
+  geographicVector,
+  ringContains,
+  regionContains,
+  angularDistance,
+  GeographyIndex,
+} from '../src/geography-math.js';
+import {
+  GEOGRAPHY_DEFAULTS,
+  normalizeGeographySettings,
+  cityLabelEnabled,
+} from '../src/geography-settings.js';
+const data = JSON.parse(
+  fs.readFileSync(new URL('../assets/geography/atlas.json', import.meta.url))
+);
+assert.equal(data.format, 'tiangong-geography-1');
+assert.deepEqual(geographicVector(0, 0, 1), [1, 0, 0]);
+assert.ok(Math.abs(geographicVector(90, 0, 1)[1] - 1) < 1e-12);
+assert.ok(Math.abs(geographicVector(0, 90, 1)[2] - 1) < 1e-12);
+assert.ok(angularDistance(179, 0, -179, 0) < 0.035);
+const square = [
+    [0, 0],
+    [10, 0],
+    [10, 10],
+    [0, 10],
+    [0, 0],
+  ],
+  hole = [
+    [4, 4],
+    [6, 4],
+    [6, 6],
+    [4, 6],
+    [4, 4],
+  ];
+assert.ok(ringContains(square, 1, 1));
+assert.ok(!ringContains(square, 12, 2));
+assert.ok(!regionContains({ parts: [{ box: [0, 0, 10, 10], rings: [square, hole] }] }, 5, 5));
+assert.deepEqual(normalizeGeographySettings(), GEOGRAPHY_DEFAULTS);
+assert.equal(normalizeGeographySettings().geographyEnabled, true);
+assert.equal(normalizeGeographySettings({ geographyEnabled: false }).geographyEnabled, false);
+assert.deepEqual(
+  normalizeGeographySettings({ geoDensity: NaN, geoBorders: 'yes' }),
+  GEOGRAPHY_DEFAULTS
+);
+assert.throws(() => normalizeGeographySettings({ geoDensity: 2 }, { strict: true }));
+assert.throws(() => normalizeGeographySettings({ geoCapitals: 'yes' }, { strict: true }));
+assert.equal(normalizeGeographySettings({ geographyEnabled: true, geoDensity: 0 }).geoDensity, 0);
+const official = data.sources.find((s) => s.provider?.includes('天地图'));
+assert.equal(
+  official.url,
+  'https://cloudcenter.tianditu.gov.cn/api/portal/region/map?gb=156000000&level=2'
+);
+assert.equal(
+  official.sha256,
+  crypto
+    .createHash('sha256')
+    .update(
+      fs.readFileSync(
+        new URL('../assets/geography/china-tianditu-20261026.bin.gz', import.meta.url)
+      )
+    )
+    .digest('hex')
+);
+assert.ok(data.lines.offshore.fine.length >= 10);
+assert.equal(new Set(data.labels.map((p) => p.id)).size, data.labels.length);
+const beijing = data.labels.find((p) => p.id === 'beijing');
+assert.equal(beijing.marker, 'star');
+assert.equal(beijing.zh, '北京');
+assert.equal(beijing.en, 'Beijing');
+assert.equal(beijing.kind, 'capital');
+assert.ok(data.labels.some((p) => p.zh === '珠穆朗玛峰'));
+assert.ok(data.labels.some((p) => p.zh === '天山山脉'));
+assert.ok(data.labels.some((p) => p.zh === '维多利亚湖'));
+assert.ok(
+  !data.countries.some((c) => ['country-TWN', 'country-HKG', 'country-MAC'].includes(c.id))
+);
+for (const l of data.labels) {
+  assert.ok(l.en && l.zh);
+  assert.ok(Number.isFinite(l.lon) && l.lon >= -180 && l.lon <= 180);
+  assert.ok(Number.isFinite(l.lat) && l.lat >= -90 && l.lat <= 90);
+}
+for (const layer of Object.values(data.lines))
+  for (const tier of Object.values(layer))
+    for (const path of tier)
+      for (const p of path) assert.ok(p.length === 2 && p.every(Number.isFinite));
+const index = new GeographyIndex(data);
+for (const [lon, lat] of [
+  [116.4074, 39.9042],
+  [121, 24],
+  [114.17, 22.32],
+  [113.55, 22.2],
+  [110, 19],
+  [78.5, 35],
+  [95, 28],
+])
+  assert.equal(
+    index.locate(lon, lat).country?.id,
+    'country-CHN',
+    `official China coverage at ${lon},${lat}`
+  );
+assert.equal(index.locate(116.4074, 39.9042).nearby.id, 'beijing');
+assert.equal(index.locate(91, 32).physical.zh, '青藏高原');
+assert.equal(index.locate(65, 15).physical.zh, '阿拉伯海');
+for (const lon of [179, -179, 181]) assert.equal(index.locate(lon, 0).physical.zh, '太平洋');
+assert.equal(index.locate(2.35, 48.85).country.en, 'France');
+assert.equal(index.locate(NaN, 0), null);
+const start = performance.now();
+for (let i = 0; i < 1000; i++) index.locate((i % 360) - 180, Math.sin(i) * 70);
+const ms = performance.now() - start;
+assert.ok(ms < 2000, `lookup budget: ${ms} ms per 1000 positions`);
+console.log(
+  'Geography: settings, official source hash, Beijing, coordinates, boundaries, location lookup passed; 1000 lookups:',
+  ms.toFixed(1),
+  'ms'
+);
 
 // Old preferences and scenes gain tier 1; corrupt tier values cannot flood labels.
-assert.equal(normalizeGeographySettings({geoCapitals:false}).geoCityTier,1);
-assert.equal(normalizeGeographySettings().geoCities,true);
-for(const invalid of [0,4,1.5,'2',null,NaN]){
- assert.equal(normalizeGeographySettings({geoCityTier:invalid}).geoCityTier,1);
- assert.throws(()=>normalizeGeographySettings({geoCityTier:invalid},{strict:true}));
+assert.equal(normalizeGeographySettings({ geoCapitals: false }).geoCityTier, 1);
+assert.equal(normalizeGeographySettings().geoCities, true);
+for (const invalid of [0, 4, 1.5, '2', null, NaN]) {
+  assert.equal(normalizeGeographySettings({ geoCityTier: invalid }).geoCityTier, 1);
+  assert.throws(() => normalizeGeographySettings({ geoCityTier: invalid }, { strict: true }));
 }
-const cities=data.labels.filter(p=>p.cityTier);
-assert.equal(cities.length,1210);
-for(const tier of [1,2,3]){
- const settings={...GEOGRAPHY_DEFAULTS,geoCapitals:false,geoCityTier:tier};
- assert.equal(normalizeGeographySettings(settings,{strict:true}).geoCityTier,tier);
- assert(cities.some(p=>p.cityTier===tier&&p.kind==='city'));
- for(const p of cities)assert.equal(!!cityLabelEnabled(p,settings),p.cityTier<=tier);
+const cities = data.labels.filter((p) => p.cityTier);
+assert.equal(cities.length, 1210);
+for (const tier of [1, 2, 3]) {
+  const settings = { ...GEOGRAPHY_DEFAULTS, geoCapitals: false, geoCityTier: tier };
+  assert.equal(normalizeGeographySettings(settings, { strict: true }).geoCityTier, tier);
+  assert(cities.some((p) => p.cityTier === tier && p.kind === 'city'));
+  for (const p of cities) assert.equal(!!cityLabelEnabled(p, settings), p.cityTier <= tier);
 }
-for(const name of ['北京','上海','广州','深圳','香港','台北','纽约','巴黎']){
- const p=cities.find(p=>p.zh===name);assert(p,name);assert.equal(p.cityTier,1,name);
+for (const name of ['北京', '上海', '广州', '深圳', '香港', '台北', '纽约', '巴黎']) {
+  const p = cities.find((p) => p.zh === name);
+  assert(p, name);
+  assert.equal(p.cityTier, 1, name);
 }
-assert.equal(cities.find(p=>p.zh==='台北').kind,'city');
-assert.equal(cities.filter(p=>p.id==='beijing').length,1);
-for(const p of cities){
- assert([1,2,3].includes(p.cityTier));
- assert.equal(!!cityLabelEnabled(p,{...GEOGRAPHY_DEFAULTS,geoCities:false}),p.kind==='capital');
- assert.equal(!!cityLabelEnabled(p,{...GEOGRAPHY_DEFAULTS,geoCities:false,geoCapitals:false}),false);
+assert.equal(cities.find((p) => p.zh === '台北').kind, 'city');
+assert.equal(cities.filter((p) => p.id === 'beijing').length, 1);
+for (const p of cities) {
+  assert([1, 2, 3].includes(p.cityTier));
+  assert.equal(
+    !!cityLabelEnabled(p, { ...GEOGRAPHY_DEFAULTS, geoCities: false }),
+    p.kind === 'capital'
+  );
+  assert.equal(
+    !!cityLabelEnabled(p, { ...GEOGRAPHY_DEFAULTS, geoCities: false, geoCapitals: false }),
+    false
+  );
 }
-console.log('City tiers: 1210 shared anchors, defaults, cumulative tiers, capital deduplication and validation passed');
+console.log(
+  'City tiers: 1210 shared anchors, defaults, cumulative tiers, capital deduplication and validation passed'
+);

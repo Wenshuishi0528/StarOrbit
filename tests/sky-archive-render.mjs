@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { archiveUsesSRGBTransfer } from '../src/sky-archive-color.js';
 import { SkyDetail } from '../src/sky-detail.js';
-import { HUBBLE_PLATE_PROVIDERS } from '../src/hubble-gallery.js';
+import { loadHubbleArchive } from '../src/hubble-gallery.js';
 import { frameSkyArtwork } from '../src/sky-camera-pointing.js';
 import { SkyDetailLayer } from '../src/sky-detail-layer.js';
 import { createWebbPlate, validSkyImageDimensions, webbPlateTile } from '../src/webb-plate.js';
 
+const { providers: HUBBLE_PLATE_PROVIDERS } = await loadHubbleArchive();
 const plate = createWebbPlate([256, 256, 256, 256, 0, 0, 128, 128, -0.001, 0, 0, 0.001, 1]);
 const view = { right: [0, 1, 0], up: [0, 0, 1], forward: [1, 0, 0], fovY: 0.05, aspect: 1 };
 const provider = { id: 'example', plate, format: 'jpg', revision: '1', baseUrl: 'local' };

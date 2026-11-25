@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { birthdayCardInscription, birthdaySkyView } from './birthday-card-render.js';
 import { birthdaySkyFrame } from './birthday-sky-frame.js';
 import { createXuntianViewRenderer } from './xuntian-view-render.js';
-import { getSkyCulture } from './sky-cultures.js';
+import { ensureSkyCulture, getSkyCulture } from './sky-cultures.js';
 import { normalizeStarChartSettings } from './star-chart-settings.js';
 import { ConstellationArt } from './constellation-art.js';
 import { SkyDetail } from './sky-detail.js';
@@ -171,6 +171,8 @@ export async function renderBirthdayBack(options) {
     layout: frozen.backText === false ? 'sky' : 'card',
   });
   const layout = birthdayBackLayout(frozen);
+  // Figures and names come from each item's culture catalogue, loaded on use.
+  await Promise.all(items.map((item) => ensureSkyCulture(item.culture)));
   const entries = items.map((item) => locate(environment, item));
   const plans = entries.map((entry, i) => {
     const box = layout.panels[i];

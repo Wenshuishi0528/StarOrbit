@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import records from '../src/webb-gallery-data.json' with { type: 'json' };
 import { WEBB_ARTWORKS, WEBB_PLATE_PROVIDERS } from '../src/webb-gallery.js';
-import { HUBBLE_PLATE_PROVIDERS } from '../src/hubble-gallery.js';
+import { loadHubbleArchive } from '../src/hubble-gallery.js';
 import profileIndex from '../src/sky-archive-color-data.json' with { type: 'json' };
 import {
   createWebbPlate,
@@ -15,6 +15,7 @@ import {
 import { planSkyDetailSelection } from '../src/sky-detail-plan.js';
 import { SKY_IMAGE_FIELDS } from '../src/deep-sky-openngc.js';
 
+const { providers: HUBBLE_PLATE_PROVIDERS } = await loadHubbleArchive();
 assert.ok(WEBB_ARTWORKS.length >= 283);
 assert.equal(new Set(WEBB_ARTWORKS.map((a) => a.id)).size, WEBB_ARTWORKS.length);
 for (const art of WEBB_ARTWORKS) {

@@ -43,34 +43,8 @@ export class ConstellationArt {
   constructor(manifest = {}, cultureManifests = {}) {
     this.cultures = new Map();
     this.invalidImages = [];
-    for (const [id, provider] of Object.entries({ western: manifest, ...cultureManifests })) {
-      const source = provider || {},
-        frames = [];
-      for (const record of source.images || []) {
-        try {
-          const frame = constellationArtFrame({ ...record, tint: record.tint || source.tint });
-          frame.culture = id;
-          // Keep existing western diagnostic IDs stable. Other providers may use
-          // the same image IDs without borrowing the wrong texture or decode.
-          if (id !== 'western') frame.id = id + ':' + frame.id;
-          frames.push(frame);
-        } catch (error) {
-          if (id === 'western') throw error;
-          this.invalidImages.push({ culture: id, imageId: record.imageId, error: error.message });
-        }
-      }
-      this.cultures.set(id, {
-        frames,
-        version: source.version ?? null,
-        source: source.source || null,
-        caption:
-          source.caption ||
-          source.credit ||
-          (id === 'western'
-            ? westernCaption
-            : 'Chinese asterism illustrations · modern teaching interpretation'),
-      });
-    }
+    for (const [id, provider] of Object.entries({ western: manifest, ...cultureManifests }))
+      this.addCulture(id, provider);
     this.culture = 'western';
     this.frames = this.cultures.get('western').frames;
     this.views = new Map();
@@ -79,6 +53,39 @@ export class ConstellationArt {
     this.failures = new Map();
     this.revision = 0;
     this.disposed = false;
+  }
+  // Lazily loaded cultures register after construction; frames are immutable.
+  addCulture(id, provider) {
+    const source = provider || {},
+      frames = [];
+    for (const record of source.images || []) {
+      try {
+        const frame = constellationArtFrame({ ...record, tint: record.tint || source.tint });
+        frame.culture = id;
+        // Keep existing western diagnostic IDs stable. Other providers may use
+        // the same image IDs without borrowing the wrong texture or decode.
+        if (id !== 'western') frame.id = id + ':' + frame.id;
+        frames.push(frame);
+      } catch (error) {
+        if (id === 'western') throw error;
+        this.invalidImages.push({ culture: id, imageId: record.imageId, error: error.message });
+      }
+    }
+    this.cultures.set(id, {
+      frames,
+      version: source.version ?? null,
+      source: source.source || null,
+      caption:
+        source.caption ||
+        source.credit ||
+        (id === 'western'
+          ? westernCaption
+          : 'Chinese asterism illustrations · modern teaching interpretation'),
+    });
+    if (this.culture === id) {
+      this.frames = frames;
+      this.revision++;
+    }
   }
   setCulture(id) {
     const next = cultureId(id);

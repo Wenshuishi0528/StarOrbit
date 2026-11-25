@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 const bundle = await build({
   stdin: {
     contents:
-      "export * from './src/shared-world-sky.js';export {createGroundSky} from './src/ground-world-sky.js';export {STAR_CHART_DEFAULTS} from './src/star-chart-settings.js';export * as THREE from 'three';",
+      "export * from './src/shared-world-sky.js';export {createGroundSky} from './src/ground-world-sky.js';export {STAR_CHART_DEFAULTS} from './src/star-chart-settings.js';export {ensureSkyCulture} from './src/sky-cultures.js';export * as THREE from 'three';",
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -22,6 +22,7 @@ const {
   readWorldSkySettings,
   applyWorldSkySettings,
   STAR_CHART_DEFAULTS,
+  ensureSkyCulture,
   THREE,
 } = await import(
   'data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].contents).toString('base64')
@@ -123,6 +124,42 @@ assert.equal(sky.camera.aspect, 1.5);
 assert.equal(status.view.fovY, 65);
 sky.render();
 assert.equal(draws.length, 4, 'stars, detail, art and full chart use common sky pipeline');
+// With a real environment the culture is applied through selectSkyCulture,
+// only once its data has loaded; other fields apply at once.
+{
+  let finish;
+  const settings = { ...STAR_CHART_DEFAULTS },
+    calls = [],
+    deferred = {
+      settings,
+      save: () => calls.push('save'),
+      selectSkyCulture(id, onApplied) {
+        calls.push('select:' + id);
+        return new Promise((resolve) => {
+          finish = () => {
+            settings.skyCulture = id;
+            onApplied();
+            resolve(true);
+          };
+        });
+      },
+    };
+  let applied = 0;
+  const pending = applyWorldSkySettings(
+    deferred,
+    { culture: 'chinese', lines: false },
+    () => applied++
+  );
+  assert.equal(settings.skyCulture, 'western');
+  assert.equal(settings.constellationLines, false);
+  assert.equal(applied, 0);
+  assert.deepEqual(calls, ['select:chinese', 'save']);
+  finish();
+  assert.equal(await pending, true);
+  assert.equal(settings.skyCulture, 'chinese');
+  assert.equal(applied, 1);
+}
+await ensureSkyCulture('chinese');
 applyWorldSkySettings(env, { culture: 'chinese', chart: false });
 assert.equal(readWorldSkySettings(env).chart, false);
 assert.equal(env.settings.starChartEnabled, false);
@@ -233,9 +270,13 @@ assert.equal(enhanced.night, natural.night);
 assert.deepEqual(enhanced.sunDirection, natural.sunDirection);
 assert.equal(starMaterial(finder).uniforms.brightness.value, 1);
 function renderedGalaxy() {
-  return draws.flatMap(({scene}) => scene.children).find(o => o.material?.uniforms?.skyMap);
+  return draws.flatMap(({ scene }) => scene.children).find((o) => o.material?.uniforms?.skyMap);
 }
-assert.equal(renderedGalaxy().material.uniforms.textured.value, 1, 'finder uses the photographic Milky Way');
+assert.equal(
+  renderedGalaxy().material.uniforms.textured.value,
+  1,
+  'finder uses the photographic Milky Way'
+);
 const optics = {
   ...base,
   finderEnhanced: true,
@@ -255,7 +296,11 @@ assert.equal(magnified.starCount, 4);
 assert.equal(magnified.view.pixelHeight, 250);
 assert.equal(magnified.view.aspect, 1.2);
 assert.equal(starMaterial(scope).uniforms.brightness.value, 8);
-assert.equal(renderedGalaxy().material.uniforms.textured.value, 1, 'eyepiece retains the photographic Milky Way');
+assert.equal(
+  renderedGalaxy().material.uniforms.textured.value,
+  1,
+  'eyepiece retains the photographic Milky Way'
+);
 assert.equal(starMaterial(scope).uniforms.pixelRatio.value, 1.25);
 assert.equal(starMaterial(finder).uniforms.brightness.value, 1);
 const scopeRequest = requests.findLast((request) => request.id === 'ground-scope-detail');

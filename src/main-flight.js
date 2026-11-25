@@ -18,6 +18,7 @@ import {
 import { mission, spacecraft, VIEW_UNITS_PER_METRE } from './missions.js';
 import { attitudeQuaternion } from './xuntian-formation-math.js';
 import { t } from './i18n.js';
+import { play, resumeClock } from './sim-clock.js';
 
 const $ = (id) => document.getElementById(id),
   zero = () => [0, 0, 0],
@@ -172,11 +173,8 @@ export function installMainFlight(sim) {
       constrained: false,
     };
     runs.set(selected, run);
-    sim.mode = 'custom';
-    sim.speed = 1;
-    sim.paused = false;
-    sim.lastWall = performance.now();
-    sim.timeUI();
+    resumeClock(sim);
+    play(sim, 1);
     document.body.classList.add('main-flight-active');
     return run;
   }
@@ -256,11 +254,8 @@ export function installMainFlight(sim) {
       run.attitude.sasTarget = null;
       // An explicit pointing command starts/resumes the same 1× maneuver whether
       // this craft already has a paused run or is being piloted for the first time.
-      sim.mode = 'custom';
-      sim.speed = 1;
-      sim.paused = false;
-      sim.lastWall = performance.now();
-      sim.timeUI();
+      resumeClock(sim);
+      play(sim, 1);
       if (selected === 'xuntian') sim.xuntian.setPilotAxes(bodyAxes(run.attitude.quaternion));
       return true;
     }

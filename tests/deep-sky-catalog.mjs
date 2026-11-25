@@ -112,7 +112,10 @@ assert(!byId.has('IC1'), 'an optical double star is not silently added to the de
 // reading associations must survive even when morphology or aliases are absent.
 const browsable = DEEP_SKY_OBJECTS.filter((object) => object.type !== 'image-field');
 assert(browsable.every((object) => object.constellation));
-assert.equal(browsable.filter((object) => object.type === 'galaxy' && object.morphology).length, 10177);
+assert.equal(
+  browsable.filter((object) => object.type === 'galaxy' && object.morphology).length,
+  10177
+);
 assert.equal(byId.get('M73').constellation, 'Aqr');
 assert.equal(byId.get('NGC346').constellation, 'Tuc');
 const doubtful = browsable.find((object) => object.morphology === 'S?');
@@ -121,7 +124,10 @@ const sparse = { id: 'NGC123', type: 'galaxy' };
 for (const language of ['zh', 'en', 'ru', 'fr']) {
   assert(describeSkyObject(byId.get('NGC346'), language).includes('N66'));
   assert(describeSkyObject(byId.get('M51'), language).includes('NGC 5195'));
-  assert.equal(describeSkyObject(byId.get('M45'), language), describeSkyObject(byId.get('Mel22'), language));
+  assert.equal(
+    describeSkyObject(byId.get('M45'), language),
+    describeSkyObject(byId.get('Mel22'), language)
+  );
   const dss = describeSurveyImage(sparse, 'dss', language);
   const ps1 = describeSurveyImage(sparse, 'panstarrs', language);
   assert(!/[°′]|undefined|NaN/.test(dss.look));

@@ -5,7 +5,8 @@ import { validateOrbit } from '../src/orbit.js';
 import { bindOrbit } from '../src/missions.js';
 import { validateScene } from '../src/scene-format.js';
 
-const read = (name) => JSON.parse(fs.readFileSync(new URL('../docs/examples/' + name, import.meta.url)));
+const read = (name) =>
+  JSON.parse(fs.readFileSync(new URL('../docs/examples/' + name, import.meta.url)));
 const mission = validateMissionPackage(read('mission-demo.json'));
 assert.equal(mission.format, 'tiangong-mission-1');
 assert.equal(mission.model.file, 'model.glb');
@@ -20,6 +21,11 @@ const weather = read('weather-orbit-demo.json');
 assert.equal(weather.format, 'tiangong-weather-1');
 assert.equal(weather.meta.kind, 'orbit');
 const decoded = Buffer.from(weather.base64, 'base64');
-assert.equal(decoded.toString('utf8'), fs.readFileSync(new URL('../docs/examples/orbit-demo.json', import.meta.url), 'utf8'));
+assert.equal(
+  decoded.toString('utf8'),
+  fs.readFileSync(new URL('../docs/examples/orbit-demo.json', import.meta.url), 'utf8')
+);
 bindOrbit(validateOrbit(JSON.parse(decoded)), weather.meta.missionId);
-console.log('Four documented examples accepted by production validators; GLB loading and browser import round trips are outside this structural check.');
+console.log(
+  'Four documented examples accepted by production validators; GLB loading and browser import round trips are outside this structural check.'
+);

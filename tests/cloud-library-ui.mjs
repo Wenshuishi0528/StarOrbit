@@ -46,7 +46,9 @@ class Element {
   replaceChildren(...items) {
     this.children = items;
   }
-  removeAttribute(key) { delete this[key]; }
+  removeAttribute(key) {
+    delete this[key];
+  }
   setAttribute(key, value) {
     this[key] = value;
   }
@@ -260,32 +262,69 @@ console.log(
 );
 
 // Undownloaded remote estimates are filterable before any full image exists.
-weather.items=[];library.disk=[];
-provider.value='satcorps';
+weather.items = [];
+library.disk = [];
+provider.value = 'satcorps';
 document.getElementById('cloudDownloadTab').onclick();
-const remoteTime=Date.parse(month.value+'-02T12:00:00Z');
-const estimated=(n,coverage,north=1,south=1)=>({provider:'satcorps',time:remoteTime+n*3600e3,date:month.value+'-02',slot:String(12+n),coverageCheck:{state:'ready',estimated:true,coverage,polarCoverage:{north,south}}});
-library.catalog={state:'ready',month:month.value,date:'',dates:[],items:[estimated(0,.98),estimated(1,.2),estimated(2,.999,.4),{provider:'satcorps',time:remoteTime+4*3600e3,coverageCheck:{state:'queued',estimated:true}}]};
+const remoteTime = Date.parse(month.value + '-02T12:00:00Z');
+const estimated = (n, coverage, north = 1, south = 1) => ({
+  provider: 'satcorps',
+  time: remoteTime + n * 3600e3,
+  date: month.value + '-02',
+  slot: String(12 + n),
+  coverageCheck: { state: 'ready', estimated: true, coverage, polarCoverage: { north, south } },
+});
+library.catalog = {
+  state: 'ready',
+  month: month.value,
+  date: '',
+  dates: [],
+  items: [
+    estimated(0, 0.98),
+    estimated(1, 0.2),
+    estimated(2, 0.999, 0.4),
+    {
+      provider: 'satcorps',
+      time: remoteTime + 4 * 3600e3,
+      coverageCheck: { state: 'queued', estimated: true },
+    },
+  ],
+};
 library.notify();
-const coverageFilter=document.getElementById('historyCoverageFilter');
-assert.equal(document.getElementById('cloudArchiveList').children.length,4);
+const coverageFilter = document.getElementById('historyCoverageFilter');
+assert.equal(document.getElementById('cloudArchiveList').children.length, 4);
 assert(document.getElementById('cloudArchiveList').textContent.includes('正在自动核查覆盖'));
-coverageFilter.value='global';coverageFilter.onchange();
-assert.equal(document.getElementById('cloudArchiveList').children.length,1);
+coverageFilter.value = 'global';
+coverageFilter.onchange();
+assert.equal(document.getElementById('cloudArchiveList').children.length, 1);
 assert(document.getElementById('cloudArchiveList').textContent.includes('98.0%'));
-assert.equal(document.getElementById('historyApply').hidden,true);
-library.catalog.items[3].coverageCheck={state:'ready',estimated:true,coverage:.999,polarCoverage:{north:1,south:1}};library.notify();
-assert.equal(document.getElementById('cloudArchiveList').children.length,2,'polling progress enters filtered results without a download');
-console.log('PASS: remote estimates, partial/polar exclusions and automatic filter updates before download.');
+assert.equal(document.getElementById('historyApply').hidden, true);
+library.catalog.items[3].coverageCheck = {
+  state: 'ready',
+  estimated: true,
+  coverage: 0.999,
+  polarCoverage: { north: 1, south: 1 },
+};
+library.notify();
+assert.equal(
+  document.getElementById('cloudArchiveList').children.length,
+  2,
+  'polling progress enters filtered results without a download'
+);
+console.log(
+  'PASS: remote estimates, partial/polar exclusions and automatic filter updates before download.'
+);
 
 // A slow preview must not replace the next selected observation.
 coverageFilter.value = 'all';
 const pendingPreviews = [];
-weather.fetch = (url, max, {signal}) => new Promise((resolve) => {
-  pendingPreviews.push({url, signal, resolve});
-});
-const remoteRows = [estimated(0,.98), estimated(1,.96)].map((r) => ({
-  ...r, preview: 'https://satcorps.larc.nasa.gov/' + r.slot + '.gif',
+weather.fetch = (url, max, { signal }) =>
+  new Promise((resolve) => {
+    pendingPreviews.push({ url, signal, resolve });
+  });
+const remoteRows = [estimated(0, 0.98), estimated(1, 0.96)].map((r) => ({
+  ...r,
+  preview: 'https://satcorps.larc.nasa.gov/' + r.slot + '.gif',
 }));
 library.catalog.items = remoteRows;
 library.notify();
@@ -296,17 +335,17 @@ const previousPreview = pendingPreviews.at(-2);
 const selectedPreview = pendingPreviews.at(-1);
 assert.equal(previousPreview.signal.aborted, true);
 assert.equal(selectedPreview.url, remoteRows[0].preview);
-selectedPreview.resolve({blob:new Blob(['GIF89a-current'])});
+selectedPreview.resolve({ blob: new Blob(['GIF89a-current']) });
 await new Promise((resolve) => setImmediate(resolve));
 assert.equal(image.hidden, false);
 const selectedImage = image.src;
-previousPreview.resolve({blob:new Blob(['GIF89a-old'])});
+previousPreview.resolve({ blob: new Blob(['GIF89a-old']) });
 await new Promise((resolve) => setImmediate(resolve));
 assert.equal(image.src, selectedImage);
 assert.equal(document.getElementById('historyApply').hidden, true);
 console.log('PASS: only the selected NASA observation preview is shown before download.');
 
-library.task = {state: 'running', message: '下载中', downloadPercent: 42};
+library.task = { state: 'running', message: '下载中', downloadPercent: 42 };
 library.notify();
 const bar = created.find((el) => el.tagName === 'progress');
 assert.equal(bar.value, 42);
@@ -317,14 +356,28 @@ library.notify();
 assert.equal(bar.value, undefined);
 assert(!document.getElementById('cloudDownloadStatus').textContent.includes('%'));
 for (const state of ['error', 'cancelled']) {
-  library.task = {state, message: state, downloadPercent: 42}; library.notify();
+  library.task = { state, message: state, downloadPercent: 42 };
+  library.notify();
   assert.equal(bar.hidden, true);
   assert(!document.getElementById('cloudDownloadStatus').textContent.includes('%'));
 }
-library.task = {state:'ready',message:'已保存'};library.notify();
-assert.match(document.getElementById('cloudDownloadStatus').textContent,/100%/);
-const {cloudTransfer} = await import('../src/cloud-download-progress.js');
+library.task = { state: 'ready', message: '已保存' };
+library.notify();
+assert.match(document.getElementById('cloudDownloadStatus').textContent, /100%/);
+const { cloudTransfer } = await import('../src/cloud-download-progress.js');
 const transfers = [];
-const receive = cloudTransfer((...args)=>transfers.push(args),'下载中');
-for (const [received,total] of [[5,10],[5,10],[7,10],[500000,null],[10,10]]) receive({received,total});
-assert.deepEqual(transfers,[['下载中',50],['下载中',70],['下载中 · 0.5 MB',null],['下载中',100]]);
+const receive = cloudTransfer((...args) => transfers.push(args), '下载中');
+for (const [received, total] of [
+  [5, 10],
+  [5, 10],
+  [7, 10],
+  [500000, null],
+  [10, 10],
+])
+  receive({ received, total });
+assert.deepEqual(transfers, [
+  ['下载中', 50],
+  ['下载中', 70],
+  ['下载中 · 0.5 MB', null],
+  ['下载中', 100],
+]);

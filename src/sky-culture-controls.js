@@ -161,27 +161,41 @@ export function paintAsterismDiagram(canvas, asterism, culture, language = 'zh')
 export function installSkyCultureControls(sim) {
   const $ = (id) => document.getElementById(id),
     env = sim.environment;
-  const culture = getSkyCulture('chinese'),
-    groupSelect = $('chineseSkyGroup'),
+  const groupSelect = $('chineseSkyGroup'),
     objectSelect = $('chineseSkyObject');
-  const artwork = env.chineseSkyArt?.images || [];
-  const individualTargets = new Set(
-    artwork
-      .filter((record) => record.kind === 'asterisms')
-      .flatMap((record) => record.targetIds || [])
-  );
-  const illustratedFigures = new Set(
-    artwork
-      .filter((record) => record.kind === 'asterisms')
-      .map((record) => record.original || record.imageId)
-  );
-  const illustratedOverviews = new Set(
-    artwork
-      .filter((record) => record.kind === 'symbols')
-      .map((record) => record.original || record.imageId)
-  );
+  // The explorer describes the Chinese sky only. Its catalogue and art load
+  // with that culture (Environment.selectSkyCulture), so the lists are built
+  // at the first refresh after they are ready, never at startup.
+  let culture = null,
+    artwork = [],
+    individualTargets = new Set(),
+    illustratedFigures = new Set(),
+    illustratedOverviews = new Set(),
+    selected = null;
+  function prepare() {
+    if (culture || !env.skyCultureReady('chinese')) return !!culture;
+    culture = getSkyCulture('chinese');
+    artwork = env.chineseSkyArt?.images || [];
+    individualTargets = new Set(
+      artwork
+        .filter((record) => record.kind === 'asterisms')
+        .flatMap((record) => record.targetIds || [])
+    );
+    illustratedFigures = new Set(
+      artwork
+        .filter((record) => record.kind === 'asterisms')
+        .map((record) => record.original || record.imageId)
+    );
+    illustratedOverviews = new Set(
+      artwork
+        .filter((record) => record.kind === 'symbols')
+        .map((record) => record.original || record.imageId)
+    );
+    selected = culture.asterisms.find((a) => a.zh === '北斗') || culture.asterisms[0];
+    return true;
+  }
   function selectedOverview() {
-    if (!groupSelect.value) return null;
+    if (!culture || !groupSelect.value) return null;
     const groupTargets = new Set(
       culture.asterisms
         .filter((record) => record.groupId === groupSelect.value)
@@ -195,9 +209,9 @@ export function installSkyCultureControls(sim) {
     $('observeChineseOverview').disabled = !selectedOverview();
     $('observeChineseOverview').title = selectedOverview() ? '' : t('请选择已有总览插画的天区。');
   }
-  let selected = culture.asterisms.find((a) => a.zh === '北斗') || culture.asterisms[0];
   let signature = '';
   const chooseObject = () => {
+    if (!culture) return;
     selected = culture.asterisms.find((a) => a.targetId === objectSelect.value) || selected;
     env.skyCultureFocus = env.settings.skyCulture === 'chinese' ? selected?.targetId : null;
     const language = getLanguage();
@@ -239,6 +253,7 @@ export function installSkyCultureControls(sim) {
     sim.dirty = true;
   };
   function listObjects() {
+    if (!culture) return;
     const records = culture.asterisms.filter(
       (a) => !groupSelect.value || a.groupId === groupSelect.value
     );
@@ -271,14 +286,15 @@ export function installSkyCultureControls(sim) {
     $('skyCultureArtLabel').textContent = t(
       value === 'chinese' ? '星官插画' : '星座图像 · 教学示意'
     );
-    $('chineseSkyArtCoverage').textContent = t(
-      '星官目录共 {records} 条；按来源已识别成员显示星点和连线。已提供 {figures} 幅星官插画、{overviews} 幅总览插画。总览可重叠显示，透明度可调。',
-      {
-        records: culture.asterisms.length,
-        figures: illustratedFigures.size,
-        overviews: illustratedOverviews.size,
-      }
-    );
+    if (prepare())
+      $('chineseSkyArtCoverage').textContent = t(
+        '星官目录共 {records} 条；按来源已识别成员显示星点和连线。已提供 {figures} 幅星官插画、{overviews} 幅总览插画。总览可重叠显示，透明度可调。',
+        {
+          records: culture.asterisms.length,
+          figures: illustratedFigures.size,
+          overviews: illustratedOverviews.size,
+        }
+      );
     if (next === signature) return;
     if (signature && signature.split(':')[0] !== value) {
       env.skyCultureFocus = null;
@@ -287,20 +303,22 @@ export function installSkyCultureControls(sim) {
     const previousGroup =
       signature && signature.split(':')[0] === value ? groupSelect.value : selected?.groupId || '';
     signature = next;
-    groupSelect.replaceChildren(new Option(t('全部天区'), ''));
-    const groups = new Map();
-    for (const group of culture.groups) {
-      const key = themeNames[group.theme] || '三垣';
-      if (!groups.has(key)) {
-        const node = document.createElement('optgroup');
-        node.label = t(key);
-        groupSelect.append(node);
-        groups.set(key, node);
+    if (culture) {
+      groupSelect.replaceChildren(new Option(t('全部天区'), ''));
+      const groups = new Map();
+      for (const group of culture.groups) {
+        const key = themeNames[group.theme] || '三垣';
+        if (!groups.has(key)) {
+          const node = document.createElement('optgroup');
+          node.label = t(key);
+          groupSelect.append(node);
+          groups.set(key, node);
+        }
+        groups.get(key).append(new Option(label(group, language), group.id));
       }
-      groups.get(key).append(new Option(label(group, language), group.id));
+      groupSelect.value = previousGroup;
+      listObjects();
     }
-    groupSelect.value = previousGroup;
-    listObjects();
     if (value !== 'chinese') env.skyCultureFocus = null;
   }
   function locateMain() {
@@ -334,7 +352,7 @@ export function installSkyCultureControls(sim) {
   };
   $('observeChineseOverview').onclick = () => {
     const overview = selectedOverview(),
-      target = skyOverviewTarget(overview, culture);
+      target = overview && skyOverviewTarget(overview, culture);
     if (!target || !sim.xuntian?.observeRegion({ ...target, artworkId: overview.original })) {
       $('chineseSkyStatus').textContent = t('巡天取景需选择中国空间站任务。');
       return;
@@ -357,6 +375,7 @@ export function installSkyCultureControls(sim) {
   return {
     refresh,
     select(id) {
+      if (!prepare()) return false;
       const record = culture.asterisms.find((a) => a.targetId === id);
       if (!record) return false;
       selected = record;

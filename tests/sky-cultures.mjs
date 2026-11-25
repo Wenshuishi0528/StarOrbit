@@ -23,7 +23,10 @@ const compiled = await build({
 const api = await import(
   'data:text/javascript;base64,' + Buffer.from(compiled.outputFiles[0].text).toString('base64')
 );
-const culture = api.getSkyCulture('chinese');
+// The Chinese catalogue is not part of the startup module; it loads on use.
+assert.equal(api.isSkyCultureLoaded('chinese'), false);
+const culture = await api.ensureSkyCulture('chinese');
+assert.equal(api.getSkyCulture('chinese'), culture);
 const byId = new Map(culture.asterisms.map((item) => [item.id, item]));
 const stars = new Map(culture.stars.map((star) => [star.id, star]));
 const physical = new Map([
@@ -388,6 +391,21 @@ for (const row of culture.additionalStars) {
 }
 near(culture.additionalStars[0][1], 15.13739276);
 near(culture.additionalStars[0][2], 65.1150678);
+// The eager star field carries only these physical rows, generated from the
+// same catalogue (prepare-chinese-sky.py --check below keeps them in sync).
+const physicalStars = json('assets/chinese-sky/physical-stars.json');
+assert.deepEqual(physicalStars.additionalStars, culture.additionalStars);
+assert.deepEqual(
+  physicalStars.otherStars,
+  culture.otherStars.map((star) =>
+    Object.fromEntries(
+      ['id', 'physicalId', 'ra', 'dec', 'mag', 'bv', 'colorUnavailable', 'epoch']
+        .filter((key) => key in star)
+        .map((key) => [key, star[key]])
+    )
+  )
+);
+assert.ok(read('assets/chinese-sky/physical-stars.json').length < 4000);
 for (const star of culture.stars) {
   assert.equal(star.physicalId, 'hip:' + star.id);
   const row = existing.get(star.id);

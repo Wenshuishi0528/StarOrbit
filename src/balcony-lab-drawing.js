@@ -1,5 +1,5 @@
-import stars from '../assets/stars.json';
-import names from '../assets/star-chart.json';
+import stars from '../assets/stars.json' with { type: 'json' };
+import names from '../assets/star-chart.json' with { type: 'json' };
 import { equatorial } from './environment-math.js';
 import { unit } from './orbit.js';
 import { getLanguage, t } from './i18n.js';

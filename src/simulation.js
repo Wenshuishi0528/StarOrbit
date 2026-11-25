@@ -9,7 +9,6 @@ import { installOverviewGroundZoom, overviewGroundTarget } from './overview-grou
 import { createOrbitControls } from './camera-controls.js';
 import { parseMissionOrbit } from './gp-orbit.js';
 import {
-  EARTH_RADIUS,
   validateOrbit,
   snapshot,
   interpolate,
@@ -18,8 +17,6 @@ import {
   clampTime,
   orbitComputationMode,
   sunlightFraction,
-  earthAxes,
-  sunPosition,
 } from './orbit.js';
 import { SolarTracker } from './solar.js';
 import { SunView } from './sun-view.js';
@@ -45,6 +42,7 @@ const $ = (id) => document.getElementById(id),
   basis = (axes) => new THREE.Matrix4().makeBasis(...axes.map(V));
 import { clockText } from './time-format.js';
 import { DateTimeInput } from './date-time-input.js';
+import { play } from './sim-clock.js';
 export class Simulation {
   constructor(api) {
     this.api = api;
@@ -312,12 +310,7 @@ export class Simulation {
       } else this.paused = !this.paused;
       this.timeUI();
     };
-    $('speed').onchange = () => {
-      this.speed = Number($('speed').value);
-      this.mode = 'custom';
-      this.paused = false;
-      this.timeUI();
-    };
+    $('speed').onchange = () => play(this, Number($('speed').value));
     $('setTime').onclick = () => {
       const t = this.timeInput.read();
       if (!validTime(t)) {
@@ -651,7 +644,7 @@ export class Simulation {
       : '';
   }
   render() {
-    const { renderer, camera, scene, stage } = this.api,
+    const { renderer, camera, scene } = this.api,
       q = this.current,
       overview = this.view === 'orbit';
     if (this.environment.devicePixelRatio !== devicePixelRatio) this.environment.updatePixelRatio();

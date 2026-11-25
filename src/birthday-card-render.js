@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import hipStars from '../assets/stars.json';
-import { getSkyCulture } from './sky-cultures.js';
+import hipStars from '../assets/stars.json' with { type: 'json' };
+import { ensureSkyCulture, getSkyCulture } from './sky-cultures.js';
 import { equatorial } from './environment-math.js';
 import { constellationArtMesh } from './constellation-art-math.js';
 import { ConstellationArtLayer } from './constellation-art-layer.js';
@@ -294,8 +294,7 @@ export async function renderBirthdayCard(options) {
     throw Error('请先计算有效的生日星座与星宿');
   // Freeze plain content before the first fetch; environment is read only for assets.
   const items = supplied.map((item) => structuredClone(item));
-  const entries = items.map((item) => locate(environment, item));
-  const dual = entries.length === 2,
+  const dual = items.length === 2,
     pure = options.layout === 'sky';
   const width = Math.round(clamp(Number(options.width) || (dual ? 2400 : 1800), 800, 3840));
   const height = Math.round(width * (pure ? (dual ? 0.58 : 0.75) : dual ? 0.625 : 4 / 3));
@@ -313,6 +312,9 @@ export async function renderBirthdayCard(options) {
   const showExplanation = options.showExplanation !== false;
   const showBlessing = options.showBlessing !== false;
   const showLines = options.showLines !== false;
+  // Figures and names come from each item's culture catalogue, loaded on use.
+  await Promise.all(items.map((item) => ensureSkyCulture(item.culture)));
+  const entries = items.map((item) => locate(environment, item));
   const controller = new AbortController();
   const signal = controller.signal;
   const abort = () => controller.abort();

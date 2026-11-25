@@ -1,6 +1,6 @@
 export const STAR_CHART_DEFAULTS = Object.freeze({
   skyCulture: 'western',
-  starChartEnabled: false,
+  starChartEnabled: true,
   starLabels: true,
   catalogStarLabels: false,
   solarSystemLabels: true,
@@ -56,7 +56,11 @@ export function normalizeStarChartSettings(input = {}, { strict = false } = {}) 
     }
   const legacy = !own(input, 'starChartEnabled');
   if (legacy) {
-    result.starChartEnabled = own(input, 'starLabels') && input.starLabels === true;
+    // Old settings used starLabels as the master switch; with neither key the
+    // current default applies.
+    result.starChartEnabled = own(input, 'starLabels')
+      ? input.starLabels === true
+      : STAR_CHART_DEFAULTS.starChartEnabled;
     result.starLabels = true;
   }
   if (
@@ -156,7 +160,8 @@ export function syncStarChartControls(settings) {
     );
 }
 
-export function bindStarChartControls(settings, onChange) {
+// selectCulture applies a culture after its data has loaded (Environment).
+export function bindStarChartControls(settings, onChange, { selectCulture } = {}) {
   const $ = (id) => document.getElementById(id),
     changed = () => {
       syncStarChartControls(settings);
@@ -164,7 +169,9 @@ export function bindStarChartControls(settings, onChange) {
     };
   if ($('skyCulture'))
     $('skyCulture').onchange = () => {
-      settings.skyCulture = $('skyCulture').value === 'chinese' ? 'chinese' : 'western';
+      const culture = $('skyCulture').value === 'chinese' ? 'chinese' : 'western';
+      if (selectCulture) return selectCulture(culture);
+      settings.skyCulture = culture;
       changed();
     };
   for (const key of ['westernArtBrightness', 'chineseArtBrightness'])

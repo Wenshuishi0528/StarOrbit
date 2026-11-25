@@ -16,6 +16,7 @@ import {
   spacecraft,
   validatePose,
 } from './missions.js';
+import { resumeClock } from './sim-clock.js';
 
 export const MISSION_MEMORY_KEY = 'tiangong-missions-v1';
 const $ = (id) => document.getElementById(id);
@@ -429,7 +430,7 @@ export class MissionController {
       this.applyPose();
       sim.rebuild();
       sim.current = null;
-      sim.lastWall = performance.now();
+      resumeClock(sim);
       const size = this.api.bounds().getSize(new THREE.Vector3()).length();
       this.api.controls.minDistance = spacecraft(id).capabilities.assembly
         ? 15

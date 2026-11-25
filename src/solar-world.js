@@ -489,7 +489,7 @@ gl_FragColor=vec4(.17,.46,1.,edge*(.06+.38*light));}`,
     scene.updateMatrixWorld(true);
     camera.updateMatrixWorld(true);
     const occupied = [];
-    for (const { body, mesh, label, radius } of [...entities.values()].sort(
+    for (const { mesh, label, radius } of [...entities.values()].sort(
       (a, b) =>
         (a.body.id === target ? -2 : a.body.id === 'Earth' ? -1 : 0) -
         (b.body.id === target ? -2 : b.body.id === 'Earth' ? -1 : 0)
