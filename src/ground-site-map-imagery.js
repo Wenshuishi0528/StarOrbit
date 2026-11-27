@@ -1,4 +1,4 @@
-import atlas from '../assets/geography/atlas.json';
+import { geographyAtlas } from './geography-atlas.js';
 import { CITY_TILE_GUTTER, CITY_TILE_SIZE, tileBounds } from './city-terrain-math.js';
 import { clamp, locationMapImageRects, projectLocation } from './ground-site-map-projection.js';
 
@@ -135,7 +135,7 @@ function drawImage(context, frame, image, bounds, gutter = 0, flipped = false) {
   }
 }
 
-function atlasFallback() {
+function atlasFallback(atlas) {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;
@@ -169,6 +169,7 @@ export function createSiteMapImagery(environment, redraw) {
   const resident = new Map(),
     images = new Map();
   let fallback,
+    awaitingAtlas = false,
     wanted = [],
     failed = new Set(),
     detailSource,
@@ -213,13 +214,22 @@ export function createSiteMapImagery(environment, redraw) {
     context.drawImage(miniBase, 0, 0, frame.width, frame.height);
   }
 
+  // 日间底图未就绪时用地理图集绘制国界底图。图集按需加载：加载前只显示底色，
+  // 加载完成后由 sourceChanged() 通知地图重绘。
+  function fallbackImage() {
+    if (fallback) return fallback;
+    const atlas = geographyAtlas();
+    awaitingAtlas = !atlas;
+    return atlas ? (fallback = atlasFallback(atlas)) : null;
+  }
+
   function draw(context, frame, large) {
     context.fillStyle = '#101c28';
     context.fillRect(0, 0, frame.width, frame.height);
     const base = environment.uniforms?.dayMap?.value?.image;
-    const baseImage = base?.width > 1 ? base : (fallback ??= atlasFallback());
-    if (large) drawImage(context, frame, baseImage, WORLD);
-    else drawMiniBase(context, frame, baseImage);
+    const baseImage = base?.width > 1 ? base : fallbackImage();
+    if (baseImage && large) drawImage(context, frame, baseImage, WORLD);
+    else if (baseImage) drawMiniBase(context, frame, baseImage);
     const detail = environment.detail;
     for (const record of images.values())
       if (large && record.day && detailSource === detail?.tiles)
@@ -337,6 +347,7 @@ export function createSiteMapImagery(environment, redraw) {
       city?.enabled,
       city?.revision,
       city?.cities.size,
+      !!fallback || (awaitingAtlas && !!geographyAtlas()),
     ];
     const changed =
       current.length !== lastSources.length || current.some((value, i) => value !== lastSources[i]);

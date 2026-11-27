@@ -1,7 +1,7 @@
 import { archiveColorProfile, archiveUsesSRGBTransfer } from './sky-archive-color.js';
 import { validSkyImageDimensions } from './webb-plate.js';
 import * as THREE from 'three';
-import { HUBBLE_PLATE_PROVIDERS } from './hubble-gallery.js';
+import { loadHubbleArchive } from './hubble-gallery.js';
 import { WEBB_PLATE_PROVIDERS } from './webb-gallery.js';
 import { SkyOffline } from './sky-offline.js';
 import { createSkyTileCache } from './sky-detail-cache.js';
@@ -96,7 +96,12 @@ export class SkyDetail {
       ...(p.id === 'jwst-carina-2022' && { archiveProfile: archiveColorProfile(p.id) }),
       tiles: p.id === manifest.local?.providerId ? manifest.local.tiles : undefined,
     }));
-    if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS, ...HUBBLE_PLATE_PROVIDERS);
+    if (webbGallery) this.providers.push(...WEBB_PLATE_PROVIDERS);
+    // 哈勃影像档案按需加载：首次规划哈勃视图或打开图集时请求，完成后追加到 providers。
+    this.hubbleGallery = webbGallery === true;
+    this.hubbleArchive = null;
+    this.hubbleLoading = null;
+    this.hubbleRetryAt = -Infinity;
     this.artworkId = null;
     this.savedPyramidOrder = undefined;
     this.artworkBySource = { recent: null, hubble: null };
@@ -142,10 +147,47 @@ export class SkyDetail {
     else this.artworkBySource = { recent: null, hubble: null };
     this.replanViews();
   }
+  // 加载哈勃档案并并入影像源；并发调用共享同一次加载。解析为档案，失败时为 null。
+  loadHubble() {
+    if (!this.hubbleGallery || this.hubbleArchive) return Promise.resolve(this.hubbleArchive);
+    this.hubbleLoading ??= loadHubbleArchive().then(
+      (archive) => {
+        this.hubbleLoading = null;
+        if (this.hubbleArchive || this.disposed) return this.hubbleArchive;
+        this.hubbleArchive = archive;
+        // 换用新数组：分组缓存和离线层级限制都按数组重新计算。
+        this.providers = [...this.providers, ...archive.providers];
+        this.offline.lastProviderLimit = null;
+        for (const entry of this.views.values()) Object.assign(entry, this.plan(entry.view));
+        this.schedule();
+        this.revision++;
+        return archive;
+      },
+      (error) => {
+        this.hubbleLoading = null;
+        this.hubbleRetryAt = now() + 30000;
+        console.error('哈勃影像档案加载失败', error);
+        this.revision++;
+        return null;
+      }
+    );
+    return this.hubbleLoading;
+  }
+  // 渲染循环中的请求：加载失败后 30 秒内不自动重试。
+  requestHubble() {
+    if (
+      this.hubbleGallery &&
+      !this.hubbleArchive &&
+      !this.hubbleLoading &&
+      now() >= this.hubbleRetryAt
+    )
+      this.loadHubble();
+  }
   setSource(value, background = this.webbBackground) {
     const source = normalizeSkyDetailSource(value);
     const base = normalizeWebbBackground(background);
     if (this.source === source && this.webbBackground === base) return;
+    this.hubbleRetryAt = -Infinity;
     this.source = source;
     this.webbBackground = base;
     this.failures.clear();
@@ -155,6 +197,7 @@ export class SkyDetail {
   plan(view) {
     const choice = view.detailSelection;
     const source = choice?.source ?? this.source;
+    if (source === 'hubble') this.requestHubble();
     const artwork = choice
       ? choice.artworkId
       : this.artworkBySource[source === 'hubble' ? 'hubble' : 'recent'] ||
@@ -429,6 +472,8 @@ export class SkyDetail {
       tiles = entry?.tiles || [],
       ready = this.ready(id);
     const failed = tiles.filter((t) => (this.failures.get(t.key) || 0) > now()).length;
+    // 哈勃档案仍在加载时视为加载中，而不是“影像不可用”。
+    const archiveLoading = source === 'hubble' && !!this.hubbleLoading;
     return {
       enabled,
       source,
@@ -439,18 +484,21 @@ export class SkyDetail {
       ),
       hasHubbleTiles: tiles.some((t) => t.provider.source === 'hubble'),
       backgroundOutsideCoverage: !!entry?.backgroundOutsideCoverage,
-      fallback: entry?.fallback || (source === 'galaxy' ? 'background' : null),
+      fallback: archiveLoading
+        ? null
+        : entry?.fallback || (source === 'galaxy' ? 'background' : null),
       requested: tiles.length,
       ready: ready.length,
       loading:
         enabled &&
         !this.clearing &&
-        tiles.some(
-          (t) =>
-            this.allowed.has(t.key) &&
-            !this.entries.has(t.key) &&
-            (this.failures.get(t.key) || 0) <= now()
-        ),
+        (archiveLoading ||
+          tiles.some(
+            (t) =>
+              this.allowed.has(t.key) &&
+              !this.entries.has(t.key) &&
+              (this.failures.get(t.key) || 0) <= now()
+          )),
       failed,
       lastError: this.lastError,
       limited: tiles.some((t) => !this.allowed.has(t.key)),
@@ -467,7 +515,8 @@ export class SkyDetail {
     const start = now();
     while (this.views.has(id) && !this.disposed && now() - start < timeout) {
       const status = this.status(id);
-      if (!status.requested || status.complete || !status.loading) break;
+      // loading 也包含哈勃档案加载：照片等它就绪后再等待影像图块。
+      if (status.complete || !status.loading) break;
       await new Promise((resolve) => setTimeout(resolve, 80));
     }
     return this.status(id);

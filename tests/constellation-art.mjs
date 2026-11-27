@@ -793,7 +793,8 @@ test('four-symbol subject axes and honest coverage counts agree with verified me
       for (const member of object.members)
         if (ids.has(member.physicalId)) members.set(member.physicalId, member);
     }
-    let count = 0, covered = 0;
+    let count = 0,
+      covered = 0;
     for (const member of members.values()) {
       const ra = (member.ra * Math.PI) / 180,
         dec = (member.dec * Math.PI) / 180,
@@ -809,7 +810,11 @@ test('four-symbol subject axes and honest coverage counts agree with verified me
       count++;
     }
     assert.equal(count, p.primaryMemberCount);
-    assert.equal(p.coveredPrimaryMembers, covered, 'report actual coverage without inflating the drawing');
+    assert.equal(
+      p.coveredPrimaryMembers,
+      covered,
+      'report actual coverage without inflating the drawing'
+    );
     assert.equal(
       record.registration.landmarks.length,
       0,
@@ -886,7 +891,10 @@ test('expanded art keeps verified target identity, source meaning and bounded ph
     if (!extentBased) {
       assert.ok(record.registration.landmarks.length > 0);
       for (const landmark of record.registration.landmarks) {
-        assert.ok(members.has('hip:' + landmark.hip), 'semantic landmarks must be real primary members');
+        assert.ok(
+          members.has('hip:' + landmark.hip),
+          'semantic landmarks must be real primary members'
+        );
         assert.equal(landmark.basis, 'modern-layout');
       }
       continue;
@@ -908,11 +916,18 @@ test('expanded art keeps verified target identity, source meaning and bounded ph
     }
     assert.equal(members.size, p.primaryMemberCount);
     assert.equal(p.coveredPrimaryMembers, covered);
-    const diameter = Math.max(...planes.flatMap(a => planes.map(b => Math.hypot(a[0]-b[0], a[1]-b[1]))));
-    assert.ok(Math.abs(diameter-p.memberDiameterPlane) < 1e-9);
-    const expectedSpan = Math.max(diameter * p.coveragePadding, 2*Math.tan(p.minimumAngularDiameterDegrees*Math.PI/360));
-    assert.ok(Math.abs(p.sourceExtentPixels*p.uniformScalePerSourcePixel-expectedSpan)<1e-9,
-      record.original+' must follow the stellar span instead of inflated rectangular containment');
+    const diameter = Math.max(
+      ...planes.flatMap((a) => planes.map((b) => Math.hypot(a[0] - b[0], a[1] - b[1])))
+    );
+    assert.ok(Math.abs(diameter - p.memberDiameterPlane) < 1e-9);
+    const expectedSpan = Math.max(
+      diameter * p.coveragePadding,
+      2 * Math.tan((p.minimumAngularDiameterDegrees * Math.PI) / 360)
+    );
+    assert.ok(
+      Math.abs(p.sourceExtentPixels * p.uniformScalePerSourcePixel - expectedSpan) < 1e-9,
+      record.original + ' must follow the stellar span instead of inflated rectangular containment'
+    );
     if (p.axisPolicy === 'north-up-visual-design') {
       assert.ok(
         Math.abs(p.orthogonalMatrix[0][0] + 1) < 1e-10 &&

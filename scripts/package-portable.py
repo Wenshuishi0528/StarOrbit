@@ -28,7 +28,13 @@ if size > 1_200_000_000:
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
     for name in files:
-        z.write(root / name, '星轨/' + name)
+        if name.endswith('.command'):
+            entry = zipfile.ZipInfo.from_file(root / name, '星轨/' + name)
+            entry.create_system = 3
+            entry.external_attr = 0o100755 << 16
+            z.writestr(entry, (root / name).read_bytes().replace(b'\r\n', b'\n'), compress_type=zipfile.ZIP_DEFLATED)
+        else:
+            z.write(root / name, '星轨/' + name)
     for p in launcher_files:
         z.write(p, '星轨/星轨.app/' + str(p.relative_to(args.macos_launcher)))
     z.writestr('星轨/先读我.txt', f'''星轨 · 航天与轨道模拟 v{version} / StarOrbit · Space & Orbit Simulator
@@ -47,7 +53,7 @@ macOS 可双击包内「星轨.app」（若已包含），或运行「启动星�
 
 Open the HTML file in a recent Chrome, Edge, or Safari for offline use.
 Open StarOrbitPro.html to compare energy, temperature and image delivery for two 24-hour mission plans.
-On macOS, use the included app launcher or run 启动星轨.command.
+On macOS, run 启动星轨.command or use the app launcher if included.
 Keep the app next to the HTML; the launcher supports Intel and Apple Silicon.
 For the local update relay on other systems, run python3 scripts/serve.py --open.
 This portable edition includes all runtime assets inside the HTML.

@@ -6,11 +6,12 @@ import { createPlanetaryRenderer } from './planetary-renderer.js';
 import { findPlanetaryEvents, planetaryComparisonDates } from './planetary-events.js';
 import { MARS_FEATURES } from './mars-catalog.js';
 import { searchWorldPlaces } from './world-explorer.js';
-import atlas from '../assets/geography/atlas.json';
+import { geographyAtlas, loadGeographyAtlas } from './geography-atlas.js';
 import geologyLegend from '../assets/mars/geology-legend.json';
 import { lastObserver, rememberObserver } from './observer-settings.js';
 import { dateTimeText, dateTimeValue, stepDateTime } from './date-time-input.js';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
+import { advanceClock, invalidate, resumeClock } from './sim-clock.js';
 
 const bodies = { Earth: '地球', Mars: '火星', Sun: '太阳', Moon: '月球' };
 const layerNames = {
@@ -58,9 +59,19 @@ export function installPlanetaryObservatory(sim) {
       ? (sampleElevationBase(sim.environment.elevation.base, longitude, latitude)?.heightMeters ??
         0)
       : 0;
-  const earthFeatures = atlas.labels
-    .filter((p) => p.kind !== 'ocean')
-    .map((p) => ({ ...p, name: p.zh, nameEn: p.en, latitude: p.lat, longitude: p.lon }));
+  // 地球地名来自按需加载的地理图集：加载前为空，加载后在下一次刷新时出现。
+  let earthFeatures = [],
+    earthAtlas = null;
+  function earthPlaces() {
+    const atlas = geographyAtlas();
+    if (atlas && atlas !== earthAtlas) {
+      earthAtlas = atlas;
+      earthFeatures = atlas.labels
+        .filter((p) => p.kind !== 'ocean')
+        .map((p) => ({ ...p, name: p.zh, nameEn: p.en, latitude: p.lat, longitude: p.lon }));
+    }
+    return earthFeatures;
+  }
   let active = false,
     view = null,
     target = 'Mars',
@@ -79,7 +90,16 @@ export function installPlanetaryObservatory(sim) {
     getLanguage() === 'zh'
       ? (f.nameZh ?? f.name ?? f.nameEn)
       : (f[getLanguage()] ?? f.nameEn ?? f.en ?? f.name);
-  const features = () => (target === 'Mars' ? MARS_FEATURES : earthFeatures);
+  const features = () => (target === 'Mars' ? MARS_FEATURES : earthPlaces());
+  // 搜索框在图集加载完成后用同一输入重新检索。
+  function afterAtlas(input, search) {
+    if (geographyAtlas()) return;
+    const query = input.value;
+    loadGeographyAtlas().then(
+      () => active && input.value === query && search(),
+      (error) => console.error('地理图集加载失败', error)
+    );
+  }
   function message(text) {
     status.textContent = text;
   }
@@ -304,9 +324,8 @@ export function installPlanetaryObservatory(sim) {
     host.hidden = true;
     sim.api.controls.stopMotion?.();
     sim.api.controls.enabled = wasControls;
-    sim.lastWall = performance.now();
-    sim.dirty = true;
-    sim.snap = true;
+    resumeClock(sim);
+    invalidate(sim);
     sim.timeUI();
   }
   function jump() {
@@ -436,8 +455,9 @@ export function installPlanetaryObservatory(sim) {
       container.append(b);
     }
   }
-  $('[data-search]').oninput = (e) => {
-    const q = e.target.value.trim().toLowerCase();
+  function searchFeatures() {
+    const input = $('[data-search]'),
+      q = input.value.trim().toLowerCase();
     results(
       $('.planet-results'),
       q
@@ -449,12 +469,18 @@ export function installPlanetaryObservatory(sim) {
         : [],
       selectFeature
     );
-  };
-  $('[data-site-search]').oninput = (e) =>
-    results($('[data-site-results]'), searchWorldPlaces(e.target.value, getLanguage()), (p) => {
+    if (q && target === 'Earth') afterAtlas(input, searchFeatures);
+  }
+  function searchSites() {
+    const input = $('[data-site-search]');
+    results($('[data-site-results]'), searchWorldPlaces(input.value, getLanguage()), (p) => {
       site = { ...p, height: earthHeight(p.longitude, p.latitude) };
       siteChanged();
     });
+    if (input.value.trim()) afterAtlas(input, searchSites);
+  }
+  $('[data-search]').oninput = searchFeatures;
+  $('[data-site-search]').oninput = searchSites;
   $('[data-site-apply]').onclick = () => {
     const latitude = Number($('[data-lat]').value),
       longitude = Number($('[data-lon]').value),
@@ -662,13 +688,8 @@ export function installPlanetaryObservatory(sim) {
   }
   function tick(wall, dt = 0) {
     if (!active) return;
-    sim.lastWall = wall;
-    if (sim.mode === 'real') sim.time = Date.now();
-    else if (!sim.paused) {
-      const next = sim.time + Math.max(0, Math.min(0.25, dt)) * sim.speed * 1000;
-      sim.time = Math.max(Date.UTC(1900, 0, 1), Math.min(Date.UTC(2101, 0, 1) - 1, next));
-      if (sim.time !== next) sim.paused = true;
-    }
+    // 行星星历覆盖 1900–2100 年；到达边界时暂停。
+    advanceClock(sim, wall, dt, { min: Date.UTC(1900, 0, 1), max: Date.UTC(2101, 0, 1) - 1 });
     const w = Math.max(1, stage.clientWidth),
       h = Math.max(1, stage.clientHeight);
     resizeRenderSurface(renderer, w, h);

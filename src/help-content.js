@@ -1,10 +1,14 @@
-import manualZh from './help-content/manual-zh.json';
-import manualEn from './help-content/manual-en.json';
-import manualFr from './help-content/manual-fr.json';
-import manualRu from './help-content/manual-ru.json';
-import tours from './help-content/tours.json';
+import tours from './help-content/tours.json' with { type: 'json' };
 
-const manuals = { zh: manualZh, en: manualEn, fr: manualFr, ru: manualRu };
+// 导览文字很小，随启动包提供；各语言详细手册较大，首次打开帮助时只载入当前语言。
+const manualLoaders = {
+  zh: () => import('./help-content/manual-zh.json', { with: { type: 'json' } }),
+  en: () => import('./help-content/manual-en.json', { with: { type: 'json' } }),
+  fr: () => import('./help-content/manual-fr.json', { with: { type: 'json' } }),
+  ru: () => import('./help-content/manual-ru.json', { with: { type: 'json' } }),
+};
+const contents = {},
+  loading = {};
 
 // Stable topic and section IDs keep bookmarks independent of language and order.
 const stops = [
@@ -23,14 +27,34 @@ const stops = [
   ['share', '#saveImage', 's10-1'],
 ];
 
-export function getHelpContent(language = 'zh') {
-  const lang = Object.hasOwn(manuals, language) ? language : 'zh';
-  const tourPages = stops.map(([id, target, section]) => ({
+const helpLanguage = (language) => (Object.hasOwn(manualLoaders, language) ? language : 'zh');
+
+export function helpTourPages(language = 'zh') {
+  const lang = helpLanguage(language);
+  return stops.map(([id, target, section]) => ({
     id,
     target,
     section,
     chapter: Number(section.slice(1).split('-')[0]),
     ...tours[lang][id],
   }));
-  return { tourPages, manualChapters: manuals[lang] };
+}
+
+// 已载入时同步返回 { tourPages, manualChapters }，否则返回 null。
+export function loadedHelpContent(language = 'zh') {
+  return contents[helpLanguage(language)] || null;
+}
+
+// 并发调用共用同一次载入；失败不缓存，下次打开帮助时重试。
+export function loadHelpContent(language = 'zh') {
+  const lang = helpLanguage(language);
+  if (contents[lang]) return Promise.resolve(contents[lang]);
+  return (loading[lang] ??= manualLoaders[lang]()
+    .then((module) => {
+      contents[lang] = { tourPages: helpTourPages(lang), manualChapters: module.default };
+      return contents[lang];
+    })
+    .finally(() => {
+      delete loading[lang];
+    }));
 }

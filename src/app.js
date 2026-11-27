@@ -1,6 +1,8 @@
 import { resizeRenderSurface } from './render-surface.js';
 import { installCameraFocus } from './camera-focus.js';
 import { spacecraftLabelNames } from './spacecraft-labels.js';
+import { focusedLabelId } from './spacecraft-label-layout.js';
+import { createSpacecraftLabelPlacer } from './spacecraft-label-placer.js';
 import { installSkyCultureControls } from './sky-culture-controls.js';
 import { installBirthdayCard } from './birthday-card.js';
 import { installWorldExplorer } from './world-explorer.js';
@@ -20,7 +22,7 @@ import { installHelp } from './help.js';
 import { installHelpExamples } from './help-examples.js';
 import { MusicPlayer } from './music-player.js';
 import { missionLibrary } from './mission-library.js';
-import { t, initLanguage, onLanguageChange, setText, getLanguage } from './i18n.js';
+import { t, initLanguage, languageReady, onLanguageChange, setText, getLanguage } from './i18n.js';
 import { installSidebar } from './sidebar.js';
 import { installSceneShare } from './scene-share.js';
 import { installSessionMemory } from './session-memory.js';
@@ -37,6 +39,7 @@ import {
   matingTransforms,
   placementMatrices,
 } from './assembly.js';
+import { resumeClock } from './sim-clock.js';
 installSidebar();
 initLanguage();
 const music = new MusicPlayer();
@@ -580,29 +583,45 @@ function resize() {
     camera.updateProjectionMatrix();
   }
 }
+// 舱段标签互相避让，并避开盖在画面上的浮动窗口；尺寸按文字缓存。
+const stationTagPlacer = createSpacecraftLabelPlacer({ stage, root: document });
+// 每帧只画一个视图：下表按优先级排列，第一个处于活动状态的视图接管这一帧，
+// 都不活动时绘制轨道主画面。
+//   holdsClock：模拟时间停住，关闭后不补算这段墙钟时间；
+//   ownsStage：该视图自己调整共用画布尺寸，主循环不再改动；
+//   tick：该视图自行绘制，需要时用 advanceClock 推进时间。
+const frameOwners = [
+  // 自由飞行按墙钟独立积分，主场景时间停住。
+  {
+    active: () => sim?.freeFlight?.active,
+    holdsClock: true,
+    tick: (wall) => sim.freeFlight.tick(wall),
+  },
+  // 模态窗口盖住画面时不绘制主场景。
+  { active: () => sim?.flightLab?.active, holdsClock: true },
+  { active: () => sim?.environment?.weather?.resourcePanel?.active, holdsClock: true },
+  {
+    active: () => sim?.planetaryObservatory?.active,
+    ownsStage: true,
+    tick: (wall, dt) => sim.planetaryObservatory.tick(wall, dt),
+  },
+  {
+    active: () => sim?.worldExplorer?.active,
+    ownsStage: true,
+    tick: (wall, dt) => sim.worldExplorer.tick(wall, dt),
+  },
+];
 function tick(wall) {
   requestAnimationFrame(tick);
   if (document.hidden) return;
-  if (!sim?.worldExplorer?.active && !sim?.planetaryObservatory?.active) resize();
-  if (sim?.freeFlight?.active) {
-    last = wall;
-    sim.lastWall = wall;
-    sim.freeFlight.tick(wall);
-    return;
-  }
-  if (sim?.flightLab?.active || sim?.environment?.weather?.resourcePanel?.active) {
-    last = wall;
-    sim.lastWall = wall;
-    return;
-  }
+  // 天体观测台打开月球实验室时，画布尺寸仍由观测台管理。
+  if (!frameOwners.some((owner) => owner.ownsStage && owner.active())) resize();
   const dt = Math.min((wall - last) / 1000, 0.1);
   last = wall;
-  if (sim?.planetaryObservatory?.active) {
-    sim.planetaryObservatory.tick(wall, dt);
-    return;
-  }
-  if (sim?.worldExplorer?.active) {
-    sim.worldExplorer.tick(wall, dt);
+  const owner = frameOwners.find((candidate) => candidate.active());
+  if (owner) {
+    if (owner.holdsClock) resumeClock(sim, wall);
+    owner.tick?.(wall, dt);
     return;
   }
   if (sim?.initialized) sim.update(wall);
@@ -626,16 +645,26 @@ function tick(wall) {
         translate: t,
       }
     );
-    for (const [k, tag] of Object.entries(tags)) {
+    // 先读画面尺寸、投影锚点并更新文字；读取遮挡与写入位置交给避让布局统一完成。
+    const width = stage.clientWidth,
+      height = stage.clientHeight,
+      focus = focusedLabelId(
+        sim?.cameraFocus?.selected,
+        Object.keys(labelNames).map((id) => ({ id, type: types[id] }))
+      );
+    const labels = Object.entries(tags).map(([k, tag]) => {
       const p = tag.anchor.clone().applyMatrix4(groups[k].matrixWorld).project(camera);
       if (labelNames[k] && tag.el.textContent !== labelNames[k]) tag.el.textContent = labelNames[k];
-      tag.el.style.display =
-        !!labelNames[k] && p.z < 1 && p.z > -1 && Math.abs(p.x) < 1 && Math.abs(p.y) < 1
-          ? 'block'
-          : 'none';
-      tag.el.style.left = ((p.x + 1) * stage.clientWidth) / 2 + 'px';
-      tag.el.style.top = ((-p.y + 1) * stage.clientHeight) / 2 + 'px';
-    }
+      return {
+        id: k,
+        el: tag.el,
+        x: ((p.x + 1) * width) / 2,
+        y: ((-p.y + 1) * height) / 2,
+        visible: !!labelNames[k] && p.z < 1 && p.z > -1 && Math.abs(p.x) < 1 && Math.abs(p.y) < 1,
+        priority: k === focus ? 1 : 0,
+      };
+    });
+    stationTagPlacer.place(labels, { width, height, language: getLanguage() });
   }
   if (sim) {
     sim.render();
@@ -733,9 +762,12 @@ async function boot() {
     });
     sim.mainFlight = installMainFlight(sim);
     sim.navball = installAttitudeNavball(sim);
+    // 已保存俄文或法文时，等按需载入的词典切换完成再揭开载入画面，不先闪现中文。
+    // 网络迟迟不响应时最多等 8 秒，词典随后到达仍会自动切换。
+    await Promise.race([languageReady(), new Promise((resolve) => setTimeout(resolve, 8000))]);
     startupStatus('boot', 'First frame');
     sim.initialized = true;
-    sim.lastWall = performance.now();
+    resumeClock(sim);
     sim.update(performance.now());
     $('loading').classList.add('hidden');
     document.body.dataset.ready = 'true';

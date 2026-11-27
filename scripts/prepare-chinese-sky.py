@@ -41,7 +41,7 @@ def sha(path):
 
 
 def source_urls():
-    gaia_ids = [key.split()[-1] for key in json.loads((SOURCE / "index.json").read_text(encoding="utf-8"))["common_names"] if key.startswith("Gaia DR3 ")]
+    gaia_ids = [key.split()[-1] for key in json.loads((SOURCE / "index.json").read_text(encoding='utf-8'))["common_names"] if key.startswith("Gaia DR3 ")]
     selection = " WHERE source_id IN (" + ",".join(gaia_ids) + ")"
     query = "SELECT source_id,ra,dec,pmra,pmdec,phot_g_mean_mag,bp_rp FROM gaiadr3.gaia_source" + selection
     tap = lambda host, adql, fmt: host + "?" + urllib.parse.urlencode({"REQUEST": "doQuery", "LANG": "ADQL", "FORMAT": fmt, "QUERY": adql})
@@ -120,7 +120,7 @@ def match_group(native, rows):
 
 
 def read_tsv(path):
-    lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line and not line.startswith("#")]
+    lines = [line for line in path.read_text(encoding='utf-8').splitlines() if line and not line.startswith("#")]
     header = lines[0].split("\t")
     return [dict(zip(header, (value.strip() for value in line.split("\t")))) for line in lines[3:] if line.split("\t")[0].strip().isdigit()]
 
@@ -144,7 +144,7 @@ def non_hip_positions():
     """Resolve actual Gaia/NGC source objects without inventing HIP numbers."""
     positions, metadata = {}, {}
     gaia = SOURCE / "Gaia-DR3.csv"
-    for record in csv.DictReader(gaia.read_text(encoding="utf-8").splitlines()):
+    for record in csv.DictReader(gaia.read_text(encoding='utf-8').splitlines()):
         source_id = record["source_id"]
         ra, dec = float(record["ra"]), float(record["dec"])
         epoch = 2016
@@ -156,7 +156,7 @@ def non_hip_positions():
             epoch = 2000
         positions[source_id] = ["gaia:" + source_id, normalized_ra(ra), round(dec, 8), float(record["phot_g_mean_mag"]), "0.6"]
         metadata[source_id] = {"physicalId": "gaia:" + source_id, "catalogId": "Gaia DR3 " + source_id, "kind": "star", "epoch": epoch, "magnitudeBand": "Gaia G", "colorUnavailable": True, "astrometrySource": "ESA Gaia DR3 gaiadr3.gaia_source; ICRS J2016.0; proper motion propagated to J2000 where supplied"}
-    text = (ROOT / "src/deep-sky-openngc-data.js").read_text(encoding="utf-8")
+    text = (ROOT / "src/deep-sky-openngc-data.js").read_text(encoding='utf-8')
     raw = text.split("`", 1)[1].rsplit("`", 1)[0]
     wanted = {"NGC0224", "NGC2632", "NGC5139", "NGC6231", "NGC6475"}
     for line in raw.splitlines():
@@ -332,10 +332,10 @@ def resolve_primary_members(asterisms, common_names, physical):
 def build():
     if sha(SOURCE / "index.json") != "426118e6238ae69edb319c91d1a74b705eaa758222e962206e58c49b9dac9d8a" or sha(SOURCE / "description.md") != "f0dec3d4fb115bb8d5667e96fb9af0450f33489ec02747c8229903c15b3a2cac":
         raise ValueError("Pinned cultural source bytes changed; review before importing")
-    original = json.loads((SOURCE / "index.json").read_text(encoding="utf-8"))
-    description = (SOURCE / "description.md").read_text(encoding="utf-8")
-    sky = json.loads((ROOT / "assets/stars.json").read_text(encoding="utf-8"))
-    western = json.loads((ROOT / "assets/star-chart.json").read_text(encoding="utf-8"))
+    original = json.loads((SOURCE / "index.json").read_text(encoding='utf-8'))
+    description = (SOURCE / "description.md").read_text(encoding='utf-8')
+    sky = json.loads((ROOT / "assets/stars.json").read_text(encoding='utf-8'))
+    western = json.loads((ROOT / "assets/star-chart.json").read_text(encoding='utf-8'))
     rendered = {row[0]: row for row in sky}
     modern_names = {star["id"]: star for star in western["stars"]}
     raw_groups, table_rows = source_tables(description)
@@ -474,6 +474,14 @@ def refresh():
         (SOURCE / filename).write_bytes(fetched.stdout)
 
 
+PHYSICAL_KEYS = ("id", "physicalId", "ra", "dec", "mag", "bv", "colorUnavailable", "epoch")
+
+
+def physical_stars(product):
+    """Positions the shared star field shows in every culture, without names or membership."""
+    return {"schema": 1, "culture": "chinese", "note": "Derived from catalog.json by scripts/prepare-chinese-sky.py. The application star field and Xuntian star index include these stars in every sky culture; the full culture catalogue loads only when names, figures or search need it.", "additionalStars": product["additionalStars"], "otherStars": [{key: star[key] for key in PHYSICAL_KEYS if key in star} for star in product["otherStars"]]}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--refresh-source", action="store_true")
@@ -482,15 +490,14 @@ def main():
     if args.refresh_source:
         refresh()
     product = build()
-    target = OUT / "catalog.json"
     content = dump(product)
-    if args.check:
-        if target.read_text(encoding="utf-8") != content:
-            raise SystemExit("Chinese culture generated file differs: rerun the preparer")
-    else:
-        target.write_bytes(content.encode("utf-8"))
-    report = json.dumps({"bytes": len(content.encode()), **product["stats"]}, ensure_ascii=False, indent=2)
-    sys.stdout.buffer.write((report + "\n").encode("utf-8"))
+    for target, text in ((OUT / "catalog.json", content), (OUT / "physical-stars.json", dump(physical_stars(product)))):
+        if args.check:
+            if not target.exists() or target.read_text(encoding='utf-8') != text:
+                raise SystemExit("Chinese culture generated file differs: rerun the preparer")
+        else:
+            target.write_bytes(text.encode('utf-8'))
+    print(json.dumps({"bytes": len(content.encode()), **product["stats"]}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

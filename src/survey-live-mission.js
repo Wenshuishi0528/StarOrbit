@@ -123,7 +123,10 @@ export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instru
     if (target) aimTile(target);
   };
   $('xtSurveyWall').onclick = () => {
-    if (target) sim.flightLab.openSurveyPhotos({ fieldId: target.fieldId });
+    if (target)
+      sim.flightLab
+        .openSurveyPhotos({ fieldId: target.fieldId })
+        .catch((error) => sim.api.toast('切换失败：{error}', { error: t(error.message) }));
   };
   $('xtSurveyExit').onclick = () => {
     clear();

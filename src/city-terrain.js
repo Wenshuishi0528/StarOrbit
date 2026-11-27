@@ -366,7 +366,7 @@ export class CityTerrain {
       view.plan = plan;
       for (const tile of plan) wanted.add(keyOf(tile));
     }
-    for (const [key, entry] of this.entries) if (!wanted.has(key)) this.entries.delete(key);
+    for (const key of this.entries.keys()) if (!wanted.has(key)) this.entries.delete(key);
     for (const [key, load] of this.loads) if (!wanted.has(key)) load.controller.abort();
     this.revision++;
     this.writeUniforms();

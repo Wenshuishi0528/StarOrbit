@@ -15,9 +15,10 @@ const { outputFiles } = await build({
   write: false,
   logLevel: 'silent',
 });
-const { searchXuntianTargets, getXuntianTarget } = await import(
+const { searchXuntianTargets, getXuntianTarget, ensureXuntianCatalog } = await import(
   'data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64')
 );
+await ensureXuntianCatalog();
 const json = (file) => JSON.parse(readFileSync(new URL(file, import.meta.url)));
 const westernArt = json('../assets/constellation-art/manifest.json').images;
 const chineseArt = json('../assets/chinese-sky/art/manifest.json').images;
@@ -34,7 +35,10 @@ for (const [culture, entries, art] of [
     assert.equal(entry.culture, culture);
     assert.equal(birthdayContentForTarget(entry.targetId), entry);
     assert(getXuntianTarget(entry.targetId), entry.targetId);
-    assert(art.some((image) => image.imageId === entry.artworkId), entry.artworkId);
+    assert(
+      art.some((image) => image.imageId === entry.artworkId),
+      entry.artworkId
+    );
     assert(entry.description.length > 20);
     assert.equal(new Set(entry.blessings).size, 2);
     for (const wish of entry.blessings) assert(wish.length > 10 && wish.length < 70);
@@ -63,4 +67,6 @@ assert.equal(searchXuntianTargets('牛郎星')[0].id, 'hip:97649');
 assert.equal(searchXuntianTargets('织女星')[0].id, 'hip:91262');
 assert.equal(searchXuntianTargets('Scorpio')[0].id, 'constellation:Sco');
 assert.equal(searchXuntianTargets('Scorpius')[0].id, 'constellation:Sco');
-console.log(`Birthday content: all 12 signs / 28 mansions, existing artwork IDs, 80 wishes and ${queried} alias searches passed.`);
+console.log(
+  `Birthday content: all 12 signs / 28 mansions, existing artwork IDs, 80 wishes and ${queried} alias searches passed.`
+);

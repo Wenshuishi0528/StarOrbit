@@ -1,12 +1,19 @@
-import hipCatalog from '../assets/stars.json';
-import chart from '../assets/star-chart.json';
+import hipCatalog from '../assets/stars.json' with { type: 'json' };
+import chart from '../assets/star-chart.json' with { type: 'json' };
 import aliases from '../assets/xuntian-star-aliases.json';
 import { equatorial } from './environment-math.js';
 import { SURVEY_FIELDS } from './survey-lab-math.js';
 import { decodeTycho, fieldRay } from './survey-sky-product-math.js';
 import { tychoCutouts } from './survey-sky-product-tycho.js';
 import { DEEP_SKY_OBJECTS, deepSkyName, deepSkyTypeName } from './deep-sky-catalog.js';
-import { getSkyCulture, normalizeSkyCulture, cultureStarName } from './sky-cultures.js';
+import {
+  ensureSkyCulture,
+  getSkyCulture,
+  isSkyCultureLoaded,
+  normalizeSkyCulture,
+  cultureStarName,
+} from './sky-cultures.js';
+import chinesePhysicalStars from '../assets/chinese-sky/physical-stars.json' with { type: 'json' };
 import chineseSearch from '../assets/chinese-sky-search.json';
 import { birthdaySearchAliases } from './birthday-content.js';
 
@@ -130,16 +137,17 @@ function starSky() {
     (grid[i] ??= []).push(record);
     byId.set(id, record);
   }
+  // Physical rows only: the star field is identical in every culture.
   for (const [hip, ra, dec, mag, rawBV] of [
     ...hipCatalog,
-    ...(getSkyCulture('chinese').additionalStars || []),
+    ...chinesePhysicalStars.additionalStars,
   ]) {
     if (byId.has('hip:' + hip)) continue;
     const bv =
       rawBV !== null && rawBV !== '' && Number.isFinite(Number(rawBV)) ? Number(rawBV) : null;
     insert('hip:' + hip, 'hip', hip, null, equatorial(ra, dec), mag, bv, 1);
   }
-  for (const point of getSkyCulture('chinese').otherStars || []) {
+  for (const point of chinesePhysicalStars.otherStars) {
     const id = point.physicalId || point.id;
     const bv =
       !point.colorUnavailable &&
@@ -272,8 +280,22 @@ function constellationFrame(c) {
   return { direction: Object.freeze(direction), fov, radius };
 }
 
+// Chinese names are search terms and display names in every culture. The base
+// index is usable at once; the culture's names join it when first loaded. The
+// first use starts that load once; callers that present results to the user
+// await ensureXuntianCatalog() (which also retries after a failure).
+export const xuntianCatalogComplete = () => isSkyCultureLoaded('chinese');
+export const ensureXuntianCatalog = () => ensureSkyCulture('chinese').then(() => {});
+let backgroundLoad = null;
 function searchCatalog() {
-  if (search) return search;
+  search ??= baseSearchCatalog();
+  if (!search.chinese) {
+    if (isSkyCultureLoaded('chinese')) addChineseSearch(search, getSkyCulture('chinese'));
+    else backgroundLoad ??= ensureXuntianCatalog().catch(() => {});
+  }
+  return search;
+}
+function baseSearchCatalog() {
   const { byId } = starSky(),
     records = new Map(),
     constellations = new Map(),
@@ -391,7 +413,11 @@ function searchCatalog() {
       point.mag
     );
   }
-  const chinese = getSkyCulture('chinese');
+  return { records, constellations, deepSky, byId, entry, chinese: false };
+}
+function addChineseSearch(index, chinese) {
+  const { records, deepSky, byId, entry } = index;
+  index.chinese = true;
   for (const asterism of chinese.asterisms) {
     const frame = constellationFrame(asterism);
     const r = entry(
@@ -461,11 +487,11 @@ function searchCatalog() {
     for (const name of [star.zh, star.en, star.ru, star.fr, ...(star.aliases || [])])
       if (name) for (const term of nameForms(name).map(fold)) if (term) r.terms.add(term);
   }
-  search = { records, constellations, deepSky };
-  return search;
 }
 function localTarget(r, language, skyCulture = 'western') {
-  const chinese = normalizeSkyCulture(skyCulture) === 'chinese';
+  // A Chinese view is selected only after its catalogue loaded; getSkyCulture
+  // reports a caller that skipped that step instead of answering in western.
+  const chinese = normalizeSkyCulture(skyCulture) === 'chinese' && !!getSkyCulture('chinese');
   const hip = r.type === 'star' ? Number(/^hip:(\d+)$/.exec(r.id)?.[1]) : null;
   const cultureLabel = hip && chinese ? cultureStarName(hip, 'chinese', language) : null;
   const objectLabel = chinese && r.chineseNames && (r.chineseNames[language] || r.chineseNames.en);
@@ -475,7 +501,7 @@ function localTarget(r, language, skyCulture = 'western') {
     id: r.id,
     type: r.type,
     name: cultureLabel || objectLabel || r.names[language] || r.names.en || r.identifier,
-    ...(r.type === 'star' && Number.isFinite(r.mag) ? {magnitude:r.mag} : {}),
+    ...(r.type === 'star' && Number.isFinite(r.mag) ? { magnitude: r.mag } : {}),
     identifier: group ? group[language] || group.en || group.zh : r.identifier,
     direction: r.direction,
     ra: r.ra,

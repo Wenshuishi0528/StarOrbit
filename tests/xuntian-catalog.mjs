@@ -55,7 +55,8 @@ for (const [hip, ra, dec, mag] of hips) {
 assert(all.every((p) => Number.isFinite(p.mag) && (p.bv === null || Number.isFinite(p.bv))));
 assert.equal(
   hips.filter((s) => s[4] === '' || s[4] === null || !Number.isFinite(Number(s[4]))).length,
-  all.filter((s) => s.source === 'hip' && s.bv === null && hips.some((row) => row[0] === s.hip)).length
+  all.filter((s) => s.source === 'hip' && s.bv === null && hips.some((row) => row[0] === s.hip))
+    .length
 );
 for (const [id, queries] of [
   [

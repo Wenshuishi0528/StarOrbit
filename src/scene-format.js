@@ -34,7 +34,13 @@ function camera(x, maxZoom = 20) {
     target = vector(x.target),
     up = vector(x.up);
   if (Math.hypot(...position.map((v, i) => v - target[i])) < 1e-9 || Math.hypot(...up) < 0.1) bad();
-  return { position, target, up, fov: number(x.fov, 0.006, 100), zoom: number(x.zoom, 0.1, maxZoom) };
+  return {
+    position,
+    target,
+    up,
+    fov: number(x.fov, 0.006, 100),
+    zoom: number(x.zoom, 0.1, maxZoom),
+  };
 }
 function reference(x) {
   if (x === null) return null;

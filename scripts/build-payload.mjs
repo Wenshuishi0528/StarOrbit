@@ -99,7 +99,12 @@ export function* embeddedAssetScripts(
 }
 
 /** Atomic output; only the small HTML template is scanned/replaced in memory. */
-export function writeTemplatePayloads(filename, template, payloads, { maxBytes = MAX_DISTRIBUTION_BYTES } = {}) {
+export function writeTemplatePayloads(
+  filename,
+  template,
+  payloads,
+  { maxBytes = MAX_DISTRIBUTION_BYTES } = {}
+) {
   const keys = Object.keys(payloads);
   const expression = new RegExp(
     keys.map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),

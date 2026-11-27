@@ -5,6 +5,7 @@ import { MinimapNightRaster, NIGHT_WIDTH, NIGHT_HEIGHT } from './minimap-lightin
 import { t, onLanguageChange } from './i18n.js';
 import { shortClock } from './time-format.js';
 import { stateAt, earthAxes, dot, norm, unit } from './orbit.js';
+import { resumeClock, invalidate } from './sim-clock.js';
 
 const $ = (id) => document.getElementById(id),
   DEG = Math.PI / 180;
@@ -94,9 +95,8 @@ export class OrbitMinimap {
       canvas.classList.remove('dragging');
       this.dragPoints = null;
       this.lastTrack = -Infinity;
-      this.sim.lastWall = performance.now();
-      this.sim.dirty = true;
-      this.sim.snap = true;
+      resumeClock(this.sim);
+      invalidate(this.sim);
       this.sim.sessionMemory?.save();
       if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     };

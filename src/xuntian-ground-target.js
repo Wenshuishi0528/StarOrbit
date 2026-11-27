@@ -102,11 +102,16 @@ const fold = (s) =>
     .replace(/\p{M}/gu, '')
     .replace(/[^\p{L}\p{N}]/gu, '');
 const degreePair = (p) => p.latitude.toFixed(2) + '°, ' + p.longitude.toFixed(2) + '°';
+const NO_LABELS = [];
+// labels 可以是地名数组，也可以是返回当前地名的函数（地理图集按需加载，
+// 加载前为空数组）；数组更换后重新建立索引。
 export function createCityFinder(labels) {
-  let entries, byId;
+  let entries, byId, source;
   function index() {
-    if (entries) return;
-    entries = labels
+    const list = (typeof labels === 'function' ? labels() : labels) || NO_LABELS;
+    if (entries && source === list) return;
+    source = list;
+    entries = list
       .filter(
         (p) =>
           (p.kind === 'city' || p.kind === 'capital') &&

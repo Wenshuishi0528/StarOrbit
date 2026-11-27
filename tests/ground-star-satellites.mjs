@@ -481,7 +481,7 @@ const sparse = createGroundSatelliteOverlay(
   { missionId: 'off0', data: behind, bundledOrbits: sparseOrbits },
   sparseCatalog
 );
-for (let i = 0; i < 16; i++) satRows = sparse.sample(mixedView);
+for (let i = 0; i < 16; i++) sparse.sample(mixedView);
 assert.equal(sparse.status.regularTotal, 60);
 assert.equal(sparse.status.total, 120);
 assert.equal(sparse.status.regularVisible, 0);

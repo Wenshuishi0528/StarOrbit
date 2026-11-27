@@ -114,17 +114,21 @@ export function groundViewDirection(azimuth, elevation = 0) {
 // The overview and the shared Earth renderer both draw a sphere of this radius.
 // Interpolate the eye along the sight line, including when it crosses the dateline.
 export function overviewDescentPose(start, destination, landingHeight, progress) {
-  const u = clamp(progress, 0, 1), eased = u * u * (3 - 2 * u);
+  const u = clamp(progress, 0, 1),
+    eased = u * u * (3 - 2 * u);
   const radius = 6371000;
   const radial = (site) => {
-    const lat = site.latitude * DEG, lon = site.longitude * DEG;
+    const lat = site.latitude * DEG,
+      lon = site.longitude * DEG;
     return [Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon), Math.sin(lat)];
   };
-  const a = radial(start), b = radial(destination);
+  const a = radial(start),
+    b = radial(destination);
   const clearance = Math.max(1, start.height - landingHeight);
-  const remaining = Math.expm1(Math.log1p(clearance / 150) * (1 - eased)) * 150 / clearance;
-  const eye = a.map((x, i) =>
-    x * (radius + start.height) * remaining + b[i] * (radius + landingHeight) * (1 - remaining)
+  const remaining = (Math.expm1(Math.log1p(clearance / 150) * (1 - eased)) * 150) / clearance;
+  const eye = a.map(
+    (x, i) =>
+      x * (radius + start.height) * remaining + b[i] * (radius + landingHeight) * (1 - remaining)
   );
   const longitude = Math.atan2(eye[1], eye[0]) / DEG;
   const latitude = Math.atan2(eye[2], Math.hypot(eye[0], eye[1])) / DEG;
@@ -132,16 +136,21 @@ export function overviewDescentPose(start, destination, landingHeight, progress)
   // out on arrival so that the ground controls start facing the landscape.
   const ray = worldVector(groundViewDirection(start.azimuth, start.elevation), enuFrame(start));
   const [east, north, up] = localVector(ray, enuFrame({ latitude, longitude, height: 0 }));
-  const azimuth = Math.hypot(east, north) < 1e-7
-    ? start.azimuth : wrapGroundAzimuth(Math.atan2(east, north) / DEG);
+  const azimuth =
+    Math.hypot(east, north) < 1e-7
+      ? start.azimuth
+      : wrapGroundAzimuth(Math.atan2(east, north) / DEG);
   const level = clamp((u - 0.65) / 0.35, 0, 1);
   const turn = level * level * (3 - 2 * level);
-  const initialLens = Math.tan(start.fov * DEG / 2);
+  const initialLens = Math.tan((start.fov * DEG) / 2);
   return {
-    latitude, longitude, height: Math.hypot(...eye) - radius, azimuth,
-    elevation: (1 - turn) * Math.asin(clamp(up, -1, 1)) / DEG + turn * 5,
+    latitude,
+    longitude,
+    height: Math.hypot(...eye) - radius,
+    azimuth,
+    elevation: ((1 - turn) * Math.asin(clamp(up, -1, 1))) / DEG + turn * 5,
     rollDegrees: (start.rollDegrees || 0) * (1 - eased),
-    fov: 2 / DEG * Math.atan(initialLens * (Math.tan(65 * DEG / 2) / initialLens) ** eased),
+    fov: (2 / DEG) * Math.atan(initialLens * (Math.tan((65 * DEG) / 2) / initialLens) ** eased),
   };
 }
 export function createGroundState(options = {}) {

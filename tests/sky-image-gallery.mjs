@@ -73,7 +73,8 @@ console.log(
 );
 
 // A four-work integration fixture must never replace the distributable catalogue.
-const { HUBBLE_ARTWORKS, HUBBLE_PLATE_PROVIDERS } = await import('../src/hubble-gallery.js');
+const { loadHubbleArchive } = await import('../src/hubble-gallery.js');
+const { artworks: HUBBLE_ARTWORKS, providers: HUBBLE_PLATE_PROVIDERS } = await loadHubbleArchive();
 assert(HUBBLE_ARTWORKS.length >= 2500);
 assert.equal(new Set(HUBBLE_ARTWORKS.map((work) => work.id)).size, HUBBLE_ARTWORKS.length);
 const providerIds = new Set(HUBBLE_PLATE_PROVIDERS.map((provider) => provider.id));

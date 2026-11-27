@@ -2,7 +2,7 @@
 // independent of the simulation clock; this catalogue is a static epoch snapshot.
 export const LY_KM = 9460730472580.8;
 export const AU_LY = 149597870.7 / LY_KM;
-export const PC_LY = 3.2615637771674336;
+export const PC_LY = 3.2615637771674337;
 export const SOLAR_RADIUS_LY = 695700 / LY_KM;
 export const TRAVEL_SPEEDS = Object.freeze({
   local: AU_LY * 0.1,

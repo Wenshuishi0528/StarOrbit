@@ -1,282 +1,1135 @@
-import {flashUniforms} from '../../src/phenomena.js';
-import {Weather} from '../../src/weather.js';
-import {cloudToneGLSL,githubCloudOpacity} from '../../src/cloud-texture.js';
-import {SPECTRAL_RAYLEIGH,SPECTRAL_OZONE} from '../../src/atmosphere-spectrum.js';
-import {SOLAR_IRRADIANCE} from '../../src/earth-radiometry.js';
+import { flashUniforms } from '../../src/phenomena.js';
+import { Weather } from '../../src/weather.js';
+import { cloudToneGLSL, githubCloudOpacity } from '../../src/cloud-texture.js';
+import { SPECTRAL_RAYLEIGH, SPECTRAL_OZONE } from '../../src/atmosphere-spectrum.js';
+import { SOLAR_IRRADIANCE } from '../../src/earth-radiometry.js';
 // Small on-demand GPU fixture: production shaders, no embedded app/assets/animation.
 import * as THREE from 'three';
-import {vertex,atmosphereFragment,earthFragment,cloudFragment,volumeCloudFragment,atmosphereTransmissionFragment} from '../../src/earth-shaders.js';
-import {SunView} from '../../src/sun-view.js';
-import {AtmosphereRenderer} from '../../src/atmosphere-renderer.js';
-import {buildMultipleScatteringTable} from '../../src/atmosphere-multiple.js';
-import {scatteringGLSL} from '../../src/atmosphere-scattering.js';
-import {solarOpticsGLSL} from '../../src/atmosphere-glsl.js';
-import {buildOpticalDepthTable} from '../../src/atmosphere-optics.js';
-const $=id=>document.getElementById(id),errors=[],table=buildOpticalDepthTable();
-const pixels=Uint16Array.from(table.data,v=>THREE.DataUtils.toHalfFloat(v));
-const lut=new THREE.DataTexture(pixels,table.width,table.height,THREE.RGBAFormat,THREE.HalfFloatType);lut.minFilter=lut.magFilter=THREE.LinearFilter;lut.needsUpdate=true;
-const multi=buildMultipleScatteringTable(table,{rayleigh:SPECTRAL_RAYLEIGH.slice(0,3),ozone:SPECTRAL_OZONE.slice(0,3)}),multiTex=new THREE.DataTexture(Uint16Array.from(multi.data,v=>THREE.DataUtils.toHalfFloat(v)),multi.width,multi.height,THREE.RGBAFormat,THREE.HalfFloatType);multiTex.minFilter=multiTex.magFilter=THREE.LinearFilter;multiTex.needsUpdate=true;
-const multiB=buildMultipleScatteringTable(table,{rayleigh:SPECTRAL_RAYLEIGH.slice(3),ozone:SPECTRAL_OZONE.slice(3)}),multiTexB=new THREE.DataTexture(Uint16Array.from(multiB.data,v=>THREE.DataUtils.toHalfFloat(v)),multiB.width,multiB.height,THREE.RGBAFormat,THREE.HalfFloatType);multiTexB.minFilter=multiTexB.magFilter=THREE.LinearFilter;multiTexB.needsUpdate=true;
-const flat=(rgba)=>{const t=new THREE.DataTexture(new Uint8Array(rgba),1,1);t.needsUpdate=true;return t;};
-const water=flat([2,10,30,255]),white=flat([255,255,255,255]),black=flat([0,0,0,255]);
-const coverage=new Uint8Array(128*64*4);
-for(let y=0;y<64;y++)for(let x=0;x<128;x++){const i=(y*128+x)*4,c=Math.max(0,Math.sin(x*.3+Math.sin(y*.3)*3)*Math.cos(y*.3));coverage.set([c*255,c*255,c*255,255],i);}
-const mask=new THREE.DataTexture(coverage,128,64);mask.wrapS=THREE.RepeatWrapping;mask.minFilter=mask.magFilter=THREE.LinearFilter;mask.needsUpdate=true;
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(1);renderer.setSize(800,560);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
-renderer.debug.onShaderError=(gl,p,v,f)=>errors.push(gl.getShaderInfoLog(f));$('canvas').append(renderer.domElement);
-const hdr=new AtmosphereRenderer(renderer);const scene=new THREE.Scene();scene.background=new THREE.Color(0);
-const camera=new THREE.PerspectiveCamera(38,800/560,10,1000000);camera.position.set(0,0,6771);camera.up.set(0,0,1);
-const sun=new THREE.Vector3(),uniforms={...flashUniforms(),linearOutput:{value:0},linearComposite:{value:0},airglowStrength:{value:1},multipleStrength:{value:1},multipleDepth:{value:multiTex},multipleDepthB:{value:multiTexB},sun:{value:sun},localSun:{value:sun},solarDepth:{value:lut},enhanced:{value:1},steps:{value:32},detailed:{value:1},dayMap:{value:water},nightMap:{value:black},oceanMap:{value:white},cloudMap:{value:mask},cloudTemplateMap:{value:mask},climateMap:{value:black},cloudAmount:{value:.85},cloudMode:{value:0},cloudChannel:{value:0},cloudTone:{value:0},gloss:{value:90},cloudMotion:{value:0},motionTime:{value:0},weatherTime:{value:0},seed:{value:0},cloudSeason:{value:0},cloudSteps:{value:28},earthInverse:{value:new THREE.Matrix3()}};
-for(let i=0;i<4;i++)for(const prefix of ['detail','nightDetail']){uniforms[prefix+'Map'+i]={value:black};uniforms[prefix+'Fade'+i]={value:0};uniforms[prefix+'Rect'+i]={value:new THREE.Vector4(0,0,1,1)};}
-const make=(r,w,h,fragment,order,back=false)=>{const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,w,h),new THREE.ShaderMaterial({uniforms,vertexShader:vertex,fragmentShader:fragment,transparent:order>0,depthWrite:!order,depthTest:!back,side:back?THREE.BackSide:THREE.FrontSide}));mesh.renderOrder=order;scene.add(mesh);return mesh;};
-make(6371,384,192,earthFragment,0);const cloud=make(6379,384,192,cloudFragment,2),volume=make(6387,128,80,volumeCloudFragment,2.4,true);const airMesh=make(6671,128,64,atmosphereFragment,3,true),transMesh=make(6471,128,64,atmosphereTransmissionFragment,2.9,true);
-transMesh.material.blending=THREE.CustomBlending;transMesh.material.blendSrc=THREE.ZeroFactor;transMesh.material.blendDst=THREE.SrcColorFactor;transMesh.material.blendSrcAlpha=THREE.ZeroFactor;transMesh.material.blendDstAlpha=THREE.OneFactor;transMesh.material.toneMapped=false;
-const sunView=new SunView({sky:scene,environment:{hdr,opticalTable:table},api:{sunLight:new THREE.DirectionalLight()}});
-function render(){const angle=Number($('sun').value)*Math.PI/180,az=Number($('azimuth').value)*Math.PI/180;sun.set(Math.cos(angle),0,Math.sin(angle));camera.lookAt(2700*Math.cos(az),2700*Math.sin(az),5900);cloud.visible=$('cloud').value==='shell';volume.visible=$('cloud').value==='volume';uniforms.cloudAmount.value=$('cloud').value==='off'?0:.85;const linear=hdr.begin();uniforms.linearOutput.value=linear?1:0;uniforms.linearComposite.value=linear?1:0;transMesh.visible=linear;cloud.renderOrder=linear?3.05:2;volume.renderOrder=linear?3.06:2.4;airMesh.material.blending=linear?THREE.AdditiveBlending:THREE.NormalBlending;sunView.update({sunDir:sun.toArray(),sun:sun.clone().multiplyScalar(149597870.7).toArray(),position:camera.position.toArray()},camera,linear);renderer.render(scene,camera);if(linear)hdr.finish();$('report').textContent=JSON.stringify({shaderErrors:errors,drawCalls:renderer.info.render.calls,textureKiB:256,mode:'按需单帧；合成云遮罩仅供着色检查'},null,2);}
-for(const id of ['sun','azimuth','cloud'])$(id).onchange=render;
-function check(){
- const results=[],assert=(ok,name)=>{results.push({name,pass:!!ok});if(!ok)throw Error(name);};
- const rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false}),buf=new Float32Array(4),probe=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));quad.frustumCulled=false;probe.add(quad);
- const u={solarDepth:{value:lut},h:{value:0},mu:{value:0},phase:{value:0}};
- const material=new THREE.ShaderMaterial({uniforms:u,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`${solarOpticsGLSL}uniform float h,mu,phase;void main(){gl_FragColor=phase>.5?vec4(rayleighPhase(mu),miePhase(mu),0.,1.):vec4(sunlightAt(h,mu),1.);}`,toneMapped:false});
- const sample=(h,mu,phase=0)=>{quad.material=material;u.h.value=h;u.mu.value=mu;u.phase.value=phase;renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf];};
- uniforms.linearOutput.value=1;uniforms.linearComposite.value=0;uniforms.airglowStrength.value=0;let directional=[];
- try{
-  const forward=sample(0,1,1),side=sample(0,0,1),back=sample(0,-1,1);results.push({phaseSamples:{forward,side,back}});
-  assert(forward[0]>.1&&Math.abs(forward[0]-back[0])<1e-6&&Math.abs(forward[0]-2*side[0])<1e-6,'Rayleigh 前后对称');assert(forward[1]>side[1]*50&&forward[1]>back[1]*100,'Mie 朝日增强');
-  const noon=sample(8,1),sunset=sample(8,-.04),night=sample(8,-.2),ground=sample(0,-.02),high=sample(8,-.02);
-  results.push({solarSamples:{noon,sunset,night,ground,high}});
-  assert(noon[2]/noon[0]>.85,'高太阳云顶近白');assert(sunset[0]>sunset[2]*3,'长光程自然偏暖');assert(night.slice(0,3).every(v=>v===0),'地影内无直射暖光');assert(ground[0]===0&&high[0]>.1,'云顶仍受光时地面已入影');
-  const rayPoint=new THREE.Vector3(),aUniforms={...uniforms,rayPoint:{value:rayPoint}},air=new THREE.ShaderMaterial({uniforms:aUniforms,vertexShader:'uniform vec3 rayPoint;varying vec3 worldP;void main(){worldP=rayPoint;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:atmosphereFragment,toneMapped:false});
-  quad.material=air;const original=camera.position.clone(),rotation=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,2,3).normalize(),.7);
-  let ratio=6381/6771;
-  const radiance=(angle,az,rotated=false)=>{const el=angle*Math.PI/180,phi=az*Math.PI/180,d=new THREE.Vector3(ratio*Math.cos(phi),ratio*Math.sin(phi),-Math.sqrt(1-ratio*ratio));sun.set(Math.cos(el),0,Math.sin(el));camera.position.copy(original);if(rotated){sun.applyQuaternion(rotation);d.applyQuaternion(rotation);camera.position.applyQuaternion(rotation);}rayPoint.copy(camera.position).addScaledVector(d,100);renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3).map(v=>Math.max(0,v*buf[3]/SOLAR_IRRADIANCE));};
-  for(const el of [45,-19,-45])for(const az of [0,90,180])directional.push({sunElevation:el,azimuth:az,rgb:radiance(el,az)});
-  const daySide=directional[1].rgb,twilight=directional[3].rgb,opposite=directional[5].rgb;
-  assert(daySide[2]>daySide[0],'白天侧向薄边偏蓝');assert(twilight[0]>opposite[0]*20,'晨昏朝日与背日亮度不同');
-  const before=radiance(-19,0),after=radiance(-19,0,true);assert(before.every((v,i)=>Math.abs(v-after[i])<.003),'共同旋转相机和太阳保持物理关系');
-  assert(directional.slice(6).every(r=>Math.max(...r.rgb)<.002),'深夜侧不制造整圈发光');assert(errors.length===0,'生产着色器编译无错误');
-  const profiles=[];
-  for(const height of [.1,.5,1,2,5,10,20,40,70,95])for(const az of [0,90,180]){ratio=(6371+height)/6771;const rgb=radiance(45,az);profiles.push({height,az,rgb});}
-  results.push({dayProfiles:profiles,multipleFeedback:multi.maxFeedback});
-  assert(profiles.every(p=>p.rgb[2]>=p.rgb[1]*.97&&p.rgb[1]>=p.rgb[0]*.97),'日照全高度剖面无暖色条带');
-  ratio=6463/6771;uniforms.airglowStrength.value=1;const glow=radiance(-45,0);uniforms.airglowStrength.value=0;const dark=radiance(-45,0);
-  assert(glow[1]>dark[1]+.0001&&glow[1]>glow[0],'地影有独立弱绿色气辉');assert(glow[1]<.02,'气辉低于白昼散射亮度');results.push({glow,dark});uniforms.airglowStrength.value=1;
-  camera.position.copy(original);
-  const cloudProbe=new THREE.ShaderMaterial({uniforms:aUniforms,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`${solarOpticsGLSL}${scatteringGLSL}uniform vec3 rayPoint;void main(){gl_FragColor=vec4(viewTransmission(rayPoint,normalize(cameraPosition-rayPoint)),1.);}`,toneMapped:false});
-  quad.material=cloudProbe;const impact=6370/6771,d=new THREE.Vector3(impact,0,-Math.sqrt(1-impact*impact)),b=original.dot(d);
-  const pathT=radius=>{rayPoint.copy(original).addScaledVector(d,-b-Math.sqrt(b*b-original.lengthSq()+radius*radius));renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3);};
-  const cloudT=pathT(6379),groundT=pathT(6371);assert(cloudT.every((v,i)=>v>groundT[i])&&cloudT[2]>groundT[2]*2,'高云前方透射不包含云后低层空气');results.push({cloudT,groundT});cloudProbe.dispose();air.dispose();
- }catch(error){results.push({error:error.message});}finally{uniforms.airglowStrength.value=1;rt.dispose();material.dispose();quad.geometry.dispose();renderer.setRenderTarget(null);render();}
- window.atmosphereCheck={results,directional,shaderErrors:errors};$('report').textContent=JSON.stringify(window.atmosphereCheck,null,2);return window.atmosphereCheck;
+import {
+  vertex,
+  atmosphereFragment,
+  earthFragment,
+  cloudFragment,
+  volumeCloudFragment,
+  atmosphereTransmissionFragment,
+} from '../../src/earth-shaders.js';
+import { SunView } from '../../src/sun-view.js';
+import { AtmosphereRenderer } from '../../src/atmosphere-renderer.js';
+import { buildMultipleScatteringTable } from '../../src/atmosphere-multiple.js';
+import { scatteringGLSL } from '../../src/atmosphere-scattering.js';
+import { solarOpticsGLSL } from '../../src/atmosphere-glsl.js';
+import { buildOpticalDepthTable } from '../../src/atmosphere-optics.js';
+const $ = (id) => document.getElementById(id),
+  errors = [],
+  table = buildOpticalDepthTable();
+const pixels = Uint16Array.from(table.data, (v) => THREE.DataUtils.toHalfFloat(v));
+const lut = new THREE.DataTexture(
+  pixels,
+  table.width,
+  table.height,
+  THREE.RGBAFormat,
+  THREE.HalfFloatType
+);
+lut.minFilter = lut.magFilter = THREE.LinearFilter;
+lut.needsUpdate = true;
+const multi = buildMultipleScatteringTable(table, {
+    rayleigh: SPECTRAL_RAYLEIGH.slice(0, 3),
+    ozone: SPECTRAL_OZONE.slice(0, 3),
+  }),
+  multiTex = new THREE.DataTexture(
+    Uint16Array.from(multi.data, (v) => THREE.DataUtils.toHalfFloat(v)),
+    multi.width,
+    multi.height,
+    THREE.RGBAFormat,
+    THREE.HalfFloatType
+  );
+multiTex.minFilter = multiTex.magFilter = THREE.LinearFilter;
+multiTex.needsUpdate = true;
+const multiB = buildMultipleScatteringTable(table, {
+    rayleigh: SPECTRAL_RAYLEIGH.slice(3),
+    ozone: SPECTRAL_OZONE.slice(3),
+  }),
+  multiTexB = new THREE.DataTexture(
+    Uint16Array.from(multiB.data, (v) => THREE.DataUtils.toHalfFloat(v)),
+    multiB.width,
+    multiB.height,
+    THREE.RGBAFormat,
+    THREE.HalfFloatType
+  );
+multiTexB.minFilter = multiTexB.magFilter = THREE.LinearFilter;
+multiTexB.needsUpdate = true;
+const flat = (rgba) => {
+  const t = new THREE.DataTexture(new Uint8Array(rgba), 1, 1);
+  t.needsUpdate = true;
+  return t;
+};
+const water = flat([2, 10, 30, 255]),
+  white = flat([255, 255, 255, 255]),
+  black = flat([0, 0, 0, 255]);
+const coverage = new Uint8Array(128 * 64 * 4);
+for (let y = 0; y < 64; y++)
+  for (let x = 0; x < 128; x++) {
+    const i = (y * 128 + x) * 4,
+      c = Math.max(0, Math.sin(x * 0.3 + Math.sin(y * 0.3) * 3) * Math.cos(y * 0.3));
+    coverage.set([c * 255, c * 255, c * 255, 255], i);
+  }
+const mask = new THREE.DataTexture(coverage, 128, 64);
+mask.wrapS = THREE.RepeatWrapping;
+mask.minFilter = mask.magFilter = THREE.LinearFilter;
+mask.needsUpdate = true;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(800, 560);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.debug.onShaderError = (gl, p, v, f) => errors.push(gl.getShaderInfoLog(f));
+$('canvas').append(renderer.domElement);
+const hdr = new AtmosphereRenderer(renderer);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0);
+const camera = new THREE.PerspectiveCamera(38, 800 / 560, 10, 1000000);
+camera.position.set(0, 0, 6771);
+camera.up.set(0, 0, 1);
+const sun = new THREE.Vector3(),
+  uniforms = {
+    ...flashUniforms(),
+    linearOutput: { value: 0 },
+    linearComposite: { value: 0 },
+    airglowStrength: { value: 1 },
+    multipleStrength: { value: 1 },
+    multipleDepth: { value: multiTex },
+    multipleDepthB: { value: multiTexB },
+    sun: { value: sun },
+    localSun: { value: sun },
+    solarDepth: { value: lut },
+    enhanced: { value: 1 },
+    steps: { value: 32 },
+    detailed: { value: 1 },
+    dayMap: { value: water },
+    nightMap: { value: black },
+    oceanMap: { value: white },
+    cloudMap: { value: mask },
+    cloudTemplateMap: { value: mask },
+    climateMap: { value: black },
+    cloudAmount: { value: 0.85 },
+    cloudMode: { value: 0 },
+    cloudChannel: { value: 0 },
+    cloudTone: { value: 0 },
+    gloss: { value: 90 },
+    cloudMotion: { value: 0 },
+    motionTime: { value: 0 },
+    weatherTime: { value: 0 },
+    seed: { value: 0 },
+    cloudSeason: { value: 0 },
+    cloudSteps: { value: 28 },
+    earthInverse: { value: new THREE.Matrix3() },
+  };
+for (let i = 0; i < 4; i++)
+  for (const prefix of ['detail', 'nightDetail']) {
+    uniforms[prefix + 'Map' + i] = { value: black };
+    uniforms[prefix + 'Fade' + i] = { value: 0 };
+    uniforms[prefix + 'Rect' + i] = { value: new THREE.Vector4(0, 0, 1, 1) };
+  }
+const make = (r, w, h, fragment, order, back = false) => {
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(r, w, h),
+    new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: vertex,
+      fragmentShader: fragment,
+      transparent: order > 0,
+      depthWrite: !order,
+      depthTest: !back,
+      side: back ? THREE.BackSide : THREE.FrontSide,
+    })
+  );
+  mesh.renderOrder = order;
+  scene.add(mesh);
+  return mesh;
+};
+make(6371, 384, 192, earthFragment, 0);
+const cloud = make(6379, 384, 192, cloudFragment, 2),
+  volume = make(6387, 128, 80, volumeCloudFragment, 2.4, true);
+const airMesh = make(6671, 128, 64, atmosphereFragment, 3, true),
+  transMesh = make(6471, 128, 64, atmosphereTransmissionFragment, 2.9, true);
+transMesh.material.blending = THREE.CustomBlending;
+transMesh.material.blendSrc = THREE.ZeroFactor;
+transMesh.material.blendDst = THREE.SrcColorFactor;
+transMesh.material.blendSrcAlpha = THREE.ZeroFactor;
+transMesh.material.blendDstAlpha = THREE.OneFactor;
+transMesh.material.toneMapped = false;
+const sunView = new SunView({
+  sky: scene,
+  environment: { hdr, opticalTable: table },
+  api: { sunLight: new THREE.DirectionalLight() },
+});
+function render() {
+  const angle = (Number($('sun').value) * Math.PI) / 180,
+    az = (Number($('azimuth').value) * Math.PI) / 180;
+  sun.set(Math.cos(angle), 0, Math.sin(angle));
+  camera.lookAt(2700 * Math.cos(az), 2700 * Math.sin(az), 5900);
+  cloud.visible = $('cloud').value === 'shell';
+  volume.visible = $('cloud').value === 'volume';
+  uniforms.cloudAmount.value = $('cloud').value === 'off' ? 0 : 0.85;
+  const linear = hdr.begin();
+  uniforms.linearOutput.value = linear ? 1 : 0;
+  uniforms.linearComposite.value = linear ? 1 : 0;
+  transMesh.visible = linear;
+  cloud.renderOrder = linear ? 3.05 : 2;
+  volume.renderOrder = linear ? 3.06 : 2.4;
+  airMesh.material.blending = linear ? THREE.AdditiveBlending : THREE.NormalBlending;
+  sunView.update(
+    {
+      sunDir: sun.toArray(),
+      sun: sun.clone().multiplyScalar(149597870.7).toArray(),
+      position: camera.position.toArray(),
+    },
+    camera,
+    linear
+  );
+  renderer.render(scene, camera);
+  if (linear) hdr.finish();
+  $('report').textContent = JSON.stringify(
+    {
+      shaderErrors: errors,
+      drawCalls: renderer.info.render.calls,
+      textureKiB: 256,
+      mode: '按需单帧；合成云遮罩仅供着色检查',
+    },
+    null,
+    2
+  );
 }
-$('check').onclick=check;window.runAtmosphereCheck=check;window.atmosphereFixture={renderer,hdr,scene,camera,uniforms,render,multi,sunView};
+for (const id of ['sun', 'azimuth', 'cloud']) $(id).onchange = render;
+function check() {
+  const results = [],
+    assert = (ok, name) => {
+      results.push({ name, pass: !!ok });
+      if (!ok) throw Error(name);
+    };
+  const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.FloatType, depthBuffer: false }),
+    buf = new Float32Array(4),
+    probe = new THREE.Scene(),
+    quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
+  quad.frustumCulled = false;
+  probe.add(quad);
+  const u = { solarDepth: { value: lut }, h: { value: 0 }, mu: { value: 0 }, phase: { value: 0 } };
+  const material = new THREE.ShaderMaterial({
+    uniforms: u,
+    vertexShader: 'void main(){gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: `${solarOpticsGLSL}uniform float h,mu,phase;void main(){gl_FragColor=phase>.5?vec4(rayleighPhase(mu),miePhase(mu),0.,1.):vec4(sunlightAt(h,mu),1.);}`,
+    toneMapped: false,
+  });
+  const sample = (h, mu, phase = 0) => {
+    quad.material = material;
+    u.h.value = h;
+    u.mu.value = mu;
+    u.phase.value = phase;
+    renderer.setRenderTarget(rt);
+    renderer.render(probe, camera);
+    renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buf);
+    return [...buf];
+  };
+  uniforms.linearOutput.value = 1;
+  uniforms.linearComposite.value = 0;
+  uniforms.airglowStrength.value = 0;
+  let directional = [];
+  try {
+    const forward = sample(0, 1, 1),
+      side = sample(0, 0, 1),
+      back = sample(0, -1, 1);
+    results.push({ phaseSamples: { forward, side, back } });
+    assert(
+      forward[0] > 0.1 &&
+        Math.abs(forward[0] - back[0]) < 1e-6 &&
+        Math.abs(forward[0] - 2 * side[0]) < 1e-6,
+      'Rayleigh 前后对称'
+    );
+    assert(forward[1] > side[1] * 50 && forward[1] > back[1] * 100, 'Mie 朝日增强');
+    const noon = sample(8, 1),
+      sunset = sample(8, -0.04),
+      night = sample(8, -0.2),
+      ground = sample(0, -0.02),
+      high = sample(8, -0.02);
+    results.push({ solarSamples: { noon, sunset, night, ground, high } });
+    assert(noon[2] / noon[0] > 0.85, '高太阳云顶近白');
+    assert(sunset[0] > sunset[2] * 3, '长光程自然偏暖');
+    assert(
+      night.slice(0, 3).every((v) => v === 0),
+      '地影内无直射暖光'
+    );
+    assert(ground[0] === 0 && high[0] > 0.1, '云顶仍受光时地面已入影');
+    const rayPoint = new THREE.Vector3(),
+      aUniforms = { ...uniforms, rayPoint: { value: rayPoint } },
+      air = new THREE.ShaderMaterial({
+        uniforms: aUniforms,
+        vertexShader:
+          'uniform vec3 rayPoint;varying vec3 worldP;void main(){worldP=rayPoint;gl_Position=vec4(position.xy,0.,1.);}',
+        fragmentShader: atmosphereFragment,
+        toneMapped: false,
+      });
+    quad.material = air;
+    const original = camera.position.clone(),
+      rotation = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(1, 2, 3).normalize(),
+        0.7
+      );
+    let ratio = 6381 / 6771;
+    const radiance = (angle, az, rotated = false) => {
+      const el = (angle * Math.PI) / 180,
+        phi = (az * Math.PI) / 180,
+        d = new THREE.Vector3(
+          ratio * Math.cos(phi),
+          ratio * Math.sin(phi),
+          -Math.sqrt(1 - ratio * ratio)
+        );
+      sun.set(Math.cos(el), 0, Math.sin(el));
+      camera.position.copy(original);
+      if (rotated) {
+        sun.applyQuaternion(rotation);
+        d.applyQuaternion(rotation);
+        camera.position.applyQuaternion(rotation);
+      }
+      rayPoint.copy(camera.position).addScaledVector(d, 100);
+      renderer.setRenderTarget(rt);
+      renderer.render(probe, camera);
+      renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buf);
+      return [...buf].slice(0, 3).map((v) => Math.max(0, (v * buf[3]) / SOLAR_IRRADIANCE));
+    };
+    for (const el of [45, -19, -45])
+      for (const az of [0, 90, 180])
+        directional.push({ sunElevation: el, azimuth: az, rgb: radiance(el, az) });
+    const daySide = directional[1].rgb,
+      twilight = directional[3].rgb,
+      opposite = directional[5].rgb;
+    assert(daySide[2] > daySide[0], '白天侧向薄边偏蓝');
+    assert(twilight[0] > opposite[0] * 20, '晨昏朝日与背日亮度不同');
+    const before = radiance(-19, 0),
+      after = radiance(-19, 0, true);
+    assert(
+      before.every((v, i) => Math.abs(v - after[i]) < 0.003),
+      '共同旋转相机和太阳保持物理关系'
+    );
+    assert(
+      directional.slice(6).every((r) => Math.max(...r.rgb) < 0.002),
+      '深夜侧不制造整圈发光'
+    );
+    assert(errors.length === 0, '生产着色器编译无错误');
+    const profiles = [];
+    for (const height of [0.1, 0.5, 1, 2, 5, 10, 20, 40, 70, 95])
+      for (const az of [0, 90, 180]) {
+        ratio = (6371 + height) / 6771;
+        const rgb = radiance(45, az);
+        profiles.push({ height, az, rgb });
+      }
+    results.push({ dayProfiles: profiles, multipleFeedback: multi.maxFeedback });
+    assert(
+      profiles.every((p) => p.rgb[2] >= p.rgb[1] * 0.97 && p.rgb[1] >= p.rgb[0] * 0.97),
+      '日照全高度剖面无暖色条带'
+    );
+    ratio = 6463 / 6771;
+    uniforms.airglowStrength.value = 1;
+    const glow = radiance(-45, 0);
+    uniforms.airglowStrength.value = 0;
+    const dark = radiance(-45, 0);
+    assert(glow[1] > dark[1] + 0.0001 && glow[1] > glow[0], '地影有独立弱绿色气辉');
+    assert(glow[1] < 0.02, '气辉低于白昼散射亮度');
+    results.push({ glow, dark });
+    uniforms.airglowStrength.value = 1;
+    camera.position.copy(original);
+    const cloudProbe = new THREE.ShaderMaterial({
+      uniforms: aUniforms,
+      vertexShader: 'void main(){gl_Position=vec4(position.xy,0.,1.);}',
+      fragmentShader: `${solarOpticsGLSL}${scatteringGLSL}uniform vec3 rayPoint;void main(){gl_FragColor=vec4(viewTransmission(rayPoint,normalize(cameraPosition-rayPoint)),1.);}`,
+      toneMapped: false,
+    });
+    quad.material = cloudProbe;
+    const impact = 6370 / 6771,
+      d = new THREE.Vector3(impact, 0, -Math.sqrt(1 - impact * impact)),
+      b = original.dot(d);
+    const pathT = (radius) => {
+      rayPoint
+        .copy(original)
+        .addScaledVector(d, -b - Math.sqrt(b * b - original.lengthSq() + radius * radius));
+      renderer.setRenderTarget(rt);
+      renderer.render(probe, camera);
+      renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buf);
+      return [...buf].slice(0, 3);
+    };
+    const cloudT = pathT(6379),
+      groundT = pathT(6371);
+    assert(
+      cloudT.every((v, i) => v > groundT[i]) && cloudT[2] > groundT[2] * 2,
+      '高云前方透射不包含云后低层空气'
+    );
+    results.push({ cloudT, groundT });
+    cloudProbe.dispose();
+    air.dispose();
+  } catch (error) {
+    results.push({ error: error.message });
+  } finally {
+    uniforms.airglowStrength.value = 1;
+    rt.dispose();
+    material.dispose();
+    quad.geometry.dispose();
+    renderer.setRenderTarget(null);
+    render();
+  }
+  window.atmosphereCheck = { results, directional, shaderErrors: errors };
+  $('report').textContent = JSON.stringify(window.atmosphereCheck, null, 2);
+  return window.atmosphereCheck;
+}
+$('check').onclick = check;
+window.runAtmosphereCheck = check;
+window.atmosphereFixture = { renderer, hdr, scene, camera, uniforms, render, multi, sunView };
 // Absolute linear-radiance probe: no tone mapping, output encoding, clouds,
 // ocean glint, night emission or airglow. Retain and account for the .002 floor.
-window.runEarthRadiometryCheck=()=>{
- const results=[],saved=Object.fromEntries(['dayMap','oceanMap','detailed','enhanced','linearOutput','linearComposite','airglowStrength','multipleStrength'].map(k=>[k,uniforms[k].value]));
- const position=camera.position.clone(),sunDirection=sun.clone(),rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false}),buf=new Float32Array(4),probe=new THREE.Scene();
- const texture=new THREE.DataTexture(new Float32Array([.18,.18,.18,1]),1,1,THREE.RGBAFormat,THREE.FloatType);texture.needsUpdate=true;
- const terrain=new THREE.ShaderMaterial({uniforms,vertexShader:'varying vec3 localN,worldN,worldP;void main(){localN=worldN=vec3(0.,0.,1.);worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:earthFragment,toneMapped:false});
- const air=new THREE.ShaderMaterial({uniforms,vertexShader:'varying vec3 worldP;void main(){worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:atmosphereFragment,toneMapped:false});
- const quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),terrain);quad.frustumCulled=false;probe.add(quad);
- const sample=()=>{renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);return [...buf].slice(0,3);};
- const assert=(ok,name,detail)=>{results.push({name,pass:!!ok,...detail});if(!ok)throw Error(name);};
- try{
-  camera.position.set(0,0,6771);sun.set(0,0,1);uniforms.dayMap.value=texture;uniforms.oceanMap.value=black;uniforms.detailed.value=0;uniforms.linearOutput.value=1;uniforms.linearComposite.value=1;uniforms.airglowStrength.value=0;uniforms.multipleStrength.value=0;
-  for(const rho of [.05,.18,.5,1]){
-   texture.image.data.set([rho,rho,rho,1]);texture.needsUpdate=true;uniforms.enhanced.value=0;const vacuum=sample();
-   assert(vacuum.every(v=>Math.abs(v-rho*1.002)<.00001),`灰板 ${rho}: 无空气 Lambert 基准`,{rgb:vacuum});
-   uniforms.enhanced.value=1;const solar=sample(),T=[.90782455,.86517139,.76641972];
-   assert(solar.every((v,i)=>Math.abs(v-rho*(T[i]+.002))<.001),`灰板 ${rho}: 仅太阳路径衰减`,{rgb:solar});
+window.runEarthRadiometryCheck = () => {
+  const results = [],
+    saved = Object.fromEntries(
+      [
+        'dayMap',
+        'oceanMap',
+        'detailed',
+        'enhanced',
+        'linearOutput',
+        'linearComposite',
+        'airglowStrength',
+        'multipleStrength',
+      ].map((k) => [k, uniforms[k].value])
+    );
+  const position = camera.position.clone(),
+    sunDirection = sun.clone(),
+    rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.FloatType, depthBuffer: false }),
+    buf = new Float32Array(4),
+    probe = new THREE.Scene();
+  const texture = new THREE.DataTexture(
+    new Float32Array([0.18, 0.18, 0.18, 1]),
+    1,
+    1,
+    THREE.RGBAFormat,
+    THREE.FloatType
+  );
+  texture.needsUpdate = true;
+  const terrain = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader:
+      'varying vec3 localN,worldN,worldP;void main(){localN=worldN=vec3(0.,0.,1.);worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: earthFragment,
+    toneMapped: false,
+  });
+  const air = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader:
+      'varying vec3 worldP;void main(){worldP=vec3(0.,0.,6371.);gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: atmosphereFragment,
+    toneMapped: false,
+  });
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), terrain);
+  quad.frustumCulled = false;
+  probe.add(quad);
+  const sample = () => {
+    renderer.setRenderTarget(rt);
+    renderer.render(probe, camera);
+    renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buf);
+    return [...buf].slice(0, 3);
+  };
+  const assert = (ok, name, detail) => {
+    results.push({ name, pass: !!ok, ...detail });
+    if (!ok) throw Error(name);
+  };
+  try {
+    camera.position.set(0, 0, 6771);
+    sun.set(0, 0, 1);
+    uniforms.dayMap.value = texture;
+    uniforms.oceanMap.value = black;
+    uniforms.detailed.value = 0;
+    uniforms.linearOutput.value = 1;
+    uniforms.linearComposite.value = 1;
+    uniforms.airglowStrength.value = 0;
+    uniforms.multipleStrength.value = 0;
+    for (const rho of [0.05, 0.18, 0.5, 1]) {
+      texture.image.data.set([rho, rho, rho, 1]);
+      texture.needsUpdate = true;
+      uniforms.enhanced.value = 0;
+      const vacuum = sample();
+      assert(
+        vacuum.every((v) => Math.abs(v - rho * 1.002) < 0.00001),
+        `灰板 ${rho}: 无空气 Lambert 基准`,
+        { rgb: vacuum }
+      );
+      uniforms.enhanced.value = 1;
+      const solar = sample(),
+        T = [0.90782455, 0.86517139, 0.76641972];
+      assert(
+        solar.every((v, i) => Math.abs(v - rho * (T[i] + 0.002)) < 0.001),
+        `灰板 ${rho}: 仅太阳路径衰减`,
+        { rgb: solar }
+      );
+    }
+    quad.material = air;
+    const single = sample(),
+      expected = [0.01877078, 0.03615139, 0.07594988];
+    assert(
+      single.every((v, i) => Math.abs(v / expected[i] - 1) < 0.05),
+      '天底单次散射与独立密集积分相符（5%）',
+      { rgb: single, reference: expected }
+    );
+    assert(errors.length === 0, '辐射基准生产着色器编译无错误');
+  } catch (error) {
+    results.push({ error: error.message });
+  } finally {
+    for (const [k, v] of Object.entries(saved)) uniforms[k].value = v;
+    camera.position.copy(position);
+    sun.copy(sunDirection);
+    renderer.setRenderTarget(null);
+    rt.dispose();
+    texture.dispose();
+    terrain.dispose();
+    air.dispose();
+    quad.geometry.dispose();
+    render();
   }
-  quad.material=air;const single=sample(),expected=[.01877078,.03615139,.07594988];
-  assert(single.every((v,i)=>Math.abs(v/expected[i]-1)<.05),'天底单次散射与独立密集积分相符（5%）',{rgb:single,reference:expected});
-  assert(errors.length===0,'辐射基准生产着色器编译无错误');
- }catch(error){results.push({error:error.message});}finally{
-  for(const [k,v] of Object.entries(saved))uniforms[k].value=v;camera.position.copy(position);sun.copy(sunDirection);renderer.setRenderTarget(null);rt.dispose();texture.dispose();terrain.dispose();air.dispose();quad.geometry.dispose();render();
- }
- return {results,shaderErrors:[...errors]};
+  return { results, shaderErrors: [...errors] };
 };
-addEventListener('pagehide',()=>{hdr.dispose();renderer.dispose();renderer.forceContextLoss();});render();
+addEventListener('pagehide', () => {
+  hdr.dispose();
+  renderer.dispose();
+  renderer.forceContextLoss();
+});
+render();
 
-window.checkAtmosphereFrames=()=>{
- const results=[],record=(name,pass,detail)=>{results.push({name,pass,...detail});if(!pass)throw Error(name);};
- const gl=renderer.getContext(),read=()=>{const size=renderer.getDrawingBufferSize(new THREE.Vector2()),p=new Uint8Array(size.x*size.y*4);gl.readPixels(0,0,size.x,size.y,gl.RGBA,gl.UNSIGNED_BYTE,p);return {p,w:size.x,h:size.y};};
- try{
-  $('sun').value='45';$('cloud').value='off';
-  for(const az of [0,90,180]){
-   $('azimuth').value=String(az);render();camera.updateMatrixWorld();const {p,w,h}=read();let count=0,warm=0;
-   for(let y=0;y<h;y++){
-    const d=new THREE.Vector3(0,(y+.5)/h*2-1,.5).unproject(camera).sub(camera.position).normalize(),b=camera.position.dot(d),alt=Math.sqrt(camera.position.lengthSq()-b*b)-6371;
-    if(b>=0||alt<0||alt>100)continue;const i=(y*w+Math.floor(w/2))*4;
-    if(p[i+2]>8){count++;if(p[i]>p[i+2]+2)warm++;}
-   }
-   record('final daytime limb blue '+az,count>5&&warm===0,{samples:count,warm});
+window.checkAtmosphereFrames = () => {
+  const results = [],
+    record = (name, pass, detail) => {
+      results.push({ name, pass, ...detail });
+      if (!pass) throw Error(name);
+    };
+  const gl = renderer.getContext(),
+    read = () => {
+      const size = renderer.getDrawingBufferSize(new THREE.Vector2()),
+        p = new Uint8Array(size.x * size.y * 4);
+      gl.readPixels(0, 0, size.x, size.y, gl.RGBA, gl.UNSIGNED_BYTE, p);
+      return { p, w: size.x, h: size.y };
+    };
+  try {
+    $('sun').value = '45';
+    $('cloud').value = 'off';
+    for (const az of [0, 90, 180]) {
+      $('azimuth').value = String(az);
+      render();
+      camera.updateMatrixWorld();
+      const { p, w, h } = read();
+      let count = 0,
+        warm = 0;
+      for (let y = 0; y < h; y++) {
+        const d = new THREE.Vector3(0, ((y + 0.5) / h) * 2 - 1, 0.5)
+            .unproject(camera)
+            .sub(camera.position)
+            .normalize(),
+          b = camera.position.dot(d),
+          alt = Math.sqrt(camera.position.lengthSq() - b * b) - 6371;
+        if (b >= 0 || alt < 0 || alt > 100) continue;
+        const i = (y * w + Math.floor(w / 2)) * 4;
+        if (p[i + 2] > 8) {
+          count++;
+          if (p[i] > p[i + 2] + 2) warm++;
+        }
+      }
+      record('final daytime limb blue ' + az, count > 5 && warm === 0, { samples: count, warm });
+    }
+    for (const sunAngle of ['45', '-19', '-45'])
+      for (const mode of ['shell', 'volume']) {
+        $('sun').value = sunAngle;
+        $('cloud').value = mode;
+        render();
+        record(
+          'cloud final ' + sunAngle + ' ' + mode,
+          gl.getError() === gl.NO_ERROR && errors.length === 0
+        );
+      }
+    const target = hdr.target;
+    renderer.setSize(640, 448);
+    render();
+    record(
+      'viewport target follows resize',
+      hdr.target === target && hdr.target.width === 640 && hdr.target.height === 448
+    );
+    renderer.setSize(800, 560);
+    render();
+    record('reuse target', hdr.target === target);
+    const before = renderer.info.memory.textures;
+    hdr.release();
+    record('quality switch frees HDR', !hdr.target && renderer.info.memory.textures === before - 1);
+    render();
+    record('quality switch recreates HDR', !!hdr.target);
+    const original = gl.checkFramebufferStatus.bind(gl);
+    hdr.release();
+    gl.checkFramebufferStatus = () => gl.FRAMEBUFFER_UNSUPPORTED;
+    try {
+      render();
+      record(
+        'unsupported HDR falls back',
+        hdr.failed && !hdr.target && renderer.getRenderTarget() === null
+      );
+    } finally {
+      gl.checkFramebufferStatus = original;
+      hdr.failed = false;
+      render();
+    }
+  } catch (e) {
+    results.push({ error: e.message, pass: false });
   }
-  for(const sunAngle of ['45','-19','-45'])for(const mode of ['shell','volume']){$('sun').value=sunAngle;$('cloud').value=mode;render();record('cloud final '+sunAngle+' '+mode,gl.getError()===gl.NO_ERROR&&errors.length===0);}
-  const target=hdr.target;renderer.setSize(640,448);render();record('viewport target follows resize',hdr.target===target&&hdr.target.width===640&&hdr.target.height===448);
-  renderer.setSize(800,560);render();record('reuse target',hdr.target===target);
-  const before=renderer.info.memory.textures;hdr.release();record('quality switch frees HDR',!hdr.target&&renderer.info.memory.textures===before-1);render();record('quality switch recreates HDR',!!hdr.target);
-  const original=gl.checkFramebufferStatus.bind(gl);hdr.release();gl.checkFramebufferStatus=()=>gl.FRAMEBUFFER_UNSUPPORTED;
-  try{render();record('unsupported HDR falls back',hdr.failed&&!hdr.target&&renderer.getRenderTarget()===null);}finally{gl.checkFramebufferStatus=original;hdr.failed=false;render();}
- }catch(e){results.push({error:e.message,pass:false});}
- return results;
+  return results;
 };
 
-window.checkHDRAntialias=()=>{
- const gl=renderer.getContext(),size=renderer.getSize(new THREE.Vector2()),samples=hdr.samples;
- const probe=new THREE.Scene();probe.background=new THREE.Color(0);
- const geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute([-.91,-.87,0,.86,-.73,0,-.77,.93,0],3));
- const material=new THREE.MeshBasicMaterial({color:0xffffff});probe.add(new THREE.Mesh(geometry,material));
- const camera=new THREE.Camera(),glow=hdr.material.uniforms.sunGlow.value.clone();
- const read=count=>{
-  hdr.release();hdr.samples=count;hdr.material.uniforms.sunGlow.value.set(0,0,0);hdr.begin();renderer.autoClear=true;renderer.render(probe,camera);hdr.finish();
-  const p=new Uint8Array(128*128*4);gl.readPixels(0,0,128,128,gl.RGBA,gl.UNSIGNED_BYTE,p);
-  let max=0,edges=0;for(let i=0;i<p.length;i+=4)max=Math.max(max,p[i]);for(let i=0;i<p.length;i+=4)if(p[i]>5&&p[i]<max-5)edges++;
-  return {edges,max};
- };
- try{renderer.setSize(128,128);const before=read(0),after=read(samples);return {pass:samples>0&&after.edges>before.edges+100,samples,before,after};}
- finally{geometry.dispose();material.dispose();hdr.release();hdr.samples=samples;hdr.material.uniforms.sunGlow.value.copy(glow);renderer.setSize(size.x,size.y);render();}
+window.checkHDRAntialias = () => {
+  const gl = renderer.getContext(),
+    size = renderer.getSize(new THREE.Vector2()),
+    samples = hdr.samples;
+  const probe = new THREE.Scene();
+  probe.background = new THREE.Color(0);
+  const geometry = new THREE.BufferGeometry().setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute([-0.91, -0.87, 0, 0.86, -0.73, 0, -0.77, 0.93, 0], 3)
+  );
+  const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  probe.add(new THREE.Mesh(geometry, material));
+  const camera = new THREE.Camera(),
+    glow = hdr.material.uniforms.sunGlow.value.clone();
+  const read = (count) => {
+    hdr.release();
+    hdr.samples = count;
+    hdr.material.uniforms.sunGlow.value.set(0, 0, 0);
+    hdr.begin();
+    renderer.autoClear = true;
+    renderer.render(probe, camera);
+    hdr.finish();
+    const p = new Uint8Array(128 * 128 * 4);
+    gl.readPixels(0, 0, 128, 128, gl.RGBA, gl.UNSIGNED_BYTE, p);
+    let max = 0,
+      edges = 0;
+    for (let i = 0; i < p.length; i += 4) max = Math.max(max, p[i]);
+    for (let i = 0; i < p.length; i += 4) if (p[i] > 5 && p[i] < max - 5) edges++;
+    return { edges, max };
+  };
+  try {
+    renderer.setSize(128, 128);
+    const before = read(0),
+      after = read(samples);
+    return { pass: samples > 0 && after.edges > before.edges + 100, samples, before, after };
+  } finally {
+    geometry.dispose();
+    material.dispose();
+    hdr.release();
+    hdr.samples = samples;
+    hdr.material.uniforms.sunGlow.value.copy(glow);
+    renderer.setSize(size.x, size.y);
+    render();
+  }
 };
 
 // Reuse the actual catalogue builder and Milky Way shader, with the bundled
 // lower-resolution copy of the same panorama to keep this QA context small.
-import {Environment} from '../../src/environment.js';
-window.checkAtmosphereSky=async()=>{
- const sky=Object.create(Environment.prototype);sky.backdrop=new THREE.Scene();sky.buildStars();sky.buildMilkyWay();sky.starUniforms.high.value=1;
- const view=new THREE.PerspectiveCamera(55,800/560,.1,2000);view.up.set(0,0,1);view.lookAt(-.05487556,-.87343709,-.48383502);
- let cube;
- try{
-  cube=await new THREE.CubeTextureLoader().loadAsync(['px','nx','py','ny','pz','nz'].map(f=>'../../assets/sky/milkyway-4k-'+f+'.jpg'));cube.colorSpace=THREE.SRGBColorSpace;sky.milky.material.uniforms.skyMap.value=cube;sky.milky.material.uniforms.textured.value=1;
-  const gl=renderer.getContext(),capture=(stars,milky,linear)=>{
-   hdr.material.uniforms.sunGlow.value.set(0,0,0);
-   sky.stars.visible=stars;sky.milky.visible=milky;sky.starUniforms.brightness.value=linear?2:1;sky.milky.material.uniforms.brightness.value=linear?2:1;renderer.autoClear=true;if(linear)hdr.begin();else renderer.setRenderTarget(null);renderer.render(sky.backdrop,view);if(linear)hdr.finish();
-   const pixels=new Uint8Array(800*560*4);gl.readPixels(0,0,800,560,gl.RGBA,gl.UNSIGNED_BYTE,pixels);return pixels;
-  };
-  const results=[];
-  for(const linear of [false,true]){
-   const background=capture(false,true,linear),combined=capture(true,true,linear);let count=0,contrast=0;
-   for(let i=0;i<background.length;i+=4){const delta=Math.max(combined[i]-background[i],combined[i+1]-background[i+1],combined[i+2]-background[i+2]);if(delta>12){count++;contrast+=delta;}}
-   results.push({linear,visibleStarPixels:count,meanContrast:contrast/count});
+import { Environment } from '../../src/environment.js';
+window.checkAtmosphereSky = async () => {
+  const sky = Object.create(Environment.prototype);
+  sky.backdrop = new THREE.Scene();
+  sky.buildStars();
+  sky.buildMilkyWay();
+  sky.starUniforms.high.value = 1;
+  const view = new THREE.PerspectiveCamera(55, 800 / 560, 0.1, 2000);
+  view.up.set(0, 0, 1);
+  view.lookAt(-0.05487556, -0.87343709, -0.48383502);
+  let cube;
+  try {
+    cube = await new THREE.CubeTextureLoader().loadAsync(
+      ['px', 'nx', 'py', 'ny', 'pz', 'nz'].map((f) => '../../assets/sky/milkyway-4k-' + f + '.jpg')
+    );
+    cube.colorSpace = THREE.SRGBColorSpace;
+    sky.milky.material.uniforms.skyMap.value = cube;
+    sky.milky.material.uniforms.textured.value = 1;
+    const gl = renderer.getContext(),
+      capture = (stars, milky, linear) => {
+        hdr.material.uniforms.sunGlow.value.set(0, 0, 0);
+        sky.stars.visible = stars;
+        sky.milky.visible = milky;
+        sky.starUniforms.brightness.value = linear ? 2 : 1;
+        sky.milky.material.uniforms.brightness.value = linear ? 2 : 1;
+        renderer.autoClear = true;
+        if (linear) hdr.begin();
+        else renderer.setRenderTarget(null);
+        renderer.render(sky.backdrop, view);
+        if (linear) hdr.finish();
+        const pixels = new Uint8Array(800 * 560 * 4);
+        gl.readPixels(0, 0, 800, 560, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        return pixels;
+      };
+    const results = [];
+    for (const linear of [false, true]) {
+      const background = capture(false, true, linear),
+        combined = capture(true, true, linear);
+      let count = 0,
+        contrast = 0;
+      for (let i = 0; i < background.length; i += 4) {
+        const delta = Math.max(
+          combined[i] - background[i],
+          combined[i + 1] - background[i + 1],
+          combined[i + 2] - background[i + 2]
+        );
+        if (delta > 12) {
+          count++;
+          contrast += delta;
+        }
+      }
+      results.push({ linear, visibleStarPixels: count, meanContrast: contrast / count });
+    }
+    return {
+      results,
+      pass:
+        results[1].visibleStarPixels >= results[0].visibleStarPixels * 0.85 &&
+        results[1].meanContrast > 30 &&
+        errors.length === 0,
+      shaderErrors: errors,
+    };
+  } finally {
+    cube?.dispose();
+    sky.backdrop.traverse((o) => {
+      o.geometry?.dispose();
+      o.material?.map?.dispose();
+      o.material?.dispose();
+    });
+    render();
   }
-  return {results,pass:results[1].visibleStarPixels>=results[0].visibleStarPixels*.85&&results[1].meanContrast>30&&errors.length===0,shaderErrors:errors};
- }finally{cube?.dispose();sky.backdrop.traverse(o=>{o.geometry?.dispose();o.material?.map?.dispose();o.material?.dispose();});render();}
 };
 
-window.checkSunFrames=()=>{
- const results=[],select=$('sun'),saved=select.value,cloudMode=$('cloud').value,az=$('azimuth').value,gl=renderer.getContext();
- const pixel=()=>{const u=hdr.material.uniforms.sunPosition.value,w=renderer.domElement.width,h=renderer.domElement.height,p=new Uint8Array(4);gl.readPixels(Math.round(u.x*w),Math.round(u.y*h),1,1,gl.RGBA,gl.UNSIGNED_BYTE,p);return [...p];};
- try{
-  $('cloud').value='off';$('azimuth').value='0';
-  for(const [name,angle] of [['clear',-15],['rising',-19.79259653],['hidden',-21]]){
-   const option=new Option(name,String(angle));select.add(option);select.value=String(angle);render();const rgb=pixel(),glow=hdr.material.uniforms.sunGlow.value.toArray();option.remove();
-   const pass=name==='clear'?Math.min(...rgb.slice(0,3))>240:name==='rising'?rgb[0]>2*rgb[1]&&rgb[0]>2*rgb[2]&&glow[0]>glow[1]&&glow[1]>glow[2]:glow.every(v=>v===0);
-   results.push({name,pass,rgb,glow});
+window.checkSunFrames = () => {
+  const results = [],
+    select = $('sun'),
+    saved = select.value,
+    cloudMode = $('cloud').value,
+    az = $('azimuth').value,
+    gl = renderer.getContext();
+  const pixel = () => {
+    const u = hdr.material.uniforms.sunPosition.value,
+      w = renderer.domElement.width,
+      h = renderer.domElement.height,
+      p = new Uint8Array(4);
+    gl.readPixels(Math.round(u.x * w), Math.round(u.y * h), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, p);
+    return [...p];
+  };
+  try {
+    $('cloud').value = 'off';
+    $('azimuth').value = '0';
+    for (const [name, angle] of [
+      ['clear', -15],
+      ['rising', -19.79259653],
+      ['hidden', -21],
+    ]) {
+      const option = new Option(name, String(angle));
+      select.add(option);
+      select.value = String(angle);
+      render();
+      const rgb = pixel(),
+        glow = hdr.material.uniforms.sunGlow.value.toArray();
+      option.remove();
+      const pass =
+        name === 'clear'
+          ? Math.min(...rgb.slice(0, 3)) > 240
+          : name === 'rising'
+            ? rgb[0] > 2 * rgb[1] && rgb[0] > 2 * rgb[2] && glow[0] > glow[1] && glow[1] > glow[2]
+            : glow.every((v) => v === 0);
+      results.push({ name, pass, rgb, glow });
+    }
+    const occultor = new THREE.Mesh(
+      new THREE.SphereGeometry(1737.4, 32, 16),
+      new THREE.MeshBasicMaterial({ color: 0 })
+    );
+    scene.add(occultor);
+    sunView.sim.environment.moon = { mesh: occultor };
+    const option = new Option('occultation', '-15');
+    select.add(option);
+    select.value = '-15';
+    render();
+    occultor.position.copy(camera.position).addScaledVector(sun, 350000);
+    render();
+    results.push({
+      name: 'Moon covers Sun and glare',
+      pass: hdr.material.uniforms.sunGlow.value.length() === 0,
+      rgb: pixel(),
+    });
+    const solarRadius = Math.asin(695700 / 149597870.7);
+    occultor.position
+      .copy(camera.position)
+      .addScaledVector(sun, 1737.4 / Math.sin(0.9 * solarRadius));
+    render();
+    results.push({
+      name: 'thin annular Sun retains glare',
+      pass:
+        hdr.material.uniforms.sunGlow.value.x > 2.9 &&
+        hdr.material.uniforms.sunOcclusionProbe.value === 0,
+      glow: hdr.material.uniforms.sunGlow.value.toArray(),
+    });
+    scene.remove(occultor);
+    occultor.geometry.dispose();
+    occultor.material.dispose();
+    delete sunView.sim.environment.moon;
+    option.remove();
+    select.value = '-19';
+    render();
+    gl.finish();
+    const start = performance.now();
+    for (let i = 0; i < 12; i++) {
+      render();
+      gl.finish();
+    }
+    results.push({
+      fixtureMillisecondsPerFrame: (performance.now() - start) / 12,
+      width: 800,
+      height: 560,
+    });
+  } finally {
+    select.value = saved;
+    $('cloud').value = cloudMode;
+    $('azimuth').value = az;
+    render();
   }
-  const occultor=new THREE.Mesh(new THREE.SphereGeometry(1737.4,32,16),new THREE.MeshBasicMaterial({color:0}));scene.add(occultor);sunView.sim.environment.moon={mesh:occultor};
-  const option=new Option('occultation','-15');select.add(option);select.value='-15';render();occultor.position.copy(camera.position).addScaledVector(sun,350000);render();
-  results.push({name:'Moon covers Sun and glare',pass:hdr.material.uniforms.sunGlow.value.length()===0,rgb:pixel()});
-  const solarRadius=Math.asin(695700/149597870.7);occultor.position.copy(camera.position).addScaledVector(sun,1737.4/Math.sin(.9*solarRadius));render();
-  results.push({name:'thin annular Sun retains glare',pass:hdr.material.uniforms.sunGlow.value.x>2.9&&hdr.material.uniforms.sunOcclusionProbe.value===0,glow:hdr.material.uniforms.sunGlow.value.toArray()});
-  scene.remove(occultor);occultor.geometry.dispose();occultor.material.dispose();delete sunView.sim.environment.moon;option.remove();
-  select.value='-19';render();gl.finish();const start=performance.now();for(let i=0;i<12;i++){render();gl.finish();}results.push({fixtureMillisecondsPerFrame:(performance.now()-start)/12,width:800,height:560});
- }finally{select.value=saved;$('cloud').value=cloudMode;$('azimuth').value=az;render();}
- return results;
+  return results;
 };
 
 // Scalar cloud masks must not turn weak source backgrounds into broad cloud decks.
-window.checkCloudTone=()=>{
- const rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false}),buf=new Float32Array(4),probe=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));
- const u={cloudTone:{value:1},value:{value:0}},m=new THREE.ShaderMaterial({uniforms:u,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`${cloudToneGLSL}uniform float value;void main(){gl_FragColor=vec4(cloudOpacity(value),0.,0.,1.);}`,toneMapped:false});
- quad.material=m;quad.frustumCulled=false;probe.add(quad);const results=[];
- try{
-  for(const mode of [1,0])for(const v of [0,.05,.1,.2,.5,.9,1]){u.cloudTone.value=mode;u.value.value=v;renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buf);results.push({mode,input:v,output:buf[0],pass:Math.abs(buf[0]-(mode?githubCloudOpacity(v):v))<1e-6});}
-  uniforms.cloudTone.value=1;
-  for(const mode of ['shell','volume']){document.getElementById('cloud').value=mode;render();results.push({mode,pass:errors.length===0});}
-  return {results,shaderErrors:errors};
- }finally{uniforms.cloudTone.value=0;document.getElementById('cloud').value='shell';renderer.setRenderTarget(null);rt.dispose();m.dispose();quad.geometry.dispose();render();}
+window.checkCloudTone = () => {
+  const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.FloatType, depthBuffer: false }),
+    buf = new Float32Array(4),
+    probe = new THREE.Scene(),
+    quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
+  const u = { cloudTone: { value: 1 }, value: { value: 0 } },
+    m = new THREE.ShaderMaterial({
+      uniforms: u,
+      vertexShader: 'void main(){gl_Position=vec4(position.xy,0.,1.);}',
+      fragmentShader: `${cloudToneGLSL}uniform float value;void main(){gl_FragColor=vec4(cloudOpacity(value),0.,0.,1.);}`,
+      toneMapped: false,
+    });
+  quad.material = m;
+  quad.frustumCulled = false;
+  probe.add(quad);
+  const results = [];
+  try {
+    for (const mode of [1, 0])
+      for (const v of [0, 0.05, 0.1, 0.2, 0.5, 0.9, 1]) {
+        u.cloudTone.value = mode;
+        u.value.value = v;
+        renderer.setRenderTarget(rt);
+        renderer.render(probe, camera);
+        renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buf);
+        results.push({
+          mode,
+          input: v,
+          output: buf[0],
+          pass: Math.abs(buf[0] - (mode ? githubCloudOpacity(v) : v)) < 1e-6,
+        });
+      }
+    uniforms.cloudTone.value = 1;
+    for (const mode of ['shell', 'volume']) {
+      document.getElementById('cloud').value = mode;
+      render();
+      results.push({ mode, pass: errors.length === 0 });
+    }
+    return { results, shaderErrors: errors };
+  } finally {
+    uniforms.cloudTone.value = 0;
+    document.getElementById('cloud').value = 'shell';
+    renderer.setRenderTarget(null);
+    rt.dispose();
+    m.dispose();
+    quad.geometry.dispose();
+    render();
+  }
 };
 
-window.checkSolarMapping=()=>{
- const u=hdr.material.uniforms,saved=Object.fromEntries(Object.entries(u).map(([k,v])=>[k,v.value]));
- const tex=new THREE.DataTexture(new Float32Array([.3,.04,.01,1]),1,1,THREE.RGBAFormat,THREE.FloatType);tex.needsUpdate=true;
- const gl=renderer.getContext(),pixel=()=>{renderer.setRenderTarget(null);renderer.render(hdr.scene,hdr.camera);const a=new Uint8Array(4);gl.readPixels(400,280,1,1,gl.RGBA,gl.UNSIGNED_BYTE,a);return [...a].slice(0,3);};
- const results=[];
- try{
-  u.frame.value=tex;u.sunGlow.value=new THREE.Vector3(.001,.001,.001);u.sunPosition.value=new THREE.Vector2(.5,.5);u.sunRadius.value=.1;u.sunOcclusionProbe.value=0;u.sunViewRays.value=new THREE.Matrix3();
-  u.sunEarthDisc.value=new THREE.Vector4(0,0,1,-1);u.sunMoonDisc.value=new THREE.Vector4(0,0,1,-1);
-  u.sunTwilight.value=0;const original=pixel();u.sunTwilight.value=1;const clear=pixel();
-  for(const body of ['sunEarthDisc','sunMoonDisc']){u[body].value.w=.01;const covered=pixel();results.push({body,original,clear,covered,pass:covered.every((v,i)=>Math.abs(v-original[i])<=1)&&clear.some((v,i)=>Math.abs(v-covered[i])>10)});u[body].value.w=-1;}
-  u.sunPosition.value.set(-5,-5);const offscreen=pixel();results.push({name:'offscreen Sun leaves background mapping intact',pass:offscreen.every((v,i)=>Math.abs(v-original[i])<=1)});
-  return {results,shaderErrors:errors};
- }finally{for(const [k,v] of Object.entries(saved))u[k].value=v;tex.dispose();render();}
+window.checkSolarMapping = () => {
+  const u = hdr.material.uniforms,
+    saved = Object.fromEntries(Object.entries(u).map(([k, v]) => [k, v.value]));
+  const tex = new THREE.DataTexture(
+    new Float32Array([0.3, 0.04, 0.01, 1]),
+    1,
+    1,
+    THREE.RGBAFormat,
+    THREE.FloatType
+  );
+  tex.needsUpdate = true;
+  const gl = renderer.getContext(),
+    pixel = () => {
+      renderer.setRenderTarget(null);
+      renderer.render(hdr.scene, hdr.camera);
+      const a = new Uint8Array(4);
+      gl.readPixels(400, 280, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, a);
+      return [...a].slice(0, 3);
+    };
+  const results = [];
+  try {
+    u.frame.value = tex;
+    u.sunGlow.value = new THREE.Vector3(0.001, 0.001, 0.001);
+    u.sunPosition.value = new THREE.Vector2(0.5, 0.5);
+    u.sunRadius.value = 0.1;
+    u.sunOcclusionProbe.value = 0;
+    u.sunViewRays.value = new THREE.Matrix3();
+    u.sunEarthDisc.value = new THREE.Vector4(0, 0, 1, -1);
+    u.sunMoonDisc.value = new THREE.Vector4(0, 0, 1, -1);
+    u.sunTwilight.value = 0;
+    const original = pixel();
+    u.sunTwilight.value = 1;
+    const clear = pixel();
+    for (const body of ['sunEarthDisc', 'sunMoonDisc']) {
+      u[body].value.w = 0.01;
+      const covered = pixel();
+      results.push({
+        body,
+        original,
+        clear,
+        covered,
+        pass:
+          covered.every((v, i) => Math.abs(v - original[i]) <= 1) &&
+          clear.some((v, i) => Math.abs(v - covered[i]) > 10),
+      });
+      u[body].value.w = -1;
+    }
+    u.sunPosition.value.set(-5, -5);
+    const offscreen = pixel();
+    results.push({
+      name: 'offscreen Sun leaves background mapping intact',
+      pass: offscreen.every((v, i) => Math.abs(v - original[i]) <= 1),
+    });
+    return { results, shaderErrors: errors };
+  } finally {
+    for (const [k, v] of Object.entries(saved)) u[k].value = v;
+    tex.dispose();
+    render();
+  }
 };
 
 // Actual downloaded texture inspection: 8K source pixels, one frame at 400 km.
-window.loadCloudInspection=async(url,mode='volume',repaired=false,latitude=-6.67,longitude=146.27,altitude=400)=>{
- const blob=await (await fetch(url)).blob(),start=performance.now();
- let tex;
- if(repaired){tex=await Weather.prototype.texture.call({env:{quality:'high',api:{renderer}}},{kind:'cloud',blob,provider:'github',channel:'alpha'});}else{
- const bitmap=await createImageBitmap(blob,{imageOrientation:'flipY',premultiplyAlpha:'none',colorSpaceConversion:'none'});
- tex=new THREE.Texture(bitmap);tex.flipY=false;tex.colorSpace=THREE.NoColorSpace;tex.wrapS=THREE.RepeatWrapping;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();tex.needsUpdate=true;}
- window.reviewCloudTexture?.dispose();window.reviewCloudTexture?.image?.close?.();
- window.reviewCloudTexture=tex;
- uniforms.cloudMap.value=tex;uniforms.cloudChannel.value=tex.userData.cloudChannel??1;uniforms.cloudTone.value=tex.userData.cloudTone??1;$('sun').value='45';$('cloud').value=mode;render();
- const lat=latitude*Math.PI/180,lon=longitude*Math.PI/180,n=new THREE.Vector3(Math.cos(lat)*Math.cos(lon),Math.cos(lat)*Math.sin(lon),Math.sin(lat)),q=new THREE.Quaternion().setFromUnitVectors(n,new THREE.Vector3(0,0,1));
- for(const o of scene.children)if(o.isMesh&&o!==sunView.mesh)o.quaternion.copy(q);
- uniforms.earthInverse.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(q).invert());uniforms.localSun.value=sun.clone().applyQuaternion(q.clone().invert());
- camera.position.set(0,0,6371+altitude);camera.up.set(0,1,0);camera.lookAt(0,0,6371);
- window.drawCloudInspection=()=>{hdr.begin();renderer.render(scene,camera);hdr.finish();};drawCloudInspection();
- return {width:tex.image.width,height:tex.image.height,milliseconds:performance.now()-start,shaderErrors:errors};
+window.loadCloudInspection = async (
+  url,
+  mode = 'volume',
+  repaired = false,
+  latitude = -6.67,
+  longitude = 146.27,
+  altitude = 400
+) => {
+  const blob = await (await fetch(url)).blob(),
+    start = performance.now();
+  let tex;
+  if (repaired) {
+    tex = await Weather.prototype.texture.call(
+      { env: { quality: 'high', api: { renderer } } },
+      { kind: 'cloud', blob, provider: 'github', channel: 'alpha' }
+    );
+  } else {
+    const bitmap = await createImageBitmap(blob, {
+      imageOrientation: 'flipY',
+      premultiplyAlpha: 'none',
+      colorSpaceConversion: 'none',
+    });
+    tex = new THREE.Texture(bitmap);
+    tex.flipY = false;
+    tex.colorSpace = THREE.NoColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.needsUpdate = true;
+  }
+  window.reviewCloudTexture?.dispose();
+  window.reviewCloudTexture?.image?.close?.();
+  window.reviewCloudTexture = tex;
+  uniforms.cloudMap.value = tex;
+  uniforms.cloudChannel.value = tex.userData.cloudChannel ?? 1;
+  uniforms.cloudTone.value = tex.userData.cloudTone ?? 1;
+  $('sun').value = '45';
+  $('cloud').value = mode;
+  render();
+  const lat = (latitude * Math.PI) / 180,
+    lon = (longitude * Math.PI) / 180,
+    n = new THREE.Vector3(
+      Math.cos(lat) * Math.cos(lon),
+      Math.cos(lat) * Math.sin(lon),
+      Math.sin(lat)
+    ),
+    q = new THREE.Quaternion().setFromUnitVectors(n, new THREE.Vector3(0, 0, 1));
+  for (const o of scene.children) if (o.isMesh && o !== sunView.mesh) o.quaternion.copy(q);
+  uniforms.earthInverse.value.setFromMatrix4(
+    new THREE.Matrix4().makeRotationFromQuaternion(q).invert()
+  );
+  uniforms.localSun.value = sun.clone().applyQuaternion(q.clone().invert());
+  camera.position.set(0, 0, 6371 + altitude);
+  camera.up.set(0, 1, 0);
+  camera.lookAt(0, 0, 6371);
+  window.drawCloudInspection = () => {
+    hdr.begin();
+    renderer.render(scene, camera);
+    hdr.finish();
+  };
+  drawCloudInspection();
+  return {
+    width: tex.image.width,
+    height: tex.image.height,
+    milliseconds: performance.now() - start,
+    shaderErrors: errors,
+  };
 };
 
-window.checkCloudRequestCoalescing=async()=>{
- const apply=Weather.prototype.apply,record={id:'test-cloud',kind:'cloud',provider:'github',downloaded:1,time:Date.now()};let calls=0,disposed=0,complete;
- const fake={settings:{cloud:'latest'},items:[record],sim:{time:Date.now()},env:{quality:'high'},tokens:{cloud:0},active:{},status(){},render(){},bindCloud(){},release(){this.active.cloud=null;},texture(){calls++;return new Promise(resolve=>{complete=()=>resolve({dispose(){disposed++;},image:{}});});}};
- const jobs=[apply.call(fake,'cloud'),apply.call(fake,'cloud'),apply.call(fake,'cloud')];complete();await Promise.all(jobs);
- const shared=calls===1&&fake.active.cloud===record.id;
- fake.active.cloud=null;const pending=apply.call(fake,'cloud');fake.settings.cloud='builtin';await apply.call(fake,'cloud');complete();await pending;
- const cancelled=fake.active.cloud===null&&disposed===1;
- fake.settings.cloud='latest';const old=apply.call(fake,'cloud'),finishOld=complete;++fake.tokens.cloud;const newer=apply.call(fake,'cloud'),finishNew=complete;finishOld();finishNew();await Promise.all([old,newer]);
- return {shared,cancelled,invalidatedReload:calls===4&&fake.active.cloud===record.id,requestsCleared:!fake.pendingApply.cloud};
+window.checkCloudRequestCoalescing = async () => {
+  const apply = Weather.prototype.apply,
+    record = {
+      id: 'test-cloud',
+      kind: 'cloud',
+      provider: 'github',
+      downloaded: 1,
+      time: Date.now(),
+    };
+  let calls = 0,
+    disposed = 0,
+    complete;
+  const fake = {
+    settings: { cloud: 'latest' },
+    items: [record],
+    sim: { time: Date.now() },
+    env: { quality: 'high' },
+    tokens: { cloud: 0 },
+    active: {},
+    status() {},
+    render() {},
+    bindCloud() {},
+    release() {
+      this.active.cloud = null;
+    },
+    texture() {
+      calls++;
+      return new Promise((resolve) => {
+        complete = () =>
+          resolve({
+            dispose() {
+              disposed++;
+            },
+            image: {},
+          });
+      });
+    },
+  };
+  const jobs = [apply.call(fake, 'cloud'), apply.call(fake, 'cloud'), apply.call(fake, 'cloud')];
+  complete();
+  await Promise.all(jobs);
+  const shared = calls === 1 && fake.active.cloud === record.id;
+  fake.active.cloud = null;
+  const pending = apply.call(fake, 'cloud');
+  fake.settings.cloud = 'builtin';
+  await apply.call(fake, 'cloud');
+  complete();
+  await pending;
+  const cancelled = fake.active.cloud === null && disposed === 1;
+  fake.settings.cloud = 'latest';
+  const old = apply.call(fake, 'cloud'),
+    finishOld = complete;
+  ++fake.tokens.cloud;
+  const newer = apply.call(fake, 'cloud'),
+    finishNew = complete;
+  finishOld();
+  finishNew();
+  await Promise.all([old, newer]);
+  return {
+    shared,
+    cancelled,
+    invalidatedReload: calls === 4 && fake.active.cloud === record.id,
+    requestsCleared: !fake.pendingApply.cloud,
+  };
 };
 
 // Exercise actual GLSL detail weights in a float target, including partial-load
 // corners. Constant white details over black make the readback equal the weight.
-window.runDetailEdgeGPUCheck=()=>{
- const u={...uniforms,testUV:{value:new THREE.Vector2()}},results=[];
- for(let i=0;i<4;i++){
-  u['detailMap'+i]={value:white};u['detailRect'+i]={value:new THREE.Vector4()};u['detailFade'+i]={value:0};
- }
- const head=earthFragment.split('void main(){vec3 n=normalize(worldN)')[0];
- const material=new THREE.ShaderMaterial({uniforms:u,toneMapped:false,vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:head+`uniform vec2 testUV;
+window.runDetailEdgeGPUCheck = () => {
+  const u = { ...uniforms, testUV: { value: new THREE.Vector2() } },
+    results = [];
+  for (let i = 0; i < 4; i++) {
+    u['detailMap' + i] = { value: white };
+    u['detailRect' + i] = { value: new THREE.Vector4() };
+    u['detailFade' + i] = { value: 0 };
+  }
+  const head = earthFragment.split('void main(){vec3 n=normalize(worldN)')[0];
+  const material = new THREE.ShaderMaterial({
+    uniforms: u,
+    toneMapped: false,
+    vertexShader: 'void main(){gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader:
+      head +
+      `uniform vec2 testUV;
  void main(){vec3 c=vec3(0.);vec2 dx=vec2(.001,0.),dy=vec2(0.,.001);
  c=sampleDetail(detailMap0,detailRect0,detailFade0,testUV,dx,dy,c,false);
  c=sampleDetail(detailMap1,detailRect1,detailFade1,testUV,dx,dy,c,false);
  c=sampleDetail(detailMap2,detailRect2,detailFade2,testUV,dx,dy,c,false);
  c=sampleDetail(detailMap3,detailRect3,detailFade3,testUV,dx,dy,c,false);
- gl_FragColor=vec4(c,1.);}`});
- const rt=new THREE.WebGLRenderTarget(1,1,{type:THREE.FloatType,depthBuffer:false});
- const probe=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material),buffer=new Float32Array(4);quad.frustumCulled=false;probe.add(quad);
- const setup=(columns,rows,fades,wrap=false)=>{
-  const left=wrap?columns-1:3,right=wrap?0:4;
-  [[left,3],[right,3],[left,2],[right,2]].forEach(([x,y],i)=>{u['detailRect'+i].value.set(x/columns,y/rows,1/columns,1/rows);u['detailFade'+i].value=fades[i];});
-  return [wrap?0:4/columns,3/rows];
- };
- const sample=(x,y)=>{u.testUV.value.set(x,y);renderer.setRenderTarget(rt);renderer.render(probe,camera);renderer.readRenderTargetPixels(rt,0,0,1,1,buffer);return buffer[0];};
- try{
-  for(const [columns,rows] of [[12,6],[24,12]])for(const wrap of [false,true]){
-   for(const fades of [[1,1,1,1],[1,.2,.6,.8],[1,1,1,0]]){
-    const [x,y]=setup(columns,rows,fades,wrap),expected=fades.reduce((a,b)=>a*b,1),values=[];
-    for(const sx of [-1,1])for(const sy of [-1,1])values.push(sample((x+sx*1e-6+1)%1,y+sy*1e-6));
-    const pass=values.every(v=>Math.abs(v-expected)<.0001);
-    results.push({name:`GLSL ${columns}x${rows} ${wrap?'date line':'corner'} ${fades}`,pass,expected,values});
-    if(!pass)throw Error('Detail corner readback is discontinuous');
-   }
+ gl_FragColor=vec4(c,1.);}`,
+  });
+  const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.FloatType, depthBuffer: false });
+  const probe = new THREE.Scene(),
+    quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material),
+    buffer = new Float32Array(4);
+  quad.frustumCulled = false;
+  probe.add(quad);
+  const setup = (columns, rows, fades, wrap = false) => {
+    const left = wrap ? columns - 1 : 3,
+      right = wrap ? 0 : 4;
+    [
+      [left, 3],
+      [right, 3],
+      [left, 2],
+      [right, 2],
+    ].forEach(([x, y], i) => {
+      u['detailRect' + i].value.set(x / columns, y / rows, 1 / columns, 1 / rows);
+      u['detailFade' + i].value = fades[i];
+    });
+    return [wrap ? 0 : 4 / columns, 3 / rows];
+  };
+  const sample = (x, y) => {
+    u.testUV.value.set(x, y);
+    renderer.setRenderTarget(rt);
+    renderer.render(probe, camera);
+    renderer.readRenderTargetPixels(rt, 0, 0, 1, 1, buffer);
+    return buffer[0];
+  };
+  try {
+    for (const [columns, rows] of [
+      [12, 6],
+      [24, 12],
+    ])
+      for (const wrap of [false, true]) {
+        for (const fades of [
+          [1, 1, 1, 1],
+          [1, 0.2, 0.6, 0.8],
+          [1, 1, 1, 0],
+        ]) {
+          const [x, y] = setup(columns, rows, fades, wrap),
+            expected = fades.reduce((a, b) => a * b, 1),
+            values = [];
+          for (const sx of [-1, 1])
+            for (const sy of [-1, 1]) values.push(sample((x + sx * 1e-6 + 1) % 1, y + sy * 1e-6));
+          const pass = values.every((v) => Math.abs(v - expected) < 0.0001);
+          results.push({
+            name: `GLSL ${columns}x${rows} ${wrap ? 'date line' : 'corner'} ${fades}`,
+            pass,
+            expected,
+            values,
+          });
+          if (!pass) throw Error('Detail corner readback is discontinuous');
+        }
+      }
+    results.push({ name: 'detail shaders compile', pass: errors.length === 0 });
+  } catch (error) {
+    results.push({ error: error.message });
+  } finally {
+    renderer.setRenderTarget(null);
+    rt.dispose();
+    material.dispose();
+    quad.geometry.dispose();
+    render();
   }
-  results.push({name:'detail shaders compile',pass:errors.length===0});
- }catch(error){results.push({error:error.message});}
- finally{renderer.setRenderTarget(null);rt.dispose();material.dispose();quad.geometry.dispose();render();}
- return {results,shaderErrors:[...errors]};
+  return { results, shaderErrors: [...errors] };
 };

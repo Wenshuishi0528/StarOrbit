@@ -71,7 +71,15 @@ assert(
   'ground pose matches renderer sphere plus measured altitude'
 );
 for (const key of [
-  'sharedLocalMesh','viewTerrainOnly','geographyLocal','realSun','scopeSources','separateDepth','restoresDisplay','survivingGeometry','finalPatchRelease',
+  'sharedLocalMesh',
+  'viewTerrainOnly',
+  'geographyLocal',
+  'realSun',
+  'scopeSources',
+  'separateDepth',
+  'restoresDisplay',
+  'survivingGeometry',
+  'finalPatchRelease',
   'cloudAfterAir',
   'finiteCloudPath',
   'hostCloudDepth',

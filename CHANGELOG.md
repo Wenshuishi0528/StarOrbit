@@ -1,6 +1,10 @@
 # Changelog / 更新记录
 
-## v1.69 · 2026-11-25 · 本机版 / Local build
+## v1.69 · 2026-11-27
+
+合并公开 v1.67 的按需加载和舱段标签避让，统一发布普通版与专业版。
+
+This release combines the public viewer’s on-demand loading and label placement with StarOrbit Pro.
 
 专业版加入 24 小时湖泊观测任务。可比较原图直传与在轨筛选的有效交付、电量和温度，逐张回放曝光、处理、断点续传与未交付原因，导出影像记录 CSV。几何窗口与逐图记录经独立复算，Windows 205 项默认回归通过。[本机验收](docs/verification.md#v169-观测与数传)
 
@@ -17,6 +21,12 @@ StarOrbit Pro adds OEM propagation and replay, optional drag, solar radiation pr
 专业版新增独立离线入口，可编辑近地卫星与两套任务、联算一天的轨道电量和温度、对比结果及三维回放越限现场。提供版本化 JSON 和命令行接口。[验证记录](docs/verification.md#v167-专业版)。
 
 StarOrbit Pro adds a standalone offline entry for configuring one LEO spacecraft, comparing two 24-hour orbit, power and thermal plans, and replaying excursions in 3D. Versioned JSON and a local CLI support integration.
+
+## v1.67 · 2026-11-23
+
+主画面默认开启星图标注，已有浏览器升级时也会开启一次。舱段名称自动错开，不再互相重叠或压在读数卡片和轨道地图上。网页版和本机版的入口及静态依赖合计约 7.33 MB，地理图集、中国星官、哈勃图集、俄法语言包、帮助手册和任务实验室各页按需加载。星表加载期间，世界视图保留最后一次选择。便携单文件版仍全部内置。开发侧：测试改为并行运行并汇总全部失败，Python 测试使用项目自带的 `.venv`；新增 ESLint；时间推进统一由 `sim-clock.js` 处理。验证见[验证记录](docs/verification.md#v167-按需加载与标签避让)。
+
+The main view now shows star chart labels by default, including once for existing browsers. Spacecraft module labels move aside instead of overlapping each other, the readout card or the orbit map. The web and local entry script and its static dependencies total about 7.33 MB. The geographic atlas, Chinese sky data, Hubble archive, Russian and French translations, help manuals and lab tabs load on demand. The world view honors the latest selection while the star catalogue loads. The portable single file still embeds everything. For developers: tests run in parallel and report every failure, Python tests use the project `.venv`, ESLint is added, and simulated time is advanced through `sim-clock.js`.
 
 ## v1.66 · 2026-11-22
 

@@ -3,6 +3,7 @@ import { syncGeographyControls } from './geography-settings.js';
 import { syncStarChartControls } from './star-chart-settings.js';
 import { t, setText } from './i18n.js';
 import { SCENE_FORMAT, MAX_SCENE_BYTES, DISPLAY_KEYS, validateScene } from './scene-format.js';
+import { resumeClock } from './sim-clock.js';
 
 const $ = (id) => document.getElementById(id);
 export const cameraState = (camera, controls) => ({
@@ -92,6 +93,9 @@ export function installSceneShare(sim, replaceAssembly) {
     try {
       await Promise.all([env.ready, weather.ready]);
       if (weather.busy) throw Error('数据正在更新，请稍后导入场景');
+      // The scene's sky culture is shown only with its data: load it before
+      // changing anything, so a failed load leaves the live scene intact.
+      await env.loadSkyCulture(scene.environment.skyCulture);
       // Persist the small orbit snapshot so a reload keeps the shared time valid.
       await sim.missions.switchTo(scene.mission.id, { fromScene: true });
       const record = scene.orbit
@@ -139,6 +143,8 @@ export function installSceneShare(sim, replaceAssembly) {
       Object.assign(env.settings, scene.environment, {
         webbBackground: scene.environment.webbBackground ?? 'galaxy',
       });
+      // Supersede any culture still loading from an earlier choice.
+      env.selectSkyCulture(env.settings.skyCulture);
       env.skyDetail.setArtwork(scene.environment.skyArtworkId || null);
       env.save();
       for (const [key, id] of Object.entries({
@@ -189,7 +195,7 @@ export function installSceneShare(sim, replaceAssembly) {
       sim.dirty = true;
       sim.snap = false;
       sim.inputDirty = false;
-      sim.lastWall = performance.now();
+      resumeClock(sim);
       sim.timeUI();
       sim.controlUI();
       api.resize();

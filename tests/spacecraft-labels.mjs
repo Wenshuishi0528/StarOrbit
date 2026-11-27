@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { spacecraftLabelNames } from '../src/spacecraft-labels.js';
+import { focusedLabelId } from '../src/spacecraft-label-layout.js';
+import { createSpacecraftLabelPlacer } from '../src/spacecraft-label-placer.js';
 
 const instances = [
   { id: 'TH', type: 'TH', name: '天和核心舱', visible: true },
@@ -73,6 +75,9 @@ const context = {
   requestAnimationFrame() {},
   document: { hidden: false },
   resize() {},
+  // No full-screen view or dialog is active: the orbital main view owns the frame.
+  frameOwners: [],
+  resumeClock() {},
   last: 1000,
   sim: {
     initialized: true,
@@ -102,6 +107,9 @@ const context = {
   ),
   instanceName: (id) => instances.find((item) => item.id === id).name,
   spacecraftLabelNames,
+  focusedLabelId,
+  stationTagPlacer: createSpacecraftLabelPlacer(),
+  getLanguage: () => 'en',
   $: () => ({ checked: labelsEnabled }),
   t: (key) => `en:${key}`,
   camera: {},
@@ -114,6 +122,13 @@ assert.equal(drawWall, 1234);
 assert.equal(tags.freeXT.el.textContent, 'en:巡天望远镜');
 assert.equal(tags.TH.el.textContent, 'en:中国空间站');
 assert.equal(tags.TH_WENTIAN.el.style.display, 'none');
+// Both remaining labels share one projected anchor: the focused telescope keeps
+// it, and the station label moves aside instead of being drawn on top.
+assert.equal(tags.freeXT.el.style.display, 'block');
+assert.equal(tags.freeXT.el.style.left, '400px');
+assert.equal(tags.freeXT.el.style.top, '300px');
+assert.equal(tags.TH.el.style.display, 'block');
+assert.notEqual(`${tags.TH.el.style.left},${tags.TH.el.style.top}`, '400px,300px');
 labelsEnabled = false;
 runInNewContext(`${tickSource}\ntick(1250);`, context);
 assert.equal(renderCount, 2);

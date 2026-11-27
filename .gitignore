@@ -19,3 +19,4 @@ __pycache__/
 
 # Separate historical showcase checkout; keep its Git history outside this repository.
 /publish/
+.venv/

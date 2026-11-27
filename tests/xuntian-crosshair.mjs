@@ -10,14 +10,22 @@ import { solarApparent } from '../src/solar-system.js';
 import { DEEP_SKY_OBJECTS } from '../src/deep-sky-catalog.js';
 
 const bundle = await build({
-  entryPoints: [fileURLToPath(new URL('../src/xuntian-crosshair.js', import.meta.url))],
+  stdin: {
+    contents:
+      "export * from './src/xuntian-crosshair.js'; export { ensureSkyCulture } from './src/sky-cultures.js';",
+    resolveDir: fileURLToPath(new URL('..', import.meta.url)),
+  },
   bundle: true,
   platform: 'node',
   format: 'esm',
   write: false,
   logLevel: 'silent',
 });
-const { identifyXuntianCrosshair: identify, crosshairTolerance: tolerance } = await import(
+const {
+  identifyXuntianCrosshair: identify,
+  crosshairTolerance: tolerance,
+  ensureSkyCulture,
+} = await import(
   'data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].contents).toString('base64')
 );
 const catalog = JSON.parse(
@@ -54,11 +62,18 @@ near(ground.distanceKm, 405);
 assert.equal(ground.city.id, 'city:beijing');
 const raisedGround = { ...ground, distanceKm: 403, elevationMeters: 2000 };
 assert.equal(identify(frame(eye, cityRay), { groundSurface: raisedGround }).elevationMeters, 2000);
-assert.notEqual(identify(frame(eye, cityRay), { groundSurface: null }).kind, 'earth',
-  'an explicit terrain miss must not be replaced by the old sphere');
-assert.equal(identify(frame(eye, cityRay), {
-  surface: { kind: 'station', distanceKm: 0.03 }, groundSurface: null,
-}).kind, 'station');
+assert.notEqual(
+  identify(frame(eye, cityRay), { groundSurface: null }).kind,
+  'earth',
+  'an explicit terrain miss must not be replaced by the old sphere'
+);
+assert.equal(
+  identify(frame(eye, cityRay), {
+    surface: { kind: 'station', distanceKm: 0.03 },
+    groundSurface: null,
+  }).kind,
+  'station'
+);
 near(ground.city.distanceKm, 0, 1e-6);
 assert.equal(finder.nearest(city.latitude, city.longitude, 'fr').name, 'Pékin');
 assert.equal(
@@ -112,7 +127,10 @@ const exact = frame(starEye, starDirection),
 assert.equal(star.id, 'hip:91262');
 assert.equal(star.name, '织女星');
 assert.equal(star.kind, 'star');
-assert(star.distanceLightYears > 24 && star.distanceLightYears < 26, 'Vega uses its measured parallax distance');
+assert(
+  star.distanceLightYears > 24 && star.distanceLightYears < 26,
+  'Vega uses its measured parallax distance'
+);
 assert(star.distanceRelativeError > 0 && star.distanceRelativeError <= 0.1);
 assert.equal(star.distanceSource, 'hipparcos-2007');
 assert.equal(JSON.stringify(exact), saved, 'identification must not mutate pointing');
@@ -261,15 +279,28 @@ const imageHit = identify(
 assert.equal(imageHit.id, 'deep-sky:jwst-carina-2022');
 assert.equal(imageHit.imageField, true);
 assert.equal(imageHit.regionOnly, true);
-for (const [id, name] of [['M44','积尸'],['NGC6231','神宫'],['M7','鱼']]) {
-  const object = DEEP_SKY_OBJECTS.find(item => item.id === id);
+// The Chinese culture is selected only after its catalogue has loaded.
+await ensureSkyCulture('chinese');
+for (const [id, name] of [
+  ['M44', '积尸'],
+  ['NGC6231', '神宫'],
+  ['M7', '鱼'],
+]) {
+  const object = DEEP_SKY_OBJECTS.find((item) => item.id === id);
   assert(object, id);
-  const hit = identify(frame(object.direction.map(value => value * (EARTH_RADIUS + 405)), object.direction, {
-    fovY: 0.01,
-    chartSettings: {skyCulture:'chinese',deepSkyObjects:true,deepSkyScope:'all'},
-  }), {limitMagnitude:-100});
-  assert.equal(hit.name,name,`Chinese single-cluster asterism ${id}`);
-  assert.equal(hit.id,'deep-sky:'+id.toLowerCase());
+  const hit = identify(
+    frame(
+      object.direction.map((value) => value * (EARTH_RADIUS + 405)),
+      object.direction,
+      {
+        fovY: 0.01,
+        chartSettings: { skyCulture: 'chinese', deepSkyObjects: true, deepSkyScope: 'all' },
+      }
+    ),
+    { limitMagnitude: -100 }
+  );
+  assert.equal(hit.name, name, `Chinese single-cluster asterism ${id}`);
+  assert.equal(hit.id, 'deep-sky:' + id.toLowerCase());
 }
 console.log(
   'Crosshair identification: actual optical entrance, Earth/station occlusion, bounded nearby cities/date-line distance, exposure-aware HIP names, pixel/FOV tolerance, immutable pointing, solar bodies and deep-sky targets passed.'

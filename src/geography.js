@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import data from '../assets/geography/atlas.json';
+import { geographyAtlas, loadGeographyAtlas } from './geography-atlas.js';
 import { geographicVector, GeographyIndex } from './geography-math.js';
 import { cityLabelEnabled } from './geography-settings.js';
 import { placeSkyLabels } from './star-chart-math.js';
@@ -86,11 +86,9 @@ export class Geography {
     this.group = new THREE.Group();
     this.group.visible = false;
     env.earth.add(this.group);
-    this.items = data.labels.map((p) => ({
-      ...p,
-      key: p.id,
-      position: new THREE.Vector3(...geographicVector(p.lon, p.lat)),
-    }));
+    // 地名图集按需加载：加载前 items 为空数组，加载后整体替换。
+    this.data = null;
+    this.items = [];
     this.shown = new Map();
     this.glyphs = new Map();
     this.lines = {};
@@ -108,6 +106,41 @@ export class Geography {
       clock: { value: 0 },
     };
     this.stats = { layouts: 0, uploads: 0, atlasBuilds: 0, lookups: 0, visible: 0, candidates: 0 };
+  }
+  // 同步取用已加载的图集；未加载时在后台开始加载并返回 false。
+  syncAtlas() {
+    if (this.data) return true;
+    const data = geographyAtlas();
+    if (!data || this.disposed) return false;
+    this.data = data;
+    this.items = data.labels.map((p) => ({
+      ...p,
+      key: p.id,
+      position: new THREE.Vector3(...geographicVector(p.lon, p.lat)),
+    }));
+    return true;
+  }
+  get ready() {
+    return !!this.data;
+  }
+  // 城市检索等功能使用：返回当前地名（未加载时为空），并按需开始加载图集。
+  places() {
+    this.syncAtlas();
+    return this.items;
+  }
+  // 等待图集加载完成后返回地名；失败时记录错误并返回当前（可能为空的）地名。
+  load() {
+    if (this.syncAtlas()) return Promise.resolve(this.items);
+    return loadGeographyAtlas().then(
+      () => {
+        this.syncAtlas();
+        return this.items;
+      },
+      (error) => {
+        console.error('地理图集加载失败', error);
+        return this.items;
+      }
+    );
   }
   ensureGeometry() {
     if (this.labels) return;
@@ -132,7 +165,7 @@ export class Geography {
   ensureLines(tier) {
     if (this.lineTier === tier) return;
     this.lineTier = tier;
-    for (const key of Object.keys(data.lines)) {
+    for (const key of Object.keys(this.data.lines)) {
       const color = ['rivers', 'lakes'].includes(key)
         ? '#8cd9f7'
         : key === 'china' || key === 'offshore'
@@ -164,7 +197,10 @@ export class Geography {
         this.lines[key] = line;
       }
       this.lines[key].geometry.dispose();
-      this.lines[key].geometry = lineGeometry(data.lines[key][tier], this.options.surfaceHeight);
+      this.lines[key].geometry = lineGeometry(
+        this.data.lines[key][tier],
+        this.options.surfaceHeight
+      );
     }
   }
   ensureAtlas(language) {
@@ -217,15 +253,15 @@ export class Geography {
     this.lastKey = '';
     this.stats.atlasBuilds++;
   }
-  updateLocation(q, now, language) {
+  updateLocation(q, now, language, ready) {
     const el = document.getElementById('minimapLocation'),
-      active = this.env.settings.geographyEnabled && this.env.settings.geoLocation && q;
+      active = ready && this.env.settings.geoLocation && q;
     el.hidden = !active;
     if (!active) return;
     const positionKey = q.latitude.toFixed(4) + '|' + q.longitude.toFixed(4);
     if (language === this.locationLanguage && positionKey === this.locationKey) return;
     if (language === this.locationLanguage && now - this.lastLocation < 0.35) return;
-    this.index ??= new GeographyIndex(data);
+    this.index ??= new GeographyIndex(this.data);
     this.location = this.index.locate(q.longitude, q.latitude);
     this.stats.lookups++;
     this.lastLocation = now;
@@ -245,8 +281,10 @@ export class Geography {
     const s = this.env.settings,
       now = performance.now() / 1000,
       language = getLanguage();
-    if (!this.options.worldView) this.updateLocation(q, now, language);
-    this.group.visible = !!s.geographyEnabled && !!q;
+    // 打开地理标注时才请求图集；加载完成前标注和位置提示保持隐藏，不阻塞渲染。
+    const ready = !!s.geographyEnabled && this.syncAtlas();
+    if (!this.options.worldView) this.updateLocation(q, now, language, ready);
+    this.group.visible = ready && !!q;
     const follow = this.env.sim.view === 'follow',
       records = this.env.sim.shadowCache.records;
     if ((!this.group.visible || !follow) && this.modelSource) {
@@ -414,6 +452,7 @@ export class Geography {
     this.upload();
   }
   dispose() {
+    this.disposed = true;
     this.group.removeFromParent();
     this.group.traverse((object) => {
       object.geometry?.dispose();

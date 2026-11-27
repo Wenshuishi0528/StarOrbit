@@ -2,6 +2,7 @@ import { validTime } from './orbit.js';
 import { DEFAULT_MISSION } from './missions.js';
 import { MISSION_MEMORY_KEY } from './mission-controller.js';
 import { setText } from './i18n.js';
+import { invalidate, resumeClock } from './sim-clock.js';
 const KEY = 'tiangong-session-v1';
 const $ = (id) => document.getElementById(id);
 const legacyDetailKeys = [
@@ -127,9 +128,8 @@ export async function installSessionMemory(sim, assembly) {
     for (const id of ['environmentPresetName', 'environmentPresets', 'sceneName'])
       if (typeof saved.fields?.[id] === 'string') $(id).value = saved.fields[id];
   }
-  sim.dirty = true;
-  sim.snap = true;
-  sim.lastWall = performance.now();
+  invalidate(sim);
+  resumeClock(sim);
   sim.timeUI();
   sim.controlUI();
   sim.missions?.syncUI();

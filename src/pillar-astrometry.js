@@ -5,8 +5,8 @@ const fields = {
     // This Zoomify pyramid is upside down relative to the published AVM frame.
     // Three independent Pan-STARRS DR2 sources locate the native tiles on sky.
     published: [
-      1706, 1706, 1706, 1706, 175.201450944, -26.4856830717, 853, 853,
-      6.90973302554452e-6, 6.045233077258017e-7, 6.045233077258017e-7, -6.90973302554452e-6, 70,
+      1706, 1706, 1706, 1706, 175.201450944, -26.4856830717, 853, 853, 6.90973302554452e-6,
+      6.045233077258017e-7, 6.045233077258017e-7, -6.90973302554452e-6, 70,
     ],
     halfTurn: true,
   },

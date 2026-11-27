@@ -1972,6 +1972,9 @@ export class Weather {
   async restorePreset() {
     const p = this.presets()[Number($('environmentPresets').value)];
     if (!p) return;
+    // Load the preset's sky culture before changing the scene; a failed load
+    // leaves everything as it was.
+    await this.env.loadSkyCulture(normalizeStarChartSettings(p.environment).skyCulture);
     await this.sim.missions.switchTo(p.missionId || DEFAULT_MISSION, { fromScene: true });
     this.sim.missions.state.rotation = validateRotation(p.rotation, p.time, {
       enabled: !!mission(this.sim.missionId).spinRpm,
@@ -2024,6 +2027,7 @@ export class Weather {
       normalizeStarChartSettings(p.environment),
       normalizeGeographySettings(p.environment)
     );
+    this.env.selectSkyCulture(this.env.settings.skyCulture);
     this.env.save();
     await this.env.setQuality(p.environment.quality);
     await this.env.setSkyStyle();

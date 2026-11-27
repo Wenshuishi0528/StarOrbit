@@ -773,18 +773,20 @@ export function mountPassPanel(container, sim) {
     }
     const pass = result.passes[selected];
     if (!pass) return;
-    sim.flightLab.openBalcony({
-      observer: result.observer,
-      pass,
-      data: identity.data,
-      missionId: identity.missionId,
-      time: at ?? previewTime,
-      profile: horizon.points,
-      profileKind: horizon.kind,
-      minimumElevation: result.minimumElevation,
-      watch,
-      replay: pass.end < Date.now(),
-    });
+    sim.flightLab
+      .openBalcony({
+        observer: result.observer,
+        pass,
+        data: identity.data,
+        missionId: identity.missionId,
+        time: at ?? previewTime,
+        profile: horizon.points,
+        profileKind: horizon.kind,
+        minimumElevation: result.minimumElevation,
+        watch,
+        replay: pass.end < Date.now(),
+      })
+      .catch((error) => sim.api.toast('切换失败：{error}', { error: t(error.message) }));
   }
   balcony.onclick = () => openBalcony(previewTime);
   jump.onclick = () => {

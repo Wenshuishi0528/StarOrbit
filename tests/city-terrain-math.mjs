@@ -65,9 +65,9 @@ assert.equal(CITY_TILE_INNER, 504);
 // These fixtures catch swapped longitude/latitude or a spherical size estimate.
 const equator = cityBounds([0, 0], 40);
 close(equator[0], -0.17966305682390432);
-close(equator[1], -0.18087389541007644);
+close(equator[1], -0.18087389541007645);
 close(equator[2], 0.17966305682390432);
-close(equator[3], 0.18087389541007644);
+close(equator[3], 0.18087389541007645);
 assert.ok(cityBounds([0, 60], 40)[2] > equator[2] * 1.99);
 assert.equal(cityBounds([179.99, 40], 40), null);
 assert.equal(cityBounds([-179.99, -40], 40), null);

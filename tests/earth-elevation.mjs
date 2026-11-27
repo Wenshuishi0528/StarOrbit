@@ -516,26 +516,35 @@ test('ground contact and globe views share measured tiles without a second mesh 
   m.dispose();
 });
 
-
 test('streaming cache clear stays empty until real camera movement or explicit resume', async () => {
-  const h=harness(),m=h.m;
-  m.setEnabled(true);await until(()=>m.base);
-  m.setView('main',view,1,true);await until(()=>m.entries.size>0);
-  await m.clearCache({pauseUntilMove:true});await until(()=>m.base);
-  const calls=h.stats().calls;
-  m.setView('main',view,1,true);
+  const h = harness(),
+    m = h.m;
+  m.setEnabled(true);
+  await until(() => m.base);
+  m.setView('main', view, 1, true);
+  await until(() => m.entries.size > 0);
+  await m.clearCache({ pauseUntilMove: true });
+  await until(() => m.base);
+  const calls = h.stats().calls;
+  m.setView('main', view, 1, true);
   await delay(30);
   assert(m.status('main').streamingPaused);
-  assert.equal(m.status('main').loading,false);
-  assert.equal(h.stats().calls,calls);assert.equal(h.blobs.size,0);
-  const moved={...view,eyeKm:view.eyeKm.map((x,i)=>x+(i===0?.3:0))};
-  m.setView('main',moved,1,true);
-  assert.equal(m.streamingPaused,false);
-  await until(()=>h.stats().calls>calls);
-  await m.clearCache({pauseUntilMove:true});await until(()=>m.base);
-  m.setView('main',moved,1,true);assert(m.streamingPaused);
-  m.resumeStreaming();assert.equal(m.streamingPaused,false);
-  m.configureStreaming({rangeKm:400});assert.equal(m.streamingRangeKm,400);
-  m.configureStreaming({rangeKm:900});assert.equal(m.streamingRangeKm,400);
+  assert.equal(m.status('main').loading, false);
+  assert.equal(h.stats().calls, calls);
+  assert.equal(h.blobs.size, 0);
+  const moved = { ...view, eyeKm: view.eyeKm.map((x, i) => x + (i === 0 ? 0.3 : 0)) };
+  m.setView('main', moved, 1, true);
+  assert.equal(m.streamingPaused, false);
+  await until(() => h.stats().calls > calls);
+  await m.clearCache({ pauseUntilMove: true });
+  await until(() => m.base);
+  m.setView('main', moved, 1, true);
+  assert(m.streamingPaused);
+  m.resumeStreaming();
+  assert.equal(m.streamingPaused, false);
+  m.configureStreaming({ rangeKm: 400 });
+  assert.equal(m.streamingRangeKm, 400);
+  m.configureStreaming({ rangeKm: 900 });
+  assert.equal(m.streamingRangeKm, 400);
   m.dispose();
 });

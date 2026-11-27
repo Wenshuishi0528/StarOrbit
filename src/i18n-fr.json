@@ -3355,5 +3355,8 @@
   "光标坐标": "Coordonnées du pointeur",
   "未找到匹配地点": "Aucun lieu correspondant",
   "正在恢复图形显示…": "Restauration de l’affichage…",
-  "重新打开星轨": "Rouvrir StarOrbit"
+  "重新打开星轨": "Rouvrir StarOrbit",
+  "帮助内容未能载入，请检查网络后重试。": "Impossible de charger l’aide. Vérifiez la connexion et réessayez.",
+  "重试": "Réessayer",
+  "此页未能载入，请检查网络后重新选择标签重试。": "Impossible de charger cet onglet. Vérifiez la connexion, puis sélectionnez de nouveau l’onglet."
 }

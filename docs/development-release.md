@@ -68,16 +68,15 @@ lsof -nP -iTCP:8771 -sTCP:LISTEN
 node --version
 python3 --version
 npm ci
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r scripts/cloud-requirements.txt
+npm run setup:python
+npm run lint
 npm run test:docs
 npm test
 npm run build
-python scripts/serve.py --port 8772 --open
+python3 scripts/serve.py --port 8772 --open
 ```
 
-以上为 macOS/Linux shell 示例。Windows 可用 `.venv\Scripts\Activate.ps1` 激活 Python 环境，再运行等价命令；macOS 启动器仅用于 macOS。完整源码可从公开仓库取得，使用与分享遵循项目许可。
+以上为 macOS/Linux shell 示例。`npm run setup:python` 在仓库内建立 `.venv` 并安装云图依赖；`npm test` 运行 Python 测试时自动把 `.venv/bin` 放在 PATH 最前，因此系统或 Anaconda 的 numpy／h5py 不兼容不会影响测试。Windows 可手动建立 `.venv` 并用 `.venv\Scripts\Activate.ps1` 激活后运行等价命令；macOS 启动器仅用于 macOS。完整源码可从公开仓库取得，使用与分享遵循项目许可。
 
 `npm ci` 按锁文件安装依赖。Python 的云图处理依赖为 NumPy、Pillow、h5py、certifi；本机启动器寻找的是系统已安装 Python，不会自动选择仓库 `.venv`。如命令行能处理云图而 Finder 启动失败，应核对两条入口实际使用的 Python 和依赖环境。
 
@@ -90,7 +89,8 @@ python scripts/serve.py --port 8772 --open
 | 层次 | 入口 | 能证明的范围 |
 | --- | --- | --- |
 | 文档与例子 | `npm run test:docs` | 文档约定、例子和受支持的结构校验；具体检查以脚本输出为准 |
-| 默认自动回归 | `npm test` | 当前 package.json 显式串联的数值、模块、资源、状态与 Python 服务检查 |
+| 代码检查 | `npm run lint` | ESLint 检查未定义变量、无用变量与常见错误；不检查格式 |
+| 默认自动回归 | `npm test` | `tests/suite.json` 列出的数值、模块、资源、状态与 Python 服务检查；默认并行，全部跑完后汇总失败。`npm test -- sky cloud` 只跑路径含关键词的测试，`--serial` 按顺序逐个运行。`--jobs N` 设置并发数，N 须为正整数，无效参数以非零状态退出 |
 | 专项自动回归 | `node tests/<专题>.mjs`、`python3 tests/<专题>.py` | 所选场景；需要在报告中记录命令，不能以存在脚本推断已执行 |
 | 格式检查 | `npm run format:check` | 手写 JavaScript/CSS 的固定格式规则；不等于功能验证 |
 | 拆分产物 | `node tests/web-build.mjs dist`；`node tests/web-build.mjs dist-local` | 入口体积、资源路径、源文件字节/哈希、原始模型和元数据等产物检查 |
@@ -98,7 +98,7 @@ python scripts/serve.py --port 8772 --open
 | 发布包 | `python3 scripts/check-docs.py --package ...` 加 ZIP 检查和冷启动 | 实际用户拿到的文档、引用与包内容；仓库链接完好不能代替此项 |
 | 运行/部署 | 实际 HTTP 版本、入口和脚本哈希及启动器检查 | 所检查地址确实提供预期构建；不证明所有功能或所有用户设备均正常 |
 
-默认 `npm test` 不等于递归执行 tests 目录，更不等于运行全部浏览器 fixture。本批 Pages 配置在安装依赖后按 `test:docs → test → build:web → web-build` 执行。该配置的本地检查与远端实际运行分开记录；远端 CI 是否通过以对应发布运行的结果为准。
+默认 `npm test` 不等于递归执行 tests 目录，更不等于运行全部浏览器 fixture；新增测试文件需加入 `tests/suite.json`。本批 Pages 配置在安装依赖后按 `test:docs → test → build:web → web-build` 执行。该配置的本地检查与远端实际运行分开记录；远端 CI 是否通过以对应发布运行的结果为准。
 
 修改算法时优先检查数值和独立参考；修改状态/缓存时检查启动、切换、取消、删除与失败竞态；修改画面时检查主画面、巡天和照片。历史 `v*-validation.json`、截图和数据只对对应版本/样本有效。报告应记录环境、命令、版本/提交、结果、证据位置和未完成项，模板及范围见[验证指南](verification.md)。
 
@@ -117,7 +117,7 @@ node tests/web-build.mjs dist
 | `npm run build:local` | `dist-local/index.html`、哈希资源、version.json | 本机轻量入口，不重新生成单文件 |
 | `npm run build:web` | `dist/index.html`、哈希资源、version.json | 静态网页部署 |
 
-拆分构建会清空并重新生成自己的输出目录。`assets/app.bundle.js` 是构建中间产物，不是独立发布源文件。不要把仅构建 `dist-local/` 的结果当作单文件也已更新。
+拆分构建会清空并重新生成自己的输出目录。拆分版的程序是 ES 模块：入口 `assets/app-<hash>.js` 以 `<script type="module">` 载入，启动必需的分块用 `modulepreload` 预告，其余 `assets/chunk-<hash>.js` 在首次使用时由 `import()` 取得；`tests/web-build.mjs` 检查这些文件存在并限制启动脚本总量。单文件版仍是一个内联 IIFE，`import()` 由打包器在包内解析，可从 `file://` 离线使用；`assets/app.bundle.js` 是它的中间产物，不是独立发布源文件。不要把仅构建 `dist-local/` 的结果当作单文件也已更新。
 
 `serve.py` 在存在 `dist-local/index.html` 时，将 `/` 和 `/StarOrbit.html` 映射到轻量入口；对应 `/assets/` 从拆分目录优先提供。单文件和本机页面在同一版本下字节也不同，因此要对比“所用构建”的入口，不能拿单文件哈希对比轻量 HTTP 入口。
 
@@ -179,7 +179,7 @@ curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8771/StarOrbit.
 shasum -a 256 output/release131/served-index.html dist-local/index.html
 ```
 
-如果安装根目录与当前源码不同，应与安装根目录中的目标产物比对，再确认它与本批构建一致。核对真实入口引用的 `assets/app.bundle-<hash>.js`，下载该脚本并比对 SHA-256；文件名内的短哈希不是完整 SHA-256 结果。
+如果安装根目录与当前源码不同，应与安装根目录中的目标产物比对，再确认它与本批构建一致。核对真实入口引用的 `assets/app-<hash>.js`（v1.66 及更早为 `assets/app.bundle-<hash>.js`），下载该脚本并比对 SHA-256；文件名内的短哈希不是完整 SHA-256 结果。
 
 `/api/status` 只回报固定应用标识，`version.json` 也只回报显示版本。完整核对需同时看入口页面、引用脚本和相应产物。浏览器可能持有旧入口缓存，重载后还应读取页面顶部版本和真实请求资源。
 

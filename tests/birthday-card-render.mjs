@@ -11,7 +11,7 @@ import { Texture, ZeroFactor, OneFactor, SrcAlphaFactor } from 'three';
 const { outputFiles } = await build({
   stdin: {
     contents:
-      "export * from './src/birthday-card-render.js'; export {getSkyCulture} from './src/sky-cultures.js';",
+      "export * from './src/birthday-card-render.js'; export {getSkyCulture, ensureSkyCulture} from './src/sky-cultures.js';",
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -25,12 +25,15 @@ const {
   projectBirthdayStar,
   fitBirthdayWish,
   getSkyCulture,
+  ensureSkyCulture,
   configureBirthdayArtworkRenderer,
   birthdayCardInscription,
 } = await import(
   'data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64')
 );
 const json = (file) => JSON.parse(readFileSync(new URL(file, import.meta.url)));
+// The app loads the Chinese catalogue before an eastern card; so does the test.
+await ensureSkyCulture('chinese');
 const art = new ConstellationArt(json('../assets/constellation-art/manifest.json'), {
   chinese: json('../assets/chinese-sky/art/manifest.json'),
 });

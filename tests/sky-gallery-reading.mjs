@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { DEEP_SKY_OBJECTS } from '../src/deep-sky-catalog.js';
-import { HUBBLE_ARTWORKS } from '../src/hubble-gallery.js';
+import { loadHubbleArchive } from '../src/hubble-gallery.js';
 import { WEBB_ARTWORKS } from '../src/webb-gallery.js';
 import {
   createSkyImageIndex,
@@ -11,6 +11,7 @@ import facts from '../src/sky-artwork-facts.json' with { type: 'json' };
 import { artworkNotes } from '../src/sky-artwork-notes.js';
 import { describeSkyObject, describeSurveyImage } from '../src/sky-object-reading.js';
 
+const { artworks: HUBBLE_ARTWORKS } = await loadHubbleArchive();
 const languages = ['zh', 'en', 'ru', 'fr'];
 
 function checkReadings(id, getParagraphs) {

@@ -1,3 +1,4 @@
+/* global elevationCheck -- installed in the page by the injected harness */
 import { build } from 'esbuild';
 import { writeFile, mkdir } from 'node:fs/promises';
 const { chromium, webkit } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');

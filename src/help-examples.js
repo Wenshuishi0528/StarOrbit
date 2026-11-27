@@ -1,5 +1,6 @@
 import { cameraState, restoreCamera } from './scene-share.js';
 import { setText } from './i18n.js';
+import { resumeClock } from './sim-clock.js';
 
 const EXAMPLE_TIME = Date.parse('2026-11-05T13:44:00+08:00');
 let simulation, original;
@@ -56,7 +57,7 @@ function checkpoint(sim) {
     byId('autoTrack').checked = auto;
     api.state.angles = angles;
     api.setAnimating(playing);
-    sim.lastWall = performance.now();
+    resumeClock(sim);
     sim.update(sim.lastWall);
     scope();
     restorePilot();
@@ -112,6 +113,8 @@ export function runHelpExample(target) {
       }
     }
     try {
+      // 北京示例的城市目标来自按需加载的地理图集。
+      if (target === 'beijing') await sim.environment.geography.load();
       if (sim.missionId !== 'tiangong')
         await sim.missions.switchTo('tiangong', { restoring: true });
       // The fixed examples use the bundled station ephemeris, even with an imported orbit active.

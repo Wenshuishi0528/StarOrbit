@@ -22,6 +22,7 @@ import {
   setFlightDockingLimits,
   stepFreeFlight,
 } from './free-flight-physics.js';
+import { resumeClock, invalidate } from './sim-clock.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const displayKey = 'starorbit-free-flight-display-v1';
@@ -395,8 +396,8 @@ export function installFreeFlight(sim, assets) {
     sim.orbitControls.enabled = orbitControls;
     document.body.classList.remove('free-flight-active', 'free-flight-onboard');
     api.resize();
-    sim.lastWall = performance.now();
-    sim.dirty = sim.snap = true;
+    resumeClock(sim);
+    invalidate(sim);
     sim.update(sim.lastWall);
     sim.render();
     focusBack?.focus({ preventScroll: true });

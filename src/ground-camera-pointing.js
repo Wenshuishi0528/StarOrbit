@@ -14,17 +14,18 @@ export function groundCameraRotation(pose, target = new Quaternion()) {
 
 export function nudgeGroundScope(pose, rightDegrees, upDegrees, fieldDegrees = 1) {
   const roll = pose.rollDegrees || 0;
-  const cos = Math.cos(roll * DEG), sin = Math.sin(roll * DEG);
+  const cos = Math.cos(roll * DEG),
+    sin = Math.sin(roll * DEG);
   const horizontal = rightDegrees * cos - upDegrees * sin;
   const vertical = rightDegrees * sin + upDegrees * cos;
 
   // A level pan follows a circle of constant elevation. As the zenith enters
   // the eyepiece, ease the azimuth gain back to zero to avoid spinning in place.
   const radius = pose.elevation === 90 ? 0 : Math.cos(pose.elevation * DEG);
-  const fieldRadius = Math.sin(fieldDegrees * DEG / 2);
+  const fieldRadius = Math.sin((fieldDegrees * DEG) / 2);
   const gain = radius / Math.max(radius * radius, fieldRadius * fieldRadius);
-  const halfChord = Math.sin(horizontal * DEG / 2) * gain;
-  const yaw = 2 * Math.asin(Math.max(-1, Math.min(1, halfChord))) / DEG;
+  const halfChord = Math.sin((horizontal * DEG) / 2) * gain;
+  const yaw = (2 * Math.asin(Math.max(-1, Math.min(1, halfChord)))) / DEG;
 
   // Beyond the pole the same optical orientation has reversed azimuth and roll.
   const pitch = Math.max(0, Math.min(180, pose.elevation + vertical));

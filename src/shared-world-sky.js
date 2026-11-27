@@ -32,11 +32,12 @@ export function readWorldSkySettings(environment) {
     density: s.starLabelDensity,
   };
 }
-export function applyWorldSkySettings(environment, patch) {
+// A culture change resolves true once applied (after its data has loaded);
+// onCulture runs at that moment. Other fields apply immediately.
+export function applyWorldSkySettings(environment, patch, onCulture = () => {}) {
   const s = environment.settings;
   const fields = {
     chart: 'starChartEnabled',
-    culture: 'skyCulture',
     lines: 'constellationLines',
     art: 'constellationArt',
     symbols: 'chineseSymbolArt',
@@ -53,13 +54,27 @@ export function applyWorldSkySettings(environment, patch) {
     if (patch[key] !== undefined) s[field] = patch[key];
   if (patch.names !== undefined) s.starLabels = s.constellationNames = patch.names;
   if (patch.artBrightness !== undefined)
-    s[s.skyCulture === 'chinese' ? 'chineseArtBrightness' : 'westernArtBrightness'] =
-      patch.artBrightness;
+    s[
+      (patch.culture ?? s.skyCulture) === 'chinese'
+        ? 'chineseArtBrightness'
+        : 'westernArtBrightness'
+    ] = patch.artBrightness;
   if (patch.source !== undefined) s.skyDetail = patch.source !== 'galaxy';
   if (patch.chart === undefined) s.starChartEnabled = true;
+  let culture;
+  if (patch.culture !== undefined) {
+    if (environment.selectSkyCulture)
+      culture = environment.selectSkyCulture(patch.culture, onCulture);
+    else {
+      s.skyCulture = patch.culture;
+      onCulture();
+      culture = Promise.resolve(true);
+    }
+  }
   syncStarChartControls(s);
   environment.skyDetailControls?.update?.();
   environment.save?.();
+  return culture;
 }
 
 // Reuse the main star chart, atlas renderer and bounded resource managers.
@@ -340,12 +355,7 @@ export function mountWorldSkyControls(host, environment, { onChange = () => {} }
   function translate() {
     root.querySelectorAll('[data-key]').forEach((el) => (el.textContent = t(el.dataset.key)));
   }
-  root.addEventListener('change', (event) => {
-    const el = event.target,
-      key = el.dataset.setting;
-    if (!key) return;
-    environment.settings[key] =
-      el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+  function changed(el, key) {
     if (['exposure', 'milky', 'stars'].includes(key)) {
       const main = document.getElementById(
         { exposure: 'skyExposure', milky: 'showMilky', stars: 'showStars' }[key]
@@ -371,6 +381,21 @@ export function mountWorldSkyControls(host, environment, { onChange = () => {} }
     environment.save?.();
     onChange();
     refresh();
+  }
+  root.addEventListener('change', (event) => {
+    const el = event.target,
+      key = el.dataset.setting;
+    if (!key) return;
+    if (key === 'skyCulture' && environment.selectSkyCulture) {
+      // Applied once the culture has loaded; the menu reverts if loading fails.
+      environment
+        .selectSkyCulture(el.value, () => changed(el, key))
+        .then((applied) => applied || refresh());
+      return;
+    }
+    environment.settings[key] =
+      el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+    changed(el, key);
   });
   const off = onLanguageChange(translate);
   translate();

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {patchBoxes, skyClearsTerrain, terrainCeiling} from '../src/ground-terrain-horizon.js';
+import { patchBoxes, skyClearsTerrain, terrainCeiling } from '../src/ground-terrain-horizon.js';
 import { elevationBaseMesh, sampleElevationBase } from '../src/earth-elevation-math.js';
 import {
   sampleGroundGrid,
@@ -14,11 +14,15 @@ import {
 
 // Clip only if the entire rotated field clears the highest possible ridge.
 const localSite = { latitude: 0, longitude: 0, height: 50 };
-const mountain = { data: {
-  sphereRadius: 6371000, segments: 32, halfSize: 250000,
-  frame: {origin: [6371000,0,0], east:[0,1,0], north:[0,0,1], up:[1,0,0]},
-  horizonBoxes: [1000,1100,0,100,1050],
-} };
+const mountain = {
+  data: {
+    sphereRadius: 6371000,
+    segments: 32,
+    halfSize: 250000,
+    frame: { origin: [6371000, 0, 0], east: [0, 1, 0], north: [0, 0, 1], up: [1, 0, 0] },
+    horizonBoxes: [1000, 1100, 0, 100, 1050],
+  },
+};
 const ceiling = terrainCeiling(localSite, mountain, true);
 assert(ceiling >= Math.PI / 4);
 assert.equal(skyClearsTerrain(50, 20, 1.6, ceiling), false);
@@ -26,8 +30,8 @@ assert.equal(skyClearsTerrain(90, 20, 1.6, ceiling), true);
 assert.equal(skyClearsTerrain(8, 10, 2, 0), false);
 assert.equal(terrainCeiling(localSite, null, true), Math.PI / 2);
 assert.equal(terrainCeiling(localSite, null, false), 0);
-const bump = {segments:2, positions:new Float32Array(27)};
-bump.positions[14]=99; // interior peak, absent from all four corners
+const bump = { segments: 2, positions: new Float32Array(27) };
+bump.positions[14] = 99; // interior peak, absent from all four corners
 assert.equal(patchBoxes(bump)[4], 99);
 
 const grid = {
@@ -176,19 +180,24 @@ for (const index of [0, 128, 256, 256 * 257, 257 * 257 - 1]) {
 }
 // 5 km altitude widens detailed coverage; settings change the regional mesh
 // without dropping the currently displayed mesh while its replacement builds.
-const lowPlan = groundTilePlan({...site,height:50},{rangeKm:160});
-const highPlan = groundTilePlan({...site,height:5000},{rangeKm:160});
-assert(highPlan.filter(t=>t.z===12).length > lowPlan.filter(t=>t.z===12).length);
-surface.update({...site,height:5000});
-assert.equal(surface.getPatch().data.halfSize,2*(5000-beijing));
-environment.settings = {surfaceElevationRangeKm:40};
-const previousRegion=surface.getPatch().surround.data;
-surface.update({...site,height:5000});
-assert.equal(surface.getPatch().surround.data,previousRegion);
+const lowPlan = groundTilePlan({ ...site, height: 50 }, { rangeKm: 160 });
+const highPlan = groundTilePlan({ ...site, height: 5000 }, { rangeKm: 160 });
+assert(highPlan.filter((t) => t.z === 12).length > lowPlan.filter((t) => t.z === 12).length);
+surface.update({ ...site, height: 5000 });
+assert.equal(surface.getPatch().data.halfSize, 2 * (5000 - beijing));
+environment.settings = { surfaceElevationRangeKm: 40 };
+const previousRegion = surface.getPatch().surround.data;
+surface.update({ ...site, height: 5000 });
+assert.equal(surface.getPatch().surround.data, previousRegion);
 await surface.whenReady();
-assert.equal(surface.getPatch().surround.data.halfSize,40000);
-assert(surface.getPatch().surround.data.gridDistances[385]-surface.getPatch().surround.data.gridDistances[384] < surface.getPatch().surround.data.gridDistances[768]-surface.getPatch().surround.data.gridDistances[767]);
-environment.settings.surfaceElevationRangeKm=160;
+assert.equal(surface.getPatch().surround.data.halfSize, 40000);
+assert(
+  surface.getPatch().surround.data.gridDistances[385] -
+    surface.getPatch().surround.data.gridDistances[384] <
+    surface.getPatch().surround.data.gridDistances[768] -
+      surface.getPatch().surround.data.gridDistances[767]
+);
+environment.settings.surfaceElevationRangeKm = 160;
 surface.update({ ...site, height: 100000 });
 assert.equal(
   surface.getPatch().data,
@@ -199,7 +208,10 @@ assert(
   surface.getPatch().surround,
   'regional terrain persists through the high-altitude transition'
 );
-assert(requested.every(tile => tile.z < 12), 'only broad terrain is requested above contact range');
+assert(
+  requested.every((tile) => tile.z < 12),
+  'only broad terrain is requested above contact range'
+);
 surface.update(site);
 
 assert.equal(scene.children[0].children.length, 0, 'no separate diffuse terrain/horizon renderer');
@@ -227,12 +239,18 @@ assert(surface.status().detailed);
 // even though sea-level altitude resembles the aircraft test above.
 environment.elevation.entries.get(central.key).heights.fill(5000);
 environment.elevation.revision++;
-surface.update({...site,height:5001.7});
-assert.equal(surface.getPatch().data.halfSize,4096);
-assert.equal(surface.getPatch().data.halfSize*2/surface.getPatch().data.segments,32);
-const plateauPlan=groundTilePlan({...site,height:5001.7},{groundHeightMeters:5000,rangeKm:160});
-const seaPlan=groundTilePlan({...site,height:1.7},{groundHeightMeters:0,rangeKm:160});
-assert.deepEqual(plateauPlan.map(t=>t.key),seaPlan.map(t=>t.key));
+surface.update({ ...site, height: 5001.7 });
+assert.equal(surface.getPatch().data.halfSize, 4096);
+assert.equal((surface.getPatch().data.halfSize * 2) / surface.getPatch().data.segments, 32);
+const plateauPlan = groundTilePlan(
+  { ...site, height: 5001.7 },
+  { groundHeightMeters: 5000, rangeKm: 160 }
+);
+const seaPlan = groundTilePlan({ ...site, height: 1.7 }, { groundHeightMeters: 0, rangeKm: 160 });
+assert.deepEqual(
+  plateauPlan.map((t) => t.key),
+  seaPlan.map((t) => t.key)
+);
 environment.elevation.entries.get(central.key).heights.fill(43);
 environment.elevation.revision++;
 

@@ -3355,5 +3355,8 @@
   "光标坐标": "Pointer coordinates",
   "未找到匹配地点": "No matching places",
   "正在恢复图形显示…": "Restoring graphics…",
-  "重新打开星轨": "Reopen StarOrbit"
+  "重新打开星轨": "Reopen StarOrbit",
+  "帮助内容未能载入，请检查网络后重试。": "Help content could not load. Check your connection and try again.",
+  "重试": "Retry",
+  "此页未能载入，请检查网络后重新选择标签重试。": "This tab could not load. Check your connection, then select the tab again to retry."
 }

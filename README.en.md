@@ -14,7 +14,9 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 ![China Space Station, independent Xuntian, orbital readings and ground track](docs/hero.jpg)
 
-> Open `StarOrbitPro.html` beside the main viewer for the local v1.69 engineering workbench. Compare two 24-hour plans for one LEO spacecraft by battery energy, board temperature and useful images delivered. Follow each image from exposure to downlink or inspect a limit crossing in 3D. The workbench also imports and compares external OEM ephemerides. [Operating guide](使用说明.md#星轨专业版)
+> Open `StarOrbitPro.html` beside the main viewer for the v1.69 engineering workbench. Compare two 24-hour plans for one LEO spacecraft by battery energy, board temperature and useful images delivered. Follow each image from exposure to downlink or inspect a limit crossing in 3D. The workbench also imports and compares external OEM ephemerides. [Operating guide](使用说明.md#星轨专业版)
+
+> v1.67 The main view shows star chart labels by default, and spacecraft labels now move aside instead of overlapping each other or the readout card. The web and local entry script and its static dependencies total about 7.33 MB. Geographic labels are enabled by default and request a further 4.30 MB atlas. Chinese sky data, the Hubble archive, Russian and French translations, help manuals and lab tabs load on demand. [Full changelog](CHANGELOG.md).
 
 <a id="interface-and-basic-controls"></a>
 
