@@ -61,9 +61,35 @@ class DeleteVersion(unittest.TestCase):
     def test_invalid_paths_and_symlinks_never_delete_targets(self):
         for name in ('../unrelated.png','/tmp/unrelated.png','nested/file.png','checks.json','x.png?x=1'):
             with self.assertRaises(ValueError):self.remove(name=name)
-        target = self.root/self.name;target.unlink();target.symlink_to(self.other)
-        with self.assertRaises(ValueError):self.remove()
-        self.assertTrue(self.other.exists())
+        target = self.root/self.name
+        target.unlink()
+        # A matching digest makes path validation the only reason to reject the link.
+        self.other.write_bytes(self.data)
+        with tempfile.TemporaryDirectory() as backing:
+            try:
+                target.symlink_to(self.other)
+            except OSError as error:
+                if getattr(error, 'winerror', None) != 1314:
+                    raise
+                # Unprivileged Windows accounts can create a directory junction.
+                # Exercise a real NTFS redirect into a separate fixture directory.
+                import _winapi
+                (Path(backing)/'keep.png').write_bytes(self.data)
+                _winapi.CreateJunction(backing, str(target))
+                self.assertEqual(target.resolve(), Path(backing).resolve())
+            try:
+                with self.assertRaisesRegex(ValueError, '云图文件路径无效'):
+                    self.remove()
+                self.assertTrue(target.exists())
+                self.assertTrue(target.with_suffix('.json').is_file())
+                self.assertEqual(self.other.read_bytes(), self.data)
+                if target.is_dir():
+                    self.assertEqual((Path(backing)/'keep.png').read_bytes(), self.data)
+            finally:
+                if target.is_dir():
+                    target.rmdir()  # Removes only this directory junction.
+                else:
+                    target.unlink(missing_ok=True)
     def test_active_job_is_preserved(self):
         self.history.state={'state':'running'}
         with self.assertRaises(ValueError):self.remove()

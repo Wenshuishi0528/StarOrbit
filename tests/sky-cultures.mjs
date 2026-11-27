@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { build } from 'esbuild';
+import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => fs.readFileSync(new URL(path, root));
@@ -13,7 +14,7 @@ const catalogue = json('assets/chinese-sky/catalog.json');
 const existing = new Map(json('assets/stars.json').map((row) => [row[0], row]));
 const western = json('assets/star-chart.json');
 const compiled = await build({
-  entryPoints: [new URL('../src/sky-cultures.js', import.meta.url).pathname],
+  entryPoints: [fileURLToPath(new URL('../src/sky-cultures.js', import.meta.url))],
   bundle: true,
   write: false,
   format: 'esm',

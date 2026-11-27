@@ -1,0 +1,1034 @@
+{
+  "method": "Independent quarter-second grid, ideal power or full outage",
+  "durationSec": 100,
+  "settings": {
+    "seed": 44371,
+    "usefulFraction": 0.58,
+    "usefulKeep": 0.76,
+    "otherKeep": 0.2,
+    "rawMB": 4,
+    "storeMB": 11,
+    "downlinkMbps": 16,
+    "processingSec": 1.5,
+    "outputFraction": 0.5,
+    "cameraW": 4,
+    "radioW": 8,
+    "processorW": 6
+  },
+  "opportunities": [
+    {
+      "id": 1,
+      "windowIndex": 0,
+      "startSec": 0.5,
+      "endSec": 1.5
+    },
+    {
+      "id": 2,
+      "windowIndex": 0,
+      "startSec": 3.5,
+      "endSec": 4.5
+    },
+    {
+      "id": 3,
+      "windowIndex": 0,
+      "startSec": 6.5,
+      "endSec": 7.5
+    },
+    {
+      "id": 4,
+      "windowIndex": 0,
+      "startSec": 9.5,
+      "endSec": 10.5
+    },
+    {
+      "id": 5,
+      "windowIndex": 0,
+      "startSec": 12.5,
+      "endSec": 13.5
+    },
+    {
+      "id": 6,
+      "windowIndex": 0,
+      "startSec": 15.5,
+      "endSec": 16.5
+    },
+    {
+      "id": 7,
+      "windowIndex": 0,
+      "startSec": 18.5,
+      "endSec": 19.5
+    },
+    {
+      "id": 8,
+      "windowIndex": 1,
+      "startSec": 21.5,
+      "endSec": 22.5
+    },
+    {
+      "id": 9,
+      "windowIndex": 1,
+      "startSec": 24.5,
+      "endSec": 25.5
+    },
+    {
+      "id": 10,
+      "windowIndex": 1,
+      "startSec": 27.5,
+      "endSec": 28.5
+    },
+    {
+      "id": 11,
+      "windowIndex": 1,
+      "startSec": 30.5,
+      "endSec": 31.5
+    },
+    {
+      "id": 12,
+      "windowIndex": 1,
+      "startSec": 33.5,
+      "endSec": 34.5
+    },
+    {
+      "id": 13,
+      "windowIndex": 1,
+      "startSec": 36.5,
+      "endSec": 37.5
+    },
+    {
+      "id": 14,
+      "windowIndex": 1,
+      "startSec": 39.5,
+      "endSec": 40.5
+    },
+    {
+      "id": 15,
+      "windowIndex": 2,
+      "startSec": 42.5,
+      "endSec": 43.5
+    },
+    {
+      "id": 16,
+      "windowIndex": 2,
+      "startSec": 45.5,
+      "endSec": 46.5
+    },
+    {
+      "id": 17,
+      "windowIndex": 2,
+      "startSec": 48.5,
+      "endSec": 49.5
+    },
+    {
+      "id": 18,
+      "windowIndex": 2,
+      "startSec": 51.5,
+      "endSec": 52.5
+    },
+    {
+      "id": 19,
+      "windowIndex": 2,
+      "startSec": 54.5,
+      "endSec": 55.5
+    },
+    {
+      "id": 20,
+      "windowIndex": 2,
+      "startSec": 57.5,
+      "endSec": 58.5
+    },
+    {
+      "id": 21,
+      "windowIndex": 2,
+      "startSec": 60.5,
+      "endSec": 61.5
+    },
+    {
+      "id": 22,
+      "windowIndex": 3,
+      "startSec": 63.5,
+      "endSec": 64.5
+    },
+    {
+      "id": 23,
+      "windowIndex": 3,
+      "startSec": 66.5,
+      "endSec": 67.5
+    },
+    {
+      "id": 24,
+      "windowIndex": 3,
+      "startSec": 69.5,
+      "endSec": 70.5
+    },
+    {
+      "id": 25,
+      "windowIndex": 3,
+      "startSec": 72.5,
+      "endSec": 73.5
+    },
+    {
+      "id": 26,
+      "windowIndex": 3,
+      "startSec": 75.5,
+      "endSec": 76.5
+    },
+    {
+      "id": 27,
+      "windowIndex": 3,
+      "startSec": 78.5,
+      "endSec": 79.5
+    },
+    {
+      "id": 28,
+      "windowIndex": 3,
+      "startSec": 81.5,
+      "endSec": 82.5
+    },
+    {
+      "id": 29,
+      "windowIndex": 4,
+      "startSec": 84.5,
+      "endSec": 85.5
+    },
+    {
+      "id": 30,
+      "windowIndex": 4,
+      "startSec": 87.5,
+      "endSec": 88.5
+    },
+    {
+      "id": 31,
+      "windowIndex": 4,
+      "startSec": 90.5,
+      "endSec": 91.5
+    },
+    {
+      "id": 32,
+      "windowIndex": 4,
+      "startSec": 93.5,
+      "endSec": 94.5
+    },
+    {
+      "id": 33,
+      "windowIndex": 4,
+      "startSec": 96.5,
+      "endSec": 97.5
+    }
+  ],
+  "stationWindows": [
+    [
+      2.25,
+      4.75
+    ],
+    [
+      9,
+      12.25
+    ],
+    [
+      19.5,
+      22.5
+    ],
+    [
+      40,
+      46.5
+    ],
+    [
+      54,
+      57.25
+    ],
+    [
+      72.75,
+      74.25
+    ],
+    [
+      80.25,
+      86.5
+    ],
+    [
+      89.5,
+      93
+    ]
+  ],
+  "outages": [
+    [
+      1,
+      2.5
+    ],
+    [
+      13,
+      16
+    ],
+    [
+      41.25,
+      43.75
+    ],
+    [
+      55,
+      56.5
+    ],
+    [
+      73,
+      75.5
+    ],
+    [
+      95,
+      97
+    ]
+  ],
+  "cases": [
+    {
+      "strategy": {
+        "mode": "raw",
+        "delaySec": 0.5
+      },
+      "images": [
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 4.5,
+          "readySec": 5.0,
+          "processEndSec": null,
+          "deliveredSec": 11.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 7.5,
+          "readySec": 8.0,
+          "processEndSec": null,
+          "deliveredSec": 20.25,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 10.5,
+          "readySec": 11.0,
+          "processEndSec": null,
+          "deliveredSec": 22.25,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 19.5,
+          "readySec": 20.0,
+          "processEndSec": null,
+          "deliveredSec": 44.25,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 22.5,
+          "readySec": 23.0,
+          "processEndSec": null,
+          "deliveredSec": 46.25,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 25.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 28.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 31.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 34.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 37.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 40.5,
+          "readySec": 41.0,
+          "processEndSec": null,
+          "deliveredSec": 57.25,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 46.5,
+          "readySec": 47.0,
+          "processEndSec": null,
+          "deliveredSec": 82.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 49.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 52.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 58.5,
+          "readySec": 59.0,
+          "processEndSec": null,
+          "deliveredSec": 84.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 61.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 64.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 67.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 70.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 76.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 79.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 82.5,
+          "readySec": 83.0,
+          "processEndSec": null,
+          "deliveredSec": 86.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 85.5,
+          "readySec": 86.0,
+          "processEndSec": null,
+          "deliveredSec": 91.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 88.5,
+          "readySec": 89.0,
+          "processEndSec": null,
+          "deliveredSec": 93.0,
+          "sentMB": 4.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "pendingDownlink",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 91.5,
+          "readySec": 92.0,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 4
+        },
+        {
+          "status": "pendingDownlink",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 94.5,
+          "readySec": 95.0,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 4
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        }
+      ],
+      "peakStoredMB": 10.5,
+      "energyWh": [
+        0.03111111111111111,
+        0.0,
+        0.04888888888888889
+      ]
+    },
+    {
+      "strategy": {
+        "mode": "filter",
+        "delaySec": 1.25
+      },
+      "images": [
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "filteredOut",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 4.5,
+          "readySec": null,
+          "processEndSec": 7.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 7.5,
+          "readySec": 10.25,
+          "processEndSec": 10.25,
+          "deliveredSec": 11.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 10.5,
+          "readySec": 16.25,
+          "processEndSec": 16.25,
+          "deliveredSec": 20.5,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "filteredOut",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 19.5,
+          "readySec": null,
+          "processEndSec": 22.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 22.5,
+          "readySec": 25.25,
+          "processEndSec": 25.25,
+          "deliveredSec": 41.0,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "filteredOut",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 25.5,
+          "readySec": null,
+          "processEndSec": 28.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 28.5,
+          "readySec": 31.25,
+          "processEndSec": 31.25,
+          "deliveredSec": 44.5,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "filteredOut",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 31.5,
+          "readySec": null,
+          "processEndSec": 34.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "filteredOut",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 34.5,
+          "readySec": null,
+          "processEndSec": 37.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 37.5,
+          "readySec": 40.25,
+          "processEndSec": 40.25,
+          "deliveredSec": 45.5,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "filteredOut",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": 40.5,
+          "readySec": null,
+          "processEndSec": 45.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 46.5,
+          "readySec": 49.25,
+          "processEndSec": 49.25,
+          "deliveredSec": 55.0,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 49.5,
+          "readySec": 52.25,
+          "processEndSec": 52.25,
+          "deliveredSec": 73.0,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 52.5,
+          "readySec": 56.75,
+          "processEndSec": 56.75,
+          "deliveredSec": 81.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 58.5,
+          "readySec": 61.25,
+          "processEndSec": 61.25,
+          "deliveredSec": 82.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 61.5,
+          "readySec": 64.25,
+          "processEndSec": 64.25,
+          "deliveredSec": 83.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "filteredOut",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 64.5,
+          "readySec": null,
+          "processEndSec": 67.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 67.5,
+          "readySec": 70.25,
+          "processEndSec": 70.25,
+          "deliveredSec": 84.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 70.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "capturePower",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 76.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "storageOverflow",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 79.5,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "filteredOut",
+          "useful": false,
+          "filterKeep": false,
+          "captureEndSec": 82.5,
+          "readySec": null,
+          "processEndSec": 85.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        },
+        {
+          "status": "delivered",
+          "useful": false,
+          "filterKeep": true,
+          "captureEndSec": 85.5,
+          "readySec": 88.25,
+          "processEndSec": 88.25,
+          "deliveredSec": 90.5,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "delivered",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 88.5,
+          "readySec": 91.25,
+          "processEndSec": 91.25,
+          "deliveredSec": 92.25,
+          "sentMB": 2.0,
+          "remainingMB": 0.0
+        },
+        {
+          "status": "pendingDownlink",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 91.5,
+          "readySec": 94.25,
+          "processEndSec": 94.25,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 2.0
+        },
+        {
+          "status": "pendingDownlink",
+          "useful": true,
+          "filterKeep": true,
+          "captureEndSec": 94.5,
+          "readySec": 98.5,
+          "processEndSec": 98.5,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 2.0
+        },
+        {
+          "status": "capturePower",
+          "useful": true,
+          "filterKeep": false,
+          "captureEndSec": null,
+          "readySec": null,
+          "processEndSec": null,
+          "deliveredSec": null,
+          "sentMB": 0,
+          "remainingMB": 0
+        }
+      ],
+      "peakStoredMB": 10.5,
+      "energyWh": [
+        0.03111111111111111,
+        0.0575,
+        0.028888888888888888
+      ]
+    }
+  ]
+}

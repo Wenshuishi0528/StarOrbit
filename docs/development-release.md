@@ -1,6 +1,6 @@
 # 开发、发布与维护
 
-适用版本：v1.66。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
+适用版本：v1.69。作者：Wenshuishi。发布渠道核对日期：2026-11-10。
 
 ## 公开源码与统一发布
 
@@ -23,6 +23,8 @@ v1.45 使用原始源码仓库的 Pages 工作流，配置为 workflow；在 CI 
 使用安装了 `beautifulsoup4` 和 `Pillow` 的 Python 运行 `python3 scripts/prepare-hubble-gallery.py --cache /tmp/starorbit-hubble-YYYYMMDD`。新一批数据使用新的缓存目录，网络中断后复用同一目录续传。按官方作品编号核对全部搜索页，再核对作品署名、天球定位与分块尺寸。输出 `src/hubble-gallery-data.json` 只含文字和数值。用 `node tests/pillar-astrometry.mjs` 检验创生之柱的定位，用 `node tests/webb-plates.mjs` 检验实际视场选片。
 
 ## 本机统一目录
+
+Windows 本机 v1.69 的专业版和普通版共用当前星轨源码根。单文件构建会产生可直接双击的 `StarOrbitPro.html`，拆分构建在各自输出目录提供同名入口。桌面「星轨专业版」指向本仓库单文件，本机服务的专业版地址为 `http://127.0.0.1:8771/StarOrbitPro.html`。两种打开方式均可运行内置湖泊观测算例和空间站星历算例。命令行、数值对照与浏览器验收见[工程接口](formats.md#专业版任务与结果)和[验证记录](verification.md#v169-观测与数传)。
 
 2026-11-09整理后，`/Users/apple/Documents/Codex/Tiangong-Orbit-Simulator`同时作为唯一源码根与已安装桌面运行根。桌面启动器配置root指向这里，本机地址继续使用`http://127.0.0.1:8771/StarOrbit.html`，保留同一origin的浏览器设置和缓存。`dist-local`由该根的`serve.py`优先提供，不再同步整套工程到3D打印目录。
 

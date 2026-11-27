@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import fs from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
 import {PerspectiveCamera, Vector3} from 'three';
 
 const bundle = new URL('../output/tests/preset-weather.mjs', import.meta.url);
 await fs.mkdir(new URL('.', bundle), {recursive: true});
-await build({entryPoints: ['src/weather.js'], bundle: true, platform: 'node', format: 'esm', outfile: bundle.pathname, logLevel: 'silent'});
+await build({entryPoints: ['src/weather.js'], bundle: true, platform: 'node', format: 'esm', outfile: fileURLToPath(bundle), logLevel: 'silent'});
 const {Weather} = await import(bundle.href);
 const values = new Map(), elements = new Map();
 globalThis.localStorage = {getItem: key => values.get(key), setItem: (key, value) => values.set(key, value)};

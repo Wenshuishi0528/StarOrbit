@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {build} from 'esbuild';
+import {fileURLToPath} from 'node:url';
 import {DOCKING_LIMITS,dockingInitial,dockingMetrics} from '../src/docking-physics.js';
 import {DockingTraining} from '../src/docking-training.js';
 import {DockingRecorder} from '../src/docking-instruments.js';
 
 // Bundle the actual functions and dictionaries without browser preference access;
 // the default Chinese locale is deterministic. No DOM, browser or mock renderer.
-const bundle=await build({entryPoints:[new URL('../src/docking-workbench.js',import.meta.url).pathname],bundle:true,platform:'node',format:'esm',write:false,logLevel:'silent',define:{localStorage:'undefined'}});
+const bundle=await build({entryPoints:[fileURLToPath(new URL('../src/docking-workbench.js',import.meta.url))],bundle:true,platform:'node',format:'esm',write:false,logLevel:'silent',define:{localStorage:'undefined'}});
 const {captureRows,trendSVG,escapeHTML,reportHTML}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
 const captureMetrics=overrides=>dockingMetrics({...dockingInitial(),position:[0,.35,0],velocity:[0,-.1,0],...overrides});
 const rowFor=(rows,key)=>{const row=rows.find(row=>row.key===key);assert.ok(row,`Missing capture check ${key}`);return row;};

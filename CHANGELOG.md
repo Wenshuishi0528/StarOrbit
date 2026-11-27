@@ -1,5 +1,23 @@
 # Changelog / 更新记录
 
+## v1.69 · 2026-11-25 · 本机版 / Local build
+
+专业版加入 24 小时湖泊观测任务。可比较原图直传与在轨筛选的有效交付、电量和温度，逐张回放曝光、处理、断点续传与未交付原因，导出影像记录 CSV。几何窗口与逐图记录经独立复算，Windows 205 项默认回归通过。[本机验收](docs/verification.md#v169-观测与数传)
+
+StarOrbit Pro adds a 24-hour lake imaging mission. Compare raw downlink and onboard filtering by useful images delivered, battery energy and board temperature. Replay each image from exposure through interrupted contacts, inspect losses, and export its event history. Independent references cover access windows and image accounting. All 205 default regression commands passed on Windows.
+
+## v1.68 · 2026-11-23 · 本机版 / Local build
+
+专业版支持从 CCSDS OEM 起算或回放轨迹，新增可选大气阻力、太阳辐射压和日月引力。用归档的中国空间站星历核对径向、横向与法向偏差，可回放偏差峰值并导出 OEM 与电热采样 CSV。[本机验收](docs/verification.md#v168-专业版)
+
+StarOrbit Pro adds OEM propagation and replay, optional drag, solar radiation pressure and Sun/Moon gravity, RTN residuals and peak replay. An archived space station ephemeris, engineering CSV and OEM exports support offline comparison and independent checks.
+
+## v1.67 · 2026-11-23 · 本机版 / Local build
+
+专业版新增独立离线入口，可编辑近地卫星与两套任务、联算一天的轨道电量和温度、对比结果及三维回放越限现场。提供版本化 JSON 和命令行接口。[验证记录](docs/verification.md#v167-专业版)。
+
+StarOrbit Pro adds a standalone offline entry for configuring one LEO spacecraft, comparing two 24-hour orbit, power and thermal plans, and replaying excursions in 3D. Versioned JSON and a local CLI support integration.
+
 ## v1.66 · 2026-11-22
 
 地表漫游、观星主画面和地面望远镜默认开启星图标注，并按设备能力加载最高 16K 的银河。天体观测支持切换星图体系、标注和图源。地理标注和巡天取景天体标注默认开启。打开巡天取景时主相机近看望远镜，外景视锥默认 8×。星图默认显示赤道坐标网、黄道及全部已收录深空目标，标注密度为 0.95。

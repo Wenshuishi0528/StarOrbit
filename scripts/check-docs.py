@@ -55,6 +55,8 @@ def check_package(path, version):
         for name in ['先读我.txt', 'README.md', 'README.en.md', '使用说明.md']:
             if name not in names or f'v{version}' not in '\n'.join(read(name).splitlines()[:12]):
                 report['issues'].append(f'{name}: missing or inconsistent package version')
+        if 'StarOrbitPro.html' not in names or f'v{version}</span>' not in read('StarOrbitPro.html'):
+            report['issues'].append('StarOrbitPro.html: missing or inconsistent package version')
         required = ['assets/sky-detail/README.md', 'assets/earth/cities/README.md',
                     'assets/earth/cities/manifest.json', 'assets/D3-CELESTIAL-LICENSE.txt',
                     'assets/GEOTIFF-DEPENDENCY-LICENSES.txt', 'assets/earth/elevation/README.md',

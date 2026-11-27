@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('output', type=Path)
 parser.add_argument('--macos-launcher',type=Path)
 args = parser.parse_args()
-files = ['StarOrbit.html', '启动星轨.command',
+files = ['StarOrbit.html', 'StarOrbitPro.html', '启动星轨.command',
          'scripts/serve.py', 'scripts/cloud_service.py', 'scripts/satcorps.py', 'scripts/cloud_quality.py', 'scripts/cloud_history.py', 'scripts/gmgsi.py', 'scripts/himawari.py', 'scripts/cloud_history_service.py', 'scripts/cloud_versions.py', 'scripts/http_download.py', 'scripts/cloud-requirements.txt']
 files.append('scripts/balcony_motion.py')
 files.append('scripts/solar_service.py')
@@ -35,6 +35,7 @@ with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as
 作者 / Author: {app['author']}
 
 直接打开「StarOrbit.html」即可离线运行。
+直接打开「StarOrbitPro.html」，对比两套 24 小时轨道任务的电量、温度与影像交付。
 macOS 可双击包内「星轨.app」（若已包含），或运行「启动星轨.command」。
 应用启动器需与运行文件保持在同一文件夹；本地服务会在后台运行。
 其他系统可安装Python 3后运行：python3 scripts/serve.py --open
@@ -45,6 +46,7 @@ macOS 可双击包内「星轨.app」（若已包含），或运行「启动星�
 场景文件不包含全部用户模型、音乐、下载缓存或自由飞行存档。
 
 Open the HTML file in a recent Chrome, Edge, or Safari for offline use.
+Open StarOrbitPro.html to compare energy, temperature and image delivery for two 24-hour mission plans.
 On macOS, use the included app launcher or run 启动星轨.command.
 Keep the app next to the HTML; the launcher supports Intel and Apple Silicon.
 For the local update relay on other systems, run python3 scripts/serve.py --open.

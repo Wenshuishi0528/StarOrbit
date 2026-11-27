@@ -1,12 +1,110 @@
 # 数据格式与本机接口
 
-适用版本：v1.66。作者：Wenshuishi。核对日期：2026-11-08。
+适用版本 v1.69。作者 Wenshuishi。专业版接口核对日期为 2026-11-25。
+
+## 专业版任务与结果
+
+任务使用 `schemaVersion: 1`、起始时刻 `epochUtc`（2000—2099，UTC，支持 1–3 位小数秒，末尾 Z）、`gravity`（`j2` 或 `twoBody`）、`spacecraft` 和两项 `plans`。`trajectory` 指定轨迹来源，`forces` 指定摄动力，可选的 `observation` 启用地面目标观测和数传。已有 v1.67、v1.68 任务可直接重算。缺少摄动配置时使用原有重力模型，缺少 `observation` 或传入 null 时只运行原有轨道、电源与热模型。手工根数采用相对 6378.1363 km 参考半径的近、远地点高度（200—2000 km），按度填写倾角、升交点赤经、近地点幅角及真近点角。任务时长为 86400 秒，拒绝跨越已知 UTC 闰秒的工况。源码目录的 Node 命令与网页共用求解器。
+
+```sh
+node scripts/pro-mission.mjs --example mission.json
+node scripts/pro-mission.mjs mission.json result.json
+node scripts/pro-mission.mjs --example-css station-mission.json
+node scripts/pro-mission.mjs station-mission.json predicted.oem
+node scripts/pro-mission.mjs station-mission.json telemetry.csv
+node scripts/pro-mission.mjs mission.json result.json --oem reference.oem --mode oemReplay --epoch-from-oem
+node scripts/pro-mission.mjs --example-lake lake.json
+node scripts/pro-mission.mjs lake.json lake-result.json
+node scripts/pro-mission.mjs lake.json lake-telemetry.csv
+node scripts/pro-mission.mjs lake.json lake-images.csv --images
+```
+
+| 输入 | 含义与单位 |
+| --- | --- |
+| `spacecraft.parameterSource` | 可选，记录部件数据表、试验编号或假设来源，最多 300 个字符；结果保留同一段说明 |
+| `spacecraft.name, perigeeKm, apogeeKm, inclinationDeg, raanDeg, argPerigeeDeg, anomalyDeg` | 名称与地心 EME2000 瞬时轨道根数 |
+| `arrayM2, efficiency, absorptance, emissivity` | 总有效帆板面积 m²、25 °C 光电效率、短波吸收率、长波发射率，后三者为无量纲比例 |
+| `capacityWh, initialWh, reserveWh, busW, chargeEff, dischargeEff` | 电池容量、初始电量、下限（Wh），平台功耗（W），充放电效率 |
+| `initialC, coldC, hotC, radiatorM2, outerJK, boardJK, conductance` | 两节点共同初温、设备板低温和高温限值（°C），等效辐射面积（m²），外表面与设备板热容（J/K），节点间热导（W/K） |
+| `plans[i].name, pointing, payloadW, windows` | 规定帆板指向 `sun/zenith/nadir`，载荷开机新增功率 W，半开区间 `[开始分钟,结束分钟)` 以任务经过时间计。每方案 0—64 个时段，输入校验按起点排序并检查重叠 |
+| `trajectory.mode, name, oemText` | `elements` 使用手工根数，可带参考星历。`oemInitial` 从起点 OEM 状态按所选力模型传播。`oemReplay` 使用连续覆盖整天的 OEM 直接驱动电热与回放。`name` 为本地文件标签，`oemText` 保留原始 KVN 文本 |
+| `forces.drag, srp, thirdBody` | 大气阻力、太阳辐射压和日月第三体引力开关，初始均关闭 |
+| `forces.massKg, dragAreaM2, cd, srpAreaM2, cr, densityScale` | 质量 kg，阻力投影面积 m² 和系数，光压投影面积 m² 和系数，密度倍率。默认依次为 12、0.08、2.2、0.1、1.3、1。两套任务共用这些固定值 |
+
+结果含 `schemaVersion: 1`、`softwareVersion`、模型标识 `starorbit-leo-electrothermal/3`、`frame`、`timeSystem`、`units`、`durationSec`、`stepSeconds` 和规范化的 `mission`。v1.68 结果的模型标识为 `starorbit-leo-electrothermal/2`。`trajectoryInfo` 记录实际轨迹来源、力模型和参考文件元数据。直接回放的 `appliedGravity/appliedForces` 为 null。`orbit[k]` 为六个地心惯性分量（前三项 km、后三项 km/s）。`plans[i].batteryWh/boardC/outerC` 与轨道同索引，默认含首尾共 17281 个 5 秒采样。每方案的 `metrics` 含极值、实际利用的太阳能、未供电量和总能量平衡残差。输入不合法时，命令行返回非零状态，网页保留上一份成功结果。
+
+`events[].kind` 取 `lowBattery`、`hotBoard` 或 `coldBoard`。`limit`、`extreme` 分别是阈值和越限期间极值，单位为 Wh 或 °C。`startSec/endSec` 是历元后的秒数，持续到任务终点时 `endSec` 为 null。启用观测时，电池预留线按充放电子区间斜率求交，`batteryKnots` 保存额外的 `[任务秒, 电量Wh]` 节点，用于重建网格之间的电量。设备板温度在电热网格上判限。关闭观测时，电池和温度事件都使用首个越限及恢复采样。
+
+### 观测任务输入
+
+`observation` 包含一个目标、一个接收站及两套方案共用的载荷与链路参数。`strategies[0]` 和 `strategies[1]` 分别对应方案 A 和 B。下表的默认值来自「湖泊观测」示例。自建启用观测的 JSON 需填写表中数值，`parameterSource` 可省略。
+
+| JSON 字段 | 含义、单位及范围 | 示例默认值 |
+| --- | --- | --- |
+| `target`、`station` | 各含 `name`（1–60 字符）、`latDeg`（WGS84 大地纬度 −90…90°）、`lonDeg`（东经为正，−180…180°）、`heightM`（椭球高 −500…9000 m） | 青海湖 36.9°N、100.2°E、3200 m。北京示例站 40°N、116°E、50 m |
+| `maxOffNadirDeg`、`minSunElevationDeg`、`minStationElevationDeg` | 最大离星下点角 0…90°、目标处最低太阳高度 −90…90°、接收站最低仰角 0…90° | 50°、10°、25° |
+| `settlingSec`、`cadenceSec`、`exposureSec` | 窗口开始后的稳定等待 0…3600 s，相邻曝光起点间隔 10…86400 s，连续曝光 0.1…3600 s。间隔须大于等于曝光时长 | 8、20、3 s |
+| `rawMB`、`storeMB`、`downlinkMbps` | 每幅原始数据 0.001…100000 MB、记录器容量 0.001…10000000 MB、可用下行速率 0.001…10000 Mbit/s。1 MB = 10⁶ B，8 Mbit/s = 1 MB/s | 32 MB、192 MB、1.6 Mbit/s |
+| `cameraW`、`processorW`、`radioW` | 相机、处理器、发射机工作功率，各 0…1000 W，叠加在平台和原计划载荷上 | 12、14、10 W |
+| `processingSec`、`outputFraction` | 满功率处理一幅所需时间 0.1…86400 s，保留产物与原图的字节比 0.001…1 | 14 s、0.35 |
+| `usefulFraction`、`usefulKeep`、`otherKeep` | 合成有用概率、给定有用时的保留概率、给定无用时的误留概率，均为 0…1 | 0.65、0.90、0.15 |
+| `seed`、`strategies[i]` | 0…4294967295 的整数种子。每套策略含 `mode`（`raw` 或 `filter`）和 `delaySec`（0…86400 s）。从曝光完成开始计时，等待结束后原图可下传，筛选策略可开始处理 | 42。A 为 raw、B 为 filter，各等待 0 s |
+| `parameterSource` | 部件型号、试验工况或假设来源，最多 300 个字符 | 示例设备和链路采用方案研究假设 |
+
+### 窗口、逐图结果与数据收支
+
+结果顶层的 `observationAccess.targetWindows/stationWindows` 各由 `{startSec,endSec,peakSec,peakElevationDeg}` 组成，峰值为各自地面位置所见卫星的最大仰角。`opportunities[]` 含自 1 起的 `id`、自 0 起的目标 `windowIndex` 和计划曝光 `startSec/endSec`。所有 `*Sec` 时刻使用历元后的浮点秒，区间采用左闭右开，动作恰在右端点完成可计入交付。A/B 共用机会、按编号产生的合成真值与筛选抽样。
+
+每方案的 `observation` 含 `strategy`、`images[]`、`metrics` 和 `storageKnots`。每个存储节点为 `[任务秒, 同时事件处理完的占用MB, 至下个节点的斜率MB/s]`。整幅写入使占用上跳，处理完成时筛除或压缩使占用下跳，传输期间按实际速率线性减小，等待时斜率为零。影像含机会标识、`useful`（合成真值）和 `filterKeep`（同一种子的筛选判决）。下表各阶段的空时刻用 null 表示。
+
+| 字段 | 时间与数量语义 |
+| --- | --- |
+| `startSec/endSec`、`captureStartSec/captureStopSec/captureEndSec` | 前两项是计划曝光，后三项是实际开始、结束或中止，以及完整曝光完成。容量溢出也可有完整曝光完成时刻 |
+| `processStartSec/processEndSec`、`processSegments[]` | 首次获电处理与处理完成。每段 `{startSec,endSec,workSec}` 保存连续获电范围及折算成满功率的有效工作秒数 |
+| `readySec`、`transferSegments[]` | 首次进入下传队列。每段 `{startSec,endSec,stationWindowIndex,sentMB}` 保存实际服务区间、从 0 起的站窗编号和该段发送量 |
+| `deliveredSec/latencySec`、`sentMB/remainingMB` | 整幅到站时刻、从完整曝光完成到整幅到站的延迟、累计发送量及截止时仍留在记录器中的数据量 |
+
+| 最终 `status` | `reason` 与判定 |
+| --- | --- |
+| `delivered`、`filteredOut` | 完整到站的 reason 为 null。处理后主动丢弃记为 `filterRejected` |
+| `storageOverflow`、`capturePower` | 分别为整幅写入时空间不足 `storeFull`，或曝光缺电中止 `cameraUnpowered` |
+| `pendingDelay`、`pendingProcessing` | 截止时仍在策略等待期为 `delayAtCutoff`。等待或尚未做完处理为 `processingAtCutoff`，当前图处理期间曾供电受限为 `processorPowerLimited` |
+| `pendingDownlink`、`partialDownlink` | 分别是尚未发送和已部分发送。就绪以后无正时长站窗为 `noStationAfterReady`，链路曾受限供电为 `radioPowerLimited`，其余等待或容量未清空为 `contactCapacityAtCutoff` |
+| `captureIncomplete`、`notReached` | 提前截止时仍在曝光为 `exposureAtCutoff`，尚未开始为 `afterCutoff`。标准整天任务只安排终点以前可以完成的曝光 |
+
+`metrics` 记录机会数、完整曝光及其中有用数（`opportunityCount/capturedCount/usefulCapturedCount`）、完整到站及其中有用数（`deliveredCount/usefulDeliveredCount`）、筛除、写盘溢出、失电错过和待完成数（`discardedCount/overflowCount/powerMissedCount/pendingCount`）。`meanLatencySec/maxLatencySec` 只统计已交付影像，`meanUsefulLatencySec` 只统计其中有用的影像。样本为空时值为 null。
+
+数据账本应满足 `generatedMB = overflowMB + filterFreedMB + sentMB + finalStoredMB`。完整曝光生成的原图计入 `generatedMB`，即使后来因容量不足丢失。`filterFreedMB` 同时包含筛除整幅与压缩节省的数据。`peakStoredMB` 取事件过程内的记录器峰值，`balanceErrorMB` 保留等式两侧的浮点差值。`cameraWh/processorWh/radioWh` 为各设备实际耗电。`unservedDeviceWh` 累积指令需求与实际供电的差额，计入方案总 `unservedWh`。中断曝光的剩余指令时长也计入该差额。`cameraActiveSec`、`processorWorkSec`、`radioActiveSec` 分别记录实际曝光秒数和处理、发送折算的满功率秒数，`processorLimitedSec/radioLimitedSec` 记录当前任务在可工作时段遭遇不足额供电的墙钟秒数。
+
+### 工程产品与时刻回放
+
+工程 CSV 按轨道网格每个时刻一行，默认 5 s。原有通道包括 UTC、经过秒数、EME2000 状态、太阳可见比例、A/B 电量、设备板与外表面温度、可用光伏功率、需求功率、原载荷开关及选配的三轴位置差。启用观测才追加 A/B 各六列，包括 `stored_MB`、`camera_active_W`、`processor_active_W`、`radio_active_W`、`observation_requested_W` 和 `observation_active_W`，列名前缀为 `a_` 或 `b_`。对应 JSON 的 `plans[i].observationSamples.storedMB` 是网格时刻的存量，其余功率是从该行开始直至下一采样的时间平均值。终点功率列为零，终点存量保留真实余量。总 `demand_W` 包含指令需求。
+
+启用观测的任务可用 `--images` 输出逐图阶段 CSV。每个机会、实际曝光、处理段、就绪、传输段、到站或最终处置各占一行，`stage` 依次使用适用的 `opportunity/exposure/processing/ready/downlink/delivered/disposition`。`start_s/end_s` 保留求解器给出的秒数，`start_utc/end_utc` 四舍五入至 1 ms。求总发送量时只累加 `downlink` 行的 `transferred_MB`。各行的 `total_sent_MB/final_remaining_MB/final_status/final_reason` 重复该幅图的终态。
+
+点击窗口、逐图事件或观测任务中的电池过线时刻，三维按该事件秒数取轨迹，数值轨道用局部三次 Hermite，直接 OEM 回放采用原分段及插值定义。电量按网格与 `batteryKnots` 重建，观测数据占用按 `storageKnots` 重建。设备板与外表面温度、设备平均功率对应最近网格的 `sampleSec`，场景时刻另存 `timeSec`。普通时间滑块使用网格采样，电量曲线也绘制网格之间的电池节点。
+
+### 星历、动力学与电热
+
+**星历和残差。** 专业版支持 CCSDS OEM 的 KVN 文本、单个目标、地心 EME2000、UTC，位置 km、速度 km/s。文件最多 8 MiB、100000 个状态。每段独立解析实际可用时段和插值节点；可用时段之间有空档时停止插值。相邻段在同一时刻相接时取后一段状态。可读六分量 PV 和具有加速度的九分量 PVA 记录。显式支持 LINEAR 1 次、LAGRANGE 1–15 次、满足节点及导数要求的 HERMITE（最高 15 次）。未给插值元数据时按节点数选用最多四个 PV 节点的 Hermite，多项式最高 7 次。协方差块执行结构检查并计数，当前产品提供确定性状态与残差。轨迹需在地球外且为有角动量的束缚轨道。其他参考系和时标需要先行转换。[CCSDS Orbit Data Messages](https://ccsds.org/publications/allpubs/entry/3073/)
+
+传播与外部参考存在共同时刻时，`orbitComparison.series[k]` 为「预测减参考」在参考轨迹 R、T、N 三轴的有符号投影，单位 m。R 沿位置，N 沿位置与速度叉积，T = N × R。`rmsM` 为共同采样上三维位置差平方的平均数再开方。`rmsRtnM`、`rmsVelocityMps`、`maxM/maxSec` 和 `peakRtnM` 给出分轴 RMS、三维速度 RMS、位置峰值及其分量。仅比较参考文件覆盖的同历元状态，缺段返回 null。另以文件中的原始节点计算 `native`，对密集数值解作局部三次 Hermite 插值，避免参考星历的区间插值进入这项统计。直接星历回放时 `orbitComparison` 为 null。
+
+轨道导出为 OEM 3.0，默认按 60 秒输出并保留首尾，位置 km、速度 km/s，`ORIGINATOR = STARORBIT`。导出回放时保留有效分段边界。
+
+**动力学与环境。** 笛卡尔 RK4 默认每 2.5 秒推进一次，地球标准引力参数为 398600.4418 km³/s²，J2 为 0.00108262668，固定对称轴取 EME2000 的 z 轴。Harris–Priester 阻力模型按 WGS84 大地高、中等太阳活动密度表、日向凸起和共转大气计算速度差，适用 100–1000 km。球形光压模型取固定反射系数和投影面积、日地距离平方反比与有限日面地影。第三体使用日、月相对于地心的差分引力；星体位置离线由 Astronomy Engine 计算。地影参考球半径 6371 km，1 AU 太阳通量 1361 W/m²。精密预报还需要与具体任务匹配的高阶地球引力、实测地球定向及空间天气、姿态相关面积和机动记录。[Harris–Priester 密度表](https://doi.org/10.1007/978-3-642-58351-3) · [JPL 引力常数](https://ssd.jpl.nasa.gov/astro_par.html)
+
+**内置轨道示例。** 星历来自已归档的中国空间站轨道公告，标识 KJZ / CSS，发布者 BACC。产品生成于 2026-10-19 00:24:27 UTC，有效期 10 月 19 日 00:00 至 26 日 00:00 UTC，共 2521 条原始状态，标称间隔 4 分钟。选择示例时采用首个 UTC 和该时刻的位置速度，任务表中的电热和质量参数仍属于使用者设定的卫星。[中国载人航天工程办公室轨道发布页](https://en.cmse.gov.cn/news/202107/t20210722_48418.html)
+
+**电热耦合。** 每个 5 秒区间使用中点轨道环境。单面帆板按入射余弦与太阳可见比例受光，温度系数为 −0.003/K。光伏先供负载，多余容量用于充电；亏电时使用电池，达到能量下限零后记录未供电量。预留线只触发事件。外表面与帆板共用等效热节点，外表面直接吸收帆板投影上的日照；设备板接收实际负载与电池损耗。两节点以线性热导换热，外表面向 3 K 背景辐射。地球红外取 237 W/m²，反照率取 0.30，使用球体平均地球视因子和当地正太阳高度近似反照。不提取的光伏能量以外表面热量处理。均温节点、理想规定指向及瞬时供电未覆盖结构自遮挡、控制机构动力学、电池电压和倍率、器件热点或材料老化。参数需由实际卫星的数据表与热试验校准。相关工程背景见 [NASA 小卫星热控](https://www.nasa.gov/smallsat-institute/sst-soa/thermal-control/) 和 [Basilisk 姿态与供电算例](https://avslab.github.io/basilisk/examples/scenarioPowerDemo.html)。
+
+## 普通版配置与交换
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 
-本页按本地 v1.36 实现维护，说明文件交换和维护所需的本机接口。格式标识独立于软件显示版本；软件升级不代表所有文件格式同时升级。[架构说明](architecture.md)解释状态归属，[使用手册](../使用说明.md)介绍界面入口。
+普通版的格式与本机接口初始整理基线为本地 v1.36。各交换格式分别维护自己的标识。状态归属与界面入口见[架构说明](architecture.md)和[使用手册](../使用说明.md)。
 
-示例中的轨道是为说明格式生成的合成数据，不能当作任何真实航天器的轨道或观测预报。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
+下文普通版配置与格式示例使用合成轨道数据。上文专业版「空间站轨道示例」的来源与历元单列在该节。没有模型文件的配置示例只通过配置校验，不构成完整航天器交付包。实际导入还会执行文件、像素、解码、任务归属和存储检查。
 
 星图设置新增 `equatorialGrid`、`eclipticLine` 两个布尔类别，均默认 `false`。中西体系共用，场景和环境收藏沿用现有规范化／严格校验；旧数据缺字段时保持关闭，日期取模拟时钟。
 

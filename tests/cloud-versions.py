@@ -1,4 +1,4 @@
-import sys,unittest,tempfile,io,json
+import os,subprocess,sys,unittest,tempfile,json
 from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
@@ -7,8 +7,12 @@ import cloud_history as h
 from cloud_history_service import HistoryService
 
 class VersionsTests(unittest.TestCase):
+ def isolated_history(self):
+  cache = tempfile.TemporaryDirectory()
+  self.addCleanup(cache.cleanup)
+  return HistoryService(cache.name)
  def test_cancel_before_post_response_prevents_late_start(self):
-  service=HistoryService();request_id='a'*32
+  service=self.isolated_history();request_id='a'*32
   self.assertTrue(service.cancel(request_id))
   with patch('cloud_history_service.subprocess.Popen') as spawn:
    job=service.start('2026-10-23','12',request_id)
@@ -87,15 +91,27 @@ class VersionsTests(unittest.TestCase):
     self.assertTrue((rgba[~mask,:3]==0).all())
     self.assertEqual(np.max(np.abs(rgba[:,:,0][mask].astype(int)-shades[mask])),error)
  def test_cancel_cannot_be_overwritten_by_late_result(self):
-  service=HistoryService()
-  class Process:
-   pid=111
-   stdout=io.StringIO('{"result":{"sha256":"late"}}\n')
-   def wait(self,timeout=None):return -15
-  with patch('cloud_history_service.subprocess.Popen',return_value=Process()),patch('cloud_history_service.threading.Thread'):
-   job=service.start('2026-10-23','12')
-  with patch('cloud_history_service.os.killpg') as kill:self.assertTrue(service.cancel(job['id']));kill.assert_called_once()
-  service.run(Process(),job['id']);self.assertEqual(service.snapshot()['state'],'cancelled');service.clear()
+  service=self.isolated_history()
+  # Buffer a result, then deliver it to the service after its own worker has stopped.
+  code = """import time
+print('ready\\n{"result":{"sha256":"late"}}', flush=True)
+time.sleep(60)"""
+  process = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+                             start_new_session=os.name == 'posix')
+  try:
+   self.assertEqual(process.stdout.readline(), 'ready\n')
+   with patch('cloud_history_service.subprocess.Popen',return_value=process),patch('cloud_history_service.threading.Thread'):
+    job=service.start('2026-10-23','12')
+   self.assertTrue(service.cancel(job['id']))
+   self.assertIsNotNone(process.poll())
+   service.run(process,job['id'])
+   self.assertEqual(service.snapshot()['state'],'cancelled');service.clear()
+  finally:
+   if process.poll() is None:
+    process.kill()
+   process.wait(timeout=5)
+   process.stdout.close()
  def test_month_validation(self):
   for month in ['2026/10','../../etc','2026-13']:
    with self.assertRaises(ValueError):v.month_value(month)

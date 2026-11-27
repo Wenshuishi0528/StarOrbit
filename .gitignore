@@ -15,6 +15,7 @@ __pycache__/
 /天宫空间站交互预览.html
 
 /StarOrbit.html
+/StarOrbitPro.html
 
 # Separate historical showcase checkout; keep its Git history outside this repository.
 /publish/

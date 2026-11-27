@@ -27,6 +27,7 @@ class Handler(SimpleHTTPRequestHandler):
   route=urllib.parse.unquote(urllib.parse.urlparse(path).path)
   compact=ROOT/'dist-local'
   if route in ('/','/StarOrbit.html') and (compact/'index.html').is_file():return str(compact/'index.html')
+  if route=='/StarOrbitPro.html' and (compact/'StarOrbitPro.html').is_file():return str(compact/'StarOrbitPro.html')
   if route.startswith('/assets/'):
    candidate=(compact/route.lstrip('/')).resolve()
    if candidate.is_relative_to((compact/'assets').resolve()) and candidate.is_file():return str(candidate)

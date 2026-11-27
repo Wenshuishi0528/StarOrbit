@@ -1,4 +1,5 @@
 import { jsonChunks, embeddedAssetScripts, writeTemplatePayloads } from './scripts/build-payload.mjs';
+import { buildPro } from './scripts/build-pro.mjs';
 import {build} from 'esbuild';import fs from 'node:fs';import zlib from 'node:zlib';import crypto from 'node:crypto';import path from 'node:path';
 const web=process.argv.includes('--web'),split=web||process.argv.includes('--local'),out=web?'dist':'dist-local';
 if(split){fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out+'/assets',{recursive:true});}
@@ -15,6 +16,7 @@ const missionOrbits=Object.fromEntries(Object.entries(MISSIONS).map(([id,x])=>[i
 const music=JSON.parse(fs.readFileSync('assets/music/catalog.json','utf8')).map(({file,...track})=>({...track,...(split?{url:publish(file)}:{base64:fs.readFileSync(file).toString('base64')})}));
 music.push({id:'mission-dfh1-broadcast',title:'东方红一号 · 乐曲与遥测信号',mission:'dfh1',sha256:crypto.createHash('sha256').update(fs.readFileSync('assets/music/dfh1-broadcast.m4a')).digest('hex'),type:'audio/mp4',duration:56.067755,...(split?{url:publish('assets/music/dfh1-broadcast.m4a')}:{base64:fs.readFileSync('assets/music/dfh1-broadcast.m4a').toString('base64')})});
 const app=JSON.parse(fs.readFileSync('package.json','utf8'));
+await buildPro(split?out:'.',app.displayVersion,web);
 const trial=JSON.parse(fs.readFileSync('assets/cloud-trial/manifest.json','utf8'));
 trial.samples=Object.fromEntries(['day','night'].map(kind=>{const file='assets/cloud-trial/'+kind+'.png';return [kind,split?publish(file):'data:image/png;base64,'+fs.readFileSync(file).toString('base64')];}));
 const worklet=await build({entryPoints:['src/dfh1-telemetry-worklet.js'],bundle:true,format:'iife',minify:true,write:false,legalComments:'none'});

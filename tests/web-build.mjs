@@ -3,7 +3,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
+import { parseOem } from '../src/pro/oem.js';
 const output=process.argv[2]||'dist';
+const pro=fs.readFileSync(output+'/StarOrbitPro.html','utf8');
+assert(pro.includes('v'+JSON.parse(fs.readFileSync('package.json')).displayVersion+'</span>')&&!pro.includes('__PRO_JS__'));
+assert(pro.includes('id="earthTexture"')&&pro.includes('id="nightTexture"')&&!/<script\b[^>]*\bsrc=/i.test(pro));
+assert(pro.includes('id="proSolverWorker"'));
+for(const id of ['observationExample','observationReport','obsImageRows','exportObservationCsv']){
+  assert(pro.includes('id="'+id+'"'), 'Missing observation control '+id);
+}
+const embeddedReference=parseOem(pro.match(/<script id="proReferenceExample"[^>]*>([\s\S]*?)<\/script\s*>/)[1]);
+assert.equal(embeddedReference.rowCount,2521);
+assert.equal(embeddedReference.createdMs,Date.parse('2026-10-19T00:24:27Z'));
+assert(fs.readFileSync(output+'/index.html','utf8').includes('href="StarOrbitPro.html"'));
 const html=fs.readFileSync(output+'/index.html','utf8'),data=id=>JSON.parse(html.match(new RegExp('<script id="'+id+'"[^>]*>([\\s\\S]*?)</script>'))[1]);
 assert(Buffer.byteLength(html)<750000);assert(!html.includes('__JS__'));assert(!html.includes('__HELP_'));assert(!html.includes('data:image/jpeg;base64,'));
 function resource(url){assert(url.startsWith('assets/'));assert(!url.includes('..'));const p=path.join(output,url);assert(fs.existsSync(p),url);return fs.readFileSync(p);}

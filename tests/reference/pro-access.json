@@ -1,0 +1,108 @@
+{
+  "epochUtc": "2026-11-25T00:00:00Z",
+  "orbit": {
+    "perigeeKm": 550,
+    "apogeeKm": 550,
+    "inclinationDeg": 51.6,
+    "raanDeg": 150,
+    "argPerigeeDeg": 0,
+    "anomalyDeg": 0
+  },
+  "reference": {
+    "earthOrientation": "ERFA c2t06a IAU 2006/2000A, xp=yp=0, UT1=UTC, EME2000 frame bias",
+    "sun": "ERFA epv00",
+    "orbit": "SciPy DOP853 fixed inertial-z WGS84 J2",
+    "pyerfa": "2.0.1.5",
+    "scipy": "1.18.1",
+    "numpy": "2.5.5"
+  },
+  "observation": {
+    "target": {
+      "name": "青海湖",
+      "latDeg": 36.9,
+      "lonDeg": 100.2,
+      "heightM": 3200
+    },
+    "station": {
+      "name": "北京示例站",
+      "latDeg": 40,
+      "lonDeg": 116,
+      "heightM": 50
+    },
+    "maxOffNadirDeg": 50,
+    "minSunElevationDeg": 10,
+    "minStationElevationDeg": 25,
+    "settlingSec": 8,
+    "exposureSec": 3,
+    "cadenceSec": 20
+  },
+  "baseline": {
+    "targetWindows": [
+      {
+        "startSec": 6477.305381368389,
+        "endSec": 6671.107740565577,
+        "peakSec": 6574.5206482121885,
+        "peakElevationDeg": 61.15557432307549
+      },
+      {
+        "startSec": 30609.184199438103,
+        "endSec": 30816.32332379649,
+        "peakSec": 30712.670622067566,
+        "peakElevationDeg": 89.24069600925306
+      }
+    ],
+    "stationWindows": [
+      {
+        "startSec": 674.040501466641,
+        "endSec": 920.2345716081996,
+        "peakSec": 796.9524048237599,
+        "peakElevationDeg": 46.818529800238124
+      },
+      {
+        "startSec": 6684.406189100802,
+        "endSec": 6872.699847422549,
+        "peakSec": 6778.509023211191,
+        "peakElevationDeg": 33.490664394694555
+      },
+      {
+        "startSec": 24728.748282583158,
+        "endSec": 25004.393955648316,
+        "peakSec": 24867.074808964364,
+        "peakElevationDeg": 70.5070504590331
+      }
+    ],
+    "opportunityCount": 20
+  },
+  "solarCutDeg": 16.083246048383277,
+  "solarLimited": {
+    "targetWindows": [
+      {
+        "startSec": 6574.206560741388,
+        "endSec": 6671.1077405626565,
+        "peakSec": 6574.520265780827,
+        "peakElevationDeg": 61.15557431803841
+      }
+    ],
+    "stationWindows": [
+      {
+        "startSec": 674.040501466641,
+        "endSec": 920.2345716081996,
+        "peakSec": 796.9524048237599,
+        "peakElevationDeg": 46.818529800238124
+      },
+      {
+        "startSec": 6684.406189100802,
+        "endSec": 6872.699847422549,
+        "peakSec": 6778.509023211191,
+        "peakElevationDeg": 33.490664394694555
+      },
+      {
+        "startSec": 24728.748282583158,
+        "endSec": 25004.393955648316,
+        "peakSec": 24867.074808964364,
+        "peakElevationDeg": 70.5070504590331
+      }
+    ],
+    "opportunityCount": 5
+  }
+}

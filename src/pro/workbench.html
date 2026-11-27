@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN"
+  ><head
+    ><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" /><link rel="icon" href="data:," /><title
+      >星轨专业版 · StarOrbit Pro</title
+    >
+    <style>
+      __PRO_CSS__
+    </style></head
+  >
+  <body
+    ><header class="mast"
+      ><div class="brand"
+        ><i class="orbit-mark" aria-hidden="true"></i><h1 data-t="brand">星轨专业版</h1
+        ><span class="version">v__VERSION__</span></div
+      >
+      <nav
+        ><a href="__MAIN_URL__" data-t="explorer">星轨主页</a
+        ><select id="lang" aria-label="Language"
+          ><option value="zh">中文</option
+          ><option value="en">English</option
+          ><option value="ru">Русский</option
+          ><option value="fr">Français</option></select
+        ></nav
+      ></header
+    >
+    <div class="layout"
+      ><aside
+        ><div class="rail-title"><h2 data-t="configuration">任务配置</h2></div>
+        <form id="form" novalidate
+          ><section class="rail-section"
+            ><h3 data-t="spacecraft">卫星</h3>
+            <label class="field"
+              ><span data-t="craftName"></span><input id="craftName" maxlength="60" required
+            /></label>
+            <label class="field"
+              ><span data-t="parameterSource"></span><input id="parameterSource" maxlength="300"
+            /></label>
+            <label class="field"
+              ><span data-t="epochUtc"></span
+              ><input id="epochUtc" type="datetime-local" step="0.001" required
+            /></label>
+            <details class="settings" id="trajectorySettings" open
+              ><summary data-t="orbitSource"></summary>
+              <label class="field"
+                ><span data-t="trajectoryMode"></span
+                ><select id="trajectoryMode"
+                  ><option value="elements" data-t="elements"></option
+                  ><option value="oemInitial" data-t="oemInitial"></option
+                  ><option value="oemReplay" data-t="oemReplay"></option></select
+              ></label>
+              <p class="field-note" id="sourceHint"></p>
+              <div class="file-actions"
+                ><button id="loadOem" type="button" data-t="loadOem"></button
+                ><button id="referenceExample" type="button" data-t="referenceExample"></button
+              ></div>
+              <input id="oemFile" type="file" accept=".oem,.kvn,.txt,text/plain" hidden />
+              <div id="oemInfo" class="oem-info" hidden
+                ><strong id="oemName"></strong><span id="oemObject"></span
+                ><div id="oemMetadata"></div><div id="oemCoverage"></div>
+                <details id="oemSegments" hidden
+                  ><summary id="segmentCount"></summary><pre id="segmentList"></pre>
+                </details>
+                <p data-t="hardwareScope"></p>
+                <div class="file-actions"
+                  ><button id="adoptOemEpoch" type="button" data-t="adoptOemEpoch"></button
+                  ><button id="removeOem" type="button" data-t="removeOem"></button></div
+              ></div>
+            </details>
+            <details class="settings" id="elementsSection" open
+              ><summary data-t="orbit"></summary><div class="form-grid" id="orbitFields"></div
+            ></details>
+            <details class="settings" id="forceSection"
+              ><summary data-t="forceModel"></summary>
+              <label class="field"
+                ><span data-t="gravity"></span
+                ><select id="gravity"
+                  ><option value="j2" data-t="j2"></option
+                  ><option value="twoBody" data-t="twoBody"></option></select
+              ></label>
+              <div class="force-options" id="forceFlags"></div
+              ><div class="form-grid" id="forceFields"></div
+              ><p class="field-note" data-t="forceScope"></p
+            ></details>
+            <details class="settings"
+              ><summary data-t="power"></summary><div class="form-grid" id="powerFields"></div
+            ></details>
+            <details class="settings"
+              ><summary data-t="thermal"></summary
+              ><div class="form-grid" id="thermalFields"></div></details
+          ></section>
+          <section class="rail-section" id="observationSettings">
+            <h3 data-t="observation"></h3>
+            <label class="force-option"
+              ><input
+                id="observationEnabled"
+                type="checkbox"
+                aria-controls="observationFields" /><span data-t="enableObservation"></span
+            ></label>
+            <div id="observationFields" hidden>
+              <details class="settings" open
+                ><summary data-t="obsSites"></summary><div id="obsSites"></div
+              ></details>
+              <details class="settings"
+                ><summary data-t="obsAcquisition"></summary
+                ><div class="form-grid" id="obsAcquisition"></div
+              ></details>
+              <details class="settings"
+                ><summary data-t="obsResources"></summary
+                ><div class="form-grid" id="obsResources"></div
+              ></details>
+              <details class="settings"
+                ><summary data-t="obsFilterModel"></summary
+                ><p class="field-note" data-t="obsModelNote"></p
+                ><div class="form-grid" id="obsFilterModel"></div><div id="obsSourceField"></div
+              ></details>
+            </div>
+          </section>
+          <section class="rail-section"
+            ><h3 data-t="plans"></h3><div id="editTabs" class="tabs wide" role="group"></div
+            ><div id="planForms"></div
+          ></section>
+          <div id="formError" class="error" role="alert" hidden></div
+          ><button id="run" class="primary run" type="submit"
+            ><span aria-hidden="true">▶</span> <span data-t="run"></span
+          ></button>
+          <div id="runStatus" role="status" class="status"></div
+        ></form>
+        <details class="files"
+          ><summary data-t="files"></summary
+          ><div class="file-actions"
+            ><button id="import" data-t="import"></button
+            ><button id="export" data-t="export"></button
+            ><button id="resultFile" data-t="resultFile"></button></div
+          ><input type="file" id="file" accept=".json,application/json" hidden
+        /></details>
+        <details class="files"
+          ><summary data-t="modelTitle"></summary><p data-t="modelNote"></p
+          ><p data-t="modelLimit"></p><p data-t="sourceNote"></p
+          ><p
+            ><a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer"
+              >Solar System Scope</a
+            >
+            ·
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer"
+              >CC BY 4.0</a
+            ></p
+          ></details
+        > </aside
+      ><main>
+        <div class="mission-heading"
+          ><div><h2 data-t="compare">任务对比</h2><p id="missionTitle" class="meta"></p></div
+          ><div class="run-controls"
+            ><button id="observationExample" type="button" data-t="observationExample"></button
+            ><span id="solved" class="state"></span
+            ><button type="submit" id="runTop" form="form" class="primary"
+              ><span aria-hidden="true">▶</span> <span data-t="run"></span></button
+            ><button type="button" id="cancelRun" data-t="cancelRun" hidden></button></div
+        ></div>
+        <section id="replay" class="panel replay" tabindex="-1"
+          ><div class="panel-head"
+            ><h3 data-t="replay"></h3
+            ><div id="cameraTabs" class="tabs">
+              <button type="button" data-mode="orbit" data-t="orbitView"></button
+              ><button type="button" data-mode="craft" data-t="craftView"></button></div
+          ></div>
+          <div class="viewport"
+            ><div class="view-graphic"
+              ><div id="scene" role="img" data-aria="sceneLabel"></div>
+              <div id="sceneError" class="scene-error" role="status" hidden></div
+              ><div id="sceneStamp" class="stamp"></div
+              ><span class="scale-note" data-t="scale"></span
+            ></div>
+            <section class="telemetry"
+              ><div id="replayTabs" class="tabs wide"></div><h4 id="activePlan"></h4
+              ><div class="clock" id="utcClock"></div><div class="meta" id="utcDate"></div
+              ><dl id="readouts"></dl></section
+          ></div>
+          <div class="scrubber"
+            ><button type="button" id="play" data-aria="play">▶</button><span id="elapsed"></span
+            ><input
+              type="range"
+              id="time"
+              min="0"
+              max="86400"
+              step="5"
+              value="0"
+              data-aria="elapsed"
+            /><span>24:00</span></div
+          ><div id="eventDetail" class="event-detail" hidden></div
+        ></section>
+        <section
+          class="panel observation-report"
+          id="observationReport"
+          aria-labelledby="obsReportTitle"
+          hidden
+        >
+          <div class="panel-head"
+            ><div
+              ><h3 data-t="obsReport" id="obsReportTitle"></h3
+              ><p id="obsMissionSites" class="meta"></p></div
+            ><button id="exportObservationCsv" type="button" data-t="exportObservationCsv"></button
+          ></div>
+          <div class="table-scroll"
+            ><table
+              ><caption class="visually-hidden" data-t="obsReport"></caption>
+              <thead
+                ><tr
+                  ><th data-t="plan"></th><th data-t="obsUsefulDelivered"></th
+                  ><th data-t="obsMeanLatency"></th><th data-t="minBattery"></th
+                  ><th data-t="obsPeakTemp"></th><th data-t="obsPeakStore"></th></tr></thead
+              ><tbody id="obsSummary"></tbody></table
+          ></div>
+          <div id="obsDiagnostic" class="obs-diagnostic" role="status"></div>
+          <div id="obsCoverageChart" class="obs-coverage-chart"></div>
+          <details class="obs-details" id="obsAccess"
+            ><summary data-t="obsAccess"></summary><div class="obs-windows" id="obsWindows"></div
+          ></details>
+          <details class="obs-details" id="obsAccounting"
+            ><summary data-t="obsAccounting"></summary
+            ><p id="obsAssumptions" class="obs-assumptions"></p
+            ><div class="table-scroll"
+              ><table
+                ><thead id="obsAccountingHead"></thead
+                ><tbody id="obsAccountingRows"></tbody></table></div
+          ></details>
+          <div class="obs-records">
+            <div class="obs-subhead"
+              ><h4 data-t="obsRecords"></h4
+              ><label class="obs-filter"
+                ><span data-t="obsShow"></span
+                ><select id="obsFilter"
+                  ><option value="all" data-t="obsAll"></option
+                  ><option value="useful" data-t="obsUseful"></option
+                  ><option value="different" data-t="obsDifferent"></option
+                  ><option value="undelivered" data-t="obsUndelivered"></option></select></label
+            ></div>
+            <div class="table-scroll"
+              ><table id="obsImageTable"
+                ><thead
+                  ><tr
+                    ><th data-t="obsImage"></th><th data-t="obsExposureStart"></th
+                    ><th data-t="obsTruth"></th><th>A</th><th>B</th></tr
+                  ></thead
+                ><tbody id="obsImageRows"></tbody></table
+            ></div>
+            <p class="obs-empty" id="obsNoRows" hidden></p>
+            <div class="obs-page" id="obsPage" hidden
+              ><button type="button" id="obsPrev" data-t="obsPrev"></button
+              ><span id="obsPageCount" class="meta"></span
+              ><button type="button" id="obsNext" data-t="obsNext"></button
+            ></div>
+            <section id="obsImageDetail" class="obs-image-detail" hidden
+              ><h4 id="obsImageTitle"></h4><div class="obs-timelines" id="obsTimelines"></div
+            ></section>
+          </div>
+        </section>
+        <section class="panel orbit-comparison" id="orbitComparison"
+          ><div class="panel-head"
+            ><h3 data-t="comparison"></h3>
+            <div class="product-actions"
+              ><button type="button" id="exportOem" data-t="exportOem"></button
+              ><button type="button" id="exportCsv" data-t="exportCsv"></button></div
+          ></div>
+          <div class="comparison-description"
+            ><p id="comparisonState"></p
+            ><button id="replayPeak" type="button" data-t="replayPeak" hidden></button
+          ></div>
+          <div id="residualHistory" hidden
+            ><div class="residual-caption"
+              ><span data-t="signedDifference"></span
+              ><span class="rtn-legend"
+                ><i class="r">R</i><i class="t">T</i><i class="n">N</i></span
+              ></div
+            >
+            <canvas id="residualPlot" data-aria="residualHistory" role="img"></canvas
+          ></div>
+          <div id="comparisonTable" class="table-scroll" hidden
+            ><table
+              ><thead
+                ><tr
+                  ><th data-t="positionDiff"></th><th data-t="norm3d"></th><th data-t="radial"></th
+                  ><th data-t="transverse"></th><th data-t="normal"></th></tr></thead
+              ><tbody id="residuals"></tbody></table></div
+        ></section>
+        <section class="panel"
+          ><div class="panel-head"
+            ><h3 data-t="curves"></h3
+            ><div class="legend"
+              ><span class="a chip">A</span><span class="b chip">B</span
+              ><span class="limit-key" data-t="limitLine"></span></div></div
+          ><div id="charts" class="charts"></div>
+          <div class="table-scroll"
+            ><table
+              ><thead
+                ><tr
+                  ><th data-t="plan"></th><th data-t="minBattery"></th><th data-t="boardRange"></th
+                  ><th data-t="solarUsed"></th><th data-t="unserved"></th></tr></thead
+              ><tbody id="summary"></tbody></table></div
+        ></section>
+        <section class="panel events"
+          ><div class="panel-head"
+            ><h3 data-t="events"></h3><span id="eventCount" class="meta"></span></div
+          ><div id="eventRows"></div></section></main
+    ></div>
+    <dialog id="obsExampleDialog" aria-labelledby="obsExampleTitle">
+      <h3 id="obsExampleTitle" data-t="observationExample"></h3><p data-t="obsExampleDetails"></p>
+      <div class="file-actions"
+        ><button type="button" id="obsExampleCancel" data-t="obsCancel"></button
+        ><button type="button" class="primary" id="obsExampleConfirm" data-t="obsLoad"></button
+      ></div>
+    </dialog>
+    <script id="proReferenceExample" type="text/plain">
+      __PRO_REFERENCE__
+    </script>
+    <script id="proSolverWorker" type="text/plain">
+      __PRO_WORKER__
+    </script>
+    <script id="earthTexture" type="text/plain">
+      __EARTH_IMAGE__</script
+    ><script id="nightTexture" type="text/plain">
+      __NIGHT_IMAGE__</script
+    ><script>
+      __PRO_JS__
+    </script></body
+  ></html
+>

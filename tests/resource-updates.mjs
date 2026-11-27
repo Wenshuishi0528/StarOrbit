@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import fs from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
 const target=new URL('../output/tests/weather-bundle.mjs',import.meta.url);await fs.mkdir(new URL('.',target),{recursive:true});
-await build({entryPoints:['src/weather.js'],bundle:true,platform:'node',format:'esm',outfile:target.pathname,logLevel:'silent'});
+await build({entryPoints:['src/weather.js'],bundle:true,platform:'node',format:'esm',outfile:fileURLToPath(target),logLevel:'silent'});
 const {Weather}=await import(target.href+'?'+Date.now());
 const {WeatherCache}=await import('../src/weather-cache.js');
 const {blobHash}=await import('../src/resource-fetch.js');
