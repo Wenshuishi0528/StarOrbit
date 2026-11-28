@@ -70,6 +70,7 @@ const {
   chineseConstellationArt,
   elevation,
   lunarTerrain,
+  lunarDetail,
   mars,
   satellites,
   earthObservation,
@@ -254,6 +255,23 @@ console.log(
 );
 
 const lunarDEM = JSON.parse(fs.readFileSync('assets/moon/terrain-manifest.json'));
+const lunarColour = JSON.parse(fs.readFileSync('assets/moon/colour-detail.json'));
+assert.equal(
+  lunarDetail.root,
+  `assets/moon/lroc-16k-${lunarColour.sha256RowMajorBytes.slice(0, 16)}`
+);
+assert.equal(lunarDetail.tiles, undefined);
+const colourDigest = crypto.createHash('sha256');
+let colourBytes = 0;
+for (let y = 0; y < lunarColour.rows; y++) {
+  for (let x = 0; x < lunarColour.columns; x++) {
+    const bytes = resource(`${lunarDetail.root}/${y}/${x}.jpg`);
+    colourDigest.update(bytes);
+    colourBytes += bytes.length;
+  }
+}
+assert.equal(colourBytes, lunarColour.bytes);
+assert.equal(colourDigest.digest('hex'), lunarColour.sha256RowMajorBytes);
 assert(resource(lunarTerrain.url).equals(fs.readFileSync(lunarDEM.file)));
 assert.equal(
   zlib.gunzipSync(resource(lunarTerrain.url)).byteLength,
@@ -263,6 +281,7 @@ for (const file of [
   'README.md',
   'SCIENCE.md',
   'terrain-manifest.json',
+  'colour-detail.json',
   'lola-720x360.i16.gz',
   'lroc-color-2k.jpg',
 ])

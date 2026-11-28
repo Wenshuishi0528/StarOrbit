@@ -2,12 +2,14 @@ import assert from 'node:assert/strict';
 import { DEEP_SKY_OBJECTS } from '../src/deep-sky-catalog.js';
 import { getSkyCulture } from '../src/sky-cultures.js';
 import readings from '../src/western-constellation-reading-data.json' with { type: 'json' };
+import histories from '../src/western-constellation-history.json' with { type: 'json' };
 import { readWesternConstellation } from '../src/western-constellation-reading.js';
 
 const constellations = getSkyCulture('western').asterisms;
 const languages = ['zh', 'en', 'fr', 'ru'];
 const paragraphs = new Set();
 const chartPages = new Set();
+const historyPages = new Set();
 const namedObjects = new Set();
 const catalog = new Map();
 for (const object of DEEP_SKY_OBJECTS) {
@@ -22,20 +24,39 @@ assert.deepEqual(
   new Set(Object.keys(readings)),
   new Set(constellations.map((record) => record.id))
 );
+assert.deepEqual(new Set(Object.keys(readings)), new Set(Object.keys(histories)));
 for (const record of constellations) {
   let objects;
   let chart;
   for (const lang of languages) {
     const label = `${record.id} · ${lang}`;
-    const { description, link } = readWesternConstellation(record, lang);
-    assert.equal(description, description.trim(), label);
-    assert.ok(!paragraphs.has(description), label);
-    paragraphs.add(description);
-    assert.doesNotMatch(description, /[<>\r\n]/, label);
-    assert.match(description, lang === 'zh' ? /。$/ : /\.$/, label);
-    const length = Array.from(description).length;
-    if (lang === 'zh') assert.ok(length >= 70 && length <= 150, label);
-    else assert.ok(length >= 170, label);
+    const { description, observing, detail, link, sources } = readWesternConstellation(
+      record,
+      lang
+    );
+    assert.equal(description, histories[record.id][lang], label);
+    assert.equal(observing, readings[record.id][lang], label);
+    for (const paragraph of [description, observing]) {
+      assert.equal(paragraph, paragraph.trim(), label);
+      assert.ok(!paragraphs.has(paragraph), label);
+      paragraphs.add(paragraph);
+      assert.doesNotMatch(paragraph, /[<>\r\n]/, label);
+      assert.match(paragraph, lang === 'zh' ? /。$/ : /\.$/, label);
+      const length = Array.from(paragraph).length;
+      if (lang === 'zh') assert.ok(length >= 70 && length <= 150, label);
+      else assert.ok(length >= 170, label);
+    }
+    if (histories[record.id].detail) {
+      assert.equal(detail, histories[record.id].detail[lang], label);
+      assert.ok(detail && detail !== description && detail !== observing, label);
+    }
+    assert.ok(sources[0].name.includes('All Skies Encyclopaedia'), label);
+    assert.equal(new URL(sources[0].url).hostname, 'ase.exopla.net', label);
+    for (const ref of sources) {
+      assert.ok(ref.name.trim(), label);
+      assert.equal(new URL(ref.url).protocol, 'https:', label);
+    }
+    historyPages.add(sources[0].url);
     const source = new URL(link.url);
     assert.equal(source.host, 'commons.wikimedia.org', label);
     const title = readings[record.id].chart;
@@ -48,7 +69,7 @@ for (const record of constellations) {
     if (chart) assert.equal(link.url, chart, label);
     chart = link.url;
 
-    const references = [...description.matchAll(/(?:NGC\s*\d+|M\s*\d+)/g)]
+    const references = [...observing.matchAll(/(?:NGC\s*\d+|M\s*\d+)/g)]
       .map((m) => m[0].replaceAll(' ', ''))
       .sort();
     if (objects) assert.deepEqual(references, objects, label);
@@ -60,22 +81,31 @@ for (const record of constellations) {
   }
   chartPages.add(chart);
 }
-assert.equal(paragraphs.size, 352);
+assert.equal(paragraphs.size, 704);
 assert.equal(chartPages.size, 88);
+assert.equal(historyPages.size, 88);
 assert.ok(namedObjects.size >= 65);
 
 const orion = constellations.find((record) => record.id === 'Ori');
-assert.equal(readWesternConstellation(orion).description, readings.Ori.zh);
-assert.equal(readWesternConstellation(orion, 'fr-CA').description, readings.Ori.fr);
-assert.equal(readWesternConstellation(orion, 'de').description, readings.Ori.en);
+assert.equal(readWesternConstellation(orion).description, histories.Ori.zh);
+assert.equal(readWesternConstellation(orion, 'fr-CA').description, histories.Ori.fr);
+assert.equal(readWesternConstellation(orion, 'de').description, histories.Ori.en);
+assert.match(readWesternConstellation(orion).description, /猎人.*俄里翁/);
+assert.match(readWesternConstellation(orion).detail, /M42.*原行星盘/);
+assert.match(readWesternConstellation({ id: 'Ant' }).description, /气泵.*拉卡伊/);
+assert.match(readWesternConstellation({ id: 'Lyr' }).description, /里拉琴.*俄耳甫斯/);
+assert.match(readWesternConstellation({ id: 'Boo' }).sources[0].url, /\/Bootes$/);
 assert.equal(readWesternConstellation({ ...orion, culture: 'chinese' }), null);
 for (const invalid of [null, {}, { id: 'constructor' }, { id: 'XYZ' }])
   assert.equal(readWesternConstellation(invalid), null);
 for (const lang of languages) {
   const serpens = readWesternConstellation({ id: 'Ser' }, lang);
-  assert.match(serpens.description, /M5\b/);
-  assert.match(serpens.description, /M16\b/);
+  assert.match(serpens.description, /Serpens Caput/);
+  assert.match(serpens.description, /Serpens Cauda/);
+  assert.match(serpens.observing, /M5\b/);
+  assert.match(serpens.observing, /M16\b/);
   assert.match(serpens.link.name, /Serpens Caput/);
+  assert.ok(serpens.sources.some((ref) => ref.name.includes('Serpens Cauda')));
 }
 
 console.log(

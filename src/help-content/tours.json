@@ -43,7 +43,7 @@
     },
     "sky-image": {
       "title": "用不同的望远镜影像看星空",
-      "text": "在「星空影像」选「DSS 光学」，放大后切到「Pan-STARRS 光学」，比较同一天区。点「浏览星空影像」，搜索「宇宙悬崖」，查看韦伯拍到的星云。"
+      "text": "在「星空影像」选「DSS 光学」，放大后切到「Pan-STARRS 光学」，比较同一天区。点「浏览星空影像与资料」，搜索「宇宙悬崖」，查看韦伯拍到的星云。"
     },
     "xuntian": {
       "title": "用巡天看星空，也看城市",
@@ -127,7 +127,7 @@
     },
     "sky-image": {
       "title": "Compare telescope surveys",
-      "text": "Select DSS optical, zoom in, and switch to Pan-STARRS optical to compare the same field. Open Browse sky imagery and search for Cosmic Cliffs to see the Webb observation."
+      "text": "Select DSS optical, zoom in, and switch to Pan-STARRS optical to compare the same field. Open Browse sky images and reference and search for Cosmic Cliffs to see the Webb observation."
     },
     "xuntian": {
       "title": "Aim Xuntian at a star and a city",
@@ -211,7 +211,7 @@
     },
     "sky-image": {
       "title": "Comparer des relevés du ciel",
-      "text": "Sélectionnez DSS optique, zoomez puis passez à Pan-STARRS optique pour comparer le même champ. Dans le catalogue d’images du ciel, recherchez « Cosmic Cliffs » pour voir cette observation de Webb."
+      "text": "Sélectionnez DSS optique, zoomez puis passez à Pan-STARRS optique pour comparer le même champ. Dans « Images et documentation du ciel », recherchez « Cosmic Cliffs » pour voir cette observation de Webb."
     },
     "xuntian": {
       "title": "Pointer Xuntian vers une étoile et une ville",
@@ -295,7 +295,7 @@
     },
     "sky-image": {
       "title": "Сравните снимки разных обзоров неба",
-      "text": "Выберите оптический обзор DSS, увеличьте масштаб и переключитесь на Pan-STARRS для сравнения того же участка неба. В каталоге изображений найдите Cosmic Cliffs, чтобы увидеть снимок телескопа «Уэбб»."
+      "text": "Выберите оптический обзор DSS, увеличьте масштаб и переключитесь на Pan-STARRS для сравнения того же участка неба. В разделе «Изображения и справочник неба» найдите Cosmic Cliffs, чтобы увидеть снимок телескопа «Уэбб»."
     },
     "xuntian": {
       "title": "Наведите Сюньтянь на звезду и на город",

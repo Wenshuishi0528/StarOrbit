@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createLunarDetail, lunarDetailGLSL } from './lunar-detail.js';
 import {
   createLunarPlaceIndex,
   layoutLunarPlaces,
@@ -20,6 +21,7 @@ void main(){texUV=uv;point=position;normalWorld=normal;heightKm=elevationKm;gl_P
 const fragment = `uniform sampler2D surfaceMap;uniform bool textured,elevationLayer,atlasMode,geologyLayer;
 uniform vec3 sunPosition,earthPosition;uniform float lunarCoreRadiusKm;uniform vec3 palette0,palette1,palette2,palette3,palette4;
 varying vec2 texUV;varying vec3 point,normalWorld;varying float heightKm;
+${lunarDetailGLSL}
 float sunlight(vec3 s,vec3 e){float a=asin(clamp(695700./length(s),0.,1.)),b=asin(clamp(6371./length(e),0.,1.));
 float d=atan(length(cross(normalize(s),normalize(e))),dot(normalize(s),normalize(e)));
 if(d>=a+b)return 1.;if(d<=b-a)return 0.;if(d<=a-b)return clamp(1.-b*b/(a*a),0.,1.);
@@ -37,7 +39,7 @@ float reflection=.6*incidence+.4*(2.*incidence/max(.0001,incidence+emission));fl
 // Atlas fill light is an explicitly labelled inspection aid. Observe never
 // receives fill light, earthshine, a painted phase mask or simulated red eclipse light.
 if(atlasMode)light=max(.25,light);
-vec3 albedo=elevationLayer?elevationColor(heightKm):(textured?texture2D(surfaceMap,texUV).rgb:vec3(.2));
+vec3 albedo=elevationLayer?elevationColor(heightKm):lunarAlbedo(texUV,textured?texture2D(surfaceMap,texUV).rgb:vec3(.2));
 if(geologyLayer){vec4 geology=texture2D(surfaceMap,texUV);albedo=mix(vec3(.12),geology.rgb,geology.a);light=.82+.18*emission;}
 gl_FragColor=vec4(albedo*light,1.);
 if(!geologyLayer){
@@ -109,7 +111,9 @@ export function createLunarRenderer(
   controls.minDistance = 1.08;
   controls.maxDistance = 10;
   controls.zoomSpeed = 0.6;
+  const detail = createLunarDetail(assets.lunarDetail, () => invalidate());
   const uniforms = {
+    ...detail.uniforms,
     surfaceMap: { value: null },
     textured: { value: false },
     elevationLayer: { value: false },
@@ -183,6 +187,7 @@ export function createLunarRenderer(
     triangles: mesh.geometry.index.count / 3,
     relief: uniforms.atlasMode.value && lastState?.relief === 8 ? 8 : 1,
     annotations: { ...annotationStats },
+    lunarDetail: detail.status,
   });
   const invalidate = () => {
     if (!disposed && !rendering && !internal) onInvalidate();
@@ -511,6 +516,7 @@ export function createLunarRenderer(
         !validVector(frame?.sunDirectionBody) ||
         !validVector(frame?.earthDirectionBody)
       ) {
+        detail.update(null);
         renderer.clear();
         labelsElement.hidden = true;
         return;
@@ -556,6 +562,24 @@ export function createLunarRenderer(
       uniforms.atlasMode.value = mode === 'atlas';
       uniforms.elevationLayer.value = state.layer === 'elevation' && status.terrain === 'ready';
       uniforms.geologyLayer.value = state.layer === 'geology';
+      const relief = mode === 'atlas' && state.relief === 8 ? 8 : 1;
+      const overview = mode === 'observe' ? observeZoom <= 1 : camera.position.length() >= 3.15;
+      if (overview || state.layer === 'geology' || state.layer === 'elevation') {
+        detail.update(null);
+      } else {
+        const basis = camera.matrixWorld.elements;
+        const tanY = 1 / camera.projectionMatrix.elements[5];
+        detail.update({
+          eye: camera.position.toArray(),
+          right: basis.slice(0, 3),
+          up: basis.slice(4, 7),
+          forward: basis.slice(8, 11).map((x) => -x),
+          tanY,
+          tanX: tanY * camera.aspect,
+          height: canvas.height,
+          relief: relief * 0.0065,
+        });
+      }
       if (state.layer === 'geology') {
         loadGeology();
         if (status.geology !== 'ready') {
@@ -571,7 +595,6 @@ export function createLunarRenderer(
         uniforms.surfaceMap.value = texture;
         uniforms.textured.value = status.texture === 'ready';
       }
-      const relief = mode === 'atlas' && state.relief === 8 ? 8 : 1;
       // 0.2 km margin keeps the core inside the triangulated 0.5-degree mesh.
       uniforms.lunarCoreRadiusKm.value = R + minimumHeightKm * relief - 0.2;
       if (data) {
@@ -648,6 +671,7 @@ export function createLunarRenderer(
   }
   function lost(event) {
     event.preventDefault();
+    detail.update(null);
     status.context = 'lost';
     status.error = 'WebGL context lost';
     invalidate();
@@ -667,6 +691,7 @@ export function createLunarRenderer(
   function dispose() {
     if (disposed) return;
     disposed = true;
+    detail.dispose();
     abort.abort();
     resize.disconnect();
     controls.removeEventListener('change', invalidate);
@@ -698,6 +723,8 @@ export function createLunarRenderer(
     render,
     resetView,
     focusFeature,
+    suspendDetail: () => detail.update(null),
+    waitForDetail: () => detail.ready(),
     getStatus,
     annotationCanvas: labelsElement,
     retryGeology: () => loadGeology(true),

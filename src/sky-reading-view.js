@@ -2,6 +2,7 @@ import { getLanguage, t } from './i18n.js';
 import { ensureSkyCulture, getSkyCulture, cultureObjectLabel } from './sky-cultures.js';
 import { getXuntianTarget } from './xuntian-catalog.js';
 import { lazyData } from './lazy-data.js';
+import { deepSkyReadingId } from './deep-sky-catalog.js';
 
 const readers = {
   western: lazyData(() => import('./western-constellation-reading.js')),
@@ -9,6 +10,12 @@ const readers = {
   objects: lazyData(() => import('./sky-object-card.js')),
 };
 const knownTypes = new Set(['star', 'deep-sky', 'solar', 'asterism', 'constellation', 'sky-group']);
+
+export function readingTargetId(id) {
+  return id.startsWith('deep-sky:')
+    ? 'deep-sky:' + deepSkyReadingId(id.slice(9)).toLowerCase()
+    : id;
+}
 
 export function formationSubject(record, language = getLanguage()) {
   if (!record) return null;
@@ -47,15 +54,28 @@ export async function skyReadingFor(target, culture, language, hit) {
   }
   const { catalogCard } = await readers.objects.load();
   const resolved =
-    target.type === 'solar' ? target : getXuntianTarget(target.id, language, culture) || target;
-  return catalogCard(resolved, hit, language);
+    target.type === 'solar'
+      ? target
+      : getXuntianTarget(readingTargetId(target.id), language) || target;
+  return catalogCard(
+    target.asterisms ? { ...resolved, asterisms: target.asterisms } : resolved,
+    hit,
+    language
+  );
 }
 
 // A selected target, region and catalogue object share one reader. Opening an
 // article never selects its subject in the instrument or changes its clock.
 export function bindSkyReading(
   host,
-  { inline = false, expanded = false, sourcesOpen = false } = {}
+  {
+    inline = false,
+    expanded = false,
+    sourcesOpen = false,
+    openSections = [],
+    heading,
+    summaryLabel,
+  } = {}
 ) {
   const node = document.createElement(inline ? 'div' : 'details');
   node.className = 'sky-reading';
@@ -64,6 +84,12 @@ export function bindSkyReading(
   if (summary) {
     node.append(summary);
     node.open = expanded;
+  }
+  if (heading) {
+    const title = document.createElement('h4');
+    title.className = 'sky-reading-heading';
+    title.textContent = heading;
+    node.append(title);
   }
   const content = document.createElement('div');
   node.append(content);
@@ -81,7 +107,29 @@ export function bindSkyReading(
     para.textContent = article?.description || t('此位置没有已收录的天体简介。');
     content.append(para);
     if (!article) return;
-    if (article.facts?.length || article.link) {
+    for (const [key, label] of [
+      ['detail', '深入了解'],
+      ['observing', '怎样观察'],
+    ]) {
+      if (!article[key] || article[key] === article.description) continue;
+      const section = document.createElement('details');
+      section.className = 'sky-reading-section sky-reading-' + key;
+      section.dataset.readingSection = key;
+      section.open = openSections.includes(key);
+      const caption = document.createElement('summary');
+      caption.textContent = t(label);
+      section.append(caption);
+      for (const part of [].concat(article[key])) {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = part;
+        section.append(paragraph);
+      }
+      content.append(section);
+    }
+    const sources = new Map();
+    for (const source of [article.link, ...(article.sources || [])])
+      if (source?.url && !sources.has(source.url)) sources.set(source.url, source);
+    if (article.facts?.length || sources.size) {
       const details = document.createElement('details'),
         caption = document.createElement('summary');
       details.className = 'sky-reading-sources';
@@ -99,10 +147,10 @@ export function bindSkyReading(
         }
         details.append(list);
       }
-      if (article.link) {
+      for (const source of sources.values()) {
         const link = document.createElement('a');
-        link.href = article.link.url;
-        link.textContent = article.link.name;
+        link.href = source.url;
+        link.textContent = source.name || source.url;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
         details.append(link);
@@ -154,7 +202,7 @@ export function bindSkyReading(
         return;
       }
       node.dataset.skyReading = subject.id;
-      if (summary) summary.textContent = t('关于{name}', { name: subject.name });
+      if (summary) summary.textContent = t(summaryLabel || '关于{name}', { name: subject.name });
       load();
     },
   };

@@ -33,9 +33,14 @@ function checkProfile(read) {
   for (const lang of langs) {
     const card = read(lang);
     assert(card.description.length >= (lang === 'zh' ? 45 : 100));
+    assert(card.detail.length >= (lang === 'zh' ? 20 : 60));
+    assert.notEqual(card.detail, card.description);
     assert.doesNotMatch(card.description, /\{[^}]*\}|undefined|\bNaN\b/);
+    assert.doesNotMatch(card.detail, /\{[^}]*\}|undefined|\bNaN\b/);
     assert.equal(new URL(card.link.url).protocol, 'https:');
     assert(card.link.name);
+    assert.equal(card.sources[0].url, card.link.url);
+    for (const source of card.sources) assert.equal(new URL(source.url).protocol, 'https:');
     translations.add(card.description);
     assert(!descriptions.has(card.description), 'repeated prose for two distinct objects');
     descriptions.add(card.description);
@@ -53,6 +58,9 @@ assert.match(readCatalogStar({ id: 'hip:32349' }, {}, 'en').description, /white 
 assert.match(readCatalogStar({ id: 'hip:7588' }, {}, 'fr').description, /équateur/);
 assert.match(readCatalogStar({ id: 'hip:65474' }, {}, 'ru').description, /спектральные/);
 assert.match(readCatalogStar({ id: 'hip:36850' }, {}).description, /六颗/);
+const algol = readCatalogStar({ id: 'hip:14576' }, {});
+assert.match(algol.description, /三星系统.*食变星/);
+assert.match(algol.detail, /2\.87.*光变曲线/);
 
 assert.deepEqual(Object.keys(solarBodyProfiles).sort(), [...solar].sort());
 for (const body of solar) {
@@ -84,20 +92,24 @@ const hit = {
   distanceLightYears: 3261.56 / parallaxByHip.get(id),
 };
 const plain = readCatalogStar(target, hit, 'en');
-assert.match(plain.description, /dark sky|dark,? sky/i);
-assert.match(plain.description, /red side.*Sun/);
-assert.match(plain.description, /light-years/);
+assert.match(plain.description, new RegExp('HIP ' + id));
+assert.match(plain.observing, /dark sky|dark,? sky/i);
+assert.match(plain.detail, /red side.*Sun/);
+assert.match(plain.detail, /light-years/);
 assert.equal(new URL(plain.link.url).searchParams.get('HIP'), String(id));
 const noMeasures = readCatalogStar(target, { magnitude: NaN, bv: null, distanceLightYears: -1 });
 assert.doesNotMatch(noMeasures.description, /B−V|光年|NaN/);
-assert.match(noMeasures.description, /可靠的距离测量/);
+assert.match(noMeasures.detail, /可靠的距离测量/);
 
 for (const obj of chinese.otherStars) {
   assert(obj.colorUnavailable);
   // The colour in the Chinese data file is a plotting placeholder, not a published B−V.
   const card = readCatalogStar(obj, { magnitude: obj.mag, bv: Number(obj.bv) }, 'en');
-  assert.match(card.description, /broad G band/);
-  assert.doesNotMatch(card.description, /B−V|light-years|red side|blue side|unaided eye/);
+  assert.match(card.detail, /broad G band/);
+  assert.doesNotMatch(
+    card.description + card.detail,
+    /B−V|light-years|red side|blue side|unaided eye/
+  );
   assert.equal(new URL(card.link.url).searchParams.get('Source'), obj.id.slice(5));
 }
 const field = SURVEY_FIELDS[0],
@@ -107,7 +119,7 @@ const row = rows[i];
 const point = { id: 'tycho:' + field.id + ':' + i, direction: fieldRay(field, row.x, row.y) };
 const tycho = readCatalogStar(point, { magnitude: row.magnitude, bv: row.bv }, 'en');
 assert.match(tycho.description, /Vₜ band/);
-assert.match(tycho.description, /approximate B−V/);
+assert.match(tycho.detail, /approximate B−V/);
 const cone = new URL(tycho.link.url);
 assert.equal(cone.searchParams.get('-source'), 'I/259/tyc2');
 assert.match(cone.searchParams.get('-c'), /^\d+\.\d+ -?\d+\.\d+$/);

@@ -74,6 +74,51 @@ dialog.sky-image-gallery {
 .sig-tools select {
   width: auto;
 }
+.sig-reference-count {
+  margin: 0 0 8px;
+}
+.sig-reference-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 7px;
+}
+.sky-image-gallery .sig-reference-card {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  padding: 10px 12px;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.sig-reference-card:focus-visible,
+.sig-reference-card:hover {
+  border-color: #75b7bf;
+}
+.sig-reference-detail {
+  max-width: 68ch;
+  margin: 1.2rem auto;
+}
+.sig-reference-detail h3 {
+  margin: 0.15rem 0 0.8rem;
+  font-size: 1.35rem;
+  overflow-wrap: anywhere;
+}
+.sig-reference-detail .sky-reading,
+.sig-reference-detail .sky-reading-prose {
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+.sig-reference-detail .sky-reading-section,
+.sig-reference-related {
+  border-top: 1px solid #304657;
+  padding-block: 0.55rem;
+}
+.sig-reference-related {
+  margin-top: 1rem;
+}
+.sig-reference-related summary {
+  margin-bottom: 0.3rem;
+}
 .sig-scroll {
   min-height: 0;
   flex: 1;

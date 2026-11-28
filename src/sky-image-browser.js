@@ -98,7 +98,7 @@ export function mountSkyImageBrowser(env) {
     openSkyOfflineDownload(env, plan, { opener: document.activeElement });
   }
 
-  // 哈勃作品随档案按需加载：首次打开图集前加载，完成后并入作品列表。
+  // 影像目录在首次浏览时并入哈勃作品，天体资料可以独立打开。
   let works = WEBB_ARTWORKS;
   function loadHubble() {
     return skyDetail.loadHubble().then((archive) => {
@@ -109,6 +109,7 @@ export function mountSkyImageBrowser(env) {
   const browser = mountSkyImageGallery({
     providers: () => skyDetail.providers,
     works: () => works,
+    loadWorks: loadHubble,
     onLocate: locate,
     canLocate,
     onSave: saveEntry,
@@ -118,12 +119,6 @@ export function mountSkyImageBrowser(env) {
       (entry.kind !== 'work' || !!providerFor(entry)?.plate),
     getSavedPreview: (entry) => skyDetail.offline.get('thumbnail:' + entry.source + ':' + entry.id),
   });
-  // 打开图集前等待哈勃档案；加载失败时仍打开其余影像，下次打开再重试。
-  const openGallery = browser.open;
-  browser.open = (options = {}) => {
-    const opener = options.opener || document.activeElement;
-    return loadHubble().then(() => openGallery({ ...options, opener }));
-  };
   for (const [id, context] of [
     ['xtSkyImageBrowse', 'xuntian'],
     ['skyImageBrowse', 'main'],

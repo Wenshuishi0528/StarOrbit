@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { cross, dot } from './orbit.js';
+import { lunarDetailGLSL } from './lunar-detail.js';
 
 export const cameraComponents = (v, axes) => [
   dot(v, axes.right),
@@ -12,6 +13,9 @@ export const solarDiscGLSL = `
 uniform vec3 direction,pole,prime,east,sun,tint;
 uniform float radius,isSun,isSaturn,hasMap,hasRing;
 uniform sampler2D surface,ring;
+#ifdef LUNAR_DETAIL
+${lunarDetailGLSL}
+#endif
 vec4 solarDisc(vec3 ray,float nightLight){
  // Express the vector from the sphere centre to the closest ray point
  // in body radii. Cross products retain precision at narrow fields.
@@ -23,6 +27,9 @@ vec4 solarDisc(vec3 ray,float nightLight){
  vec2 uv=vec2(.5+atan(dot(n,east),dot(n,prime))/6.2831853,.5+asin(clamp(dot(n,pole),-1.,1.))/3.14159265);
  vec3 albedo=tint;
  if(hasMap>.5)albedo=texture2D(surface,uv).rgb;
+ #ifdef LUNAR_DETAIL
+ albedo=lunarAlbedo(uv,albedo);
+ #endif
  float lighting=max(dot(n,sun),0.);
  vec3 surfaceLight=isSun>.5?mix(vec3(2.3),vec3(4.8),front)*mix(vec3(1.),albedo,.25):albedo*(nightLight+1.65*sqrt(lighting));
  vec3 light=surfaceLight*cover;

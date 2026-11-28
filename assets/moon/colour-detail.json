@@ -1,0 +1,18 @@
+{
+  "edition": "NASA SVS CGI Moon Kit, December 2025 LROC colour",
+  "source": {
+    "official": "https://svs.gsfc.nasa.gov/4720/",
+    "jpeg": "https://raw.githubusercontent.com/kvsankar/moon-mission/5d63408bdd826df38e100c7bc90c0b7cb3524beb/images/moon/lroc_color_2025_16k_quality.jpg",
+    "sha256": "14ba95e251dd444ad408df91a7004ee1801c333f0fa8f963be0db692a00e4ebe",
+    "bytes": 20377650
+  },
+  "width": 16384,
+  "height": 8192,
+  "columns": 32,
+  "rows": 16,
+  "tileSize": 512,
+  "gutter": 8,
+  "filePattern": "lroc-16k/{y}/{x}.jpg",
+  "bytes": 21284527,
+  "sha256RowMajorBytes": "00ce828659e262961804e3c9220ce7bb3b45abca2e695b9aa0d7b9482531b7a6"
+}

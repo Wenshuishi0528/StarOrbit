@@ -627,12 +627,17 @@ export function mountLunarLab(container, sim) {
     captureBusy = true;
     capture.disabled = true;
     stop();
-    const capturedTime = time,
-      capturedMode = ui(prefs.mode === 'atlas' ? 'atlasBadge' : 'observe'),
-      capturedLayer = ui(prefs.layer),
-      capturedRelief = prefs.mode === 'observe' ? 1 : prefs.relief,
-      capturedSite = { ...site };
     try {
+      viewer.render(renderOptions());
+      await viewer.waitForDetail();
+      if (!visible || disposed) return;
+      // The view can change while the requested tiles arrive. Capture the
+      // current image and its matching caption together at the actual shutter.
+      const capturedTime = time,
+        capturedMode = ui(prefs.mode === 'atlas' ? 'atlasBadge' : 'observe'),
+        capturedLayer = ui(prefs.layer),
+        capturedRelief = prefs.mode === 'observe' ? 1 : prefs.relief,
+        capturedSite = { ...site };
       viewer.render(renderOptions());
       const out = document.createElement('canvas');
       out.width = canvas.width;
@@ -715,6 +720,7 @@ export function mountLunarLab(container, sim) {
   }
   function suspend() {
     visible = false;
+    viewer?.suspendDetail();
     stop();
     persist();
   }

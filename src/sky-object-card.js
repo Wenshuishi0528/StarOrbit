@@ -18,8 +18,9 @@ export function catalogCard(target, hit = {}, lang = getLanguage()) {
   const facts = [];
   let article;
   if (target.type === 'star') {
-    const values = { ...target, ...stellarDistance(target.id), ...hit };
-    article = readCatalogStar(target, values, lang);
+    const catalogueValues = { ...target, ...stellarDistance(target.id) };
+    const values = { ...catalogueValues, ...hit };
+    article = readCatalogStar(target, catalogueValues, lang);
     const catalogue = target.id.startsWith('hip:')
       ? 'Hipparcos'
       : target.id.startsWith('gaia:')

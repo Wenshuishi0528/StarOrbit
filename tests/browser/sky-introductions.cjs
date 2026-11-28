@@ -107,10 +107,12 @@ async function main() {
     await click('#xtPin');
     assert.equal(await page.evaluate(() => viewer.sim.xuntian.pointing.mode), 'free');
     await selectFinder('Orion', 'constellation:Ori');
-    await article('#xtTargetReading', 'constellation:Ori', /腰带.*M42/);
+    await article('#xtTargetReading', 'constellation:Ori', /猎人.*腰带/);
+    await expand('#xtTargetReading .sky-reading-observing');
+    assert.match(await page.locator('#xtTargetReading .sky-reading-observing p').innerText(), /腰带.*M42/);
     for (const [button, lang, word] of [
       ['#languageEn', 'en', /belt/i],
-      ['#languageFr', 'fr', /ceinture/i],
+      ['#languageFr', 'fr', /baudrier/i],
       ['#languageRu', 'ru', /пояс/i],
     ]) {
       await click(button);

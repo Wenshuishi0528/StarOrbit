@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v1.73 · 2026-11-28
+
+巡天和地面观星右击天体即可阅读它的来历、科学特点和观测线索。「浏览星空影像与资料」新增可按名称、别名、星表编号和类别查找的「天体资料」。两个入口共用正文，阅读时保留望远镜指向。218 项默认回归通过，并在网页与断网单文件中核验了两个入口。[验收记录](docs/verification.md#v173-天体资料与右键阅读)
+
+Right-click an object in Xuntian or the ground telescope to read about its identity, history and observable features. The image browser now includes a searchable object reference. Both entry points open the same article and preserve telescope pointing. All 218 default regressions passed, and both the web build and offline standalone viewer were checked.
+
+## v1.72 · 2026-11-28 · 本机版 / Local build
+
+巡天取景与月球观测共用内置的 16K 可见光月面影像。远景显示原有的 2K 底图，放大环形山时自动加载当前区域的细节。桌面版可离线查看整个月球，网页版按视野读取相同切片。217 项回归通过，已核对同视角坑缘细节及两处照片导出。[本机验收](docs/verification.md#v172-月面高清细节)
+
+The Xuntian finder and lunar observatory share a bundled 16K visible-light Moon map. Wide views use the existing 2K map. Zooming in loads detail for the visible region. The desktop edition includes the entire Moon offline, and the web build serves the same tiles on demand. All 217 regression checks passed. Browser checks covered crater detail and photo exports in both views.
+
 ## v1.71 · 2026-11-28
 
 天体卡片打开即显示成段介绍。88 个西方星座、中国星官及所属天区、亮星和太阳系天体都有四语导读，普通星表与深空目标按各自资料解释。巡天右键「对准并固定十字线」会锁定天球方向并保持倍率。216 项默认回归通过，并在浏览器核验断网阅读与轨道推进后的实际光轴。[验收记录](docs/verification.md#v171-天体简介与巡天指向)

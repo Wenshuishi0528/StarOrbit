@@ -219,3 +219,25 @@ details.sky-reading {
 .sky-reading a {
   color: #b0e4e1;
 }
+.sky-reading-heading {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: #b2d9df;
+}
+.sky-reading-section > summary,
+.sig-reference-related > summary {
+  color: #a8ded7;
+  cursor: pointer;
+}
+.sky-reading-section p {
+  margin: 0.3rem 0 0.65rem;
+  line-height: 1.7;
+}
+.sky-reading-sources a {
+  display: block;
+  width: fit-content;
+  margin-block: 0.25rem;
+}
+.sky-object-actions + [role='status']:empty {
+  display: none;
+}

@@ -1,9 +1,12 @@
+import { deepSkyLandmarks, deepSkyStories } from './deep-sky-featured-reading.js';
+import { deepSkyReadingId } from './deep-sky-catalog.js';
 import { SKY_CONSTELLATION_NAMES } from './deep-sky-openngc-data.js';
 
 // Aligned with the four names in SKY_CONSTELLATION_NAMES. Each paragraph is
 // written for its language; only catalogue measurements and identifiers are inserted.
 const languages = ['zh', 'en', 'ru', 'fr'];
-const languageIndex = (language) => Math.max(0, languages.indexOf(language));
+const languageIndex = (language) =>
+  Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
 
 // Basic descriptions explain the recorded class without inferring the identity,
 // distance, colours or membership of individual points in a survey image.
@@ -299,6 +302,12 @@ const featured = {
 };
 
 const otherSubjects = {
+  'JWST-CARINA-2022': [
+    '“宇宙悬崖”是韦伯空间望远镜 2022 年拍摄的一幅影像。这条记录标出相机在船底座 NGC 3324 边缘拍到的那一块天空。照片里像山脊一样的边界，其实是年轻恒星吹出的空腔与致密云气相接的地方。',
+    'The Cosmic Cliffs is a 2022 James Webb Space Telescope image. This entry marks the camera’s field at the edge of NGC 3324 in Carina. The apparent mountain ridge is where a cavity carved by young stars meets a dense cloud.',
+    '«Космические скалы» — снимок телескопа «Джеймс Уэбб» 2022 года. Эта запись отмечает поле камеры у края NGC 3324 в созвездии Киля. Гребень на фотографии — граница между полостью, созданной молодыми звёздами, и плотным облаком.',
+    'Les Falaises cosmiques sont une image obtenue en 2022 par le télescope James Webb. Cette entrée délimite le champ photographié au bord de NGC 3324 dans la Carène. La crête apparente marque la rencontre d’une cavité creusée par de jeunes étoiles avec un nuage dense.',
+  ],
   M24: [
     'M24 是人马座方向的一片银河星野。透过前景尘埃之间的空隙，我们能看见这条视线上格外密集的恒星。',
     'M24 is a Milky Way star field in Sagittarius. A gap in foreground dust gives us a view of unusually dense background stars.',
@@ -323,15 +332,15 @@ const otherSubjects = {
     'Вешалка в Лисичке — астеризм. Несколько ярких звёзд на небе очерчивают перекладину и крючок.',
     'Le Cintre, dans le Petit Renard, est un astérisme. Des étoiles brillantes dessinent une barre et un crochet sur le ciel.',
   ],
-  HCG92: [
-    '斯蒂芬五重星系由五个看起来相邻的星系组成。其中四个在太空中彼此靠近，第五个 NGC 7320 位于前景。',
-    'Stephan’s Quintet appears as five neighbouring galaxies. Four are physically close to one another, while NGC 7320 lies in the foreground.',
-    'Квинтет Стефана выглядит как группа из пяти галактик. Четыре расположены близко друг к другу в пространстве, а NGC 7320 находится на переднем плане.',
-    'Le Quintette de Stephan réunit cinq galaxies voisines en apparence. Quatre sont proches dans l’espace, tandis que NGC 7320 se trouve au premier plan.',
-  ],
 };
 
 const surveyTips = {
+  'image-field': [
+    '先在宽视场中找准作品的覆盖范围，再打开韦伯影像，沿云壁起伏的亮边辨认细节。两幅图的视场和波段都可能不同。',
+    'Place the footprint in a wide survey first, then open the Webb image and follow the bright, uneven edge of the cloud. The two views can differ in both field and wavelength.',
+    'Найдите границы кадра на широком обзоре, затем откройте снимок «Уэбба» и проследите неровный светлый край облака. Поле зрения и диапазон волн у этих видов могут различаться.',
+    'Situez d’abord l’emprise dans le relevé large, puis ouvrez l’image de Webb et suivez le bord lumineux et irrégulier du nuage. Le champ et les longueurs d’onde peuvent différer.',
+  ],
   'galaxy': [
     '先找星系中较亮的位置，再向外观察星光逐渐融入背景的范围。',
     'Find the brighter part of the galaxy, then follow its light outwards until it blends into the sky.',
@@ -464,12 +473,16 @@ const genericLook = [
 ];
 
 // These two records in the existing catalogue describe the same Pleiades cluster.
-const featuredFor = (object) => featured[object.id === 'Mel22' ? 'M45' : object.id];
+const featuredFor = (object) => featured[deepSkyReadingId(object.id)];
 
 export function describeSkyObject(object, language = 'zh') {
   if (!object?.id) return '';
   const i = languageIndex(language);
-  const curated = featuredFor(object)?.[0] || otherSubjects[object.id];
+  const curated =
+    deepSkyStories[object.id] ||
+    deepSkyLandmarks[object.id]?.intro ||
+    featuredFor(object)?.[0] ||
+    otherSubjects[object.id];
   if (curated) return curated[i];
   const constellation = SKY_CONSTELLATION_NAMES[object.constellation]?.[i];
   const id = object.id.replace(/^(NGC|IC)(\d)/, '$1 $2');
@@ -479,10 +492,26 @@ export function describeSkyObject(object, language = 'zh') {
       : `${id} (${constellation})`
     : id;
   const placeholder = i === 0 && constellation ? '$ ' : '$';
-  return (subjects[subjectClass(object)] || genericSubject)[i].replace(placeholder, target);
+  const identity = (subjects[subjectClass(object)] || genericSubject)[i].replace(
+    placeholder,
+    target
+  );
+  // The same angular extent can have very different physical sizes at different distances.
+  // Use only the two measured axes, never infer a 3-D shape or a missing minor axis.
+  const [major, minor] = object.angularSizeArcmin || [];
+  if (!Number.isFinite(major) || !(minor > 0 && major / minor >= 1.5)) return identity;
+  const ratio = (major / minor).toLocaleString(languages[i], { maximumFractionDigits: 1 });
+  const shape = [
+    `在天球上的轮廓较狭长，星表给出的长径约为短径的 ${ratio} 倍。`,
+    `Its outline is elongated on the sky. The catalogue gives a long axis about ${ratio} times the short one.`,
+    `На небе объект выглядит вытянутым. Отношение большой оси к малой по каталогу составляет около ${ratio}.`,
+    `Sa silhouette est allongée sur le ciel. Au catalogue, le grand axe mesure environ ${ratio} fois le petit.`,
+  ][i];
+  return identity + (i === 0 ? '' : ' ') + shape;
 }
 
-function extentText(object, i) {
+export function catalogueExtentText(object, language) {
+  const i = languageIndex(language);
   const [major, minor] = object.angularSizeArcmin || [];
   if (!(Number.isFinite(major) && major > 0)) return '';
   const large = major >= 60;
@@ -505,13 +534,19 @@ function extentText(object, i) {
 export function describeSurveyImage(object, source = 'dss', language = 'zh') {
   if (!object?.id) return { look: '', method: '' };
   const i = languageIndex(language);
+  const look = describeObjectAppearance(object, language);
+  const extent = catalogueExtentText(object, language);
+  return {
+    look: extent ? look + (i === 0 ? '' : ' ') + extent : look,
+    method: (surveyMethods[source] || surveyMethods.dss)[i],
+  };
+}
+
+export function describeObjectAppearance(object, language = 'zh') {
+  const i = languageIndex(language);
   const tips =
     featuredFor(object)?.[1] ||
     surveyTips[object.id === 'Cl399' ? 'asterism' : object.type] ||
     genericLook;
-  const extent = extentText(object, i);
-  return {
-    look: extent ? tips[i] + (i === 0 ? '' : ' ') + extent : tips[i],
-    method: (surveyMethods[source] || surveyMethods.dss)[i],
-  };
+  return tips[i];
 }

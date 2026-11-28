@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { cross, dot, EARTH_RADIUS } from './orbit.js';
+import { createLunarDetail } from './lunar-detail.js';
 import {
   cameraComponents,
   createSolarDiscUniforms,
@@ -34,9 +36,11 @@ void main(){
 
 export function createSolarView(env, geometry, shared) {
   const observations = createSolarObservationView(geometry, shared);
+  const detail = createLunarDetail(env.assets?.lunarDetail);
   const uniforms = {
     ...shared,
     ...createSolarDiscUniforms(),
+    ...detail.uniforms,
     discPixels: { value: 0 },
     sigma: { value: 1 },
     flux: { value: 0 },
@@ -44,6 +48,7 @@ export function createSolarView(env, geometry, shared) {
   // Celestial opacity hides more distant stars/bodies; the alpha channel
   // itself belongs to station coverage and is preserved for the Earth pass.
   const material = new THREE.ShaderMaterial({
+    defines: { LUNAR_DETAIL: 1 },
     uniforms,
     vertexShader: solarDiscVertex,
     fragmentShader: fragment,
@@ -88,17 +93,64 @@ export function createSolarView(env, geometry, shared) {
     }
     return rows.sort((a, b) => b.body.distanceKm - a.body.distanceKm);
   }
+  function updateDetail(rows, frame, size) {
+    const row = rows.find(({ body }) => body.id === 'Moon');
+    if (!row || row.px < 450) {
+      detail.update(null);
+      return;
+    }
+    const { body } = row;
+    const earthDistance = Math.hypot(...frame.eyeKm);
+    if (body.behindEarth && earthDistance > EARTH_RADIUS) {
+      const separation = Math.acos(
+        THREE.MathUtils.clamp(-dot(frame.eyeKm, body.direction) / earthDistance, -1, 1)
+      );
+      if (separation + body.radiusRad < Math.asin(EARTH_RADIUS / earthDistance)) {
+        detail.update(null);
+        return;
+      }
+    }
+    const east = cross(body.north, body.prime);
+    const bodyVector = (v) => [dot(v, body.prime), dot(v, east), dot(v, body.north)];
+    const distance = 1 / Math.sin(body.radiusRad);
+    const tanY = Math.tan((frame.fovY * Math.PI) / 360);
+    detail.update({
+      eye: bodyVector(body.direction).map((x) => -x * distance),
+      right: bodyVector(frame.axes.right),
+      up: bodyVector(frame.axes.up),
+      forward: bodyVector(frame.axes.forward),
+      tanY,
+      tanX: tanY * size.aspect,
+      height: size.h,
+    });
+  }
   return {
+    prepareLunarPhoto(frame, size) {
+      updateDetail(visible(frame, size), frame, size);
+      return detail.ready(2500);
+    },
+    get lunarDetail() {
+      return detail.status;
+    },
     key: () =>
-      textures.revision + ':' + (env.moon?.texture?.id ?? '') + ':' + observations.revision,
+      textures.revision +
+      ':' +
+      (env.moon?.texture?.id ?? '') +
+      ':' +
+      observations.revision +
+      ':' +
+      detail.revision,
     preparePhoto(frame, size) {
       // The shutter samples the live pointing after asynchronous terrain loading.
       // Prepare its frozen observation even if the Sun starts outside the field,
       // so moving onto the Sun cannot silently photograph the procedural fallback.
       const ready = frame.solarObservation ? [observations.prepare(frame.solarObservation)] : [];
+      const rows = visible(frame, size);
+      updateDetail(rows, frame, size);
       return Promise.all([
         ...ready,
-        ...visible(frame, size).flatMap(({ body, px }) =>
+        detail.ready(),
+        ...rows.flatMap(({ body, px }) =>
           body.id === 'Sun' && frame.solarObservation
             ? []
             : textures.maps(body, px).map((entry) => entry?.ready)
@@ -108,12 +160,15 @@ export function createSolarView(env, geometry, shared) {
     draw(renderer, camera, frame, size, optics) {
       const { w, h } = size,
         psf = xuntianStarPSF(optics, h);
-      for (const { body, d, px, centre } of visible(frame, size)) {
+      const rows = visible(frame, size);
+      updateDetail(rows, frame, size);
+      for (const { body, d, px, centre } of rows) {
         const saturn = body.id === 'Saturn',
           sun = body.id === 'Sun';
         // Observations are drawn once after the detector transfer, on every GPU.
         // Never put the procedural white Sun behind a pending real observation.
         if (sun && frame.solarObservation) continue;
+        uniforms.lunarDetailOn.value = body.id === 'Moon' && detail.status.loaded > 0;
         const radius = Math.sin(body.radiusRad);
         // Saturated, very bright sources remain compact in a wide field. Their
         // visible halo grows gradually rather than scaling diameter by flux.
@@ -156,6 +211,7 @@ export function createSolarView(env, geometry, shared) {
         : null;
     },
     dispose() {
+      detail.dispose();
       observations.dispose();
       material.dispose();
       textures.dispose();

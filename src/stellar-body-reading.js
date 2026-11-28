@@ -1,13 +1,18 @@
+import chart from '../assets/star-chart.json' with { type: 'json' };
 import { equatorial } from './environment-math.js';
 import { westernRegion, skyAngles } from './sky-location-math.js';
 import { cultureObjectLabel } from './sky-cultures.js';
-import { stellarProfiles } from './stellar-featured-reading.js';
-import { solarBodyProfiles } from './solar-body-reading-data.js';
+import { stellarProfiles, stellarNotes } from './stellar-featured-reading.js';
+import { solarBodyProfiles, solarIntroductions } from './solar-body-reading-data.js';
+
+const chartNames = new Map(chart.stars.filter((s) => s.hasProperName).map((s) => [s.id, s]));
 
 const copy = {
   zh: {
     field: '从地球望去，这颗星落在{region}天区。',
     star: '星图用它的天球坐标标出了这个光点的位置。',
+    catalogue: '这颗恒星在星表里的标识是 {name}。',
+    named: '{name} 是一颗有专名的恒星，在依巴谷星表中能用 {id} 查到它。',
     magnitude: '观测记录给出的 {band} 星等约为 {mag}。',
     beacon: '这样的亮度在星空中相当醒目，适合用来定位邻近较暗的目标。',
     easy: '在晴朗的暗夜里，通常可以从周围的星群中用肉眼认出这种亮度的星。',
@@ -26,6 +31,8 @@ const copy = {
   en: {
     field: 'On a star chart, this point lies in the region marked {region}.',
     star: 'Celestial coordinates mark the position of this point on a star chart.',
+    catalogue: 'This star is listed as {name}.',
+    named: '{name} is a named star recorded in the Hipparcos catalogue as {id}.',
     magnitude: 'Its apparent magnitude in the {band} band is about {mag}.',
     beacon:
       'That puts it among the conspicuous lights in the sky and makes it a useful starting point for finding fainter neighbours.',
@@ -48,6 +55,8 @@ const copy = {
   fr: {
     field: 'Sur une carte du ciel, cette étoile se trouve dans la région indiquée « {region} ».',
     star: 'Ses coordonnées célestes indiquent la position de ce point sur la carte du ciel.',
+    catalogue: 'Cette étoile porte la désignation {name} dans le catalogue.',
+    named: '{name} est le nom de l’étoile inscrite au catalogue Hipparcos sous le numéro {id}.',
     magnitude: 'Sa magnitude apparente en bande {band} est d’environ {mag}.',
     beacon:
       'Son éclat la rend facile à repérer et en fait un bon point de départ pour rechercher des voisines plus faibles.',
@@ -70,6 +79,8 @@ const copy = {
   ru: {
     field: 'На звёздной карте эта точка лежит в области с подписью «{region}».',
     star: 'Положение этой точки на звёздной карте задано небесными координатами.',
+    catalogue: 'В каталоге эта звезда обозначена как {name}.',
+    named: '{name} — собственное имя звезды, записанной в каталоге Hipparcos как {id}.',
     magnitude: 'Её видимая величина в полосе {band} — около {mag}.',
     beacon:
       'Такой блеск хорошо выделяет звезду на небе. От неё удобно искать более слабые соседние объекты.',
@@ -130,18 +141,38 @@ export function readCatalogStar(target, hit, language = 'zh') {
   const [, family, id] = match;
   const lang = supportedLanguage(language);
   const profile = family === 'hip' && stellarProfiles[id];
-  if (profile?.[lang])
-    return { description: profile[lang], link: { name: profile.source, url: profile.url } };
-
   const phrases = copy[lang];
   const direction = fieldDirection(target, hit);
+  const catalogue = catalogueLink(family, id, direction);
+  if (profile?.[lang]) {
+    const link = { name: profile.source, url: profile.url };
+    return {
+      description: profile[lang],
+      detail: stellarNotes[id][lang],
+      observing: profile.observing?.[lang],
+      link,
+      sources: profile.study ? [link, profile.study, catalogue] : [link, catalogue],
+    };
+  }
+
   const region = direction && cultureObjectLabel(westernRegion(direction), lang);
-  const parts = [region ? phrases.field.replace('{region}', region) : phrases.star];
+  // Tycho cutouts have local row indices, not globally resolvable Tycho identifiers.
+  const name =
+    family === 'hip' ? 'HIP ' + id : family === 'gaia' ? 'Gaia DR3 ' + id : target?.identifier;
+  const named = family === 'hip' && chartNames.get(Number(id));
+  const intro = [
+    named
+      ? phrases.named.replace('{name}', named[lang] || named.en).replace('{id}', name)
+      : name && phrases.catalogue.replace('{name}', name),
+    region ? phrases.field.replace('{region}', region) : phrases.star,
+  ].filter(Boolean);
+  const measurements = [];
+  let observing;
   const fmt = (number, digits) => number.toLocaleString(lang, { maximumFractionDigits: digits });
   const mag = Number.isFinite(hit?.magnitude) ? hit.magnitude : target?.magnitude;
   if (Number.isFinite(mag)) {
     const band = { hip: 'V', tycho: 'Vₜ', gaia: 'G' }[family];
-    parts.push(phrases.magnitude.replace('{band}', band).replace('{mag}', fmt(mag, 2)));
+    intro.push(phrases.magnitude.replace('{band}', band).replace('{mag}', fmt(mag, 2)));
     const advice =
       family === 'gaia'
         ? 'gaia'
@@ -152,15 +183,16 @@ export function readCatalogStar(target, hit, language = 'zh') {
             : mag <= 6
               ? 'dark'
               : 'faint';
-    parts.push(phrases[advice]);
+    if (family === 'gaia') measurements.push(phrases[advice]);
+    else observing = phrases[advice];
   }
 
   // The bundled Gaia stars have G magnitudes and no measured B−V. The Tycho
   // cutouts approximate Johnson B−V using 0.85 × (BT−VT).
-  const bv = hit?.bv;
+  const bv = hit?.bv ?? target?.bv;
   if (family !== 'gaia' && Number.isFinite(bv)) {
     const tone = bv < 0.45 ? phrases.blue : bv > 0.85 ? phrases.red : phrases.neutral;
-    parts.push(
+    measurements.push(
       phrases[family === 'tycho' ? 'converted' : 'colour']
         .replace('{value}', fmt(bv, 2))
         .replace('{tone}', tone)
@@ -168,11 +200,26 @@ export function readCatalogStar(target, hit, language = 'zh') {
   }
   const distance = hit?.distanceLightYears;
   if (Number.isFinite(distance) && distance > 0)
-    parts.push(phrases.distance.replace('{distance}', fmt(Number(distance.toPrecision(2)), 2)));
-  else if (!Number.isFinite(bv) || family === 'gaia') parts.push(phrases.noDistance);
+    measurements.push(
+      phrases.distance.replace('{distance}', fmt(Number(distance.toPrecision(2)), 2))
+    );
+  else if (!Number.isFinite(bv) || family === 'gaia') measurements.push(phrases.noDistance);
+  const separator = lang === 'zh' ? '' : ' ';
+  const sources = [catalogue];
+  if (family === 'hip' && hit?.distanceSource === 'hipparcos-2007' && distance > 0) {
+    sources.push({
+      name: 'CDS VizieR · Hipparcos 2007',
+      url:
+        'https://vizier.cfa.harvard.edu/viz-bin/VizieR?' +
+        new URLSearchParams({ '-source': 'I/311/hip2', HIP: id }),
+    });
+  }
   return {
-    description: parts.join(lang === 'zh' ? '' : ' '),
-    link: catalogueLink(family, id, direction),
+    description: intro.join(separator),
+    detail: measurements.join(separator) || undefined,
+    observing,
+    link: catalogue,
+    sources,
   };
 }
 
@@ -182,8 +229,12 @@ export function readSolarBody(bodyId, language = 'zh') {
     .toLowerCase();
   const name = id.charAt(0).toUpperCase() + id.slice(1);
   if (!Object.hasOwn(solarBodyProfiles, name)) return null;
+  const lang = supportedLanguage(language);
+  const link = { name: 'NASA Science', url: 'https://science.nasa.gov/' + id + '/facts/' };
   return {
-    description: solarBodyProfiles[name][supportedLanguage(language)],
-    link: { name: 'NASA Science', url: 'https://science.nasa.gov/' + id + '/facts/' },
+    description: solarIntroductions[name][lang],
+    detail: solarBodyProfiles[name][lang],
+    link,
+    sources: [link],
   };
 }

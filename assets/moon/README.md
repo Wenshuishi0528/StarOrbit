@@ -6,6 +6,12 @@
 
 保留项目已有 `lroc-color-2k.jpg`（2048 × 1024），来自 [NASA SVS CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/) 的 2025 LROC 颜色图。NASA 说明该可视化拼图经过曝光、白平衡和极区缺覆盖处理；它适于渲染展示，不是可用于定量光度分析的原始反照率产品。经度 0° 位于中央，左／右边界为 −180°／+180°，北在上，东经为正。
 
+巡天取景和月球观测馆放大时共用同版 16384 × 8192 月面颜色切片。所用 8 位 sRGB JPEG 由 `kvsankar/moon-mission` 从 NASA 的 2025 年 12 月 16K TIFF 转换，大小 20,377,650 字节。[转换记录](https://github.com/kvsankar/moon-mission/blob/5d63408bdd826df38e100c7bc90c0b7cb3524beb/docs/evidence/baselines/moon-render-assets-2026-04.md) · [固定版本 JPEG](https://raw.githubusercontent.com/kvsankar/moon-mission/5d63408bdd826df38e100c7bc90c0b7cb3524beb/images/moon/lroc_color_2025_16k_quality.jpg)
+
+随软件提供的 512 片共 20.30 MiB。每片覆盖 512 × 512 个原图像素，各边加 8 像素供过滤采样。经度环绕，极点外重复边缘像素。切片保持原始 DCT 分块位置和量化表。赤道处相邻颜色像素约相距 0.67 km；高纬填补区实际可见的细节取决于原始拼图。[切片规格、字节数与校验值](colour-detail.json)
+
+重建切片需 Python 和 Pillow。取得上述 JPEG 后运行 `python scripts/prepare-lunar-detail.py --source <JPEG文件路径>`。脚本先核对原图 SHA-256，再按从北到南、从西到东的顺序输出切片与清单。运行软件时无需准备原始 TIFF 或下载此 JPEG。
+
 ## LOLA 高程
 
 运行文件与精确处理记录：

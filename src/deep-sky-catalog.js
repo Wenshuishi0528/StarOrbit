@@ -2,6 +2,12 @@ import { equatorial } from './environment-math.js';
 import { DEEP_SKY_SUPPLEMENT } from './deep-sky-supplement.js';
 import { canonicalDeepSkyId, openNGCObjects, SKY_IMAGE_FIELDS } from './deep-sky-openngc.js';
 
+// These two catalogue positions measure the same Pleiades cluster. Keep both
+// observing records, but give the object a single article and directory entry.
+export function deepSkyReadingId(id) {
+  return id.toLowerCase() === 'mel22' ? 'M45' : id;
+}
+
 // Shared observing catalogue: NASA/GSFC HEASARC Messier (109 published rows),
 // M102/NGC5866 following NASA/Hubble, OpenNGC's real extended objects, and
 // explicitly distinguished, WCS-calibrated image fields.

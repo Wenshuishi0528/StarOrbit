@@ -171,6 +171,9 @@ if (split) {
     format: 'iife',
     minify: true,
     outfile: 'assets/app.bundle.js',
+    // The host HTML declares UTF-8. Store the four-language library as text
+    // instead of six ASCII bytes per escaped code point in the portable copy.
+    charset: 'utf8',
     legalComments: 'none',
     define: appDefine,
   });
@@ -210,9 +213,9 @@ environmentAssets.nightSources = {
   '2016': {
     columns: 24,
     rows: 12,
-    base: Object.fromEntries(
-      ['simple', 'medium', 'standard', 'high'].map((tier) => [tier, environmentAssets[tier].night])
-    ),
+    // The 2016 overview images already belong to the four base quality tiers.
+    // As with the 2004 day source, use those images without serializing them twice.
+    base: {},
   },
 };
 for (const id of ['2024-1km', '2025-500m']) {
@@ -294,6 +297,23 @@ for (const id of ['2026-q2-1km', '2026-q2-500m']) {
   };
 }
 environmentAssets.moon = image('assets/moon/lroc-color-2k.jpg');
+{
+  const directory = 'assets/moon';
+  const manifest = JSON.parse(fs.readFileSync(directory + '/colour-detail.json', 'utf8'));
+  const { rows, columns } = manifest;
+  if (split) {
+    const root = `${directory}/lroc-16k-${manifest.sha256RowMajorBytes.slice(0, 16)}`;
+    fs.cpSync(directory + '/lroc-16k', `${out}/${root}`, { recursive: true });
+    environmentAssets.lunarDetail = { root };
+    emitted.set(root, manifest.bytes);
+  } else {
+    environmentAssets.lunarDetail = {
+      tiles: Array.from({ length: columns * rows }, (_, i) =>
+        image(`${directory}/lroc-16k/${Math.floor(i / columns)}/${i % columns}.jpg`)
+      ),
+    };
+  }
+}
 {
   const manifest = JSON.parse(fs.readFileSync('assets/satellites/manifest.json', 'utf8'));
   const file = 'assets/satellites/' + manifest.file;
@@ -648,6 +668,7 @@ if (split) {
     'README.md',
     'SCIENCE.md',
     'terrain-manifest.json',
+    'colour-detail.json',
     'lola-720x360.i16.gz',
     'lroc-color-2k.jpg',
   ])

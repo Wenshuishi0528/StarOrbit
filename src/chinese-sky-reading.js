@@ -3,14 +3,63 @@ import {
   regions,
   symbols,
   figures,
-  readingScenes,
+  historicalNotes,
+  regionObserving,
 } from './chinese-sky-reading-content.js';
+import profiles from './chinese-sky-profiles.json' with { type: 'json' };
 
 // The data remain in the lazy-loaded culture. Index its actual primary members once.
 const indexes = new WeakMap();
 const languages = ['zh', 'en', 'fr', 'ru'];
 const museum = 'https://hk.space.museum/en/web/spm/resources/';
 const sourceLinks = {
+  jin: {
+    name: [
+      '《晋书》卷十一 · 天文志',
+      'Book of Jin · Astronomy, vol. 11',
+      'Livre des Jin · Astronomie, vol. 11',
+      'Книга Цзинь · Астрономия, цз. 11',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/晉書/卷011',
+  },
+  song49: songVolume(49, '四十九'),
+  song50: songVolume(50, '五十'),
+  song51: songVolume(51, '五十一'),
+  fuYue: {
+    name: [
+      '《史记》· 殷本纪',
+      'Records of the Grand Historian · Annals of Yin',
+      'Mémoires historiques · Annales des Yin',
+      'Исторические записки · Основные записи об Инь',
+    ],
+    url: 'https://ctext.org/text.pl?if=gb&node=4563&remap=gb&show=parallel',
+  },
+  shiji: {
+    name: [
+      '《史记》· 天官书',
+      'Shiji · Treatise on the Celestial Officials',
+      'Mémoires historiques · Traité des officiers célestes',
+      'Исторические записки · Трактат о небесных чиновниках',
+    ],
+    url: 'https://ctext.org/text.pl?if=en&node=5592&show=parallel',
+  },
+  xunzi: {
+    name: [
+      '《荀子》· 解蔽',
+      'Xunzi · Dispelling Obsession',
+      'Xunzi · Dissiper les illusions',
+      'Сюнь-цзы · Об избавлении от заблуждений',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/荀子/解蔽篇',
+  },
+  etaCar: {
+    name: 'NASA · Eta Carinae',
+    url: 'https://science.nasa.gov/asset/hubble/eta-carinae-the-great-eruption-of-a-massive-star/',
+  },
+  alphaCen: {
+    name: 'NASA · Alpha Centauri',
+    url: 'https://science.nasa.gov/resource/the-bright-star-alpha-centauri-and-its-surroundings/',
+  },
   catalogue: {
     name: 'Stellarium · 中国星官',
     url: 'https://github.com/Stellarium/stellarium/blob/3c4a720f313ada6124b86fef24131fa65900133f/skycultures/chinese/description.md#the-list-of-xingguans',
@@ -77,8 +126,20 @@ function nameOf(row, lang) {
     return row.pinyin || row.sourceNames?.[0]?.pronounce || local || row.id;
   return local || row.en || row.id || '';
 }
+function songVolume(volume, chineseNumeral) {
+  return {
+    name: [
+      '《宋史》卷' + chineseNumeral + ' · 天文志',
+      'History of Song · Astronomy, vol. ' + volume,
+      'Histoire des Song · Astronomie, vol. ' + volume,
+      'История Сун · Астрономия, цз. ' + volume,
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/宋史/卷0' + volume,
+  };
+}
 function sourceLink(key, i) {
   const link = sourceLinks[key];
+  if (Array.isArray(link.name)) return { name: link.name[i], url: link.url };
   const name =
     link.name.startsWith('Stellarium') && i !== 0
       ? [
@@ -90,7 +151,16 @@ function sourceLink(key, i) {
       : link.name === 'Hong Kong Space Museum' && i !== 1
         ? ['香港太空馆', '', 'Musée de l’espace de Hong Kong', 'Гонконгский музей космоса'][i]
         : link.name;
-  return { name, url: link.url };
+  return {
+    name,
+    url:
+      i === 0 && link.name === 'Hong Kong Space Museum'
+        ? link.url.replace('/en/', '/sc/')
+        : link.url,
+  };
+}
+function sourceList(keys, i) {
+  return [...new Set(keys.filter(Boolean))].map((key) => sourceLink(key, i));
 }
 const languageIndex = (lang) => (languages.includes(lang) ? languages.indexOf(lang) : 1);
 const first = (row) => row?.replace(/[(（].*$/u, '').trim();
@@ -470,28 +540,90 @@ export function readChineseAsterism(record, culture, language = 'zh') {
             ? 'deep'
             : 'mansions'
       : ref?.[0] || (a.groupId === 'southern' ? 'southern' : 'catalogue');
-  const lead = ref?.[i + 1] || identity(a, index, i);
-  const scene = ref ? null : readingScenes.get(a.id)?.[i];
-  const note = (central && a.groupId === 'yi') || a.id === '090' ? '' : membershipNote(a, i);
+  const history = historyReferences.filter(([, ids]) => ids.has(a.id)).map(([key]) => key);
+  const sources = sourceList(
+    [
+      ...history,
+      extraReferences[a.id],
+      link,
+      !history.length && link === 'catalogue' && 'glossary',
+      'catalogue',
+    ],
+    i
+  );
+  const detail = historicalNotes[a.id]?.[i] || (fieldNotes.has(a.id) ? ref?.[i + 1] : '');
+  const note = ['029', '090', '186'].includes(a.id) ? '' : membershipNote(a, i);
   return {
-    description: joinSentences([lead, scene, geometry(a, index, i, Boolean(ref)), note], i),
-    link: sourceLink(a.id === '062' ? 'algol' : link, i),
+    description: profiles[a.id]?.[i] || identity(a, index, i),
+    detail: joinSentences([detail, note], i),
+    observing: joinSentences([identity(a, index, i), geometry(a, index, i, Boolean(ref))], i),
+    sources,
+    link: sources[0],
   };
 }
+// Historic assignments vary between texts. Cite the chapter used by each
+// article separately from the Qing-based catalogue that supplies the sky positions.
+const historyReferences = [
+  [
+    'jin',
+    '002 003 004 005 006 008 009 011 012 014 016 017 018 023 025 028 029 040 048 065 066 069 072 077 081 084 086 093 096 102 104 105 106 107 110 112 114 115 122 124 136 149 163 185 193 195 206 213 215 216 222 226 229 232 233 254 256 263 266 269 273 280 294 307 308 312 313 314 316 318',
+  ],
+  [
+    'song49',
+    '039 041 045 052 057 059 067 080 083 087 098 101 117 131 132 140 142 152 153 155 159 160 165 175 176 178 179 180 181 189 190 200 202 203 205 208 212 214 223 228 235 237 241 248 255 257 265 267 270 274 276 279 283 285 292 297 310',
+  ],
+  [
+    'song50',
+    '036 037 038 042 054 055 058 060 064 068 070 073 074 075 078 089 095 100 108 111 116 121 129 130 137 138 143 151 156 158 162 167 169 174 186 194 196 197 198 206 209 217 218 220 236 239 240 243 245 246 251 259 271 272 277 281 287 288 289 290 295 296 299 301 302 306 309 317',
+  ],
+  [
+    'song51',
+    '053 104 118 119 133 139 154 171 172 188 191 207 210 211 219 221 224 225 230 231 238 242 244 247 249 250 252 253 260 261 262 273 278 282 286 291 293 298 315',
+  ],
+].map(([key, ids]) => [key, new Set(ids.split(' '))]);
+const extraReferences = {
+  '062': 'algol',
+  '075': 'jin',
+  '078': 'fuYue',
+  '090': 'etaCar',
+  '093': 'qixi',
+  '151': 'alphaCen',
+  '265': 'shiji',
+  '272': 'xunzi',
+  '296': 'xunzi',
+};
+// Preserve measured identifications and source disagreements beyond the opening text.
+const fieldNotes = new Set(
+  '012 029 039 041 080 083 090 101 110 130 137 186 220 222 228 232 249 278 299 300'.split(' ')
+);
 export function readChineseGroup(group, culture, language = 'zh') {
   const index = indexOf(culture);
   if (!index || !group || (group.culture && group.culture !== 'chinese')) return null;
   const id = String(group.id ?? group),
     i = languageIndex(language);
-  if (Object.hasOwn(symbols, id))
-    return { description: regions[id][i], link: sourceLink('symbols', i) };
-  const g = index.groups.get(id);
-  if (!g) return null;
-  if (g.type !== 'mansion')
+  if (Object.hasOwn(symbols, id)) {
+    const sources = [sourceLink('symbols', i), sourceLink('mansions', i)];
     return {
       description: regions[id][i],
-      link: sourceLink(g.type === 'southern' ? 'southern' : 'enclosures', i),
+      observing: regionObserving[id][i],
+      link: sources[0],
+      sources,
     };
+  }
+  const g = index.groups.get(id);
+  if (!g) return null;
+  if (g.type !== 'mansion') {
+    const sources = sourceList(
+      g.type === 'southern' ? ['southern', 'glossary'] : ['song49', 'enclosures', 'glossary'],
+      i
+    );
+    return {
+      description: regions[id][i],
+      observing: regionObserving[id][i],
+      link: sources[0],
+      sources,
+    };
+  }
   const ref = mansions[id],
     symbol = symbols[g.theme][i];
   const anchor = ref[0],
@@ -518,8 +650,29 @@ export function readChineseGroup(group, culture, language = 'zh') {
       anchor +
       '. От таких звёзд отсчитывали положение светил вдоль небесного экватора.',
   ][i];
+  const neighbourNames = g.asterismIds
+    .filter((key) => key !== index.mainByGroup.get(id)?.id)
+    .map((key) => index.asterisms.get(key))
+    .filter((row) => row && !row.isSubsidiary)
+    .slice(0, 3)
+    .map((row) => first(nameOf(row, languages[i])));
+  const list = new Intl.ListFormat(languages[i]).format(neighbourNames);
+  const neighbours = !list
+    ? ''
+    : [
+        '同属这一宿区的还有' + list + '。它们各有自己的星形，可以作为游览这一带的下一站。',
+        'The region also includes ' + list + ', each a separate figure to explore.',
+        'La région comprend aussi ' + list + ', autant de figures distinctes à découvrir.',
+        'В эту область также входят ' +
+          list +
+          '. Каждая из этих фигур имеет собственный звёздный рисунок.',
+      ][i];
+  const sources = [sourceLink('mansions', i), sourceLink('jin', i)];
   return {
-    description: joinSentences([head, ref[i + 1], end], i),
-    link: sourceLink('mansions', i),
+    description: joinSentences([head, ref[i + 1]], i),
+    detail: neighbours,
+    observing: end,
+    link: sources[0],
+    sources,
   };
 }

@@ -11,6 +11,7 @@ const names = {
   Uranus: ['天王星', 'Uranus', 'Уран'],
   Neptune: ['海王星', 'Neptune', 'Нептун'],
 };
+export const solarBodyIds = Object.keys(names);
 const fold = (text) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 export function solarLabel(id, lang) {
   const row = names[id];

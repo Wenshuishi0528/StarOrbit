@@ -29,7 +29,7 @@ python3 scripts/prepare-deep-sky-catalog.py /path/to/pinned/csvs
 
 ## 影像详情中的天体与巡天说明
 
-12,161 个可浏览的深空天体共用中、英、俄、法四语解说。星座取自同一固定版本 OpenNGC 的 `Const`，沿用星图的本地化名称。`Hubble` 列提供 10,177 个星系的形态，其中 `S?` 和 `E?` 共 74 个，简介保留到星系一级。目录所列的视大小是从地球看见的角尺寸。大小未知时，详情只给观察线索。
+巡天深空目录有 12,161 条观测记录，均可查阅中、英、俄、法四语解说。「天体资料」按对象汇总为 12,160 项：M45 与 Melotte 22 对应同一个昴星团，两个编号可以找到同一篇介绍。原始测量位置各自保留。另有一个经配准的韦伯影像视场，列在影像目录中。星座取自同一固定版本 OpenNGC 的 `Const`，沿用星图的本地化名称。`Hubble` 列提供 10,177 个星系的形态，其中 `S?` 和 `E?` 共 74 个，简介保留到星系一级。目录所列的视大小是从地球看见的角尺寸。大小未知时，详情只给观察线索。
 
 精选天体按实际对象撰写，参考 [NASA 梅西耶目录](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/)、[ESA/Hubble 的 NGC 346 观测](https://esahubble.org/images/heic0514a/)和 [ESA/Webb 的 NGC 3324 观测](https://esawebb.org/images/weic2205a/)。例如，M16 的简介同时说明年轻星团和附近柱体，M51 的简介分别标出主星系和伴星系。
 

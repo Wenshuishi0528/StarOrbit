@@ -1,9 +1,9 @@
-import { getLanguage, onLanguageChange } from './i18n.js';
+import { getLanguage, onLanguageChange, t } from './i18n.js';
 import { getSkyCulture, cultureObjectLabel } from './sky-cultures.js';
 import { galleryCoordinates } from './sky-image-index.js';
 import { rayInView, skyAngles, localRegion } from './sky-location-math.js';
 import { drawLocation } from './sky-location-draw.js';
-import { objectTarget } from './sky-object-target.js';
+import { objectTarget, objectSightline } from './sky-object-target.js';
 import { bindSkyReading, formationSubject } from './sky-reading-view.js';
 import { skyText } from './sky-tool-language.js';
 
@@ -185,17 +185,21 @@ function createSkyTools(sim) {
     const target = objectTarget(hit, ray, culture);
     const body = object.body;
     body.replaceChildren();
-    body.append(make('small', skyText(owner.label)));
+    if (options.length === 1) body.append(make('small', skyText(owner.label)));
     if (selection.toolbar && !coordinatesOpen)
       body.append(make('p', skyText('gesture'), 'sky-locator-legend'));
     if (options.length > 1) {
-      const label = make('label', skyText('filters')),
+      const label = make('label', skyText(owner.label) + ' · ' + skyText('filters')),
         select = make('select');
       select.setAttribute('aria-label', skyText('filters'));
       options.forEach((candidate, i) => {
         const name =
           objectTarget(candidate, ray, culture)?.name || candidate.name || skyText(candidate.kind);
-        const label = candidate.regionOnly ? name + ' · ' + skyText('covering') : name;
+        const label = candidate.relation
+          ? t(candidate.relation, { name })
+          : candidate.regionOnly
+            ? name + ' · ' + skyText('covering')
+            : name;
         select.add(new Option(label, String(i), false, i === selection.index));
       });
       select.dataset.skyCandidates = '';
@@ -207,11 +211,17 @@ function createSkyTools(sim) {
       label.append(select);
       body.append(label);
     }
-    body.append(
-      make('h3', target?.name || hit.name || skyText(hit.kind + 'Title') || skyText('blank'))
+    const heading = make(
+      'h3',
+      target?.name || hit.name || skyText(hit.kind + 'Title') || skyText('blank')
     );
+    body.append(heading);
     if (target && hit.kind !== 'sky') {
-      bindSkyReading(body, { inline: true, sourcesOpen }).set(target, culture, hit);
+      bindSkyReading(body, { inline: true, sourcesOpen, heading: t('认识这个目标') }).set(
+        target,
+        culture,
+        hit
+      );
     } else {
       const description =
         hit.kind === 'sky'
@@ -219,14 +229,33 @@ function createSkyTools(sim) {
           : [skyText(hit.kind), hit.kind === 'satellite' && hit.detail].filter(Boolean).join(' ');
       body.append(make('p', description));
     }
-    if (target) {
+    if (target && hit.kind === 'formation') {
+      if (target.groupId) {
+        const group = getSkyCulture('chinese').groups.find((g) => g.id === target.groupId);
+        bindSkyReading(body).set(formationSubject(group), 'chinese');
+      }
+    } else if (target) {
       const chart = getSkyCulture(culture);
-      const region = localRegion(hit.regionOnly ? ray : target.direction || ray, chart);
-      bindSkyReading(body).set(formationSubject(region), chart.id);
+      const members = !hit.regionOnly && target.asterisms;
+      if (members?.length) {
+        for (const member of members) {
+          const record = chart.asterisms.find((a) => a.targetId === member.id);
+          bindSkyReading(body, { summaryLabel: '所属星官 · {name}' }).set(
+            formationSubject(record),
+            chart.id
+          );
+        }
+      } else {
+        const region = localRegion(objectSightline(hit, target, ray), chart);
+        bindSkyReading(body, {
+          expanded: hit.kind === 'sky' && !coordinatesOpen,
+          summaryLabel: chart.id === 'chinese' ? '附近星官 · {name}' : '所在星座 · {name}',
+        }).set(formationSubject(region), chart.id);
+      }
     }
     // Coordinates describe the selected position. Foreground objects have no
     // catalogue celestial identity, but their sightline can still be explained.
-    const dir = coordinatesOpen || hit.regionOnly ? ray : target?.direction || ray,
+    const dir = coordinatesOpen ? ray : objectSightline(hit, target, ray),
       { ra, dec } = skyAngles(dir);
     const position = make('p', 'J2000 · ' + galleryCoordinates(ra, dec), 'sky-coordinates');
     const read = make('details');
@@ -261,7 +290,7 @@ function createSkyTools(sim) {
     const aim = button(skyText(owner.aimLabel || 'aim'), () => execute(false), 'aim');
     aim.disabled = owner.canPoint?.(positionTarget) === false;
     actions.append(aim);
-    if (hit.kind !== 'sky') {
+    if (hit.kind !== 'sky' && hit.kind !== 'formation') {
       const track = button(skyText('track'), () => execute(true), 'track');
       track.disabled = owner.canPoint?.(target) === false;
       actions.append(track);
@@ -289,7 +318,7 @@ function createSkyTools(sim) {
       );
       actions.append(plan);
     }
-    body.append(actions, status);
+    heading.after(actions, status);
   }
   function openAt(owner, x, y, opener, client, coordinatesOpen = false) {
     if (!owner?.enabled()) return;
@@ -311,7 +340,24 @@ function createSkyTools(sim) {
         seen.add(item.id);
         options.push(item);
       }
-      options.push({ kind: 'sky', direction: ray, explicitPosition: true });
+    }
+    if (skyKinds.has(primary.kind) && !primary.withinDisc) {
+      const chart = getSkyCulture(view.culture);
+      const target = objectTarget(primary, ray, view.culture);
+      if (!primary.regionOnly && target?.asterisms?.length) {
+        for (const a of target.asterisms)
+          options.push({ kind: 'formation', id: a.id, relation: '所属星官 · {name}' });
+      } else {
+        const region = localRegion(objectSightline(primary, target, ray), chart);
+        if (region)
+          options.push({
+            kind: 'formation',
+            id: region.targetId,
+            relation: chart.id === 'chinese' ? '附近星官 · {name}' : '所在星座 · {name}',
+          });
+      }
+      if (primary.kind !== 'sky')
+        options.push({ kind: 'sky', direction: ray, explicitPosition: true });
     }
     selection = {
       owner,

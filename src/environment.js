@@ -106,6 +106,10 @@ export class Environment {
     this.lastTrack = 0;
     const assetNode = $('environmentAssets');
     this.assets = readEmbeddedAssets(assetNode);
+    const legacyNight = this.assets.nightSources?.['2016'];
+    if (legacyNight)
+      for (const tier of ['simple', 'medium', 'standard', 'high'])
+        legacyNight.base[tier] ??= this.assets[tier]?.night;
     // Parsed assets own the data now; release the large inline JSON DOM copy.
     assetNode.remove();
     this.settings = {

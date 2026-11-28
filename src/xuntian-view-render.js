@@ -794,6 +794,7 @@ export function createXuntianViewRenderer(
       labels,
       chartSettings,
       solarObservation,
+      lunarDetail: solarView.lunarDetail,
       skyDetail,
       cityTerrain: earthView.cityStatus(!annotations),
       elevation: earthView.elevationStatus(!annotations),
@@ -960,6 +961,7 @@ export function createXuntianViewRenderer(
           if (!valid(candidate)) throw Error('没有可用的巡天光学位置');
           await Promise.all([
             earthView.prepareCityPhoto(candidate, size, 4000),
+            solarView.prepareLunarPhoto(candidate, size),
             env.constellationArt?.prepare(
               skyPhotoId,
               skyDetailView(candidate, size),

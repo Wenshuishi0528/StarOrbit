@@ -6,9 +6,11 @@
 
 [**Launch in your browser**](https://wenshuishi0528.github.io/StarOrbit/) · [Download a published portable release](https://github.com/Wenshuishi0528/StarOrbit/releases/latest) · [User manual (Chinese)](使用说明.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md)
 
-**Author: Wenshuishi · Current source: v1.71 · Original content: [CC BY-NC 4.0](LICENSING.md)**
+**Author: Wenshuishi · Current source: v1.73 · Original content: [CC BY-NC 4.0](LICENSING.md)**
 
 StarOrbit runs in a browser and combines a self-made China Space Station model with orbital motion, solar arrays, spacecraft attitude, Earth and the sky. It includes spacecraft imports, main-scene piloting, free flight, docking training and observation photography tools, with exploration extending to ground roaming, the Solar System and interstellar travel.
+
+Right-click an object in the Xuntian finder or ground telescope to read its history and observing notes. The sky image browser also includes a reference index searchable by name, catalogue number or sky region.
 
 It is intended for space enthusiasts, educational demonstrations and scene creation. Start by watching the station move through day and night, then assemble modules, undock a ship, find a pass or compose an image with the Xuntian telescope. The interface supports Chinese, English, Russian and French. Public orbital and astronomical sources support the calculations; data and models are described below.
 
@@ -20,7 +22,7 @@ It is intended for space enthusiasts, educational demonstrations and scene creat
 
 <a id="interface-and-basic-controls"></a>
 
-The lunar observatory combines topocentric phases/libration, rise/set planning, real LRO terrain, surface exploration and captioned exports. See the [current manual](使用说明.md#月球观测).
+The lunar observatory combines topocentric phases and libration, rise/set planning, LRO terrain and captioned exports. Zoom in on a crater here or in the Xuntian finder to see local detail from the bundled 16K Moon map. [Lunar observing guide](使用说明.md#月球观测)
 
 ## Get started
 

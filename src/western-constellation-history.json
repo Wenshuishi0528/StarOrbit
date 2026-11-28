@@ -1,0 +1,578 @@
+{
+  "And": {
+    "zh": "仙女座以希腊传说中的公主安德洛墨达命名。王后卡西奥佩娅夸耀美貌，招来了海怪，公主被缚在岩石上，直到珀尔修斯赶来相救。星图把公主、父母、海怪和救她的人排在相邻的天空，一条星链便成了整段故事的入口。",
+    "en": "Andromeda is the princess chained to a rock in the Greek tale of Perseus. Her mother Cassiopeia’s boast brought a sea monster upon the kingdom. The princess, her parents, the monster and her rescuer all have places on the sky chart, so her chain of stars leads into a whole cast of characters.",
+    "fr": "Andromède est la princesse enchaînée à un rocher dans le récit grec de Persée. Sa mère Cassiopée s’était vantée de sa beauté, attirant un monstre marin sur le royaume. La princesse, ses parents, le monstre et son sauveur ont chacun leur place sur la carte du ciel.",
+    "ru": "Андромеда — царевна, прикованная к скале в греческом предании о Персее. Хвастовство её матери Кассиопеи навлекло на царство морское чудовище. На карте неба можно найти всех участников рассказа — царевну, её родителей, чудовище и спасителя.",
+    "detail": {
+      "zh": "望远镜在仙女座方向看到的 M31 是一个完整的星系。里面的恒星远在画出公主轮廓的银河系恒星之后。观测它内部的造父变星可以估计距离，这曾帮助天文学家确认，银河系以外还有别的星系。",
+      "en": "M31 is an entire galaxy seen in the direction of Andromeda. Its stars lie far beyond the Milky Way stars that draw the princess. Measuring Cepheid variables inside it helped astronomers establish its distance and show that galaxies exist beyond our own.",
+      "fr": "M31 est une galaxie entière vue dans la direction d’Andromède. Ses étoiles se trouvent loin derrière celles de la Voie lactée qui dessinent la princesse. Les céphéides mesurées dans M31 ont permis d’en estimer la distance et d’établir l’existence de galaxies extérieures à la nôtre.",
+      "ru": "M31 — целая галактика в направлении Андромеды. Её звёзды находятся далеко за звёздами Млечного Пути, очерчивающими царевну. Измерения цефеид в M31 помогли установить её расстояние и подтвердить существование галактик за пределами нашей."
+    }
+  },
+  "Ant": {
+    "zh": "唧筒是早期物理实验中用来把空气从容器里抽出的气泵。18 世纪，法国天文学家拉卡伊给南天的一组暗星取了这件仪器的名字，纪念气泵的发明。今天星图上的唧筒座，保留了实验室里这件工具的身影。",
+    "en": "Antlia takes its name from an air pump, a device that drew air out of a vessel for experiments. In the eighteenth century Nicolas Louis de Lacaille named these faint southern stars in honour of its invention. A piece of laboratory apparatus thus found a permanent place on the sky chart.",
+    "fr": "La Machine pneumatique porte le nom de la pompe qui servait à retirer l’air d’un récipient pour des expériences. Au XVIIIᵉ siècle, Nicolas Louis de Lacaille donna à ces étoiles australes le nom de cet instrument. La carte du ciel garde ainsi le souvenir d’une invention de laboratoire.",
+    "ru": "Насос назван в честь воздушного насоса, которым в физических опытах откачивали воздух из сосуда. В XVIII веке Никола Луи де Лакайль увековечил изобретение в названии группы слабых звёзд южного неба. Так лабораторный прибор оказался на звёздной карте."
+  },
+  "Aps": {
+    "zh": "天燕座所画的是天堂鸟。16 世纪末荷兰航海者记录南天星位时，这种以羽毛闻名的鸟也进入了欧洲星图。拉丁名 Apus 有「无足」之意，留下了当时的一个误会。运到欧洲的鸟皮常已去掉双脚，活鸟当然有脚。",
+    "en": "Apus represents a bird of paradise. It entered European charts through Dutch observations of the southern sky in the late sixteenth century. Its name means “without feet”. Bird skins reaching Europe often had the feet removed, leaving a mistaken belief about the living bird in the name of a constellation.",
+    "fr": "L’Oiseau de paradis entra sur les cartes européennes à la suite des relevés néerlandais du ciel austral à la fin du XVIᵉ siècle. Son nom latin, Apus, signifie « sans pieds ». Les dépouilles qui arrivaient en Europe avaient souvent perdu leurs pattes, d’où cette idée curieuse sur un oiseau bien réel.",
+    "ru": "Райская Птица появилась на европейских картах после голландских наблюдений южного неба в конце XVI века. Латинское имя Apus означает «безногая». В Европу часто привозили птичьи шкурки с удалёнными лапками, и ошибочное представление о живой птице сохранилось в названии созвездия."
+  },
+  "Aqr": {
+    "zh": "宝瓶座的主角是一位提着水罐倾倒清水的人。古希腊星图把一串较暗的星安在罐口下方，水流一直引向南鱼座的嘴。把这两个天区放在一起看，就能读出一个星座的动作怎样延续到另一个星座。",
+    "en": "Aquarius is the water bearer, a figure tipping a jar. In Greek sky charts a stream of faint stars spills from the jar towards the mouth of the Southern Fish. The action begun by one constellation carries on into the next.",
+    "fr": "Le Verseau représente un porteur d’eau qui incline sa jarre. Sur les cartes grecques, un filet de faibles étoiles s’en échappe jusqu’à la bouche du Poisson austral. En regardant les deux figures ensemble, on suit le geste de l’une jusque chez l’autre.",
+    "ru": "Водолей — человек, льющий воду из кувшина. На греческих картах струя из слабых звёзд тянется к пасти Южной Рыбы. Если охватить взглядом оба созвездия, видно, как действие одной фигуры продолжается в соседней."
+  },
+  "Aql": {
+    "zh": "天鹰座是一只沿银河展翅的鹰。在希腊传说中，鹰替宙斯衔送雷霆。标出鹰身的亮星，在中国星图中叫作河鼓二，也就是民间熟悉的牛郎星。同一个光点，把两种看天的方式连在一起。",
+    "en": "Aquila is the eagle spreading its wings along the Milky Way. In Greek tradition the eagle carries the thunderbolts of Zeus. Its bright star Altair has a different role on the Chinese chart as Hegu Er, the Cowherd of the Qixi story. Both traditions begin with the same point of light.",
+    "fr": "L’Aigle déploie ses ailes le long de la Voie lactée. Dans la tradition grecque, il porte la foudre de Zeus. Son étoile brillante Altaïr est aussi Hegu Er, le Bouvier de la fête chinoise de Qixi. Le même point de lumière fait ainsi partie de deux récits différents.",
+    "ru": "Орёл расправил крылья вдоль Млечного Пути. В греческом предании он носит молнии Зевса. Его яркая звезда Альтаир на китайской карте — Хэгу-эр, Пастух из предания о празднике Циси. Один и тот же огонёк получил две совершенно разные роли."
+  },
+  "Ara": {
+    "zh": "天坛座是古代地中海星图中的祭坛。相邻的半人马手持一头兽，面向祭坛，后世星图把这头兽画成豺狼。今天它们各占一个星座，三者的位置仍保存着古人画下的一幕祭礼。",
+    "en": "Ara is the altar on ancient Mediterranean sky maps. Beside it a centaur carries an animal towards the altar. The animal later took the form of a wolf. The three figures now occupy separate constellations, preserving the arrangement of a single scene of sacrifice.",
+    "fr": "L’Autel est celui d’une scène rituelle des cartes antiques de la Méditerranée. À côté, un centaure approche avec une bête, devenue plus tard le Loup. Les trois figures sont aujourd’hui des constellations distinctes, dont la disposition conserve cette scène de sacrifice.",
+    "ru": "Жертвенник — алтарь на древних картах Средиземноморья. Соседний Центавр несёт к нему зверя, позднее изображённого в виде Волка. Сейчас у трёх фигур отдельные границы, но их расположение сохраняет сцену древнего жертвоприношения."
+  },
+  "Ari": {
+    "zh": "白羊座画的是公羊。希腊传说中的金毛公羊驮着两个孩子逃离险境，它留下的金羊毛又成了远航者寻找的宝物。天文学里还留有「白羊宫第一点」这个春分点的古称，地轴的缓慢摆动已让这个点移到了双鱼座。",
+    "en": "Aries is the ram. In Greek legend its golden fleece belonged to the animal that carried two children away from danger. Astronomers still use the old term “First Point of Aries” for the March equinox. The slow precession of Earth’s axis has shifted that point into Pisces.",
+    "fr": "Le Bélier de la légende grecque porte une toison d’or et emporte deux enfants hors de danger. L’ancien nom du point de l’équinoxe de mars, « premier point du Bélier », garde aussi son souvenir. La lente précession de l’axe terrestre a déplacé ce point jusque dans les Poissons.",
+    "ru": "Овен — баран с золотым руном, который, по греческому преданию, унёс двух детей от опасности. Старинное название точки весеннего равноденствия — «первая точка Овна». Из-за медленной прецессии земной оси сегодня она оказалась в Рыбах."
+  },
+  "Aur": {
+    "zh": "御夫座的名字意为驾车人，古星图上的他却还抱着羊。星座最明亮的五车二，拉丁名 Capella 就是「小母羊」的意思。驾车人的缰绳和怀里的羊出现在同一幅图里，也记录在不同的星名中。",
+    "en": "Auriga is the Charioteer, but old sky figures give the driver a second charge to carry on his arm. Capella, his brightest star, has a Latin name meaning “little she-goat”. The driver's reins and his goat both have a place in the traditional portrait.",
+    "fr": "Le Cocher tient des rênes et porte aussi une chèvre dans les anciennes figures du ciel. Le nom latin de sa plus brillante étoile, Capella, signifie « petite chèvre ». Le nom de l’étoile conserve ainsi un détail du personnage que le nom de la constellation laisse de côté.",
+    "ru": "Возничий на старинных изображениях держит вожжи и несёт козу. Название самой яркой звезды созвездия, Капелла, по-латыни означает «козочка». В имени звезды сохранилась деталь портрета, о которой трудно догадаться по одному названию созвездия."
+  },
+  "Boo": {
+    "zh": "牧夫座跟在大熊后面。古希腊人既用耕田者的名字称呼他，也把他叫作守熊人。明亮的橙色大角星，西名 Arcturus，同样带有「守熊」的意思。即使看不出人物轮廓，读星名也能找到他和大熊的联系。",
+    "en": "Boötes follows the Great Bear. Greek writers called this figure both a ploughman and a guardian of the bear. The name of the bright orange star Arcturus also means “bear guard”. The star’s name preserves the connection even when the outlines are hard to trace.",
+    "fr": "Le Bouvier suit la Grande Ourse. Les auteurs grecs ont vu en lui un laboureur ou encore le gardien de l’ourse. Le nom de sa brillante étoile orangée, Arcturus, signifie lui aussi « gardien de l’ourse ». Ce nom rappelle le lien entre les deux figures.",
+    "ru": "Волопас идёт вслед за Большой Медведицей. Греческие авторы называли его и пахарем, и стражем медведицы. Название яркой оранжевой звезды Арктур тоже означает «страж медведицы». По имени звезды можно восстановить связь между соседними фигурами."
+  },
+  "Cae": {
+    "zh": "雕具座的「雕具」指雕刻用的工具。18 世纪拉卡伊在南天星图上画了靠在一起的刻刀，把雕版工匠手中能刻出细线的器具也放进了星空。它与附近波江座的长河相比很小，几颗暗星便占全了这个图形。",
+    "en": "Caelum represents the engraver’s tools. In the eighteenth century Lacaille drew cutting tools together on his southern chart, giving the instruments that cut fine lines into a plate a place among the stars. A few faint stars mark this small figure beside the long river Eridanus.",
+    "fr": "Le Burin représente les outils du graveur. Au XVIIIᵉ siècle, Lacaille dessina sur sa carte australe les lames qui servent à inciser de fines lignes sur une plaque. Quelques étoiles discrètes suffisent à cette petite figure, près du long fleuve Éridan.",
+    "ru": "Резец представляет инструменты гравёра. В XVIII веке Лакайль изобразил на карте южного неба резцы, которыми на печатной форме проводят тонкие линии. Для небольшой фигуры рядом с длинной рекой Эридан хватило нескольких слабых звёзд."
+  },
+  "Cam": {
+    "zh": "鹿豹座画的是长颈鹿，也常称作长颈鹿座。17 世纪初，制图家普朗修斯在北天的一片暗星中画出它。欧洲古称把骆驼的身形与豹的斑纹合进一个词，拉丁名 Camelopardalis 便沿用了这个说法。",
+    "en": "Camelopardalis is the giraffe that Petrus Plancius drew among faint northern stars in the early seventeenth century. Its Latin name retains an old description of a giraffe as an animal with a camel’s shape and a leopard’s markings.",
+    "fr": "La Girafe apparut parmi les étoiles discrètes du nord sur un globe de Petrus Plancius au début du XVIIᵉ siècle. Son nom latin, Camelopardalis, garde une ancienne façon de décrire la girafe en associant la silhouette du chameau aux taches du léopard.",
+    "ru": "Жираф появился среди слабых северных звёзд на глобусе Петруса Планциуса в начале XVII века. Латинское имя Camelopardalis сохраняет древнее описание жирафа, в котором облик верблюда соединяли с пятнами леопарда."
+  },
+  "Cnc": {
+    "zh": "巨蟹座是黄道上的螃蟹。在希腊故事的一种讲法里，它在赫拉克勒斯与水蛇搏斗时夹了英雄的脚。这个天区还收着另一幅古老的小画。两颗星叫作两头驴，它们中间肉眼看去朦朦胧胧的一团星光，就是驴吃食的「马槽」。",
+    "en": "Cancer is the crab of the zodiac. In one Greek tale it pinches Heracles’ foot while he fights the water serpent. The same constellation contains another old picture. Two stars are called the Donkeys, and the misty patch of light between them is Praesepe, their manger.",
+    "fr": "Le Cancer est le crabe du zodiaque. Dans un récit grec, il pince le pied d’Héraclès pendant son combat contre l’hydre. Une autre image ancienne habite le même ciel. Deux étoiles sont les Ânes, et la lueur diffuse entre elles est leur mangeoire, la Crèche.",
+    "ru": "Рак — небесный краб зодиака. В одном из греческих преданий он вцепился в ногу Геракла, пока тот сражался с гидрой. Здесь же есть другая древняя картина. Две звезды зовутся Ослятами, а туманное пятнышко между ними — их кормушка, Ясли."
+  },
+  "CVn": {
+    "zh": "猎犬座是跟随牧夫的两只猎犬。赫维留斯的星图画出牧夫牵着它们追逐大熊。把猎犬单独画出，也给北斗柄下方这片原先很少引人注意的天空安排了一个角色。",
+    "en": "Canes Venatici are the two hunting dogs of Boötes. Hevelius’s atlas showed the herdsman holding their leads as they pursue the Great Bear. The dogs gave the rather inconspicuous patch below the Big Dipper’s handle a role of its own.",
+    "fr": "Les Chiens de chasse accompagnent le Bouvier. Sur la carte d’Hevelius, il les tient en laisse à la poursuite de la Grande Ourse. Les chiens ont donné un rôle à part entière à cette région discrète située sous le manche de la Grande Casserole.",
+    "ru": "Гончие Псы — две собаки Волопаса. На карте Гевелия пастух держит их на поводках, преследуя Большую Медведицу. Так у малоприметного участка под ручкой Большого Ковша появилась собственная роль в небесной сцене."
+  },
+  "CMa": {
+    "zh": "大犬座在古希腊星图上是一只猎犬，与猎户相随。标出猎犬的天狼星常被称作「犬星」。即使猎犬身上的暗星被灯光盖住，这个名字和夜空中最明亮的恒星仍能让人认出它的位置。",
+    "en": "Canis Major is the great dog accompanying Orion the hunter. Its brilliant star Sirius is often called the Dog Star. Even when city lights hide the rest of the animal, the brightest star in the night sky gives the figure away.",
+    "fr": "Le Grand Chien accompagne Orion le chasseur sur les cartes du ciel. Sirius, son étoile la plus brillante, est surnommée l’étoile du Chien. Même lorsque les lumières de la ville effacent le reste de l’animal, l’étoile la plus brillante du ciel nocturne permet de le situer.",
+    "ru": "Большой Пёс сопровождает охотника Ориона. Яркий Сириус часто называют Собачьей звездой. Даже если городской свет скрыл слабые звёзды фигуры, самую яркую звезду ночного неба легко отыскать.",
+    "detail": {
+      "zh": "天狼星还藏着一颗很难从它的眩光中分出来的伴星，天狼星 B。它是一颗白矮星，直径和地球相近，却把接近太阳质量的物质压进了这么小的体积。一明一暗的两颗星正在绕共同的质心运行。",
+      "en": "Sirius has a companion that is difficult to separate from its glare. Sirius B is a white dwarf about as wide as Earth yet containing nearly the mass of the Sun. The bright star and this dense remnant orbit a common centre of mass.",
+      "fr": "Sirius a un compagnon difficile à distinguer dans son éclat. Sirius B est une naine blanche dont le diamètre est proche de celui de la Terre et la masse voisine de celle du Soleil. L’étoile brillante et ce résidu très dense tournent autour d’un centre de masse commun.",
+      "ru": "Рядом с Сириусом есть спутник, который трудно различить в его сиянии. Сириус B — белый карлик размером примерно с Землю, в котором заключена почти целая солнечная масса. Яркая звезда и этот плотный остаток обращаются вокруг общего центра масс."
+    }
+  },
+  "CMi": {
+    "zh": "小犬座是星图上陪伴猎户的两条猎犬中较小的一条。它的亮星南河三有一个更古老的名字 Procyon，希腊语意为「在犬之前」。在古希腊人的纬度，南河三先于大犬座的天狼星升起，名字记录的是仰头等待两颗星登场的次序。",
+    "en": "Canis Minor is the smaller of the two dogs that accompany Orion on star charts. Its bright star Procyon has a Greek name meaning “before the dog”. At the latitudes of ancient Greece it rises ahead of Sirius, the Dog Star, so the name preserves a sequence that observers could watch for themselves.",
+    "fr": "Le Petit Chien est le plus petit des deux chiens qui accompagnent Orion sur les cartes. Le nom grec de son étoile Procyon signifie « avant le chien ». Aux latitudes de la Grèce antique, elle se lève avant Sirius, l’étoile du Grand Chien. Son nom garde la trace de deux levers successifs.",
+    "ru": "Малый Пёс — меньшая из двух собак Ориона на звёздных картах. Греческое имя его яркой звезды Процион означает «перед псом». На широтах Древней Греции она восходит раньше Сириуса, главной звезды Большого Пса. Имя сохранило порядок появления двух светил."
+  },
+  "Cap": {
+    "zh": "摩羯座的传统形象是一头海山羊，前半身有蹄有角，后半身却拖着鱼尾。这种水陆合一的动物早已出现在美索不达米亚，和掌管智慧与地下淡水的神埃亚有关。这个沿黄道排列的古老图形，随古代星学的传播进入希腊星图。",
+    "en": "Capricornus is a sea-goat, with a horned goat’s forequarters and a fish’s tail. The creature appears in Mesopotamia in association with Ea, the god of wisdom and the subterranean fresh waters. This ancient figure on the zodiac travelled west into Greek astronomy.",
+    "fr": "Le Capricorne est un animal à cornes et à sabots qui se termine par une queue de poisson. En Mésopotamie, il accompagnait Éa, dieu de la sagesse et des eaux douces souterraines. Cette figure ancienne du zodiaque a ensuite trouvé sa place dans l’astronomie grecque.",
+    "ru": "Козерог — морской козёл с рогами и копытами спереди и рыбьим хвостом сзади. В Месопотамии такое существо связывали с Эа, богом мудрости и подземных пресных вод. Вместе с другими фигурами зодиака этот древний образ перешёл в греческую астрономию."
+  },
+  "Car": {
+    "zh": "船底座是阿尔戈号的船身。希腊故事里，伊阿宋和伙伴们乘这艘船去寻找金羊毛。昔日的南船座横跨大片南天，现代星图把船底、船帆、船尾分别划成星座。船上最亮的老人星仍留在船底，能帮人把分开的几块天区拼回一艘船。",
+    "en": "Carina is the hull of the Argo, the ship on which Jason and his companions sought the Golden Fleece in Greek legend. Modern charts divide the great ship among Carina, Vela and Puppis. Canopus, the old ship’s brightest star, belongs to the hull and is a good place to begin piecing the vessel together.",
+    "fr": "La Carène est la coque de l’Argo, le navire sur lequel Jason et ses compagnons partirent chercher la Toison d’or. Les cartes modernes répartissent l’ancien navire entre la Carène, les Voiles et la Poupe. Canopus, son étoile la plus brillante, est restée dans la Carène.",
+    "ru": "Киль — корпус «Арго», на котором Ясон и его спутники отправились за золотым руном. На современных картах огромное созвездие корабля поделено между Килем, Парусами и Кормой. Канопус, ярчайшая звезда прежнего корабля, остался в Киле и помогает вновь собрать судно на небе."
+  },
+  "Cas": {
+    "zh": "仙后座是希腊故事中坐在宝座上的王后卡西奥佩娅。她夸耀美貌，触怒海中仙女，女儿安德洛墨达因而被献给海怪。五颗亮星勾出的折线随北天转动，时而像 W，时而像 M，也让人容易想起星图上那张跟着王后一起翻转的宝座。",
+    "en": "Cassiopeia is the enthroned queen in the Greek story of Andromeda. Her boast about beauty offended the sea nymphs and put her daughter in the sea monster’s path. The queen’s five prominent stars turn from a W to an M as the northern sky wheels round, tipping her celestial throne with them.",
+    "fr": "Cassiopée est la reine assise sur son trône dans le récit grec d’Andromède. Sa vantardise au sujet de la beauté offensa les nymphes de la mer et livra sa fille au monstre marin. Cinq étoiles dessinent un W qui devient un M quand le ciel boréal tourne, renversant aussi le trône de la reine.",
+    "ru": "Кассиопея — царица на троне в греческом сказании об Андромеде. Её похвальба красотой разгневала морских нимф, и дочь пришлось отдать морскому чудовищу. Пять заметных звёзд складываются то в W, то в M, когда вращение северного неба переворачивает трон царицы."
+  },
+  "Cen": {
+    "zh": "半人马座把人的上身和马的身体连在一起。古希腊星图常让他伸手举着一头兽，面向祭坛，今天的豺狼座和天坛座正好保留这幅场景的另外两部分。他的前足附近还有半人马座α星系，太阳最近的恒星邻居就属于这个系统。",
+    "en": "Centaurus combines a human torso with the body of a horse. Greek star charts show him holding a beast before an altar. Lupus and Ara preserve those other pieces of the scene as constellations of their own. Near the centaur’s forefeet lies Alpha Centauri, the system that contains the Sun’s nearest stellar neighbour.",
+    "fr": "Le Centaure a un buste humain et un corps de cheval. Sur les cartes grecques, il tend un animal devant un autel. Le Loup et l’Autel conservent ces deux autres éléments de la scène. Près des sabots antérieurs se trouve Alpha Centauri, le système auquel appartient l’étoile la plus proche du Soleil.",
+    "ru": "Центавр соединяет человеческое туловище с лошадиным телом. На греческих картах он держит зверя перед жертвенником. Остальные части сцены сохранились в созвездиях Волка и Жертвенника. У передних копыт находится система альфы Центавра, в которую входит ближайшая к Солнцу звезда."
+  },
+  "Cep": {
+    "zh": "仙王座是安德洛墨达故事里的国王刻甫斯，仙后座和仙女座分别是他的妻子和女儿。今天常把这几颗星连成一座带尖屋顶的小房子，古星图画的却是站立的国王。把国王、王后和公主在北天依次找出来，便能看见古人如何用相邻的星图叙述家族的故事。",
+    "en": "Cepheus is the king in the story of Andromeda. Cassiopeia is his wife and Andromeda their daughter. Modern observers often see a house with a pointed roof where old charts drew a standing king. Finding king, queen and princess across the northern sky helps piece together the family story.",
+    "fr": "Céphée est le roi du récit d’Andromède. Cassiopée est son épouse et Andromède leur fille. On dessine souvent une maison au toit pointu là où les anciennes cartes plaçaient un roi debout. Repérer le roi, la reine et la princesse dans le ciel du nord permet de reconstituer ce récit de famille.",
+    "ru": "Цефей — царь из предания об Андромеде, муж Кассиопеи и отец царевны. Наблюдатели часто видят домик с острой крышей там, где старинные карты изображали стоящего царя. Если найти на северном небе царя, царицу и царевну, из соседних созвездий складывается семейная история.",
+    "detail": {
+      "zh": "为什么会亮暗变化的星可以用来量距离？亨丽埃塔·勒维特发现，同一类造父变星的脉动越慢，平均发光本领往往越强。测出它的周期，就能估算它本身有多亮，再和从地球看到的亮度比较，推算光走过的距离。",
+      "en": "Why can a varying star tell us a distance? Henrietta Leavitt found that, within the same class of Cepheids, a slower pulse generally means a higher average luminosity. The period helps predict the star’s actual light output. Comparing that with its apparent brightness gives a distance.",
+      "fr": "Comment une étoile variable donne-t-elle une distance ? Henrietta Leavitt a découvert que, pour une même classe de céphéides, une pulsation plus lente indique une plus grande luminosité moyenne. La période permet d’estimer la lumière réellement émise et sa comparaison avec l’éclat apparent donne une distance.",
+      "ru": "Как переменная звезда помогает измерять расстояния? Генриетта Ливитт обнаружила, что в одном классе цефеид более медленные пульсации обычно соответствуют большей средней светимости. По периоду оценивают мощность излучения и, сравнивая её с видимым блеском, определяют расстояние."
+    }
+  },
+  "Cet": {
+    "zh": "鲸鱼座的古希腊名字 kētos 指的是传说中的海怪。故事里，它游向被锁在岸边的安德洛墨达，直到珀尔修斯赶来。古代画家给它安上长尾、怪兽的头，有时还带前爪。今天叫它「鲸鱼」，仍能在相邻星座中认出这幕海岸上的故事。",
+    "en": "Cetus is the sea monster that approaches the chained Andromeda in the Greek tale of Perseus. The Greek word kētos could mean a fabulous sea creature. Artists drew it with a long tail, a fearsome head and sometimes forepaws. The familiar name “the Whale” is a later way of picturing that monster.",
+    "fr": "La Baleine est le monstre qui s’approche d’Andromède enchaînée dans le récit de Persée. Le mot grec kētos pouvait désigner une créature marine fabuleuse. Les artistes lui donnaient une longue queue, une tête redoutable et parfois des pattes avant. La baleine est une image plus récente de ce monstre.",
+    "ru": "Кит — морское чудовище, которое приближалось к прикованной Андромеде в предании о Персее. Греческое слово kētos могло обозначать сказочного морского зверя. На старых рисунках у него длинный хвост, устрашающая голова, а иногда и передние лапы. Кит — более поздний образ этого существа."
+  },
+  "Cha": {
+    "zh": "蝘蜓座描绘的是眼睛灵活、能伸出长舌捕虫的变色龙。十六世纪末前往东印度群岛的荷兰航海者记录南天恒星，欧洲制图者在其中画出一组新动物。古星图把这只小蜥蜴放在苍蝇旁边，连附近的一小块星空也有了捕食的情节。",
+    "en": "Chamaeleon is the colour-changing lizard with independently moving eyes and a long tongue for catching insects. It joined European globes after Dutch voyagers recorded southern stars in the late sixteenth century. On old charts the lizard faces a fly, giving the little patch of sky a predator and its prey.",
+    "fr": "Le Caméléon représente le lézard qui change de couleur et capture les insectes avec sa longue langue. Il entra sur les globes européens après les relevés des navigateurs néerlandais à la fin du XVIe siècle. Sur d’anciennes cartes, le lézard fait face à une mouche, sa proie toute trouvée.",
+    "ru": "Хамелеон изображает ящерицу, которая меняет окраску и ловит насекомых длинным языком. Созвездие появилось на европейских глобусах после наблюдений голландских мореплавателей конца XVI века. На старинных картах прямо перед ящерицей нарисована муха, словно художник изобразил момент охоты."
+  },
+  "Cir": {
+    "zh": "圆规座画的是制图员用来画圆、量取距离的双脚圆规。十八世纪拉卡伊在好望角测量南天，把这件工具放在半人马座近旁。星图上两条细线从同一点张开，很像圆规的两脚，也保留下地图和星图曾经由人拿着工具逐笔绘成的记忆。",
+    "en": "Circinus is a pair of drafting compasses, the hinged instrument used to draw circles or transfer a length on a map. Lacaille placed it beside Centaurus after his eighteenth-century survey at the Cape of Good Hope. Two lines opening from one point recall the legs of the tool with which charts themselves were drawn.",
+    "fr": "Le Compas est l’instrument à deux branches qui sert à tracer des cercles ou à reporter une distance sur une carte. Lacaille le plaça près du Centaure après ses observations du XVIIIe siècle au cap de Bonne-Espérance. Deux traits partant d’un même point dessinent l’outil qui servait à dresser les cartes.",
+    "ru": "Циркуль — чертёжный инструмент с двумя ножками, которым проводят окружности и переносят расстояния на карту. Лакайль поместил его рядом с Центавром после наблюдений XVIII века на мысе Доброй Надежды. Две линии расходятся из одной точки и напоминают о том, как чертили сами звёздные карты."
+  },
+  "Col": {
+    "zh": "天鸽座是一只衔着橄榄枝的鸽子。十六世纪末，制图者普朗修斯把它画进大犬座以南。早期星表已经写到那根树枝，它让人想起《创世记》中飞回方舟的鸽子，带回洪水正在消退的消息。衔在鸟喙里的小细节，点出了整幅星图的故事。",
+    "en": "Columba is a dove carrying an olive branch. The cartographer Petrus Plancius placed it south of Canis Major in the late sixteenth century. An early star catalogue mentions the branch, the clue to the story in Genesis in which a dove returns to Noah’s ark bearing news that the floodwaters are receding.",
+    "fr": "La Colombe porte un rameau d’olivier dans son bec. Le cartographe Petrus Plancius la plaça au sud du Grand Chien à la fin du XVIe siècle. Le rameau figure déjà dans un ancien catalogue. Il évoque la colombe de la Genèse qui revient vers l’arche de Noé avec le signe que les eaux se retirent.",
+    "ru": "Голубь несёт в клюве оливковую ветвь. Картограф Петер Планциус поместил его к югу от Большого Пса в конце XVI века. Ветвь упоминает уже ранний звёздный каталог. Эта деталь отсылает к библейскому рассказу о голубе, который вернулся на Ноев ковчег и возвестил, что вода убывает."
+  },
+  "Com": {
+    "zh": "后发座是埃及王后贝勒尼基二世的一绺头发。古代宫廷故事说，她为出征的丈夫许愿，献出长发，后来供发消失，天文学家科农指出那绺头发已经升上天空。在暗处看去，这片天区真的散着一团细碎星光，很像披散开的发丝。",
+    "en": "Coma Berenices is a lock of hair belonging to Berenice II, queen of Egypt. A court tale says she dedicated her hair for her husband’s safe return from war. When the offering vanished, the astronomer Conon pointed out the lock in the sky. A loose sprinkling of stars still gives the hair its texture.",
+    "fr": "La Chevelure de Bérénice est une mèche de Bérénice II, reine d’Égypte. Selon le récit de cour, elle offrit ses cheveux pour que son époux revienne de la guerre. Quand l’offrande disparut, l’astronome Conon montra la mèche dans le ciel. Un poudroiement d’étoiles donne encore sa texture à cette chevelure.",
+    "ru": "Волосы Вероники — прядь египетской царицы Береники II. По придворному преданию, она пожертвовала волосы ради благополучного возвращения мужа с войны. Когда дар исчез, астроном Конон показал царице эту прядь на небе. В темноте россыпь слабых звёзд и впрямь напоминает разметавшиеся волосы."
+  },
+  "CrA": {
+    "zh": "南冕座是人马座脚下的一弧小星。「冕」在这里可以想成一圈编成的花冠。古希腊诗人阿拉托斯曾写到这组星围成环形，后来才有南方王冠这个称呼。它和北冕座分居南北，两弧星光各自成图，隔着很大一段天空。",
+    "en": "Corona Australis is the small southern crown beneath Sagittarius. Aratus, writing in Greek antiquity, described the stars as forming a ring. Later charts made a wreath or crown of that little arc. Its name pairs it with Corona Borealis, a second, much more distant arc in the northern sky.",
+    "fr": "La Couronne australe est un petit arc d’étoiles sous le Sagittaire. Le poète grec Aratos décrivait déjà des étoiles disposées en anneau. Les cartes en firent ensuite une couronne, que l’on peut imaginer tressée de feuillage. Son pendant, la Couronne boréale, dessine un autre arc loin dans le ciel du nord.",
+    "ru": "Южная Корона — маленькая дуга звёзд под ногами Стрельца. Древнегреческий поэт Арат описывал их как кольцо. Позднее на картах эту дугу стали рисовать в виде венка или короны. Её небесная тёзка, Северная Корона, образует отдельную дугу далеко в северном небе."
+  },
+  "CrB": {
+    "zh": "北冕座是一个朝一边敞开的花冠。古希腊传说把它和阿里阿德涅相连，她曾用线团指引忒修斯走出迷宫，后来成为狄俄尼索斯的妻子。冠上最亮的贯索四有个拉丁名字 Gemma，意思是「宝石」，正好像镶在花冠中央的一颗珠宝。",
+    "en": "Corona Borealis is an open arc of stars imagined as a wreath. In Greek tradition the crown belongs to Ariadne, who gave Theseus a thread to lead him out of the labyrinth and later married Dionysus. Its brightest star has the Latin name Gemma, “gem”, a fitting jewel near the centre of the crown.",
+    "fr": "La Couronne boréale est un arc ouvert qui évoque un diadème. Dans la tradition grecque, il appartient à Ariane, qui donna à Thésée le fil du labyrinthe avant d’épouser Dionysos. L’étoile la plus brillante de la couronne porte aussi le nom latin de Gemma, « pierre précieuse ».",
+    "ru": "Северная Корона — незамкнутая дуга звёзд, в которой видели венец. В греческом предании он принадлежит Ариадне, давшей Тесею нить для выхода из лабиринта и впоследствии ставшей супругой Диониса. Латинское имя ярчайшей звезды, Гемма, означает «драгоценный камень»."
+  },
+  "Crv": {
+    "zh": "乌鸦座是长蛇背上的一只鸟，旁边还放着巨爵座的杯子。希腊故事里，阿波罗派乌鸦去取水，它却贪等无花果成熟，回来时又企图把迟到推给水蛇。星图把鸟、杯和蛇画在一起，找到四边形的鸟身就能接着找齐另外两件。",
+    "en": "Corvus is a raven perched on the back of Hydra beside a cup. In a Greek tale Apollo sends the bird for water. It lingers for figs to ripen and blames a water snake for the delay. The bird, cup and snake share the same part of the sky, with the raven’s four-sided body a handy starting point.",
+    "fr": "Le Corbeau se tient sur le dos de l’Hydre, à côté d’une coupe. Dans un récit grec, Apollon l’envoie chercher de l’eau. L’oiseau attend que mûrissent des figues puis accuse un serpent d’eau de son retard. Le quadrilatère du Corbeau permet de retrouver les trois personnages de la scène.",
+    "ru": "Ворон сидит на спине Гидры рядом с чашей. В греческом предании Аполлон послал его за водой. Птица задержалась, дожидаясь спелых смокв, а опоздание попыталась свалить на водяную змею. Заметный четырёхугольник Ворона помогает найти на карте и чашу, и длинную змею."
+  },
+  "Crt": {
+    "zh": "巨爵座代表古希腊宴席上调和酒和水的大杯，名字中的「爵」可以理解成酒器。它坐落在长蛇座背上，与乌鸦座相邻。把三块天区一起看，就能读出古人画的场面，一只奉命取水的鸟迟迟没有把杯子送回太阳神阿波罗手中。",
+    "en": "Crater is a mixing bowl of the kind used to combine wine and water at a Greek feast. It rests on Hydra beside Corvus. Taken together, the three constellations illustrate the tale of Apollo’s raven, whose errand to fetch water kept the god waiting a very long time for his cup.",
+    "fr": "La Coupe figure le grand vase qui servait à mêler le vin et l’eau lors d’un banquet grec. Elle repose sur l’Hydre, à côté du Corbeau. Les trois constellations composent le récit de l’oiseau envoyé par Apollon chercher de l’eau et qui fit bien longtemps attendre le dieu et sa coupe.",
+    "ru": "Чаша изображает большой кратер — сосуд, в котором на греческом пиру смешивали вино с водой. Он стоит на спине Гидры рядом с Вороном. Вместе три созвездия напоминают о вороне Аполлона, отправленном за водой и заставившем бога долго дожидаться своей чаши."
+  },
+  "Cru": {
+    "zh": "南十字座的四颗主星在古希腊星图中曾属于半人马的腿。后来南航的海员把十字当作辨认方向的标记，它才在欧洲星图上成为独立的图形。将较长的一臂从十字顶端向下延长，大致指向南天极，这是南方夜空中实际能用的方向线索。",
+    "en": "Crux is the Southern Cross. Its four main stars belonged to the legs of Centaurus on ancient Greek charts. Mariners sailing south used the cross as a guide, and it became a constellation in its own right on European maps. Extending its long axis beyond the foot gives a rough direction to the south celestial pole.",
+    "fr": "La Croix du Sud était autrefois incluse dans les pattes du Centaure sur les cartes grecques. Les marins qui naviguaient vers le sud se guidèrent sur cette croix, devenue une constellation à part entière. En prolongeant son grand axe au-delà du pied, on obtient une direction approximative du pôle céleste sud.",
+    "ru": "Южный Крест составляют звёзды, которые на древнегреческих картах относились к ногам Центавра. Мореплаватели южных морей использовали крест как ориентир, и на европейских картах он стал самостоятельной фигурой. Его длинная ось, продолженная за подножие, указывает примерное направление на южный полюс мира."
+  },
+  "Cyg": {
+    "zh": "天鹅座像一只在银河上张开翅膀的大鸟。早期希腊天文学直接称它为「鸟」，后世星图画成了天鹅。亮星天津四标出尾端，长颈尽头是辇道增七，两侧星线展开成翼。换个读法，同一组星又构成观星者熟悉的「北十字」。",
+    "en": "Cygnus is a great bird with wings spread across the Milky Way. Early Greek astronomers called it simply the Bird, and later charts pictured a swan. Deneb marks the tail and Albireo the far end of the long neck. Reading the same lines another way gives observers the familiar Northern Cross.",
+    "fr": "Le Cygne étend ses ailes sur la Voie lactée. Les premiers astronomes grecs parlaient simplement de l’Oiseau, devenu cygne sur les cartes. Deneb en marque la queue et Albireo l’extrémité du long cou. Les mêmes lignes se lisent aussi comme la Croix du Nord, familière aux observateurs.",
+    "ru": "Лебедь раскинул крылья поперёк Млечного Пути. Ранние греческие астрономы называли его просто Птицей, а позднее на картах появился лебедь. Денеб отмечает хвост, Альбирео — конец длинной шеи. Те же звёзды образуют другой знакомый наблюдателям рисунок — Северный Крест."
+  },
+  "Del": {
+    "zh": "海豚座是一只从水面跃出的小海豚，四颗星勾出脑袋和躯干，一颗拖出尾巴。古希腊传说中，歌手阿里翁被迫投海，受他琴声吸引的海豚把他驮回岸上。一小组不起眼的星，因这段救人的故事有了好记的轮廓。",
+    "en": "Delphinus is a small leaping dolphin, with a diamond for the front of its body and one star trailing as its tail. In one Greek tale the singer Arion is forced overboard. A dolphin drawn to his music carries him safely ashore, giving a quiet patch of sky a memorable story.",
+    "fr": "Le Dauphin paraît bondir hors de l’eau, le corps dessiné par un losange et la queue par une étoile en retrait. Dans un récit grec, le chanteur Arion est forcé de se jeter à la mer. Un dauphin attiré par sa musique le ramène au rivage, donnant une histoire à ce petit groupe discret.",
+    "ru": "Дельфин словно выпрыгивает из воды. Четыре звезды ромба намечают его тело, ещё одна — хвост. По одному из греческих преданий, певца Ариона вынудили броситься в море, и дельфин, привлечённый его музыкой, вынес его на берег. Так у скромной группы звёзд появилась запоминающаяся история."
+  },
+  "Dor": {
+    "zh": "剑鱼座来自十六世纪末航海者带回欧洲的南天记录。它的名字 Dorado 在这里指体色金绿、游速很快的鲯鳅，有些早期星图也把它画成剑鱼。旧图上的大鱼正追逐邻近的飞鱼，两块现代天区因此保留了一幅热带海面的景象。",
+    "en": "Dorado is the swift, gold-green dolphinfish known to sailors in warm seas. The constellation grew out of southern observations brought to Europe in the late sixteenth century. Some early charts drew a swordfish instead. The great fish pursues neighbouring Volans, the flying fish, across this stretch of sky.",
+    "fr": "La Dorade est ici la coryphène, un poisson rapide aux reflets d’or et de vert des mers chaudes. La figure vient des relevés austraux rapportés en Europe à la fin du XVIe siècle. Certains atlas en firent un espadon. Le grand poisson y poursuit le Poisson volant, son voisin sur la carte.",
+    "ru": "Золотая Рыба изображает стремительную золотисто-зелёную корифену тёплых морей. Созвездие восходит к южным наблюдениям, привезённым в Европу в конце XVI века. На некоторых старых картах вместо корифены рисовали меч-рыбу. И та и другая преследует соседнюю Летучую Рыбу."
+  },
+  "Dra": {
+    "zh": "天龙座的身体在大熊和小熊之间弯曲，龙头像四边形。古希腊人把这道长星链讲成巨蛇或守卫的龙，其中一个传说让它看守赫斯珀里得斯的金苹果。龙身上的右枢曾靠近北天极，使这条守卫天空的龙也留下了地轴方向缓慢变化的痕迹。",
+    "en": "Draco winds between the two Bears and has a head outlined by four stars. Greek traditions saw a great serpent or a guardian dragon here. In one story it guarded the golden apples of the Hesperides. Thuban on its body once lay near the north celestial pole, a reminder that Earth’s axis slowly changes direction.",
+    "fr": "Le Dragon s’enroule entre les deux Ourses et quatre étoiles marquent sa tête. Les récits grecs en faisaient un grand serpent ou un dragon gardien, notamment celui des pommes d’or des Hespérides. Thuban, sur son corps, fut proche du pôle céleste nord, témoin du lent changement de direction de l’axe terrestre.",
+    "ru": "Дракон извивается между двумя Медведицами, а его голову отмечают четыре звезды. Греческие предания видели здесь великого змея или дракона-стража, в том числе хранителя золотых яблок Гесперид. Звезда Тубан на его теле некогда была близка к северному полюсу мира и напоминает о медленном движении земной оси."
+  },
+  "Equ": {
+    "zh": "小马座在飞马座鼻端附近，今天的名字意为「小马」。古希腊星表把它写成「马的前部」，老星图也只从几颗暗星画出马头和颈部。如果总是找不到一整匹马，知道古人实际只画了半身，便容易认出这幅小小的侧影。",
+    "en": "Equuleus, the Little Horse, lies near the nose of Pegasus. Ancient Greek catalogues called it the Forepart of the Horse, and old maps drew only the head and neck from a handful of faint stars. Looking for that small profile makes more sense of the figure than trying to trace four legs.",
+    "fr": "Le Petit Cheval se trouve près du nez de Pégase. Des catalogues grecs le désignaient comme le devant du cheval. Sur les cartes anciennes, quelques étoiles faibles formaient seulement la tête et le cou. C’est ce petit profil que l’on peut chercher auprès du grand cheval ailé.",
+    "ru": "Малый Конь находится у носа Пегаса. Древнегреческие каталоги называли его передней частью коня, а на старинных картах по нескольким слабым звёздам проводили лишь голову и шею. Искать этот небольшой профиль гораздо проще, если представлять именно такой рисунок."
+  },
+  "Eri": {
+    "zh": "波江座是一条从猎户座脚边曲折流向南方的天河。古希腊人称它为「河」，不同作者把它联系到人间不同的河流。今天星图让它一直流到明亮的水委一，这颗星的名字 Achernar 来自阿拉伯语的「河流尽头」，给漫长的星链添了一个终点。",
+    "en": "Eridanus is the river that winds south from Orion’s foot. Ancient Greek writers called it the River and offered different identifications with rivers on Earth. On modern maps the stream runs all the way to bright Achernar, whose name comes from the Arabic for “the end of the river”.",
+    "fr": "L’Éridan est le fleuve céleste qui serpente vers le sud depuis le pied d’Orion. Les auteurs grecs l’appelaient le Fleuve et le rapprochaient de différents cours d’eau terrestres. Sur les cartes actuelles, il atteint la brillante Achernar, dont le nom arabe signifie « l’extrémité du fleuve ».",
+    "ru": "Эридан — небесная река, текущая извилистым путём на юг от ноги Ориона. Греческие авторы называли её просто Рекой и сопоставляли с разными земными реками. На современной карте путь заканчивается у яркого Ахернара, имя которого происходит от арабского выражения «конец реки»."
+  },
+  "For": {
+    "zh": "天炉座的炉子是化学实验室里的加热炉。十八世纪的拉卡伊把它画进波江座河道的弯曲处，旧图还画有承受加热的容器。在温度能得到控制的炉膛里，人们可以蒸馏、煅烧和研究物质，这个星座保留了早期实验室工作台的一角。",
+    "en": "Fornax is a chemist’s furnace. In the eighteenth century Lacaille placed it in a bend of the celestial river Eridanus and pictured a vessel over the heat. Furnaces gave experimenters the sustained heat needed to distil or calcine substances. The constellation preserves a small corner of an early laboratory.",
+    "fr": "Le Fourneau représente le four d’un chimiste. Au XVIIIe siècle, Lacaille le plaça dans un méandre de l’Éridan, avec un récipient exposé à la chaleur. Un tel four entretenait le feu nécessaire aux distillations ou aux calcinations. Un coin de laboratoire ancien a ainsi pris place dans le ciel.",
+    "ru": "Печь — нагревательная печь химика. В XVIII веке Лакайль поставил её в излучине небесной реки Эридан и нарисовал сосуд над огнём. Ровный длительный жар позволял перегонять и прокаливать вещества. Так на небе сохранился уголок ранней химической лаборатории."
+  },
+  "Gem": {
+    "zh": "双子座是并肩站立的卡斯托尔和波吕克斯。古希腊人讲述这对兄弟彼此不肯分离，也把他们视为遇险海员的守护者。两颗亮星北河二和北河三至今各用一位兄弟的西方名字。从这两颗并列的头向下望，就能分别沿星链找到他们的身体。",
+    "en": "Gemini depicts Castor and Pollux standing side by side. Greek tradition told of the brothers’ devotion and regarded them as protectors of sailors in distress. Their names survive on the two bright stars that mark their heads. From each head a separate chain of stars runs down the body of a twin.",
+    "fr": "Les Gémeaux sont Castor et Pollux, deux frères figurés côte à côte. La tradition grecque racontait leur attachement mutuel et en faisait les protecteurs des marins en péril. Leurs noms sont restés ceux des deux étoiles qui marquent leurs têtes, chacune au sommet d’une chaîne dessinant un corps.",
+    "ru": "Близнецы изображают стоящих рядом Кастора и Поллукса. Греки рассказывали о преданности братьев друг другу и почитали их как покровителей моряков в беде. Звёзды, отмечающие головы братьев, до сих пор носят их имена. От каждой головы тянется отдельная цепочка звёзд, очерчивающая тело."
+  },
+  "Gru": {
+    "zh": "天鹤座是一只长颈大鸟。十六世纪末的荷兰航行把这片南天的测星资料带入欧洲制图室，德·豪特曼的星表里叫它苍鹭，其他制图者则写作鹤。名字有所变化，星图里细长的颈项和收在身后的双脚，却让它一直像一只掠过水面的鸟。",
+    "en": "Grus is a long-necked bird. Dutch voyages at the end of the sixteenth century brought these southern star positions to European mapmakers. De Houtman’s catalogue called the bird a heron, while other mapmakers called it a crane. Its long neck and trailing legs suit either bird in flight.",
+    "fr": "La Grue est un grand oiseau au long cou. Les navigateurs néerlandais de la fin du XVIe siècle rapportèrent les positions de ces étoiles australes aux cartographes européens. Le catalogue de De Houtman parlait d’un héron, d’autres d’une grue. Le long cou et les pattes en arrière conviennent aux deux oiseaux en vol.",
+    "ru": "Журавль — большая длинношеяя птица. После голландских плаваний конца XVI века положения этих южных звёзд стали известны европейским картографам. В каталоге де Хаутмана птицу назвали цаплей, в других источниках — журавлём. Длинная шея и вытянутые назад ноги подходят обеим птицам в полёте."
+  },
+  "Her": {
+    "zh": "武仙座代表希腊英雄赫拉克勒斯。更早的希腊诗里，这组星只叫「跪着的人」，看得清姿势，却没说清他是谁。后来的星图给他披上狮皮、手握棍棒，才让人一眼认出完成十二项功业的英雄。常用来找星的四边形，正好落在他的躯干上。",
+    "en": "Hercules represents the Greek hero Heracles. An earlier Greek poem calls the figure simply the Kneeler, describing a posture without naming the man. Later charts supplied the lion skin and club of the hero famous for his twelve labours. The familiar four-star Keystone falls on his torso.",
+    "fr": "Hercule représente le héros grec Héraclès. Un ancien poème grec parle simplement de l’Agenouillé, décrivant sa posture sans nommer le personnage. La peau de lion et la massue des cartes plus tardives désignent le héros des douze travaux. Le quadrilatère familier aux observateurs marque son torse.",
+    "ru": "Геркулес изображает греческого героя Геракла. В старинной греческой поэме фигуру звали просто Коленопреклонённым, описывая позу без имени. Позднее на картах появились львиная шкура и палица героя двенадцати подвигов. Знакомая наблюдателям трапеция из четырёх звёзд отмечает его туловище."
+  },
+  "Hor": {
+    "zh": "时钟座是一架可以读到秒的摆钟。十八世纪的拉卡伊测绘南天时，把它画在波江座附近。过去测定一颗星在天空中的位置，需要看它何时越过一条参考线，钟摆的一次摆动就可能影响记录。这个星座让人看见计时也是测星工作的一部分。",
+    "en": "Horologium is a pendulum clock that reads to seconds. Lacaille drew it near Eridanus after his eighteenth-century survey of southern stars. To determine a star’s position, an observer could time its passage across a reference line. Even a single swing of the pendulum mattered to the measurement.",
+    "fr": "L’Horloge est une pendule qui indique les secondes. Lacaille la dessina près de l’Éridan après ses relevés du ciel austral au XVIIIe siècle. Pour situer une étoile, l’observateur pouvait noter l’instant où elle franchissait un repère. Une seule oscillation du pendule comptait dans cette mesure.",
+    "ru": "Часы изображают маятниковые часы с отсчётом секунд. Лакайль нарисовал их у Эридана после наблюдений южных звёзд в XVIII веке. Чтобы определить положение звезды, наблюдатель мог засечь момент её прохождения через метку. Для такого измерения имело значение даже одно качание маятника."
+  },
+  "Hya": {
+    "zh": "长蛇座的头在巨蟹座以南，身躯一路伸过狮子座和室女座下方，是现代八十八星座中面积最大的一座。古希腊故事让一只迟到的乌鸦把取水耽搁的责任推给水蛇，所以星图让乌鸦和酒杯都落在蛇背上，长长的身躯成了整幅图的线索。",
+    "en": "Hydra is a water snake stretching from south of Cancer beneath Leo and Virgo. It covers more sky than any other modern constellation. In one Greek tale a late raven blames the water snake for delaying its errand, which explains how the bird and its cup ended up together along the snake’s back.",
+    "fr": "L’Hydre est un serpent d’eau qui s’étend du sud du Cancer jusque sous le Lion et la Vierge. C’est la plus vaste des constellations modernes. Dans un récit grec, un corbeau en retard accuse le serpent d’avoir retardé sa corvée d’eau. Sur la carte, l’oiseau et sa coupe reposent tous deux sur son dos.",
+    "ru": "Гидра — водяная змея, протянувшаяся из-под Рака далеко подо Львом и Девой. По площади это крупнейшее созвездие неба. В греческом предании опоздавший ворон обвинил змею в том, что она задержала его у источника. Так на длинной спине Гидры оказались и птица, и чаша."
+  },
+  "Hyi": {
+    "zh": "水蛇座位于很靠南的天空，是航海时代进入欧洲星图的小水蛇。早期制图者在两片麦哲伦云之间拉出它的身形。当星图同时出现 Hydra 和 Hydrus，可以从位置分清它们，长蛇横跨赤道附近，这条较小的南方水蛇则盘踞在南天极一带。",
+    "en": "Hydrus is the little southern water snake, added to European charts in the age of ocean voyages. Mapmakers traced it among the stars between the Magellanic Clouds. Its position distinguishes it from Hydra. The great water snake sprawls near the celestial equator, while Hydrus lives close to the south celestial pole.",
+    "fr": "L’Hydre mâle est le petit serpent d’eau austral entré sur les cartes européennes à l’époque des grandes navigations. On le dessina entre les deux Nuages de Magellan. Sa position le distingue de l’autre Hydre, qui longe l’équateur céleste, tandis que ce petit serpent vit près du pôle céleste sud.",
+    "ru": "Южная Гидра — малая водяная змея, вошедшая в европейские атласы в эпоху дальних плаваний. Картографы протянули её между Магеллановыми Облаками. От большой Гидры её легко отличить по месту. Та растянулась у небесного экватора, а Южная Гидра обитает близ южного полюса мира."
+  },
+  "Ind": {
+    "zh": "印第安座是十六世纪末欧洲制图者画在南天的人物。Indus 这个名字沿用了当时欧洲航海者宽泛的地理称呼，单凭它无法把这个人认定为某个特定民族。历代星图还改过人物的装束，留下的是制图者眼中的远方人物形象。",
+    "en": "Indus is a human figure placed in the southern sky by European mapmakers in the late sixteenth century. Its Latin name reflects a broad geographical term used by European voyagers and cannot identify a particular people. The figure’s clothing changed from atlas to atlas, recording the mapmakers’ changing ideas.",
+    "fr": "L’Indien est un personnage placé dans le ciel austral par des cartographes européens à la fin du XVIe siècle. Son nom latin reprend une appellation géographique alors très large qui ne permet pas de désigner un peuple précis. Son costume change au fil des atlas, au gré des représentations de leurs auteurs.",
+    "ru": "Индеец — человеческая фигура, помещённая на южное небо европейскими картографами конца XVI века. Латинское название отражает широкий географический термин той эпохи и не указывает на конкретный народ. Одежда персонажа менялась от атласа к атласу вместе с представлениями самих картографов."
+  },
+  "Lac": {
+    "zh": "蝎虎座的名字里虽然有「虎」，星图上画的却是一只小蜥蜴。十七世纪赫维留斯在天鹅座和仙女座之间用一小串星给它安了身。夹缝中容得下一条折来折去的细长身躯，摊开老星图就能理解，为什么制图者选了这样一只小动物。",
+    "en": "Lacerta is a lizard fitted between Cygnus and Andromeda. In the seventeenth century Hevelius assigned it a short zigzag of stars in the narrow gap. Old atlases show how neatly the slender body of a little reptile could be laid into the space between its much larger neighbours.",
+    "fr": "Le Lézard se faufile entre le Cygne et Andromède. Au XVIIe siècle, Hevelius lui attribua une petite ligne d’étoiles en zigzag dans cet intervalle étroit. Les anciens atlas montrent combien le corps effilé d’un reptile se glissait aisément entre les figures de ses voisins bien plus grands.",
+    "ru": "Ящерица устроилась между Лебедем и Андромедой. В XVII веке Гевелий отдал ей небольшой зигзаг из звёзд в узком промежутке. На старых картах хорошо видно, как удачно вытянутое тело маленькой рептилии вписалось между двумя гораздо более крупными соседями."
+  },
+  "Leo": {
+    "zh": "狮子座是黄道上一头侧身的雄狮。美索不达米亚的星图里早已有狮子，希腊传说又把它解释为赫拉克勒斯制服的涅墨亚狮。亮星轩辕十四的拉丁名字 Regulus 意为「小王」，就在狮胸前，弯曲的鬃毛从它向上扬起。",
+    "en": "Leo is a lion in profile on the zodiac. A lion already occupied this part of the sky in Mesopotamia. Greek tradition later associated it with the Nemean lion overcome by Heracles. Regulus, whose Latin name means “little king”, marks the chest where the curve of the mane begins.",
+    "fr": "Le Lion se présente de profil sur le zodiaque. Un lion occupait déjà cette région du ciel mésopotamien. Les Grecs l’ont associé au lion de Némée vaincu par Héraclès. Régulus, dont le nom latin signifie « petit roi », brille sur le poitrail, au départ de la courbe de la crinière.",
+    "ru": "Лев показан в профиль на зодиаке. В Месопотамии в этой части неба уже видели льва, а греческая традиция связала его с Немейским львом, побеждённым Гераклом. Регул, чьё латинское имя означает «маленький царь», отмечает грудь у основания изогнутой гривы."
+  },
+  "LMi": {
+    "zh": "小狮座是大熊和狮子之间的幼狮形象，十七世纪由赫维留斯画入星图。这一带的星光很弱，小狮子的轮廓要靠少数星点慢慢拼起。它最亮的成员如今常按星表叫作小狮座46，反而没有常见于星座亮星名字中的希腊字母 α。",
+    "en": "Leo Minor is the little lion placed between Ursa Major and Leo by Hevelius in the seventeenth century. Only a handful of faint points suggest its outline. Its brightest member is usually called 46 Leonis Minoris, an unusual case in which a constellation’s leading star has no Greek-letter Alpha designation.",
+    "fr": "Le Petit Lion est le lionceau placé entre la Grande Ourse et le Lion par Hevelius au XVIIe siècle. Quelques étoiles discrètes suffisent à peine à en suggérer le contour. La plus brillante porte le numéro 46 du Petit Lion et n’a pas reçu la lettre grecque alpha, souvent associée à une étoile dominante.",
+    "ru": "Малый Лев — львёнок, которого в XVII веке Гевелий поместил между Большой Медведицей и Львом. Лишь несколько слабых точек намечают его контур. Ярчайшую звезду обычно называют 46 Малого Льва. У неё нет обозначения альфа, часто встречающегося у главных звёзд созвездий."
+  },
+  "Lep": {
+    "zh": "天兔座伏在猎户脚下。古希腊人已将它画成野兔，隔壁的大犬仿佛正要追来。先看猎户和天狼星之间的空隙，再回头认兔子，就会发现这个小星座的意义来自动物的位置，猎人、猎犬和猎物合在一起才是一幅冬夜的狩猎图。",
+    "en": "Lepus is the hare crouching beneath Orion’s feet. Greek observers already pictured a hare here, with Canis Major close behind as if in pursuit. The space between Orion and Sirius makes sense of its position. Hunter, dog and quarry form a hunting scene spread across this stretch of sky.",
+    "fr": "Le Lièvre se tapit aux pieds d’Orion. Les Grecs voyaient déjà un lièvre à cet endroit, avec le Grand Chien tout près comme s’il se lançait à sa poursuite. Sa place entre Orion et Sirius donne son sens au dessin. Le chasseur, le chien et le gibier forment ensemble une scène de chasse.",
+    "ru": "Заяц притаился под ногами Ориона. Греки уже видели здесь зайца, а расположившийся рядом Большой Пёс словно пускался в погоню. Положение между Орионом и Сириусом объясняет смысл рисунка. Охотник, собака и добыча вместе составляют сцену небесной охоты."
+  },
+  "Lib": {
+    "zh": "天秤座是黄道上的一杆秤，美索不达米亚早已用秤来描绘这片天空。一些希腊星图却把同一批星当作邻近天蝎的双螯，后来罗马人广用天秤的形象。今天两颗主星的阿拉伯名字仍分别提到南螯和北螯，一片天空留下两套画法。",
+    "en": "Libra is the balance of the zodiac, already known as scales in Mesopotamia. Some Greek charts made the same stars the claws of neighbouring Scorpius, while Roman astronomy favoured the scales. The Arabic names of its two principal stars still refer to the southern and northern claw, preserving both pictures in one place.",
+    "fr": "La Balance du zodiaque était déjà une balance en Mésopotamie. Des cartes grecques attribuaient pourtant ces étoiles aux pinces du Scorpion voisin, avant que l’image des plateaux s’impose à Rome. Les noms arabes des deux étoiles principales évoquent encore les pinces du sud et du nord.",
+    "ru": "Весы — зодиакальное созвездие, в котором ещё в Месопотамии видели весы. На некоторых греческих картах эти звёзды были клешнями соседнего Скорпиона, а в Риме утвердился образ весов. Арабские названия двух главных звёзд до сих пор означают южную и северную клешни."
+  },
+  "Lup": {
+    "zh": "豺狼座是半人马手中举起的野兽。早期希腊星图用「兽」称呼它，并未给出物种，后世欧洲星图才让狼的形象固定下来。把视野移到旁边的半人马座和天坛座，就能看见这块天区原先在图画里扮演的角色，一只被带到祭坛前的动物。",
+    "en": "Lupus is the animal held aloft by Centaurus. Early Greek accounts called it simply the Beast and did not specify its species. Later European maps settled on a wolf. Centaurus and Ara complete its setting and show the part this patch of sky once played, an animal being carried towards an altar.",
+    "fr": "Le Loup est l’animal que brandit le Centaure. Les premiers récits grecs l’appelaient simplement la Bête, sans en préciser l’espèce. Les cartes européennes ont ensuite retenu le loup. Le Centaure et l’Autel voisins éclairent le rôle du personnage, celui d’un animal porté vers un autel.",
+    "ru": "Волк — зверь, которого держит Центавр. В ранних греческих описаниях его называли просто Зверем без указания вида. Позднее в европейских атласах закрепился волк. Соседние Центавр и Жертвенник поясняют роль этой части неба в общей картине — животное несут к алтарю."
+  },
+  "Lyn": {
+    "zh": "天猫座里的「天猫」指猞猁，一种以敏锐视力著称的猫科动物。赫维留斯为大熊座与御夫座之间的长串暗星取这个名字，留下一个观星者的玩笑，得有猞猁般的眼力才好找到它。在有城市灯光的夜空下，这个名字尤其贴切。",
+    "en": "Lynx is the sharp-eyed wildcat. Hevelius chose it for a long chain of faint stars between Ursa Major and Auriga, with a joke for observers that you need the eyes of a lynx to see it. Anyone trying to follow the chain from a brightly lit town can appreciate the name.",
+    "fr": "Le Lynx doit son nom au félin réputé pour sa vue perçante. Hevelius le choisit pour une longue file d’étoiles faibles entre la Grande Ourse et le Cocher, plaisantant qu’il fallait des yeux de lynx pour les voir. L’image prend tout son sens sous le ciel éclairé d’une ville.",
+    "ru": "Рысь названа в честь кошки, прославленной своим острым зрением. Гевелий выбрал это имя для длинной цепочки слабых звёзд между Большой Медведицей и Возничим, заметив, что для их поиска нужны глаза рыси. Особенно легко оценить эту шутку под засвеченным городским небом."
+  },
+  "Lyr": {
+    "zh": "天琴座是一把里拉琴，古希腊人抱在身前拨弦的小琴。传说赫尔墨斯用龟壳制成第一把琴，琴后来与能以乐声打动万物的俄耳甫斯相连。织女星是琴旁最醒目的亮点，同一颗星在中国又有织女的故事，仰望它可以进入两种不同的星空传统。",
+    "en": "Lyra is a lyre, the small stringed instrument held against the body and plucked in ancient Greece. Hermes was said to have made the first from a tortoise shell, and the instrument became associated with Orpheus, whose music moved all living things. Its brilliant Vega is also the Weaver Girl in Chinese sky lore.",
+    "fr": "La Lyre est le petit instrument à cordes que les Grecs tenaient contre eux pour le pincer. Selon la légende, Hermès en fabriqua une avec une carapace de tortue. La lyre est aussi celle d’Orphée, dont la musique émouvait les êtres vivants. Sa brillante Véga représente la Tisserande dans la tradition chinoise.",
+    "ru": "Лира — небольшой струнный инструмент, который древние греки прижимали к себе и перебирали пальцами. Легенда приписывает Гермесу первую лиру из панциря черепахи. Инструмент связан и с Орфеем, трогавшим музыкой всё живое. Яркая Вега на китайском небе рассказывает другую историю — о Ткачихе.",
+    "detail": {
+      "zh": "天琴座的 M57 从地球看像一枚烟圈。望远镜和光谱测量揭示，发光气体其实有立体结构，较密的环朝向我们。中心高温的恒星残核用紫外线照亮先前抛出的气体，于是从这个角度看去，边缘特别清楚。",
+      "en": "M57 in Lyra looks like a smoke ring from Earth. Imaging and spectra reveal a three-dimensional gas structure with a denser ring facing us. Ultraviolet light from the hot stellar core illuminates material shed earlier, making the rim particularly conspicuous from our direction.",
+      "fr": "M57 ressemble à un anneau de fumée vu depuis la Terre. Les images et les spectres révèlent un volume de gaz dont l’anneau plus dense nous fait face. Le cœur stellaire très chaud éclaire en ultraviolet la matière éjectée auparavant, faisant ressortir le bord dans notre direction.",
+      "ru": "M57 с Земли похожа на дымовое кольцо. Снимки и спектры показывают объёмную структуру газа с обращённым к нам плотным кольцом. Ультрафиолет горячего звёздного ядра заставляет светиться выброшенное раньше вещество, и с нашей стороны особенно хорошо виден обод."
+    }
+  },
+  "Men": {
+    "zh": "山案座纪念南非开普敦背后真正的桌山。拉卡伊在山下测星时，看见云常覆在平顶山上，当地人把它想成铺开的桌布。他在星图上将暗星画成山形，让大麦哲伦云搭在山顶，这样一眼望去，地上的风景就映到了天上。",
+    "en": "Mensa commemorates Table Mountain overlooking Cape Town, where Lacaille surveyed the southern sky. Cloud often drapes the flat summit like a tablecloth. He placed his celestial mountain beneath the Large Magellanic Cloud, recreating a view from the ground with a faint galaxy standing in for the covering of cloud.",
+    "fr": "La Table évoque la montagne de la Table qui domine Le Cap, où Lacaille observa le ciel austral. Des nuages drapent souvent son sommet plat comme une nappe. Sur sa carte, Lacaille plaça la montagne sous le Grand Nuage de Magellan, une galaxie qui tient dans le ciel le rôle de la nappe de nuages.",
+    "ru": "Столовая Гора названа в честь настоящей горы над Кейптауном, где Лакайль наблюдал южное небо. Облака часто накрывают плоскую вершину словно скатертью. На карте он поместил небесную гору под Большим Магеллановым Облаком, отдав далёкой галактике роль облачной скатерти."
+  },
+  "Mic": {
+    "zh": "显微镜座是拉卡伊在十八世纪画进南天的一架显微镜。原图有直立镜筒和底下的方盒，当时这类仪器让博物学家能研究昆虫、植物组织和肉眼难见的生命。天文学家用望远镜编星表，也给向细小世界张望的同伴留下一个星座。",
+    "en": "Microscopium is the microscope that Lacaille placed in the southern sky in the eighteenth century. His drawing shows a tube over a square box. Microscopes were opening insects, plant tissues and tiny living organisms to study. An astronomer mapping the distant sky gave a place to the instrument that looked inward in scale.",
+    "fr": "Le Microscope est l’appareil que Lacaille plaça dans le ciel austral au XVIIIe siècle. Son dessin montre un tube dressé sur une boîte carrée. Les microscopes révélaient aux naturalistes les tissus végétaux, les insectes et les organismes minuscules. L’astronome fit ainsi une place à ceux qui scrutaient l’infiniment petit.",
+    "ru": "Микроскоп — прибор, который Лакайль поместил на южное небо в XVIII веке. На его рисунке трубка стоит над квадратной коробкой. Такие приборы открывали натуралистам строение насекомых, растительных тканей и мельчайших организмов. Астроном оставил на карте место и для исследователей мира малых величин."
+  },
+  "Mon": {
+    "zh": "麒麟座的西方原名 Monoceros 是「独角兽」。十七世纪初，普朗修斯的天球仪把这种额上长着一支角的传说动物放在猎户座与两只天犬之间。中文沿用「麒麟座」这个译名，读老星图时，画中长得像马、额上带角的正是西方独角兽。",
+    "en": "Monoceros means “one-horned” and represents the European unicorn. It appeared on a globe by Petrus Plancius in the early seventeenth century, in the space between Orion and his two dogs. Old charts turn these faint stars into a horse-like animal carrying the single long horn of its name.",
+    "fr": "La Licorne est l’animal fabuleux à la corne unique, sens du nom Monoceros. Elle figurait déjà sur un globe de Petrus Plancius au début du XVIIe siècle, entre Orion et ses deux chiens. Les cartes anciennes dessinent parmi ces étoiles discrètes un animal semblable à un cheval coiffé d’une longue corne.",
+    "ru": "Единорог — сказочное животное с единственным рогом, о чём и говорит название Monoceros. В начале XVII века он появился между Орионом и двумя его собаками на глобусе Петера Планциуса. На старых картах слабые звёзды очерчивают похожее на лошадь животное с длинным рогом на лбу."
+  },
+  "Mus": {
+    "zh": "苍蝇座是一只飞在南十字旁的小昆虫。这片南天的星在十六世纪末被荷兰航海者记录后，欧洲星图曾给它用过蜜蜂和苍蝇两种名字。如今留下的是苍蝇，它恰好面对蝘蜓座，古图上那只变色龙伸出的舌头让两者有了生动的联系。",
+    "en": "Musca is the fly beside the Southern Cross. After Dutch voyagers recorded these southern stars in the late sixteenth century, European maps pictured the little insect variously as a bee and a fly. The fly survived, facing Chamaeleon. In old charts the lizard’s extended tongue brings the two figures to life.",
+    "fr": "La Mouche est le petit insecte près de la Croix du Sud. Après les relevés néerlandais de la fin du XVIe siècle, les cartes européennes hésitèrent entre une abeille et une mouche. La mouche est restée, face au Caméléon dont la langue tendue anime les deux personnages sur les anciens atlas.",
+    "ru": "Муха — маленькое насекомое рядом с Южным Крестом. После голландских наблюдений конца XVI века европейские карты изображали здесь то пчелу, то муху. Закрепилась муха, оказавшаяся перед Хамелеоном. Высунутый язык ящерицы оживляет эту встречу на старинных рисунках."
+  },
+  "Nor": {
+    "zh": "矩尺座是一件木工和制图都用得上的直角尺。拉卡伊原先把它和一把直尺画在一起，放在天蝎和南三角之间。两件工具配合便能画平行线和直角，旧图里几条短短的星线，也就成了一张工作台上量角、画线的器具。",
+    "en": "Norma is a set square, the tool used by carpenters and draughtsmen to draw a right angle. Lacaille pictured it with a ruler between Scorpius and Triangulum Australe. Together the tools can mark out parallel lines and right angles, turning a few short lines of stars into a draughtsman’s instruments.",
+    "fr": "La Règle était à l’origine une équerre accompagnée d’une règle sur la carte de Lacaille, entre le Scorpion et le Triangle austral. Menuisiers et dessinateurs employaient les deux outils pour tracer angles droits et parallèles. Quelques traits d’étoiles y figurent ainsi de vrais instruments de travail.",
+    "ru": "На карте Лакайля Наугольник был угольником с линейкой между Скорпионом и Южным Треугольником. Столяры и чертёжники пользовались ими, чтобы проводить прямые углы и параллельные линии. Несколько коротких звёздных отрезков превратились в инструменты с рабочего стола."
+  },
+  "Oct": {
+    "zh": "南极座的西方名字 Octans 是「八分仪」，一种海员用来测量天体离地平线多高的仪器。刻度弧占一整圈的八分之一，所以得名。拉卡伊把它放在南天极附近，观测者转动星图时，群星便绕着这件老航海仪器所在的天区旋转。",
+    "en": "Octans is named for the octant, a navigator’s instrument for measuring the altitude of a celestial body above the horizon. Its graduated arc is one eighth of a circle. Lacaille put it at the south celestial pole, so the surrounding stars appear to turn around this old instrument of navigation.",
+    "fr": "L’Octant doit son nom à un instrument des navigateurs qui mesure la hauteur d’un astre au-dessus de l’horizon. Son arc gradué occupe un huitième de cercle. Lacaille le plaça au pôle céleste sud, autour duquel les autres étoiles semblent tourner au fil de la nuit.",
+    "ru": "Октант назван в честь штурманского инструмента для измерения высоты светила над горизонтом. Его градуированная дуга занимает одну восьмую окружности. Лакайль поместил его у южного полюса мира, так что за ночь звёзды словно поворачиваются вокруг этого старинного прибора."
+  },
+  "Oph": {
+    "zh": "蛇夫座是双手握着一条大蛇的人。希腊故事常把他认作医者阿斯克勒庇俄斯，蛇也与这位医神的标志相连。星图让巨蛇的头和尾从他的两侧伸出。当太阳沿黄道穿过天蝎和人马之间时，也会经过这位持蛇人的天区。",
+    "en": "Ophiuchus is the Serpent Bearer, shown with a great snake in both hands. Greek tradition often identifies him as the healer Asclepius, for whom the snake was an emblem. Its head and tail emerge on either side of the figure. The Sun’s apparent path also crosses his territory between Scorpius and Sagittarius.",
+    "fr": "Ophiuchus est le Serpentaire qui tient un grand serpent à deux mains. La tradition grecque y reconnaît souvent Asclépios, le guérisseur dont le serpent était l’emblème. La tête et la queue de l’animal dépassent de chaque côté du personnage. Le Soleil traverse aussi son territoire entre le Scorpion et le Sagittaire.",
+    "ru": "Змееносец держит обеими руками большую змею. Греческая традиция часто видела в нём врачевателя Асклепия, чьим символом была змея. Её голова и хвост видны с разных сторон фигуры. Видимый путь Солнца тоже пересекает владения Змееносца между Скорпионом и Стрельцом."
+  },
+  "Ori": {
+    "zh": "猎户座是希腊传说中身材高大的猎人俄里翁。古星图画他一手高举棍棒，另一臂伸向金牛，身后是猎犬，脚下伏着野兔。北半球冬夜那三颗排成直线的亮星正是他的腰带，认出这条带子，就有了重建整幅狩猎场景的起点。",
+    "en": "Orion is the towering hunter of Greek legend. Old charts show him raising a club and extending his other arm towards Taurus, with hunting dogs at his heels and a hare beneath his feet. The three bright stars in a row on northern winter nights are his belt, the starting point for reconstructing the hunting scene.",
+    "fr": "Orion est le grand chasseur de la tradition grecque. Sur les anciennes cartes, il lève sa massue et tend l’autre bras vers le Taureau, avec les chiens derrière lui et le lièvre à ses pieds. Les trois étoiles alignées des nuits d’hiver boréal forment son baudrier, repère pour reconstituer toute la scène de chasse.",
+    "ru": "Орион — могучий охотник греческих преданий. На старых картах он поднимает палицу и протягивает другую руку к Тельцу, за ним идут собаки, у ног притаился заяц. Три яркие звезды, видимые в ряд зимними ночами в Северном полушарии, отмечают его пояс, от которого легко восстановить всю сцену охоты.",
+    "detail": {
+      "zh": "猎户的短剑里有一个仍在形成恒星的区域 M42。哈勃望远镜在那里看见一些幼星旁的原行星盘，有的亮边朝着附近的炽热恒星，有的在明亮星云前投下暗影。这些盘使我们能研究行星系统形成时的环境。",
+      "en": "M42 in Orion’s sword is a region where stars are still forming. Hubble has resolved protoplanetary discs around some of the young stars. Some have bright rims facing nearby hot stars, while others make dark silhouettes against the luminous nebula, allowing us to study the birthplaces of planetary systems.",
+      "fr": "Dans l’épée d’Orion, M42 est une région où des étoiles continuent de naître. Hubble y a distingué des disques protoplanétaires autour de jeunes étoiles. Certains présentent un bord éclairé du côté des étoiles chaudes voisines, d’autres se découpent en ombres sur la nébuleuse. Ils révèlent le milieu où naissent les systèmes planétaires.",
+      "ru": "M42 в мече Ориона — область продолжающегося звездообразования. «Хаббл» различил протопланетные диски у некоторых молодых звёзд. У одних виден яркий край, обращённый к горячим звёздам, другие выглядят тёмными силуэтами на светлом фоне туманности. Эти диски позволяют изучать места рождения планетных систем."
+    }
+  },
+  "Pav": {
+    "zh": "孔雀座描绘的是雄孔雀，长长的覆羽能展开成带眼斑的尾屏。它随十六世纪末荷兰航海者的南天测星记录进入欧洲星图，和附近的鹤、凤凰同占一片南天。最亮的孔雀十一至今也叫 Peacock，正好同时记下了这颗星和整只鸟的名字。",
+    "en": "Pavo is a peacock, the male bird whose long feathers fan out in a train of eyespots. It entered European charts with the southern star observations of late-sixteenth-century Dutch voyagers and shares this sky with a crane and a phoenix. Its brightest star is itself called Peacock.",
+    "fr": "Le Paon est le mâle dont les longues plumes ocellées se déploient en éventail. Il entra sur les cartes européennes avec les relevés austraux des navigateurs néerlandais à la fin du XVIe siècle et voisine avec une grue et un phénix. Sa principale étoile s’appelle elle-même Peacock, « paon » en anglais.",
+    "ru": "Павлин — самец птицы с веером длинных перьев, украшенных глазками. Он вошёл в европейские атласы вместе с наблюдениями южного неба голландских мореплавателей конца XVI века, по соседству с Журавлём и Фениксом. Его ярчайшая звезда сама носит английское имя Peacock — «павлин»."
+  },
+  "Peg": {
+    "zh": "飞马座如今画作希腊传说中的有翼神马珀伽索斯，相传它从美杜莎的血中诞生，曾载着英雄柏勒洛丰。早期希腊星图也有只称作「马」的画法。著名的飞马大四边形勾出它的躯干，其中一个角如今划给相邻的仙女座。",
+    "en": "Pegasus is the winged horse of Greek legend, born from Medusa’s blood and ridden by the hero Bellerophon. Early Greek astronomy also knew the figure simply as the Horse. The Great Square outlines its body, though one of the four corners now belongs to neighbouring Andromeda.",
+    "fr": "Pégase est le cheval ailé de la légende grecque, né du sang de Méduse et monture du héros Bellérophon. L’astronomie grecque ancienne l’appelait aussi simplement le Cheval. Le Grand Carré dessine son corps, même si l’un des quatre sommets appartient aujourd’hui à Andromède, sa voisine.",
+    "ru": "Пегас — крылатый конь греческих преданий, рождённый из крови Медузы и ставший скакуном Беллерофонта. В ранней греческой астрономии эту фигуру называли также просто Конём. Большой Квадрат намечает его туловище, хотя одна из угловых звёзд сейчас принадлежит соседней Андромеде."
+  },
+  "Per": {
+    "zh": "英仙座是杀死美杜莎、解救安德洛墨达的英雄珀尔修斯。在许多星图上，他一手持剑，另一手提着美杜莎的头。头上明暗有变的大陵五格外贴合这幅形象，现代观测发现它的主要亮度变化来自伴星在视线方向上轮流遮挡。",
+    "en": "Perseus is the Greek hero who killed Medusa and rescued Andromeda. Many star maps show him holding a sword in one hand and Medusa’s head in the other. Algol, a star that fades and brightens on the head, suits that striking image. Its main light changes come from eclipses as companion stars pass in front of one another.",
+    "fr": "Persée est le héros grec qui tua Méduse et délivra Andromède. Sur de nombreuses cartes, il brandit une épée et tient dans l’autre main la tête de Méduse. Algol, sur cette tête, faiblit et se ravive. Ses principales variations viennent des éclipses produites lorsque les étoiles du système passent l’une devant l’autre.",
+    "ru": "Персей — герой греческих преданий, убивший Медузу и спасший Андромеду. На картах он держит меч в одной руке и голову Медузы в другой. На голове меркнет и вновь разгорается Алголь. Основные изменения его блеска вызваны затмениями, когда звёзды системы поочерёдно заслоняют друг друга."
+  },
+  "Phe": {
+    "zh": "凤凰座画的是西方传说中的不死鸟。故事有过不同讲法，最熟悉的一种说它能在烈火过后重生，因此成了更新与再生的象征。这种鸟的传说很古老，在南天成为欧洲星座却是十六世纪末航海制图时代的事。它与中国传统的凤凰各有来历。",
+    "en": "Phoenix depicts the mythical bird of renewal. Versions of its story differ, but the best-known tells of a bird reborn after a fire. The legend is ancient, while the constellation entered European southern charts only in the late sixteenth century. The Chinese fenghuang has its own distinct tradition.",
+    "fr": "Le Phénix représente l’oiseau fabuleux du renouveau. Les récits varient, mais le plus connu le fait renaître après un feu. La légende est ancienne, tandis que la constellation n’entra sur les cartes australes européennes qu’à la fin du XVIe siècle. Le fenghuang chinois relève d’une tradition distincte.",
+    "ru": "Феникс изображает мифическую птицу возрождения. Версии сказания различаются, но в самой известной птица рождается вновь после огня. Сама легенда древняя, а созвездие вошло в европейские карты юга лишь в конце XVI века. Китайская птица фэнхуан принадлежит отдельной традиции."
+  },
+  "Pic": {
+    "zh": "绘架座是画家用来托住画布的架子。拉卡伊在十八世纪的南天星图上画出装好画布的绘架，位置就在明亮的老人星附近。它和一旁的雕刻、刻版工具呼应，让旧星图也为艺术家的工作留了一席之地。拉丁名 Pictor 保留了「画家」的意思。",
+    "en": "Pictor is a painter’s easel. In the eighteenth century Lacaille drew the easel with its canvas already attached, near the bright star Canopus. Alongside the sculptor’s and engraver’s equipment elsewhere in the southern sky, it gives artists a place in the atlas. The shorter Latin name Pictor means “painter”.",
+    "fr": "Le Peintre était à l’origine le chevalet du peintre. Au XVIIIe siècle, Lacaille le dessina près de Canopus, avec sa toile déjà fixée. Avec les accessoires du sculpteur et du graveur ailleurs dans le ciel austral, il donne une place aux artistes dans l’atlas. Le nom latin Pictor signifie « peintre ».",
+    "ru": "Живописец первоначально изображал мольберт. В XVIII веке Лакайль нарисовал его вблизи Канопуса с уже укреплённым холстом. Вместе с принадлежностями скульптора и гравёра в других частях южного неба он дал художникам место в атласе. Латинское название Pictor означает «живописец»."
+  },
+  "Psc": {
+    "zh": "双鱼座是两条尾巴上各系一根绳的鱼，绳子在两鱼之间打成一个结。古希腊诗人阿拉托斯已经写到这个结，星图因此能把相隔较远的两条鱼连成一幅画。今天春分瞬间的太阳位于这片天区，古老星图也有了现代天球坐标的参照意义。",
+    "en": "Pisces shows two fish tethered by cords that meet in a knot. The Greek poet Aratus already described the knot, which ties two widely separated figures into a single picture. Today the Sun lies in this part of the sky at the March equinox, giving the ancient figure a place in the celestial coordinate system.",
+    "fr": "Les Poissons sont reliés par deux liens qui se rejoignent en un nœud. Le poète grec Aratos décrivait déjà ce nœud qui réunit sur la carte deux figures éloignées. De nos jours, le Soleil se trouve dans cette région à l’équinoxe de mars, ce qui lui donne aussi un rôle dans le repérage céleste.",
+    "ru": "Рыбы привязаны за хвосты к двум шнурам, сходящимся в один узел. Греческий поэт Арат уже описывал этот узел, соединяющий на карте две далеко разнесённые фигуры. Сейчас в день мартовского равноденствия Солнце находится в этой области, важной и для системы небесных координат."
+  },
+  "PsA": {
+    "zh": "南鱼座是一条张嘴接水的大鱼，水从上方宝瓶座的瓶口倾下。在希腊天文学传统里，这条单独的「大鱼」和黄道上的双鱼另有来历。嘴边的亮星北落师门，其西方名 Fomalhaut 就来自阿拉伯语的「鱼嘴」，把星名放回原图尤其好记。",
+    "en": "Piscis Austrinus is the great fish drinking the stream poured from Aquarius’s jar. Greek astronomy distinguished this single Great Fish from the two fish of the zodiac. Its brilliant Fomalhaut lies at the mouth, and the star’s name comes from the Arabic for “the fish’s mouth”, just where the picture places it.",
+    "fr": "Le Poisson austral est le grand poisson qui boit l’eau versée par le Verseau. L’astronomie grecque distinguait ce Grand Poisson des deux poissons du zodiaque. Fomalhaut, son étoile éclatante, marque sa bouche. Son nom vient justement de l’arabe pour « la bouche du poisson ».",
+    "ru": "Южная Рыба — большая рыба, пьющая воду, которую льёт из сосуда Водолей. Греки отличали эту единственную Большую Рыбу от двух зодиакальных Рыб. Яркий Фомальгаут отмечает её рот. Имя звезды как раз происходит от арабских слов «рот рыбы»."
+  },
+  "Pup": {
+    "zh": "船尾座保存着阿尔戈号的船艉。古希腊水手掌舵时可用船尾侧边的舵桨，古星图里的阿尔戈也画有这种桨。现代星图把这艘传说中的船分给船底、船帆和船尾，沿银河把三块天区接起来，就能想象一条远航的船有多长。",
+    "en": "Puppis is the stern of the Argo, the ship from Greek legend. Ancient ships could be steered with great oars at the stern, and the Argo on old star charts carries such oars. Following Puppis, Carina and Vela along the Milky Way puts stern, hull and sails back together and suggests the scale of the ship.",
+    "fr": "La Poupe conserve l’arrière de l’Argo, le navire de la légende grecque. Les navires antiques se dirigeaient à l’aide de grandes rames de gouverne, que l’on retrouve sur les anciens dessins de l’Argo. Suivre la Poupe, la Carène et les Voiles le long de la Voie lactée permet de recomposer le vaisseau.",
+    "ru": "Корма — задняя часть легендарного греческого «Арго». Древними судами правили при помощи больших рулевых вёсел на корме, и такие вёсла видны на старых рисунках небесного корабля. Если проследить вдоль Млечного Пути Корму, Киль и Паруса, можно представить весь размах судна."
+  },
+  "Pyx": {
+    "zh": "罗盘座是给海船指示航向的磁罗盘。十八世纪拉卡伊把它画在古船阿尔戈附近，这个位置让人很容易以为罗盘与伊阿宋的航行传说同样古老。其实古人在这里画过船桅，给这片星空配上磁针和罗盘盒，是近代制图者自己的点子。",
+    "en": "Pyxis is a mariner’s magnetic compass. Lacaille placed it beside the old ship Argo in the eighteenth century, a setting that makes it look quite at home with Jason’s crew. Ancient charts put a mast in this area. The compass box and its needle are a later mapmaker’s addition to the scene.",
+    "fr": "La Boussole est le compas magnétique des navigateurs. Au XVIIIe siècle, Lacaille le plaça près de l’ancien navire Argo, si bien qu’il semble tout indiqué pour l’équipage de Jason. Les cartes antiques y dessinaient un mât. La boîte et son aiguille sont un ajout de la cartographie moderne.",
+    "ru": "Компас изображает магнитный компас мореплавателей. В XVIII веке Лакайль поставил его рядом с древним кораблём «Арго», словно прямо для команды Ясона. На античных картах в этой области рисовали мачту. Коробка с магнитной стрелкой появилась в небесной сцене гораздо позднее."
+  },
+  "Ret": {
+    "zh": "网罟座像一小块菱形细网。早期欧洲星图在这里画了一个菱形，拉卡伊后来把它画成观测用的菱形分划网。在望远镜视野里，星点经过线条的位置和时刻可以用来测量。它的名字保留下人们怎样把眼前流动的星空记成一张星表。",
+    "en": "Reticulum is a small diamond-shaped grid. An earlier European chart put a rhombus here, and Lacaille recast it as the rhomboidal reticle of an observing instrument. A grid gives an observer reference lines against which to measure the passage of stars, turning a drifting point of light into a catalogue entry.",
+    "fr": "Le Réticule est une petite grille en losange. Une carte européenne antérieure plaçait un simple losange ici, et Lacaille en fit le réticule rhomboïde d’un instrument d’observation. Les traits de la grille donnaient des repères pour mesurer le passage des étoiles et en tirer des entrées de catalogue.",
+    "ru": "Сетка — маленькая ромбовидная решётка. На более ранней европейской карте здесь помещался ромб, а Лакайль превратил его в ромбовидную сетку наблюдательного прибора. Линии служили ориентирами для измерения прохождений звёзд и помогали превращать движущуюся точку света в запись каталога."
+  },
+  "Sge": {
+    "zh": "天箭座是一支离弦的箭，几颗星竟能画出箭杆、箭头和箭羽。古代作者对谁射出这支箭有过不同说法，罗马时期的许癸努斯写下赫拉克勒斯用箭除掉折磨普罗米修斯的鹰。天箭座旁边恰好有天鹰座，读故事时可以把星图上的两幅图像连起来。",
+    "en": "Sagitta is an arrow in flight. Just a few stars suggest shaft, point and fletching. Ancient authors disagreed about the archer. Hyginus recorded a story in which Heracles shot the eagle that tormented Prometheus. Aquila, the Eagle, is handily close to the arrow on the sky chart.",
+    "fr": "La Flèche est un trait en vol dont quelques étoiles dessinent la hampe, la pointe et l’empennage. Les auteurs anciens lui donnaient différents archers. Hygin rapporte qu’Héraclès abattit d’une flèche l’aigle qui tourmentait Prométhée. L’Aigle est justement tout près sur la carte.",
+    "ru": "Стрела уже сорвалась с тетивы. Несколько звёзд намечают её древко, наконечник и оперение. Древние авторы по-разному называли стрелка. У Гигина Геракл поражает орла, терзавшего Прометея. Созвездие Орла как раз находится неподалёку от стрелы."
+  },
+  "Sgr": {
+    "zh": "人马座是黄道上的弓箭手，今天常画成人身马躯、引弓朝向天蝎的形象。更早的美索不达米亚星图在此描绘神祇帕比尔萨格，形象比今天的弓箭手更复杂。现代观星者却常先认出一把「茶壶」，壶嘴上方的银河像一缕升起的蒸汽。",
+    "en": "Sagittarius is the archer of the zodiac, now usually shown with a human torso and a horse’s body aiming towards Scorpius. An earlier Mesopotamian figure was the more elaborate divine archer Pabilsag. Observers today often see a Teapot first, with the Milky Way rising like steam from its spout.",
+    "fr": "Le Sagittaire est l’archer du zodiaque, au buste humain et au corps de cheval, qui vise le Scorpion. En Mésopotamie, on y figurait Pabilsag, un archer divin aux traits plus complexes. Aujourd’hui on reconnaît souvent d’abord une Théière, d’où la Voie lactée semble s’élever comme une vapeur.",
+    "ru": "Стрелец — зодиакальный лучник, обычно с человеческим торсом и лошадиным телом, целящийся в Скорпиона. В Месопотамии здесь помещали божественного лучника Пабильсага с более сложным обликом. Сегодня наблюдатели часто видят Чайник, над носиком которого Млечный Путь поднимается, словно пар.",
+    "detail": {
+      "zh": "从地球看，人马座方向正对银河系中心。星际尘埃遮住了中心发出的可见光，红外观测却能追踪绕中心高速运行的恒星。射电望远镜还测到了中央黑洞人马座 A* 周围炽热气体的辐射。",
+      "en": "From Earth the centre of the Milky Way lies in Sagittarius. Interstellar dust obscures visible light from the centre, but infrared observations can follow stars in rapid orbits there. Radio telescopes have also measured radiation from hot gas around the central black hole, Sagittarius A*.",
+      "fr": "Depuis la Terre, le centre de la Voie lactée se trouve dans la direction du Sagittaire. Les poussières en masquent la lumière visible, mais l’infrarouge permet d’y suivre les orbites rapides des étoiles. Des radiotélescopes ont aussi mesuré le rayonnement du gaz chaud autour du trou noir central Sagittarius A*.",
+      "ru": "С Земли центр Млечного Пути виден в направлении Стрельца. Межзвёздная пыль поглощает его видимый свет, но в инфракрасном диапазоне удаётся проследить движение звёзд по быстрым орбитам вблизи центра. Радиотелескопы зарегистрировали и излучение горячего газа вокруг центральной чёрной дыры Стрелец A*."
+    }
+  },
+  "Sco": {
+    "zh": "天蝎座的一长串亮星蜷成带毒刺的尾巴，中段发红的心宿二就是蝎心。美索不达米亚已在这里画蝎子，希腊人又讲它曾追逐或击倒猎人俄里翁。两个星座分居天空两头，一方升起、另一方退场的景象很容易让人记住这段追逐。",
+    "en": "Scorpius curls a long tail of stars towards a sting, with reddish Antares at the scorpion’s heart. Mesopotamian observers already pictured a scorpion here. Greek stories made it the pursuer or slayer of Orion. The two figures lie far apart in the sky, making their alternating appearances easy to remember.",
+    "fr": "Le Scorpion déroule une longue queue étoilée qui se recourbe en dard, avec la rougeâtre Antarès au cœur. On y voyait déjà un scorpion en Mésopotamie. Les Grecs en firent le poursuivant ou le meurtrier d’Orion. L’éloignement des deux figures dans le ciel rappelle leur apparition à tour de rôle.",
+    "ru": "Скорпион изгибает длинный звёздный хвост с жалом, а красноватый Антарес отмечает его сердце. В Месопотамии здесь уже видели скорпиона. В греческих преданиях он преследует или убивает Ориона. Две фигуры расположены далеко друг от друга, и их чередование на небе напоминает о погоне."
+  },
+  "Scl": {
+    "zh": "玉夫座的「玉夫」是雕刻师。拉卡伊最初画的是整间雕刻作坊，凳上摆着模型，大理石上搁着木槌和凿子。后来星座的长名字逐渐缩成今天的 Sculptor，意思是雕刻师。知道这段来历，就能明白为何有些旧星图把一片南方暗星画成工作室。",
+    "en": "Sculptor began as a sculptor’s workshop. Lacaille’s eighteenth-century plate supplied a model on a stool, plus a wooden mallet and chisel resting on a block of marble. The longer name eventually became simply Sculptor, the artist. The earlier drawing explains how a patch of quiet southern sky once contained a whole working studio.",
+    "fr": "Le Sculpteur était au départ un atelier de sculpture. Lacaille y dessina au XVIIIe siècle un modèle sur un tabouret, un maillet et un ciseau sur un bloc de marbre. Le nom finit par se réduire à celui de l’artiste. L’ancien dessin explique comment tout un atelier a occupé cette région discrète du ciel austral.",
+    "ru": "Скульптор первоначально был целой скульптурной мастерской. На рисунке Лакайля XVIII века видны модель на табурете, а на глыбе мрамора — деревянный молоток и резец. Со временем длинное название сократилось до имени мастера. Старая карта объясняет, как в скромном участке южного неба когда-то помещалась целая мастерская."
+  },
+  "Sct": {
+    "zh": "盾牌座原是献给波兰国王扬三世·索别斯基的一面盾，赫维留斯以此纪念他在一六八三年维也纳之战中的角色。今天星座只留下「盾牌」这个短名。虽然几颗主星并不突出，盾后方却是银河恒星密集的天区，暗夜里可以看见一片明亮的星云状光斑。",
+    "en": "Scutum began as the shield of the Polish king Jan III Sobieski. Hevelius named it to commemorate the king’s part in the battle of Vienna in 1683, and the shorter name Shield survived. Its outline is modest, but behind it lies a rich part of the Milky Way that makes a luminous patch on dark nights.",
+    "fr": "L’Écu était celui du roi de Pologne Jean III Sobieski. Hevelius lui donna ce nom en souvenir du rôle du roi à la bataille de Vienne en 1683. Le simple nom d’Écu est resté. Son contour est discret, mais derrière lui la Voie lactée regorge d’étoiles et forme une plage lumineuse par nuit noire.",
+    "ru": "Щит первоначально принадлежал на небе польскому королю Яну III Собескому. Гевелий назвал его в память о роли короля в Венской битве 1683 года, а со временем осталось короткое имя Щит. Очертания скромны, зато позади простирается богатая звёздами область Млечного Пути, светящаяся в тёмную ночь."
+  },
+  "Ser": {
+    "zh": "巨蛇座是蛇夫双手托住的一条大蛇。星图将蛇头画在蛇夫一边、蛇尾画在另一边，现代天区边界也随这幅构图把巨蛇分成互不相连的两块。星表中的 Serpens Caput 是蛇头，Serpens Cauda 是蛇尾，它们共有一个星座名和缩写 Ser。",
+    "en": "Serpens is the single snake held by Ophiuchus. Its head emerges on one side of the bearer and its tail on the other, and modern boundaries follow the picture by dividing the constellation into two separate areas. Serpens Caput is the head and Serpens Cauda the tail. Both share the abbreviation Ser.",
+    "fr": "Le Serpent est l’unique animal porté par Ophiuchus. Sa tête dépasse d’un côté du porteur et sa queue de l’autre. Les frontières modernes suivent ce dessin et divisent la constellation en deux régions séparées. Serpens Caput désigne la tête et Serpens Cauda la queue. Toutes deux ont pour abréviation Ser.",
+    "ru": "Змея — одно животное в руках Змееносца. Её голова видна с одной стороны человека, хвост — с другой. Современные границы следуют этому рисунку и делят созвездие на две раздельные области. Serpens Caput означает голову, Serpens Cauda — хвост. Сокращение у обеих частей одно — Ser.",
+    "detail": {
+      "zh": "巨蛇尾部的鹰状星云 M16 是一片正在诞生恒星的区域。「创生之柱」的轮廓来自密集的气体和尘埃，附近炽热年轻恒星的辐射逐渐侵蚀柱面。照片上亮边与暗柱的交界，正是天文学家研究年轻恒星怎样改变出生环境的地方。",
+      "en": "In the tail of Serpens the Eagle Nebula, M16, is an active star-forming region. Dense gas and dust outline its Pillars of Creation, whose surfaces are being eroded by radiation from nearby hot young stars. The boundary between bright rims and dark columns shows how young stars alter the environment that produced them.",
+      "fr": "Dans la queue du Serpent, la nébuleuse de l’Aigle, M16, abrite des naissances d’étoiles. Les Piliers de la création sont faits de gaz et de poussières denses dont la surface est érodée par le rayonnement de jeunes étoiles chaudes. Leurs bords lumineux révèlent comment les étoiles transforment leur lieu de naissance.",
+      "ru": "В хвосте Змеи находится туманность Орёл M16 — область звездообразования. Её Столпы Творения состоят из плотного газа и пыли, поверхность которых разрушает излучение молодых горячих звёзд. Границы светлых ободков и тёмных столбов показывают, как звёзды изменяют породившую их среду."
+    }
+  },
+  "Sex": {
+    "zh": "六分仪座纪念赫维留斯和妻子伊丽莎白测星时使用的大型六分仪。两位观测者可用它测两颗星之间的角距离，仪器的圆弧占整圆的六分之一。一六七九年火灾吞噬他们的天文台后，这件工具的形象在狮子座南面的星图上留了下来。",
+    "en": "Sextans recalls the large sextant used by Johannes and Elisabeth Hevelius. Two observers could measure the angle between stars with an instrument whose arc spanned a sixth of a circle. A fire destroyed their observatory in 1679, but the image of the instrument remains in the sky south of Leo.",
+    "fr": "Le Sextant rappelle le grand instrument dont se servaient Johannes et Elisabeth Hevelius. Deux observateurs pouvaient y mesurer l’angle entre deux étoiles sur un arc d’un sixième de cercle. Un incendie détruisit leur observatoire en 1679, mais l’image de l’instrument demeure dans le ciel au sud du Lion.",
+    "ru": "Секстант напоминает о большом инструменте, которым пользовались Ян и Эльжбета Гевелий. Два наблюдателя могли измерять углы между звёздами по дуге в одну шестую окружности. В 1679 году обсерваторию уничтожил пожар, но изображение инструмента сохранилось на небе к югу от Льва."
+  },
+  "Tau": {
+    "zh": "金牛座从美索不达米亚时代就以公牛的形象出现在黄道上。在一则希腊传说中，宙斯化作白牛，驮着欧罗巴渡海来到克里特岛。古星图往往只画牛的前身，长角向前伸出，牛肩附近一小簇紧靠的星就是昴星团。",
+    "en": "Taurus is the Bull, a zodiac figure inherited from Mesopotamia. One Greek tale tells of Zeus taking the form of a white bull and carrying Europa across the sea to Crete. Old charts often show only the bull’s forequarters, with long horns reaching ahead and the tight Pleiades cluster near its shoulder.",
+    "fr": "Le Taureau figure sur le zodiaque depuis l’époque mésopotamienne. Dans un récit grec, Zeus prend la forme d’un taureau blanc et porte Europe par-delà la mer jusqu’en Crète. Les cartes anciennes montrent souvent le seul avant-train, les cornes projetées en avant et les Pléiades serrées près de l’épaule.",
+    "ru": "Телец — зодиакальный бык, известный со времён Месопотамии. По одному из греческих преданий, Зевс принял облик белого быка и перенёс Европу через море на Крит. На старых картах часто изображали только переднюю часть быка с вытянутыми вперёд рогами и тесной группой Плеяд у плеча."
+  },
+  "Tel": {
+    "zh": "望远镜座纪念用透镜观看远处的仪器。拉卡伊把它画在南冕座以南，十八世纪的原图是一架长镜筒的望远镜。早期望远镜的物镜焦距很长，因此镜筒常显得细长。顺着几颗暗星找这套设备时，也是在看天文学家把本行的工具画回星空。",
+    "en": "Telescopium is the telescope that Lacaille put south of Corona Australis. His eighteenth-century picture shows a long refractor. Early refracting telescopes could have very long focal lengths, explaining the slender tubes in such illustrations. Here an astronomer put his own profession’s instrument into its subject, the sky.",
+    "fr": "Le Télescope est l’instrument que Lacaille plaça au sud de la Couronne australe. Son dessin du XVIIIe siècle montre une longue lunette. Les objectifs des premières lunettes pouvaient avoir de très longues focales, d’où ces tubes démesurés. L’astronome a ainsi dessiné son propre outil dans le ciel qu’il observait.",
+    "ru": "Телескоп — инструмент, который Лакайль поместил к югу от Южной Короны. На рисунке XVIII века изображён длинный рефрактор. Некоторые ранние линзовые телескопы имели очень большие фокусные расстояния, отсюда длинные тонкие трубы. Здесь астроном поместил орудие своего труда прямо на карту неба."
+  },
+  "Tri": {
+    "zh": "三角座用三颗星勾出一个瘦长的三角形。古希腊人把它叫三角，也叫形似大写希腊字母 Δ 的图形，两种称呼都能直接在天上认出来。它还给附近的三角座星系 M33 留下了名字，后者是一座位于银河系之外的旋涡星系。",
+    "en": "Triangulum is the slender triangle formed by three stars. Greek observers called it both a triangle and a figure like their capital letter Delta, Δ. Both names are easy to read in the sky. It also gives its name to the Triangulum Galaxy, M33, a spiral galaxy beyond the Milky Way.",
+    "fr": "Le Triangle est une figure étirée formée de trois étoiles. Les Grecs l’appelaient triangle ou le comparaient à leur lettre majuscule delta, Δ. Les deux noms se lisent directement sur la carte. Il a aussi donné son nom à la galaxie du Triangle, M33, une galaxie spirale au-delà de la Voie lactée.",
+    "ru": "Треугольник — вытянутая фигура из трёх звёзд. Греки называли его треугольником или сравнивали с заглавной буквой дельта, Δ. Оба названия легко прочитать прямо на небе. Его имя носит и галактика Треугольника M33 — спиральная галактика за пределами Млечного Пути."
+  },
+  "TrA": {
+    "zh": "南三角座由三颗较醒目的星勾出紧凑的三角形。欧洲航海者向南远行时，这样一个简单的几何图形很容易在陌生的星空中重新找到。它随十六世纪末的南天观测进入欧洲天球仪，和古希腊人记录的北方三角座各有自己的来历。",
+    "en": "Triangulum Australe is a compact triangle outlined by three conspicuous stars. Such a simple figure was easy for sailors to recognise again in unfamiliar southern skies. It entered European globes with the southern observations of the late sixteenth century and has a different history from the ancient northern Triangle.",
+    "fr": "Le Triangle austral est un triangle compact délimité par trois étoiles bien visibles. Une figure si simple se retrouvait facilement sous un ciel encore peu familier aux marins venus d’Europe. Elle figura sur leurs globes à la fin du XVIe siècle, avec une histoire distincte de celle du Triangle boréal de l’Antiquité.",
+    "ru": "Южный Треугольник — компактная фигура из трёх заметных звёзд. Такой простой рисунок морякам легко было вновь отыскать под незнакомым южным небом. Он вошёл в европейские глобусы по наблюдениям конца XVI века и имеет иную историю, чем известный с античности северный Треугольник."
+  },
+  "Tuc": {
+    "zh": "杜鹃座的西方形象是一只有着巨大鸟喙的巨嘴鸟。它出现在十六世纪末荷兰人的南天天球仪上，最初航海记录对这种鸟的称呼并不一致。中文星座名沿用了「杜鹃」，看古图时，认那条特别宽长的鸟喙就能明白画家画的是什么。",
+    "en": "Tucana is a toucan, the bird with an enormous bill. It appeared on Dutch southern globes in the late sixteenth century. Early voyage records and maps did not always give the bird the same name. On the old drawings its long, deep bill is the clearest clue to the identity that became standard.",
+    "fr": "Le Toucan est l’oiseau au bec démesuré placé sur les globes néerlandais du ciel austral à la fin du XVIe siècle. Les premiers récits de voyage et les cartes ne donnaient pas toujours le même nom à l’oiseau. Sur les anciens dessins, son bec long et massif explique l’identité qui a fini par s’imposer.",
+    "ru": "Тукан — птица с огромным клювом, которая появилась на голландских глобусах южного неба в конце XVI века. Первые путевые записи и карты называли птицу по-разному. На старых рисунках особенно заметен длинный массивный клюв, по которому легко узнать закрепившийся образ."
+  },
+  "UMa": {
+    "zh": "大熊座是一头北天巨熊，古希腊诗人荷马就提到过它。最熟悉的北斗七星只画出熊背的一部分和伸长的尾巴，其余较暗的星向外勾出身躯、头和腿。中国传统把这七星看成斗，欧洲也有人看成车，同一组亮星可以组织出几种好记的形象。",
+    "en": "Ursa Major is the Great Bear of the northern sky, already mentioned by Homer. The familiar seven stars of the Big Dipper trace only part of the back and the long tail. Fainter stars supply head, body and legs. A dipper in Chinese tradition and a wagon in parts of Europe give the bright seven other memorable forms.",
+    "fr": "La Grande Ourse est l’ourse du ciel boréal que mentionnait déjà Homère. Les sept étoiles de la Grande Casserole ne dessinent qu’une partie du dos et la longue queue. Des étoiles moins vives forment tête, corps et pattes. La louche de la tradition chinoise et le Chariot européen offrent d’autres lectures des sept étoiles.",
+    "ru": "Большая Медведица — северная медведица, которую упоминал уже Гомер. Семь звёзд знакомого Ковша отмечают лишь часть спины и длинный хвост. Голову, туловище и ноги очерчивают более слабые звёзды. Китайская традиция видела в семи ярких звёздах ковш, а в некоторых частях Европы в них видели повозку."
+  },
+  "UMi": {
+    "zh": "小熊座是大熊身旁另一头尾巴很长的熊，尾尖就是今天的北极星。古代地中海航海者已经用小熊的星找北，那时的天极与今天的位置稍有不同。将星图围绕北天极转动，会看到尾尖附近几乎不动，其他星则在一夜中围着它画弧。",
+    "en": "Ursa Minor is the smaller long-tailed bear beside the Great Bear. Polaris, today’s pole star, sits at the tip of its tail. Ancient Mediterranean sailors used the Little Bear for direction even when the celestial pole occupied a different spot. Over a night the other stars arc about the nearly stationary tail tip.",
+    "fr": "La Petite Ourse est l’autre ourse à longue queue du ciel boréal. Polaris, l’étoile Polaire actuelle, se trouve au bout de sa queue. Des marins de la Méditerranée antique s’orientaient déjà avec la Petite Ourse, à une époque où le pôle était ailleurs. Les étoiles décrivent leurs arcs autour de cette pointe presque immobile.",
+    "ru": "Малая Медведица — младшая из двух длиннохвостых небесных медведиц. Нынешняя Полярная звезда находится на кончике её хвоста. Средиземноморские моряки ориентировались по Малой Медведице ещё тогда, когда полюс занимал другое положение. За ночь другие звёзды описывают дуги вокруг почти неподвижного кончика хвоста."
+  },
+  "Vel": {
+    "zh": "船帆座是阿尔戈号的船帆。古希腊星图里的船形和近代插图有所不同，今天常见的大船帆是后来制图者画出来的。现代天图把这条著名的船分成船帆、船底、船尾。把银河附近这三块拼起来，才能看出原来那条航船的规模。",
+    "en": "Vela is the sails of the Argo. The ship on ancient Greek charts had a different outline, and the great sails familiar from later illustrations were a mapmakers’ development. Modern charts divide the vessel among Vela, Carina and Puppis. Putting the sails, hull and stern together restores the scale of the ship.",
+    "fr": "Les Voiles sont celles de l’Argo. Le navire des cartes grecques antiques avait un autre contour, et les grandes voiles des illustrations plus récentes sont l’œuvre de cartographes ultérieurs. Les cartes modernes partagent le vaisseau entre les Voiles, la Carène et la Poupe. Les réunir redonne sa taille au navire.",
+    "ru": "Паруса принадлежат кораблю «Арго». На древнегреческих картах у корабля были другие очертания, а знакомые по поздним иллюстрациям большие паруса добавили картографы. Современные карты делят судно между Парусами, Килем и Кормой. Лишь вместе эти части передают размах корабля."
+  },
+  "Vir": {
+    "zh": "室女座是一位手持麦穗的女子。不同古代传统把她认作不同的女神，有的和丰收相关，有的代表正义。麦穗却留在了最亮星的名字里，角宿一的西方名 Spica 在拉丁语中就是谷穗。古人用这一小束庄稼，把地上的收获带到了黄道上。",
+    "en": "Virgo is a maiden holding an ear of grain. Ancient traditions identified her with different goddesses, some connected with the harvest and others with justice. The grain remains in the name of her brightest star. Spica means an ear of grain in Latin, placing a familiar emblem of harvest on the zodiac.",
+    "fr": "La Vierge est une jeune femme qui tient un épi. Les Anciens l’identifiaient à différentes déesses, les unes liées aux moissons, les autres à la justice. L’épi demeure dans le nom de sa principale étoile. Spica signifie « épi » en latin, un signe familier des récoltes placé sur le zodiaque.",
+    "ru": "Дева — девушка с колосом в руке. В древности в ней видели разных богинь, связанных с урожаем или справедливостью. Колос сохранился в имени её ярчайшей звезды. Спика по-латыни означает «колос» — знакомый земной знак жатвы, помещённый на зодиак.",
+    "detail": {
+      "zh": "室女座星系团中的 M87 藏着一颗超大质量黑洞。事件视界望远镜把分散各地的射电台站联合起来，在二〇一九年公布了它周围明亮环状辐射和中央暗影的影像。星图上一个普通的小星系标记，因而连接到对黑洞近旁空间的直接观测。",
+      "en": "M87 in the Virgo Cluster contains a supermassive black hole. The Event Horizon Telescope combined radio observatories around the world and in 2019 released an image showing a bright ring of emission and a central shadow. A small galaxy symbol on the chart thus points to an observation of the immediate surroundings of a black hole.",
+      "fr": "M87, dans l’amas de la Vierge, contient un trou noir supermassif. L’Event Horizon Telescope a relié des radiotélescopes du monde entier et publié en 2019 une image montrant un anneau lumineux et une ombre centrale. Un petit symbole de galaxie sur la carte renvoie ainsi à l’observation du voisinage immédiat d’un trou noir.",
+      "ru": "В галактике M87 из скопления Девы находится сверхмассивная чёрная дыра. В 2019 году проект «Телескоп горизонта событий», объединивший радиообсерватории по всему миру, представил снимок яркого кольца излучения с тёмной тенью в центре. За скромным значком галактики на карте стоит наблюдение непосредственных окрестностей чёрной дыры."
+    }
+  },
+  "Vol": {
+    "zh": "飞鱼座描绘的是能跃出海面、展开宽大胸鳍滑翔的鱼。十六世纪末欧洲航海者记录南天时，把热带水域里熟悉的这种鱼画到了天上。旧图安排它从剑鱼座的大鱼面前逃开，两只海洋动物就在星图上留下了跃水和追逐的一瞬。",
+    "en": "Volans is the flying fish that breaks the sea surface and glides on enlarged pectoral fins. Late-sixteenth-century European voyagers placed this familiar sight from tropical waters in the southern sky. On old maps the fish escapes before the great dolphinfish of Dorado, a chase caught midway through a leap.",
+    "fr": "Le Poisson volant est le poisson qui jaillit de l’eau et plane sur de larges nageoires pectorales. Les navigateurs européens de la fin du XVIe siècle ont placé cette vision des mers tropicales dans le ciel austral. Sur les cartes anciennes, il fuit la grande Dorade voisine, comme saisi au milieu d’un bond.",
+    "ru": "Летучая Рыба выпрыгивает из моря и планирует на широких грудных плавниках. Европейские мореплаватели конца XVI века поместили эту знакомую по тропическим водам сцену на южное небо. На старых картах рыба ускользает от соседней Золотой Рыбы, словно художник застал её в середине прыжка."
+  },
+  "Vul": {
+    "zh": "狐狸座出自十七世纪赫维留斯的星图，原本是一只叼着鹅的小狐狸。后来星座名缩短，鹅却以另一种方式留下了踪迹，这个星座最亮的恒星正式名为 Anser，拉丁语就是「鹅」。先找小狐狸，再读星名，便能把老图上消失的另一只动物找回来。",
+    "en": "Vulpecula was the little fox with a goose on Hevelius’s seventeenth-century chart. The goose disappeared from the shortened constellation name, but it left another trace. The brightest star is officially called Anser, Latin for “goose”. Reading the star’s name puts both animals from the old drawing back on the map.",
+    "fr": "Le Petit Renard portait une oie sur la carte d’Hevelius au XVIIe siècle. L’oie a disparu du nom abrégé de la constellation, mais elle a laissé une autre trace. L’étoile la plus brillante porte le nom officiel d’Anser, « oie » en latin. Lire le nom de l’étoile fait ainsi réapparaître les deux animaux.",
+    "ru": "Лисичка на карте Гевелия XVII века держала гуся. Из сокращённого названия созвездия гусь исчез, но оставил другой след. Его ярчайшая звезда официально называется Ансер, что по-латыни означает «гусь». Так по имени звезды можно вернуть на карту обоих животных со старого рисунка."
+  }
+}

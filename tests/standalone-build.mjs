@@ -6,6 +6,9 @@ const file = process.argv[2] || 'StarOrbit.html';
 assert(fs.statSync(file).size <= MAX_DISTRIBUTION_BYTES, 'standalone distribution budget');
 const manifest = JSON.parse(fs.readFileSync('assets/earth/night-2025-500m/manifest.json', 'utf8'));
 const earthManifest = JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json', 'utf8'));
+const lunarColour = JSON.parse(fs.readFileSync('assets/moon/colour-detail.json', 'utf8'));
+const colourDigest = crypto.createHash('sha256');
+let colourCount = 0;
 const earthFiles = new Set([
   ...Object.values(earthManifest.layers).map((r) => r.file),
   earthManifest.layers.earthElevation.heightFile,
@@ -42,6 +45,11 @@ function script(attributes, body) {
   blocks++;
   last = payload.last;
   for (const [path, value] of payload.patches) {
+    if (path[0] === 'lunarDetail' && path[1] === 'tiles' && path.length === 3) {
+      assert.equal(path[2], colourCount++);
+      assert(value.startsWith('data:image/jpeg;base64,'));
+      colourDigest.update(Buffer.from(value.slice(value.indexOf(',') + 1), 'base64'));
+    }
     if (path[0] === 'earthObservation' && typeof value === 'string' && value.startsWith('data:')) {
       const record = path[1] === 'layers' ? earthManifest.layers[path[2]] : earthManifest.minerals;
       const file = path.at(-1) === 'heightUrl' ? record.heightFile : record.file;
@@ -103,6 +111,8 @@ assert(format && blocks > 1 && last);
 assert.equal(expected.size, 0);
 assert.equal(nightBases, 4);
 assert.equal(earthFiles.size, 0);
+assert.equal(colourCount, lunarColour.rows * lunarColour.columns);
+assert.equal(colourDigest.digest('hex'), lunarColour.sha256RowMajorBytes);
 console.log(
   JSON.stringify({
     file,

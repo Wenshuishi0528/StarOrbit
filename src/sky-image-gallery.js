@@ -2,7 +2,8 @@ import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { deepSkyTypeName } from './deep-sky-catalog.js';
 import { artworkNotes } from './sky-artwork-notes.js';
 import { describeSurveyImage } from './sky-object-reading.js';
-import { describeDeepSkySubject } from './deep-sky-guide.js';
+import { bindSkyReading, readingTargetId } from './sky-reading-view.js';
+import { lazyData } from './lazy-data.js';
 import {
   createSkyImageIndex,
   galleryCoordinates,
@@ -13,6 +14,7 @@ import { loadGalleryThumbnail } from './sky-image-thumbnail.js';
 
 const filters = [
   ['featured', '精选'],
+  ['reference', '天体资料'],
   ['all', '全部影像'],
   ['recent', '韦伯图集'],
   ['hubble', '哈勃图集'],
@@ -20,6 +22,10 @@ const filters = [
   ['panstarrs', 'Pan-STARRS 光学'],
 ];
 const pageSize = 18;
+const referenceData = lazyData(async () => {
+  const module = await import('./sky-reference-library.js');
+  return { ...module, directory: await module.loadReferenceLibrary() };
+});
 const sourceLabel = (source) => t(filters.find(([id]) => id === source)?.[1] || '');
 const make = (tag, cls, text) => {
   const el = document.createElement(tag);
@@ -158,6 +164,7 @@ export function mountSkyImageGallery({
   canLocate,
   canSave,
   getSavedPreview,
+  loadWorks,
 }) {
   // providers / works 可为数组或返回当前数组的函数（哈勃档案按需加载后会更换数组）。
   const providerList = () => (typeof providers === 'function' ? providers() : providers);
@@ -175,6 +182,14 @@ export function mountSkyImageGallery({
     opener = null,
     lastCardId = null,
     failed = false;
+  let references,
+    referenceId = null,
+    referenceCategory = 'all',
+    referenceHistory = [],
+    referenceOrigin = null,
+    generation = 0,
+    requestedWorks = false,
+    refreshRelated = null;
   const dialog = make('dialog', 'sky-image-gallery');
   dialog.id = 'skyImageGallery';
   dialog.setAttribute('aria-labelledby', 'skyGalleryTitle');
@@ -190,7 +205,9 @@ export function mountSkyImageGallery({
   search.autocomplete = 'off';
   search.id = 'skyGallerySearch';
   filter.id = 'skyGalleryFilter';
-  tool.append(search, filter);
+  const category = make('select');
+  category.id = 'skyReferenceCategory';
+  tool.append(search, filter, category);
   const scroller = make('div', 'sig-scroll'),
     feedback = make('p', 'sig-feedback');
   feedback.setAttribute('role', 'status');
@@ -198,11 +215,14 @@ export function mountSkyImageGallery({
   document.body.append(dialog);
   function updateStatus() {
     const offline = navigator.onLine === false;
-    feedback.textContent = offline
-      ? t('当前离线，可搜索目录和查看已保存的影像。')
-      : failed
-        ? t('部分预览暂未载入，仍可搜索和定位。')
-        : '';
+    feedback.textContent =
+      source === 'reference' || referenceId
+        ? ''
+        : offline
+          ? t('当前离线，可搜索目录和查看已保存的影像。')
+          : failed
+            ? t('部分预览暂未载入，仍可搜索和定位。')
+            : '';
     feedback.hidden = !feedback.textContent;
   }
   const images = visibleThumbnails(
@@ -232,11 +252,13 @@ export function mountSkyImageGallery({
     }
   );
   function setLabels() {
-    title.textContent = t('浏览星空影像');
-    closeButton.textContent = t('关闭图集');
-    search.placeholder = t('搜索天体、编号或作品');
+    title.textContent = t('浏览星空影像与资料');
+    closeButton.textContent = t('关闭');
+    search.placeholder = t(
+      source === 'reference' ? '搜索名称、别名或星表编号' : '搜索天体、编号或作品'
+    );
     search.setAttribute('aria-label', search.placeholder);
-    filter.setAttribute('aria-label', t('筛选影像'));
+    filter.setAttribute('aria-label', t('浏览类别'));
     filter.replaceChildren(
       ...filters.map(([value, label]) => {
         const option = make('option', null, t(label));
@@ -245,6 +267,16 @@ export function mountSkyImageGallery({
       })
     );
     filter.value = source;
+    category.hidden = source !== 'reference' || !references;
+    category.setAttribute('aria-label', t('资料类别'));
+    if (!category.hidden) {
+      category.replaceChildren(
+        ...Object.entries(references.referenceCategories).map(
+          ([id, label]) => new Option(t(label), id)
+        )
+      );
+      category.value = referenceCategory;
+    }
     search.value = query;
   }
   function caption(entry) {
@@ -261,13 +293,23 @@ export function mountSkyImageGallery({
       .join(' · ');
   }
   function clearContent() {
+    generation++;
+    refreshRelated = null;
     images.clear();
+    scroller.removeAttribute('aria-busy');
     scroller.replaceChildren();
     failed = false;
     updateStatus();
   }
+  function updateImageIndex() {
+    if (indexedWorks === workList()) return;
+    indexedWorks = workList();
+    searchIndex = createSkyImageIndex(indexedWorks);
+  }
   function showDetails(row, restore) {
+    updateImageIndex();
     selected = row;
+    referenceId = null;
     const language = getLanguage();
     const entry = galleryEntry(row, selectedSource, language);
     clearContent();
@@ -293,7 +335,9 @@ export function mountSkyImageGallery({
       const next = galleryEntry(item, 'dss', language);
       const id = keyOf(next);
       const link = button(label, () => {
-        const earlier = trail.findIndex((frame) => frame.row === item);
+        const earlier = trail.findIndex(
+          (frame) => (frame.row.work || frame.row.object) === (item.work || item.object)
+        );
         if (earlier >= 0) {
           const [previous] = trail.splice(earlier);
           selectedSource = previous.source;
@@ -440,10 +484,26 @@ export function mountSkyImageGallery({
     if (locations.childElementCount) figure.append(locations);
     detail.append(figure, text);
     const reading = make('div', 'sig-reading');
-    const about = passage(
-      '关于天体',
-      (object && describeDeepSkySubject(object, language)) || narrative.subject
-    );
+    const about = make('section', 'sig-passage');
+    about.append(make('h4', null, t('关于天体')));
+    if (object) {
+      const id = readingTargetId('deep-sky:' + object.id.toLowerCase());
+      const link = button(
+        t('阅读{name}的资料', { name: galleryEntry({ object }, 'dss', language).title }),
+        () => {
+          referenceOrigin = {
+            row,
+            scroll: scroller.scrollTop,
+            focus: id,
+            relatedOpen: scroller.querySelector('.sig-related')?.open,
+          };
+          openReference(id);
+        },
+        'sig-subject-link'
+      );
+      link.dataset.referenceLink = id;
+      about.append(link);
+    } else if (narrative.subject) about.append(make('p', null, narrative.subject));
     for (const subject of subjects) {
       const target = galleryEntry(subject, 'dss', language);
       const link = relatedButton(subject, target.title);
@@ -480,49 +540,234 @@ export function mountSkyImageGallery({
       provenance.append(link);
     }
     if (entry.object) {
-      const linked = searchIndex.related(entry.object);
-      if (linked.length) {
-        const group = make('details', 'sig-related');
-        group.append(make('summary', null, t('相关作品（{count}）', { count: linked.length })));
-        function fillRelated() {
-          if (!group.open || group.childElementCount > 1) return;
-          for (const item of linked) {
-            const work = galleryEntry(item, null, language);
-            group.append(relatedButton(item, sourceLabel(work.source) + ' · ' + work.title));
-          }
+      const group = make('details', 'sig-related'),
+        summary = make('summary');
+      const displayed = new Set();
+      group.append(summary);
+      refreshRelated = () => {
+        const linked = searchIndex.related(entry.object);
+        if (!linked.length) return;
+        summary.textContent = t('相关作品（{count}）', { count: linked.length });
+        if (!group.parentNode) reading.append(group);
+        if (!group.open) return;
+        for (const item of linked) {
+          const work = galleryEntry(item, null, language);
+          const key = keyOf(work);
+          if (displayed.has(key)) continue;
+          displayed.add(key);
+          group.append(relatedButton(item, sourceLabel(work.source) + ' · ' + work.title));
         }
-        group.addEventListener('toggle', fillRelated);
-        if (restore?.focus) {
-          group.open = true;
-          fillRelated();
-        }
-        reading.append(group);
-      }
+      };
+      group.addEventListener('toggle', refreshRelated);
+      group.open =
+        restore?.relatedOpen ?? (!!restore?.focus && !restore.focus.startsWith('deep-sky:'));
+      refreshRelated();
     }
     detail.append(provenance);
     scroller.append(back, detail);
     scroller.scrollTop = restore?.scroll || 0;
     const focus =
       restore &&
-      [...detail.querySelectorAll('[data-related]')].find(
-        (el) => el.dataset.related === restore.focus
+      [...detail.querySelectorAll('[data-related], [data-reference-link]')].find(
+        (el) => (el.dataset.related || el.dataset.referenceLink) === restore.focus
       );
     (focus || back).focus({ preventScroll: true });
   }
   function textFocus() {
     scroller.querySelector('.sig-info select')?.focus({ preventScroll: true });
   }
-  function renderList() {
-    tool.hidden = false;
-    if (indexedWorks !== workList()) {
-      indexedWorks = workList();
-      searchIndex = createSkyImageIndex(indexedWorks);
+  function withReferences(render) {
+    if (references) return render();
+    const current = generation;
+    scroller.append(make('p', 'sig-meta', t('正在读取资料目录…')));
+    scroller.setAttribute('aria-busy', 'true');
+    referenceData
+      .load()
+      .then((result) => {
+        if (current !== generation || !dialog.open) return;
+        references = result;
+        setLabels();
+        render();
+      })
+      .catch(() => {
+        if (current === generation && dialog.open) {
+          scroller.removeAttribute('aria-busy');
+          scroller.replaceChildren(
+            button(t('重新读取资料目录'), () =>
+              referenceId ? openReference(referenceId) : renderList()
+            )
+          );
+        }
+      });
+  }
+  function referenceMeta(id, target) {
+    const key = references.referenceCategory(id);
+    const type = t(references.referenceCategories[key]);
+    const extra = target.category || target.record?.pinyin || target.identifier;
+    return [type, extra && extra !== target.name && extra !== type ? extra : '']
+      .filter(Boolean)
+      .join(' · ');
+  }
+  function focusEntry(id) {
+    Array.from(scroller.querySelectorAll('[data-entry], [data-related-reference]'))
+      .find((el) => (el.dataset.entry || el.dataset.relatedReference) === id)
+      ?.focus({ preventScroll: true });
+  }
+  function openReference(id, restore) {
+    referenceId = id;
+    tool.hidden = true;
+    clearContent();
+    withReferences(() => {
+      const target = references.directory.subject(id, getLanguage());
+      const back = button(
+        t(
+          referenceHistory.length
+            ? '返回上一篇资料'
+            : referenceOrigin
+              ? '返回影像详情'
+              : '返回资料目录'
+        ),
+        () => {
+          const previous = referenceHistory.pop();
+          if (previous) return openReference(previous.id, previous);
+          referenceId = null;
+          if (referenceOrigin) {
+            const original = referenceOrigin;
+            referenceOrigin = null;
+            return showDetails(original.row, original);
+          }
+          renderList(lastCardId);
+        },
+        'sig-back'
+      );
+      const detail = make('article', 'sig-reference-detail');
+      if (target) {
+        detail.append(
+          make('small', 'sig-meta', referenceMeta(id, target)),
+          make('h3', null, target.name)
+        );
+        bindSkyReading(detail, {
+          inline: true,
+          sourcesOpen: restore?.sourcesOpen,
+          openSections: restore?.openSections,
+        }).set(
+          target,
+          target.type === 'asterism' || target.type === 'sky-group' ? 'chinese' : 'western'
+        );
+        const neighbors = references.directory.related(id, target);
+        if (neighbors.length) {
+          const related = make('details', 'sig-reference-related');
+          related.open = !!restore?.focus;
+          related.append(
+            make('summary', null, t('相关天体与天区（{count}）', { count: neighbors.length }))
+          );
+          const showRelated = () => {
+            if (!related.open || related.childElementCount > 1) return;
+            for (const key of neighbors) {
+              const neighbor = references.directory.subject(key, getLanguage());
+              if (!neighbor) continue;
+              const link = button(
+                neighbor.name + ' · ' + t(references.referenceCategories[neighbor.type]),
+                () => {
+                  const earlier = referenceHistory.findIndex((entry) => entry.id === key);
+                  if (earlier >= 0) {
+                    const [previous] = referenceHistory.splice(earlier);
+                    openReference(key, previous);
+                  } else {
+                    referenceHistory.push({
+                      id,
+                      scroll: scroller.scrollTop,
+                      focus: key,
+                      openSections: [
+                        ...detail.querySelectorAll('[data-reading-section][open]'),
+                      ].map((s) => s.dataset.readingSection),
+                      sourcesOpen: detail.querySelector('[data-sky-about]')?.open,
+                    });
+                    openReference(key);
+                  }
+                },
+                'sig-subject-link'
+              );
+              link.dataset.relatedReference = key;
+              related.append(link);
+            }
+          };
+          related.addEventListener('toggle', showRelated);
+          showRelated();
+          detail.append(related);
+        }
+      } else detail.append(make('p', 'sig-meta', t('此位置没有已收录的天体简介。')));
+      scroller.replaceChildren(back, detail);
+      scroller.removeAttribute('aria-busy');
+      scroller.scrollTop = restore?.scroll || 0;
+      if (restore?.focus) focusEntry(restore.focus);
+      else back.focus({ preventScroll: true });
+    });
+  }
+  function renderReferences(focus) {
+    const { directory } = references;
+    const results = directory.search(query, referenceCategory);
+    const pages = Math.max(1, Math.ceil(results.length / pageSize));
+    page = Math.min(page, pages - 1);
+    const list = make('div', 'sig-reference-list');
+    for (const id of results.slice(page * pageSize, (page + 1) * pageSize)) {
+      const target = directory.subject(id, getLanguage());
+      if (!target) continue;
+      const card = button(
+        '',
+        () => {
+          savedScroll = scroller.scrollTop;
+          lastCardId = id;
+          openReference(id);
+        },
+        'sig-reference-card'
+      );
+      card.dataset.entry = id;
+      card.append(
+        make('strong', null, target.name),
+        make('small', 'sig-meta', referenceMeta(id, target))
+      );
+      list.append(card);
     }
+    const count = results.length
+      ? t('共 {count} 条资料', { count: results.length.toLocaleString(getLanguage()) })
+      : t('没有找到匹配的天体资料。');
+    const total = make('p', 'sig-reference-count sig-meta', count);
+    total.setAttribute('role', 'status');
+    scroller.replaceChildren(total, list, makePager(pages));
+    scroller.removeAttribute('aria-busy');
+    scroller.scrollTop = savedScroll;
+    if (focus) focusEntry(focus);
+  }
+  function renderList(focus) {
+    tool.hidden = false;
+    clearContent();
+    if (source === 'reference') return withReferences(() => renderReferences(focus));
+    if (loadWorks && !requestedWorks) {
+      requestedWorks = true;
+      loadWorks()
+        .then(() => {
+          if (!dialog.open || indexedWorks === workList() || source === 'reference' || referenceId)
+            return;
+          if (selected) {
+            updateImageIndex();
+            refreshRelated?.();
+          } else {
+            const focused = document.activeElement?.dataset.entry;
+            savedScroll = scroller.scrollTop;
+            renderList();
+            if (focused) focusEntry(focused);
+          }
+        })
+        .catch(() => {
+          /* Available catalogues stay readable; reopen to retry. */
+        });
+    }
+    updateImageIndex();
     const results = searchIndex(query, source);
     const count = results.length,
       pages = Math.max(1, Math.ceil(count / pageSize));
     page = Math.min(page, pages - 1);
-    clearContent();
     const list = make('div', 'sig-grid');
     for (const row of results.slice(page * pageSize, (page + 1) * pageSize)) {
       const entry = galleryEntry(row, source, getLanguage());
@@ -549,12 +794,16 @@ export function mountSkyImageGallery({
       list.append(card);
     }
     if (!count) list.append(make('p', 'sig-meta', t('没有找到匹配的影像。')));
+    scroller.append(list, makePager(pages));
+    scroller.scrollTop = savedScroll;
+  }
+  function makePager(pages) {
     const pager = make('div', 'sig-pager');
     const turn = (delta) => {
       page += delta;
       savedScroll = 0;
       renderList();
-      scroller.querySelector('.sig-card')?.focus({ preventScroll: true });
+      scroller.querySelector('[data-entry]')?.focus({ preventScroll: true });
     };
     const prev = button(t('上一页'), () => turn(-1)),
       next = button(t('下一页'), () => turn(1));
@@ -566,20 +815,22 @@ export function mountSkyImageGallery({
         make('span', null, t('第 {page} / {total} 页', { page: page + 1, total: pages })),
         next
       );
-    scroller.append(list, pager);
-    scroller.scrollTop = savedScroll;
+    return pager;
   }
   function refresh() {
     if (!dialog.open) return;
-    if (!selected) savedScroll = scroller.scrollTop;
+    if (!selected && !referenceId) savedScroll = scroller.scrollTop;
     setLabels();
-    if (selected) showDetails(selected);
+    if (referenceId) openReference(referenceId);
+    else if (selected) showDetails(selected);
     else renderList();
   }
   function resetList() {
     page = 0;
     savedScroll = 0;
     selected = null;
+    referenceId = referenceOrigin = null;
+    referenceHistory = [];
     renderList();
   }
   search.oninput = () => {
@@ -588,14 +839,25 @@ export function mountSkyImageGallery({
   };
   filter.onchange = () => {
     source = filter.value;
+    setLabels();
+    resetList();
+  };
+  category.onchange = () => {
+    referenceCategory = category.value;
     resetList();
   };
   dialog.addEventListener('keydown', (event) => event.stopPropagation());
   scroller.addEventListener('scroll', () => {
-    if (dialog.open && !selected) savedScroll = scroller.scrollTop;
+    if (dialog.open && !selected && !referenceId) savedScroll = scroller.scrollTop;
   });
   dialog.addEventListener('close', () => {
     selected = null;
+    referenceId = referenceOrigin = null;
+    referenceHistory = [];
+    generation++;
+    requestedWorks = false;
+    refreshRelated = null;
+    scroller.removeAttribute('aria-busy');
     images.clear();
     scroller.replaceChildren();
     if (opener?.isConnected) opener.focus({ preventScroll: true });
