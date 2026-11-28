@@ -11,7 +11,7 @@ const namesFor = (item) =>
 const localName = (names, language) => names?.[language] || names?.en || names?.zh || '';
 const westernAsterisms = westernChart.constellations.map((item) => ({
   ...item,
-  names: namesFor(item),
+  names: namesFor(item.id === 'Ser' ? { ...item, en: 'Serpens' } : item),
   targetId: 'constellation:' + item.id,
   culture: 'western',
   memberHips: [],

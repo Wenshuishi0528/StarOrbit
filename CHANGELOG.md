@@ -1,5 +1,11 @@
 # Changelog / 更新记录
 
+## v1.71 · 2026-11-28
+
+天体卡片打开即显示成段介绍。88 个西方星座、中国星官及所属天区、亮星和太阳系天体都有四语导读，普通星表与深空目标按各自资料解释。巡天右键「对准并固定十字线」会锁定天球方向并保持倍率。216 项默认回归通过，并在浏览器核验断网阅读与轨道推进后的实际光轴。[验收记录](docs/verification.md#v171-天体简介与巡天指向)
+
+Object cards now open with a readable field guide. Four-language introductions cover all 88 Western constellations, Chinese asterisms and their regions, bright stars and Solar System objects. Other catalogue entries explain their available observations. Aiming from the finder’s context menu locks the crosshair to the selected sky direction at the current zoom. All 216 default regressions passed, alongside browser checks for offline reading and pointing stability.
+
 ## v1.70 · 2026-11-28 · 本机版 / Local build
 
 巡天拍摄计划可按名称、编号或 J2000 坐标取景，拍单张或四格。主页与巡天各自保存图源，手选光学巡天可从广角查看，哈勃和韦伯可用空白底图。巡天与地面观星支持按实际位置认星、查看简介与对准目镜。新增天区定位、太阳观测退出、可拉宽的取景工作区与共用瞄准标记。

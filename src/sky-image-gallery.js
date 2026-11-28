@@ -1,7 +1,8 @@
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { deepSkyTypeName } from './deep-sky-catalog.js';
 import { artworkNotes } from './sky-artwork-notes.js';
-import { describeSkyObject, describeSurveyImage } from './sky-object-reading.js';
+import { describeSurveyImage } from './sky-object-reading.js';
+import { describeDeepSkySubject } from './deep-sky-guide.js';
 import {
   createSkyImageIndex,
   galleryCoordinates,
@@ -441,7 +442,7 @@ export function mountSkyImageGallery({
     const reading = make('div', 'sig-reading');
     const about = passage(
       '关于天体',
-      (object && describeSkyObject(object, language)) || narrative.subject
+      (object && describeDeepSkySubject(object, language)) || narrative.subject
     );
     for (const subject of subjects) {
       const target = galleryEntry(subject, 'dss', language);

@@ -98,6 +98,7 @@ export function identifyCelestialCrosshair({
         targetDirection: star.direction,
         ...(target.asterisms?.length ? { asterisms: target.asterisms } : {}),
         magnitude: star.mag,
+        bv: star.bv,
         ...stellarDistance(target.id),
         angularDistanceDeg: angle / DEG,
       };

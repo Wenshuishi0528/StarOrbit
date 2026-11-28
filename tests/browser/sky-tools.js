@@ -41,11 +41,12 @@ export async function inspectSkyToolsInPage() {
     !$('#skyObjectWindow').hidden && $('#skyObjectWindow h3').textContent.includes('织女'),
     'centre identification'
   );
-  click('#skyObjectWindow [data-sky-about] summary');
-  check(
-    $('#skyObjectWindow [data-sky-about]').textContent.includes('夏季大三角'),
-    'curated sourced content'
+  await wait(
+    () => $('#skyObjectWindow .sky-reading-prose')?.textContent.includes('夏季大三角'),
+    'Vega introduction visible'
   );
+  click('#skyObjectWindow [data-sky-about] summary');
+  check($('#skyObjectWindow [data-sky-about] a')?.href.startsWith('https://'), 'article source');
   check(
     sim.xuntian.pointing.target === first.target && sim.xuntian.pointing.field === first.field,
     'reading changed pointing'
@@ -83,13 +84,30 @@ export async function inspectSkyToolsInPage() {
   check(sim.xuntian.pointing.target === first.target, 'context menu moved camera');
   const before = sim.xuntian.pointing.axes.forward;
   click('#skyObjectWindow [data-sky-action="aim"]');
-  await wait(() => sim.xuntian.pointing.mode === 'free', 'free one-shot');
+  await wait(() => sim.xuntian.pointing.mode === 'sky-pin', 'inertial direction pinned');
   const aligned = sim.xuntian.pointing;
   check(
     aligned.field === first.field &&
       Math.hypot(...aligned.axes.forward.map((v, i) => v - before[i])) > 0.0001,
     'one-shot FOV or direction'
   );
+  const epoch = sim.current.t,
+    frozen = [...aligned.axes.forward];
+  sim.seek(epoch + 120000);
+  await wait(() => Math.abs(sim.current.t - epoch) >= 115000, 'advance the orbit');
+  check(
+    sim.xuntian.pointing.pinned === 'sky' &&
+      sim.xuntian.pointing.locked &&
+      Math.hypot(...sim.xuntian.pointing.axes.forward.map((v, i) => v - frozen[i])) < 1e-7 &&
+      sim.xuntian.pointing.field === first.field,
+    'fixed crosshair drifted with the orbit'
+  );
+  click('#xtPin');
+  check(
+    sim.xuntian.pointing.mode === 'free' && !sim.xuntian.pointing.pinned,
+    'can release the crosshair'
+  );
+  sim.seek(epoch);
   click('#xtClose');
   click('.world-mode-entry > button');
   click('[data-ground-deploy]');

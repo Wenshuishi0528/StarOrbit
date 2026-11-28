@@ -1,3 +1,4 @@
+import { bindSkyReading } from './sky-reading-view.js';
 import { nudgeGroundScope } from './ground-camera-pointing.js';
 import { mountAimMarker, drawAimMarker } from './aim-marker.js';
 import { projectRay, rayInView, skyAngles } from './sky-location-math.js';
@@ -49,6 +50,7 @@ export const starPanelMarkup = `
   <input id="groundStarSearch" type="search" autocomplete="off" placeholder="搜索月球、织女星、M31…">
   <div data-star-results class="star-results"></div>
   <div class="star-current"><strong data-star-name></strong><span data-star-target-alt></span></div>
+  <div data-star-reading></div>
   <div class="star-action-row"><button data-star-aim>对准目标</button><button data-star-track aria-pressed="false">跟踪目标</button><button data-star-recommend>推荐星野</button></div>
   <label for="groundStarLens">目镜</label>
   <select id="groundStarLens"><option value="finder">广角寻星 · 60°</option><option value="25">25 mm · 24×</option><option value="10">10 mm · 60×</option><option value="6">6 mm · 100×</option><option value="custom" hidden>连续视场</option><option data-star-frame value="frame" hidden>影像画幅</option></select>
@@ -119,6 +121,7 @@ export function mountGroundStarPanel({
   onViewChange = () => {},
 }) {
   const $ = (selector) => host.querySelector(selector);
+  const targetArticle = bindSkyReading($('[data-star-reading]'));
   const control = createGroundStargazing();
   let aimMarker = null;
   const date = () => sim.time;
@@ -677,6 +680,7 @@ export function mountGroundStarPanel({
       Number.isFinite(obs?.magnitude) &&
       obs.magnitude > starLimit;
     setText($('[data-star-name]'), targetName(target) || t('自由指向'));
+    targetArticle.set(target, culture());
     setText(
       $('[data-star-target-alt]'),
       obs

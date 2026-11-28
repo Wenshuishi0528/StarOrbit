@@ -1,3 +1,4 @@
+import { bindSkyReading, formationSubject } from './sky-reading-view.js';
 import { pointMainCameraAtSky } from './sky-camera-pointing.js';
 import { getLanguage, onLanguageChange, t } from './i18n.js';
 import { getSkyCulture, cultureName } from './sky-cultures.js';
@@ -163,6 +164,9 @@ export function installSkyCultureControls(sim) {
     env = sim.environment;
   const groupSelect = $('chineseSkyGroup'),
     objectSelect = $('chineseSkyObject');
+  const objectReading = bindSkyReading($('chineseSkyReading'), { expanded: true });
+  const groupReading = bindSkyReading($('chineseGroupReading'));
+  const symbolReading = bindSkyReading($('chineseSymbolReading'));
   // The explorer describes the Chinese sky only. Its catalogue and art load
   // with that culture (Environment.selectSkyCulture), so the lists are built
   // at the first refresh after they are ready, never at startup.
@@ -218,6 +222,19 @@ export function installSkyCultureControls(sim) {
     paintAsterismDiagram($('chineseSkyDiagram'), selected, culture, language);
     if (!selected) return;
     const group = culture.groups.find((g) => g.id === selected.groupId);
+    objectReading.set(formationSubject(selected, language), culture.id);
+    groupReading.set(formationSubject(group, language), culture.id);
+    symbolReading.set(
+      group?.type === 'mansion'
+        ? {
+            id: group.theme,
+            type: 'sky-group',
+            name: t(themeNames[group.theme]),
+            record: { id: group.theme },
+          }
+        : null,
+      culture.id
+    );
     const members = asterismPrimaryMembers(selected, culture);
     const memberNames = members.map((s, i) => `${i + 1}. ${label(s, language) || s.physicalId}`);
     const art = artwork.find(

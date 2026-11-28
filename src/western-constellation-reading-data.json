@@ -1,0 +1,618 @@
+{
+  "And": {
+    "chart": "Andromeda",
+    "zh": "从飞马大四边形的东北角出发，沿着亮星向东经过奎宿九（Mirach），再到天大将军一（Almach），就描出了仙女座的主线。回到奎宿九，向西北逐级找两颗较暗的星，旁边那片长椭圆形的微光是 M31 仙女座星系。",
+    "en": "The northeastern corner of the Great Square of Pegasus is the start of Andromeda’s chain. Follow it east past Mirach to Almach. Return to Mirach and step northwest along two fainter stars. Beside the second is the elongated glow of M31, the Andromeda Galaxy.",
+    "fr": "Depuis le coin nord-est du Grand Carré de Pégase, suivez la chaîne d’Andromède vers l’est, en passant par Mirach jusqu’à Almach. Revenez à Mirach et remontez vers le nord-ouest en suivant deux étoiles plus faibles. Près de la seconde s’étire la lueur de M31, la galaxie d’Andromède.",
+    "ru": "От северо-восточного угла Большого квадрата Пегаса к востоку тянется цепочка Андромеды. Проследите её через Мирах до Альмака. Вернувшись к Мираху, шагните по двум более слабым звёздам на северо-запад. У второй видно вытянутое пятно галактики Андромеды M31."
+  },
+  "Ant": {
+    "chart": "Antlia",
+    "zh": "要找唧筒座，可以从长蛇座蜿蜒的身躯向南移，到船帆座亮星以北停下。两者之间这块安静的天区缺少醒目的亮星，唧筒座 α 是认路的起点。沿几乎相同的赤纬向西移动视场，可以找到旋涡星系 NGC 2997，深曝光能把它环绕核心的旋臂显出来。",
+    "en": "Start at the winding body of Hydra and move south towards the bright stars of Vela. The quiet patch between them is Antlia, where Alpha Antliae makes a useful starting point in a field of faint stars. Almost due west of it lies the spiral galaxy NGC 2997. Deep exposures reveal arms curling around its core.",
+    "fr": "Descendez du corps sinueux de l’Hydre vers les étoiles brillantes des Voiles. L’espace discret entre les deux appartient à la Machine pneumatique. Alpha Antliae sert de repère parmi ses étoiles peu éclatantes. Presque exactement à l’ouest, les poses longues révèlent les bras enroulés autour du noyau de la galaxie spirale NGC 2997.",
+    "ru": "От извилистого тела Гидры двигайтесь к югу, в сторону ярких звёзд Парусов. Между ними лежит неприметный Насос. Среди слабых звёзд удобно начать с Альфы Насоса. Почти точно к западу от неё находится спиральная галактика NGC 2997. На снимках с долгой выдержкой видны рукава, огибающие её ядро."
+  },
+  "Aps": {
+    "chart": "Apus",
+    "zh": "南三角座醒目的三角形以南，是天燕座几颗相当低调的星。在星图上先认西侧的天燕座 α，再向东找挨得较近的 β 和 γ，主星的疏密就有了参照。沿这片天区的北缘，还可以找到由众多老年恒星聚集而成的球状星团 NGC 6101。",
+    "en": "South of the conspicuous Southern Triangle, Apus has a quieter outline. Find Alpha Apodis on its western side, then the closer pair of Beta and Gamma to the east. The contrast in spacing helps anchor the figure. Near its northern edge is NGC 6101, a globular cluster of old stars.",
+    "fr": "Au sud du Triangle austral, l’Oiseau de paradis se dessine plus discrètement. Repérez Alpha Apodis à l’ouest, puis, à l’est, Bêta et Gamma, bien plus rapprochées l’une de l’autre. Leur espacement aide à lire la figure. Près de sa limite nord se trouve NGC 6101, un amas globulaire d’étoiles anciennes.",
+    "ru": "Южнее яркого Южного Треугольника лежит неброская Райская Птица. Найдите на западе Альфу, а затем на востоке — сближенные на небе Бету и Гамму. Разница в промежутках помогает узнавать рисунок. У северной границы созвездия находится шаровое скопление старых звёзд NGC 6101."
+  },
+  "Aqr": {
+    "chart": "Aquarius",
+    "zh": "飞马大四边形以南有一大片亮星疏落的区域。先认出宝瓶座 ζ 周围那个小小的 Y 形，传统星图把它画作水瓶的瓶口，再顺着较暗的星点向南追踪倒出的水流。要找一个完全不同的目标，可从宝瓶座 β 向北移到球状星团 M2。",
+    "en": "South of the Great Square of Pegasus, look for a small Y of stars around Zeta Aquarii. It marks the mouth of Aquarius’s water jar, with a much fainter stream winding south. For a different sight, start at Beta Aquarii and move north to M2, a densely packed globular cluster.",
+    "fr": "Au sud du Grand Carré de Pégase, cherchez le petit Y autour de Zêta Aquarii. Il figure l’ouverture de la jarre du Verseau. Un filet d’étoiles plus faibles serpente vers le sud. Pour découvrir un tout autre paysage, partez de Bêta Aquarii vers le nord jusqu’à l’amas globulaire M2.",
+    "ru": "К югу от Большого квадрата Пегаса поищите маленькую букву Y вокруг Дзеты Водолея. Она отмечает горлышко кувшина, а слабые звёзды южнее намечают струю воды. От Беты Водолея можно пройти на север к совсем иному объекту — плотному шаровому скоплению M2."
+  },
+  "Aql": {
+    "chart": "Aquila",
+    "zh": "牛郎星又称牵牛星，星名是河鼓二，是夏季大三角中最靠南的顶点。它的两旁分别是河鼓三和河鼓一，三颗星排成稍稍倾斜的短线。先认出中间格外明亮的牵牛星，再把视野拉宽，就能看出天鹰座的星线横跨在夏季银河的两侧。",
+    "en": "Altair marks the southern corner of the Summer Triangle. It sits between Tarazed and Alshain in a short, slightly slanting row, easily picked out because the middle star is so much brighter. Widen the view from this trio to see Aquila’s longer figure spread across the Milky Way.",
+    "fr": "Altaïr occupe la pointe sud du Triangle d’été. Tarazed et Alshain l’encadrent sur une courte ligne oblique. L’éclat de l’étoile du milieu permet de reconnaître ce trio. En élargissant ensuite le champ, on découvre la silhouette de l’Aigle qui s’étend de part et d’autre de la Voie lactée.",
+    "ru": "Альтаир отмечает южную вершину Летнего треугольника. По обе стороны от него стоят Таразед и Альшаин. В этом коротком наклонном ряду средняя звезда заметно ярче остальных. Расширьте поле вокруг тройки, чтобы увидеть, как весь рисунок Орла раскинулся поперёк Млечного Пути."
+  },
+  "Ara": {
+    "chart": "Ara",
+    "zh": "跟着天蝎座弯曲的尾巴向南，在银河明亮的背景前可以找到天坛座。这里的 β 和 γ 在星图上挨得很近，颜色偏橙的 β 在北侧。转向星座西部，可见球状星团 NGC 6397，放大后它的中心比外围密集得多。",
+    "en": "Follow the curl of Scorpius’s tail south to Ara against the bright Milky Way. Beta and Gamma Arae lie close together on the chart, with orange Beta on the north side. The western part of the constellation contains NGC 6397, a globular cluster whose stars crowd tightly towards the centre.",
+    "fr": "Au sud de la queue recourbée du Scorpion, l’Autel se détache sur la Voie lactée. Bêta et Gamma Arae sont voisines sur la carte, Bêta étant l’étoile orangée la plus au nord du couple. À l’ouest, l’amas globulaire NGC 6397 montre une forte concentration d’étoiles vers son centre.",
+    "ru": "К югу от изогнутого хвоста Скорпиона на фоне яркого Млечного Пути лежит Жертвенник. Бета и Гамма Жертвенника расположены рядом, причём оранжевая Бета находится севернее. В западной части созвездия лежит шаровое скопление NGC 6397, в котором звёзды особенно тесно сгущаются к центру."
+  },
+  "Ari": {
+    "chart": "Aries",
+    "zh": "白羊座夹在双鱼座与金牛座之间。把星图转到昴星团以西，先找偏橙的娄宿三（Hamal），再沿弯曲的短线经过娄宿一，便到娄宿二（Mesarthim）。用小望远镜细看线尾的娄宿二，原先的一点光可以分成两颗亮度相近的星。",
+    "en": "West of the Pleiades, between Pisces and Taurus, orange-tinged Hamal leads into the short, bent line of Aries. Trace it through Sheratan to Mesarthim. A small telescope can split Mesarthim into two stars of similar brightness, a close-up reward at the end of the ram’s sparse outline.",
+    "fr": "À l’ouest des Pléiades, entre les Poissons et le Taureau, Hamal se reconnaît à sa teinte orangée. Suivez la courte ligne coudée du Bélier par Sheratan jusqu’à Mesarthim. Un petit télescope sépare cette dernière en deux étoiles d’éclat comparable.",
+    "ru": "К западу от Плеяд, между Рыбами и Тельцом, оранжеватый Хамаль начинает короткую изогнутую цепочку Овна. Пройдите по ней через Шератан до Мезартима. В небольшой телескоп последняя точка разделяется на две почти одинаково яркие звезды."
+  },
+  "Aur": {
+    "chart": "Auriga",
+    "zh": "五车二是御夫座最亮的星，从它出发能描出一个大五边形。最南一角借用了金牛座的五车五，所以顺着连线会越过星座边界。沿银河扫过这个五边形的南半部及附近，可以接连找到 M36、M37 和 M38 三个疏散星团。",
+    "en": "Capella lights up the top of Auriga’s broad pentagon. Its southern tip is Elnath, a star that belongs to Taurus, so the familiar outline crosses the constellation boundary. Sweep the Milky Way in and around the southern half of the pentagon for the three open clusters M36, M37 and M38.",
+    "fr": "Capella domine le vaste pentagone du Cocher. À sa pointe sud, Elnath appartient au Taureau, de sorte que le dessin traverse la frontière des deux constellations. En parcourant la Voie lactée dans la partie sud du pentagone et ses abords, on rencontre les amas ouverts M36, M37 et M38.",
+    "ru": "Капелла сияет в северной части большого пятиугольника Возничего. Его южную вершину образует Эльнат, принадлежащий Тельцу, так что привычная фигура пересекает границу созвездий. Вдоль Млечного Пути в южной части пятиугольника и рядом с ним ищите рассеянные скопления M36, M37 и M38."
+  },
+  "Boo": {
+    "chart": "Boötes",
+    "zh": "顺着北斗斗柄的弧度向外延长，遇到的橙色亮星就是牧夫座的大角星。它像一只风筝的尖端，其余较暗的星向北展开。大角星东北方的梗河一（Izar）是有名的双星，用望远镜分开时可以对比两个成员的颜色。",
+    "en": "Continue the curve of the Big Dipper’s handle to the orange star Arcturus. It forms the pointed end of Boötes’s kite, with the fainter part of the figure opening out to the north. Northeast of Arcturus lies Izar, a double star whose components show contrasting colours when resolved in a telescope.",
+    "fr": "Prolongez la courbe du manche de la Grande Casserole jusqu’à l’étoile orangée Arcturus. C’est la pointe du cerf-volant du Bouvier, dont les étoiles plus faibles se déploient vers le nord. Au nord-est d’Arcturus, un télescope permet de séparer les deux composantes de couleurs contrastées d’Izar.",
+    "ru": "Продолжите изгиб ручки Большого Ковша до оранжевого Арктура. Он отмечает заострённый конец небесного змея Волопаса, остальная часть которого раскрывается к северу. К северо-востоку от Арктура находится Ицар. В телескоп у этой двойной звезды различимы компоненты контрастных цветов."
+  },
+  "Cae": {
+    "chart": "Caelum",
+    "zh": "雕具座位于天兔座的西南、波江座的东侧，主星只勾出一段细而弯的折线。天区里没有特别抢眼的星，可以先借天鸽座的亮星定方向，再向西核对雕具座 α、β 和 γ 的位置。这种小星座在广角星图上比在窄视场内更容易认全。",
+    "en": "Southwest of Lepus and east of Eridanus, the faint stars of Caelum trace a thin, bent line. Use the brighter stars of Columba to get your bearings, then check Alpha, Beta and Gamma Caeli to the west. A wide field keeps the whole small figure and its brighter neighbours in view.",
+    "fr": "Au sud-ouest du Lièvre et à l’est de l’Éridan, le Burin dessine une mince ligne brisée. Prenez les étoiles plus brillantes de la Colombe comme repères, puis cherchez à l’ouest Alpha, Bêta et Gamma Caeli. Un champ large permet de comparer la petite figure à ses voisines.",
+    "ru": "К юго-западу от Зайца и восточнее Эридана слабые звёзды Резца образуют тонкую ломаную. Сориентируйтесь по более ярким звёздам Голубя, затем найдите западнее Альфу, Бету и Гамму Резца. В широком поле маленькая фигура помещается целиком вместе с яркими соседями."
+  },
+  "Cam": {
+    "chart": "Camelopardalis",
+    "zh": "长颈鹿座占据北极星和五车二之间一大片亮星稀少的天空。与其在暗星中拼出长颈鹿，不妨先找「肯布尔星链」，双筒望远镜能看见许多星点排成一条长线。沿星链追到东南端，密集的一小团是疏散星团 NGC 1502。",
+    "en": "Camelopardalis fills a broad, faint field between Polaris and Capella. One way into it is Kemble’s Cascade, a long line of mostly faint stars that fits binoculars much better than the entire giraffe. Follow the cascade to its southeastern end to find the compact open cluster NGC 1502.",
+    "fr": "La Girafe occupe un vaste espace pauvre en étoiles brillantes entre la Polaire et Capella. Commencez aux jumelles par la Cascade de Kemble, un long alignement d’étoiles faibles. À son extrémité sud-est apparaît une petite concentration d’étoiles, l’amas ouvert NGC 1502.",
+    "ru": "Жираф занимает обширное поле между Полярной звездой и Капеллой, где мало ярких ориентиров. Удобно начать с Каскада Кембла, длинной цепочки слабых звёзд, хорошо заметной в бинокль. На её юго-восточном конце находится небольшое рассеянное скопление NGC 1502."
+  },
+  "Cnc": {
+    "chart": "Cancer",
+    "zh": "从双子座的北河三向东望去，在到达狮子座轩辕十四之前，有一片肉眼看来相当空旷的天区。巨蟹座就在那里。暗夜里，它的中心有一团淡雾般的光，双筒镜能把它分解成蜂巢星团 M44 的许多恒星。东南方还有较紧凑的星团 M67。",
+    "en": "East of Pollux in Gemini, before reaching Regulus in Leo, look for a seemingly empty stretch of sky. This is Cancer. In darkness a misty patch near its middle becomes a swarm of stars in binoculars, the Beehive Cluster M44. The more compact open cluster M67 lies to its southeast.",
+    "fr": "Entre Pollux, dans les Gémeaux, et Régulus, dans le Lion, une portion de ciel paraît presque vide. C’est le Cancer. Par nuit noire, une tache laiteuse se devine au milieu. Les jumelles y séparent les étoiles de la Crèche, M44. Au sud-est se trouve l’amas ouvert plus compact M67.",
+    "ru": "Между Поллуксом в Близнецах и Регулом во Льве лежит почти пустой на первый взгляд участок — Рак. В тёмном небе в его середине заметно туманное пятнышко. В бинокль оно распадается на звёзды рассеянного скопления Ясли, M44. Юго-восточнее находится более компактное скопление M67."
+  },
+  "CVn": {
+    "chart": "Canes Venatici",
+    "zh": "在北斗斗柄之南，猎犬座用一条简短的星线标出位置，较亮的一端是常陈一（Cor Caroli）。要找著名的涡状星系 M51，可以借用斗柄末端的摇光作路标，再向西南稍移。深空照片里，旋臂旁紧挨着另一颗小星系。",
+    "en": "Canes Venatici lies south of the Big Dipper’s handle. Its short line of stars has Cor Caroli at the brighter end. To reach the Whirlpool Galaxy M51, start instead at Alkaid, the tip of the handle, and move a little southwest. Images show a small companion tucked against a spiral arm.",
+    "fr": "Sous le manche de la Grande Casserole, les Chiens de chasse se résument à un court trait dont le point le plus brillant est Cor Caroli. Pour trouver la galaxie du Tourbillon M51, partez d’Alkaïd, au bout du manche, et décalez-vous vers le sud-ouest. Une petite galaxie accompagne l’un de ses bras spiraux.",
+    "ru": "К югу от ручки Большого Ковша лежат Гончие Псы. Яркий конец их короткой цепочки отмечает Сердце Карла. Для поиска галактики Водоворот M51 удобнее оттолкнуться от Алькаида на конце ручки и сместиться к юго-западу. На снимках у спирального рукава видна галактика-спутник."
+  },
+  "CMa": {
+    "chart": "Canis Major",
+    "zh": "沿猎户腰带向东南延长，很快就会遇到全天夜空最亮的恒星天狼星。它是大犬座的醒目标志。把视场向正南移约四度，会遇到疏散星团 M41，双筒镜中能看见一群星点聚在一起，与北边独自耀眼的天狼星形成对照。",
+    "en": "Extend Orion’s belt southeast to Sirius, the brightest star in the night sky and the unmistakable marker of Canis Major. Move about four degrees south from Sirius for M41. In binoculars this open cluster is a gathering of individual stars, quite a different sight from the brilliant point to its north.",
+    "fr": "Prolongez la ceinture d’Orion vers le sud-est jusqu’à Sirius, l’étoile la plus brillante du ciel nocturne et le grand repère du Grand Chien. À environ quatre degrés au sud se trouve M41. Aux jumelles, cet amas ouvert se décompose en une multitude d’étoiles, contraste frappant avec l’éclat solitaire de Sirius.",
+    "ru": "Продолжите линию пояса Ориона на юго-восток до Сириуса — самой яркой звезды ночного неба и главного ориентира Большого Пса. Примерно в четырёх градусах к югу находится M41. В бинокль это рассеянное скопление выглядит целой россыпью звёзд, в отличие от сияющей точки Сириуса севернее."
+  },
+  "CMi": {
+    "chart": "Canis Minor",
+    "zh": "把天狼星、参宿四和南河三连起来，就是北半球冬夜常说的冬季大三角。最东端的南河三属于小犬座，西北侧的南河二与它勾出星图上很短的一笔。西南方的大犬和这条小犬各守一颗亮星，中间隔着暗淡的麒麟座。",
+    "en": "Sirius, Betelgeuse and Procyon make the Winter Triangle. Its eastern vertex, Procyon, belongs to Canis Minor. With the fainter Gomeisa just northwest, it makes a conspicuously short stroke on the chart. The two dogs’ bright stars, Procyon and Sirius, are separated by the much fainter stars of Monoceros.",
+    "fr": "Sirius, Bételgeuse et Procyon dessinent le Triangle d’hiver. Sa pointe orientale, Procyon, appartient au Petit Chien. Avec Gomeïsa, plus faible et située au nord-ouest, elle trace un trait particulièrement court sur la carte. Entre Procyon et Sirius, les deux phares des Chiens, s’étend la discrète Licorne.",
+    "ru": "Сириус, Бетельгейзе и Процион образуют Зимний треугольник. Его восточная вершина — Процион в Малом Псе. Вместе с более слабой Гомейзой к северо-западу он намечает на карте очень короткий отрезок. Яркие звёзды двух Псов разделяют гораздо более тусклые звёзды Единорога."
+  },
+  "Cap": {
+    "chart": "Capricornus",
+    "zh": "在射手座与宝瓶座之间，摩羯座的主星勾出一个宽而浅的三角形。先找西北角相距很近的两颗星，它们合称摩羯座 α，实际与我们相隔的距离很不相同。沿星线到东侧的垒壁阵四（Deneb Algedi），再向南还能找球状星团 M30。",
+    "en": "Between Sagittarius and Aquarius, Capricornus outlines a broad, shallow triangle. At its northwestern corner, the two stars called Alpha Capricorni appear close together despite lying at very different distances. Follow the outline east to Deneb Algedi. The globular cluster M30 lies farther south.",
+    "fr": "Entre le Sagittaire et le Verseau, le Capricorne forme un triangle large et peu profond. À son angle nord-ouest, les deux étoiles d’Alpha Capricorni semblent voisines malgré des distances très différentes. Suivez la figure vers l’est jusqu’à Deneb Algedi. L’amas globulaire M30 se trouve plus au sud.",
+    "ru": "Между Стрельцом и Водолеем звёзды Козерога намечают широкий приплюснутый треугольник. В северо-западном углу тесно видны две звезды Альфы Козерога, хотя расстояния до них очень разные. Восточный край отмечает Денеб Альгеди, а южнее находится шаровое скопление M30."
+  },
+  "Car": {
+    "chart": "Carina",
+    "zh": "老人星明亮而偏南，是辨认船底座最方便的起点。船底座与船帆座、船尾座曾同属古星图上的南船，如今各有独立边界。沿银河向老人星的东面扫去，会遇到船底座大星云 NGC 3372，亮气体和暗尘带围绕着海山二所在的天区。",
+    "en": "Brilliant Canopus is a good starting point for Carina. The keel, the sails and the stern were once parts of the great ship Argo on sky charts and now occupy separate constellations. Sweep east from Canopus towards the Milky Way to find NGC 3372, the Carina Nebula, with bright gas and dark dust lanes around Eta Carinae.",
+    "fr": "La brillante Canopus permet de repérer la Carène. Celle-ci partageait autrefois le grand Navire Argo avec les Voiles et la Poupe, aujourd’hui trois régions distinctes. À l’est de Canopus, dans la Voie lactée, cherchez NGC 3372, la nébuleuse de la Carène, dont le gaz lumineux et les traînées de poussière entourent Êta Carinae.",
+    "ru": "Яркий Канопус помогает найти Киль. Когда-то на картах он входил в Корабль Арго вместе с Парусами и Кормой, а сегодня у них раздельные границы. Восточнее Канопуса, в полосе Млечного Пути, отыщите туманность Киля NGC 3372 со светящимся газом и тёмными полосами пыли вокруг Эты Киля."
+  },
+  "Cas": {
+    "chart": "Cassiopeia",
+    "zh": "仙后座的五颗主星折成一个 W，星图旋转时它也会像字母 M。这个轮廓与北斗位于北极星的两侧，很适合用来在北天认方向。银河穿过折线附近的天区，其中的疏散星团 NGC 457 有两颗突出的亮星，因而得名「猫头鹰星团」。",
+    "en": "Five stars zigzag into the W of Cassiopeia, which can look like an M as the chart turns. The W lies across Polaris from the Big Dipper and makes an excellent northern landmark. The Milky Way runs through the area. In the open cluster NGC 457, two conspicuous bright stars suggest the eyes of an owl.",
+    "fr": "Cinq étoiles dessinent le W de Cassiopée, qui devient un M quand on tourne la carte. De l’autre côté de la Polaire par rapport à la Grande Casserole, il sert de repère dans le ciel boréal. La Voie lactée traverse la région. Deux étoiles brillantes y forment les « yeux » de l’amas ouvert du Hibou, NGC 457.",
+    "ru": "Пять звёзд Кассиопеи складываются в W, которая при повороте карты становится похожа на М. По другую сторону Полярной звезды лежит Большой Ковш, поэтому фигура удобна для ориентирования. В этой полосе Млечного Пути находится рассеянное скопление Сова, NGC 457. Две яркие звезды напоминают её глаза."
+  },
+  "Cen": {
+    "chart": "Centaurus",
+    "zh": "南十字座以东的两颗醒目亮星是南门二和马腹一，连起它们，向西便能找回南十字。这对指向南十字的亮星都属于半人马座，南门二所在的系统是太阳的近邻。天区北面还有肉眼呈朦胧光斑的半人马座 ω，它实际上是一个巨大的球状星团。",
+    "en": "The two bright Pointers east of the Southern Cross are Alpha and Beta Centauri. Trace their line west to return to the Cross. Both belong to Centaurus, and the Alpha Centauri system is a neighbour of the Sun. Farther north the hazy naked-eye patch Omega Centauri is an enormous globular cluster.",
+    "fr": "À l’est de la Croix du Sud, Alpha et Bêta du Centaure forment les deux Pointeurs. Prolongez leur ligne vers l’ouest pour retrouver la Croix. Le système d’Alpha du Centaure est voisin du Soleil. Plus au nord, la petite tache floue d’Oméga du Centaure est en réalité un immense amas globulaire.",
+    "ru": "К востоку от Южного Креста находятся две яркие звезды-указательницы, Альфа и Бета Центавра. Их линия ведёт к Кресту на запад. Система Альфы Центавра — соседка Солнца. Севернее невооружённым глазом видно туманное пятно Омеги Центавра. Это огромное шаровое скопление."
+  },
+  "Cep": {
+    "chart": "Cepheus",
+    "zh": "仙后座的 W 与北天极之间，仙王座主星画出一座歪歪的小屋。找到房屋的南边，再看东南侧的造父一（δ Cephei）。它大约五天亮暗循环一次，一类可用来测定遥远星系距离的脉动变星「造父变星」就以它命名。",
+    "en": "Between Cassiopeia’s W and the north celestial pole, the main stars of Cepheus resemble a crooked house. Look near its southeastern corner for Delta Cephei. It brightens and fades in just over five days. It gave its name to the Cepheid variables, pulsating stars used to measure distances to other galaxies.",
+    "fr": "Entre le W de Cassiopée et le pôle céleste nord, les étoiles de Céphée dessinent une maison de guingois. Près de son angle sud-est, Delta Cephei gagne et perd de l’éclat en un peu plus de cinq jours. Elle a donné son nom aux céphéides, des étoiles pulsantes qui servent à mesurer la distance des galaxies.",
+    "ru": "Между буквой W Кассиопеи и северным полюсом мира главные звёзды Цефея образуют перекошенный домик. У юго-восточного угла найдите Дельту Цефея. Её блеск меняется с периодом немного более пяти суток. По её имени названы цефеиды — пульсирующие звёзды, позволяющие измерять расстояния до других галактик."
+  },
+  "Cet": {
+    "chart": "Cetus",
+    "zh": "鲸鱼座横在双鱼座以南，东部的一圈星勾出头部，西南端的土司空（Diphda）标出尾部。从头部沿颈部往西南找，可以遇到变星刍藁增二（Mira）。它在约十一个月的周期里亮度变化很大，有些夜晚能用肉眼看见，有时则需借助望远镜。",
+    "en": "Cetus stretches south of Pisces. A loop of stars forms its eastern head and Diphda marks the tail to the southwest. Trace the neck southwest from the head to Mira. Over a cycle of roughly eleven months it changes from a star sometimes visible to the unaided eye to one requiring a telescope.",
+    "fr": "La Baleine s’étend au sud des Poissons. Une boucle d’étoiles figure sa tête à l’est, tandis que Diphda marque la queue au sud-ouest. En suivant le cou vers le sud-ouest, on arrive à Mira. Au fil d’un cycle d’environ onze mois, son éclat passe de la visibilité à l’œil nu à celle au télescope.",
+    "ru": "Кит простирается южнее Рыб. Петля звёзд на востоке намечает голову, а Дифда на юго-западе отмечает хвост. Пройдя от головы по шее к юго-западу, можно найти Миру. Примерно за одиннадцать месяцев её блеск меняется настолько, что иногда она видна глазом, а иногда для неё нужен телескоп."
+  },
+  "Cha": {
+    "chart": "Chamaeleon",
+    "zh": "蝘蜓座贴近南天极，躲在船底座与天燕座之间。先用邻近的南十字座定方向，再转向苍蝇座以南那一小列暗星，蝘蜓座 α 和 γ 有助于看清星线的跨度。星座西部还藏有行星状星云 NGC 3195，那是衰老恒星抛出的发光气体。",
+    "en": "Near the south celestial pole, Chamaeleon lies between Carina and Apus. Use the Southern Cross for orientation, then look south of Musca for a short run of faint stars. Alpha and Gamma Chamaeleontis help set its scale. In its western part, the planetary nebula NGC 3195 is glowing gas shed by an ageing star.",
+    "fr": "Près du pôle céleste sud, le Caméléon se glisse entre la Carène et l’Oiseau de paradis. À partir de la Croix du Sud, passez au sud de la Mouche pour repérer sa courte suite d’étoiles faibles, dont Alpha et Gamma Chamaeleontis. À l’ouest, NGC 3195 est une nébuleuse planétaire formée de gaz rejeté par une étoile vieillissante.",
+    "ru": "Вблизи южного полюса мира между Килем и Райской Птицей прячется Хамелеон. Сориентируйтесь по Южному Кресту и поищите южнее Мухи короткий ряд слабых звёзд. Его масштаб задают Альфа и Гамма Хамелеона. На западе созвездия лежит NGC 3195, светящаяся газовая оболочка стареющей звезды."
+  },
+  "Cir": {
+    "chart": "Circinus",
+    "zh": "圆规座就在南门二的东南方，辨认时很适合借这颗半人马座亮星起步。先找到圆规座 α，再看两条向东北张开的窄边，β 和 γ 分别守在远端。从地球望去，这片天区靠近银河平面，连附近的圆规座星系也得透过前景中的尘埃才能看见。",
+    "en": "Begin at bright Alpha Centauri and look southeast to Alpha Circini. Two narrow arms open northeast from there, ending at Beta and Gamma Circini, like the legs of a pair of compasses. This field lies close to the plane of the Milky Way. Even the nearby Circinus Galaxy is seen through foreground dust.",
+    "fr": "Partez d’Alpha du Centaure et cherchez au sud-est Alpha Circini. De là, deux branches étroites s’ouvrent vers le nord-est jusqu’à Bêta et Gamma, les pointes du Compas. Ce champ frôle le plan de la Voie lactée. Même la galaxie du Compas, pourtant assez proche, se voit à travers des poussières de notre Galaxie.",
+    "ru": "К юго-востоку от Альфы Центавра найдите Альфу Циркуля. От неё к северо-востоку расходятся две узкие ножки с Бетой и Гаммой на концах. Здесь взгляд скользит вдоль плоскости Млечного Пути. Даже близкую галактику Циркуль мы видим сквозь пыль нашей собственной Галактики."
+  },
+  "Col": {
+    "chart": "Columba",
+    "zh": "天鸽座紧挨天兔座南侧，远看不如东边的天狼星醒目。把星图移到天兔下方，用较亮的 Phact 和偏橙的 Wazn 定出鸽身的大致走向。沿这两颗星向更南的天区搜索，还能找到中心紧密的球状星团 NGC 1851。",
+    "en": "Columba sits just south of Lepus, easily overlooked beside Sirius to the east. Move below the hare on the chart and use bright Phact and orange-tinged Wazn to pick out the line of the dove’s body. Farther south in the same constellation lies the tightly concentrated globular cluster NGC 1851.",
+    "fr": "Juste au sud du Lièvre, la Colombe peut passer inaperçue face à Sirius, plus à l’est. Cherchez Phact et Wazn, cette dernière de teinte orangée, pour retrouver l’orientation du corps de l’oiseau. Plus au sud dans la même constellation se trouve NGC 1851, un amas globulaire au centre très dense.",
+    "ru": "Голубь находится сразу к югу от Зайца и легко теряется рядом с ярким Сириусом на востоке. Под фигурой Зайца найдите Факт и оранжеватый Вазн, чтобы наметить тело птицы. Южнее в том же созвездии лежит шаровое скопление NGC 1851 с очень плотным центром."
+  },
+  "Com": {
+    "chart": "Coma Berenices",
+    "zh": "从狮子座尾端的五帝座一向东北看，会见到一把像撒开的细沙那样松散的星点。它们构成后发座星团 Melotte 111，范围很大，低倍率比高倍率更容易看全。星团以东还有绰号「黑眼」的星系 M64，暗尘带贴着它明亮的核心。",
+    "en": "Northeast of Denebola, at the tail of Leo, a loose scattering of stars marks Coma Berenices. This is the Coma Star Cluster, Melotte 111. It spans several degrees and is best taken in at low power. To its east lies M64, the Black Eye Galaxy, named for a dark dust lane against its bright centre.",
+    "fr": "Au nord-est de Denebola, au bout de la queue du Lion, une poignée d’étoiles éparses marque la Chevelure de Bérénice. C’est l’amas Melotte 111, si étendu qu’un faible grossissement lui convient mieux. À l’est se trouve M64, la galaxie de l’Œil noir, dont une bande de poussière borde le noyau brillant.",
+    "ru": "К северо-востоку от Денеболы, на кончике хвоста Льва, в Волосах Вероники рассыпана горстка звёзд. Это скопление Мелотт 111. Оно занимает несколько градусов, поэтому его удобнее рассматривать при малом увеличении. Восточнее лежит галактика Чёрный Глаз M64 с тёмной пылевой полосой возле яркого ядра."
+  },
+  "CrA": {
+    "chart": "Corona Australis",
+    "zh": "顺着天蝎的尾钩往东，在人马座「茶壶」的南侧有一小弯暗星，像一顶侧放的冠冕。这就是南冕座。弧线附近的南冕座 R 是一颗年轻恒星，它的光被周围尘埃散射，在照片上形成扇形的反射星云 NGC 6729。",
+    "en": "East of the hook of Scorpius and south of the Sagittarius Teapot, a little arc of faint stars gives Corona Australis its crown. Near the arc lies the young star R Coronae Australis. Its light scattered by neighbouring dust makes the fan-shaped reflection nebula NGC 6729 visible in images.",
+    "fr": "À l’est du crochet du Scorpion et au sud de la Théière du Sagittaire, un petit arc d’étoiles faibles dessine la Couronne australe. Près de l’arc brille la jeune étoile R Coronae Australis. Sa lumière diffusée par la poussière voisine révèle sur les images la nébuleuse par réflexion NGC 6729, en forme d’éventail.",
+    "ru": "Восточнее крючка Скорпиона и южнее Чайника Стрельца лежит небольшая дуга слабых звёзд — Южная Корона. Вблизи дуги находится молодая звезда R Южной Короны. Её свет рассеивается окружающей пылью и выявляет на снимках веерообразную отражательную туманность NGC 6729."
+  },
+  "CrB": {
+    "chart": "Corona Borealis",
+    "zh": "在大角星与武仙座的四边形之间，七颗星弯成一个缺口朝北的半圆，像一顶小王冠。弧线中间最亮的星是贯索四（Alphecca）。认北冕座时先找这一点，再沿它的两侧逐颗勾出圆弧，比试着从一个暗淡的端点开始容易。",
+    "en": "Between Arcturus and the Keystone of Hercules, seven stars form a semicircle with its opening to the north. Alphecca, the brightest jewel in Corona Borealis, lies near the middle of the arc. Start with this star and trace the curve in both directions to pick out the crown’s fainter tips.",
+    "fr": "Entre Arcturus et le Trapèze d’Hercule, sept étoiles forment un demi-cercle ouvert vers le nord. Alphecca, le joyau le plus brillant de la Couronne boréale, se trouve vers le milieu de l’arc. Partez de cette étoile et suivez la courbe dans les deux sens pour en retrouver les extrémités plus discrètes.",
+    "ru": "Между Арктуром и четырёхугольником Геркулеса семь звёзд образуют полукруг, разомкнутый к северу. Самая яркая, Альфекка, сияет в середине дуги Северной Короны. Начните с неё и проследите изгиб в обе стороны, чтобы различить слабые звёзды на концах венца."
+  },
+  "Crv": {
+    "chart": "Corvus",
+    "zh": "在室女座角宿一的西南方，四颗亮度相近的星围成一个歪四边形，这是乌鸦座最好用的路标。星图上它蹲在长蛇座的背上，西边紧邻巨爵座。向四边形西侧移，深空照片里能看到触须星系 NGC 4038 与 NGC 4039 正在相互牵引。",
+    "en": "Southwest of Spica, four fairly bright stars make the skew quadrilateral of Corvus. On the chart the crow perches on Hydra’s back, just east of Crater. West of the quadrilateral are the Antennae Galaxies, NGC 4038 and NGC 4039. Images reveal long tails pulled out by their gravitational interaction.",
+    "fr": "Au sud-ouest de Spica, quatre étoiles assez brillantes tracent le quadrilatère de travers du Corbeau. Sur la carte il est posé sur le dos de l’Hydre, juste à l’est de la Coupe. À l’ouest du quadrilatère, NGC 4038 et NGC 4039 montrent les longues traînées arrachées par leur interaction, d’où leur nom de galaxies des Antennes.",
+    "ru": "К юго-западу от Спики четыре довольно яркие звезды образуют косой четырёхугольник Ворона. На карте птица сидит на спине Гидры восточнее Чаши. К западу от четырёхугольника лежат галактики Антенны, NGC 4038 и NGC 4039. На снимках видны длинные хвосты, вытянутые их взаимным притяжением."
+  },
+  "Crt": {
+    "chart": "Crater",
+    "zh": "巨爵座坐落在长蛇座的背上，比东邻乌鸦座的四边形暗淡。先借乌鸦认路，向西找到巨爵座 δ，再把周围几颗星连成敞开的杯口与小杯底。杯口附近的星点都在银河系内，更远处还有棒旋星系 NGC 3887，照片里能看见旋臂从中央棒向外伸展。",
+    "en": "The cup of Crater rides on Hydra’s back and is fainter than the quadrilateral of Corvus to its east. Start at the crow, move west to Delta Crateris, and trace the flaring rim and small base of the cup. Far beyond these stars in the same direction lies the barred spiral galaxy NGC 3887.",
+    "fr": "La Coupe repose sur le dos de l’Hydre. Ses étoiles sont plus discrètes que le quadrilatère du Corbeau, à l’est. Partez de celui-ci vers l’ouest jusqu’à Delta Crateris, puis dessinez le bord évasé et le petit pied de la coupe. Bien au-delà de ces étoiles se trouve la galaxie spirale barrée NGC 3887.",
+    "ru": "Чаша стоит на спине Гидры. Её звёзды слабее четырёхугольника Ворона, расположенного восточнее. Пройдите от Ворона на запад до Дельты Чаши и проследите расширяющийся край чаши и небольшое основание. Далеко за этими звёздами лежит спиральная галактика с перемычкой NGC 3887."
+  },
+  "Cru": {
+    "chart": "Crux",
+    "zh": "南天银河中，四颗亮星围成一个紧凑的十字。沿长轴从偏红的 Gacrux 指向蓝白的 Acrux，继续沿这个方向就能估计南天极的位置。转向短臂东端的 Mimosa，附近有一小撮密集的星点，那是绰号「珠宝盒」的疏散星团 NGC 4755。",
+    "en": "Four bright stars make a compact cross in the southern Milky Way. Trace its long arm from reddish Gacrux to blue-white Acrux and continue in that direction to estimate the south celestial pole. Near Mimosa, at the eastern end of the short arm, a knot of stars is the Jewel Box open cluster, NGC 4755.",
+    "fr": "Quatre étoiles brillantes forment une petite croix dans la Voie lactée australe. Pour estimer la direction du pôle céleste sud, prolongez son grand axe de Gacrux, rougeâtre, vers Acrux, blanc bleuté. Près de Mimosa, à l’extrémité est du petit axe, se serre un groupe d’étoiles appelé la Boîte à bijoux, l’amas ouvert NGC 4755.",
+    "ru": "Четыре яркие звезды образуют небольшой крест в южной части Млечного Пути. Если провести линию от красноватого Гакрукса к бело-голубому Акруксу и продолжить её, она укажет примерно на южный полюс мира. У восточного конца перекладины, рядом с Мимозой, видна россыпь звёзд — рассеянное скопление NGC 4755, «Шкатулка с драгоценностями»."
+  },
+  "Cyg": {
+    "chart": "Cygnus",
+    "zh": "沿夏季银河找一条长十字，东北端的天津四标出天鹅的尾巴，西南端的辇道增七（Albireo）是鸟嘴。十字相交处的天津一附近布满明暗相间的星云。把视线转回鸟嘴，用望远镜分开辇道增七，还能看出金黄和蓝色两点。",
+    "en": "In the summer Milky Way, a long cross traces Cygnus. Deneb at its northeastern end is the tail, while Albireo at the southwestern end marks the beak. Bright and dark nebulosity surrounds Sadr at the crossing. Return to the beak with a telescope to split Albireo into gold and blue points of light.",
+    "fr": "Une longue croix dans la Voie lactée d’été dessine le Cygne. Deneb au nord-est marque la queue et Albiréo au sud-ouest le bec. Autour de Sadr, à la croisée des ailes, des nébulosités claires côtoient des nuages sombres. Au télescope, le bec se sépare en deux étoiles, l’une dorée et l’autre bleue.",
+    "ru": "На фоне летнего Млечного Пути длинный крест намечает Лебедя. Денеб на северо-востоке отмечает хвост, а Альбирео на юго-западе — клюв. Вокруг Садра, в перекрестии крыльев, чередуются светлые и тёмные туманности. В телескоп Альбирео разделяется на золотистую и голубую звёзды."
+  },
+  "Del": {
+    "chart": "Delphinus",
+    "zh": "在牛郎星的东北方，有四颗星挤成一个小菱形，旁边还伸出一颗尾星。海豚座虽然不亮，这个紧凑的轮廓却很容易在广角中认出。找到菱形最东端的海豚座 γ 后，可以用望远镜分辨它的两个成员，完成从整条海豚到一对恒星的辨认。",
+    "en": "Northeast of Altair, four stars make a tiny diamond with a fifth trailing off as a tail. Delphinus is faint, but this compact silhouette stands out in a wide field. At the eastern tip of the diamond, Gamma Delphini becomes a pair of stars through a telescope.",
+    "fr": "Au nord-est d’Altaïr, quatre étoiles serrées forment un losange et une cinquième prolonge la queue. Le Dauphin est peu brillant, mais sa silhouette compacte ressort dans un grand champ. À la pointe orientale du losange, un télescope sépare Gamma Delphini en deux étoiles.",
+    "ru": "К северо-востоку от Альтаира четыре звезды складываются в маленький ромб, а пятая продолжает его коротким хвостом. Дельфин неярок, но его компактный силуэт заметен в широком поле. На восточной вершине ромба находится Гамма Дельфина, которая в телескоп разделяется на две звезды."
+  },
+  "Dor": {
+    "chart": "Dorado",
+    "zh": "剑鱼座的主星在南方天空拉出一条长而斜的鱼身，更容易先认出的却是大麦哲伦云。这个邻近星系横跨剑鱼座与山案座的边界。在属于剑鱼座的一侧寻找蜘蛛星云，也叫剑鱼座 30，照片里纵横的气体纤维围绕着年轻的大质量恒星。",
+    "en": "Dorado’s stars trace a long, slanting fish, but the Large Magellanic Cloud is often easier to find first. This neighbouring galaxy straddles the border of Dorado and Mensa. On the Dorado side lies the Tarantula Nebula, also called 30 Doradus, where images show tangled gas filaments around young massive stars.",
+    "fr": "Les étoiles de la Dorade dessinent un poisson long et oblique. Le Grand Nuage de Magellan est souvent plus facile à repérer pour commencer. Cette galaxie voisine chevauche la frontière avec la Table. Du côté de la Dorade se trouve la Tarentule, ou 30 Doradus, dont les filaments de gaz entourent de jeunes étoiles massives.",
+    "ru": "Звёзды Золотой Рыбы образуют длинную наклонную фигуру, но первым часто удаётся найти Большое Магелланово Облако. Эта соседняя галактика пересекает границу со Столовой Горой. Со стороны Золотой Рыбы лежит туманность Тарантул, или 30 Золотой Рыбы. На снимках её газовые нити окружают молодые массивные звёзды."
+  },
+  "Dra": {
+    "chart": "Draco",
+    "zh": "在大熊与小熊之间，一串星线弯来绕去，那是天龙的身躯。朝织女星一侧追踪，就会到达一个紧凑的四边形，龙头的亮星天棓四（Eltanin）在这里。沿龙身往回可找右枢（Thuban），数千年前地球自转轴北端曾指向它附近。",
+    "en": "Between the Great and Little Bears, Draco winds through a long series of bends. Trace it towards Vega to a compact four-sided head containing bright Eltanin. Farther back along the dragon is Thuban. Several thousand years ago the north end of Earth’s rotation axis pointed close to that star.",
+    "fr": "Entre les deux Ourses, le Dragon déroule une longue suite de méandres. Vers Véga, la chaîne aboutit à une petite tête quadrangulaire où brille Eltanin. En revenant le long du corps, on trouve Thuban. Il y a plusieurs millénaires, l’axe de rotation de la Terre pointait vers cette étoile.",
+    "ru": "Между Большой и Малой Медведицами извивается длинная цепочка Дракона. Со стороны Веги она заканчивается небольшой четырёхугольной головой с яркой звездой Эльтанин. Вернувшись вдоль тела, можно найти Тубан. Несколько тысячелетий назад северный полюс мира находился вблизи этой звезды."
+  },
+  "Equ": {
+    "chart": "Equuleus",
+    "zh": "海豚座的小菱形与飞马座鼻尖危宿三（Enif）之间，夹着面积很小的小马座。找它时先把这两个路标都放进视场，再辨认中间几颗暗星形成的窄小轮廓。南端较亮的 Kitalpha 就是小马座 α，离开亮星的干扰后更容易把它认出来。",
+    "en": "Equuleus fits in the small gap between the diamond of Delphinus and Enif, the nose of Pegasus. Put both landmarks in a wide field first, then pick out the narrow figure of fainter stars between them. Kitalpha, or Alpha Equulei, is the brighter point at its southern end.",
+    "fr": "Le Petit Cheval se glisse entre le losange du Dauphin et Enif, le museau de Pégase. Placez d’abord ces deux repères dans le même champ, puis isolez l’étroite figure d’étoiles plus faibles entre les deux. Kitalpha, ou Alpha Equulei, en marque l’extrémité sud.",
+    "ru": "Малый Конь помещается между ромбом Дельфина и Энифом, звездой на носу Пегаса. Сначала охватите оба ориентира широким полем, затем выделите между ними узкую фигурку слабых звёзд. На её южном конце заметнее остальных Китальфа, или Альфа Малого Коня."
+  },
+  "Eri": {
+    "chart": "Eridanus",
+    "zh": "在猎户座参宿七旁找到波江座 β，就找到了这条天河的一端。星链先向西蜿蜒，再折回并流向南天深处，直到明亮的水委一（Achernar）。两端相隔很远，观察时可以逐段追踪。地处偏北纬度时，河流南端可能始终在地平线以下。",
+    "en": "Begin near Rigel in Orion at Beta Eridani, one end of the celestial river. Its chain winds west, doubles back and runs deep into the southern sky to brilliant Achernar. Trace it in sections on a wide chart. From more northerly latitudes its southern end stays below the horizon.",
+    "fr": "Près de Rigel, dans Orion, Bêta Eridani marque une extrémité du fleuve céleste. Son cours serpente vers l’ouest, revient sur lui-même et descend loin dans le ciel austral jusqu’à la brillante Achernar. Suivez-le par tronçons. Aux latitudes très septentrionales, son extrémité sud reste sous l’horizon.",
+    "ru": "Неподалёку от Ригеля в Орионе найдите Бету Эридана — один конец небесной реки. Цепочка уходит на запад, поворачивает обратно и спускается далеко на юг к яркому Ахернару. Удобно следить за ней по участкам. В северных широтах южный конец реки может вовсе не подниматься над горизонтом."
+  },
+  "For": {
+    "chart": "Fornax",
+    "zh": "在波江座大幅弯折的河道西南侧，天炉座只有几颗较暗的星勾出简单的折角。把星图移向星座东缘，视野的主角就从前景恒星换成了天炉座星系团。其中的 NGC 1365 有一道清楚的中央棒，两条长旋臂从棒的两端伸出。",
+    "en": "Southwest of a wide bend in Eridanus, a few faint stars draw the simple angle of Fornax. Shift to its eastern edge and the foreground stars give way to a rich field of galaxies in the Fornax Cluster. In NGC 1365 a prominent central bar joins two long sweeping spiral arms.",
+    "fr": "Au sud-ouest d’un grand méandre de l’Éridan, quelques étoiles faibles forment le coude discret du Fourneau. Vers sa limite orientale, les galaxies de l’amas du Fourneau prennent le relais des étoiles de premier plan. Dans NGC 1365, deux longs bras spiraux partent des extrémités d’une barre centrale bien visible.",
+    "ru": "К юго-западу от широкого изгиба Эридана несколько слабых звёзд намечают угол Печи. У восточного края созвездия за звёздами переднего плана открывается богатое скопление галактик Печи. У галактики NGC 1365 два длинных спиральных рукава выходят из концов отчётливой центральной перемычки."
+  },
+  "Gem": {
+    "chart": "Gemini",
+    "zh": "北河二和北河三并肩标出双子座的两颗头部，北河三的色调略偏橙。从这对亮星向西南看，两列较暗的星点勾出兄弟俩的身体。靠近北河二一侧的脚部可以找到 M35，双筒镜里像一团星沙，小望远镜能分出更多成员。",
+    "en": "Castor and Pollux sit side by side at the heads of Gemini, with Pollux the more orange of the pair. Two strings of fainter stars stretch southwest to trace the twins’ bodies. Near the foot on Castor’s side lies M35, a sprinkling of stars in binoculars that resolves further in a small telescope.",
+    "fr": "Castor et Pollux marquent côte à côte les têtes des Gémeaux. Pollux est la plus orangée des deux. Deux files d’étoiles plus faibles s’étirent vers le sud-ouest pour former les corps. Près du pied de Castor, l’amas ouvert M35 paraît granuleux aux jumelles et se résout davantage dans un petit télescope.",
+    "ru": "Кастор и Поллукс стоят рядом, отмечая головы Близнецов, причём у Поллукса заметнее оранжевый оттенок. Две цепочки более слабых звёзд тянутся к юго-западу и обрисовывают тела. У ног со стороны Кастора находится рассеянное скопление M35. В бинокль это россыпь искр, а телескоп показывает больше звёзд."
+  },
+  "Gru": {
+    "chart": "Grus",
+    "zh": "在南鱼座的北落师门以南，鹤座的鹤一（Alnair）和偏红的鹤座 β 都相当醒目。先用两者的颜色与间距定好位置，再从鹤座 β 向西北追几组较暗的星点，便能看出星图上伸长的鹤颈。把视场拉宽，还能同时认出北面的南鱼。",
+    "en": "South of Fomalhaut in Piscis Austrinus, find Alnair and the redder Beta Gruis. Their colour contrast and spacing are useful anchors for Grus. From Beta trace the fainter stars northwest along the crane’s outstretched neck. A wider view brings the Southern Fish back into the picture.",
+    "fr": "Au sud de Fomalhaut, dans le Poisson austral, repérez Alnair et Bêta Gruis, plus rouge. Leur écartement et leur contraste de couleur aident à reconnaître la Grue. À partir de Bêta, suivez les étoiles plus discrètes vers le nord-ouest pour dessiner son long cou.",
+    "ru": "Южнее Фомальгаута в Южной Рыбе найдите Альнаир и более красную Бету Журавля. Цвет и расстояние между ними дают удобный ориентир. От Беты проследите более слабые звёзды к северо-западу вдоль вытянутой шеи птицы. В более широкое поле попадёт и Южная Рыба."
+  },
+  "Her": {
+    "chart": "Hercules",
+    "zh": "织女星以西，有四颗中等亮度的星围成一个略不规则的四边形，常被称为武仙座的「拱顶石」。从四边形西边的 η 星沿边向 ζ 星移动，大约走完三分之一就会遇到球状星团 M13。它在双筒镜里是小光斑，在照片上能看到向中心逐渐拥挤的群星。",
+    "en": "West of Vega, four moderately bright stars make the slightly uneven Keystone of Hercules. On its western edge, go about a third of the way from Eta to Zeta Herculis to find M13. Binoculars show a small glow, while images resolve a crowd of stars growing denser towards the centre.",
+    "fr": "À l’ouest de Véga, quatre étoiles d’éclat moyen forment le trapèze d’Hercule. Sur son côté ouest, partez d’Êta vers Zêta. Vers le premier tiers du chemin apparaît l’amas globulaire M13. Les jumelles montrent une petite lueur, tandis que les images révèlent des étoiles de plus en plus serrées vers le centre.",
+    "ru": "К западу от Веги четыре звезды средней яркости образуют слегка неровную Трапецию Геркулеса. На её западной стороне пройдите около трети пути от Эты к Дзете до шарового скопления M13. В бинокль видно пятнышко, а на снимках различимы звёзды, всё теснее сближенные к центру."
+  },
+  "Hor": {
+    "chart": "Horologium",
+    "zh": "时钟座是一条狭长的南天星座，沿波江座与网罟座之间的空隙伸展。广角下先认北端附近较显眼的时钟座 α，再沿偏暗的星列向南寻找钟摆的轮廓。从 α 星往西南约十六度可找到球状星团 NGC 1261，它 在照片中呈圆形，核心比四周明亮。",
+    "en": "Horologium stretches through a narrow gap between Eridanus and Reticulum. Begin at Alpha Horologii towards its northern end, then follow the fainter stars south to trace the pendulum clock. The globular cluster NGC 1261 lies about sixteen degrees southwest of Alpha. Images show a round glow with light concentrated towards the core.",
+    "fr": "L’Horloge s’étire dans un espace étroit entre l’Éridan et le Réticule. Repérez d’abord Alpha Horologii vers son extrémité nord, puis descendez vers les étoiles plus faibles qui prolongent le dessin de la pendule. À environ seize degrés au sud-ouest d’Alpha, l’amas globulaire NGC 1261 forme une tache ronde au centre lumineux.",
+    "ru": "Часы тянутся узкой полосой между Эриданом и Сеткой. Начните с Альфы Часов в северной части, затем проследите к югу более слабые звёзды, намечающие маятник. Примерно в шестнадцати градусах к юго-западу от Альфы находится шаровое скопление NGC 1261. На снимках оно круглое, со сгущением света в середине."
+  },
+  "Hya": {
+    "chart": "Hydra",
+    "zh": "长蛇座横跨的天区比其他任何星座都大。先在巨蟹座以南认出一小圈蛇头，再向东南找周围少有亮星的星宿一（Alphard）。沿蛇身继续向东，会从巨爵座和乌鸦座下方经过，一直延伸到靠近天秤座的蛇尾，整条蛇很难塞进同一视场。",
+    "en": "Hydra covers more sky than any other constellation. Begin with its small loop of head stars south of Cancer, then step southeast to Alphard, conspicuously alone among fainter stars. The body stretches east beneath Crater and Corvus all the way to a tail near Libra. A narrow field shows only one stretch at a time.",
+    "fr": "L’Hydre couvre plus de ciel que toute autre constellation. Commencez par la petite boucle de la tête au sud du Cancer, puis allez au sud-est vers Alphard, isolée parmi des étoiles plus faibles. Le corps file vers l’est sous la Coupe et le Corbeau, jusqu’à la queue près de la Balance.",
+    "ru": "Гидра занимает на небе больше места, чем любое другое созвездие. Южнее Рака найдите небольшую петлю головы, затем к юго-востоку — одинокий яркий Альфард. Тело тянется на восток под Чашей и Вороном до самого хвоста возле Весов. В узком поле виден лишь один изгиб за раз."
+  },
+  "Hyi": {
+    "chart": "Hydrus",
+    "zh": "水蛇座靠近南天极，隔着很远的天区才是长蛇座。找它可以借两团麦哲伦云认路，水蛇座 β 在小麦哲伦云以南，γ 则靠近大麦哲伦云的西侧。加上北面的 α，三颗主星划出一个跨幅很大的三角形，适合在南天广角图中辨认。",
+    "en": "Hydrus lies near the south celestial pole, far across the sky from Hydra. Use the Magellanic Clouds as signposts. Beta Hydri is south of the Small Cloud and Gamma is on the western side of the Large Cloud. With Alpha to the north, the three stars span a broad triangle on a southern chart.",
+    "fr": "L’Hydre mâle est proche du pôle céleste sud, très loin de la grande Hydre. Les Nuages de Magellan aident à la situer. Bêta Hydri se trouve au sud du Petit Nuage et Gamma à l’ouest du Grand. Avec Alpha, plus au nord, ces étoiles délimitent un large triangle sur la carte australe.",
+    "ru": "Южная Гидра находится у южного полюса мира, далеко от созвездия Гидры. Ориентирами служат Магеллановы Облака. Бета Южной Гидры лежит южнее Малого Облака, а Гамма — западнее Большого. Вместе с Альфой на севере они обозначают широкий треугольник на карте южного неба."
+  },
+  "Ind": {
+    "chart": "Indus",
+    "zh": "印第安座位于鹤座与孔雀座之间。可以先找两侧的亮星鹤一和孔雀十一，再到两星连线的西侧辨认以印第安座 α 为一角的暗星轮廓。星座更南方的 ε 星虽然看起来并不起眼，却是太阳的近邻，距离我们约十二光年。",
+    "en": "Indus lies between Grus and Pavo. Use their bright stars Alnair and Peacock to bracket the area, then find Alpha Indi in the fainter figure west of the line between them. Farther south lies unassuming Epsilon Indi. It is one of the Sun’s neighbours, only about twelve light-years away.",
+    "fr": "L’Indien se trouve entre la Grue et le Paon. Prenez Alnair et Alpha Pavonis comme points de repère, puis cherchez Alpha Indi à l’ouest de la ligne qui les relie. Plus au sud, la discrète Epsilon Indi est une voisine du Soleil, distante d’environ douze années-lumière.",
+    "ru": "Индеец лежит между Журавлём и Павлином. Соедините Альнаир с Альфой Павлина и поищите Альфу Индейца к западу от этой линии среди более слабых звёзд. Южнее расположена неприметная Эпсилон Индейца. Это одна из соседок Солнца, всего примерно в двенадцати световых годах."
+  },
+  "Lac": {
+    "chart": "Lacerta",
+    "zh": "仙女座与天鹅座之间，银河带上有几颗较暗的星来回折转，像一只细小的蜥蜴。先用天津四和仙女座的亮星限定范围，再找出蝎虎座 α 附近的折线。星座北半部还有疏散星团 NGC 7243，适合在低倍率下与周围银河星野一起看。",
+    "en": "Between Andromeda and Cygnus, a few fainter stars zigzag along the Milky Way to make Lacerta. Use Deneb and the bright stars of Andromeda to bracket the field, then pick up the bends near Alpha Lacertae. In the northern half of the lizard lies NGC 7243, a loose open cluster set against the Milky Way.",
+    "fr": "Entre Andromède et le Cygne, le Lézard se dessine en zigzag sur la Voie lactée. Prenez Deneb et les étoiles brillantes d’Andromède comme repères, puis cherchez les coudes près d’Alpha Lacertae. Dans la moitié nord, l’amas ouvert NGC 7243 se découvre à faible grossissement parmi les étoiles de la Voie lactée.",
+    "ru": "Между Андромедой и Лебедем несколько слабых звёзд образуют на Млечном Пути зигзаг Ящерицы. Найдите область между Денебом и яркими звёздами Андромеды, затем отыщите изгибы у Альфы Ящерицы. В северной половине созвездия лежит рассеянное скопление NGC 7243, которое удобно смотреть при малом увеличении."
+  },
+  "Leo": {
+    "chart": "Leo",
+    "zh": "轩辕十四位于狮子座胸前，也是弯镰刀形星群的柄端。沿镰刀向北描出狮头，再向东找五帝座一，它标出狮尾。后腿附近还有更遥远的目标：M65、M66 和从侧面看去的 NGC 3628 在星图上靠得很近，合称「狮子座三重星系」。",
+    "en": "Regulus marks the lion’s chest and the handle of the Sickle. Follow its curve north around the head, then look east to Denebola at the tail. Near the hind legs, M65, M66 and the edge-on galaxy NGC 3628 occupy the same small patch of sky. Together they make the Leo Triplet.",
+    "fr": "Régulus marque la poitrine du Lion et le manche de la Faucille. Suivez sa courbe vers le nord autour de la tête, puis allez à l’est jusqu’à Denebola, au bout de la queue. Près des pattes arrière, M65, M66 et NGC 3628, vue par la tranche, composent le Triplet du Lion.",
+    "ru": "Регул отмечает грудь Льва и рукоять Серпа. Проследите его изгиб к северу вокруг головы, затем найдите на востоке Денеболу на кончике хвоста. У задних лап в небольшом поле помещаются галактики M65, M66 и видимая с ребра NGC 3628. Вместе они составляют Триплет Льва."
+  },
+  "LMi": {
+    "chart": "Leo Minor",
+    "zh": "狮子座弯镰刀的北面、大熊座的南面夹着较暗的小狮座。这里最显眼的星在星图上标作小狮座 46，并没有沿用常见的 α 命名。把它与西侧几颗暗星连起来便能看出小狮的尺度，所在天区还可找到几乎正对我们的旋涡星系 NGC 3344。",
+    "en": "North of Leo’s Sickle and south of Ursa Major lies faint Leo Minor. Its brightest star bears the number 46 Leonis Minoris. Trace west from 46 to the fainter outline to see how small the cub is. The same constellation contains NGC 3344, a spiral galaxy seen nearly face-on.",
+    "fr": "Entre la Faucille du Lion et la Grande Ourse se glisse le discret Petit Lion. Sa plus brillante étoile porte le numéro 46 Leonis Minoris. Depuis cette étoile, suivez la petite figure vers l’ouest. Dans la même constellation, la galaxie spirale NGC 3344 se présente presque de face.",
+    "ru": "Между Серпом Льва и Большой Медведицей находится тусклый Малый Лев. Самая яркая его звезда обозначена числом 46, а не буквой альфа. Проследите от неё слабый контур к западу, чтобы оценить размер фигуры. Здесь же расположена спиральная галактика NGC 3344, видимая почти плашмя."
+  },
+  "Lep": {
+    "chart": "Lepus",
+    "zh": "猎户座两脚的正南方有一组紧凑的星点，组成天兔座。较亮的厕一（Arneb）与厕二（Nihal）标出兔身，和北边猎户座宽大的沙漏对照，兔身的星点靠得格外紧。从两星所在处向南，M79 球状星团在小望远镜里是一团中心较亮的圆光斑。",
+    "en": "Immediately south of Orion’s feet, the compact figure of Lepus is easy to place. Arneb and Nihal mark the body of the hare. Locate them before moving farther south towards the globular cluster M79. In a small telescope it appears as a round patch of light that brightens towards the centre.",
+    "fr": "Juste au sud des pieds d’Orion se serrent les étoiles du Lièvre. Arneb et Nihal marquent son corps. Repérez-les avant de descendre plus au sud vers l’amas globulaire M79. Dans un petit télescope, il forme une tache ronde dont l’éclat augmente vers le centre.",
+    "ru": "Под самыми ногами Ориона к югу сгруппировались звёзды Зайца. Арнеб и Нихаль отмечают его тело. Найдите их и двигайтесь дальше к югу до шарового скопления M79. В небольшой телескоп оно выглядит круглым пятнышком, более ярким в середине."
+  },
+  "Lib": {
+    "chart": "Libra",
+    "zh": "从室女座的角宿一到天蝎座的心宿二之间，可以找出天秤座的四边形。最醒目的两颗星是氐宿一和氐宿四，它们的阿拉伯星名分别保留了「南螯」与「北螯」的意思。双筒镜对准氐宿一，能看出这一处其实有两个相邻的亮点。",
+    "en": "Between Spica in Virgo and Antares in Scorpius, pick out the quadrilateral of Libra. Its two conspicuous stars, Zubenelgenubi and Zubeneschamali, preserve the Arabic names for the southern and northern claws. Binoculars aimed at Zubenelgenubi reveal two distinct points of light.",
+    "fr": "Entre Spica dans la Vierge et Antarès dans le Scorpion, repérez le quadrilatère de la Balance. Ses deux étoiles les plus remarquables, Zubenelgenubi et Zubeneschamali, gardent les noms arabes des pinces du Sud et du Nord. Les jumelles séparent Zubenelgenubi en deux points lumineux.",
+    "ru": "Между Спикой в Деве и Антаресом в Скорпионе отыщите четырёхугольник Весов. Имена Зубен Эльгенуби и Зубен Эшамали сохранили арабские обозначения южной и северной клешней. В бинокль на месте южной клешни видны две отдельные звезды."
+  },
+  "Lup": {
+    "chart": "Lupus",
+    "zh": "天蝎座与半人马座之间，豺狼座主星在银河边缘排出一组明暗相间的折线。可以从南侧较亮的豺狼座 α 起步，一段段向东北追过去。往更南的银河边缘搜索，疏散星团 NGC 5822 的成员分布松散，在较宽视场里更容易看全。",
+    "en": "Between Scorpius and Centaurus, the stars of Lupus trace an angular figure along the Milky Way. Alpha Lupi, on its southern side, makes a useful starting point. Farther south lies the open cluster NGC 5822. Its stars are spread out enough that a broad view shows the whole group best.",
+    "fr": "Entre le Scorpion et le Centaure, les étoiles du Loup forment une figure anguleuse au bord de la Voie lactée. Alpha Lupi, du côté sud, offre un bon point de départ. Plus au sud se trouve l’amas ouvert NGC 5822. Ses étoiles assez dispersées se regroupent mieux à l’œil dans un grand champ.",
+    "ru": "Между Скорпионом и Центавром звёзды Волка образуют угловатую фигуру на краю Млечного Пути. Ориентиром послужит Альфа Волка в южной части. Ещё южнее находится рассеянное скопление NGC 5822. Его звёзды разбросаны довольно широко, поэтому группу удобнее охватить при малом увеличении."
+  },
+  "Lyn": {
+    "chart": "Lynx",
+    "zh": "天猫座在御夫座和大熊座之间拉出一条漫长而暗淡的星链，认它需要离开几颗亮星，把目光放到中间的空档。东南端偏橙的天猫座 α 比链上其他星更容易辨认。天区的另一端藏着球状星团 NGC 2419，它远在银河系的外围。",
+    "en": "Lynx stretches a long, faint chain between Auriga and Ursa Major. Look past the bright landmarks to the gap between them. Orange-tinged Alpha Lyncis is the easiest star to identify at the southeastern end. The opposite part of the constellation contains NGC 2419, a globular cluster far out in the Milky Way’s halo.",
+    "fr": "Le Lynx étire une longue chaîne d’étoiles discrètes entre le Cocher et la Grande Ourse. Cherchez dans l’intervalle entre ces repères brillants. À l’extrémité sud-est, Alpha Lyncis se distingue par sa teinte orangée. À l’autre bout se trouve NGC 2419, amas globulaire très éloigné dans le halo de la Voie lactée.",
+    "ru": "Между Возничим и Большой Медведицей Рысь протянула длинную цепочку слабых звёзд. Ищите её в промежутке между яркими ориентирами. На юго-восточном конце заметнее других оранжеватая Альфа Рыси. На другой стороне созвездия лежит NGC 2419, далёкое шаровое скопление в гало Млечного Пути."
+  },
+  "Lyr": {
+    "chart": "Lyra",
+    "zh": "先找到夏季大三角中明亮的织女星，再在它东南侧寻找一个小平行四边形，这就是天琴座最容易认出的轮廓。平行四边形南边的两颗星是渐台二和渐台三，把视场对准它们之间，就能找到 M57 环状星云，那圈气体来自一颗演化晚期的恒星。",
+    "en": "Start at Vega in the Summer Triangle and look southeast for the small parallelogram of Lyra. The two stars on its southern side are Sheliak and Sulafat. Point between them to find M57, the Ring Nebula. Its luminous ring is gas expelled by a star late in its life.",
+    "fr": "Depuis Véga, dans le Triangle d’été, cherchez le petit parallélogramme de la Lyre au sud-est. Sheliak et Sulafat forment son côté sud. Entre ces deux étoiles se trouve M57, la nébuleuse de l’Anneau. Son anneau lumineux est constitué de gaz expulsé par une étoile en fin de vie.",
+    "ru": "От Веги в Летнем треугольнике посмотрите к юго-востоку на маленький параллелограмм Лиры. Его южная сторона соединяет Шелиак и Сулафат. Между ними находится Кольцевая туманность M57. Её светящееся кольцо образовано газом, сброшенным звездой в конце жизни."
+  },
+  "Men": {
+    "chart": "Mensa",
+    "zh": "在大麦哲伦云的南缘，山案座几颗暗星只画出一段平缓的折线。即使 α 星也不显眼，辨认时可先找到云的明亮主体，再沿它向南越过剑鱼座的边界。这片看起来朦胧的光属于邻近星系的一部分，前方稀疏的星点才是山案座的认路标志。",
+    "en": "On the southern edge of the Large Magellanic Cloud, the faint stars of Mensa make a shallow outline. Even Alpha Mensae is inconspicuous. Start with the bright body of the cloud and move south across the Dorado boundary. The haze belongs to a neighbouring galaxy, while the sparse foreground stars trace Table Mountain.",
+    "fr": "Au bord sud du Grand Nuage de Magellan, les étoiles faibles de la Table forment une ligne peu marquée. Même Alpha Mensae est discrète. Partez du corps brillant du Nuage, puis descendez au-delà de la limite de la Dorade. La lueur appartient à une galaxie voisine, et les étoiles de premier plan dessinent la montagne.",
+    "ru": "У южного края Большого Магелланова Облака слабые звёзды Столовой Горы намечают пологую ломаную. Даже её Альфа неброска. Начните с яркой части Облака и пройдите к югу через границу Золотой Рыбы. Дымка принадлежит соседней галактике, а редкие звёзды переднего плана помогают узнать созвездие."
+  },
+  "Mic": {
+    "chart": "Microscopium",
+    "zh": "显微镜座在摩羯座以南、南鱼座以西，亮星很少。把北落师门留在东边作参照，向西找到显微镜座 γ 和 α 附近横向排开的几颗星，再向南跟踪较宽的轮廓。天区里还有盘面倾斜的星系 NGC 6925，它的细长外形要在深空照片里才看得清。",
+    "en": "South of Capricornus and west of Piscis Austrinus is the faint field of Microscopium. Keep Fomalhaut to the east and look west for the stars around Gamma and Alpha Microscopii. The figure extends south from there. Images also show NGC 6925, a galaxy whose tilted disk gives it an elongated outline.",
+    "fr": "Au sud du Capricorne et à l’ouest du Poisson austral, le Microscope passe facilement inaperçu. Gardez Fomalhaut à l’est et cherchez les étoiles autour de Gamma et Alpha Microscopii à l’ouest, puis suivez la figure vers le sud. Les photos profondes y révèlent le disque incliné et allongé de la galaxie NGC 6925.",
+    "ru": "Южнее Козерога и западнее Южной Рыбы лежит неброский Микроскоп. Оставьте Фомальгаут на востоке и найдите звёзды вокруг Гаммы и Альфы Микроскопа к западу от него. Фигура продолжается к югу. На глубоких снимках виден вытянутый наклонный диск галактики NGC 6925."
+  },
+  "Mon": {
+    "chart": "Monoceros",
+    "zh": "麒麟座的星不算亮，位置却很好描述：它占据参宿四、南河三与天狼星围成的冬季大三角中的大片区域。沿银河穿过这里时，可以找疏散星团 NGC 2244。照片中围绕星团铺开的发光气体和暗尘勾勒出玫瑰星云，星团的年轻恒星照亮了气体。",
+    "en": "Monoceros is faint but easy to place inside the Winter Triangle of Betelgeuse, Procyon and Sirius. Follow the Milky Way through this area to the open cluster NGC 2244. Its young stars light the gas of the Rosette Nebula, whose bright folds and dark dust form a great wreath around the cluster in images.",
+    "fr": "La Licorne est discrète, mais se situe aisément dans le Triangle d’hiver formé par Bételgeuse, Procyon et Sirius. Suivez la Voie lactée jusqu’à l’amas ouvert NGC 2244. Ses jeunes étoiles illuminent le gaz de la Rosette, dont les replis lumineux et les poussières sombres forment une couronne autour de l’amas.",
+    "ru": "Единорог неярок, но его легко отыскать внутри Зимнего треугольника Бетельгейзе, Проциона и Сириуса. Проследите Млечный Путь до рассеянного скопления NGC 2244. Его молодые звёзды освещают газ туманности Розетка. На снимках светлые складки и тёмная пыль окружают скопление венком."
+  },
+  "Mus": {
+    "chart": "Musca",
+    "zh": "沿南十字座的长轴向南，越过 Acrux 不远，就能看到苍蝇座由几颗星围成的紧凑小轮廓。最亮的苍蝇座 α 可以用来核对中心位置。再把视线移向轮廓东侧的 δ 星，附近的球状星团 NGC 4833 藏在银河密集的前景星点后方。",
+    "en": "Continue south along the long axis of the Southern Cross past Acrux to the compact outline of Musca. Its brightest star, Alpha Muscae, helps fix the centre of the figure. Near Delta Muscae on its eastern side lies the globular cluster NGC 4833, seen through a crowded foreground field of Milky Way stars.",
+    "fr": "Prolongez le grand axe de la Croix du Sud au-delà d’Acrux pour découvrir la figure compacte de la Mouche. Alpha Muscae, la plus brillante, aide à s’y repérer. Du côté est, près de Delta, l’amas globulaire NGC 4833 se distingue derrière un champ dense d’étoiles de la Voie lactée.",
+    "ru": "Продолжите длинную ось Южного Креста к югу за Акрукс до небольшой группы звёзд Мухи. Её ярчайшая звезда Альфа помогает сориентироваться. На восточной стороне, возле Дельты, находится шаровое скопление NGC 4833. Между ним и нами лежит густое поле звёзд Млечного Пути."
+  },
+  "Nor": {
+    "chart": "Norma",
+    "zh": "在天蝎座与南三角座之间，矩尺座的几颗主星在银河上勾出一个小角尺。可以先从天蝎尾部向西南寻找这片亮星较少的区域。星座南部的疏散星团 NGC 6087 是较容易定位的目标，星团方向还有一颗脉动变星矩尺座 S。",
+    "en": "Between Scorpius and Triangulum Australe, a few stars of Norma suggest a small carpenter’s square against the Milky Way. Look southwest from the scorpion’s tail for this relatively faint field. The open cluster NGC 6087 marks its southern part. Among the stars in its direction is the pulsating variable S Normae.",
+    "fr": "Entre le Scorpion et le Triangle austral, quelques étoiles de la Règle évoquent une petite équerre sur la Voie lactée. Cherchez ce champ discret au sud-ouest de la queue du Scorpion. Dans sa partie sud se trouve l’amas ouvert NGC 6087, où l’on peut repérer l’étoile variable pulsante S Normae.",
+    "ru": "Между Скорпионом и Южным Треугольником несколько звёзд Наугольника рисуют маленький угольник на фоне Млечного Пути. Ищите эту область к юго-западу от хвоста Скорпиона. На юге созвездия лежит рассеянное скопление NGC 6087. В его поле находится пульсирующая переменная S Наугольника."
+  },
+  "Oct": {
+    "chart": "Octans",
+    "zh": "南天极落在南极座内。广角图上先认出 β、ν 和 δ 三颗星组成的宽三角，再切到极点附近寻找暗淡的南极座 σ。它虽靠近地球自转轴的南向延长线，亮度却只有约五点五等，实地观星往往要先借南十字座来估计方向。",
+    "en": "The south celestial pole falls inside Octans. On a wide chart first locate the broad triangle of Beta, Nu and Delta Octantis, then close in on faint Sigma Octantis near the pole. At about magnitude 5.5 it is hard to pick out, so observers often use the Southern Cross to estimate the direction first.",
+    "fr": "Le pôle céleste sud se situe dans l’Octant. Sur une carte à grand champ, repérez d’abord le triangle de Bêta, Nu et Delta Octantis, puis recherchez Sigma près du pôle. Sa magnitude d’environ 5,5 la rend discrète. La Croix du Sud est souvent un repère plus facile pour commencer.",
+    "ru": "Южный полюс мира находится в Октанте. На широкой карте отыщите большой треугольник Беты, Ню и Дельты Октанта, а затем слабую Сигму у полюса. Её блеск составляет около 5,5 звёздной величины, поэтому общее направление удобнее сначала найти по Южному Кресту."
+  },
+  "Oph": {
+    "chart": "Ophiuchus",
+    "zh": "蛇夫座横在武仙座与天蝎座之间，北端明亮的侯（Rasalhague）标出持蛇人的头部。身体两侧分布着巨蛇座彼此分开的蛇头与蛇尾。沿蛇夫座向南移动，先后能找到 M10 和 M12 两个球状星团，适合在同一倍率下比较它们的疏密。",
+    "en": "Ophiuchus stands between Hercules and Scorpius, with bright Rasalhague marking the serpent-bearer’s head in the north. The two parts of Serpens flank his body. Moving south through Ophiuchus brings you to M10 and M12, a pair of globular clusters worth comparing at the same magnification.",
+    "fr": "Entre Hercule et le Scorpion, Rasalhague marque au nord la tête d’Ophiuchus, le porteur de serpent. La tête et la queue du Serpent occupent deux régions de part et d’autre de son corps. En descendant dans Ophiuchus, on rencontre M10 et M12, deux amas globulaires à comparer au même grossissement.",
+    "ru": "Змееносец стоит между Геркулесом и Скорпионом. На севере яркий Рас-Альхаг отмечает его голову, а по обеим сторонам фигуры лежат голова и хвост Змеи. Двигаясь к югу по Змееносцу, можно найти шаровые скопления M10 и M12 и сравнить их плотность при одинаковом увеличении."
+  },
+  "Ori": {
+    "chart": "Orion",
+    "zh": "三颗亮星几乎等距地排成一行，标出猎户的腰带。橙红的参宿四与蓝白的参宿七分守腰带两侧，正好占据沙漏形轮廓的两个对角。从腰带向南找垂下的短剑，中段那团朦胧的光就是 M42 猎户座大星云，年轻恒星正在照亮周围的气体。",
+    "en": "Three nearly evenly spaced stars make Orion’s belt. Orange-red Betelgeuse and blue-white Rigel stand at opposite corners of the hourglass around it. Trace the short sword south of the belt to a hazy patch in its middle. This is M42, the Orion Nebula, where young stars light up the surrounding gas.",
+    "fr": "Trois étoiles presque équidistantes dessinent la ceinture d’Orion. Bételgeuse, orangée, et Rigel, blanc bleuté, occupent deux coins opposés du sablier qui l’entoure. Au sud de la ceinture pend une courte épée. La lueur floue en son milieu est M42, la nébuleuse d’Orion, dont le gaz est éclairé par de jeunes étoiles.",
+    "ru": "Три звезды на почти равных расстояниях образуют пояс Ориона. Рыжеватая Бетельгейзе и бело-голубой Ригель лежат в противоположных углах фигуры, похожей на песочные часы. К югу от пояса свисает короткий меч. Светлое пятнышко в его середине — туманность Ориона M42, газ которой освещают молодые звёзды."
+  },
+  "Pav": {
+    "chart": "Pavo",
+    "zh": "孔雀座最亮的孔雀十一（Peacock）位在星座东北角，像一颗单独亮起的鸟头。由它向西南拉开视野，几颗较暗的星才显出孔雀身体的宽度。在这片天区西部寻找 NGC 6752，它是南天显眼的球状星团，中心星点挤得很密。",
+    "en": "Peacock, or Alpha Pavonis, stands out like a bright head at the northeastern corner of Pavo. Open the field southwest from it to see the fainter stars span the bird’s body. On the western side look for NGC 6752, a prominent southern globular cluster with a dense core.",
+    "fr": "Alpha Pavonis, l’étoile Peacock, brille à l’angle nord-est du Paon comme une tête isolée. Élargissez le champ vers le sud-ouest pour retrouver le corps formé d’étoiles plus discrètes. Dans la partie occidentale se trouve NGC 6752, un amas globulaire austral au cœur dense.",
+    "ru": "Альфа Павлина, или Пикок, выделяется как яркая голова в северо-восточном углу созвездия. Расширьте поле к юго-западу, где слабые звёзды обозначают туловище птицы. В западной части находится NGC 6752, заметное шаровое скопление южного неба с плотным ядром."
+  },
+  "Peg": {
+    "chart": "Pegasus",
+    "zh": "飞马座最好认的图形是秋季大四边形。四角中有三颗属于飞马座，东北角的壁宿二（Alpheratz）却是仙女座的一员。沿飞马的头颈找到鼻尖危宿三（Enif），再向西北移，就能遇到球状星团 M15，照片上明亮的中心格外紧凑。",
+    "en": "Three corners of the Great Square belong to Pegasus. The fourth, Alpheratz at the northeast, belongs to Andromeda. From the square trace the horse’s neck to Enif, the star at its nose. A little northwest of Enif lies M15, a globular cluster with a strikingly concentrated bright centre.",
+    "fr": "Trois sommets du Grand Carré appartiennent à Pégase. Le quatrième, Alpheratz au nord-est, fait partie d’Andromède. Depuis le carré, suivez le cou du cheval jusqu’à Enif, au bout du museau. Un peu au nord-ouest se trouve M15, amas globulaire dont le cœur brillant est particulièrement concentré.",
+    "ru": "Три угла Большого квадрата принадлежат Пегасу. Четвёртый, Альферац на северо-востоке, относится к Андромеде. От квадрата проследите шею коня до Энифа на носу. Чуть северо-западнее лежит шаровое скопление M15 с особенно плотным ярким центром."
+  },
+  "Per": {
+    "chart": "Perseus",
+    "zh": "仙后座的 W 与五车二之间，天船三（Mirfak）周围散着一群在双筒镜中尤其好看的亮星，这是英仙座醒目的一角。向西南转到大陵五，可观察食双星发生的周期性变暗。往仙后座一侧搜索，还有两个并列在银河中的英仙座双星团。",
+    "en": "Between Cassiopeia’s W and Capella, Mirfak sits in a loose spray of stars best enjoyed in binoculars. Southwest of Mirfak is Algol, an eclipsing binary that regularly fades as one star passes in front of another. Back towards Cassiopeia, two rich open clusters stand side by side as the Double Cluster of Perseus.",
+    "fr": "Entre le W de Cassiopée et Capella, Mirfak baigne dans une gerbe d’étoiles idéale aux jumelles. Au sud-ouest, Algol faiblit périodiquement lorsqu’une composante du système éclipse l’autre. En revenant vers Cassiopée, on rencontre les deux amas ouverts voisins qui forment le Double Amas de Persée.",
+    "ru": "Между буквой W Кассиопеи и Капеллой вокруг Мирфака видна россыпь звёзд, особенно красивая в бинокль. Юго-западнее лежит Алголь, блеск которого периодически падает при затмении одной звезды другой. В сторону Кассиопеи на Млечном Пути стоят рядом два рассеянных скопления — Двойное скопление Персея."
+  },
+  "Phe": {
+    "chart": "Phoenix",
+    "zh": "在南鱼座的北落师门和波江座的水委一之间，凤凰座最显眼的星是火鸟六（Ankaa）。它位在凤凰主体的西北侧，向东南追踪几段折线便能勾出鸟身。在这颗星以东还有星系 NGC 625，形态不规则，明亮的成星区沿着星系分布。",
+    "en": "Between Fomalhaut and Achernar, look for Ankaa, the brightest star in Phoenix. It marks the northwestern side of the main figure, with bends extending southeast through the bird’s body. East of Ankaa lies the irregular galaxy NGC 625, where bright regions of star formation punctuate the galaxy.",
+    "fr": "Entre Fomalhaut et Achernar, cherchez Ankaa, l’étoile la plus brillante du Phénix. Elle occupe le côté nord-ouest de la figure principale, dont les traits se déploient vers le sud-est. À l’est d’Ankaa se trouve la galaxie irrégulière NGC 625, ponctuée de régions brillantes où se forment des étoiles.",
+    "ru": "Между Фомальгаутом и Ахернаром найдите Анкаа, ярчайшую звезду Феникса. Она отмечает северо-западный край основной фигуры, откуда к юго-востоку зигзагом тянется тело птицы. Восточнее Анкаа лежит неправильная галактика NGC 625 с яркими областями звездообразования."
+  },
+  "Pic": {
+    "chart": "Pictor",
+    "zh": "在耀眼的老人星附近，绘架座几颗暗星在船底座与剑鱼座之间搭出细长的轮廓。其中的绘架座 β 以环绕它的尘埃盘闻名。这个盘几乎侧对地球，专业望远镜遮住恒星强光所拍的照片里，可以看见盘向恒星两边伸展。",
+    "en": "Close to brilliant Canopus, look for the faint, slender figure of Pictor between Carina and Dorado. Beta Pictoris is famous for its dusty debris disk. We see the disk nearly edge-on. In images taken with the star’s glare suppressed, the dust extends to either side of the star.",
+    "fr": "Près de la brillante Canopus, le Peintre forme une silhouette discrète et allongée entre la Carène et la Dorade. Bêta Pictoris est entourée d’un disque de débris vu presque par la tranche. Les images obtenues en masquant l’éclat de l’étoile révèlent la poussière qui s’étend de part et d’autre.",
+    "ru": "Неподалёку от яркого Канопуса между Килем и Золотой Рыбой видна узкая неброская фигура Живописца. Бета Живописца известна своим пылевым диском, который мы видим почти с ребра. Когда блеск самой звезды перекрывают, на снимках заметно, как пыль простирается по обе стороны от неё."
+  },
+  "Psc": {
+    "chart": "Pisces",
+    "zh": "飞马大四边形的西南方有一圈较暗的星，是双鱼座西鱼的「小环」。从小环向东沿细长的星链追踪，直到外屏七（Alrescha）所在的绳结，再沿另一条支线转向北鱼。两条鱼加上长长的系绳，使星图上的双鱼座比初看时宽广得多。",
+    "en": "Southwest of the Great Square of Pegasus, the western fish of Pisces makes a faint ring called the Circlet. Follow its long cord east to Alrescha, the knot joining the two fish, then turn up the second cord towards the northern fish. The full figure spans far more sky than the little ring suggests.",
+    "fr": "Au sud-ouest du Grand Carré de Pégase, le poisson occidental dessine un petit anneau discret. Suivez son long cordon vers l’est jusqu’à Alrescha, le nœud qui relie les deux Poissons. Le second cordon remonte vers le poisson du nord. L’ensemble est bien plus vaste que ne le laisse croire le petit anneau.",
+    "ru": "К юго-западу от Большого квадрата Пегаса западная Рыба образует тусклое Колечко. Следуйте по длинной нити к востоку до Альриши — узла, связывающего двух Рыб. По второй нити можно подняться к северной Рыбе. Вся фигура занимает куда больше места, чем кажется по одному Колечку."
+  },
+  "PsA": {
+    "chart": "Piscis Austrinus",
+    "zh": "南鱼座在宝瓶座以南，最醒目的标志是北落师门（Fomalhaut）。这颗亮星周围显得空旷，几颗较暗的星从它向西勾出鱼身。北落师门本身也值得细看，红外与可见光观测都揭示了环绕恒星的尘埃结构，其中有一圈倾斜的环带。",
+    "en": "South of Aquarius, Fomalhaut stands out in the relatively empty field of Piscis Austrinus. Fainter stars stretch west from it to trace the fish’s body. The star is also a target in its own right. Infrared and visible-light observations reveal dusty material around it, including a ring seen at a slant.",
+    "fr": "Au sud du Verseau, Fomalhaut domine le champ peu peuplé du Poisson austral. Des étoiles plus faibles dessinent vers l’ouest le corps du poisson. Fomalhaut elle-même est un sujet d’observation remarquable. En infrarouge et en lumière visible, on distingue des poussières autour de l’étoile, dont un anneau incliné.",
+    "ru": "Южнее Водолея Фомальгаут выделяется в сравнительно пустом поле Южной Рыбы. От него к западу тянутся более слабые звёзды, намечая тело рыбы. Инфракрасные и оптические наблюдения самого Фомальгаута выявили окружающую пыль, в том числе кольцо, видимое под наклоном."
+  },
+  "Pup": {
+    "chart": "Puppis",
+    "zh": "从天狼星向东南看，船尾座沿银河铺展，是古代大船南船的船艉。广角星图里最值得停一停的是它北部的 M46 与 M47，两者都是疏散星团，在天上只相隔约一度半。M47 有几颗抢眼的亮星，M46 的星点则更细密。",
+    "en": "Southeast of Sirius, Puppis follows the Milky Way and represents the stern of the old ship Argo. In its northern part, the open clusters M46 and M47 sit only about a degree and a half apart. A wide view shows the contrast between the conspicuous bright members of M47 and the finer, denser stars of M46.",
+    "fr": "Au sud-est de Sirius, la Poupe de l’ancien Navire Argo s’étend sur la Voie lactée. Au nord de la constellation, les amas ouverts M46 et M47 sont séparés d’environ un degré et demi. Le même champ large montre les étoiles brillantes et espacées de M47 à côté du semis plus fin et plus dense de M46.",
+    "ru": "К юго-востоку от Сириуса вдоль Млечного Пути тянется Корма старинного Корабля Арго. На севере созвездия рассеянные скопления M46 и M47 разделяет около полутора градусов. В широком поле хорошо сравнить заметные яркие звёзды M47 с более мелкой и густой россыпью M46."
+  },
+  "Pyx": {
+    "chart": "Pyxis",
+    "zh": "罗盘座紧挨船尾座以东，几颗主要恒星排成近乎一线，像一根细长的指针。以最亮的罗盘座 α 为中心，向北找 γ、向南找 β，就容易把这条线认全。再往东南方搜索，NGC 2818 是一颗恒星走到演化晚期后留下的行星状星云。",
+    "en": "Just east of Puppis, the main stars of Pyxis make an almost straight line like a compass needle. Start at Alpha Pyxidis, the brightest, with Gamma to its north and Beta to its south. Farther southeast is NGC 2818, a planetary nebula left by a star late in its evolution.",
+    "fr": "Juste à l’est de la Poupe, les principales étoiles de la Boussole s’alignent presque comme une aiguille. Partez d’Alpha Pyxidis, la plus brillante, et cherchez Gamma au nord et Bêta au sud. Plus au sud-est se trouve NGC 2818, nébuleuse planétaire laissée par une étoile en fin de vie.",
+    "ru": "Сразу восточнее Кормы главные звёзды Компаса выстраиваются почти в линию, словно стрелка. В центре найдите яркую Альфу Компаса, к северу от неё Гамму, а к югу Бету. Юго-восточнее расположена планетарная туманность NGC 2818, оставшаяся от звезды на поздней стадии её жизни."
+  },
+  "Ret": {
+    "chart": "Reticulum",
+    "zh": "在水委一与老人星这两颗南天亮星之间，网罟座用几颗不太亮的星画出一个小菱形，α 星位在它偏南的一端。「网罟」指早期望远镜中用来量位置的分划网。沿菱形向更南处查找，形状不对称的棒旋星系 NGC 1313 也在这片天区。",
+    "en": "Between Achernar and Canopus, look for the little diamond of Reticulum, with Alpha Reticuli towards its southern end. Its name recalls the reticle once used inside a telescope to measure positions. Farther south in the same field of sky lies NGC 1313, a barred spiral with an unusually lopsided shape.",
+    "fr": "Entre Achernar et Canopus, cherchez le petit losange du Réticule, dont Alpha Reticuli occupe le côté sud. Son nom rappelle le quadrillage qui servait à mesurer les positions dans une lunette. Plus au sud dans la même constellation, NGC 1313 est une galaxie spirale barrée à la silhouette dissymétrique.",
+    "ru": "Между Ахернаром и Канопусом поищите маленький ромб Сетки с Альфой у южного конца. Название созвездия напоминает о сетке нитей в телескопе, служившей для измерения положений. Южнее лежит NGC 1313 — заметно несимметричная спиральная галактика с перемычкой."
+  },
+  "Sge": {
+    "chart": "Sagitta",
+    "zh": "沿天鹰座牛郎星向北看，在狐狸座以南的银河里，有几颗星挤成一支很短的箭。暗淡的 α 和 β 在西边分开，较亮的 γ 标出东端箭头。顺着箭身在 δ 与 γ 之间寻找，就能看到球状星团 M71，其外围的星点显得比较疏松。",
+    "en": "North of Altair and south of Vulpecula, a handful of Milky Way stars make the short arrow of Sagitta. Alpha and Beta separate at the western tail and brighter Gamma marks the eastern tip. Along the shaft between Delta and Gamma lies M71, a globular cluster with relatively loose outer stars.",
+    "fr": "Au nord d’Altaïr et au sud du Petit Renard, quelques étoiles de la Voie lactée dessinent la Flèche. Alpha et Bêta s’écartent à l’ouest, et Gamma marque la pointe orientale. Sur la hampe, entre Delta et Gamma, se trouve M71, un amas globulaire aux étoiles périphériques assez dispersées.",
+    "ru": "К северу от Альтаира и к югу от Лисички несколько звёзд Млечного Пути образуют короткую Стрелу. Альфа и Бета расходятся у западного оперения, а яркая Гамма отмечает восточное остриё. Между Дельтой и Гаммой на древке лежит шаровое скопление M71 с довольно рыхлыми окраинами."
+  },
+  "Sgr": {
+    "chart": "Sagittarius",
+    "zh": "天蝎座尾钩以东，人马座（也叫射手座）的亮星勾出一把茶壶。壶嘴朝西，旁边像蒸汽一样升起的明亮星云带，就是朝银河系中心方向密集的星野。沿壶嘴向西北扫过去，可以找到礁湖星云 M8，暗尘带把发光的气体分成相邻的亮区。",
+    "en": "East of Scorpius’s hooked tail, the bright stars of Sagittarius make the Teapot. Its spout points west. The Milky Way rising like steam beside it is the dense star field towards the Galactic centre. Sweep northwest from the spout to find M8, the Lagoon Nebula, where a dark lane divides bright patches of gas.",
+    "fr": "À l’est du crochet du Scorpion, les étoiles du Sagittaire dessinent une théière au bec tourné vers l’ouest. La « vapeur » voisine est la Voie lactée, très dense en direction du centre galactique. Au nord-ouest du bec se trouve la Lagune, M8, dont une bande sombre sépare les nappes de gaz lumineux.",
+    "ru": "К востоку от хвоста Скорпиона яркие звёзды Стрельца образуют Чайник с носиком, направленным на запад. Рядом словно пар поднимается густая полоса Млечного Пути в направлении центра Галактики. Пройдите от носика к северо-западу до туманности Лагуна M8, где тёмная полоса разделяет светящиеся облака газа."
+  },
+  "Sco": {
+    "chart": "Scorpius",
+    "zh": "天蝎座从头部的几颗星延伸到橙红色的心宿二，再向南弯下，最后回钩成一对相近的尾星。先辨颜色，再沿长弧追到尾端的尾宿八和尾宿九，即使星图旋转也容易认出。心宿二以西不远处还有球状星团 M4，位置尤其好找。",
+    "en": "Scorpius runs from its head stars past orange-red Antares, curves south and hooks back to two close-set tail stars, Shaula and Lesath. Pick out the colour of Antares, then trace the long curve to the stinger. Just west of Antares is M4, one of the easiest globular clusters to locate by a bright star.",
+    "fr": "Le Scorpion passe par l’orangée Antarès, plonge vers le sud et recourbe sa queue jusqu’aux deux étoiles du dard, Shaula et Lesath. Partez de la couleur d’Antarès pour suivre le long arc, même si la carte est tournée. Juste à l’ouest d’Antarès, l’amas globulaire M4 se repère aisément.",
+    "ru": "Скорпион тянется от головы к оранжево-красному Антаресу, затем изгибается к югу и загибает хвост обратно к двум звёздам жала, Шауле и Лесату. Ориентируйтесь по цвету Антареса, а затем проследите всю дугу. Чуть западнее Антареса легко найти шаровое скопление M4."
+  },
+  "Scl": {
+    "chart": "Sculptor",
+    "zh": "玉夫座在鲸鱼座以南，疏落的主星不易一眼连成图案。要找它的代表天体，可以从鲸鱼座尾端明亮的土司空往南略偏东移动。那里一条斜着展开的窄长光带就是玉夫座星系 NGC 253，我们从倾斜的角度看见它的星盘和尘带。",
+    "en": "South of Cetus, the sparse stars of Sculptor are hard to connect at first glance. For a more distinctive landmark start at Diphda in the whale’s tail and move south and a little east. The long slanting glow there is the Sculptor Galaxy, NGC 253, whose dusty disk is tilted strongly to our line of sight.",
+    "fr": "Au sud de la Baleine, les étoiles éparses du Sculpteur sont difficiles à relier du premier coup. Partez de Diphda, dans la queue de la Baleine, vers le sud et un peu vers l’est. La longue lueur oblique est NGC 253, la galaxie du Sculpteur, dont nous voyons le disque poussiéreux sous un angle prononcé.",
+    "ru": "К югу от Кита редкие звёзды Скульптора не сразу складываются в фигуру. Более заметный ориентир можно найти от Дифды в хвосте Кита, сместившись к югу и чуть к востоку. Вытянутая наклонная полоска — галактика Скульптора NGC 253, чей пыльный диск повёрнут к нам под большим углом."
+  },
+  "Sct": {
+    "chart": "Scutum",
+    "zh": "盾牌座小而不亮，夹在天鹰座与人马座之间，背后却是很浓的银河星云。广角中先找这片密集的盾牌座恒星云，再往它的东北部收小视场。野鸭星团 M11 就在那里，放大后能分出许多密集的恒星，它在分类上属于疏散星团。",
+    "en": "Small, faint Scutum lies between Aquila and Sagittarius against a dense patch of Milky Way. Begin with the broad Scutum Star Cloud, then narrow the field towards its northeastern part. The Wild Duck Cluster, M11, resolves into a crowded swarm of stars. Despite its packed appearance it is an open cluster.",
+    "fr": "Petit et discret, l’Écu se situe entre l’Aigle et le Sagittaire sur une portion très dense de la Voie lactée. Repérez d’abord le nuage stellaire de l’Écu, puis resserrez le champ vers sa partie nord-est. L’amas du Canard sauvage, M11, se résout en une multitude d’étoiles. C’est un amas ouvert particulièrement riche.",
+    "ru": "Маленький неяркий Щит лежит между Орлом и Стрельцом на густом участке Млечного Пути. Найдите широкое Звёздное Облако Щита и сузьте поле у его северо-восточной части. Там находится Дикая Утка, M11. Под увеличением это богатое рассеянное скопление распадается на множество тесных звёзд."
+  },
+  "Ser": {
+    "chart": "Serpens Caput",
+    "zh": "巨蛇座在星图上分成两片，隔在中间的是蛇夫座。西侧的蛇头有一个小三角，沿它向南可找到亮星天市右垣七（Unukalhai），球状星团 M5 也在这一半。东侧的蛇尾伸入银河，鹰状星云 M16 就在尾部一带，其中有著名的「创生之柱」。",
+    "en": "Serpens occupies two separate patches with Ophiuchus between them. The western head has a little triangle. Follow it south to bright Unukalhai. The globular cluster M5 also belongs to this half. The eastern tail reaches the Milky Way, where the Eagle Nebula M16 contains the Pillars of Creation.",
+    "fr": "Le Serpent occupe deux régions séparées par Ophiuchus. À l’ouest, sa tête forme un petit triangle. En descendant vers le sud, on trouve la brillante Unukalhai. L’amas globulaire M5 appartient aussi à cette moitié. À l’est, la queue rejoint la Voie lactée et la nébuleuse de l’Aigle M16, qui abrite les Piliers de la création.",
+    "ru": "Змея занимает две отдельные области по сторонам от Змееносца. На западе голова отмечена маленьким треугольником. К югу от него сияет Унук-Эльхайя. В этой же части лежит шаровое скопление M5. Восточный хвост уходит в Млечный Путь к туманности Орёл M16, где находятся Столпы Творения."
+  },
+  "Sex": {
+    "chart": "Sextans",
+    "zh": "在狮子座的轩辕十四与长蛇座的星宿一之间，六分仪座的几颗暗星只留下一个浅浅的折角。先用两颗亮星框住视场，再去找中间的六分仪座 α。西南方的 NGC 3115 是透镜状星系，侧向观察时中央鼓起，两端收尖，所以又称「纺锤星系」。",
+    "en": "Between Regulus in Leo and Alphard in Hydra, a few faint stars make the shallow angle of Sextans. Use the two bright landmarks to frame the field and find Alpha Sextantis between them. Southwest of Alpha lies the lenticular galaxy NGC 3115. Seen edge-on, its bulging middle and tapered ends suggest a spindle.",
+    "fr": "Entre Régulus dans le Lion et Alphard dans l’Hydre, quelques étoiles faibles forment l’angle discret du Sextant. Utilisez ces deux étoiles brillantes pour encadrer Alpha Sextantis. Au sud-ouest se trouve NGC 3115, galaxie lenticulaire vue par la tranche. Son centre renflé et ses extrémités effilées évoquent un fuseau.",
+    "ru": "Между Регулом во Льве и Альфардом в Гидре слабые звёзды образуют пологий угол Секстанта. По двум ярким ориентирам найдите Альфу Секстанта. Юго-западнее лежит линзовидная галактика NGC 3115. Мы видим её с ребра, и выпуклый центр с заострёнными концами напоминает веретено."
+  },
+  "Tau": {
+    "chart": "Taurus",
+    "zh": "金牛座的牛脸像一个 V，毕星团的许多星点散布在两条边上。橙色的毕宿五恰好点在牛眼的位置，实际离我们更近，是毕星团前方的一颗恒星。沿牛脸向西北移，紧凑的昴星团 M45 又是另一群恒星，广角中可以同时比较两种星团的疏密。",
+    "en": "The V-shaped face of Taurus is sprinkled with stars of the Hyades. Orange Aldebaran marks the eye in that pattern but is a foreground star, closer than the cluster. Northwest of the face lies another open cluster, the compact Pleiades, M45. A wide field lets you compare the two groups’ very different spacing.",
+    "fr": "Le visage en V du Taureau est semé d’étoiles des Hyades. Aldébaran, orangée, occupe la place de l’œil mais se trouve au premier plan, plus près que l’amas. Au nord-ouest se serrent les Pléiades, M45. Un champ large permet de comparer l’espacement des étoiles de ces deux amas ouverts.",
+    "ru": "Лицо Тельца образует буква V из звёзд Гиад. Оранжевый Альдебаран приходится на место глаза, но находится ближе к нам, перед скоплением. К северо-западу от морды видны более тесные Плеяды, M45. В широком поле удобно сравнить расстояния между звёздами этих двух рассеянных скоплений."
+  },
+  "Tel": {
+    "chart": "Telescopium",
+    "zh": "从人马座「茶壶」向南越过南冕座，就进入挺不起眼的望远镜座。靠近北缘的望远镜座 α 比较好找，在它周围用几颗较暗的星勾出细短的线段。再往西南方移，球状星团 NGC 6584 是这个星座里值得用小视场取景的目标。",
+    "en": "Go south from the Sagittarius Teapot past Corona Australis to enter faint Telescopium. Alpha Telescopii is a useful landmark near its northern border, where fainter stars mark short line segments. Farther southwest, the globular cluster NGC 6584 is a good small-field target in the same constellation.",
+    "fr": "Depuis la Théière du Sagittaire, descendez au-delà de la Couronne australe jusqu’au discret Télescope. Alpha Telescopii est un bon repère près de sa limite nord, où de courtes lignes relient des étoiles plus faibles. Au sud-ouest, l’amas globulaire NGC 6584 offre une belle cible à cadrer dans un champ réduit.",
+    "ru": "От Чайника Стрельца двигайтесь к югу за Южную Корону до неброского Телескопа. У северного края найдите Альфу Телескопа, от которой короткие линии ведут к более слабым звёздам. Юго-западнее лежит шаровое скопление NGC 6584 — подходящий объект для небольшого поля зрения."
+  },
+  "Tri": {
+    "chart": "Triangulum",
+    "zh": "北天的三角座夹在仙女座与白羊座之间，三颗主星组成一个明显不等边的细长三角，西南端尤其尖。把视线从这个尖角继续移向仙女座的奎宿九，中途就会遇到 M33 三角座星系。这座旋涡星系的光分布很散，找它适合用低倍率与宽视场。",
+    "en": "Between Andromeda and Aries, three stars of Triangulum make a narrow, uneven triangle with a sharp southwestern vertex. From that tip head towards Mirach in Andromeda to reach the Triangulum Galaxy, M33, along the way. Its spiral disk spreads its light widely, so low power and a broad field work well.",
+    "fr": "Entre Andromède et le Bélier, trois étoiles composent un triangle étroit et inégal dont la pointe sud-ouest est particulièrement aiguë. De cette pointe, allez vers Mirach dans Andromède. En chemin se trouve M33, la galaxie du Triangle. Son disque étendu et diffus s’observe bien à faible grossissement.",
+    "ru": "Между Андромедой и Овном три звезды образуют узкий неравносторонний Треугольник с острым юго-западным углом. От этой вершины двигайтесь к Мираху в Андромеде. По пути лежит галактика Треугольника M33. Свет её диска рассеян по большой площади, поэтому удобны малое увеличение и широкое поле."
+  },
+  "TrA": {
+    "chart": "Triangulum Australe",
+    "zh": "在半人马座南门二与孔雀座之间，南三角座的三颗亮星在银河边缘围出清楚的三角形。最亮、颜色偏橙的是三角形东端的 Atria，向西北和西各有一个顶点。回到北边的顶点附近，还可以在银河星野里寻找疏散星团 NGC 6025。",
+    "en": "Between Alpha Centauri and Pavo, three bright stars mark the Southern Triangle along the edge of the Milky Way. Orange Atria, the brightest, is its eastern vertex, with the other corners west and northwest. From the northern vertex explore the nearby Milky Way field for the open cluster NGC 6025.",
+    "fr": "Entre Alpha du Centaure et le Paon, trois étoiles brillantes dessinent le Triangle austral au bord de la Voie lactée. Atria, orangée et la plus brillante, en marque la pointe est, les autres sommets se trouvant à l’ouest et au nord-ouest. Près du sommet nord se trouve l’amas ouvert NGC 6025.",
+    "ru": "Между Альфой Центавра и Павлином три яркие звезды обозначают Южный Треугольник на краю Млечного Пути. Его восточная вершина — оранжевая Атрия, самая яркая в фигуре. Два других угла лежат западнее и северо-западнее. Возле северной вершины можно найти рассеянное скопление NGC 6025."
+  },
+  "Tuc": {
+    "chart": "Tucana",
+    "zh": "杜鹃座最容易辨认的地标是小麦哲伦云，它在暗夜里像一团与银河分离的淡云。西边紧邻一团更圆、更集中的光，那是球状星团杜鹃座 47（NGC 104）。它属于我们自己的银河系，星图上相距很近的两个目标在深度上却隔得很远。",
+    "en": "The easiest landmark in Tucana is the Small Magellanic Cloud, a pale patch detached from the Milky Way on a dark night. Just west is a rounder, more concentrated glow, the globular cluster 47 Tucanae, NGC 104. The cluster belongs to our own galaxy and lies well in front of its apparent neighbour.",
+    "fr": "Dans le Toucan, le Petit Nuage de Magellan ressemble par nuit noire à une nuée pâle détachée de la Voie lactée. Juste à l’ouest brille une tache plus ronde et plus concentrée, l’amas globulaire 47 Tucanae, NGC 104. Cet amas appartient à notre Galaxie et se trouve bien en avant du Nuage.",
+    "ru": "В Тукане проще всего узнать Малое Магелланово Облако — бледное пятно в стороне от Млечного Пути. Чуть западнее видно более круглое и плотное свечение шарового скопления 47 Тукана, NGC 104. Оно принадлежит нашему Млечному Пути и гораздо ближе к нам, чем соседнее по небу Облако."
+  },
+  "UMa": {
+    "chart": "Ursa Major",
+    "zh": "北斗七星是大熊座的一部分，斗身和斗柄勾出熊的背部与尾巴。从斗口的天璇经过天枢向外延长约五倍两星间距，就到了北极星附近。回到斗柄中段，开阳旁还有较暗的辅星，两者很适合用来比较肉眼与双筒镜的辨星能力。",
+    "en": "The Big Dipper traces part of the Great Bear’s back and tail. Follow the line from Merak through Dubhe at the lip of the bowl, and continue about five times their separation to reach Polaris. Back at the bend of the handle, look for faint Alcor beside Mizar, first by eye and then with binoculars.",
+    "fr": "La Grande Casserole dessine une partie du dos et de la queue de la Grande Ourse. Prolongez la ligne de Merak à Dubhe, au bord de la cuve, d’environ cinq fois leur écart pour atteindre la Polaire. Revenez au coude du manche et cherchez la discrète Alcor aux côtés de Mizar, à l’œil puis aux jumelles.",
+    "ru": "Большой Ковш обозначает часть спины и хвост Большой Медведицы. Проведите от Мерака через Дубхе на краю чаши линию ещё примерно на пять расстояний между ними, и она выведет к Полярной звезде. В изгибе ручки рядом с Мицаром поищите более слабый Алькор сначала глазом, затем в бинокль."
+  },
+  "UMi": {
+    "chart": "Ursa Minor",
+    "zh": "北极星位在小熊座尾巴的末端，靠近地球自转轴所指的北天极，仍与极点隔着一小段距离。顺着小斗的柄追向斗身，边缘较亮的北极二（Kochab）和北极一（Pherkad）比中间几颗暗星更容易看见。认出它们就能估出整只小斗的朝向。",
+    "en": "Polaris marks the end of the Little Bear’s tail. It lies close to the north celestial pole, with a small gap between star and pole. Follow the Little Dipper’s handle back to the bowl. Kochab and Pherkad on its rim are easier to spot than the faint intermediate stars and help fix the bowl’s orientation.",
+    "fr": "La Polaire marque le bout de la queue de la Petite Ourse. Elle est très proche du pôle céleste nord, avec un petit écart entre l’étoile et le pôle. Suivez le manche de la Petite Casserole jusqu’à sa cuve. Kochab et Pherkad au bord sont plus faciles à voir que les étoiles intermédiaires et en indiquent l’orientation.",
+    "ru": "Полярная звезда отмечает конец хвоста Малой Медведицы. Она близка к северному полюсу мира, хотя между ними остаётся небольшой промежуток. Проследите ручку Малого Ковша к чаше. Кохаб и Феркад на краю чаши ярче промежуточных звёзд, и по ним легче определить наклон ковша."
+  },
+  "Vel": {
+    "chart": "Vela",
+    "zh": "沿船底座向北就进入船帆座，银河从帆面穿过。船帆座 δ、κ 与船底座的两颗亮星还能拼成「假十字」，比真正的南十字更靠西。回到船帆西侧，亮星天社一（γ Velorum）所在的多星系统中包含一颗沃尔夫–拉叶星，恒星风十分强劲。",
+    "en": "Move north from Carina into Vela, the sails crossed by the Milky Way. Delta and Kappa Velorum join two stars in Carina to make the False Cross, west of the true Southern Cross. On the western side of Vela, bright Gamma Velorum belongs to a multiple system containing a Wolf–Rayet star with a powerful stellar wind.",
+    "fr": "Remontez de la Carène vers les Voiles, traversées par la Voie lactée. Delta et Kappa Velorum forment avec deux étoiles de la Carène la Fausse Croix, à l’ouest de la véritable Croix du Sud. À l’ouest des Voiles, Gamma Velorum appartient à un système multiple qui contient une étoile Wolf-Rayet au vent stellaire puissant.",
+    "ru": "К северу от Киля простираются Паруса, через которые проходит Млечный Путь. Дельта и Каппа Парусов вместе с двумя звёздами Киля образуют Ложный Крест западнее настоящего Южного Креста. На западе Парусов яркая Гамма входит в кратную систему со звездой Вольфа — Райе, испускающей мощный звёздный ветер."
+  },
+  "Vir": {
+    "chart": "Virgo",
+    "zh": "顺着北斗斗柄弧线经大角星再走下去，会遇到室女座蓝白色的角宿一。以它为起点向西北、朝狮子座尾端移，星图上的亮星渐渐稀疏，却聚集着室女座星系团的许多成员。巨大的椭圆星系 M87 就在这片星系密集的区域里。",
+    "en": "Follow the arc of the Big Dipper’s handle to Arcturus and continue to blue-white Spica in Virgo. Move northwest from Spica towards the tail of Leo. Bright foreground stars grow scarce, but this region is crowded with members of the Virgo Cluster of galaxies, including the giant elliptical galaxy M87.",
+    "fr": "Prolongez la courbe du manche de la Grande Casserole jusqu’à Arcturus, puis jusqu’à Spica, blanc bleuté, dans la Vierge. Remontez au nord-ouest vers la queue du Lion. Les étoiles brillantes s’y raréfient, mais les galaxies de l’amas de la Vierge s’y pressent, parmi lesquelles la géante elliptique M87.",
+    "ru": "Продолжите дугу ручки Большого Ковша через Арктур до бело-голубой Спики в Деве. От Спики идите на северо-запад к хвосту Льва. Ярких звёзд переднего плана там мало, зато много галактик скопления Девы. Среди них гигантская эллиптическая галактика M87."
+  },
+  "Vol": {
+    "chart": "Volans",
+    "zh": "飞鱼座夹在船底座与山案座之间，星点连成一小组紧凑的折线。先从船底座南缘向南移，认出飞鱼座 β 和 γ 分守的两侧，再把视场转向星座内部。那里的 NGC 2442 有两条不对称的旋臂，深空照片中的弯曲外形为它赢得了「肉钩星系」的别名。",
+    "en": "Between Carina and Mensa, Volans makes a compact angular figure. Sweep south from the keel and identify Beta and Gamma Volantis on opposite sides of the fish. In the same constellation lies NGC 2442. Its unequal, strongly bent spiral arms account for the nickname Meathook Galaxy.",
+    "fr": "Entre la Carène et la Table, le Poisson volant forme une petite figure anguleuse. Descendez du bord sud de la Carène pour repérer Bêta et Gamma Volantis de part et d’autre du poisson. La galaxie NGC 2442 occupe le même champ du ciel. Ses bras spiraux inégaux et recourbés lui ont valu le surnom de Croc de boucher.",
+    "ru": "Между Килем и Столовой Горой Летучая Рыба образует компактную угловатую фигуру. Спуститесь от южного края Киля, чтобы найти Бету и Гамму Летучей Рыбы по разные стороны контура. Здесь же лежит NGC 2442. За неравные изогнутые спиральные рукава её прозвали Мясным Крюком."
+  },
+  "Vul": {
+    "chart": "Vulpecula",
+    "zh": "在天鹅座鸟嘴与天箭座之间，狐狸座的暗星混在银河密集的背景里。想找它最著名的目标，可以先认出天箭座东端的 γ 星，再向北移动约三度，直到哑铃星云 M27。照片里两瓣相连的亮区是恒星抛出的气体，形状像一只哑铃。",
+    "en": "Between the beak of Cygnus and the little arrow of Sagitta, Vulpecula’s faint stars blend into the Milky Way. To reach its best-known target, start at Gamma Sagittae, the eastern tip of the arrow, and move about three degrees north. The two bright lobes of gas in M27 give the Dumbbell Nebula its name.",
+    "fr": "Entre le bec du Cygne et la Flèche, les étoiles faibles du Petit Renard se fondent dans la Voie lactée. Depuis Gamma Sagittae, à la pointe est de la Flèche, remontez d’environ trois degrés. Vous arrivez à M27, la nébuleuse de l’Haltère, nommée pour ses deux lobes de gaz lumineux.",
+    "ru": "Между клювом Лебедя и созвездием Стрелы слабые звёзды Лисички теряются на фоне Млечного Пути. Начните с Гаммы Стрелы у её восточного острия и сместитесь примерно на три градуса к северу. Там находится туманность Гантель M27, названная так за две яркие лопасти светящегося газа."
+  }
+}

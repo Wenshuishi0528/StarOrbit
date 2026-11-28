@@ -184,3 +184,38 @@
     height: 100px;
   }
 }
+
+.sky-reading[hidden] {
+  display: none !important;
+}
+.sky-reading {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+details.sky-reading {
+  margin-block: 0.35rem;
+}
+.sky-reading > summary,
+.sky-reading-sources > summary {
+  color: #a8ded7;
+  cursor: pointer;
+}
+.sky-reading > summary {
+  font-weight: 600;
+}
+.sky-reading .sky-reading-prose {
+  margin: 0.45rem 0 0.6rem;
+  color: #d9e7ed;
+  font-size: 13px;
+  line-height: 1.75;
+  letter-spacing: normal;
+}
+.sky-reading-sources {
+  margin-block: 0.4rem;
+  font-size: 12px;
+}
+.sky-reading a {
+  color: #b0e4e1;
+}

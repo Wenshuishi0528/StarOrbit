@@ -1,3 +1,4 @@
+import { bindSkyReading } from './sky-reading-view.js';
 import { mountAimMarker } from './aim-marker.js';
 import { crosshairDistanceText } from './xuntian-distance.js';
 import { attachSkyTools } from './sky-tools.js';
@@ -96,6 +97,7 @@ export function installXuntianScope(sim) {
   const panel = $('xuntianScope'),
     canvas = $('xtCanvas'),
     ocular = canvas.parentElement;
+  const targetArticle = bindSkyReading($('xtTargetReading'));
   mountAimMarker({
     marker: ocular.querySelector('.xt-reticle'),
     host: $('xtAimMarker'),
@@ -286,6 +288,13 @@ export function installXuntianScope(sim) {
       locked = false;
     }
     lastDraw = -Infinity;
+  }
+  function fixSkyDirection(direction) {
+    mode = 'sky-pin';
+    anchor = { kind: 'sky', direction: [...direction] };
+    named = null;
+    fieldId = null;
+    aim(direction, true);
   }
   function saveSky() {
     if (mode === 'sky') bookmark = { pose: (desired || pose).clone(), named, fieldId, field };
@@ -821,6 +830,18 @@ export function installXuntianScope(sim) {
             : t('手动星野'))
         : t(modes[mode]));
     setText($('xtTarget'), targetName);
+    targetArticle.set(
+      named ||
+        (mode === 'nadir'
+          ? {
+              type: 'solar',
+              id: 'solar:Earth',
+              body: 'Earth',
+              name: solarLabel('Earth', getLanguage()),
+            }
+          : null),
+      sim.environment.settings.skyCulture
+    );
     $('xtReturn').hidden = mode === 'sky' || mode === 'free';
     $('xtRecommend').hidden = !sky;
     const below = anchor?.kind === 'ground' && tracked?.visible === false;
@@ -841,7 +862,7 @@ export function installXuntianScope(sim) {
             : blocked
               ? t(center?.kind === 'earth' || below ? '地球遮挡' : '站体遮挡')
               : anchor
-                ? t('固定跟踪中')
+                ? t(anchor.kind === 'sky' ? '十字线已固定' : '固定跟踪中')
                 : mode === 'pilot'
                   ? t('导航球操纵')
                   : mode === 'free'
@@ -1196,6 +1217,7 @@ export function installXuntianScope(sim) {
     surface: canvas,
     controls: $('xtSkyTools'),
     label: 'scope',
+    aimLabel: 'aimAndPin',
     detailSelection: () => sim.environment.skyDetailControls?.finderSelection?.(),
     enabled: () => active && !!sim.current && !!optics,
     view: () =>
@@ -1225,13 +1247,8 @@ export function installXuntianScope(sim) {
       if (target.body !== 'Sun') solarControls.ordinary();
       surveyMission?.clear();
       discardAnchor();
-      mode = 'free';
-      named = null;
-      fieldId = null;
+      fixSkyDirection(direction);
       $('xtSearch').value = '';
-      aim(direction, true);
-      rememberFree();
-      lastDraw = -Infinity;
       hud();
       return true;
     },
@@ -1706,13 +1723,9 @@ export function installXuntianScope(sim) {
       solarControls.ordinary();
       surveyMission?.clear();
       discardAnchor();
-      mode = 'sky-pin';
-      named = null;
-      fieldId = null;
+      fixSkyDirection(target.direction);
       overviewArtworkId = target.artworkId || null;
-      anchor = { kind: 'sky', direction: [...target.direction] };
       setLens(target.fov);
-      aim(target.direction, true);
       selectedAt = performance.now();
       $('xtNames').checked = true;
       $('xtSearch').value = '';

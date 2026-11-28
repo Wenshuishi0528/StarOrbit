@@ -1,3 +1,4 @@
+import { bindSkyReading, formationSubject } from './sky-reading-view.js';
 import { mountWorldEarthControls } from './shared-world-earth.js';
 import {
   createSharedWorldSky,
@@ -118,11 +119,11 @@ export function createInterstellarWorld({
   panel.innerHTML = `<style>${css}</style><h3 data-text="星际穿梭"></h3><small data-text="离开太阳，看看星座的另一面"></small>
 <label data-text="寻找恒星或星图"></label><input data-search aria-label="寻找恒星或星图" placeholder="天狼星、织女星、北斗、HIP…"><div class="interstellar-results"></div>
 <div class="interstellar-actions"><button data-shortcut="hip:32349" data-text="天狼星"></button><button data-shortcut="hip:91262" data-text="织女星"></button><button data-dipper data-text="北斗"></button></div>
-<div class="interstellar-selected" aria-live="polite"></div><div class="interstellar-actions"><button data-go data-text="前往恒星"></button><button data-look data-text="看向目标"></button><button data-stop data-text="停止"></button></div>
+<div class="interstellar-selected" aria-live="polite"></div><div data-star-reading></div><div class="interstellar-actions"><button data-go data-text="前往恒星"></button><button data-look data-text="看向目标"></button><button data-stop data-text="停止"></button></div>
 <label data-text="巡航速度"></label><select data-speed><option value="local">0.1 AU/s</option><option value="nearby">0.02 ly/s</option><option value="cruise">2 ly/s</option><option value="fast">50 ly/s</option></select>
 <label><input type="checkbox" data-assist checked> <span data-text="接近恒星时自动减速"></span></label>
 <div class="interstellar-actions"><button data-home data-text="返回太阳附近"></button><button data-sun data-text="回望太阳"></button><button data-solar data-text="进入太阳系"></button><button data-ground data-text="地表对照"></button></div>
-<details open><summary data-text="星图与画面"></summary><label data-text="星空体系"></label><select data-culture><option value="chinese" data-text="中国星官"></option><option value="western" data-text="西方星座"></option></select><select data-formation aria-label="选择星图"></select><div class="interstellar-actions"><button data-side data-text="从侧面看"></button><button data-earth data-text="太阳附近视角"></button></div><label><input type="checkbox" data-lines checked> <span data-text="三维连线"></span></label><label><input type="checkbox" data-names checked> <span data-text="恒星名称"></span></label><label><input type="checkbox" data-auto-exposure checked> <span data-text="自动曝光"></span></label><label data-text="星空亮度"></label><input data-brightness aria-label="星空亮度" type="range" min="0.2" max="2.5" step="0.05" value="1"><label data-text="视场"></label><input data-fov aria-label="视场" type="range" min="0.006" max="100" step="0.001" value="65"></details>
+<details open><summary data-text="星图与画面"></summary><label data-text="星空体系"></label><select data-culture><option value="chinese" data-text="中国星官"></option><option value="western" data-text="西方星座"></option></select><select data-formation aria-label="选择星图"></select><div data-formation-reading></div><div class="interstellar-actions"><button data-side data-text="从侧面看"></button><button data-earth data-text="太阳附近视角"></button></div><label><input type="checkbox" data-lines checked> <span data-text="三维连线"></span></label><label><input type="checkbox" data-names checked> <span data-text="恒星名称"></span></label><label><input type="checkbox" data-auto-exposure checked> <span data-text="自动曝光"></span></label><label data-text="星空亮度"></label><input data-brightness aria-label="星空亮度" type="range" min="0.2" max="2.5" step="0.05" value="1"><label data-text="视场"></label><input data-fov aria-label="视场" type="range" min="0.006" max="100" step="0.001" value="65"></details>
 <div data-marker-host></div>
 <details><summary data-text="航点与操作"></summary><input data-bookmark-name aria-label="航点名称" placeholder="航点名称" maxlength="40"><div class="interstellar-actions"><button data-save data-text="保存航点"></button><button data-remove data-text="删除航点"></button></div><select data-bookmarks aria-label="保存的航点"></select><button type="button" data-bookmark-keys></button></details>
 <details><summary data-text="星表与空间数据"></summary><p data-statistics></p><p data-text="恒星位置：J2000 星表快照；移动观察者产生空间视差。模拟时钟与穿梭速度独立，恒星自行尚未外推。"></p><p data-text="三维连线只显示两端均有可靠距离的线段。银河影像作为太阳邻域背景，远离后逐渐淡出。"></p><p data-text="太阳与天狼星 A 使用实测半径的球面；其他恒星显示星点。颜色与曝光为观测可视化，球面不代表实拍纹理。"></p><p>Hipparcos / van Leeuwen 2007 · d3-celestial · Stellarium CC BY-SA 4.0 · Sirius A: Davis et al. 2011</p></details><small data-message role="status"></small>`;
@@ -142,6 +143,8 @@ export function createInterstellarWorld({
     stop();
   };
   const $ = (selector) => panel.querySelector(selector);
+  const starReading = bindSkyReading($('[data-star-reading]'));
+  const formationReading = bindSkyReading($('[data-formation-reading]'));
   const labels = document.createElement('div');
   labels.className = 'interstellar-labels';
   const hud = document.createElement('div');
@@ -763,6 +766,15 @@ export function createInterstellarWorld({
       referenceView && referenceTarget
         ? referenceTarget.name + '\n' + t('太阳视角参考 · 图源与插画')
         : info.join('\n');
+    starReading.set(
+      referenceView && referenceTarget
+        ? referenceTarget
+        : selected === 0
+          ? { type: 'solar', id: 'solar:Sun', body: 'Sun', name: name(0) }
+          : { type: 'star', id: 'hip:' + catalog.hips[selected], name: name(selected) },
+      culture
+    );
+    formationReading.set(formationSubject(formation?.item), culture);
     const along = position.map((n, i) => ['X', 'Y', 'Z'][i] + ' ' + n.toFixed(3)).join(' · ');
     hud.textContent = `${t('距太阳')} ${format(Math.hypot(...position))}  ·  ${t('速度')} ${format(currentSpeed)}/s\n${t('最近已收录恒星')} ${name(nearest)} · ${format(nearestDistance)}`;
     hud.title = `${along} ly · J2000\n${t('累计航程')} ${format(pathLength)}`;

@@ -366,6 +366,7 @@ function baseSearchCatalog() {
       [
         field.id,
         field.en,
+        ...(field.id === 'Ser' ? ['Serpens Cauda'] : []),
         ...(supplement?.names ?? []),
         supplement?.genitive,
         ...birthdaySearchAliases('constellation:' + field.id),
@@ -502,6 +503,7 @@ function localTarget(r, language, skyCulture = 'western') {
     type: r.type,
     name: cultureLabel || objectLabel || r.names[language] || r.names.en || r.identifier,
     ...(r.type === 'star' && Number.isFinite(r.mag) ? { magnitude: r.mag } : {}),
+    ...(r.type === 'star' ? { bv: starSky().byId.get(r.id)?.bv ?? null } : {}),
     identifier: group ? group[language] || group.en || group.zh : r.identifier,
     direction: r.direction,
     ra: r.ra,
@@ -564,6 +566,7 @@ export function getXuntianTarget(id, language = 'zh', skyCulture = 'western') {
     id: p.id,
     type: 'star',
     magnitude: p.mag,
+    bv: p.bv,
     name: identifier,
     identifier,
     direction: p.direction,

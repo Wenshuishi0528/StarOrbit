@@ -3,7 +3,8 @@ import { getSkyCulture, cultureObjectLabel } from './sky-cultures.js';
 import { galleryCoordinates } from './sky-image-index.js';
 import { rayInView, skyAngles, localRegion } from './sky-location-math.js';
 import { drawLocation } from './sky-location-draw.js';
-import { celestialCard, objectTarget } from './sky-object-card.js';
+import { objectTarget } from './sky-object-target.js';
+import { bindSkyReading, formationSubject } from './sky-reading-view.js';
 import { skyText } from './sky-tool-language.js';
 
 const toolsForSim = new WeakMap();
@@ -66,7 +67,9 @@ function createSkyTools(sim) {
     explainRA = make('p'),
     explainDec = make('p', skyText('decInfo'));
   explain.append(explainTitle, explainRA, explainDec);
-  location.body.append(banner, panels, locCoords, legend, explain);
+  location.body.append(banner, panels, locCoords, legend);
+  const regionReading = bindSkyReading(location.body, { expanded: true });
+  location.body.append(explain);
 
   function updateButtons() {
     for (const binding of links) {
@@ -119,6 +122,7 @@ function createSkyTools(sim) {
       panels.hidden = true;
       locCoords.textContent = '';
       legend.textContent = '';
+      regionReading.set(null);
       explain.hidden = true;
       return;
     }
@@ -127,6 +131,7 @@ function createSkyTools(sim) {
     const culture = getSkyCulture(view.culture);
     const { ra, dec } = skyAngles(view.forward);
     const region = localRegion(view.forward, culture);
+    regionReading.set(formationSubject(region), culture.id);
     const name = cultureObjectLabel(region, getLanguage());
     const field = (view.opticalFov || view.fovY).toLocaleString(getLanguage(), {
       maximumFractionDigits: 3,
@@ -173,11 +178,10 @@ function createSkyTools(sim) {
     if (!location.root.hidden && !timer) timer = setInterval(locatorTick, 250);
     location.close.focus({ preventScroll: true });
   }
-  function showObject(infoOpen = false, coordinatesOpen = false) {
+  function showObject(coordinatesOpen = false, sourcesOpen = false) {
     if (!selection) return;
     const { options, owner, ray, culture } = selection;
     const hit = options[selection.index];
-    const card = celestialCard(hit, ray, culture);
     const target = objectTarget(hit, ray, culture);
     const body = object.body;
     body.replaceChildren();
@@ -197,32 +201,29 @@ function createSkyTools(sim) {
       select.dataset.skyCandidates = '';
       select.onchange = () => {
         selection.index = select.selectedIndex;
-        showObject(infoOpen, coordinatesOpen);
+        showObject(coordinatesOpen);
         body.querySelector('select')?.focus();
       };
       label.append(select);
       body.append(label);
     }
-    body.append(make('h3', card.title || skyText('blank')));
+    body.append(
+      make('h3', target?.name || hit.name || skyText(hit.kind + 'Title') || skyText('blank'))
+    );
     if (target && hit.kind !== 'sky') {
-      const details = make('details');
-      details.dataset.skyAbout = '';
-      details.open = infoOpen;
-      details.append(make('summary', skyText('info')), make('p', card.description));
-      if (card.facts.length) {
-        const list = make('ul', null, 'sky-object-facts');
-        card.facts.forEach((fact) => list.append(make('li', fact)));
-        details.append(list);
-      }
-      if (card.link) {
-        const a = make('a', card.link.name);
-        a.href = card.link.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        details.append(a);
-      }
-      body.append(details);
-    } else body.append(make('p', card.description));
+      bindSkyReading(body, { inline: true, sourcesOpen }).set(target, culture, hit);
+    } else {
+      const description =
+        hit.kind === 'sky'
+          ? skyText(hit.explicitPosition ? 'usePosition' : 'unmatched')
+          : [skyText(hit.kind), hit.kind === 'satellite' && hit.detail].filter(Boolean).join(' ');
+      body.append(make('p', description));
+    }
+    if (target) {
+      const chart = getSkyCulture(culture);
+      const region = localRegion(hit.regionOnly ? ray : target.direction || ray, chart);
+      bindSkyReading(body).set(formationSubject(region), chart.id);
+    }
     // Coordinates describe the selected position. Foreground objects have no
     // catalogue celestial identity, but their sightline can still be explained.
     const dir = coordinatesOpen || hit.regionOnly ? ray : target?.direction || ray,
@@ -257,7 +258,7 @@ function createSkyTools(sim) {
       }
       hide(object);
     };
-    const aim = button(skyText('aim'), () => execute(false), 'aim');
+    const aim = button(skyText(owner.aimLabel || 'aim'), () => execute(false), 'aim');
     aim.disabled = owner.canPoint?.(positionTarget) === false;
     actions.append(aim);
     if (hit.kind !== 'sky') {
@@ -321,7 +322,7 @@ function createSkyTools(sim) {
       toolbar: opener === owner.object,
     };
     show(object, owner, opener);
-    showObject(false, coordinatesOpen);
+    showObject(coordinatesOpen);
     if (!object.root.hasAttribute('data-floating-moved')) {
       object.root.removeAttribute('data-sky-anchored');
       for (const key of ['left', 'top', 'right', '--sky-anchor-top'])
@@ -378,8 +379,8 @@ function createSkyTools(sim) {
     if (location.owner) locatorTick();
     if (object.owner)
       showObject(
-        object.body.querySelector('[data-sky-about]')?.open,
-        object.body.querySelector('[data-sky-coordinate-help]')?.open
+        object.body.querySelector('[data-sky-coordinate-help]')?.open,
+        object.body.querySelector('[data-sky-about]')?.open
       );
   });
   return {

@@ -3426,5 +3426,11 @@
   "此天区没有已定位的作品": "Aucune image positionnée dans ce champ",
   "影像暂不可用，缺失区域留黑": "Images indisponibles. Les zones sans données restent noires.",
   "Pan-STARRS 仅覆盖部分视场": "Pan-STARRS couvre une partie du champ",
-  "开启星空后可切换影像": "Activez le ciel étoilé pour changer d’image"
+  "开启星空后可切换影像": "Activez le ciel étoilé pour changer d’image",
+  "关于{name}": "À propos de {name}",
+  "星表资料与出处": "Données du catalogue et sources",
+  "此位置没有已收录的天体简介。": "Aucune notice du catalogue ne correspond à cette position.",
+  "正在读取简介…": "Chargement de la notice…",
+  "重新读取简介": "Recharger la notice",
+  "十字线已固定": "Réticule verrouillé"
 }

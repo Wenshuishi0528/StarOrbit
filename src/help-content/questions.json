@@ -196,22 +196,22 @@
     "section": "s4-3",
     "zh": [
       "我点到的是哪颗星？",
-      "在巡天或地面观星画面右击天体，触屏可长按。「查看简介」显示目录资料，「对准」将望远镜转向该点。在没有目录匹配的位置仍可读坐标。",
+      "在巡天或地面观星画面右击天体，触屏可长按。介绍会直接显示，展开「星表资料与出处」可查数据和来源。搜索结果与「天区定位」也能打开星座、星官介绍。",
       "哪颗星|天体+简介|星+介绍|右键+星|右击|天体操作|辨认"
     ],
     "en": [
       "Which star am I pointing at?",
-      "Right-click the object in the finder or ground sky, or long-press on touch. Open its description for catalogue information, or centre the telescope there. Unmatched positions still have coordinates.",
+      "Right-click the object in the finder or ground sky, or long-press on touch. The article appears immediately. Expand Catalogue data and sources for measurements and references. Search results and the sky locator also introduce constellations and Chinese asterisms.",
       "which+star|right click|right-click|object+description|identify+star"
     ],
     "fr": [
       "Quelle étoile est-ce ?",
-      "Faites un clic droit dans le viseur ou le ciel terrestre, ou un appui long sur écran tactile. Consultez la notice ou centrez le télescope. Une position sans objet identifié conserve ses coordonnées.",
+      "Faites un clic droit ou un appui long sur l’objet dans le viseur ou le ciel au sol. La notice s’affiche aussitôt. Ouvrez « Données du catalogue et sources » pour consulter les mesures et références. La recherche et le repère céleste donnent aussi accès aux constellations et aux astérismes chinois.",
       "quelle+étoile|clic droit|notice+astre"
     ],
     "ru": [
       "Что это за звезда?",
-      "Нажмите правой кнопкой на объект в видоискателе или на наземном небе, а на сенсорном экране удерживайте палец. Откройте описание или наведите телескоп. У точки без совпадения остаются координаты.",
+      "Щёлкните по светилу правой кнопкой в видоискателе или в небе наземного наблюдателя. На сенсорном экране нажмите и удерживайте. Описание появится сразу. В разделе «Данные каталога и источники» есть измерения и ссылки. О созвездиях и китайских астеризмах можно прочитать также через поиск и указатель области неба.",
       "что+звезда|правой кнопк|описани+объект"
     ]
   },
