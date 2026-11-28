@@ -8,6 +8,8 @@ const manifest = JSON.parse(fs.readFileSync('assets/earth/night-2025-500m/manife
 const earthManifest = JSON.parse(fs.readFileSync('assets/earth/observation/manifest.json', 'utf8'));
 const lunarColour = JSON.parse(fs.readFileSync('assets/moon/colour-detail.json', 'utf8'));
 const colourDigest = crypto.createHash('sha256');
+const ngcLicense = fs.readFileSync('assets/NGC-CC-BY-SA-3.0.txt', 'utf8').trim();
+let head = '';
 let colourCount = 0;
 const earthFiles = new Set([
   ...Object.values(earthManifest.layers).map((r) => r.file),
@@ -84,6 +86,14 @@ for await (const chunk of fs.createReadStream(file, {
   encoding: 'utf8',
   highWaterMark: 1024 * 1024,
 })) {
+  if (head !== null) {
+    head += chunk;
+    const end = head.indexOf('</head>');
+    if (end >= 0) {
+      assert(head.slice(0, end).includes(ngcLicense), 'offline NGC transcription license');
+      head = null;
+    }
+  }
   buffer += chunk;
   while (true) {
     if (tag === null) {
@@ -107,6 +117,7 @@ for await (const chunk of fs.createReadStream(file, {
   );
 }
 assert.equal(tag, null, 'all script tags terminate');
+assert.equal(head, null, 'standalone head was checked');
 assert(format && blocks > 1 && last);
 assert.equal(expected.size, 0);
 assert.equal(nightBases, 4);

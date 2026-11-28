@@ -37,6 +37,8 @@ assert(Buffer.byteLength(html) < 750000);
 assert(!html.includes('__JS__'));
 assert(!html.includes('__HELP_'));
 assert(!html.includes('data:image/jpeg;base64,'));
+for (const file of ['assets/NGC-CC-BY-SA-3.0.txt', 'docs/deep-sky-catalog.md'])
+  assert(fs.readFileSync(path.join(output, file)).equals(fs.readFileSync(file)), file);
 function resource(url) {
   assert(url.startsWith('assets/'));
   assert(!url.includes('..'));

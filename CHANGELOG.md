@@ -1,5 +1,17 @@
 # Changelog / 更新记录
 
+## v1.75 · 2026-11-28
+
+天体简介按对象讲述图形、得名或早期观测。北斗的斗形与四时、巨蟹座的升天传说、气泡星云的发现分别有可追溯的出处；相关传说和后世影像可单独展开。编号恒星加入历史光谱和逐星测量记录，资料目录可按 HD、TYC 编号查找。219 项回归通过，并实测桌面、网页版与断网阅读。[验收记录](docs/verification.md#v175-天体故事与观测出处)
+
+Sky articles trace each figure, name or early observation to its source. The Northern Dipper, Cancer and the Bubble Nebula open with their own histories. Companion accounts open separately. Numbered stars gain historical spectra and individual observing records, searchable in the library by HD and TYC designation. All 219 regressions passed, with browser checks on the desktop, web and offline builds. [Verification](docs/verification.md#v175-天体故事与观测出处)
+
+## v1.74 · 2026-11-28
+
+天体简介直接展示有出处的故事、命名来历、观测发现或星表背景。北斗加入《搜神记》里颜超遇见弈者的故事。全部 88 个西方星座可按历史星图或天赤道位置分组浏览，也可对照传统黄道十二星座与黄道经过的十三星座。541 个正式星名补入具体释名或史料。218 项回归通过，网页及断网单文件均已实测。[验收记录](docs/verification.md#v174-天体故事与西方星座分类)
+
+Object articles now show the story behind a name, an observation or a catalogue entry as soon as they open. The Northern Dipper includes Yan Chao’s encounter with the two game players in the *Soushen ji*. Browse all 88 Western constellations by chart history or position relative to the celestial equator, or compare the traditional twelve zodiac constellations with the thirteen crossed by the ecliptic. All 541 matched star names have an account of their origin or history. All 218 regressions passed, with browser checks on the web and offline builds. [Verification](docs/verification.md#v174-天体故事与西方星座分类)
+
 ## v1.73 · 2026-11-28
 
 巡天和地面观星右击天体即可阅读它的来历、科学特点和观测线索。「浏览星空影像与资料」新增可按名称、别名、星表编号和类别查找的「天体资料」。两个入口共用正文，阅读时保留望远镜指向。218 项默认回归通过，并在网页与断网单文件中核验了两个入口。[验收记录](docs/verification.md#v173-天体资料与右键阅读)

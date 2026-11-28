@@ -7,12 +7,135 @@ import {
   regionObserving,
 } from './chinese-sky-reading-content.js';
 import profiles from './chinese-sky-profiles.json' with { type: 'json' };
+import stories from './chinese-sky-stories.json' with { type: 'json' };
+import relatedStories from './chinese-sky-related-stories.json' with { type: 'json' };
 
 // The data remain in the lazy-loaded culture. Index its actual primary members once.
 const indexes = new WeakMap();
 const languages = ['zh', 'en', 'fr', 'ru'];
 const museum = 'https://hk.space.museum/en/web/spm/resources/';
 const sourceLinks = {
+  achernar: {
+    name: [
+      '中国天文学会天文学名词审定委员会 · 水委一',
+      'Chinese Astronomical Society · Achernar',
+      'Société chinoise d’astronomie · Achernar',
+      'Китайское астрономическое общество · Ахернар',
+    ],
+    url: 'https://nadc.china-vo.org/astrodict/termdetails?id=68',
+  },
+  douWord: {
+    name: [
+      '教育部《异体字字典》· 斗',
+      'Dictionary of Chinese Character Variants · 斗',
+      'Dictionnaire des variantes des caractères chinois · 斗',
+      'Словарь вариантов китайских иероглифов · 斗',
+    ],
+    url: 'https://dict.variants.moe.edu.tw/dictView.jsp?educode=A01746',
+  },
+  dongjun: {
+    name: [
+      '《楚辞》· 九歌·东君',
+      'Songs of Chu · Lord of the East',
+      'Chants de Chu · Le Seigneur de l’Est',
+      'Чуские строфы · Владыка Востока',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/楚辭/九歌#東君',
+  },
+  wangliang: {
+    name: [
+      '《孟子》· 滕文公下',
+      'Mencius · Duke Wen of Teng, II',
+      'Mencius · Le duc Wen de Teng, II',
+      'Мэн-цзы · Тэн Вэнь-гун, часть II',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/孟子/滕文公下',
+  },
+  zaofu: {
+    name: [
+      '《史记》· 秦本纪',
+      'Records of the Grand Historian · Annals of Qin',
+      'Mémoires historiques · Annales des Qin',
+      'Исторические записки · Основные записи о Цинь',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/史記/卷005',
+  },
+  weaverPoem: {
+    name: [
+      '《古诗十九首》· 迢迢牵牛星',
+      'Nineteen Old Poems · Distant Cowherd Star',
+      'Dix-neuf poèmes anciens · La lointaine étoile du Bouvier',
+      'Девятнадцать древних стихотворений · Далёкая звезда Волопаса',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/迢迢牽牛星',
+  },
+  dingTripods: {
+    name: [
+      '《左传》· 宣公三年 · 王孙满对楚子',
+      'Zuo Commentary · Duke Xuan, third year',
+      'Commentaire de Zuo · troisième année de Xuan',
+      'Цзо чжуань · третий год Сюань-гуна',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/王孫滿對楚子',
+  },
+  lacquerChest: {
+    name: [
+      '湖北省博物馆 · 曾侯乙墓二十八宿漆箱',
+      'Hubei Provincial Museum · Lacquer chest of the 28 mansions',
+      'Musée provincial du Hubei · Coffre laqué des 28 demeures',
+      'Музей провинции Хубэй · Ларец с 28 лунными стоянками',
+    ],
+    url: 'https://www.hbww.org.cn/hhfz70n/p/9135.html',
+  },
+  tortoiseBrick: {
+    name: [
+      '故宫博物院 · 玄武纹砖',
+      'Palace Museum · Brick with Xuanwu motif',
+      'Musée du Palais · Brique au motif de Xuanwu',
+      'Дворцовый музей · Кирпич с изображением Сюаньу',
+    ],
+    url: 'https://www.dpm.org.cn/collection/sculpture/233922.html',
+  },
+  rites: {
+    name: [
+      '《礼记》· 曲礼上',
+      'Book of Rites · Quli, I',
+      'Livre des rites · Quli, I',
+      'Книга обрядов · Цюй ли, часть I',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/禮記/曲禮上',
+  },
+  soushen: {
+    name: [
+      '干宝《搜神记》卷三 · 颜超',
+      'Gan Bao · In Search of the Supernatural, book III',
+      'Gan Bao · À la recherche des esprits, livre III',
+      'Гань Бао · Записки о поисках духов, книга III',
+    ],
+    url: 'https://www.shidianguji.com/zh/book/HY0002/chapter/1lme697l6v0uh',
+  },
+  zuozhuan: {
+    name: [
+      '《左传》· 昭公元年',
+      'Zuo Commentary · Duke Zhao, first year',
+      'Commentaire de Zuo · première année de Zhao',
+      'Цзо чжуань · первый год Чжао-гуна',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/春秋左氏傳/昭公',
+  },
+  dadong: songPoem('大东', '大東', 'Dadong'),
+  qiyue: songPoem('七月', '七月', 'Qiyue'),
+  xiaoxing: songPoem('小星', '小星', 'Xiaoxing'),
+  yaodian: {
+    name: [
+      '《尚书》· 尧典',
+      'Book of Documents · Canon of Yao',
+      'Livre des documents · Canon de Yao',
+      'Книга документов · Канон Яо',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/尚書/堯典',
+  },
+  ding: songPoem('定之方中', '定之方中', 'Ding zhi fang zhong'),
   jin: {
     name: [
       '《晋书》卷十一 · 天文志',
@@ -32,7 +155,7 @@ const sourceLinks = {
       'Mémoires historiques · Annales des Yin',
       'Исторические записки · Основные записи об Инь',
     ],
-    url: 'https://ctext.org/text.pl?if=gb&node=4563&remap=gb&show=parallel',
+    url: 'https://zh.wikisource.org/zh-hant/史記/卷003',
   },
   shiji: {
     name: [
@@ -41,7 +164,43 @@ const sourceLinks = {
       'Mémoires historiques · Traité des officiers célestes',
       'Исторические записки · Трактат о небесных чиновниках',
     ],
-    url: 'https://ctext.org/text.pl?if=en&node=5592&show=parallel',
+    url: 'https://zh.wikisource.org/zh-hant/史記/卷027',
+  },
+  zhuangzi: {
+    name: [
+      '《庄子》· 大宗师',
+      'Zhuangzi · The Great Teacher',
+      'Zhuangzi · Le Grand Maître',
+      'Чжуан-цзы · Великий учитель',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/莊子/大宗師',
+  },
+  qingAtlas: {
+    name: [
+      '《钦定大清会典图》卷一百十六 · 近南极恒星',
+      'Illustrated Qing Statutes · Southern stars, vol. 116',
+      'Statuts illustrés des Qing · Étoiles australes, vol. 116',
+      'Иллюстрированный свод Цин · Южные звёзды, цз. 116',
+    ],
+    url: 'https://www.shidianguji.com/zh/book/CADAL02088209/chapter/1lddege75dovn',
+  },
+  qingObservations: {
+    name: [
+      '《钦定仪象考成》卷一 · 恒星总纪',
+      'Qing Imperial Star Catalogue · General account, vol. I',
+      'Catalogue impérial des Qing · Inventaire général, vol. I',
+      'Императорский звёздный каталог Цин · Общий свод, цз. I',
+    ],
+    url: 'https://www.shidianguji.com/book/NGJ892312001039708280834/chapter/1lumn97recxs6',
+  },
+  meiCatalogue: {
+    name: [
+      '梅文鼎《中西经星同异考》',
+      'Mei Wending · A Comparison of Chinese and Western Star Catalogues',
+      'Mei Wending · Comparaison des catalogues stellaires chinois et occidentaux',
+      'Мэй Вэньдин · Сопоставление китайских и западных звёздных каталогов',
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/中西經星同異考_(四庫全書本)/全覽',
   },
   xunzi: {
     name: [
@@ -55,6 +214,10 @@ const sourceLinks = {
   etaCar: {
     name: 'NASA · Eta Carinae',
     url: 'https://science.nasa.gov/asset/hubble/eta-carinae-the-great-eruption-of-a-massive-star/',
+  },
+  ngc6231: {
+    name: 'Chandra X-ray Center · NGC 6231',
+    url: 'https://chandra.si.edu/photo/2018/ngc6231/',
   },
   alphaCen: {
     name: 'NASA · Alpha Centauri',
@@ -135,6 +298,40 @@ function songVolume(volume, chineseNumeral) {
       'История Сун · Астрономия, цз. ' + volume,
     ],
     url: 'https://zh.wikisource.org/zh-hant/宋史/卷0' + volume,
+  };
+}
+function songPoem(name, path, romanised) {
+  return {
+    name: [
+      '《诗经》· ' + name,
+      'Book of Songs · ' + romanised,
+      'Livre des Odes · ' + romanised,
+      'Книга песен · ' + romanised,
+    ],
+    url: 'https://zh.wikisource.org/zh-hant/詩經/' + path,
+  };
+}
+function withStory(article, id, i) {
+  const entry = Object.hasOwn(stories, id) && stories[id];
+  if (!entry) return article;
+  const [storyKind, reference, ...translations] = entry;
+  const primary = sourceList([reference].flat(), i);
+  const primaryUrls = new Set(primary.map((source) => source.url));
+  const related = Object.hasOwn(relatedStories, id) && relatedStories[id];
+  return {
+    ...article,
+    storyKind,
+    story: translations[i],
+    link: primary[0],
+    sources: [...primary, ...article.sources.filter((item) => !primaryUrls.has(item.url))],
+    ...(related && {
+      relatedStory: {
+        kind: related.kind,
+        label: related.label[i],
+        text: related.text[i],
+        links: sourceList(related.references, i),
+      },
+    }),
   };
 }
 function sourceLink(key, i) {
@@ -553,13 +750,17 @@ export function readChineseAsterism(record, culture, language = 'zh') {
   );
   const detail = historicalNotes[a.id]?.[i] || (fieldNotes.has(a.id) ? ref?.[i + 1] : '');
   const note = ['029', '090', '186'].includes(a.id) ? '' : membershipNote(a, i);
-  return {
-    description: profiles[a.id]?.[i] || identity(a, index, i),
-    detail: joinSentences([detail, note], i),
-    observing: joinSentences([identity(a, index, i), geometry(a, index, i, Boolean(ref))], i),
-    sources,
-    link: sources[0],
-  };
+  return withStory(
+    {
+      description: profiles[a.id]?.[i] || identity(a, index, i),
+      detail: joinSentences([detail, note], i),
+      observing: joinSentences([identity(a, index, i), geometry(a, index, i, Boolean(ref))], i),
+      sources,
+      link: sources[0],
+    },
+    a.id,
+    i
+  );
 }
 // Historic assignments vary between texts. Cite the chapter used by each
 // article separately from the Qing-based catalogue that supplies the sky positions.
@@ -582,6 +783,7 @@ const historyReferences = [
   ],
 ].map(([key, ids]) => [key, new Set(ids.split(' '))]);
 const extraReferences = {
+  '039': 'douWord',
   '062': 'algol',
   '075': 'jin',
   '078': 'fuYue',
@@ -603,12 +805,16 @@ export function readChineseGroup(group, culture, language = 'zh') {
     i = languageIndex(language);
   if (Object.hasOwn(symbols, id)) {
     const sources = [sourceLink('symbols', i), sourceLink('mansions', i)];
-    return {
-      description: regions[id][i],
-      observing: regionObserving[id][i],
-      link: sources[0],
-      sources,
-    };
+    return withStory(
+      {
+        description: regions[id][i],
+        observing: regionObserving[id][i],
+        link: sources[0],
+        sources,
+      },
+      id,
+      i
+    );
   }
   const g = index.groups.get(id);
   if (!g) return null;
@@ -617,12 +823,16 @@ export function readChineseGroup(group, culture, language = 'zh') {
       g.type === 'southern' ? ['southern', 'glossary'] : ['song49', 'enclosures', 'glossary'],
       i
     );
-    return {
-      description: regions[id][i],
-      observing: regionObserving[id][i],
-      link: sources[0],
-      sources,
-    };
+    return withStory(
+      {
+        description: regions[id][i],
+        observing: regionObserving[id][i],
+        link: sources[0],
+        sources,
+      },
+      id,
+      i
+    );
   }
   const ref = mansions[id],
     symbol = symbols[g.theme][i];
@@ -668,11 +878,15 @@ export function readChineseGroup(group, culture, language = 'zh') {
           '. Каждая из этих фигур имеет собственный звёздный рисунок.',
       ][i];
   const sources = [sourceLink('mansions', i), sourceLink('jin', i)];
-  return {
-    description: joinSentences([head, ref[i + 1]], i),
-    detail: neighbours,
-    observing: end,
-    link: sources[0],
-    sources,
-  };
+  return withStory(
+    {
+      description: joinSentences([head, ref[i + 1]], i),
+      detail: neighbours,
+      observing: end,
+      link: sources[0],
+      sources,
+    },
+    id,
+    i
+  );
 }

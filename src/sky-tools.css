@@ -212,6 +212,21 @@ details.sky-reading {
   line-height: 1.75;
   letter-spacing: normal;
 }
+.sky-reading-story {
+  margin: 0.9em 0 1em;
+  padding: 0;
+  border: 0;
+}
+.sky-reading-story :is(h4, h5) {
+  margin: 0 0 0.25em;
+  font-size: 0.92em;
+  color: #a8ded7;
+}
+.sky-reading-story p {
+  margin: 0;
+  color: #e1edf1;
+  line-height: 1.75;
+}
 .sky-reading-sources {
   margin-block: 0.4rem;
   font-size: 12px;

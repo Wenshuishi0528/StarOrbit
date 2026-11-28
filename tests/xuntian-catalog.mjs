@@ -92,6 +92,7 @@ for (const [id, queries] of [
   for (const q of queries) assert.equal(search(q)[0]?.id, id, 'Query: ' + q);
 }
 assert.equal(get('HIP:91262', 'zh').name, '织女星');
+assert.equal(search('Gajahmina', 'en')[0].id, 'hip:5364');
 assert.equal(get('hip:91262', 'en').name, 'Vega');
 assert.equal(get('hip:27989', 'fr').name, 'Bételgeuse');
 assert.equal(get('constellation:Cyg', 'ru').name, 'Лебедь');

@@ -1,0 +1,128 @@
+{
+  "263": {
+    "kind": "tradition",
+    "references": [
+      "wangliang"
+    ],
+    "label": [
+      "王良为什么辞去猎手的邀约",
+      "Why Wang Liang declined the hunter’s offer",
+      "Pourquoi Wang Liang refusa l’offre du chasseur",
+      "Почему Ван Лян отказался ездить с охотником"
+    ],
+    "text": [
+      "《孟子》讲，赵简子派王良驾车，带嬖奚出猎。他按规矩驱车，一天下来一无所获，嬖奚便嘲笑他手艺差。再试一次，王良换了不合规矩的追逐办法，一个早晨就猎获十只。嬖奚转口夸他，王良却辞谢了长期搭档的差事。他不愿把破例讨好射手当成自己的本领。",
+      "In Mencius, Wang Liang drives for the hunter Xi. Following proper practice they catch nothing all day and Xi calls him incompetent. Breaking the rules produces ten animals in a morning and praise from Xi. Offered the job permanently, Wang Liang declines to make such driving his trade.",
+      "Dans le Mencius, Wang Liang conduit pour le chasseur Xi. Selon les règles, ils ne prennent rien de la journée et Xi le juge incapable. En s’en écartant, il obtient dix prises en une matinée. Xi le félicite, mais Wang Liang refuse de devenir son cocher attitré à ce prix.",
+      "В книге «Мэн-цзы» Ван Лян везёт охотника Си. Соблюдая правила, за день они ничего не добыли, и Си назвал его неумехой. Отступив от правил, за одно утро взяли десять животных. Си расхвалил возницу, но тот отказался от постоянной службы на таких условиях."
+    ]
+  },
+  "296": {
+    "kind": "tradition",
+    "references": [
+      "zaofu"
+    ],
+    "label": [
+      "为穆王驾车返周",
+      "King Mu’s urgent return",
+      "Le retour précipité du roi Mu",
+      "Срочное возвращение царя Му"
+    ],
+    "text": [
+      "《史记·秦本纪》讲，周穆王正在西方巡游，传来徐偃王起兵的消息。造父握住缰辔，载着穆王昼夜兼程赶回周地。书中以一日千里形容这趟急行，还说穆王把赵城封给造父，后人遂以赵为氏。",
+      "In the Annals of Qin, news of a rising by King Yan of Xu reaches King Mu of Zhou on his western travels. Zaofu takes the reins and rushes him home. The chronicle credits the team with a thousand li in a day and tells how the grant of Zhao to the driver supplied his descendants’ family name.",
+      "Dans les Annales des Qin, le roi Mu de Zhou, en voyage vers l’ouest, apprend le soulèvement du roi Yan de Xu. Zaofu prend les rênes et le ramène au pays. Le récit prête au char mille li en un jour. Le roi donne en fief Zhao au cocher, dont les descendants en tirent leur nom.",
+      "В «Основных записях о Цинь» весть о выступлении правителя Сюй застала чжоуского царя Му в западных землях. Цзаофу взял вожжи и поспешил с царём домой. Хроника приписывает упряжке тысячу ли за день. Получив в награду город Чжао, возница передал его имя своему роду."
+    ]
+  },
+  "306": {
+    "kind": "context",
+    "references": [
+      "dingTripods"
+    ],
+    "label": [
+      "楚王打听鼎有多重",
+      "The king who asked the weight of the tripods",
+      "Le roi qui demanda le poids des trépieds",
+      "Царь, спросивший о весе треножников"
+    ],
+    "text": [
+      "《左传》讲，楚王领兵来到周的边境，向来迎接他的王孙满打听九鼎尺寸和分量。一个诸侯过问王室重器有多重，话里藏着自己能不能把它带走的野心。王孙满没有报斤两，答意是天下归谁要看德行。后来人说「问鼎」，一只青铜礼器就带出了这场交锋。",
+      "In the Zuo Commentary, the king of Chu brings troops to Zhou’s border and asks the envoy Wangsun Man about the size and weight of the royal tripods. Their weight hints at who might carry them off. The envoy answers that authority depends on virtue. Asking about tripods became a way to speak of a bid for power.",
+      "Dans le Commentaire de Zuo, le roi de Chu arrive en armes à la frontière des Zhou et demande à Wangsun Man la taille et le poids des trépieds royaux. Peut-on les emporter ? L’envoyé répond que l’autorité tient à la vertu. Demander le poids des trépieds finit par évoquer l’ambition de régner.",
+      "В «Цзо чжуань» царь Чу приводит войска к границе Чжоу и спрашивает Вансунь Маня о размере и весе царских треножников. За вопросом слышится притязание завладеть ими. Посланник отвечает, что власть держится на добродетели. Вопрос о треножниках стал образом борьбы за власть."
+    ]
+  },
+  "039": {
+    "kind": "tradition",
+    "references": [
+      "soushen"
+    ],
+    "label": [
+      "颜超遇南北斗",
+      "Yan Chao and the two Dippers",
+      "Yan Chao et les deux Louches",
+      "Янь Чао и два Ковша"
+    ],
+    "text": [
+      "《搜神记》卷三讲，管辂在平原遇见少年颜超，见他有早夭之相。颜父来求救，管辂教颜超带上清酒和鹿肉干，去收割过的麦田南边，在大桑树下给两位棋客斟酒，不要开口。两人专心下围棋，吃喝了几巡才看见他。坐北的人说寿数早已写定，坐南的人却说吃了人家的酒肉，总该领情。他借来簿册，把颜超的十九岁改作九十岁。管辂后来才点破，北座是北斗，南座是南斗。在这则志怪里，记生与记死的两组星也会贪一局棋、念一份人情。",
+      "In the third book of the Soushen Ji, Guan Lu sees signs of an early death in young Yan Chao. At his father’s request he sends the boy to a mulberry tree south of a harvested wheat field with wine and dried venison. Two players are absorbed in a game of Go. Yan silently refills their cups. When they finally notice him, the man sitting in the north says the register is settled. His companion insists that their host deserves a kindness, borrows the register and changes nineteen years to ninety. Only afterwards does Guan Lu identify the players as the Northern and Southern Dippers, keepers of death and birth in this tale.",
+      "Au livre III du Soushen Ji, Guan Lu présage une mort précoce au jeune Yan Chao. Son père demande de l’aide. Sous un mûrier au sud d’un champ de blé moissonné, le garçon offre en silence vin et venaison séchée à deux joueurs de go. Absorbés par la partie, ils ne le remarquent qu’après plusieurs coupes. L’homme assis au nord dit que le registre est arrêté. Son partenaire tient à récompenser leur hôte, emprunte le registre et change dix-neuf ans en quatre-vingt-dix. Guan Lu révèle ensuite leur identité. Dans ce récit, les Boisseaux du Nord et du Sud tiennent les registres de la mort et de la naissance.",
+      "В третьей книге «Записок о поисках духов» Гуань Лу предвидит раннюю смерть юноши Янь Чао. По просьбе отца он посылает его с вином и сушёной олениной к тутовому дереву южнее сжатого поля. Двое играют в го, а юноша молча наполняет чаши. Лишь после нескольких кругов игроки замечают гостя. Сидящий на севере говорит, что срок уже записан. Сосед считает, что за угощение следует отблагодарить, берёт книгу и меняет девятнадцать лет на девяносто. Позднее Гуань Лу объясняет, что это были Северный и Южный Ковши, ведающие в этом предании смертью и рождением."
+    ]
+  },
+  "075": {
+    "kind": "context",
+    "references": [
+      "qiyue"
+    ],
+    "label": [
+      "《七月》里的采桑人",
+      "Gathering mulberry leaves in Qiyue",
+      "La cueillette des feuilles de mûrier dans Qiyue",
+      "Сбор тутовых листьев в песне «Седьмой месяц»"
+    ],
+    "text": [
+      "《诗经·七月》把采桑写在春日。黄莺啼鸣，一位女子提着深筐走上小路，去找刚长出的嫩桑叶。诗人让我们跟着她走过这一程，看到养蚕所需的第一筐食物是怎样采来的。",
+      "In the spring of the ode Qiyue an oriole calls. A woman takes a deep basket down a narrow path to find tender mulberry leaves. The poem follows her out to gather the silkworms’ first basket of food.",
+      "Au printemps, dans l’ode Qiyue, un loriot chante. Une femme emporte un panier profond sur un sentier à la recherche de jeunes feuilles de mûrier. Le poème la suit dans sa cueillette, à l’origine de la nourriture des vers à soie.",
+      "В песне «Седьмой месяц» весной поёт иволга. Женщина с глубокой корзиной идёт по узкой тропинке за молодыми тутовыми листьями. Поэт следует за ней и показывает, как набирали первую корзину корма для шелкопрядов."
+    ]
+  },
+  "078": {
+    "kind": "tradition",
+    "references": [
+      "fuYue"
+    ],
+    "label": [
+      "武丁去哪里找傅说",
+      "Where Wuding found Fu Yue",
+      "Où Wuding trouva Fu Yue",
+      "Где У-дин нашёл Фу Юэ"
+    ],
+    "text": [
+      "《史记·殷本纪》说，武丁在梦里见过一位贤人。醒来后，他照着记得的模样寻找，朝中百官无一相像。使者最后在傅险找到一个正在筑墙的工人。武丁同他交谈，认出梦中的人，便请他来辅政。",
+      "In the Annals of Yin, Wuding dreams of a wise man. On waking he searches for the face he remembers. None of his officials fits. His envoys finally find a labourer building a wall at Fuxian. After speaking with him, Wuding recognises the man and makes him his minister.",
+      "Dans les Annales des Yin, Wuding voit en rêve un sage. Au réveil, il cherche ce visage parmi ses officiers. Ses envoyés finissent par trouver à Fuxian un ouvrier occupé à bâtir un mur. En lui parlant, le roi reconnaît l’homme du rêve et le prend pour ministre.",
+      "В «Основных записях об Инь» У-дину снится мудрец. Проснувшись, царь ищет знакомое лицо среди чиновников. Посланцы находят в Фусяне рабочего, который возводит стену. Поговорив с ним, царь узнаёт человека из сна и приглашает его стать советником."
+    ]
+  },
+  "093": {
+    "kind": "tradition",
+    "references": [
+      "qixi"
+    ],
+    "label": [
+      "河鼓二与七夕",
+      "Altair at Qixi",
+      "Altaïr à la fête de Qixi",
+      "Альтаир в предании о Циси"
+    ],
+    "text": [
+      "七夕传说里，河鼓二是牛郎，河对岸明亮的织女一是织女。银河把两人隔开。相传每年农历七月初七，喜鹊在水上搭成一座桥，他们才得以渡过银河相见。",
+      "In the Qixi story Altair, the middle star of the Drum, is the Cowherd. Vega across the Milky Way is the Weaver. Once a year, on the seventh night of the seventh lunar month, magpies make a bridge so the two can cross the river and meet.",
+      "À Qixi, Altaïr, au milieu du Tambour, est le Bouvier. Véga sur l’autre rive de la Voie lactée est la Tisserande. La septième nuit du septième mois lunaire, des pies forment un pont qui permet aux deux amants de traverser le fleuve et de se retrouver.",
+      "В предании о Циси Альтаир в середине Барабана — Пастух. Вега на другом берегу Млечного Пути — Ткачиха. В седьмую ночь седьмого лунного месяца сороки образуют мост, и влюблённые раз в году могут перейти реку и встретиться."
+    ]
+  }
+}

@@ -3,15 +3,20 @@ import { equatorial } from './environment-math.js';
 import { westernRegion, skyAngles } from './sky-location-math.js';
 import { cultureObjectLabel } from './sky-cultures.js';
 import { stellarProfiles, stellarNotes } from './stellar-featured-reading.js';
-import { solarBodyProfiles, solarIntroductions } from './solar-body-reading-data.js';
+import { starHistory } from './stellar-catalogue-history-reading.js';
+import { standardStarNames } from './stellar-name-register-reading.js';
+import { tychoObservations } from './stellar-observing-records.js';
+import { solarBodyProfiles, solarIntroductions, solarStories } from './solar-body-reading-data.js';
 
 const chartNames = new Map(chart.stars.filter((s) => s.hasProperName).map((s) => [s.id, s]));
 
 const copy = {
   zh: {
     field: '从地球望去，这颗星落在{region}天区。',
+    cataloguedField: '{name} 位于{region}天区。',
     star: '星图用它的天球坐标标出了这个光点的位置。',
     catalogue: '这颗恒星在星表里的标识是 {name}。',
+    tychoName: '它在《第谷第二星表》里的编号是 {name}。三段数字依次标记天区、区内序号和星表分量。',
     named: '{name} 是一颗有专名的恒星，在依巴谷星表中能用 {id} 查到它。',
     magnitude: '观测记录给出的 {band} 星等约为 {mag}。',
     beacon: '这样的亮度在星空中相当醒目，适合用来定位邻近较暗的目标。',
@@ -30,8 +35,11 @@ const copy = {
   },
   en: {
     field: 'On a star chart, this point lies in the region marked {region}.',
+    cataloguedField: '{name} lies in the constellation of {region}.',
     star: 'Celestial coordinates mark the position of this point on a star chart.',
     catalogue: 'This star is listed as {name}.',
+    tychoName:
+      'The Tycho-2 designation is {name}. Its three numbers give the sky region, the entry within that region and the catalogue component.',
     named: '{name} is a named star recorded in the Hipparcos catalogue as {id}.',
     magnitude: 'Its apparent magnitude in the {band} band is about {mag}.',
     beacon:
@@ -54,8 +62,11 @@ const copy = {
   },
   fr: {
     field: 'Sur une carte du ciel, cette étoile se trouve dans la région indiquée « {region} ».',
+    cataloguedField: 'Sur les cartes du ciel, {name} se trouve dans la constellation « {region} ».',
     star: 'Ses coordonnées célestes indiquent la position de ce point sur la carte du ciel.',
     catalogue: 'Cette étoile porte la désignation {name} dans le catalogue.',
+    tychoName:
+      'Cette étoile est répertoriée sous le numéro {name} dans Tycho-2. Ses trois nombres indiquent la région du ciel, le numéro dans cette région et la composante du catalogue.',
     named: '{name} est le nom de l’étoile inscrite au catalogue Hipparcos sous le numéro {id}.',
     magnitude: 'Sa magnitude apparente en bande {band} est d’environ {mag}.',
     beacon:
@@ -78,8 +89,11 @@ const copy = {
   },
   ru: {
     field: 'На звёздной карте эта точка лежит в области с подписью «{region}».',
+    cataloguedField: 'На звёздной карте {name} находится в области с подписью «{region}».',
     star: 'Положение этой точки на звёздной карте задано небесными координатами.',
     catalogue: 'В каталоге эта звезда обозначена как {name}.',
+    tychoName:
+      'В каталоге Tycho-2 эта звезда обозначена как {name}. Три числа указывают область неба, номер в этой области и обозначение компонента в каталоге.',
     named: '{name} — собственное имя звезды, записанной в каталоге Hipparcos как {id}.',
     magnitude: 'Её видимая величина в полосе {band} — около {mag}.',
     beacon:
@@ -120,8 +134,10 @@ function catalogueLink(family, id, direction) {
   const tables = { hip: 'I/239/hip_main', gaia: 'I/355/gaiadr3', tycho: 'I/259/tyc2' };
   const names = { hip: 'Hipparcos', gaia: 'Gaia DR3', tycho: 'Tycho-2' };
   const query = new URLSearchParams({ '-source': tables[family] });
-  if (family === 'tycho' && direction) {
-    // The cutouts store a J2000 position and a local row number, not a TYC identifier.
+  const tyc = family === 'tycho' && tychoObservations(id);
+  if (tyc) {
+    ['TYC1', 'TYC2', 'TYC3'].forEach((key, i) => query.set(key, String(tyc[i])));
+  } else if (family === 'tycho' && direction) {
     const { ra, dec } = skyAngles(direction);
     query.set('-c', ra.toFixed(6) + ' ' + dec.toFixed(6));
     query.set('-c.rs', '5');
@@ -139,33 +155,51 @@ export function readCatalogStar(target, hit, language = 'zh') {
   const match = /^(hip|gaia|tycho):(.+)$/.exec(target?.id || hit?.id || '');
   if (!match) return null;
   const [, family, id] = match;
+  if (family !== 'tycho' && !/^\d+$/.test(id)) return null;
   const lang = supportedLanguage(language);
   const profile = family === 'hip' && stellarProfiles[id];
   const phrases = copy[lang];
   const direction = fieldDirection(target, hit);
   const catalogue = catalogueLink(family, id, direction);
+  const history = starHistory(family, id, lang);
   if (profile?.[lang]) {
     const link = { name: profile.source, url: profile.url };
     return {
       description: profile[lang],
+      story: history.story,
+      storyKind: history.storyKind,
+      relatedStory: history.relatedStory,
       detail: stellarNotes[id][lang],
       observing: profile.observing?.[lang],
       link,
-      sources: profile.study ? [link, profile.study, catalogue] : [link, catalogue],
+      sources: [link, ...history.sources, profile.study, catalogue].filter(
+        (s, i, items) => s && items.findIndex((item) => item?.url === s.url) === i
+      ),
     };
   }
 
   const region = direction && cultureObjectLabel(westernRegion(direction), lang);
-  // Tycho cutouts have local row indices, not globally resolvable Tycho identifiers.
+  const tyc = family === 'tycho' && tychoObservations(id);
   const name =
-    family === 'hip' ? 'HIP ' + id : family === 'gaia' ? 'Gaia DR3 ' + id : target?.identifier;
-  const named = family === 'hip' && chartNames.get(Number(id));
-  const intro = [
-    named
-      ? phrases.named.replace('{name}', named[lang] || named.en).replace('{id}', name)
-      : name && phrases.catalogue.replace('{name}', name),
-    region ? phrases.field.replace('{region}', region) : phrases.star,
-  ].filter(Boolean);
+    family === 'hip'
+      ? 'HIP ' + id
+      : family === 'gaia'
+        ? 'Gaia DR3 ' + id
+        : tyc
+          ? 'TYC ' + tyc.slice(0, 3).join('-')
+          : target?.identifier;
+  const chartName = family === 'hip' && chartNames.get(Number(id));
+  const named =
+    chartName?.[lang] || chartName?.en || (family === 'hip' && standardStarNames[id]?.[0]);
+  const intro =
+    name && region && !tyc && !named
+      ? [phrases.cataloguedField.replace('{name}', name).replace('{region}', region)]
+      : [
+          named
+            ? phrases.named.replace('{name}', named).replace('{id}', name)
+            : name && (tyc ? phrases.tychoName : phrases.catalogue).replace('{name}', name),
+          region ? phrases.field.replace('{region}', region) : phrases.star,
+        ].filter(Boolean);
   const measurements = [];
   let observing;
   const fmt = (number, digits) => number.toLocaleString(lang, { maximumFractionDigits: digits });
@@ -205,7 +239,7 @@ export function readCatalogStar(target, hit, language = 'zh') {
     );
   else if (!Number.isFinite(bv) || family === 'gaia') measurements.push(phrases.noDistance);
   const separator = lang === 'zh' ? '' : ' ';
-  const sources = [catalogue];
+  const sources = [catalogue, ...history.sources];
   if (family === 'hip' && hit?.distanceSource === 'hipparcos-2007' && distance > 0) {
     sources.push({
       name: 'CDS VizieR · Hipparcos 2007',
@@ -216,6 +250,9 @@ export function readCatalogStar(target, hit, language = 'zh') {
   }
   return {
     description: intro.join(separator),
+    story: history.story,
+    storyKind: history.storyKind,
+    relatedStory: history.relatedStory,
     detail: measurements.join(separator) || undefined,
     observing,
     link: catalogue,
@@ -231,10 +268,13 @@ export function readSolarBody(bodyId, language = 'zh') {
   if (!Object.hasOwn(solarBodyProfiles, name)) return null;
   const lang = supportedLanguage(language);
   const link = { name: 'NASA Science', url: 'https://science.nasa.gov/' + id + '/facts/' };
+  const story = solarStories[name];
   return {
     description: solarIntroductions[name][lang],
+    story: story[lang],
+    storyKind: story.kind,
     detail: solarBodyProfiles[name][lang],
     link,
-    sources: [link],
+    sources: [link, story.source, story.artifact].filter(Boolean),
   };
 }

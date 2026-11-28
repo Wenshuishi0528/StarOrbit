@@ -83,6 +83,7 @@
   "tests/star-chart-data.mjs",
   "tests/star-chart.mjs",
   "tests/deep-sky-catalog.mjs",
+  "tests/deep-sky-stories.mjs",
   "tests/star-chart-layers.mjs",
   "tests/geography.mjs",
   "tests/lazy-data.mjs",

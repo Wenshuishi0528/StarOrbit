@@ -437,6 +437,8 @@ environmentAssets.moon = image('assets/moon/lroc-color-2k.jpg');
     ])
       fs.copyFileSync('assets/chinese-sky/art/' + name, directory + '/art/' + name);
     fs.mkdirSync(out + '/docs', { recursive: true });
+    for (const name of ['assets/NGC-CC-BY-SA-3.0.txt', 'docs/deep-sky-catalog.md'])
+      fs.copyFileSync(name, out + '/' + name);
     for (const name of fs
       .readdirSync('docs')
       .filter((name) => /^v\d+\.\d+-validation\.json$/.test(name)))
@@ -614,6 +616,7 @@ html = html.replace(
     fs.readFileSync('素材与迁移说明.md', 'utf8') +
     '\n' +
     fs.readFileSync('assets/D3-CELESTIAL-LICENSE.txt', 'utf8') +
+    (split ? '' : '\n' + fs.readFileSync('assets/NGC-CC-BY-SA-3.0.txt', 'utf8')) +
     ' -->\n</head>'
 );
 html = html.replace(

@@ -3,6 +3,10 @@ import { ensureSkyCulture, getSkyCulture, cultureObjectLabel } from './sky-cultu
 import { getXuntianTarget } from './xuntian-catalog.js';
 import { lazyData } from './lazy-data.js';
 import { deepSkyReadingId } from './deep-sky-catalog.js';
+import {
+  WESTERN_CONSTELLATION_CATEGORIES,
+  WESTERN_SKY_POSITIONS,
+} from './western-constellation-categories.js';
 
 const readers = {
   western: lazyData(() => import('./western-constellation-reading.js')),
@@ -10,6 +14,13 @@ const readers = {
   objects: lazyData(() => import('./sky-object-card.js')),
 };
 const knownTypes = new Set(['star', 'deep-sky', 'solar', 'asterism', 'constellation', 'sky-group']);
+const storyLabels = {
+  tradition: '流传的故事',
+  history: '历史记载',
+  name: '名字的来历',
+  discovery: '观测与发现',
+  catalogue: '它怎样进入星表',
+};
 
 export function readingTargetId(id) {
   return id.startsWith('deep-sky:')
@@ -107,19 +118,34 @@ export function bindSkyReading(
     para.textContent = article?.description || t('此位置没有已收录的天体简介。');
     content.append(para);
     if (!article) return;
-    for (const [key, label] of [
-      ['detail', '深入了解'],
-      ['observing', '怎样观察'],
+    if (article.story && article.story !== article.description) {
+      const section = document.createElement('section');
+      section.className = 'sky-reading-story';
+      const caption = document.createElement(heading ? 'h5' : 'h4');
+      caption.textContent = t(storyLabels[article.storyKind] || '名字的来历');
+      const paragraph = document.createElement('p');
+      paragraph.textContent = article.story;
+      section.append(caption, paragraph);
+      content.append(section);
+    }
+    const related = article.relatedStory;
+    const displayed = new Set([article.description, article.story]);
+    for (const [key, label, body] of [
+      ['related', related?.label || t('延伸阅读'), related?.text],
+      ['detail', t('深入了解'), article.detail],
+      ['observing', t('怎样观察'), article.observing],
     ]) {
-      if (!article[key] || article[key] === article.description) continue;
+      const paragraphs = [...new Set([body].flat())].filter((part) => part && !displayed.has(part));
+      if (!paragraphs.length) continue;
       const section = document.createElement('details');
       section.className = 'sky-reading-section sky-reading-' + key;
       section.dataset.readingSection = key;
       section.open = openSections.includes(key);
       const caption = document.createElement('summary');
-      caption.textContent = t(label);
+      caption.textContent = label;
       section.append(caption);
-      for (const part of [].concat(article[key])) {
+      for (const part of paragraphs) {
+        displayed.add(part);
         const paragraph = document.createElement('p');
         paragraph.textContent = part;
         section.append(paragraph);
@@ -127,9 +153,18 @@ export function bindSkyReading(
       content.append(section);
     }
     const sources = new Map();
-    for (const source of [article.link, ...(article.sources || [])])
+    for (const source of [article.link, ...(article.sources || []), ...(related?.links || [])])
       if (source?.url && !sources.has(source.url)) sources.set(source.url, source);
-    if (article.facts?.length || sources.size) {
+    const origin =
+      subject.type === 'constellation' &&
+      WESTERN_CONSTELLATION_CATEGORIES.find(({ id }) => id === article.category);
+    const facts = [...(article.facts || [])];
+    if (origin) {
+      const position = WESTERN_SKY_POSITIONS.find(({ id }) => id === article.skyPosition);
+      facts.unshift(t('按星图来历') + ' · ' + t(origin.label));
+      if (position) facts.push(t('按天球位置') + ' · ' + t(position.label) + ' (J2000)');
+    }
+    if (facts?.length || sources.size) {
       const details = document.createElement('details'),
         caption = document.createElement('summary');
       details.className = 'sky-reading-sources';
@@ -137,10 +172,10 @@ export function bindSkyReading(
       details.dataset.skyAbout = '';
       caption.textContent = t('星表资料与出处');
       details.append(caption);
-      if (article.facts?.length) {
+      if (facts?.length) {
         const list = document.createElement('ul');
         list.className = 'sky-object-facts';
-        for (const fact of article.facts) {
+        for (const fact of facts) {
           const line = document.createElement('li');
           line.textContent = fact;
           list.append(line);

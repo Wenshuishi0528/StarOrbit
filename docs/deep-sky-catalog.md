@@ -29,6 +29,20 @@ python3 scripts/prepare-deep-sky-catalog.py /path/to/pinned/csvs
 
 ## 影像详情中的天体与巡天说明
 
+### 十九世纪的目视记录
+
+德雷尔于 1888 年汇编《星云和星团新总表》（NGC）。资料里的历史观感取自原目录逐行记下的亮暗、形状等线索；它们描述当时观测者在目镜里看见的样子。编表、发现及现代物理分类各有不同的依据。[1888 年原刊](https://ui.adsabs.harvard.edu/abs/1888MmRAS..49....1D/abstract)
+
+Robert E. Erdmann, Jr. 于 1991–2005 年完成机器可读转录，Harold G. Corwin, Jr. 于 2017 年 5–6 月对齐字段、抽查并订正。本版摘取可与本地目标匹配的短字段，转换为离线读本使用的记录。原始 ASCII 文件的 SHA-256 为 `c5d7d25f586edea400b7dde17d0185da2418f445a6207ad7ab8ba072e8eb1dbc`。派生的数据沿用 CC BY-SA 3.0 Unported。[转录与署名](http://haroldcorwin.net/ngcic/) · [逐行资料](http://haroldcorwin.net/ngcic/NGCorig.txt) · [字段说明](http://haroldcorwin.net/ngcic/NGCorigformat.txt) · [随包许可全文](../assets/NGC-CC-BY-SA-3.0.txt)
+
+德雷尔随后编成两册《索引星表》（IC），分别汇集 1888–1894 年与 1895–1907 年找到的目标。读本把可以逐行确认的 IC 编号定位到原刊页，能辨认观测者时也随文列出。四语简介还可读到原表对亮度、形状或亮核的简记。按无后缀的 4,168 项核对，2,276 项可确认当时的外观描述，1,665 项可读出观测者署名，其中至少具备一种记录的有 2,990 项。另有 991 项可直达原刊页，187 项采用编目经过与现代星位。现代补加的字母后缀按各自目录身份处理。[第一册](https://articles.adsabs.harvard.edu/pdf/1895MmRAS..51..185D) · [第二册](https://articles.adsabs.harvard.edu/pdf/1910MmRAS..59..105D)
+
+### 梅西耶的目镜记录
+
+110 个梅西耶天体各自叙述早期记录、得名或有据的观测经历。1781 年原刊的 103 个编号按项连到相应影印对页。例如 M87 页首先讲梅西耶在八等星旁边看见的微光，以及他当晚与 M84、M86 的亮度比较；2019 年事件视界望远镜对星系中心的成像可另行展开。[梅西耶原刊 M87 对页](https://www.digitale-sammlungen.de/en/view/bsb10538209?page=270,271) · [事件视界望远镜发布的图像](https://eventhorizontelescope.org/press-release-april-10-2019-astronomers-capture-first-image-black-hole)
+
+### 巡天与观测作品
+
 巡天深空目录有 12,161 条观测记录，均可查阅中、英、俄、法四语解说。「天体资料」按对象汇总为 12,160 项：M45 与 Melotte 22 对应同一个昴星团，两个编号可以找到同一篇介绍。原始测量位置各自保留。另有一个经配准的韦伯影像视场，列在影像目录中。星座取自同一固定版本 OpenNGC 的 `Const`，沿用星图的本地化名称。`Hubble` 列提供 10,177 个星系的形态，其中 `S?` 和 `E?` 共 74 个，简介保留到星系一级。目录所列的视大小是从地球看见的角尺寸。大小未知时，详情只给观察线索。
 
 精选天体按实际对象撰写，参考 [NASA 梅西耶目录](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/)、[ESA/Hubble 的 NGC 346 观测](https://esahubble.org/images/heic0514a/)和 [ESA/Webb 的 NGC 3324 观测](https://esawebb.org/images/weic2205a/)。例如，M16 的简介同时说明年轻星团和附近柱体，M51 的简介分别标出主星系和伴星系。

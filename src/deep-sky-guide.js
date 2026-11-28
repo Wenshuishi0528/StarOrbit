@@ -7,6 +7,9 @@ import {
 } from './sky-object-reading.js';
 import { deepSkyLandmarks } from './deep-sky-featured-reading.js';
 import { messierReading } from './messier-reading-data.js';
+import { messier1781, messierHistory } from './messier-history-reading.js';
+import { deepCatalogueHistory } from './deep-sky-catalogue-history-reading.js';
+import { landmarkHistory, otherCatalogueHistory } from './deep-sky-landmark-history-reading.js';
 
 const languages = ['zh', 'en', 'ru', 'fr'];
 const messier =
@@ -16,10 +19,6 @@ const openNGC =
 const heasarc = {
   name: 'NASA / HEASARC · Messier',
   url: 'https://heasarc.gsfc.nasa.gov/W3Browse/all/messier.html',
-};
-const messier1781 = {
-  name: 'C. Messier · 1781',
-  url: 'https://onepagepapers.com/messier-catalogue/read/',
 };
 // Hubble's published collection has 89 individual pages for the 110 objects.
 const outsideHubbleCollection = new Set([
@@ -81,10 +80,19 @@ export function readDeepSkyObject(object, language = 'zh') {
     lang = languages[i];
   const id = deepSkyReadingId(object.id);
   const description = describeSkyObject(object, lang);
-  const history = messierReading[id]?.[i];
+  const historicalRow = deepCatalogueHistory(object, i);
+  const history =
+    (/^M\d+$/.test(id) && messierHistory(id, i)) ||
+    landmarkHistory(id, i) ||
+    historicalRow ||
+    otherCatalogueHistory(object, i);
   const extent = catalogueExtentText(object, lang);
   const parts = (values) => values.filter(Boolean).join(i === 0 ? '' : ' ');
-  const detail = parts([history, extent]);
+  const detail = parts([
+    !history.usesExisting && messierReading[id]?.[i],
+    historicalRow && historicalRow !== history && historicalRow.story,
+    extent,
+  ]);
   const observing = parts([describeObjectAppearance(object, lang), landmarkSentence(object, i)]);
   let link;
   let catalogue;
@@ -119,9 +127,14 @@ export function readDeepSkyObject(object, language = 'zh') {
   else if (object.source === 'heasarc-messier') link = heasarc;
   return {
     description,
+    story: history.story,
+    storyKind: history.storyKind,
+    relatedStory: history.relatedStory,
     detail: detail || undefined,
     observing,
     link,
-    sources: [link, catalogue].filter(Boolean),
+    sources: [link, history.source, history.further, historicalRow?.source, catalogue].filter(
+      (s, i, items) => s && items.findIndex((v) => v?.url === s.url) === i
+    ),
   };
 }

@@ -1,0 +1,984 @@
+{
+  "301": {
+    "zh": "古希腊人在这片暗星广布的天区想象出一片“水”，Hydor 原先指的就是它。这个曾覆盖整片天区的词，如今落在鲸鱼座的一颗星上。",
+    "en": "Ancient Greek observers imagined water spread across this region of faint stars. Hydor once named that expanse and now designates a star in Cetus.",
+    "ru": "Древние греки видели среди здешних слабых звёзд водное пространство. Имя Hydor перешло с обширного участка неба на одну звезду Кита.",
+    "fr": "Les Grecs anciens voyaient une étendue d’eau dans cette région d’étoiles faibles. Hydor est passé de toute cette étendue à une étoile de la Baleine."
+  },
+  "3031": {
+    "zh": "Anunītu 有“天上的那一位”之意。在古代阿卡德，这是爱与战争女神伊什塔尔的称号，她的星象跨在今日仙女座与双鱼座一带。",
+    "en": "Anunītu, the heavenly one, was an Akkadian title for Ishtar, associated with love and war. Her figure stretched across parts of today’s Andromeda and Pisces.",
+    "ru": "Ануниту, «небесная», — аккадский эпитет Иштар, богини любви и войны. Её небесная фигура занимала части современных Андромеды и Рыб.",
+    "fr": "Anunītu, « la céleste », était un titre akkadien d’Ishtar, déesse de l’amour et de la guerre. Sa figure occupait une partie de l’actuelle Andromède et des Poissons."
+  },
+  "3092": {
+    "zh": "在爪哇和巴厘的天空传统中，这里曾有一匹马。马来语 kuda 就是马，星名让一种当地曾十分珍贵的牲畜留在天上。",
+    "en": "Java and Bali had a horse figure in this part of the sky. Its Malay name, kuda, recalls an animal once prized as a luxury on the islands.",
+    "ru": "В яванской и балийской традициях здесь помещали коня. Малайское kuda означает лошадь — некогда ценное приобретение на этих островах.",
+    "fr": "À Java et à Bali, on reconnaissait ici un cheval. Le mot malais kuda rappelle un animal autrefois considéré comme un luxe dans ces îles."
+  },
+  "3479": {
+    "zh": "这个名字把尼加拉瓜湖带上了星图。Cocibolca 是这片中美洲大湖的当地旧名，源自纳瓦特尔语传统。",
+    "en": "This star takes a local name of Lake Nicaragua. Cocibolca, of Nahuatl origin, names the largest lake in Central America.",
+    "ru": "Имя отсылает к озеру Никарагуа, крупнейшему в Центральной Америке. Кокиболка — местное название, восходящее к языку науатль.",
+    "fr": "Cocibolca reprend un nom local du lac Nicaragua. Ce nom d’origine nahuatl désigne le plus grand lac d’Amérique centrale."
+  },
+  "3821": {
+    "zh": "仙后座 η 的这个名字可以在 1950 年的斯卡尔纳特普莱索星图里找到。现有星名研究尚未找到它在更早文献里的确切出处。",
+    "en": "Achird occurs for Eta Cassiopeiae in the Skalnaté Pleso atlas of 1950. Researchers have yet to identify a secure earlier use of the name.",
+    "ru": "Ахирд как имя η Кассиопеи встречается в звёздном атласе Скалнате-Плесо 1950 года. Надёжного более раннего употребления пока не установлено.",
+    "fr": "Achird désigne Êta de Cassiopée dans l’atlas de Skalnaté Pleso paru en 1950. Aucun usage plus ancien n’a été établi avec certitude."
+  },
+  "5054": {
+    "zh": "在厄瓜多尔亚马孙地区，瓦奥拉尼人用 nenque 称太阳。这个词被用来给一颗遥远的恒星命名，也把当地的日常语言带上星图。",
+    "en": "Nenque is the Waorani word for the Sun in the Ecuadorian Amazon. A name for our own familiar star was chosen for a distant one.",
+    "ru": "У ваорани в эквадорской Амазонии nenque означает Солнце. Слово для нашей ближайшей звезды стало именем далёкой.",
+    "fr": "Dans l’Amazonie équatorienne, nenque désigne le Soleil en langue waorani. Le nom familier de notre étoile a été choisi pour une étoile lointaine."
+  },
+  "5348": {
+    "zh": "澳大利亚瓦达曼人的 Wurren 意为“孩子”。在当地叙事里，这颗星是蛙女 Dungdung 的孩子“小鱼”，给针鼹 Gawalyan 送水。",
+    "en": "For the Wardaman of northern Australia Wurren means child. In their account the Little Fish, child of the Frog Lady Dungdung, brings water to the echidna Gawalyan.",
+    "ru": "У вардаман на севере Австралии Wurren означает ребёнка. В местном рассказе Маленькая Рыба, дитя женщины-лягушки Дунгдунг, несёт воду ехидне Гавальян.",
+    "fr": "Chez les Wardaman du nord de l’Australie, Wurren signifie enfant. Le Petit Poisson, enfant de la Femme-Grenouille Dungdung, apporte de l’eau à l’échidné Gawalyan."
+  },
+  "5737": {
+    "zh": "在印度星空传统中，Revati 是一位母神，也是二十七个月宿中最后一宿的名字。双鱼座 ζ 代表这一宿，太阳经过附近还可作为历年的标志。",
+    "en": "Revati is both a Hindu mother goddess and the last of the twenty-seven lunar stations. Zeta Piscium marks that station, and the Sun’s passage also served as a calendrical marker.",
+    "ru": "Ревати — имя индуистской богини-матери и последней из 27 лунных стоянок. Её отмечает ζ Рыб, а прохождение Солнца служило календарной вехой.",
+    "fr": "Revati est une déesse mère hindoue et la dernière des vingt-sept stations lunaires. Zêta des Poissons marque cette station, et le passage du Soleil servait aussi de repère calendaire."
+  },
+  "5743": {
+    "zh": "Paushna 是 Revati 的另一个梵文称呼。相邻星区的两颗星因此分别保留了同一位女神的两个名字，也指向印度传统的第二十七个月宿。",
+    "en": "Paushna is an alternative Sanskrit designation for Revati. Neighbouring stars thus preserve two names associated with the goddess of the twenty-seventh lunar station.",
+    "ru": "Паушна — ещё одно санскритское обозначение Ревати. Соседние звёзды хранят два имени, связанных с богиней двадцать седьмой лунной стоянки.",
+    "fr": "Paushna est une autre appellation sanskrite de Revati. Deux étoiles voisines conservent ainsi deux noms liés à la déesse de la vingt-septième station lunaire."
+  },
+  "5824": {
+    "zh": "Buranun 是幼发拉底河的苏美尔语名字。美索不达米亚的观星者曾把这条河画在天上，这颗星选在古代河形所在的区域。",
+    "en": "Buranun names the Euphrates in Sumerian. The star was chosen in the part of the sky where Mesopotamian observers had placed the river.",
+    "ru": "Буранун — шумерское название Евфрата. Звезду выбрали в той части неба, где в Месопотамии помещали эту реку.",
+    "fr": "Buranun est le nom sumérien de l’Euphrate. L’étoile se trouve dans la région où les observateurs mésopotamiens plaçaient ce fleuve."
+  },
+  "6643": {
+    "zh": "Bélénos 借用了高卢神话里的神名。这位神祇与光明、太阳和健康相连，亮星的名字由此联系到古代高卢的信仰。",
+    "en": "Bélénos recalls a god of ancient Gaul. Light, the Sun and health all belonged to his sphere in Gaulish tradition.",
+    "ru": "Беленос — имя древнегалльского божества. С ним связывали свет, Солнце и здоровье.",
+    "fr": "Bélénos appartient à la tradition religieuse de l’ancienne Gaule. La lumière, le Soleil et la santé étaient associés à cette divinité."
+  },
+  "7513": {
+    "zh": "Titawin 指摩洛哥北部得土安的老城。它处在非洲与欧洲往来、阿拉伯与西班牙文化交会的地方，星名纪念的是这座真实的城市。",
+    "en": "Titawin is the historic medina of Tétouan in northern Morocco. Its position linked African and European shores and brought Arabic and Spanish cultures into contact.",
+    "ru": "Титавин — историческая медина Тетуана на севере Марокко. Здесь пересекались пути между Африкой и Европой, арабской и испанской культурами.",
+    "fr": "Titawin renvoie à la médina historique de Tétouan, au nord du Maroc. Cette ville reliait les rives africaine et européenne et les cultures arabe et espagnole."
+  },
+  "7535": {
+    "zh": "Idigna 是底格里斯河的苏美尔语名。这颗星取自古代美索不达米亚画出“底格里斯”的天区，与另一条天河 Buranun（幼发拉底）遥相呼应。",
+    "en": "Idigna is the Sumerian Tigris. The star lies in the ancient Mesopotamian river figure, complementing Buranun, the celestial Euphrates.",
+    "ru": "Идигна — шумерское название Тигра. Звезда лежит в древнем месопотамском образе реки и перекликается с Бурануном, небесным Евфратом.",
+    "fr": "Idigna est le Tigre des Sumériens. Le nom distingue une étoile de cette figure fluviale de Mésopotamie et répond à Buranun, l’Euphrate céleste."
+  },
+  "7607": {
+    "zh": "拜耳 1603 年的《测天图》已经标出 Nembus。书里说它是阿拉伯语，后来的星名研究者却怀疑是拉丁语，并认为它可能与英仙斩下美杜莎头颅的弯剑有关。",
+    "en": "Bayer printed Nembus in 1603 and attributed it to Arabic. Name researchers suspect a Latin origin and a possible allusion to the curved blade Perseus used against Medusa.",
+    "ru": "Байер напечатал имя Nembus в 1603 году и считал его арабским. Исследователи допускают латинское происхождение и возможную связь с изогнутым клинком Персея.",
+    "fr": "Bayer imprima Nembus en 1603 et lui attribua une origine arabe. Les chercheurs envisagent plutôt le latin et une allusion possible à la lame courbe avec laquelle Persée affronta Méduse."
+  },
+  "8886": {
+    "zh": "Segin 出现在捷克天文学家贝奇瓦日编制的斯卡尔纳特普莱索星图中。星图给出了辨认目标的证据，但这个词原本是什么意思，至今没有可靠定论。",
+    "en": "Segin appears in the Skalnaté Pleso atlas by Czech astronomer Antonín Bečvář. The atlas identifies the star securely, while the word’s origin remains unresolved.",
+    "ru": "Сегин встречается в атласе Скалнате-Плесо чешского астронома Антонина Бечваржа. Звезда установлена надёжно, но происхождение самого слова остаётся неясным.",
+    "fr": "Segin figure dans l’atlas de Skalnaté Pleso de l’astronome tchèque Antonín Bečvář. L’atlas identifie l’étoile. L’origine du mot demeure inconnue."
+  },
+  "9353": {
+    "zh": "Zibbatu 在阿卡德语里指“尾”。巴比伦观测日志用天燕的尾部为行星定位，那一带天空今天划入双鱼座。",
+    "en": "Zibbatu refers to tails in Akkadian. Babylonian observers used the tails of a celestial swallow to describe planetary positions in what is now Pisces.",
+    "ru": "Аккадское Zibbatu означает хвосты. Вавилонские дневники отмечали положения планет относительно хвоста небесной ласточки в области нынешних Рыб.",
+    "fr": "Zibbatu évoque des queues en akkadien. Les journaux babyloniens repéraient les planètes par rapport à la queue d’une hirondelle céleste, dans les actuels Poissons."
+  },
+  "10324": {
+    "zh": "Bawy 是古埃及语 ba 的双数，意为“两个灵魂”。古埃及的旬星钟留下了这个名字，把星群的出没与夜间计时联系起来。",
+    "en": "Bawy is the Egyptian dual of ba, a soul. The two souls appear in decanal star clocks, which associated the night’s passing with particular stars.",
+    "ru": "Бауи — двойственная форма египетского ба, души. Две души упоминаются в деканальных звёздных часах, связывавших ход ночи со звёздами.",
+    "fr": "Bawy est le duel égyptien de ba, l’âme. Les deux âmes figurent dans les horloges stellaires décanales, qui associaient des étoiles au déroulement de la nuit."
+  },
+  "10644": {
+    "zh": "古希腊人把三角座的轮廓看成字母 Δ，因而有 Deltoton 这个称呼。古文献中原指整幅三角图形，现代星名取它来称呼图中的一颗星。",
+    "en": "The Greek word Deltoton likened the whole constellation Triangulum to the letter Δ. The modern name singles out one star inside the ancient letter shape.",
+    "ru": "Греческое Deltoton уподобляло всё созвездие Треугольника букве Δ. Сейчас этим старым названием буквенной фигуры обозначена одна её звезда.",
+    "fr": "Le grec Deltoton comparait la constellation entière du Triangle à la lettre Δ. Ce nom de l’ancienne figure désigne aujourd’hui l’une de ses étoiles."
+  },
+  "10670": {
+    "zh": "Apdu 来自古埃及星图里的一只“鸟”。夜间星钟留下了这种星象和多种写法，却不足以判定它究竟是鹅、隼，还是另一种鸟。",
+    "en": "Apdu recalls a bird figure in ancient Egyptian astronomy. The star clocks and surviving spellings establish the bird, but do not settle whether it was a goose, falcon or another species.",
+    "ru": "Апду восходит к небесной птице Древнего Египта. Звёздные часы и варианты написания подтверждают образ птицы, но не позволяют уверенно назвать её вид.",
+    "fr": "Apdu rappelle un oiseau de l’astronomie égyptienne ancienne. Les horloges stellaires et les graphies conservées attestent la figure sans permettre de trancher entre oie, faucon ou autre espèce."
+  },
+  "12191": {
+    "zh": "在埃塞俄比亚，buna 是人们日常说的“咖啡”。这个来自日常生活的词随现代命名进入了星图。",
+    "en": "Buna is an everyday word for coffee in Ethiopia. Choosing it for a star carries a familiar part of life into the sky.",
+    "ru": "В Эфиопии buna — повседневное слово для кофе. Этот привычный земной напиток дал имя звезде.",
+    "fr": "En Éthiopie, buna est un mot d’usage courant pour le café. Ce choix a porté un élément familier de la vie quotidienne sur les cartes du ciel."
+  },
+  "12387": {
+    "zh": "古埃及的旬星钟留下一个位于今日鲸鱼头部附近的天象。Qed 或 Sawyqed 可理解为一圈围栏、一个羊圈，给出了一种完全不同于海兽的认星形状。",
+    "en": "An Egyptian decanal figure lay near the head of modern Cetus. Qed or Sawyqed evoked a circle or sheepfold, a very different outline from the sea monster on later charts.",
+    "ru": "На египетских деканальных часах близ головы нынешнего Кита отмечалась фигура Кед, или Сауикед. Её образ — круг или овечий загон.",
+    "fr": "Une figure des horloges décanales égyptiennes occupait la région de la tête de la Baleine actuelle. Qed ou Sawyqed évoquait un cercle ou un enclos à moutons."
+  },
+  "13209": {
+    "zh": "印度的 Bharani 意为“承载者”，是由白羊座三颗星组成的第二个月宿。现代专名给了三颗中最亮的白羊座 41。",
+    "en": "Bharani, the bearer, is the second Indian lunar station. Of the three stars in Aries that formed it, the brightest, 41 Arietis, now bears the name.",
+    "ru": "Бхарани, «несущая», — вторая индийская лунная стоянка. Из её трёх звёзд в Овне имя получила самая яркая, 41 Овна.",
+    "fr": "Bharani, « celle qui porte », est la deuxième station lunaire indienne. Des trois étoiles du Bélier qui la forment, la plus brillante, 41 du Bélier, en a reçu le nom."
+  },
+  "13254": {
+    "zh": "满语 Tobo Usiha 是天上的“小屋”星群。在当地关于萨满的传统里，灵魂升向天空途中会到这里歇脚。",
+    "en": "The Manchu Tobo Usiha is a hut in the sky. In the associated tradition it offered a resting place for shamans’ souls on their ascent.",
+    "ru": "Маньчжурское Тобо Усиха обозначает небесную хижину. По преданию здесь отдыхали души шаманов, поднимавшиеся в небо.",
+    "fr": "Le mandchou Tobo Usiha désigne une cabane céleste. La tradition en fait une halte pour les âmes des chamanes qui montent vers le ciel."
+  },
+  "13993": {
+    "zh": "Ayeyarwady 指缅甸的伊洛瓦底江。这条贯穿国土的大河给恒星留下了一个可以在地理图和星图上同时找到的名字。",
+    "en": "Ayeyarwady is Myanmar’s great river, also called the Irrawaddy. Its name can now be found on both maps of the land and charts of the sky.",
+    "ru": "Айеявади — главная река Мьянмы, известная также как Иравади. Теперь её имя встречается и на географической, и на звёздной карте.",
+    "fr": "Ayeyarwady est le grand fleuve du Myanmar, aussi appelé Irrawaddy. Son nom se lit désormais sur une carte géographique comme sur une carte stellaire."
+  },
+  "14328": {
+    "zh": "巴比伦《犁星表》在英仙座一带记着“老人”Shugi，并把它与神 Enmesharra 联系起来。英仙座 γ 是双星，现代复合星名把老人和神名分别留给两颗成员。",
+    "en": "The Babylonian MUL.APIN connects the Old Man figure in Perseus with the god Enmesharra. The compound name assigns Shugi and Enmesharra to separate components of Gamma Persei.",
+    "ru": "В вавилонском MUL.APIN небесный Старец в области Персея связан с богом Энмешаррой. Две части современного имени относятся к отдельным компонентам γ Персея.",
+    "fr": "Le recueil babylonien MUL.APIN relie le Vieillard de la région de Persée au dieu Enmesharra. Les deux parties du nom moderne distinguent deux composantes de Gamma de Persée."
+  },
+  "16537": {
+    "zh": "在北欧传说中，海神 Rán 掀起波浪，还会撒网捕捉水手。这个名字将海上的危险和海洋女神一起带入星空。",
+    "en": "In Norse tradition Rán stirs the waves and casts her net for sailors. The star takes its name from this personification of the sea’s dangers.",
+    "ru": "В скандинавской традиции Ран вздымает волны и ловит моряков сетью. Звезда носит имя этого олицетворения опасного моря.",
+    "fr": "Dans la tradition nordique, Rán soulève les vagues et capture des marins dans son filet. L’étoile reprend le nom de cette figure des dangers de la mer."
+  },
+  "17096": {
+    "zh": "Tupi 纪念南美洲东海岸的图皮人。在葡萄牙人 16 世纪到来以前，那里已有许多图皮社群生活。",
+    "en": "Tupi honours an Indigenous people of eastern South America. Numerous Tupi communities lived along the coast before the Portuguese arrived in the sixteenth century.",
+    "ru": "Тупи — имя коренного народа востока Южной Америки. Многочисленные общины тупи жили на побережье до прихода португальцев в XVI веке.",
+    "fr": "Tupi honore un peuple autochtone de l’est de l’Amérique du Sud. De nombreuses communautés tupies vivaient sur la côte avant l’arrivée des Portugais au XVIe siècle."
+  },
+  "17358": {
+    "zh": "Sarvvis 来自斯堪的纳维亚北部萨米人的天上鹿形，名字用的是雄鹿的称呼。另一颗星 Áldu 则保存了雌驯鹿的说法。",
+    "en": "Sarvvis names the male animal in the Sámi celestial reindeer or elk figure of northern Scandinavia. Áldu preserves a related name for a female reindeer on another star.",
+    "ru": "Сарввис — название самца в саамском образе небесного оленя или лося на севере Скандинавии. Другая звезда, Альду, хранит имя самки северного оленя.",
+    "fr": "Sarvvis nomme le mâle d’une figure céleste de renne ou d’élan des Sámis du nord de la Scandinavie. Une autre étoile, Áldu, garde le nom de la femelle du renne."
+  },
+  "18532": {
+    "zh": "在萨米语里，Áldu 是雌驯鹿。有关天上驯鹿的叙事说它入冬仍戴着角，这个细节与雌驯鹿过冬时保留鹿角相呼应。",
+    "en": "Áldu means a female reindeer in Sámi. The celestial animal keeps its antlers through winter in the story, a detail that points to the female reindeer.",
+    "ru": "Áldu по-саамски означает самку северного оленя. В рассказе небесный олень зимой сохраняет рога, что характерно для самки.",
+    "fr": "Áldu désigne la femelle du renne en sámi. Dans le récit, l’animal céleste garde ses bois en hiver, détail qui renvoie à la femelle."
+  },
+  "20484": {
+    "zh": "毕星团在美索不达米亚也曾被看成“天之冠”。Agaanim 把这顶王冠的名字留给星团方向的一颗星。",
+    "en": "The Hyades could be pictured in Mesopotamia as the Crown of Heaven. Agaanim preserves that crown on one star in the cluster’s direction.",
+    "ru": "В Месопотамии Гиады представляли как небесную корону. Агааним сохраняет её имя у звезды в направлении скопления.",
+    "fr": "En Mésopotamie, les Hyades pouvaient figurer la Couronne du ciel. Agaanim conserve ce nom sur une étoile dans la direction de l’amas."
+  },
+  "20535": {
+    "zh": "波江座这颗星的名字在中世纪抄本中有多种拼法。1492 年版《阿方索星表》写作 Beemim，现代名保留了这条可追踪的文字线索。",
+    "en": "Medieval sources spelled the name of this Eridanus star in different ways. Beemim is the form printed in the Alfonsine Tables of 1492.",
+    "ru": "В средневековых источниках имя этой звезды Эридана писали по-разному. Написание Beemim зафиксировано в Альфонсинских таблицах 1492 года.",
+    "fr": "L’orthographe du nom de cette étoile d’Éridan varie selon les sources médiévales. Beemim est la forme imprimée dans les Tables alphonsines de 1492."
+  },
+  "20648": {
+    "zh": "Kleeia 是古希腊文学中毕星姊妹的一员。古代诗人给的是人物的名字，用它来专指毕星团里一颗特定的星则是近代的做法。",
+    "en": "Greek literature names Kleeia among the Hyades sisters. Assigning her ancient personal name to a particular star in the cluster came much later.",
+    "ru": "Древнегреческие тексты называют Клею одной из сестёр Гиад. Закрепление её имени за отдельной звездой скопления произошло гораздо позднее.",
+    "fr": "Les textes grecs nomment Kleeia parmi les sœurs Hyades. L’attribution de ce nom ancien à une étoile précise de l’amas est bien plus récente."
+  },
+  "20877": {
+    "zh": "印度传统把毕宿五与 Rohini 相连，把周围的毕星团看作她的车。Shakata 取“车”的意象，今天以车形中央的一颗星代表它。",
+    "en": "In Indian star lore Rohini is associated with Aldebaran and her cart with the Hyades. Shakata designates a star near the middle of that celestial cart.",
+    "ru": "В индийской традиции Рохини связана с Альдебараном, а её повозку видели в Гиадах. Шаката отмечает звезду у середины небесной повозки.",
+    "fr": "Dans la tradition indienne, Rohini est associée à Aldébaran et son chariot aux Hyades. Shakata distingue une étoile près du milieu de ce chariot céleste."
+  },
+  "20894": {
+    "zh": "尤卡坦玛雅人以一种小鸟的名字 chamukuy 来辨认金牛座 θ。毕星团在许多传统里是一幅大型图案，这个名字则留下了一只小鸟。",
+    "en": "Yucatec Maya tradition identifies Theta Tauri with a small bird called chamukuy. A bird’s name thus survives inside the familiar outline of the Hyades.",
+    "ru": "У юкатекских майя θ Тельца связана с маленькой птицей чамугуй. Её название сохранилось внутри знакомого очертания Гиад.",
+    "fr": "Chez les Mayas du Yucatán, Thêta du Taureau correspond à un petit oiseau appelé chamukuy. Son nom subsiste à l’intérieur de la figure des Hyades."
+  },
+  "20995": {
+    "zh": "Aret 来自古埃及星钟中的旧星象。研究者依据拉美西斯时代星钟标出的时刻推断它可能是一小片聚星天区，其确切范围仍难以复原。",
+    "en": "Aret is an ancient Egyptian sky figure. The hour scale on Ramesside star clocks suggests a compact patch of stars, but its original extent is uncertain.",
+    "ru": "Арет — древнеегипетская небесная фигура. Часовая шкала звёздных часов эпохи Рамессидов указывает на небольшую группу звёзд, но её границы неясны.",
+    "fr": "Aret est une figure du ciel égyptien ancien. Les heures des horloges stellaires ramessides suggèrent un petit groupe d’étoiles, dont les limites restent incertaines."
+  },
+  "21039": {
+    "zh": "Islee 来自阿卡德语“公牛的颌骨”。它原指美索不达米亚“天牛”图形中的一小组星，如今以其中一个方向保留牛颌这个称呼。",
+    "en": "The Akkadian name behind Islee means a bull’s jaw. It belonged to a smaller pattern within the Mesopotamian Bull of Heaven.",
+    "ru": "За именем Исли стоит аккадское «челюсть быка». Так называли небольшую группу внутри месопотамского Небесного Быка.",
+    "fr": "Le nom akkadien à l’origine d’Islee signifie la mâchoire du taureau. Il désignait une petite figure à l’intérieur du Taureau céleste mésopotamien."
+  },
+  "21137": {
+    "zh": "北欧中世纪文献记下一根“狼杖”。杖顶想象成狼颌，大致对应毕星团。Ulfskeptr 让这个颇不寻常的形状重新出现在星图上。",
+    "en": "Medieval Norse glosses mention a wolf staff with the wolf’s jaw at its top. The jaw is identified with the Hyades, and Ulfskeptr recalls the whole staff.",
+    "ru": "Средневековые скандинавские глоссы описывают волчий посох с челюстью волка наверху. Эту челюсть сопоставляют с Гиадами, а имя Ulfskeptr напоминает о целом посохе.",
+    "fr": "Des gloses nordiques médiévales décrivent un bâton du loup surmonté de sa mâchoire. La mâchoire est identifiée aux Hyades et Ulfskeptr rappelle le bâton entier."
+  },
+  "21881": {
+    "zh": "Gaja 在梵语中是“大象”。把大象放在这片天区的传统见于印度尼西亚的 Palelintangan 历图，在那里它对应星期日与五日循环中第二天的交会。",
+    "en": "Gaja means elephant in Sanskrit. The sky figure is documented in Indonesia’s Palelintangan calendars at the meeting of Sunday and the second day of a five-day cycle.",
+    "ru": "По-санскритски gaja — слон. Небесный слон засвидетельствован в индонезийском календаре палелинтанган, где воскресенье пересекается со вторым днём пятидневного цикла.",
+    "fr": "Gaja signifie éléphant en sanskrit. La figure céleste est attestée dans le calendrier indonésien Palelintangan à l’intersection du dimanche et du deuxième jour d’un cycle de cinq jours."
+  },
+  "22491": {
+    "zh": "Mouhoun 是布基纳法索重要的河流，也称黑沃尔特河。许多沿岸居民的生活与这条河相连，它的当地名字如今也用来指认恒星。",
+    "en": "Mouhoun is the Black Volta, a major river of Burkina Faso. The stellar name honours a waterway central to communities along its banks.",
+    "ru": "Мухун — Чёрная Вольта, крупная река Буркина-Фасо. Звезда носит имя водного пути, важного для жителей её берегов.",
+    "fr": "Le Mouhoun, ou Volta Noire, est un grand fleuve du Burkina Faso. L’étoile porte le nom de ce cours d’eau essentiel aux populations riveraines."
+  },
+  "22565": {
+    "zh": "在爪哇与巴厘的传统历图中，Lintang Lembu 是一头能拉车的牛。这个名字保存了岛屿生活里的役畜，也保存了将天象放进历谱的习惯。",
+    "en": "Lintang Lembu is the draft ox of traditional Javanese and Balinese calendars. The star name preserves both an animal that drew carts and its place in an island calendar.",
+    "ru": "Линтанг Лембу — тягловый бык традиционных календарей Явы и Бали. Название сохраняет образ животного, которое запрягали в повозки, и его место в календаре.",
+    "fr": "Lintang Lembu est le bœuf de trait des calendriers traditionnels de Java et de Bali. Le nom rappelle l’animal attelé aux chars et sa place dans le calendrier insulaire."
+  },
+  "24003": {
+    "zh": "Mago 是埃塞俄比亚的一座国家公园，以长颈鹿闻名。这颗以它为名的星也恰好落在鹿豹座，也就是现代星图的长颈鹿天区。",
+    "en": "Mago National Park in Ethiopia is known for its giraffes. The star chosen for its name lies in Camelopardalis, the celestial giraffe.",
+    "ru": "Эфиопский национальный парк Маго известен жирафами. Звезда, названная в его честь, находится как раз в созвездии Жирафа.",
+    "fr": "Le parc national de Mago, en Éthiopie, est connu pour ses girafes. L’étoile qui en porte le nom se trouve justement dans la constellation de la Girafe."
+  },
+  "24305": {
+    "zh": "Bade 是巴厘传统里的送葬高塔。它也曾是当地天空中的一种图形，将仪式中可见的高塔画进了夜空。",
+    "en": "Bade is a Balinese funerary tower. A figure in the Balinese sky shared its name, carrying a structure from island ritual into the stars.",
+    "ru": "Баде — балийская погребальная башня. Её именем обозначалась фигура в местном небе, переносившая ритуальную постройку к звёздам.",
+    "fr": "Bade est une tour funéraire balinaise. Une figure du ciel de Bali en portait le nom, transposant parmi les étoiles une construction rituelle de l’île."
+  },
+  "24822": {
+    "zh": "在公元前一千纪的巴比伦星图里，金牛座东半边有一辆战车。Gigir 继承的正是这辆车的苏美尔名。",
+    "en": "A Babylonian chariot occupied the eastern half of modern Taurus in the first millennium BCE. Gigir preserves its Sumerian name.",
+    "ru": "В первом тысячелетии до н. э. вавилонская Колесница занимала восточную часть нынешнего Тельца. Гигир сохраняет её шумерское имя.",
+    "fr": "Au premier millénaire avant notre ère, un chariot babylonien occupait l’est du Taureau actuel. Gigir en garde le nom sumérien."
+  },
+  "26241": {
+    "zh": "Hatysa 标在贝奇瓦日编制的斯卡尔纳特普莱索星图上，指向猎户座剑部的这颗星。星名工作组未能确定这个词出自哪一种更早的语言传统。",
+    "en": "Bečvář’s Skalnaté Pleso atlas records Hatysa for the star in Orion’s sword. A secure linguistic origin for the word has not been established.",
+    "ru": "В атласе Скалнате-Плесо Бечваржа имя Hatysa относится к звезде в мече Ориона. Надёжно установить языковое происхождение слова пока не удалось.",
+    "fr": "L’atlas de Skalnaté Pleso de Bečvář indique Hatysa pour l’étoile de l’épée d’Orion. L’origine linguistique de ce mot reste incertaine."
+  },
+  "26380": {
+    "zh": "在澳大利亚东南部的布努龙语里，bubup 指孩子。这个带有亲属与日常生活意味的词被选作恒星专名。",
+    "en": "Bubup means child in Boonwurrung, an Indigenous language of south-eastern Australia. A word from family life thus became a star name.",
+    "ru": "Bubup на языке бунвуррунг юго-восточной Австралии означает ребёнка. Семейное слово стало именем звезды.",
+    "fr": "Bubup signifie enfant en boonwurrung, langue autochtone du sud-est australien. Un mot de la vie familiale est ainsi devenu nom d’étoile."
+  },
+  "27288": {
+    "zh": "苏美尔语 DAR.LUGAL 指公鸡。Darlugal 把巴比伦天空中的家禽保存在现代星名中，和同一天空传统里的战车、牛颌各自成形。",
+    "en": "The Sumerian expression DAR.LUGAL names a rooster. Darlugal preserves a domestic bird among the animals and implements of the Babylonian sky.",
+    "ru": "Шумерское сочетание DAR.LUGAL означает петуха. Дарлугал сохраняет образ домашней птицы среди животных и предметов вавилонского неба.",
+    "fr": "L’expression sumérienne DAR.LUGAL désigne un coq. Darlugal garde un oiseau domestique parmi les animaux et les objets du ciel babylonien."
+  },
+  "28404": {
+    "zh": "Gasha 是满族传统中的神鹰，与萨满的灵魂相连。鹰能飞向高天，也因此象征灵魂升空的能力。",
+    "en": "In Manchu tradition Gasha is a divine eagle associated with shamans’ souls. Its power of flight links the bird to journeys toward the sky.",
+    "ru": "В маньчжурской традиции Гаша — священный орёл, связанный с душами шаманов. Способность летать связывает птицу с восхождением в небо.",
+    "fr": "Dans la tradition mandchoue, Gasha est un aigle divin associé aux âmes des chamanes. Son vol symbolise leur capacité à s’élever vers le ciel."
+  },
+  "29271": {
+    "zh": "山案座原先纪念的是南非桌山。Hoerikwaggo 来自当地把它称作“海山”的传统，给拉丁星座名所指的同一座山补上了另一种名字。",
+    "en": "Mensa originally commemorated South Africa’s Table Mountain. Hoerikwaggo preserves an Indigenous designation of the same mountain as the mountain of the sea.",
+    "ru": "Созвездие Столовой Горы названо в честь горы в Южной Африке. Hoerikwaggo хранит её местное имя, передающее образ морской горы.",
+    "fr": "La Table commémore à l’origine la montagne sud-africaine. Hoerikwaggo conserve un nom autochtone de ce même relief, la montagne de la mer."
+  },
+  "30860": {
+    "zh": "Lucilinburhuc 是卢森堡起源处的城堡名。963 年，西格弗里德伯爵在此建立堡垒，星名保留了比现代国名更古老的写法。",
+    "en": "Lucilinburhuc was the fortress associated with Luxembourg’s beginnings. Count Siegfried established it in 963, and the stellar name preserves its early form.",
+    "ru": "Люцилинбурхуком называли крепость, с которой начинался Люксембург. Её в 963 году основал граф Зигфрид, а звезда сохранила старую форму названия.",
+    "fr": "Lucilinburhuc désignait la forteresse à l’origine du Luxembourg. Le comte Sigefroid l’établit en 963 et l’étoile en conserve le nom ancien."
+  },
+  "31685": {
+    "zh": "Pipit 是婆罗洲西加里曼丹肯达扬人的星名，明确指向今天的船尾座 ν。这里保存的是当地人原本就用来认这一颗星的称呼。",
+    "en": "The Kendayan of West Kalimantan in Borneo identify Nu Puppis as Pipit. The traditional identification points to this particular star in the modern Stern constellation.",
+    "ru": "У кендаян на западе Калимантана на Борнео Пипит обозначает именно ν Кормы. Сохранилось местное имя конкретной звезды.",
+    "fr": "Les Kendayan du Kalimantan occidental, à Bornéo, nomment Pipit précisément Nu de la Poupe. Le nom conserve une identification stellaire locale."
+  },
+  "31940": {
+    "zh": "Kamelos 是希腊语的“骆驼”。鹿豹座的拉丁名本来也带有“斑点骆驼”的意象，17 世纪的制图者巴尔奇甚至曾提议把它画成丽贝卡的骆驼。",
+    "en": "Kamelos means camel in Greek. The constellation’s name Camelopardalis evokes a spotted camel, and Jacob Bartsch even proposed Rebecca’s camel as an alternative figure in 1624.",
+    "ru": "По-гречески kamelos — верблюд. Название Жирафа, Camelopardalis, вызывает образ пятнистого верблюда. В 1624 году Якоб Барч предлагал видеть здесь верблюда Ревекки.",
+    "fr": "Kamelos signifie chameau en grec. Camelopardalis évoque un chameau tacheté, et Jacob Bartsch proposa même en 1624 d’y voir le chameau de Rébecca."
+  },
+  "33719": {
+    "zh": "Citalá 在中美洲的纳瓦特语中意为“星之河”。星名将河流与星光放进同一个词里。",
+    "en": "Citalá evokes a river made of stars in the Central American Nawat language. A river and the night sky meet in one name.",
+    "ru": "На центральноамериканском языке нават Citalá означает звёздную реку. В одном имени соединены река и ночное небо.",
+    "fr": "En nawat, langue d’Amérique centrale, Citalá signifie rivière d’étoiles. Un seul nom associe un cours d’eau au ciel nocturne."
+  },
+  "33856": {
+    "zh": "澳大利亚布龙人的故事把它说成蜥蜴祖先，两侧星是他的妻子。袋鼬月神 Mityan 想带走其中一位，引发争斗。月面暗斑在故事里是战后留下的伤痕。",
+    "en": "In Boorong tradition a lizard ancestor stands between two wives. Mityan, the quoll Moon, tried to lure one away. Their fight accounts for the scars seen on the Moon’s face.",
+    "ru": "В предании буронг предок-ящерица стоит между двумя жёнами. Луна-кволл Митьян попыталась увлечь одну из них. Тёмные следы на Луне связывают с их схваткой.",
+    "fr": "Dans un récit boorong, un ancêtre lézard se tient entre ses deux épouses. Mityan, la Lune figurée par un chat marsupial, tenta d’en séduire une. Leur lutte explique les cicatrices du visage lunaire."
+  },
+  "38170": {
+    "zh": "托勒密曾用船尾上的“小盾”给邻星指路。表示盾的小词 Aspidiske 在传抄中出现变形，Azmidi 就来自这条拼写曲折的线索。",
+    "en": "Ptolemy located stars above a small shield on the stern of Argo. The Greek term Aspidiske acquired variant spellings, and Azmidi descends from one of its corrupted forms.",
+    "ru": "Птолемей указывал звёзды над щитком на корме Арго. Греческое Aspidiske изменялось при переписывании, а Azmidi восходит к одной из искажённых форм.",
+    "fr": "Ptolémée situait des étoiles au-dessus d’un petit bouclier de la poupe d’Argo. Le grec Aspidiske connut diverses graphies, dont une forme altérée à l’origine d’Azmidi."
+  },
+  "40881": {
+    "zh": "一份记月宿的科普特语手稿里有 piautos，可读作“同一个”。它把科普特语成分与希腊语“自身”组合起来，具体为何成为月宿用语尚不清楚。",
+    "en": "Piautos occurs in a Coptic manuscript on lunar stations. It combines a Coptic article with Greek autos to mean the same one, though the reason for this lunar usage remains unclear.",
+    "ru": "Пиаутос встречается в коптской рукописи о лунных стоянках. Коптский артикль и греческое autos дают смысл «тот же самый», но происхождение такого употребления неясно.",
+    "fr": "Piautos figure dans un manuscrit copte sur les stations lunaires. L’article copte et le grec autos évoquent « le même », sans que cet emploi lunaire soit éclairci."
+  },
+  "41037": {
+    "zh": "Avior 是英国航海历书部门为《航空历书》创制的名字。给船底座 ε 一个简短而能念出的专名，也方便飞行导航者在历书里认星。",
+    "en": "Britain’s Nautical Almanac Office coined Avior for its Air Almanac. Epsilon Carinae gained a short, pronounceable name in a publication used for aerial navigation.",
+    "ru": "Британская служба морских альманахов придумала Авиор для авиационного альманаха. Так ε Киля получила короткое произносимое имя для воздушной навигации.",
+    "fr": "Le service britannique des éphémérides nautiques créa Avior pour son almanach aéronautique. Epsilon de la Carène reçut ainsi un nom court pour la navigation aérienne."
+  },
+  "43103": {
+    "zh": "爪哇语 yuyu 指稻田里也能见到的淡水蟹。岛上的历图把这种日常可见的小动物放在天上，旧爪哇语的词形是 hayuyu。",
+    "en": "Yuyu is the Javanese freshwater crab familiar in rice fields. Island calendars placed it among the stars, preserving an animal already named hayuyu in Old Javanese.",
+    "ru": "Яванское yuyu — пресноводный краб, знакомый по рисовым полям. Островные календари перенесли на небо животное, которое на старояванском называлось hayuyu.",
+    "fr": "En javanais, yuyu est un crabe d’eau douce fréquent dans les rizières. Les calendriers de l’île plaçaient au ciel cet animal, appelé hayuyu en vieux javanais."
+  },
+  "43109": {
+    "zh": "Ashlesha 是印度传统月宿之一的梵文名，所在星群落在今天的长蛇座。一个原本标记月亮行经天区的名字，如今也用来称这一颗星。",
+    "en": "Ashlesha denotes an Indian lunar station whose stars lie in modern Hydra. A name marking a stretch of the Moon’s route now identifies one star there.",
+    "ru": "Ашлеша — санскритское имя индийской лунной стоянки в области современной Гидры. Старое название участка лунного пути теперь относится и к одной звезде.",
+    "fr": "Ashlesha désigne en sanskrit une station lunaire indienne dans l’actuelle Hydre. Le nom d’une portion du chemin de la Lune distingue aujourd’hui une étoile."
+  },
+  "44946": {
+    "zh": "波斯语 nahn 是“鼻子”。1971 年一份美国航天局备忘录已经将这个词用作巨蟹座 ξ 的名字，因此可以查到一次明确的近代用例。",
+    "en": "Nahn is Persian for nose. A 1971 NASA memorandum applies it to Xi Cancri, providing a dated modern record of that identification.",
+    "ru": "Персидское nahn означает нос. В меморандуме NASA 1971 года это слово отнесено к ξ Рака — датированный пример современного употребления.",
+    "fr": "En persan, nahn désigne le nez. Un mémorandum de la NASA de 1971 l’applique à Xi du Cancer, attestation moderne datée de cet usage."
+  },
+  "45556": {
+    "zh": "Aspidiske 是古希腊语的“小盾”。托勒密曾以南船上装饰和护卫用的盾牌给星定位。后来大船拆分为几个现代星座，小盾究竟对应哪里也曾被弄混。",
+    "en": "Aspidiske means a small shield. Ptolemy used shields attached to Argo to locate stars. Dividing the ship among modern constellations later complicated the identification.",
+    "ru": "Аспидиске — греческий щиток. Птолемей описывал положения звёзд относительно щитов на Арго. Позднее разделение корабля на созвездия запутало отождествление.",
+    "fr": "Aspidiske est un petit bouclier en grec. Ptolémée situait des étoiles par rapport aux boucliers fixés sur Argo. Le découpage ultérieur du navire en constellations brouilla l’identification."
+  },
+  "47087": {
+    "zh": "Illyrian 纪念古代伊利里亚人。这个称呼在阿尔巴尼亚被用来表达与古代巴尔干历史的联系，星名沿用了这层文化认同。",
+    "en": "Illyrian recalls the ancient Illyrians of the Balkans. The name chosen for the star expresses the historical connection claimed in Albanian cultural identity.",
+    "ru": "Имя Illyrian напоминает об античных иллирийцах на Балканах. Выбор звёздного имени отражает их место в историческом самосознании албанцев.",
+    "fr": "Illyrian rappelle les anciens Illyriens des Balkans. Le choix du nom exprime la place de cette filiation dans l’identité culturelle albanaise."
+  },
+  "53524": {
+    "zh": "在《奥德赛》里，守风者 Aiolos 把风装进牛皮袋，只留下西风送奥德修斯返乡。这位掌风人的名字如今落在一颗恒星上。",
+    "en": "In the Odyssey, Aiolos bound the winds in an oxhide bag but left the west wind free to carry Odysseus home. The star bears the wind keeper’s name.",
+    "ru": "В «Одиссее» Эол запер ветры в мешке из бычьей шкуры, оставив западный ветер помогать Одиссею вернуться домой. Звезда названа в честь хранителя ветров.",
+    "fr": "Dans l’Odyssée, Aiolos enferme les vents dans une outre de peau de bœuf et laisse le vent d’ouest ramener Ulysse chez lui. L’étoile porte le nom du gardien des vents."
+  },
+  "53721": {
+    "zh": "Chalawan 是泰国民间故事里的鳄鱼王。给恒星取这个名字，保留的是一位有名字的叙事角色和它所代表的水中动物。",
+    "en": "Chalawan is the crocodile king in Thai folklore. The star carries the personal name of this animal ruler from a story into the sky.",
+    "ru": "Чалаван — царь крокодилов в тайской сказке. Имя сказочного властителя водных животных стало именем звезды.",
+    "fr": "Chalawan est le roi des crocodiles dans un conte thaï. Le nom propre de ce souverain animal est passé du récit aux étoiles."
+  },
+  "54872": {
+    "zh": "Zosma 在希腊语里是腰带或腰布。近代学者误以为中世纪文献用它形容狮子座 δ，原文其实写的是髋部或下背。这次误读留下了今天的名字。",
+    "en": "Zosma means a girdle or loincloth in Greek. Early modern writers mistakenly read it into a description of Delta Leonis that actually referred to the hip or lower back.",
+    "ru": "По-гречески zosma — пояс или набедренная повязка. Учёные Нового времени приписали это слово описанию δ Льва, где в действительности говорилось о бедре или пояснице.",
+    "fr": "En grec, zosma évoque une ceinture ou un pagne. Des auteurs modernes l’ont attribué à tort à une description de Delta du Lion qui parlait en réalité de la hanche ou du bas du dos."
+  },
+  "56211": {
+    "zh": "波斯语 jauzahr 本是天文学术语，指月球或行星轨道与参照平面的交点。Giausar 后来被当成天龙座 λ 的专名，使一个几何位置的名字转到了恒星上。",
+    "en": "The Persian jauzahr denoted an orbital node of the Moon or a planet. Giausar arose when this geometrical term was treated as a name for Lambda Draconis.",
+    "ru": "Персидское jauzahr обозначало узел орбиты Луны или планеты. Гиаузар возникло при переносе геометрического термина на λ Дракона.",
+    "fr": "Le persan jauzahr désignait un nœud de l’orbite lunaire ou planétaire. Giausar est né du transfert de ce terme géométrique à Lambda du Dragon."
+  },
+  "56508": {
+    "zh": "Formosa 曾是欧洲航海者称呼台湾的地名，带有“美丽”之意。这个沿用到 17 世纪的名字后来被选来代表恒星。",
+    "en": "Formosa recalls an early European name for Taiwan and its association with beauty. The stellar choice preserves a geographical name used in the seventeenth century.",
+    "ru": "Формоза — старое европейское название Тайваня, связанное со словом «прекрасная». Имя звезды сохраняет географическое название XVII века.",
+    "fr": "Formosa rappelle un ancien nom européen de Taïwan et son évocation de la beauté. Le choix stellaire conserve un toponyme employé au XVIIe siècle."
+  },
+  "57291": {
+    "zh": "在皮特凯恩群岛的皮特凯恩语里，Uklun 表示“我们”。用集体代词给星命名，留下的是岛民说起自己时使用的一个词。",
+    "en": "Uklun is the Pitkern word for us or we. The star thus bears the word Pitcairn Islanders use to speak of themselves collectively.",
+    "ru": "На питкэрнском языке uklun означает «мы» или «нас». Звезде дали слово, которым островитяне называют себя сообща.",
+    "fr": "En pitkern, uklun signifie « nous ». L’étoile porte le mot par lequel les habitants de Pitcairn parlent d’eux-mêmes collectivement."
+  },
+  "57820": {
+    "zh": "Aniara 原本是一艘虚构的飞船，出自瑞典作家哈里·马丁松的同名长诗。这个星名来自近现代文学对太空的想象。",
+    "en": "Aniara is a fictional spacecraft in Swedish author Harry Martinson’s epic poem of that name. A literary voyage into space supplied the stellar name.",
+    "ru": "Аниара — космический корабль из одноимённой поэмы шведского писателя Харри Мартинсона. Путь к этому звёздному имени ведёт через литературу.",
+    "fr": "Aniara est le vaisseau fictif du poème épique du même nom de l’écrivain suédois Harry Martinson. Le nom stellaire vient ainsi d’un voyage littéraire dans l’espace."
+  },
+  "58952": {
+    "zh": "在阿兹特克传统里，Tonatiuh 是太阳神。这颗星以神名纪念古代墨西哥文化理解太阳的一种方式。",
+    "en": "Tonatiuh is the solar deity of Aztec tradition. The star name recalls a way the Sun was understood in ancient Mexico.",
+    "ru": "Тонатиу — солнечное божество в традиции ацтеков. Его имя у звезды напоминает о представлениях о Солнце в древней Мексике.",
+    "fr": "Tonatiuh est la divinité solaire de la tradition aztèque. Son nom stellaire rappelle une manière de comprendre le Soleil dans l’ancien Mexique."
+  },
+  "59747": {
+    "zh": "在埃塞俄比亚穆尔西人的传统里，Imai 也是奥莫河岸草的名字。这颗星在暮光中隐没，提示河水会涨高并压倒河岸草。人们还用接续隐没的几颗星掌握洪水与播种的时节。",
+    "en": "For the Mursi, imai also names a grass on the Omo River. The star’s seasonal disappearance signalled water high enough to flatten the grass, part of a sequence used to time flooding and planting.",
+    "ru": "У мурси imai — также трава на берегах Омо. Исчезновение звезды в сумерках предвещало воду, приминавшую траву. Дальнейший ход звёзд помогал выбирать время посева.",
+    "fr": "Chez les Mursi, imai est aussi une herbe des rives de l’Omo. La disparition de l’étoile au crépuscule annonçait une crue capable de coucher l’herbe, parmi les signes guidant les semailles."
+  },
+  "60260": {
+    "zh": "瓦达曼人的这一段天上旅程里，红色狐蝠沿银河向南十字飞行，途中交换仪式歌。Ginan 是这个传承里南十字座 ε 的名字，星的颜色也让人想起仪式用的袋子。",
+    "en": "In a Wardaman account red flying foxes follow the Milky Way toward the Southern Cross, trading ceremonial songs. Ginan is Epsilon Crucis in this tradition, its colour recalling a ceremonial bag.",
+    "ru": "В предании вардаман рыжие летучие лисицы летят по Млечному Пути к Южному Кресту, обмениваясь обрядовыми песнями. Гинан — имя ε Южного Креста, цвет которой напоминает обрядовую сумку.",
+    "fr": "Dans un récit wardaman, des roussettes rousses suivent la Voie lactée vers la Croix du Sud en échangeant des chants rituels. Ginan y désigne Epsilon de la Croix, dont la couleur rappelle un sac cérémoniel."
+  },
+  "60644": {
+    "zh": "在巴拉圭流传的瓜拉尼创世叙事中，Tupã 是帮助至高神 Ñamandu 创造宇宙的神祇之一。这颗星取的正是这位协助创世者的名字。",
+    "en": "In a Guarani creation account told in Paraguay, Tupã is one of the gods who help Ñamandu bring the universe into being. The star honours that divine helper.",
+    "ru": "В гуаранийском предании Парагвая Тупа — один из богов, помогающих Ньяманду создать вселенную. Звезда носит имя участника сотворения мира.",
+    "fr": "Dans un récit guarani du Paraguay, Tupã est l’un des dieux qui aident Ñamandu à créer l’univers. L’étoile reprend le nom de cet auxiliaire divin."
+  },
+  "61317": {
+    "zh": "希腊语 chara 是“喜悦”。赫维留斯在 1690 年的星图里用它称南边的那只猎犬，后来这个整只狗的名字固定在猎犬座 β 上。",
+    "en": "Chara means joy in Greek. Hevelius used it for the southern of his hunting dogs in 1690. The whole dog’s name later settled on Beta Canum Venaticorum.",
+    "ru": "Греческое chara означает радость. В 1690 году Гевелий так назвал южную из своих гончих собак, а позднее имя всей собаки перешло к β Гончих Псов.",
+    "fr": "Chara signifie joie en grec. En 1690, Hevelius nomma ainsi le chien austral de sa figure de chasse. Le nom du chien entier s’attacha ensuite à Bêta des Chiens de chasse."
+  },
+  "61359": {
+    "zh": "乌鸦座 β 的 Kraz 可在贝奇瓦日的斯卡尔纳特普莱索星图中查到。星图有据可追，但它究竟借自什么词，星名研究者还没有定论。",
+    "en": "Kraz is attested for Beta Corvi in Bečvář’s Skalnaté Pleso atlas. The chart is identifiable, but no secure etymology for its label has been found.",
+    "ru": "Краз обозначает β Ворона в атласе Скалнате-Плесо Бечваржа. Атлас известен, но происхождение подписи остаётся неустановленным.",
+    "fr": "Kraz désigne Bêta du Corbeau dans l’atlas de Skalnaté Pleso de Bečvář. Le document est identifié, mais l’étymologie de la légende reste inconnue."
+  },
+  "61394": {
+    "zh": "Phyllon Kissinou 是古希腊语的“一片常春藤叶”。词组出自托勒密《天文学大成》，现代观测者一度将它缩作 Kissin，正式名恢复了整片叶子的说法。",
+    "en": "Phyllon Kissinou is an ivy leaf in Ptolemy’s Greek wording. Modern observers used the shorter Kissin before the full expression became the star name.",
+    "ru": "Phyllon Kissinou — лист плюща в греческом тексте «Альмагеста». Современные наблюдатели сокращали его до Kissin, прежде чем звезда получила полное выражение.",
+    "fr": "Phyllon Kissinou désigne une feuille de lierre dans le grec de l’Almageste. Des observateurs modernes disaient simplement Kissin avant l’adoption de l’expression complète."
+  },
+  "61966": {
+    "zh": "Lumbung 是很快就能搭起的稻谷仓。在传统历图中，天上这座谷仓对应星期三与五市日循环第三日的交会，把收储稻米的建筑放在历法里。",
+    "en": "Lumbung is a quick-built rice granary. Its traditional calendar figure falls where Wednesday meets the third day of the market cycle, giving a farm building a place in time as well as sky.",
+    "ru": "Лумбунг — быстро возводимый рисовый амбар. В традиционном календаре его фигура связана со средой и третьим днём рыночного цикла.",
+    "fr": "Lumbung est un grenier à riz que l’on monte rapidement. Dans le calendrier traditionnel, il se place au croisement du mercredi et du troisième jour du cycle des marchés."
+  },
+  "64241": {
+    "zh": "“Diadem”是王冠或冠带。后发座描绘王后贝勒尼基的秀发，用一件王室发饰称呼后发座 α，正好把星和头发的图像连了起来。",
+    "en": "A diadem is a royal headband or crown. Alpha Comae Berenices thus carries a fitting piece of jewellery in a constellation depicting Queen Berenice’s hair.",
+    "ru": "Диадема — царский венец или головная повязка. Имя α Волос Вероники связывает звезду с украшением в волосах царицы Береники.",
+    "fr": "Un diadème est une couronne ou un bandeau royal. Le nom d’Alpha de la Chevelure de Bérénice évoque un bijou dans les cheveux de la reine.",
+    "source": {
+      "name": "Houston Astronomical Society",
+      "url": "https://www.astronomyhouston.org/newsletters/guidestar/shallow-sky-object-month-diadem%E2%80%94alpha-com"
+    }
+  },
+  "64962": {
+    "zh": "Naga 来自梵语 nāga，意为大蛇。这个词流入多种南亚和东南亚语言，星名保留的是蛇的意象。",
+    "en": "Sanskrit nāga denotes a great serpent. The word spread into several South and Southeast Asian languages, and the star name retains the serpent image.",
+    "ru": "Санскритское nāga обозначает большого змея. Слово вошло в языки Южной и Юго-Восточной Азии, а звёздное имя сохранило образ змея.",
+    "fr": "Le sanskrit nāga désigne un grand serpent. Le mot a circulé en Asie du Sud et du Sud-Est, et le nom stellaire en conserve l’image."
+  },
+  "65426": {
+    "zh": "在索克人的语言里，Matza 可以让人想到天上的星，也可以形容内心有光的人。这个星名保留了同一词语联起的两种亮光。",
+    "en": "In the Zoque language Matza can evoke a star overhead or a person shining from within. The choice plays on both senses of light.",
+    "ru": "На языке соке Matza может обозначать звезду в небе или человека, светящегося изнутри. Имя соединяет два образа света.",
+    "fr": "En langue zoque, Matza peut évoquer une étoile dans le ciel ou une personne qui brille intérieurement. Le nom réunit ces deux images de lumière."
+  },
+  "66006": {
+    "zh": "Apamvatsa 在印度星名传统里有“水之犊”之意。旧文献用位置指路，说它在 Citrā（角宿一）以北约五度，亮星与距离是辨认这一名字的重要线索。",
+    "en": "Apamvatsa evokes the calf of the waters. Indian records placed it about five degrees north of Citrā, or Spica, leaving a bright reference star and an angular separation as clues.",
+    "ru": "Апамватса — «телёнок вод». Индийские тексты указывают место примерно в пяти градусах к северу от Читры, или Спики, оставляя яркий ориентир и угловое расстояние.",
+    "fr": "Apamvatsa évoque le veau des eaux. Des textes indiens le placent à environ cinq degrés au nord de Citrā, ou Spica, laissant comme indices une étoile brillante et une distance angulaire."
+  },
+  "66047": {
+    "zh": "在印度尼西亚尼亚斯岛的语言中，Dofida 是“我们的星”。这个名字保留的是岛民用自己语言表达的一层归属。",
+    "en": "Dofida means our star in the language of Nias in Indonesia. It preserves a collective expression from the island in the star chart.",
+    "ru": "На языке индонезийского острова Ниас Dofida означает «наша звезда». На карте неба сохранилось выражение общности островитян.",
+    "fr": "Dofida signifie notre étoile dans la langue de Nias en Indonésie. Ce mot collectif de l’île a trouvé place sur la carte stellaire."
+  },
+  "66249": {
+    "zh": "Heze 出现在贝奇瓦日的近代星图上。有研究者将拼写与《圣经》中的以西结联系起来，但现有材料还不足以坐实这一词源。",
+    "en": "Heze is documented in Bečvář’s modern star atlas. A proposed connection with the biblical name Ezekiel remains a hypothesis rather than an established origin.",
+    "ru": "Хезе засвидетельствовано в современном атласе Бечваржа. Связь с библейским именем Иезекииль предложена как гипотеза и не считается установленной.",
+    "fr": "Heze est attesté dans l’atlas moderne de Bečvář. Un rapprochement avec le nom biblique Ézéchiel reste une hypothèse sans étymologie établie."
+  },
+  "67275": {
+    "zh": "古埃及拉美西斯时代的星钟中有一个“系船桩”Menit。Tepiamenit 指这个星象内部走在“桩”前的一颗星，把辨认次序写进了名字。",
+    "en": "Ramesside star clocks record the Egyptian Mooring Post, Menit. Tepiamenit designates the star preceding the post within that figure, making the order of stars part of its name.",
+    "ru": "В звёздных часах эпохи Рамессидов Менит — причальный столб. Тепиаменит указывает на звезду, идущую перед столбом в этой фигуре.",
+    "fr": "Les horloges stellaires ramessides mentionnent Menit, le poteau d’amarrage. Tepiamenit désigne l’étoile qui précède ce poteau au sein de la figure."
+  },
+  "68002": {
+    "zh": "马绍尔群岛的星名 Ļeepwal 指半人马座 ζ。原拼法首字母下方的符号还保存了发音线索，开头的 l 要发得比普通 l 更厚重。",
+    "en": "Marshallese Ļeepwal identifies Zeta Centauri. The mark below the initial letter preserves a pronunciation clue, a darker, more retracted l sound.",
+    "ru": "Маршалльское Ļeepwal обозначает ζ Центавра. Знак под первой буквой указывает на особый, более глубокий звук l.",
+    "fr": "Le marshallais Ļeepwal désigne Zêta du Centaure. Le signe sous l’initiale garde une indication de prononciation, un l plus sombre et rétracté."
+  },
+  "69701": {
+    "zh": "托勒密描述室女座 ι 时，用的是希腊语的“裙裾”。Syrma 让古星图上拖在人物身后的衣料，变成今日一颗恒星的名字。",
+    "en": "Ptolemy located Iota Virginis in the train of a dress. The Greek word Syrma turned a detail of the celestial figure’s clothing into a star name.",
+    "ru": "Птолемей помещал ι Девы в шлейф платья. Греческое Сирма превратило деталь одежды небесной фигуры в имя звезды.",
+    "fr": "Ptolémée plaçait Iota de la Vierge dans la traîne d’une robe. Le grec Syrma a transformé un détail du vêtement céleste en nom d’étoile."
+  },
+  "69974": {
+    "zh": "古代科普特占候文本把室女脚边的星称作 Khambalia，有“弯爪”的意思。它究竟暗指农具还是一种象征，现有文献未能说明。",
+    "en": "Coptic divinatory texts applied Khambalia, evoking a crooked claw, to a star at Virgo’s foot. Its possible reference to a tool or a symbol remains uncertain.",
+    "ru": "В коптских гадательных текстах Кхамбалия, образ загнутого когтя, относилась к звезде у ноги Девы. Имелся ли в виду инструмент или символ, неясно.",
+    "fr": "Des textes divinatoires coptes appellent Khambalia, la griffe recourbée, une étoile au pied de la Vierge. Son éventuel lien avec un outil ou un symbole demeure incertain."
+  },
+  "71053": {
+    "zh": "巴厘传统把它看成倒立的精怪。Kala 可指精怪，也联系梵语的时间概念，sungsang 指上下颠倒。这个天上形象还提醒人珍惜时间。",
+    "en": "In Bali, kala can designate a demon and sungsang means upside down. The inverted being and the older association of kala with time recall an injunction against wasting time.",
+    "ru": "На Бали kala может обозначать демона, а sungsang — положение вниз головой. Перевёрнутый образ и старое значение времени напоминают о том, что время не стоит терять.",
+    "fr": "À Bali, kala peut désigner un démon et sungsang une position renversée. L’être la tête en bas et l’ancien sens temporel de kala rappellent de ne pas gaspiller son temps."
+  },
+  "71860": {
+    "zh": "Uridim 继承了巴比伦天上兽形的苏美尔名。今天的豺狼座与这幅古老兽形传承相接，是黄道以外也有跨文化延续的一例。",
+    "en": "Uridim is the Sumerian name of the Babylonian beast underlying modern Lupus. Its outline is an example of transmission into Greek astronomy beyond the familiar zodiac.",
+    "ru": "Уридим — шумерское имя вавилонского зверя, предшественника современного Волка. Его образ перешёл в греческую традицию за пределами зодиакального круга.",
+    "fr": "Uridim est le nom sumérien de la bête babylonienne à l’origine du Loup. Cette figure illustre un emprunt grec au-delà des constellations zodiacales."
+  },
+  "71908": {
+    "zh": "南非传统把半人马座 α 和 β 看作狮眼。星名工作组据此把圆规座 α 放在狮脸延伸的方向，以 Xami 命名。这是依传统作出的现代选星。",
+    "en": "In a southern African tradition Alpha and Beta Centauri are a lion’s eyes. The working group placed Alpha Circini within the inferred face and chose Xami, a modern assignment informed by that figure.",
+    "ru": "В одной южноафриканской традиции α и β Центавра — глаза льва. Рабочая группа поместила α Циркуля в предполагаемый контур морды и дала ей имя Хами.",
+    "fr": "Dans une tradition d’Afrique australe, Alpha et Bêta du Centaure figurent les yeux du lion. Le groupe de nomenclature a choisi Xami pour Alpha du Compas, située dans le visage ainsi reconstitué."
+  },
+  "72370": {
+    "zh": "普朗修斯 1598 年的荷兰语记录把天上的极乐鸟写成 Paradys-vogel。今天取其中前半个词命名天燕座的主星，保留了早期航海时代的拼写。",
+    "en": "Plancius recorded the bird of paradise as Paradys-vogel in Dutch in 1598. The first part of that early spelling now names the principal star in Apus.",
+    "ru": "В 1598 году Планциус записал по-нидерландски Paradys-vogel, райская птица. Первая часть старого написания стала именем главной звезды Райской Птицы.",
+    "fr": "En 1598, Plancius écrivit Paradys-vogel pour l’oiseau de paradis en néerlandais. Le début de cette graphie ancienne nomme maintenant l’étoile principale de l’Oiseau de paradis."
+  },
+  "72571": {
+    "zh": "Solitaire 纪念勒莫尼耶在 18 世纪提出、后来停用的鸟形星座。原意指已经灭绝的罗德里格斯孤鸽，旧星图画出来的却通常是蓝矶鸫。",
+    "en": "Solitaire recalls an obsolete bird constellation proposed by Le Monnier in the eighteenth century. The intended bird was the extinct Rodrigues solitaire, although engravers depicted a blue rock thrush.",
+    "ru": "Солитер напоминает об упразднённом птичьем созвездии Лемонье XVIII века. Подразумевался вымерший родригесский дронт, а на картах обычно рисовали синего каменного дрозда.",
+    "fr": "Solitaire rappelle une constellation d’oiseau proposée par Le Monnier au XVIIIe siècle puis abandonnée. Elle devait commémorer le solitaire de Rodrigues disparu, mais les cartes montraient un monticole bleu."
+  },
+  "72845": {
+    "zh": "Arcalís 是安道尔北部的山峰。在固定时节，阳光会穿过山上的孔洞，当地牧人曾用这道光来辨认一年中的日子。",
+    "en": "Arcalís is a peak in northern Andorra. Sunlight passes through an opening in the mountain at particular times of year, providing a calendar marker for shepherds.",
+    "ru": "Аркалис — вершина в северной Андорре. В определённые дни солнечный свет проходит через отверстие в горе и служит пастухам календарной отметкой.",
+    "fr": "Arcalís est un sommet du nord de l’Andorre. À certaines dates, le Soleil traverse une ouverture dans la montagne, repère calendaire pour les bergers."
+  },
+  "73136": {
+    "zh": "Baekdu 是朝鲜半岛最高峰白头山的韩语名称。这座在当地文化中具有象征意义的山峰，也为恒星留下了一个地理名字。",
+    "en": "Baekdu is the Korean name of the highest mountain on the Korean peninsula. The stellar name honours a peak with deep symbolic importance in Korean culture.",
+    "ru": "Пэкту — корейское имя высочайшей горы Корейского полуострова. Название звезды отсылает к вершине с важным культурным значением.",
+    "fr": "Baekdu nomme en coréen la plus haute montagne de la péninsule coréenne. L’étoile rend hommage à cette cime d’une grande importance symbolique."
+  },
+  "73555": {
+    "zh": "阿拉伯语 al-baqqar 原指“赶牛人”，用来称呼今天的牧夫座。Nekkar 从一次误读发展而来，原先整个赶牛人的名称最终落到牧夫座 β 身上。",
+    "en": "Arabic al-baqqar, the ox driver, designated Boötes. A misreading produced Nekkar, transferring a variant of the constellation’s name to its Beta star.",
+    "ru": "Арабское al-baqqar, погонщик волов, обозначало Волопаса. Искажённое чтение дало Неккар, и имя всей фигуры перешло к β Волопаса.",
+    "fr": "L’arabe al-baqqar, le meneur de bœufs, désignait le Bouvier. Une lecture fautive donna Nekkar et fit passer le nom de la figure entière à son étoile Bêta."
+  },
+  "73714": {
+    "zh": "Brachium 有“臂”的意思。拜耳把包含此词的一段拉丁文列在旧蝎钳附近，后人将本来描述部位的词当成了星名。",
+    "en": "Brachium means arm. Bayer’s index quoted the Latin term near the old Scorpion’s claws, although what became a star name originally described part of the figure.",
+    "ru": "Латинское brachium означает руку. В указателе Байера это слово относилось к области старых клешней Скорпиона. Названием звезды стало обозначение части фигуры.",
+    "fr": "Le latin brachium signifie bras. L’index de Bayer citait le terme près des anciennes pinces du Scorpion. Une indication anatomique finit par devenir un nom propre."
+  },
+  "74793": {
+    "zh": "皮亚齐有时借用显眼邻星的名字称呼较暗的星。这颗位于 Pherkad 附近的星因而得名 Pherkad Minor，后半词标出较小、较暗的那一个。",
+    "en": "Piazzi sometimes named a faint star after a much more conspicuous neighbour. Pherkad Minor distinguishes this lesser light beside Pherkad.",
+    "ru": "Пьяцци иногда называл слабую звезду по яркой соседке. Pherkad Minor отличает меньший огонёк рядом с Феркадом.",
+    "fr": "Piazzi nommait parfois une étoile faible d’après une voisine plus marquante. Pherkad Minor distingue ici la moins brillante près de Pherkad."
+  },
+  "74961": {
+    "zh": "在加拿大克里语里，nikawiy 是“母亲”。这个来自亲属称谓的名字让一颗恒星保存了克里人的日常用语。",
+    "en": "Nikawiy is the Cree word for mother. The name on the chart preserves a word of everyday kinship from Canada.",
+    "ru": "На языке кри в Канаде nikawiy означает мать. На звёздной карте сохранилось слово семейного родства.",
+    "fr": "En cri du Canada, nikawiy signifie mère. Le nom porté sur la carte garde un terme courant de parenté."
+  },
+  "76952": {
+    "zh": "Baltesha 来自苏美尔语星群名 BAL.TEŠ₂.A，有“尊严”之意。古人把它放在今天北冕座一带，给弧形星列留下了与“王冠”不同的称呼。",
+    "en": "Baltesha preserves a Sumerian name associated with dignity. The figure occupied the area now called Corona Borealis, giving its stars a different identity from the crown.",
+    "ru": "Бальтеша сохраняет шумерское имя, связанное с достоинством. Древняя фигура лежала в области нынешней Северной Короны.",
+    "fr": "Baltesha conserve un nom sumérien associé à la dignité. La figure occupait la région de la Couronne boréale et donnait à ses étoiles une autre identité."
+  },
+  "77048": {
+    "zh": "Stephanos 是古希腊语的“花冠”。它可让人想到胜者的桂冠或婚礼花环，原先称整座北冕，如今也标出弧形里的一颗星。",
+    "en": "Greek stephanos denotes a wreath, whether a victor’s laurel or a bridal garland. Once a name for all of Corona Borealis, it now also marks one star in the arc.",
+    "ru": "Греческое stephanos — венок, победный лавровый или свадебный. Название всей Северной Короны теперь отмечает и одну звезду в её дуге.",
+    "fr": "Le grec stephanos désigne une couronne tressée, laurier du vainqueur ou guirlande nuptiale. Le nom de toute la Couronne boréale marque aussi une étoile de l’arc."
+  },
+  "77450": {
+    "zh": "瓦达曼人把巨蛇座 κ 叫作 Gudja，一只与出生和再生有关的水巨蜥。旁边的亮星中还有岩鳕和象征诞生之地的星，三点构成一组有联系的形象。",
+    "en": "Wardaman tradition identifies Kappa Serpentis as Gudja, a water goanna associated with birth and renewal. Neighbouring stars represent a rock cod and a birthing place.",
+    "ru": "В традиции вардаман κ Змеи — Гуджа, водяной варан, связанный с рождением и возрождением. Соседние звёзды обозначают рыбу и место рождения.",
+    "fr": "Chez les Wardaman, Kappa du Serpent est Gudja, un varan d’eau associé à la naissance et au renouveau. Les étoiles voisines représentent un poisson et un lieu de naissance."
+  },
+  "77512": {
+    "zh": "Matrichakra 是印度传统给北冕天区的“圆环”之名。旧天球仪与星盘都留下过这一梵语词，映照出那排环抱着的星点。",
+    "en": "Historical Indian globes and astrolabes preserve Matrichakra, the circle, for Corona Borealis. The word follows the sweep of the stars themselves.",
+    "ru": "На старых индийских глобусах и астролябиях для Северной Короны встречается Матричакра, круг. Слово повторяет форму дуги звёзд.",
+    "fr": "Des globes et des astrolabes indiens anciens donnent Matrichakra, le cercle, à la Couronne boréale. Le mot épouse l’arc des étoiles."
+  },
+  "78072": {
+    "zh": "在瓦达曼人的星名中，Muning 是“小岩鳕”，与巨蛇头部的两颗星有关。瓦达曼长者同意把这个名字在现代名录里具体配给巨蛇座 γ。",
+    "en": "Muning, the small rock cod, is associated with two Serpens stars in Wardaman tradition. Wardaman Elders approved the modern assignment to Gamma Serpentis.",
+    "ru": "Мунинг, маленькая каменная треска, связан у вардаман с двумя звёздами Змеи. Старейшины одобрили закрепление имени за γ Змеи.",
+    "fr": "Muning, le petit cabillaud de roche, concerne deux étoiles du Serpent chez les Wardaman. Leurs anciens ont approuvé son attribution moderne à Gamma du Serpent."
+  },
+  "78493": {
+    "zh": "Aurwandilsta 的意思是“Aurvandill 的脚趾”。13 世纪斯诺里的冰岛《埃达》记有这一古怪的天上形象，星名由此有了一条能查到文本的出处。",
+    "en": "Aurwandilsta evokes Aurvandill’s toe. The curious celestial figure is documented in Snorri’s thirteenth-century Icelandic Edda.",
+    "ru": "Аурвандильста — палец ноги Аурвандиля. Необычный небесный образ засвидетельствован в исландской Эдде Снорри XIII века.",
+    "fr": "Aurwandilsta évoque l’orteil d’Aurvandill. Cette figure céleste singulière est attestée dans l’Edda islandaise de Snorri au XIIIe siècle."
+  },
+  "79219": {
+    "zh": "在阿伊努语里，kamuy 指拥有灵力的超自然存在。这个星名借用了当地理解人与自然世界关系的一个核心概念。",
+    "en": "In Ainu, kamuy denotes a supernatural being endowed with spiritual power. The star carries a word central to the Ainu understanding of the world.",
+    "ru": "В языке айну kamuy обозначает сверхъестественное существо с духовной силой. Звезда носит важное для представлений айну о мире слово.",
+    "fr": "En aïnou, kamuy désigne un être surnaturel doué d’une puissance spirituelle. L’étoile porte un terme important dans la vision aïnoue du monde."
+  },
+  "79992": {
+    "zh": "满语 Asu Usiha 是“网星”。在满族萨满的星空传统中，这幅图形是一张捕貂网，把森林狩猎的工具带到了天上。",
+    "en": "The Manchu Asu Usiha are net stars. In a shamanic sky tradition their pattern is a hunting net for sable, taking forest equipment into the sky.",
+    "ru": "Маньчжурское Asu Usiha означает звёзды-сеть. В шаманской традиции это сеть для ловли соболей, перенесённая из леса на небо.",
+    "fr": "Le mandchou Asu Usiha désigne les étoiles-filet. Dans une tradition chamanique, elles forment un filet de chasse à la zibeline."
+  },
+  "80582": {
+    "zh": "盖丘亚传统把银河暗区看作母美洲驼 Yaqana，她身旁还有幼驼 Uñallamacha。当地叙事把它们升起的时节与地上的幼驼出生相联系。",
+    "en": "In Quechua tradition Yaqana is a mother llama in the dark Milky Way, beside her calf Uñallamacha. Their rising is linked to the season when llamas give birth on Earth.",
+    "ru": "В традиции кечуа Якана — мать-лама в тёмном участке Млечного Пути рядом с детёнышем Уньяльямача. Их восход связывают с сезоном рождения лам на земле.",
+    "fr": "Dans la tradition quechua, Yaqana est une mère lama dans la Voie lactée sombre, près de son petit Uñallamacha. Leur lever est associé à la saison des naissances sur Terre."
+  },
+  "80687": {
+    "zh": "孟加拉语 timir 指黑暗。这颗星取名时借的是深空背景的意象，亮点从漫长而黑暗的距离之外照过来。",
+    "en": "Timir means darkness in Bengali. The name alludes to the darkness of space surrounding the distant point of starlight.",
+    "ru": "По-бенгальски timir означает тьму. Имя отсылает к космическому мраку, окружающему далёкую светящуюся точку.",
+    "fr": "En bengali, timir signifie obscurité. Le nom évoque le noir de l’espace autour de ce point lumineux lointain."
+  },
+  "80816": {
+    "zh": "Kornephoros 在希腊语里指“持棍者”，呼应武仙赫拉克勒斯的武器。托勒密当初以“跪者”描述这片星区，没有提到棍棒，现代名字保留的是后来的人物解释。",
+    "en": "Kornephoros means club bearer and evokes Heracles’ weapon. Ptolemy described a kneeling figure here without a club. The star name preserves the later mythological reading.",
+    "ru": "Корнефорос значит «носитель палицы» и напоминает об оружии Геракла. Птолемей описывал здесь коленопреклонённого без палицы. В имени сохранилось позднейшее толкование.",
+    "fr": "Kornephoros signifie porteur de massue et évoque l’arme d’Héraclès. Ptolémée décrivait ici un agenouillé sans massue. L’étoile garde la lecture mythologique ultérieure."
+  },
+  "81022": {
+    "zh": "这个名字纪念加利西亚作家罗萨莉娅·德·卡斯特罗。夜色与天体常出现在她的作品里，读者熟悉的意象也回到了以她命名的星空。",
+    "en": "Rosalía de Castro was a leading Galician writer. Night and celestial objects recur in her work, giving an apt literary background to the star that bears her name.",
+    "ru": "Росалия де Кастро — одна из ведущих писательниц Галисии. Ночь и небесные светила неоднократно появляются в её произведениях, откуда имя шагнуло на карту неба.",
+    "fr": "Rosalía de Castro fut une grande figure des lettres galiciennes. La nuit et les astres reviennent dans son œuvre et donnent au nom de l’étoile sa résonance littéraire."
+  },
+  "81266": {
+    "zh": "夏威夷文献记有自北向南排列的三星。中间的“红星”可认作心宿二，以它为参照，南边的 Paikauhale 便对应天蝎座 τ。",
+    "en": "Hawaiian records describe a north–south line of three stars. Identifying the central red star with Antares places Paikauhale to its south at Tau Scorpii.",
+    "ru": "Гавайские записи описывают три звезды с севера на юг. Центральную красную звезду отождествляют с Антаресом, что указывает на τ Скорпиона как на Пайкаухале.",
+    "fr": "Les sources hawaïennes décrivent trois étoiles alignées du nord au sud. Reconnaître Antarès dans l’étoile rouge centrale place Paikauhale au sud, à Tau du Scorpion."
+  },
+  "82396": {
+    "zh": "在瓦达曼有关仪式的天上队列中，Larawag 是守望者。他查看参加者是否已准备妥当，再发出可以继续的信号，这一角色对应天蝎座 ε。",
+    "en": "In a Wardaman ceremonial procession the watcher Larawag checks those present and gives the signal for the rite to proceed. Epsilon Scorpii represents that role.",
+    "ru": "В небесной обрядовой процессии вардаман Лараваг наблюдает за присутствующими и подаёт знак продолжать церемонию. Ему соответствует ε Скорпиона.",
+    "fr": "Dans une procession rituelle wardaman, le guetteur Larawag vérifie les présences et donne le signal de poursuivre. Epsilon du Scorpion représente ce rôle."
+  },
+  "82514": {
+    "zh": "南非科伊科伊语 xami di mura 意为“兽眼”。有人据天蝎座 μ 肉眼看成一对光点而把它解释为这双眼睛，但历史上的具体认星也有其他意见。",
+    "en": "Khoekhoe xami di mura evokes an animal’s eyes. The close visual pair Mu Scorpii prompted one historical identification, but the precise match has also been interpreted differently.",
+    "ru": "Кхойкхойское xami di mura означает глаза зверя. Визуальная пара μ Скорпиона послужила одним из исторических отождествлений, но существуют и иные толкования.",
+    "fr": "Le khoekhoe xami di mura évoque les yeux d’un animal. La paire visible de Mu du Scorpion a inspiré une identification ancienne, mais la correspondance précise fait débat."
+  },
+  "82545": {
+    "zh": "塔希提的一种讲法把 Pipiri 和 Rehua 当作登上天空的孪生孩子。在波利尼西亚各地，故事里的双星有不同认法。现代星名采用了天蝎座 μ 附近的这一支。",
+    "en": "In one Tahitian account Pipiri and Rehua are twins who ascend to the sky. Polynesian tellings identify different pairs of stars. The modern name follows the association near Mu Scorpii.",
+    "ru": "В таитянской версии Пипири и Рехуа — близнецы, поднявшиеся в небо. В Полинезии их связывали с разными парами звёзд, а современное имя закреплено возле μ Скорпиона.",
+    "fr": "Dans une version tahitienne, Pipiri et Rehua sont deux jumeaux montés au ciel. Les traditions polynésiennes les associent à différentes paires. Le nom moderne suit celle de Mu du Scorpion."
+  },
+  "83207": {
+    "zh": "古埃及夜间星钟保留了河马女神 Reret 身上的一个定位词。Khepdenreret 指她的臀部，让整只河马形象中的一个部位成了夜间辨星的标记。",
+    "en": "Ramesside star clocks preserve a landmark on Reret, the Egyptian hippopotamus goddess. Khepdenreret locates her hindquarters within the larger celestial animal.",
+    "ru": "В звёздных часах Рамессидов сохранился ориентир на фигуре богини-бегемотихи Ререт. Хепденререт обозначает её заднюю часть.",
+    "fr": "Les horloges stellaires ramessides gardent un repère sur Reret, déesse hippopotame égyptienne. Khepdenreret situe son arrière-train dans la grande figure céleste."
+  },
+  "83547": {
+    "zh": "Rapeto 是马达加斯加故事里的巨人。这颗恒星纪念的是当地叙事中的角色，名字因此也能在马达加斯加的民间故事中找到。",
+    "en": "Rapeto is a giant of Malagasy storytelling. The star bears a character’s name drawn from the oral traditions of Madagascar.",
+    "ru": "Рапету — великан из малагасийских сказаний. Имя звезды отсылает к персонажу устной традиции Мадагаскара.",
+    "fr": "Rapeto est un géant des récits malgaches. L’étoile porte ainsi un nom de personnage issu des traditions orales de Madagascar."
+  },
+  "84379": {
+    "zh": "Sarin 见于贝奇瓦日的斯卡尔纳特普莱索星图。有人猜测它原指身体的一部分，但推测还没有足够的文字证据来坐实。",
+    "en": "Sarin appears in Bečvář’s Skalnaté Pleso atlas. A body-part term has been suggested, but the proposed derivation lacks firm documentary support.",
+    "ru": "Сарин встречается в атласе Скалнате-Плесо Бечваржа. Предполагалось название части тела, но для такой этимологии не хватает надёжных свидетельств.",
+    "fr": "Sarin apparaît dans l’atlas de Skalnaté Pleso de Bečvář. On a proposé le nom d’une partie du corps, sans preuve textuelle décisive."
+  },
+  "84405": {
+    "zh": "在澳大利亚卡米拉罗伊与欧阿莱人的传统中，Guniibuu 是红胸知更鸟。一则故事把它和虎皮鹦鹉 Gidjirrigaa 相连，后者在现代星名中对应天蝎座 κ。",
+    "en": "For the Kamilaroi and Euahlayi, Guniibuu is the scarlet robin. A story connects it with Gidjirrigaa the budgerigar, identified with Kappa Scorpii.",
+    "ru": "У камиларои и эуалайи Гуниибуу — алая петроика. Предание связывает птицу с волнистым попугайчиком Гиджирригаа, которому соответствует κ Скорпиона.",
+    "fr": "Pour les Kamilaroi et les Euahlayi, Guniibuu est le miro écarlate. Un récit le relie à la perruche ondulée Gidjirrigaa, associée à Kappa du Scorpion."
+  },
+  "84556": {
+    "zh": "在印加的暗星座中，小美洲驼依偎着母驼 Yaqana。这个图案由银河里的暗云勾出，工作组特意选了云区里一颗勉强可见的暗星承接幼驼的名字。",
+    "en": "The Inka baby llama lies beside its mother Yaqana in a dark Milky Way cloud. A star near the naked-eye limit inside the cloud was chosen to carry the calf’s name.",
+    "ru": "Детёныш ламы инков лежит рядом с матерью Яканой в тёмном облаке Млечного Пути. Чтобы сохранить образ, его именем назвали едва видимую глазом звезду внутри облака.",
+    "fr": "Le petit lama inka se tient près de sa mère Yaqana dans un nuage sombre de la Voie lactée. Une étoile à la limite de visibilité dans le nuage a reçu son nom."
+  },
+  "84787": {
+    "zh": "Inquill 来自秘鲁作家亚伯拉罕·巴尔德洛马尔的《通往太阳之路》。这则悲剧写一对恋人的爱情，Inquill 是其中一人。",
+    "en": "Inquill is one of the lovers in Abraham Valdelomar’s tragic Peruvian story Way to the Sun. A character from literature supplied this stellar name.",
+    "ru": "Инкиль — один из влюблённых в трагической повести перуанского писателя Абраама Вальделомара «Путь к солнцу». Звезда названа по литературному персонажу.",
+    "fr": "Inquill est l’un des deux amoureux du récit tragique Le Chemin du soleil du Péruvien Abraham Valdelomar. Le nom stellaire vient de ce personnage littéraire."
+  },
+  "86228": {
+    "zh": "巴比伦《犁星表》在蝎尾列出马尔杜克的两件武器 Shargaz 与 Sharur。Sargas 沿袭 Shargaz 的名字，所指范围在古代星图与今天的天蝎座 θ 之间有过变化。",
+    "en": "The Babylonian MUL.APIN places two weapons of Marduk, Shargaz and Sharur, at the scorpion’s sting. Sargas preserves Shargaz, though the ancient location and modern assignment to Theta Scorpii differ.",
+    "ru": "Вавилонский MUL.APIN помещает оружие Мардука Шаргаз и Шарур в жало Скорпиона. Имя Саргас сохраняет Шаргаз, хотя нынешнее отнесение к θ Скорпиона отличается от древнего.",
+    "fr": "Le MUL.APIN babylonien place au dard du Scorpion deux armes de Marduk, Shargaz et Sharur. Sargas garde Shargaz, avec un emplacement moderne à Thêta du Scorpion distinct de l’ancien."
+  },
+  "86796": {
+    "zh": "这颗星纪念西班牙作家米格尔·德·塞万提斯。《堂吉诃德》的作者以姓氏走进星图，取名线索因此可以从一本小说开始找。",
+    "en": "Cervantes honours Miguel de Cervantes Saavedra, author of Don Quixote. The novelist’s surname gives this stellar system its literary point of departure.",
+    "ru": "Звезда названа в честь Мигеля де Сервантеса Сааведры, автора «Дон Кихота». Литературную историю этого имени можно начать с его романа.",
+    "fr": "Cervantes rend hommage à Miguel de Cervantes Saavedra, auteur de Don Quichotte. Le patronyme du romancier donne à ce système stellaire son point de départ littéraire."
+  },
+  "87108": {
+    "zh": "马绍尔人的 Bake-eo 指蛇夫座 γ。Bake 是海菊蛤一类贝壳，eo 有“在这里，拿去”的意思。贝壳与日常说话的语气都保留在名字里。",
+    "en": "Marshallese Bake-eo identifies Gamma Ophiuchi. Bake is a Spondylus shellfish, while eo offers something at hand. The star’s name preserves both shell and gesture.",
+    "ru": "Маршалльское Bake-eo обозначает γ Змееносца. Bake — моллюск спондилюс, а eo передаёт предложение взять то, что здесь. Имя хранит и раковину, и жест.",
+    "fr": "Le marshallais Bake-eo désigne Gamma d’Ophiuchus. Bake est un coquillage du genre Spondylus et eo invite à prendre ce qui est là. Le nom associe le coquillage au geste."
+  },
+  "88567": {
+    "zh": "从 14 世纪起，印度星盘就以 Dhanuśarāgra 标出今天人马座里的一颗星。这个梵语箭名把仪器上的定位点与射手手中的箭联系起来。",
+    "en": "Indian astrolabes from the fourteenth century onward mark a Sagittarius star as Dhanuśarāgra, the arrow. A point on the instrument thus carried a name from the archer’s equipment.",
+    "ru": "С XIV века на индийских астролябиях звезду Стрельца обозначали Дханушарагра, стрела. Отметка на приборе получила имя из снаряжения стрелка.",
+    "fr": "Dès le XIVe siècle, des astrolabes indiens appellent une étoile du Sagittaire Dhanuśarāgra, la flèche. Un point sur l’instrument emprunte son nom à l’équipement de l’archer."
+  },
+  "89341": {
+    "zh": "科普特语 Polis 有“马驹”的意思。这个名字早先与人马弓上的星群有关，经历了指认对象的迁移，才成为今天一颗恒星的专名。",
+    "en": "Polis denotes a foal in Coptic. The name was associated with stars in the Archer’s bow before changes in identification attached it to its present star.",
+    "ru": "Коптское Polis означает жеребёнка. Сначала имя относилось к звёздам в луке Стрельца, затем меняло привязку до нынешнего отождествления.",
+    "fr": "Polis signifie poulain en copte. D’abord lié à des étoiles de l’arc du Sagittaire, le nom a changé de point d’attache avant sa désignation actuelle."
+  },
+  "89642": {
+    "zh": "古埃及人把今日天蝎与人马一带画成一艘大船 Wia。斜行星钟中出现的 Heryibwia 指“船中央”，是用船身部位辨认时辰的一处星标。",
+    "en": "The Egyptian boat Wia stretched across parts of Scorpius and Sagittarius. Heryibwia, in the boat’s middle, occurs in diagonal star clocks as a landmark within that long figure.",
+    "ru": "Египетская лодка Виа протянулась по области Скорпиона и Стрельца. Хериибвиа, середина лодки, встречается как ориентир в диагональных звёздных часах.",
+    "fr": "La barque égyptienne Wia s’étendait entre le Scorpion et le Sagittaire. Heryibwia, au milieu de la barque, figure comme repère dans les horloges stellaires diagonales."
+  },
+  "90004": {
+    "zh": "Alasia 是古文献中对塞浦路斯的早期称呼，记录可上溯到公元前 15 世纪中叶。星名保留的是这座地中海岛屿历史很深的一层地名。",
+    "en": "Alasia is an early recorded name for Cyprus, attested by the middle of the fifteenth century BCE. The star preserves an ancient name of the Mediterranean island.",
+    "ru": "Аласия — древнее название Кипра, известное к середине XV века до н. э. Звезда хранит давнее имя средиземноморского острова.",
+    "fr": "Alasia est un ancien nom de Chypre, attesté vers le milieu du XVe siècle avant notre ère. L’étoile garde ce toponyme méditerranéen."
+  },
+  "90037": {
+    "zh": "Magur 是巴比伦星图上人马座以南的一艘船。古代记录没有为整艘船定下毫无争议的边界，现代工作组选了一颗暗星来纪念它。",
+    "en": "Magur was a Babylonian ship south of Sagittarius. Its full outline cannot be recovered with certainty from the ancient evidence, so a faint star was chosen to commemorate it.",
+    "ru": "Магур — вавилонский небесный корабль к югу от Стрельца. Его контур по древним источникам восстановить точно нельзя. В память о нём выбрали слабую звезду.",
+    "fr": "Magur était un navire babylonien au sud du Sagittaire. Ses contours anciens demeurent incertains et une étoile faible a été choisie pour le commémorer."
+  },
+  "90344": {
+    "zh": "Fafnir 是北欧传说中的法夫尼尔，原本是矮人，后来化为龙。一颗看似平静的星，因此带着一次神话变形的名字。",
+    "en": "Fafnir was a dwarf in Norse mythology who took the form of a dragon. The stellar name preserves that transformation.",
+    "ru": "Фафнир в скандинавском мифе первоначально был карликом и превратился в дракона. Его превращение стоит за именем звезды.",
+    "fr": "Dans le mythe nordique, Fafnir était un nain qui prit la forme d’un dragon. Le nom de l’étoile garde la trace de cette métamorphose."
+  },
+  "91919": {
+    "zh": "南太平洋普卡普卡岛把天琴座 ε 这对肉眼双星叫作“鼻孔”。现代名录把 Pongaponga 具体配给 ε¹ 的 A 成员，保留了整对星原本的图形。",
+    "en": "On Pukapuka the visible pair Epsilon Lyrae was pictured as nostrils. The register assigns Pongaponga specifically to Epsilon-1 A, preserving the image of the original pair.",
+    "ru": "На Пукапуке визуальная пара ε Лиры изображала ноздри. В реестре Pongaponga относится конкретно к компоненту A системы ε¹ Лиры и хранит образ всей пары.",
+    "fr": "À Pukapuka, la paire visible Epsilon de la Lyre figurait des narines. Le registre donne Pongaponga à Epsilon-1 A, gardant l’image des deux étoiles d’origine."
+  },
+  "91971": {
+    "zh": "在太平洋卡平阿马朗伊环礁的星空传统中，Kautoki 是一柄石锛的柄。kau 与 toki 分别指出柄和工具，星名因而能拆开来读。",
+    "en": "On Kapingamarangi a star pattern represents the handle of an adze. The parts kau and toki identify the handle and tool within the name Kautoki.",
+    "ru": "На атолле Капингамаранги небесная фигура изображает рукоять тесла. В имени Каутоки различаются kau, рукоять, и toki, орудие.",
+    "fr": "À Kapingamarangi, une figure stellaire représente le manche d’une herminette. Les éléments kau et toki nomment le manche et l’outil dans Kautoki."
+  },
+  "91973": {
+    "zh": "印加的 Urquchillay 是多色的美洲驼神，庇护家畜和野生动物。它原本覆盖天琴座的一大片星空，现代名字选在驼神心口附近的一颗星。",
+    "en": "The Inka many-coloured llama Urquchillay protected livestock and wild animals. The figure covered much of Lyra, and a star near its heart was chosen for the modern name.",
+    "ru": "Многоцветная лама инков Уркучильяй покровительствовала домашним и диким животным. Фигура занимала большую часть Лиры, и для имени выбрали звезду у её сердца.",
+    "fr": "La divinité lama multicolore des Incas, Urquchillay, protégeait animaux domestiques et sauvages. Sa figure couvrait une bonne partie de la Lyre. Le nom a été donné à une étoile près de son cœur."
+  },
+  "92845": {
+    "zh": "苏美尔神 Pabilsang 手执弓箭，身形混合了人马、蝎尾与鸟的特征，是人马座一条很早的传统。现代工作组选在这位射手眼睛的位置命名。",
+    "en": "The Sumerian archer Pabilsang combined a centaur-like body with scorpion and bird features, an early ancestor of Sagittarius. The modern name marks a star at his eye.",
+    "ru": "Шумерский лучник Пабильсанг сочетал облик кентавра с чертами скорпиона и птицы. Это древний прообраз Стрельца, а современное имя дано звезде у его глаза.",
+    "fr": "L’archer sumérien Pabilsang associait un corps de centaure à des traits de scorpion et d’oiseau. Ancêtre du Sagittaire, il a donné son nom à une étoile de son œil."
+  },
+  "93244": {
+    "zh": "在马绍尔群岛，一列三星被看成“大眼的翻版”，真正的“大眼”指牛郎星。Arin-majlep 原先涵盖天鹰座 ε、ζ 和 ω，如今专指其中的 ε 星。",
+    "en": "In Marshallese tradition a line of three stars echoed the Great Eye, Altair. Arin-majlep belonged to Epsilon, Zeta and Omega Aquilae together before its assignment to Epsilon.",
+    "ru": "У жителей Маршалловых Островов ряд из трёх звёзд повторял Большой Глаз, Альтаир. Arin-majlep относилось к ε, ζ и ω Орла, а сейчас закреплено за ε.",
+    "fr": "Aux Îles Marshall, trois étoiles en ligne reproduisaient le Grand Œil, Altaïr. Arin-majlep désignait ensemble Epsilon, Zêta et Oméga de l’Aigle, avant son attribution à Epsilon."
+  },
+  "94005": {
+    "zh": "Qedty 是古埃及的“两张网”。它以旬星的身份出现在星钟上，人们曾用这幅网形在夜空中的出没辨认时辰。",
+    "en": "Qedty evokes two nets in ancient Egyptian astronomy. The figure appeared among the decans on star clocks, linking its course across the sky with the hours of night.",
+    "ru": "Кедти — «две сети» в древнеегипетской астрономии. Фигура входила в деканы звёздных часов, связывавших их движение с часами ночи.",
+    "fr": "Qedty évoque deux filets dans le ciel de l’Égypte ancienne. La figure apparaît parmi les décans des horloges stellaires qui rythmaient la nuit."
+  },
+  "94645": {
+    "zh": "马来语 gumala 指传说能在蛇或龙体内找到的神奇宝石。星名纪念这种民间想象中的珍物。",
+    "en": "In Malay lore a gumala is a magical stone thought to occur in a serpent or dragon. That legendary treasure became the name of a star.",
+    "ru": "В малайском предании гумала — волшебный камень, который находят в змее или драконе. Сказочная драгоценность дала звезде имя.",
+    "fr": "Dans la tradition malaise, une gumala est une pierre magique que l’on imagine trouver dans un serpent ou un dragon. Ce trésor légendaire a donné son nom à l’étoile."
+  },
+  "94713": {
+    "zh": "苏美尔神 Ninnisig 与 Erragal 在星图上成对出现。Ninnisig 的职责是为大神庙屠宰，古代神庙生活里的一项具体职业因此也留在星名中。",
+    "en": "Ninnisig and Erragal form a divine pair in Sumerian star lore. Ninnisig served as butcher of the great temple, so the name also preserves a specific temple occupation.",
+    "ru": "Ниннисиг и Эррагаль образуют божественную пару в шумерском звёздном предании. Ниннисиг была мясником великого храма, и имя хранит память о храмовом ремесле.",
+    "fr": "Ninnisig et Erragal forment un couple divin dans la tradition stellaire sumérienne. Ninnisig exerçait la fonction de bouchère du grand temple, métier conservé dans le nom."
+  },
+  "95124": {
+    "zh": "在塞内加尔北部，Belel 指当地难得的水源。用它来称呼一颗恒星，纪念的是在干旱土地上寻找和共享水的重要性。",
+    "en": "Belel names a rare source of water in northern Senegal. The star honours a feature of particular value in a dry landscape.",
+    "ru": "Белель обозначает редкий источник воды на севере Сенегала. Звезда названа в честь особенно ценной приметы сухой местности.",
+    "fr": "Belel désigne un point d’eau rare dans le nord du Sénégal. L’étoile célèbre un élément particulièrement précieux en pays sec."
+  },
+  "95168": {
+    "zh": "Kenemu 纪念古埃及旬星序列中的第十七组星，位置大致在今天人马座 ρ¹ 一带。它在古历的 Peret 季黎明前重新出现，是一项季节标记。",
+    "en": "Kenemu recalls the seventeenth Egyptian decan near modern Rho-1 Sagittarii. Its reappearance before sunrise in the season of Peret helped mark the calendar.",
+    "ru": "Кенему связано с семнадцатым египетским деканом около нынешней ρ¹ Стрельца. Его появление перед рассветом в сезон Перет служило календарным знаком.",
+    "fr": "Kenemu rappelle le dix-septième décan égyptien près de Rhô-1 du Sagittaire. Son retour avant l’aube pendant la saison de Péret servait de repère calendaire."
+  },
+  "95262": {
+    "zh": "在加纳使用的埃维语里，Sika 是“金”。黄金也是当地重要的出产，地上的金属就这样给天上的光点取了名字。",
+    "en": "Sika means gold in Ewe. Gold is a major export of Ghana, giving the stellar name a direct connection to life on the ground.",
+    "ru": "На языке эве Sika означает золото. Золото — важная статья экспорта Ганы, так что имя звезды имеет вполне земное происхождение.",
+    "fr": "Sika signifie or en éwé. L’or est l’une des grandes exportations du Ghana, donnant au nom stellaire une origine très terrestre."
+  },
+  "96665": {
+    "zh": "Hru 或 Ru 的意思是箭，词根来自梵语。把它当作这片天空的箭形，是巴厘历图中可追溯千年以上的传统。",
+    "en": "Hru or Ru means arrow and derives from Sanskrit. Its use as a celestial arrow belongs to a Balinese calendar tradition attested for more than a millennium.",
+    "ru": "Хру, или Ру, означает стрелу и восходит к санскриту. Небесная стрела известна в балийской календарной традиции более тысячи лет.",
+    "fr": "Hru ou Ru signifie flèche et dérive du sanskrit. Son emploi comme flèche céleste est attesté à Bali dans une tradition calendaire de plus d’un millénaire."
+  },
+  "96837": {
+    "zh": "《犁星表》里曾有一头猪，今天的天箭座 α 和 β 被认作猪鼻的两点。Shakh 取自苏美尔语“猪”，现代星名配给了 β 星。",
+    "en": "The Babylonian MUL.APIN includes a pig. Alpha and Beta Sagittae have been identified with its snout, and Beta carries the Sumerian animal name Shakh.",
+    "ru": "В вавилонском MUL.APIN есть свинья. С её пятачком сопоставляют α и β Стрелы, а шумерское название Шах закрепили за β.",
+    "fr": "Le MUL.APIN babylonien comprend un porc. Alpha et Bêta de la Flèche ont été identifiées à son groin et Bêta porte le nom sumérien Shakh."
+  },
+  "97278": {
+    "zh": "天鹰三星在阿拉伯传统里曾是一杆秤，波斯语把它形容为秤梁。Tarazed 来自这个较长名称的缩写与转写，今天落在牛郎星旁边的天鹰座 γ。",
+    "en": "An Arabic balance became the beam of a scale in a Persian name for three Aquila stars. Abbreviation and altered spelling produced Tarazed for Gamma Aquilae beside Altair.",
+    "ru": "Арабские Весы в персидском названии трёх звёзд Орла превратились в коромысло весов. Сокращение и изменение написания дали Таразед для γ Орла рядом с Альтаиром.",
+    "fr": "Une balance arabe devint le fléau d’une balance dans le nom persan de trois étoiles de l’Aigle. Abréviation et transcription donnèrent Tarazed, Gamma de l’Aigle, près d’Altaïr."
+  },
+  "97804": {
+    "zh": "阿卡德语 Pagru 指身体或遗体，古代星表中常译作“死者”。这一星象见于《犁星表》，并在公元前一千纪长期沿用。",
+    "en": "Akkadian Pagru means a body or corpse, hence the customary rendering the Dead Man. The figure occurs in MUL.APIN and remained in use through the first millennium BCE.",
+    "ru": "Аккадское Pagru означает тело или останки, отсюда перевод «Мёртвый человек». Фигура засвидетельствована в MUL.APIN и использовалась в первом тысячелетии до н. э.",
+    "fr": "L’akkadien Pagru signifie corps ou dépouille, d’où la traduction habituelle le Mort. L’ancienne figure apparaît dans le MUL.APIN et resta en usage au premier millénaire avant notre ère."
+  },
+  "99473": {
+    "zh": "托勒密在《天文学大成》中将 Antinous 画在天鹰附近，作为大星座中的小星群。今日的正式天区仍是天鹰座，而这个旧人物名以单颗恒星的形式保留下来。",
+    "en": "Ptolemy’s Almagest placed the figure of Antinous within the Eagle’s region. The modern constellation is Aquila, while the older figure survives here in a single star name.",
+    "ru": "В «Альмагесте» Птолемея фигура Антиноя находилась в области Орла. Современное созвездие — Орёл, а имя древней фигуры сохранилось у отдельной звезды.",
+    "fr": "L’Almageste de Ptolémée plaçait la figure d’Antinoüs dans la région de l’Aigle. La constellation moderne reste l’Aigle et l’ancien personnage survit ici dans un nom d’étoile."
+  },
+  "99894": {
+    "zh": "Chechia 是突尼斯传统的红色羊毛帽，顶部较平，男女都可以戴。星名纪念的是这件当地辨识度很高的服饰。",
+    "en": "The chechia is a traditional Tunisian cap of red wool with a flattened top, worn by women and men. A distinctive piece of dress supplied the star name.",
+    "ru": "Шешия — традиционная тунисская красная шерстяная шапка с плоским верхом, которую носят женщины и мужчины. Головной убор дал имя звезде.",
+    "fr": "La chéchia est une coiffe tunisienne traditionnelle en laine rouge à dessus plat, portée par des femmes et des hommes. Cette pièce de costume a nommé l’étoile."
+  },
+  "100027": {
+    "zh": "Sukhurmashu 是阿卡德语中“羊鱼”这头混合动物的名字。它在巴比伦传统里是有益于人类健康的守护形象，也是摩羯鱼尾形象的一条古老来路。",
+    "en": "Sukhurmashu is the Akkadian goat-fish. This benevolent creature was associated with human health, an ancient background to the fish-tailed figure of Capricornus.",
+    "ru": "Сухурмашу — аккадская коза-рыба. Благосклонное существо связывали со здоровьем людей. Его образ лежит у истоков рыбьего хвоста Козерога.",
+    "fr": "Sukhurmashu est le poisson-chèvre akkadien. Cette créature bienveillante veillait à la santé humaine et éclaire l’ancienneté de la queue de poisson du Capricorne."
+  },
+  "100751": {
+    "zh": "Peacock 是英国航海历书部门为航空导航选取的英语星名。它把孔雀座的整只孔雀直接借给最显眼的那颗星，让飞行员在认星表里一眼对应星座。",
+    "en": "Britain’s Nautical Almanac Office coined Peacock for aerial navigation. Using the English name of Pavo’s bird for its bright star made the constellation and navigational entry easy to connect.",
+    "ru": "Британская служба морских альманахов ввела Peacock для воздушной навигации. Английское имя птицы от всего созвездия Павлина перешло к его яркой звезде.",
+    "fr": "Le service britannique des éphémérides nautiques créa Peacock pour la navigation aérienne. Le mot anglais pour le Paon reliait directement l’étoile brillante à sa constellation."
+  },
+  "102531": {
+    "zh": "Dhanishta 是印度二十七个月宿之一。古代图形是一群星，现代名录以一颗具体恒星保存这一原先属于整组的名字。",
+    "en": "Dhanishta is one of the Indian lunar stations. Its traditional figure comprises a group of stars, while the modern register preserves the collective name on one star.",
+    "ru": "Дхаништха — одна из индийских лунных стоянок. Традиционный рисунок состоял из нескольких звёзд, а реестр закрепляет имя всей группы за одной.",
+    "fr": "Dhanishta est l’une des stations lunaires indiennes. Sa figure traditionnelle réunissait plusieurs étoiles et le registre moderne conserve le nom collectif sur une seule."
+  },
+  "104139": {
+    "zh": "Udang 在巴厘语境里是“虾”。这种岛上渔业常见的动物也进入传统 Palelintangan 历图，成为可以在天上寻认的图形。",
+    "en": "Udang is the shrimp in the Balinese Palelintangan calendar. An animal familiar to the island’s fisheries also supplied a figure for its sky.",
+    "ru": "Уданг — креветка в балийском календаре палелинтанган. Знакомое рыбакам животное нашло место и среди небесных фигур.",
+    "fr": "Udang est la crevette du calendrier balinais Palelintangan. Cet animal familier des pêcheries de l’île a aussi fourni une figure à son ciel."
+  },
+  "104538": {
+    "zh": "Protome 在古希腊语里指半身像或前半身。罗马时代的学术传统曾用它称这幅天上图形，为什么最初要画成这样，现存记录没有交代。",
+    "en": "Protome means a bust or forepart in Greek. It named the figure in Roman times, when Greek remained a scholarly language. The original reason for depicting it this way is lost.",
+    "ru": "Греческое Protome означает бюст или переднюю часть фигуры. В римскую эпоху так называли небесную фигуру, но причины её первоначального изображения неизвестны.",
+    "fr": "Le grec Protome désigne un buste ou la partie antérieure d’une figure. Ce nom était employé à l’époque romaine et le motif du dessin initial n’est pas conservé."
+  },
+  "104858": {
+    "zh": "古埃及星空中的巨人叫 Nekhet。Tepennekhet 标出巨人的头，在拉美西斯时代的星钟中已有记载，可以沿着身体部位找回这颗计时星。",
+    "en": "Nekhet was an Egyptian celestial giant. Tepennekhet marks its head in Ramesside star clocks, locating a timekeeping star by a part of the larger figure.",
+    "ru": "Нехет — древнеегипетский небесный великан. Тепеннехет отмечает его голову в звёздных часах эпохи Рамессидов и задаёт место звезды внутри фигуры.",
+    "fr": "Nekhet était un géant du ciel égyptien. Tepennekhet situe sa tête dans les horloges stellaires ramessides, repérant une étoile horaire à l’intérieur de la figure."
+  },
+  "104887": {
+    "zh": "满族的刺猬女神 Enduri Senggu 看护人家。传统里她的天上形象在冬天头朝北、尾朝南，守护角色和认星方向都保存在名字的来历里。",
+    "en": "Enduri Senggu is the Manchu hedgehog goddess who guards homes. Her winter sky figure faces north, with the tail to the south.",
+    "ru": "Маньчжурская богиня-ежиха Эндури Сэнгу охраняет жилища. Её зимняя небесная фигура обращена головой к северу, а хвостом к югу.",
+    "fr": "Enduri Senggu est la déesse hérissonne mandchoue qui protège les habitations. Sa figure hivernale pointe la tête au nord et la queue au sud."
+  },
+  "106786": {
+    "zh": "Bunda 原是波斯传统中的一个月宿，也就是用来划分月亮行经星空的一段。现代专名把一个原本标记天区的词保存在单颗星上。",
+    "en": "Bunda was a Persian lunar mansion, a station along the Moon’s route among the stars. The modern name preserves the old sky division on an individual star.",
+    "ru": "Бунда — персидская лунная стоянка на пути Луны среди звёзд. В современном имени отдельной звезды сохранилось старое деление неба.",
+    "fr": "Bunda était une station lunaire persane sur le chemin de la Lune parmi les étoiles. Un nom d’étoile garde aujourd’hui cette ancienne division du ciel."
+  },
+  "107259": {
+    "zh": "1773 年威廉·赫歇尔用石榴石般的深红色形容仙王座 μ。皮亚齐后来在星表中沿用这个比喻，“石榴星”于是把一次目视比色变成了名字。",
+    "en": "William Herschel likened the deep red of Mu Cephei to garnet in 1773. Piazzi later carried the comparison into his catalogue, turning an eyepiece colour into a name.",
+    "ru": "В 1773 году Уильям Гершель сравнил густой красный цвет μ Цефея с гранатом. Позднее Пьяцци перенёс сравнение в каталог, и оттенок стал именем.",
+    "fr": "En 1773, William Herschel compara le rouge profond de Mu de Céphée au grenat. Piazzi reprit ensuite l’image dans son catalogue et la teinte devint nom d’étoile."
+  },
+  "108375": {
+    "zh": "在加蓬的米耶内语里，Itonda 表达一切美好的事物。星名以当地对美的称呼来指认一个光点。",
+    "en": "In the Myene language of Gabon, Itonda refers to what is beautiful. A local expression of beauty became a name on the sky.",
+    "ru": "На языке мьене в Габоне Itonda обозначает всё прекрасное. Местное понятие красоты стало звёздным именем.",
+    "fr": "Dans la langue myènè du Gabon, Itonda évoque tout ce qui est beau. Un mot local de la beauté a rejoint la carte du ciel."
+  },
+  "110130": {
+    "zh": "Lang 指犀鸟，Exster 是荷兰语的喜鹊。17 世纪初航海者记录南方鸟形时揉合了当地词和荷兰词，两种不同鸟名的相遇留在了这颗星上。",
+    "en": "Lang refers to a hornbill and Dutch exster to a magpie. Early seventeenth-century navigators combined names from different languages and birds while documenting the southern figure.",
+    "ru": "Lang обозначает птицу-носорога, а нидерландское exster — сороку. Мореплаватели начала XVII века соединили названия разных птиц, описывая южную фигуру.",
+    "fr": "Lang évoque un calao et le néerlandais exster une pie. Les navigateurs du début du XVIIe siècle rapprochèrent deux langues et deux oiseaux en décrivant la figure australe."
+  },
+  "110813": {
+    "zh": "Lionrock 指香港的狮子山。山脊的轮廓像俯伏的狮子，也是香港人熟悉的文化象征。本地地标因这个名字出现在星图上。",
+    "en": "Lionrock honours Lion Rock above Hong Kong. The ridge resembles a crouching lion and is a familiar cultural symbol of the city.",
+    "ru": "Лайонрок назван в честь Львиной скалы Гонконга. Гребень напоминает припавшего ко земле льва и служит культурным символом города.",
+    "fr": "Lionrock rend hommage au Rocher du Lion de Hong Kong. Sa crête évoque un lion accroupi et constitue un symbole culturel de la ville."
+  },
+  "112122": {
+    "zh": "1941 年一份记录把 Tiaki 对应到天鹤座 β。土阿莫土语词典中有“守望者”的意思，但那份认星记录所引的田野原稿至今未找到，词义和具体认星的证据应分别看待。",
+    "en": "A 1941 account links Tiaki to Beta Gruis, and a Tuamotuan dictionary gives a sense of guardian or watcher. The original field notes behind the stellar identification have not been located.",
+    "ru": "Запись 1941 года связывает Тиаки с β Журавля, а словарь языка Туамоту даёт значение стража. Первичные полевые заметки с отождествлением звезды пока не найдены.",
+    "fr": "Un relevé de 1941 associe Tiaki à Bêta de la Grue, et le dictionnaire des Tuamotu évoque un gardien. Les notes de terrain à l’origine de l’identification stellaire restent introuvables."
+  },
+  "112716": {
+    "zh": "Lintang 是星群，kumba 是巴厘仪式里盛圣水的器皿，词源可追到梵语的水罐。印度和印度尼西亚的天空传统都在宝瓶天区留下过这一器物。",
+    "en": "Lintang identifies a star pattern and Balinese kumba a vessel for sacred water, related to the Sanskrit pitcher. Related vessels belong to the Aquarius region in both Indian and Indonesian traditions.",
+    "ru": "Lintang обозначает группу звёзд, а балийское kumba — сосуд со священной водой, родственный санскритскому названию кувшина. Такие сосуды связаны с областью Водолея в Индии и Индонезии.",
+    "fr": "Lintang désigne une figure stellaire et le balinais kumba un récipient d’eau sacrée, apparenté à la cruche sanskrite. L’Inde et l’Indonésie plaçaient ce récipient dans le Verseau."
+  },
+  "112961": {
+    "zh": "Shatabhisha 在梵语里有“百位医者”之意，是吠陀传统第二十四个月宿。宝瓶座 λ 是这一宿的代表星，以一个光点代指整片月宿。",
+    "en": "Shatabhisha, the hundred healers, is the twenty-fourth Vedic lunar station. Lambda Aquarii is its representative star and gives one point of light the name of the whole station.",
+    "ru": "Шатабхиша, сто целителей, — двадцать четвёртая ведийская лунная стоянка. Её опорная звезда λ Водолея носит имя всего участка.",
+    "fr": "Shatabhisha, les cent guérisseurs, est la vingt-quatrième station lunaire védique. Lambda du Verseau est son étoile repère et porte le nom de toute la station."
+  },
+  "116084": {
+    "zh": "库克群岛毛利语的 Poerava 是想象中珍贵而完美的大黑珍珠。给恒星取这个名字时，海中珍物的光泽也成了天空的比喻。",
+    "en": "Cook Islands Māori Poerava evokes an extraordinary black pearl, large and of perfect beauty. A treasure imagined in the sea became an image for a distant light.",
+    "ru": "Маорийское слово островов Кука Poerava обозначает необыкновенно красивую крупную чёрную жемчужину. Морское сокровище стало образом далёкого огня.",
+    "fr": "En māori des îles Cook, Poerava évoque une grande perle noire d’une beauté parfaite. Un trésor de la mer a offert une image à la lumière d’une étoile."
+  },
+  "116584": {
+    "zh": "Udkadua 是苏美尔语的复合词，描绘张大嘴的风暴精怪。这颗星位于古图中精怪的脚跟附近。整幅星象还被观测者用来计时，沿用过很长时期。",
+    "en": "Udkadua evokes a Sumerian storm demon with a gaping mouth. This star marks its heel, and observers used the larger figure in measuring time over many centuries.",
+    "ru": "Удкадуа изображает шумерского духа бури с разинутой пастью. Звезда отмечает пятку фигуры, по которой наблюдатели долгие века отсчитывали время.",
+    "fr": "Udkadua évoque un démon sumérien de la tempête à la bouche béante. L’étoile marque son talon, dans une figure longtemps utilisée pour mesurer le temps."
+  },
+  "116771": {
+    "zh": "巴厘语 Puwuh Atarung 是“两只争斗的鹌鹑”。这种当地人熟悉的家禽至少从公元 8 世纪起就以争斗的姿态出现在巴厘天空传统里。",
+    "en": "Puwuh Atarung evokes battling quails in Balinese. These familiar birds appear as a fighting pair in a sky tradition documented since the eighth century.",
+    "ru": "Балийское Puwuh Atarung обозначает сражающихся перепелов. Эти знакомые птицы образуют небесную пару в традиции, известной с VIII века.",
+    "fr": "Puwuh Atarung évoque des cailles qui se battent en balinais. Ces oiseaux familiers forment un couple céleste attesté dans la tradition balinaise depuis le VIIIe siècle."
+  }
+}

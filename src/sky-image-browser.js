@@ -135,6 +135,8 @@ export function mountSkyImageBrowser(env) {
       });
     };
   }
+  $('westernSkyBrowse').onclick = (event) =>
+    browser.open({ source: 'reference', category: 'constellation', opener: event.currentTarget });
   $('xtSaveSkyField').onclick = (event) => {
     const id = sim.xuntian?.skyViewId;
     const plan = id && skyDetail.offline.planCurrent(id);

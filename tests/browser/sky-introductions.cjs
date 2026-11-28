@@ -143,7 +143,17 @@ async function main() {
     });
     for (const label of parents)
       await page.locator('summary').filter({ hasText: label }).first().click();
+    await click('#westernSkyBrowse');
+    const westernGallery = page.locator('#skyImageGallery');
+    await westernGallery.locator('#skyConstellationFilter').waitFor();
+    assert.equal(await westernGallery.locator('#skyReferenceCategory').inputValue(), 'constellation');
+    assert.equal(await westernGallery.locator('#skyConstellationFilter').inputValue(), 'all');
+    assert.match(await westernGallery.locator('.sig-reference-count').innerText(), /88/);
+    await page.keyboard.press('Escape');
+    await westernGallery.waitFor({state:'hidden'});
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'westernSkyBrowse');
     await page.locator('#skyCulture').selectOption('chinese');
+    await page.locator('#westernSkyBrowse').waitFor({ state: 'hidden' });
     await expand('#chineseSkyExplorer');
     await page.waitForFunction(() =>
       Array.from(document.querySelector('#chineseSkyObject').options).some(

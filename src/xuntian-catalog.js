@@ -16,6 +16,7 @@ import {
 import chinesePhysicalStars from '../assets/chinese-sky/physical-stars.json' with { type: 'json' };
 import chineseSearch from '../assets/chinese-sky-search.json';
 import { birthdaySearchAliases } from './birthday-content.js';
+import { standardStarNames } from './stellar-name-register-reading.js';
 
 const DEG = Math.PI / 180,
   BIN = 5,
@@ -393,14 +394,16 @@ function baseSearchCatalog() {
     ...named.keys(),
     ...supplement.keys(),
     ...Object.keys(aliases.starNames).map(Number),
+    ...Object.keys(standardStarNames).map(Number),
   ]);
   for (const hip of ids) {
     const point = byId.get('hip:' + hip);
     if (!point) continue;
     const n = named.get(hip),
       d = supplement.get(hip),
+      registered = standardStarNames[hip],
       identifier = 'HIP ' + hip,
-      fallback = d?.designation || identifier;
+      fallback = d?.designation || registered?.[0] || identifier;
     const names = { zh: n?.zh || fallback, en: n?.en || fallback, ru: n?.ru, fr: n?.fr };
     entry(
       point.id,
@@ -410,7 +413,7 @@ function baseSearchCatalog() {
       point.direction,
       8,
       0,
-      [...(aliases.starNames[hip] ?? []), ...(d?.extra ?? [])],
+      [...(aliases.starNames[hip] ?? []), ...(d?.extra ?? []), registered?.[0], registered?.[3]],
       point.mag
     );
   }

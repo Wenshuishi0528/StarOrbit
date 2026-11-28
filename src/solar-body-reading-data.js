@@ -1,3 +1,125 @@
+// Separate historical witnesses and cultural traditions from physical properties.
+export const solarStories = {
+  Sun: {
+    kind: 'history',
+    source: {
+      name: 'Museo Galileo',
+      url: 'https://brunelleschi.imss.fi.it/galileopalazzostrozzi/object/GalileoGalileiDrawingsOfTheSunspots.html',
+    },
+    zh: '1612 年，伽利略连续把太阳圆面和黑子的位置画在纸上。同一片黑斑隔天移了位置，靠近圆面边缘时又显得扁窄。把这一页页图按日期排开，斑点便成了追踪太阳表面运动的标记。在一张静态照片里像瑕疵的东西，由此成了太阳也在自转的证据。',
+    en: 'In 1612 Galileo drew the Sun and its spots on successive days. A group changed position from one drawing to the next and looked narrower near the limb. Arranged by date, the spots became markers for motion on the Sun. Marks that looked like blemishes in a single image helped show that the Sun rotates.',
+    fr: 'En 1612, Galilée dessina le Soleil et ses taches jour après jour. Un groupe changeait de position d’une feuille à l’autre et se rétrécissait près du bord. Les dessins classés par date transformaient de simples marques sombres en repères du mouvement du Soleil sur lui-même.',
+    ru: 'В 1612 году Галилей изо дня в день зарисовывал Солнце и пятна на нём. Группа пятен меняла положение и у края диска казалась уже. В ряду датированных зарисовок тёмные отметины стали метками движения и свидетельством вращения самого Солнца.',
+  },
+  Moon: {
+    kind: 'tradition',
+    artifact: {
+      name: 'The Metropolitan Museum of Art · Tang mirror',
+      url: 'https://www.metmuseum.org/art/collection/search/61405',
+    },
+    source: {
+      name: 'British Library · International Dunhuang Programme',
+      url: 'https://idp.bl.uk/discover/learning/chinese-astronomy/articles/astrology-and-myth/chang-e-or-the-archer-and-the-moon-goddess/',
+    },
+    zh: '中国有许多种嫦娥奔月的讲法。在一则流传很广的故事里，射手羿得到了长生药，嫦娥服药后升到月亮上，夫妻从此天地相隔。月中玉兔捣药的图像，又给这片明暗相间的圆面添了一位居民。读这个故事时，古人仰望的是我们今天也能看见的那一张月面。',
+    en: 'There are several Chinese traditions about Chang’e. In one, the archer Yi obtains an elixir of immortality. Chang’e takes it and ascends to the Moon, separating the couple between sky and Earth. Images of a rabbit preparing medicine give the lunar disc another inhabitant. The pattern of light and dark behind these stories is the familiar face we see today.',
+    fr: 'Il existe plusieurs récits chinois de Chang’e. Dans l’un d’eux, l’archer Yi obtient un élixir d’immortalité. Chang’e le prend et monte sur la Lune, séparant le couple entre la Terre et le ciel. Le lapin qu’on représente en train de piler un remède peuple lui aussi ce disque clair et sombre que nous voyons encore.',
+    ru: 'В Китае есть разные предания о Чанъэ. По одному из них стрелок И получил эликсир бессмертия. Чанъэ выпила его и поднялась на Луну, и супругов разделили небо и Земля. На изображениях там же заяц толчёт снадобье. За преданием стоит тот же знакомый светло-тёмный лик, который мы видим сегодня.',
+  },
+  Mercury: {
+    kind: 'history',
+    source: {
+      name: 'Observatoire de Paris · IMCCE',
+      url: 'https://vt2004.imcce.fr/CDs/CD-VT-histoire/html_english/textescommentes1631.html',
+    },
+    zh: '1631 年，皮埃尔·伽桑狄在巴黎按开普勒的预报守候水星凌日。投影的日面上出现了一个比预料小得多的黑点，他起初怀疑它是黑子。接连记录的位置显示这个点很快横移，正是从地球和太阳之间经过的水星。一颗古人早就熟悉的晨昏行星，因此有了可以实测的视直径。',
+    en: 'In Paris in 1631, Pierre Gassendi waited for a transit predicted by Kepler. A tiny dark point appeared on his projected solar disc, so much smaller than expected that he considered a sunspot. Successive positions showed it moving rapidly across the Sun. Mercury, familiar since antiquity, had presented a disc whose apparent size could be measured.',
+    fr: 'À Paris, en 1631, Pierre Gassendi guetta le transit prévu par Kepler. Un point si petit parut sur le disque solaire projeté qu’il songea d’abord à une tache solaire. Mais ses positions successives trahissaient le passage rapide de Mercure. On pouvait enfin mesurer la taille apparente du disque de cette planète connue depuis l’Antiquité.',
+    ru: 'В Париже в 1631 году Пьер Гассенди ожидал предсказанного Кеплером прохождения Меркурия. На проекции Солнца появилась неожиданно маленькая тёмная точка, которую можно было принять за солнечное пятно. Повторные отметки показали её быстрое движение. У давно знакомой планеты удалось измерить видимый диаметр.',
+  },
+  Venus: {
+    kind: 'name',
+    source: {
+      name: 'Hong Kong Observatory',
+      url: 'https://www.hko.gov.hk/tc/天氣隨筆/104283/西望長庚',
+    },
+    zh: '《诗经·大东》里有“东有启明，西有长庚”。清晨，在东方天色将明之际出现的亮星叫启明。傍晚，在西方余晖里出现的叫长庚。两个名字记下了两次不同的相遇，对应的却是同一颗金星。它绕太阳运行，因而会先后出现在太阳两侧。',
+    en: 'An ode in China’s Book of Songs pairs Qiming in the east with Changgeng in the west. One name belongs to the bright herald of dawn, the other to the light lingering in the evening sky. They describe two encounters with Venus. Its changing position around the Sun places the same planet first in one half of the twilight sky, then the other.',
+    fr: 'Une ode du Livre des vers associe Qiming à l’est et Changgeng à l’ouest. Le premier nom évoque le point brillant qui annonce le jour, le second celui qui prolonge le crépuscule. Ce sont deux apparitions de Vénus, qui se présente successivement de part et d’autre du Soleil au cours de son orbite.',
+    ru: 'В китайской «Книге песен» Цимин на востоке сопоставлен с Чангэном на западе. Одно имя относилось к яркой предвестнице рассвета, другое — к светилу в вечерних сумерках. Оба обозначают Венеру: на своей орбите она появляется то по одну, то по другую сторону Солнца.',
+  },
+  Earth: {
+    kind: 'history',
+    source: {
+      name: 'NOAA',
+      url: 'https://www.noaa.gov/jetstream/global/learning-lesson-shadow-knows-i',
+    },
+    zh: '两千多年前，埃拉托色尼把两个地方的正午阳光当成了测量地球的工具。夏至时，赛伊尼的太阳接近头顶，亚历山大的竖杆却留下影子。由影子的角度知道两地间的弧线占整圆的大约几分之一，再结合两地距离，就能估出地球一周有多长。',
+    en: 'More than two thousand years ago, Eratosthenes used noon sunlight at two places to measure Earth. At the summer solstice the Sun stood close to the zenith at Syene, while a vertical rod in Alexandria cast a shadow. Its angle gave a fraction of a full circle. Combined with the distance between the cities, it gave an estimate of Earth’s circumference.',
+    fr: 'Il y a plus de deux mille ans, Ératosthène utilisa le Soleil de midi en deux lieux. Au solstice d’été, le Soleil était presque au zénith à Syène, alors qu’un bâton vertical portait une ombre à Alexandrie. L’angle indiquait une fraction de tour. La distance entre les villes permettait alors d’estimer la circonférence de la Terre.',
+    ru: 'Более двух тысяч лет назад Эратосфен измерил Землю с помощью полуденного света. В летнее солнцестояние в Сиене Солнце было почти в зените, а вертикальный стержень в Александрии отбрасывал тень. По её углу определяли долю полного круга, а по расстоянию между городами — длину земной окружности.',
+  },
+  Mars: {
+    kind: 'name',
+    source: {
+      name: '中国国家航天局 / CNSA',
+      url: 'https://www.cnsa.gov.cn/n6758824/n6759009/n6760412/n6760413/c6840402/content.html',
+    },
+    zh: '中国古代把火星称为“荧惑”。这颗泛红的游星在星群间长期向东移动，有时却停下来，向西倒退一段，又恢复东行。把好几个月的位置画在一张图上，便能认出这种逆行。当地球从内侧赶过火星时，视线方向会改变，于是远方星空上留下了这段回头路。',
+    en: 'Ancient Chinese observers called Mars Yinghuo. Over many nights the reddish wanderer generally moves east among the stars, yet sometimes turns west before resuming its course. Months of plotted positions reveal this retrograde motion. As Earth overtakes Mars on an inner orbit, the changing line of sight draws the apparent backtrack.',
+    fr: 'En Chine ancienne, Mars portait le nom de Yinghuo. Le point rougeâtre glisse généralement vers l’est parmi les étoiles, mais repasse parfois vers l’ouest avant de repartir. Des positions relevées pendant des mois dessinent ce recul apparent, qui se produit quand la Terre dépasse Mars sur son orbite intérieure.',
+    ru: 'Древнекитайские наблюдатели называли Марс Инхо. Обычно красноватое светило движется среди звёзд к востоку, но порой поворачивает на запад и затем возвращается к прежнему ходу. На карте за несколько месяцев виден этот попятный участок: он возникает, когда Земля обгоняет Марс по внутренней орбите.',
+  },
+  Jupiter: {
+    kind: 'discovery',
+    source: {
+      name: 'NASA · History',
+      url: 'https://www.nasa.gov/history/410-years-ago-galileo-discovers-jupiters-moons/',
+    },
+    zh: '1610 年 1 月，伽利略把望远镜对准木星，先记下了圆盘附近三个小光点。接下来的夜晚，它们的排列变了，又出现了第四个，却总留在木星身旁。反复作图让他认出，这是绕另一颗行星运行的卫星。当时的人第一次有了可以亲自复查的例子，说明天空中还有地球以外的环绕中心。',
+    en: 'In January 1610 Galileo noted three specks beside Jupiter. Over the following nights their arrangement changed and a fourth appeared, but all stayed near the planet. Repeated sketches showed that these were moons circling another world. Other observers could point their own telescopes there and check that Earth was not the only centre of orbital motion.',
+    fr: 'En janvier 1610, Galilée nota trois points près de Jupiter. Les nuits suivantes, leur arrangement changea et un quatrième apparut, mais tous restèrent auprès de la planète. Ses dessins révélèrent des lunes tournant autour d’un autre monde. Chacun pouvait vérifier au télescope qu’il existait un centre de révolution autre que la Terre.',
+    ru: 'В январе 1610 года Галилей заметил три точки рядом с Юпитером. В следующие ночи они менялись местами, показалась четвёртая, но все оставались возле планеты. Серия зарисовок выявила спутники другого мира. Любой наблюдатель с телескопом мог проверить, что Земля не единственный центр орбитального движения.',
+  },
+  Saturn: {
+    kind: 'history',
+    source: {
+      name: 'Museo Galileo',
+      url: 'https://catalogue.museogalileo.it/multimedia/SaturnsSystemBis.html',
+    },
+    zh: '伽利略的小望远镜使土星看起来像两旁各长了一只“耳朵”。几年间，两侧的东西竟会收窄乃至消失。惠更斯提出，行星周围有一个倾斜、与球体分离的环。当我们几乎沿环面看过去，环便细得难以分辨。一个几何解释把原先互相矛盾的模样串在了一起。',
+    en: 'Through Galileo’s small telescope Saturn seemed to have an ear on each side. In later observations those extensions narrowed or vanished. Huygens proposed a detached, inclined ring around the planet. Viewed nearly along its plane, the ring becomes too thin to resolve. A geometric idea reconciled a series of puzzling appearances.',
+    fr: 'Dans la petite lunette de Galilée, Saturne semblait porter deux oreilles. Plus tard, ces appendices s’amincirent jusqu’à disparaître. Huygens proposa un anneau incliné et séparé du globe. Presque vu par la tranche, il devenait trop fin pour l’instrument. Une même géométrie expliquait ainsi des aspects longtemps déroutants.',
+    ru: 'В маленький телескоп Галилея у Сатурна по бокам виднелись словно два уха. Позже выступы сужались и исчезали. Гюйгенс предложил объяснение: отдельное наклонённое кольцо вокруг планеты. Если смотреть почти с ребра, кольцо слишком тонко для телескопа. Так геометрия связала прежде загадочные наблюдения.',
+  },
+  Uranus: {
+    kind: 'name',
+    source: {
+      name: 'NASA · StarChild',
+      url: 'https://starchild.gsfc.nasa.gov/docs/StarChild/questions/question42.html',
+    },
+    zh: '赫歇尔希望用英王乔治三世的名字称呼这颗新行星，欧洲的星图一度出现了不同写法。波德提出 Uranus，理由是神谱中乌拉诺斯是萨图尔努斯（土星）的父亲，正好让太阳系外侧的行星名字也连成一代代的世系。今天使用的这个名称，就是当年讨论留下的结果。',
+    en: 'Herschel wanted the new planet to honour King George III, and its name varied between early charts. Johann Bode proposed Uranus. In the classical genealogy Uranus fathered Saturn, who fathered Jupiter, so the new outer planet continued a chain of generations. The name still in use preserves that eighteenth-century debate.',
+    fr: 'Herschel souhaitait honorer le roi George III, et le nom de la nouvelle planète varia d’abord selon les cartes. Bode proposa Uranus, père de Saturne, lui-même père de Jupiter dans la généalogie antique. La nouvelle planète prolongeait ainsi la lignée vers l’extérieur. Son nom actuel garde la trace du débat.',
+    ru: 'Гершель предложил назвать новую планету в честь короля Георга III, и на ранних картах имена различались. Боде предложил Уран: в античной родословной Уран — отец Сатурна, а тот — отец Юпитера. Новая внешняя планета продолжала ряд поколений, и это имя закрепилось.',
+  },
+  Neptune: {
+    kind: 'discovery',
+    source: {
+      name: 'Leibniz-Institut für Astrophysik Potsdam · Berliner Sternwarte',
+      url: 'https://www.aip.de/de/institute/history/the-history-behind-the-aip-logo/',
+    },
+    artifact: {
+      name: 'NASA · Discovery of Neptune',
+      url: 'https://www.nasa.gov/history/175-years-ago-astronomers-discover-neptune-the-eighth-planet/',
+    },
+    zh: '1846 年 9 月 23 日，柏林天文台的伽勒收到了勒维耶从巴黎寄来的信。天王星总是偏离计算的位置，勒维耶据此推算出一颗更远行星应在的方向。当晚，伽勒与达雷斯特一人在望远镜前报星位，一人核对布雷米克的星图。他们找到一个图上没有的光点，离预报位置约一度。次夜光点移了位置，海王星就这样被认了出来。早在 1612 年，伽利略画木星附近的星点时也曾画到它。',
+    en: 'On 23 September 1846 a letter from Le Verrier reached Johann Galle in Berlin. Uranus had strayed from its calculated path, allowing Le Verrier to predict where to look for a more distant planet. That night Galle and Heinrich d’Arrest compared the telescope view with Carl Bremiker’s star chart. They found a point missing from the chart about a degree from the prediction. The next night it had moved. Galileo had even drawn the same planet near Jupiter in 1612.',
+    fr: 'Le 23 septembre 1846, Galle reçut à Berlin une lettre de Le Verrier. Les écarts d’Uranus à son orbite calculée lui avaient permis de prédire où chercher une planète plus lointaine. Le soir même, Galle et d’Arrest comparèrent le ciel au télescope avec la carte de Bremiker. À environ un degré de la position prévue brillait un point absent de la carte. La nuit suivante, il avait bougé. Galilée avait déjà dessiné cette planète près de Jupiter en 1612.',
+    ru: '23 сентября 1846 года берлинский астроном Галле получил письмо от Леверье. По отклонениям Урана от расчётной орбиты Леверье предсказал, где искать более далёкую планету. В тот вечер Галле и д’Аррест сравнили вид в телескоп с картой Бремикера и примерно в градусе от предсказанного места заметили лишнюю точку. На следующую ночь она сместилась. Ещё в 1612 году Галилей зарисовал ту же планету рядом с Юпитером.',
+  },
+};
+
 // NASA Science facts pages are identified by body in readSolarBody.
 export const solarIntroductions = {
   Sun: {

@@ -185,6 +185,7 @@ export function mountSkyImageGallery({
   let references,
     referenceId = null,
     referenceCategory = 'all',
+    constellationFilter = 'all',
     referenceHistory = [],
     referenceOrigin = null,
     generation = 0,
@@ -208,6 +209,16 @@ export function mountSkyImageGallery({
   const category = make('select');
   category.id = 'skyReferenceCategory';
   tool.append(search, filter, category);
+  const constellationTools = make('div', 'sig-constellation-tools'),
+    constellationLabel = make('label'),
+    constellationSelect = make('select'),
+    constellationNote = make('p', 'sig-meta');
+  constellationSelect.id = 'skyConstellationFilter';
+  constellationLabel.htmlFor = constellationSelect.id;
+  constellationNote.id = 'skyConstellationNote';
+  constellationSelect.setAttribute('aria-describedby', constellationNote.id);
+  constellationTools.append(constellationLabel, constellationSelect, constellationNote);
+  tool.append(constellationTools);
   const scroller = make('div', 'sig-scroll'),
     feedback = make('p', 'sig-feedback');
   feedback.setAttribute('role', 'status');
@@ -276,6 +287,28 @@ export function mountSkyImageGallery({
         )
       );
       category.value = referenceCategory;
+    }
+    constellationTools.hidden = category.hidden || referenceCategory !== 'constellation';
+    if (!constellationTools.hidden) {
+      constellationLabel.textContent = t('星座分类');
+      constellationSelect.replaceChildren(new Option(t('全部星座'), 'all'));
+      for (const { label, options } of references.constellationFilters) {
+        const group = make('optgroup');
+        group.label = t(label);
+        for (const option of options) {
+          const name = t(option.label);
+          const n = references.directory.search('', 'constellation', option.id).length;
+          group.append(
+            new Option(
+              label === '按黄道查看' ? name : t('{name}（{count}）', { name, count: n }),
+              option.id
+            )
+          );
+        }
+        constellationSelect.append(group);
+      }
+      constellationSelect.value = constellationFilter;
+      constellationNote.textContent = t(references.constellationNotes[constellationFilter]);
     }
     search.value = query;
   }
@@ -600,13 +633,29 @@ export function mountSkyImageGallery({
         }
       });
   }
-  function referenceMeta(id, target) {
+  function referenceMeta(id, target, list = false) {
     const key = references.referenceCategory(id);
     const type = t(references.referenceCategories[key]);
+    if (key === 'constellation') {
+      const browsingConstellations = list && referenceCategory === key;
+      const latin = references.directory.subject(id, 'en').name;
+      const history = references.constellationHistoryLabel(id);
+      return [
+        !browsingConstellations && type,
+        latin !== target.name && latin,
+        target.identifier,
+        (!browsingConstellations || constellationFilter === 'all') && history && t(history),
+      ]
+        .filter(Boolean)
+        .join(' · ');
+    }
     const extra = target.category || target.record?.pinyin || target.identifier;
-    return [type, extra && extra !== target.name && extra !== type ? extra : '']
-      .filter(Boolean)
-      .join(' · ');
+    return [
+      type,
+      ...new Set(
+        [extra, target.referenceDesignation].filter((s) => s && s !== target.name && s !== type)
+      ),
+    ].join(' · ');
   }
   function focusEntry(id) {
     Array.from(scroller.querySelectorAll('[data-entry], [data-related-reference]'))
@@ -706,7 +755,7 @@ export function mountSkyImageGallery({
   }
   function renderReferences(focus) {
     const { directory } = references;
-    const results = directory.search(query, referenceCategory);
+    const results = directory.search(query, referenceCategory, constellationFilter);
     const pages = Math.max(1, Math.ceil(results.length / pageSize));
     page = Math.min(page, pages - 1);
     const list = make('div', 'sig-reference-list');
@@ -725,7 +774,7 @@ export function mountSkyImageGallery({
       card.dataset.entry = id;
       card.append(
         make('strong', null, target.name),
-        make('small', 'sig-meta', referenceMeta(id, target))
+        make('small', 'sig-meta', referenceMeta(id, target, true))
       );
       list.append(card);
     }
@@ -844,6 +893,12 @@ export function mountSkyImageGallery({
   };
   category.onchange = () => {
     referenceCategory = category.value;
+    setLabels();
+    resetList();
+  };
+  constellationSelect.onchange = () => {
+    constellationFilter = constellationSelect.value;
+    constellationNote.textContent = t(references.constellationNotes[constellationFilter]);
     resetList();
   };
   dialog.addEventListener('keydown', (event) => event.stopPropagation());
@@ -871,11 +926,18 @@ export function mountSkyImageGallery({
     open(options = {}) {
       if (dialog.open) return;
       context = options.context || 'main';
-      if (filters.some(([id]) => id === options.source) && source !== options.source) {
+      if (
+        filters.some(([id]) => id === options.source) &&
+        (source !== options.source || options.category)
+      ) {
         source = options.source;
         page = 0;
         savedScroll = 0;
         query = '';
+      }
+      if (options.category === 'constellation') {
+        referenceCategory = 'constellation';
+        constellationFilter = 'all';
       }
       opener = options.opener || document.activeElement;
       selected = null;

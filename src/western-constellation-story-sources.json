@@ -1,0 +1,242 @@
+{
+  "procyon": {
+    "name": "Bond et al. · Hubble Space Telescope Astrometry of the Procyon System",
+    "url": "https://arxiv.org/abs/1510.00485"
+  },
+  "tycho": {
+    "name": "Tycho Brahe · De nova stella (1573)",
+    "url": "https://causascientia.org/science/Tycho/DeNova.pdf"
+  },
+  "apolloPer": {
+    "name": "Apollodorus · Bibliotheca II.4.3",
+    "url": "https://beta.perseus.tufts.edu/urn%3Acts%3AgreekLit%3Atlg0548.tlg001.perseus-eng2/section%3A2.4.3/"
+  },
+  "mira": {
+    "name": "Neuhäuser et al. · Mira, 1596–1609",
+    "url": "https://arxiv.org/abs/2412.13756"
+  },
+  "fasti": {
+    "name": "Ovid · Fasti II.243–266",
+    "url": "https://bcs.fltr.ucl.ac.be/fastam/F2-243-474.html"
+  },
+  "bessel": {
+    "name": "F. W. Bessel · 61 Cygni (1838)",
+    "url": "https://articles.adsabs.harvard.edu/pdf/1838MNRAS...4..152B"
+  },
+  "equuleus": {
+    "name": "E. H. Burritt · The Geography of the Heavens, Equuleus",
+    "url": "https://archive.org/details/geographyofheav00burr"
+  },
+  "ovid2": {
+    "name": "Ovid · Metamorphoses II",
+    "url": "https://ovid.lib.virginia.edu/trans/Metamorph2.htm"
+  },
+  "pindar": {
+    "name": "Pindar · Nemean X.55–90",
+    "url": "https://en.wikisource.org/wiki/Pindar_and_Anacreon/Pindar/Nemean_Odes/10"
+  },
+  "apolloLabours": {
+    "name": "Apollodorus · Bibliotheca II.5.1–2",
+    "url": "https://beta.perseus.tufts.edu/urn%3Acts%3AgreekLit%3Atlg0548.tlg001.perseus-eng2%3A2.5/"
+  },
+  "virgil": {
+    "name": "Virgil · Georgica I.208–214",
+    "url": "https://www.theoi.com/Text/VirgilGeorgics1.html"
+  },
+  "ovid10": {
+    "name": "Ovid · Metamorphoses X.1–85",
+    "url": "https://ovid.lib.virginia.edu/trans/Metamorph10.htm"
+  },
+  "apolloMedusa": {
+    "name": "Apollodorus · Bibliotheca II.4.2",
+    "url": "https://beta.perseus.tufts.edu/urn%3Acts%3AgreekLit%3Atlg0548.tlg001.perseus-eng2/section%3A2.4.2/"
+  },
+  "hesiod": {
+    "name": "Hesiod · Works and Days 383–387",
+    "url": "https://chs.harvard.edu/primary-source/hesiod-works-and-days-sb/"
+  },
+  "houtman": {
+    "name": "Verbunt & Van Gent · Early Star Catalogues of the Southern Sky (2011)",
+    "url": "https://arxiv.org/abs/1104.0946"
+  },
+  "plancius": {
+    "name": "Petrus Plancius · Linda Hall Library",
+    "url": "https://www.lindahall.org/about/news/scientist-of-the-day/petrus-plancius/"
+  },
+  "ices": {
+    "name": "NASA / ESA / CSA · Webb, Chamaeleon I",
+    "url": "https://science.nasa.gov/missions/webb/webb-unveils-dark-side-of-pre-stellar-ice-chemistry/"
+  },
+  "genesis": {
+    "name": "Genesis 8.8–12",
+    "url": "https://bible.usccb.org/bible/genesis/8"
+  },
+  "coma": {
+    "name": "Catullus · Carmina 66",
+    "url": "https://beta.perseus.tufts.edu/urn%3Acts%3AlatinLit%3Aphi0472.phi001.perseus-eng3%3A66/"
+  },
+  "corsali": {
+    "name": "A. Corsali · Lettera (1516), State Library of New South Wales",
+    "url": "https://www.sl.nsw.gov.au/collection-items/lettera-di-andrea-corsali-allo-illustrissimo-signore-duco-iuliano-de-medici"
+  },
+  "sn1987": {
+    "name": "Bionta et al. · Neutrinos from SN 1987A (1987)",
+    "url": "https://ntrs.nasa.gov/citations/19870051140"
+  },
+  "blaeu": {
+    "name": "W. J. Blaeu · Celestial globe, Royal Museums Greenwich",
+    "url": "https://www.rmg.co.uk/collections/objects/rmgc-object-19838"
+  },
+  "echo": {
+    "name": "NASA / ESA · Hubble, V838 Monocerotis",
+    "url": "https://science.nasa.gov/asset/hubble/light-echo-from-star-v838-monocerotis/"
+  },
+  "ovid1": {
+    "name": "Ovid · Metamorphoses I.722–723",
+    "url": "https://ovid.lib.virginia.edu/book1.html"
+  },
+  "herodotus": {
+    "name": "Herodotus · Histories II.73",
+    "url": "https://phoinixplatform.org/pandecta/1109"
+  },
+  "lacaille": {
+    "name": "N.-L. de Lacaille · Table des ascensions droites (1756), remarques",
+    "url": "https://www.watcheroftheskies.net/lacaille/remarks.html"
+  },
+  "tuc47": {
+    "name": "ESO · 47 Tucanae",
+    "url": "https://www.eso.org/public/news/eso0620/"
+  },
+  "volansring": {
+    "name": "NASA / ESA · Hubble, AM 0644-741",
+    "url": "https://science.nasa.gov/asset/hubble/blue-stars-ring-nucleus-of-galaxy-am-0644-741/"
+  },
+  "bllac": {
+    "name": "AAVSO · BL Lacertae",
+    "url": "https://mintaka.aavso.org/vsots_bllac"
+  },
+  "sobieski": {
+    "name": "Museum of King Jan III’s Palace · Hevelius and Sobieski",
+    "url": "https://wilanow-palac.pl/en/knowledge/hevelius-s-tribute-to-jan-iii-sobieski"
+  },
+  "sextant": {
+    "name": "J. Hevelius · Machina coelestis (1673), Linda Hall Library",
+    "url": "https://www.lindahall.org/about/news/scientist-of-the-day/elisabeth-hevelius/"
+  },
+  "pulsar": {
+    "name": "J. Bell Burnell · University of Cambridge",
+    "url": "https://www.cam.ac.uk/stories/journeysofdiscovery-pulsars"
+  },
+  "pump": {
+    "name": "Historisches Museum Basel · Magdeburg Hemispheres",
+    "url": "https://www.hmb.ch/en/museums/eguides/a/e/two-magdeburg-hemispheres"
+  },
+  "udf": {
+    "name": "NASA / ESA · Hubble Ultra Deep Field",
+    "url": "https://science.nasa.gov/mission/hubble/science/universe-uncovered/hubble-deep-fields/"
+  },
+  "clock": {
+    "name": "S. Coster · Nationaal Archief / Museum Boerhaave (1657)",
+    "url": "https://www.nationaalarchief.nl/onderzoeken/fotocollectie/af551c72-d0b4-102d-bcf8-003048976d84"
+  },
+  "geodesy": {
+    "name": "C. Sterken · Geodetic Surveying in South Africa",
+    "url": "https://doi.org/10.1017/S1743921325000493"
+  },
+  "hooke": {
+    "name": "R. Hooke · Micrographia (1665), Observation XVIII",
+    "url": "https://archive.org/details/micrographiaorso00hook"
+  },
+  "octant": {
+    "name": "Royal Museums Greenwich · Octant",
+    "url": "https://www.rmg.co.uk/collections/objects/rmgc-object-43479"
+  },
+  "betapic": {
+    "name": "NASA / ESA · Beta Pictoris, circumstellar disk",
+    "url": "https://science.nasa.gov/missions/hubble/disk-around-star-may-be-warped-by-unseen-planet/"
+  },
+  "betaplanet": {
+    "name": "NASA · Direct imaging of Beta Pictoris b",
+    "url": "https://science.nasa.gov/universe/exoplanets/seeing-and-believing-15-years-of-exoplanet-images/"
+  },
+  "tpyx": {
+    "name": "NASA / ESA · Hubble, T Pyxidis",
+    "url": "https://science.nasa.gov/mission/hubble/science/science-behind-the-discoveries/hubble-stellar-explosions/"
+  },
+  "sculptorgal": {
+    "name": "NASA / ESA · Hubble, NGC 253",
+    "url": "https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-65/"
+  },
+  "reticle": {
+    "name": "N.-L. de Lacaille · Réticule rhomboïde (1756–1763), transcriptions",
+    "url": "https://ase.exopla.net/index.php/Reticulum#Lacaille's_transformations"
+  },
+  "telescope": {
+    "name": "J. Hevelius · Machina coelestis (1673), Royal Society",
+    "url": "https://pictures.royalsociety.org/image-rs-17695"
+  },
+  "houttable": {
+    "name": "F. de Houtman (1603) · Verbunt & Van Gent, table 1",
+    "url": "https://arxiv.org/pdf/1104.0946#page=2"
+  },
+  "houtscan": {
+    "name": "F. de Houtman · Spraeck ende woord-boeck (1603), Utrecht University",
+    "url": "https://objects.library.uu.nl/reader/1874-205055"
+  },
+  "bayersouth": {
+    "name": "J. Bayer · Uranometria (1603), plate 49 · Linda Hall Library",
+    "url": "https://www.lindahall.org/about/news/scientist-of-the-day/frederick-de-houtman/"
+  },
+  "tucplates": {
+    "name": "P. Plancius & W. J. Blaeu · Tucana, globes (1598–1603)",
+    "url": "https://ase.exopla.net/index.php/Tucana#Image_Gallery"
+  },
+  "dorplates": {
+    "name": "F. de Houtman & J. Kepler · Dorado / Xiphias (1603–1627)",
+    "url": "https://ase.exopla.net/index.php/Dorado#Etymology_and_History"
+  },
+  "monbartsch": {
+    "name": "P. Plancius & J. Bartsch · Monoceros / Unicornu · Brown University Library",
+    "url": "https://library.brown.edu/create/unicornfound/monoceros-the-unicorn/"
+  },
+  "hevlizard": {
+    "name": "J. Hevelius · Lacerta sive Stellio, text and plate",
+    "url": "https://ase.exopla.net/index.php/Lacerta#Origin_of_the_Constellation"
+  },
+  "hevfox": {
+    "name": "J. Hevelius · Vulpecula cum Ansere, text and plate",
+    "url": "https://ase.exopla.net/index.php/Vulpecula#Origin_of_Constellation"
+  },
+  "hevhounds": {
+    "name": "J. Hevelius · Canes Venatici (1690), Smithsonian / Chandra",
+    "url": "https://chandra.si.edu/photo/constellations/canesvenatici.html"
+  },
+  "hevlion": {
+    "name": "J. Hevelius · Firmamentum Sobiescianum, plate Z, Leo Minor",
+    "url": "https://commons.wikimedia.org/wiki/File:Johannes_Hevelius_-_Prodromus_Astronomia_-_Volume_III_%22Firmamentum_Sobiescianum,_sive_uranographia%22_-_Tavola_Z_-_Leo_minor.jpg"
+  },
+  "babscales": {
+    "name": "F. Rochberg · The Heavenly Writing, late Babylonian zodiacal names",
+    "url": "https://assets.cambridge.org/97805217/16611/frontmatter/9780521716611_frontmatter.pdf"
+  },
+  "colchart": {
+    "name": "P. Plancius · Columba, early maps and chart comparison",
+    "url": "https://ase.exopla.net/index.php/Columba#Etymology_and_History"
+  },
+  "hevfoxwords": {
+    "name": "J. Hevelius · Vulpecula, account quoted by R. H. Allen · University of Chicago",
+    "url": "https://penelope.uchicago.edu/Thayer/E/Gazetteer/Topics/astronomy/_Texts/secondary/ALLSTA/Vulpecula*.html"
+  },
+  "lynxwords": {
+    "name": "J. Hevelius · Lynx sive Tigris, catalogue and original description",
+    "url": "https://ase.exopla.net/index.php/Lynx#Origin_of_Constellation"
+  },
+  "bartschcamel": {
+    "name": "J. Bartsch · Usus astronomicus planisphaerii stellati (1624), Camelopardalis",
+    "url": "https://ase.exopla.net/index.php/Camelopardalis#Jacob_Bartsch_(1600-1632)"
+  },
+  "hevsextant": {
+    "name": "J. Hevelius · Sextans, description and chart",
+    "url": "https://ase.exopla.net/index.php/Sextans#Origin_of_Constellation"
+  }
+}

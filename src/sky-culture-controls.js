@@ -290,6 +290,7 @@ export function installSkyCultureControls(sim) {
         ? t('清代通行整理 · 三垣二十八宿；近南极增补单列。图像为现代教学意象。')
         : t('88 个现代星座 · 名称、连线与教学插画。');
     $('chineseSkyExplorer').hidden = value !== 'chinese';
+    $('westernSkyBrowse').hidden = value !== 'western';
     const displayHint =
       env.settings.stars === false
         ? t('恒星显示已关闭，插画也会隐藏。')
