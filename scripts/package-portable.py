@@ -21,7 +21,14 @@ files.extend(['scripts/cloud_versions.py', 'scripts/cloud_coverage.py', 'scripts
 # New unlinked engineering notes and temporary evidence are not silently distributed.
 files = sorted(set(files + portable_documents(root)))
 launcher_files = [p for p in args.macos_launcher.rglob('*') if p.is_file()] if args.macos_launcher else []
-size = sum((root / name).stat().st_size for name in files)+sum(p.stat().st_size for p in launcher_files)
+# The offline art reference contains large indented coordinate arrays.
+art_manifest = 'assets/chinese-sky/art/manifest.json'
+packed_documents = {}
+if art_manifest in files:
+    manifest = json.loads((root / art_manifest).read_bytes())
+    packed_documents[art_manifest] = json.dumps(manifest, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+size = sum(len(packed_documents[name]) if name in packed_documents else (root / name).stat().st_size for name in files)
+size += sum(p.stat().st_size for p in launcher_files)
 # Native day/night imagery is retained; large JSON is split into bounded inert blocks.
 if size > 1_200_000_000:
     raise SystemExit(f'Runtime package is {size} bytes, exceeding the 1200 MB budget')
@@ -33,6 +40,8 @@ with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as
             entry.create_system = 3
             entry.external_attr = 0o100755 << 16
             z.writestr(entry, (root / name).read_bytes().replace(b'\r\n', b'\n'), compress_type=zipfile.ZIP_DEFLATED)
+        elif name in packed_documents:
+            z.writestr('星轨/' + name, packed_documents[name])
         else:
             z.write(root / name, '星轨/' + name)
     for p in launcher_files:
