@@ -1,4 +1,4 @@
-import { onLanguageChange, t } from './i18n.js';
+import { createWindowSizer } from './window-sizing.js';
 
 export const FLOATING_WINDOWS_KEY = 'starorbit-floating-windows-v1';
 const MARGIN = 8;
@@ -35,6 +35,27 @@ const definitions = [
   },
   { id: 'attitudeNavballPanel', selector: '#attitudeNavballPanel', handle: '.an-heading' },
   { id: 'freeFlightPanel', selector: '#freeFlightPanel', handle: '.ff-head', flow: true },
+  { id: 'spacecraftKeyGuide', selector: '#spacecraftKeyGuide', handle: '.pilot-guide-heading' },
+  { id: 'freeFlightKeyGuide', selector: '#freeFlightKeyGuide', handle: '.pilot-guide-heading' },
+  { id: 'interstellarKeyGuide', selector: '#interstellarKeyGuide', handle: '.pilot-guide-heading' },
+  {
+    id: 'freeFlightCameraWindow',
+    selector: '#freeFlightCameraWindow',
+    handle: '.ff-camera-heading',
+  },
+  { id: 'skyLocationWindow', selector: '#skyLocationWindow', handle: '.sky-tool-heading' },
+  { id: 'skyObjectWindow', selector: '#skyObjectWindow', handle: '.sky-tool-heading' },
+  { id: 'groundScope', selector: '.ground-scope-window', handle: '.ground-scope-bar' },
+  {
+    id: 'groundLocation',
+    selector: '.ground-location-map',
+    handle: '.ground-location-map-heading',
+  },
+  { id: 'interstellarMap', selector: '.interstellar-map', handle: '.map-header' },
+  { id: 'interstellarPanel', selector: '.interstellar-panel', handle: 'h3' },
+  { id: 'groundPanel', selector: '.world-ground-panel', sizingOnly: true },
+  { id: 'solarPanel', selector: '.solar-world-panel', handle: 'h3' },
+  { id: 'planetPanel', selector: '.planet-panel', sizingOnly: true },
   {
     id: 'flightNavigation',
     selector: '#freeFlightInstruments .ffi-navigation',
@@ -82,7 +103,9 @@ export function restoreFloatingPosition(position, rect, viewport) {
 export function sanitizeFloatingLayout(value) {
   const clean = { version: 1, windows: {} };
   if (value?.version !== 1 || !value.windows || typeof value.windows !== 'object') return clean;
-  for (const { id } of definitions) {
+  for (const id of Object.keys(value.windows)) {
+    if (!definitions.some((entry) => entry.id === id) && !/^dialog-[\w-]{1,100}$/.test(id))
+      continue;
     const position = value.windows[id];
     if (
       position &&
@@ -92,18 +115,29 @@ export function sanitizeFloatingLayout(value) {
       position.x <= 1 &&
       position.y >= 0 &&
       position.y <= 1
-    )
+    ) {
       clean.windows[id] = { x: position.x, y: position.y };
+      for (const name of ['compact', 'wide', 'compactLarge', 'wideLarge']) {
+        const input = position.sizes?.[name];
+        if (!input) continue;
+        const size = {};
+        for (const axis of ['width', 'height']) {
+          if (Number.isFinite(input[axis]) && input[axis] > 0 && input[axis] <= 32000)
+            size[axis] = input[axis];
+        }
+        if (Object.keys(size).length) (clean.windows[id].sizes ??= {})[name] = size;
+      }
+    }
   }
   return clean;
 }
 
 // Existing layout remains untouched until a window is moved. Keeping every
 // root in its original DOM parent preserves mode visibility and all controls.
-export function installFloatingWindows() {
+export function installFloatingWindows({ t, onLanguageChange, storageKey = FLOATING_WINDOWS_KEY }) {
   let layout = sanitizeFloatingLayout(null);
   try {
-    layout = sanitizeFloatingLayout(JSON.parse(localStorage.getItem(FLOATING_WINDOWS_KEY)));
+    layout = sanitizeFloatingLayout(JSON.parse(localStorage.getItem(storageKey)));
   } catch {}
   const records = new Map(),
     abort = new AbortController(),
@@ -126,9 +160,58 @@ export function installFloatingWindows() {
   const viewport = () => ({ width: window.innerWidth, height: window.innerHeight });
   const isLocked = () => !!lock?.checked;
   const notify = () => document.dispatchEvent(new Event('floating-window-layout'));
+  const sizeMode = (root) =>
+    (window.innerWidth <= 760 ? 'compact' : 'wide') +
+    (root.matches('.expanded,.dock-large,.compact-expanded') ? 'Large' : '');
+  const sizer = createWindowSizer({
+    t,
+    allowed: (record) => enabled(record) && !isLocked(),
+    begin(record) {
+      raise(record);
+      return structuredClone(layout.windows[record.definition.id] || null);
+    },
+    apply(record, rect, edge) {
+      const id = record.definition.id;
+      const saved = (layout.windows[id] ??= { x: 0, y: 0 });
+      const sizes = (saved.sizes ??= {});
+      const size = (sizes[sizeMode(record.root)] ??= {});
+      if (/[we]/.test(edge)) size.width = rect.width;
+      if (/[ns]/.test(edge)) size.height = rect.height;
+      applySize(record, size);
+      place(record, rect, { measure: false });
+      Object.assign(
+        saved,
+        normalizeFloatingPosition(record.root.getBoundingClientRect(), viewport())
+      );
+      notify();
+    },
+    commit() {
+      save();
+      schedule();
+    },
+    cancel(record, previous) {
+      if (previous) layout.windows[record.definition.id] = previous;
+      else delete layout.windows[record.definition.id];
+      refreshRecord(record);
+    },
+    reset(record) {
+      delete layout.windows[record.definition.id];
+      restoreStyle(record);
+      save();
+      notify();
+    },
+  });
+  function applySize(record, size) {
+    for (const axis of ['width', 'height']) {
+      const key = '--floating-user-' + axis;
+      record.root.toggleAttribute('data-user-' + axis, !!size?.[axis]);
+      if (size?.[axis]) record.root.style.setProperty(key, size[axis] + 'px');
+      else record.root.style.removeProperty(key);
+    }
+  }
   const save = () => {
     try {
-      localStorage.setItem(FLOATING_WINDOWS_KEY, JSON.stringify(layout));
+      localStorage.setItem(storageKey, JSON.stringify(layout));
     } catch {}
   };
   function enabled(record) {
@@ -136,6 +219,7 @@ export function installFloatingWindows() {
   }
   function restoreStyle(record, { keepLayer = false } = {}) {
     const { root } = record;
+    applySize(record, null);
     root.removeAttribute('data-floating-moved');
     root.removeAttribute('data-floating-width');
     root.removeAttribute('data-floating-constrained');
@@ -200,6 +284,7 @@ export function installFloatingWindows() {
     }
     if (!root.getClientRects().length) return;
     if (saved) {
+      applySize(record, saved.sizes?.[sizeMode(root)]);
       const natural = naturalSize(record);
       if (!natural.width || !natural.height) return;
       root.setAttribute('data-floating-moved', '');
@@ -217,7 +302,8 @@ export function installFloatingWindows() {
   }
   function updateHandles() {
     document.body.classList.toggle('floating-windows-locked', isLocked());
-    for (const record of records.values())
+    for (const record of records.values()) {
+      sizer.update(record);
       for (const handle of record.handles) {
         const unavailable = isLocked() || !enabled(record);
         handle.title = t(
@@ -227,6 +313,8 @@ export function installFloatingWindows() {
         if (handle.classList.contains('floating-drag-grip'))
           handle.setAttribute('aria-label', t('移动窗口'));
       }
+    }
+    sizer.sync();
   }
   function schedule() {
     if (disposed || frame) return;
@@ -255,14 +343,18 @@ export function installFloatingWindows() {
       restoreStyle(record);
       refreshRecord(record);
     } else {
-      layout.windows[record.definition.id] = normalizeFloatingPosition(
-        record.root.getBoundingClientRect(),
-        viewport()
-      );
+      savePosition(record);
       save();
     }
     for (const other of records.values()) if (other !== record) refreshRecord(other);
     notify();
+  }
+  function savePosition(record) {
+    const id = record.definition.id;
+    layout.windows[id] = {
+      ...layout.windows[id],
+      ...normalizeFloatingPosition(record.root.getBoundingClientRect(), viewport()),
+    };
   }
   function pointerDown(event, record, handle) {
     if (
@@ -336,10 +428,7 @@ export function installFloatingWindows() {
         delta = directions[event.code],
         step = event.shiftKey ? 40 : 8;
       place(record, { left: rect.left + delta[0] * step, top: rect.top + delta[1] * step });
-      layout.windows[record.definition.id] = normalizeFloatingPosition(
-        record.root.getBoundingClientRect(),
-        viewport()
-      );
+      savePosition(record);
     }
     save();
     notify();
@@ -403,26 +492,35 @@ export function installFloatingWindows() {
       );
     }
     root.setAttribute('data-floating-window', definition.id);
+    sizer.install(record);
     records.set(definition.id, record);
     resize?.observe(root);
-    mutations?.observe(root, { attributes: true, attributeFilter: ['hidden', 'class'] });
+    mutations?.observe(root, { attributes: true, attributeFilter: ['hidden', 'class', 'open'] });
     return true;
   }
+  const candidates = definitions
+    .map((def) => def.selector)
+    .concat('dialog')
+    .join(',');
+  function registerRoot(root) {
+    if (root.hasAttribute('data-floating-window')) return false;
+    let definition = definitions.find((def) => root.matches(def.selector));
+    if (!definition && root.tagName === 'DIALOG') {
+      const key = root.id || root.getAttribute('aria-labelledby') || root.classList[0];
+      if (!key) return false;
+      definition = { id: 'dialog-' + key.replace(/[^\w-]/g, '-'), sizingOnly: true };
+    }
+    if (!definition) return false;
+    const previous = records.get(definition.id);
+    if (previous?.root.isConnected) return false;
+    return register(definition, root);
+  }
   function discover() {
-    const before = records.size;
-    for (const definition of definitions) {
-      if (records.has(definition.id)) continue;
-      const root = document.querySelector(definition.selector);
-      if (root) register(definition, root);
-    }
-    if (records.size === definitions.length) {
-      discovery?.disconnect();
-      discovery = null;
-    }
-    return records.size > before;
+    for (const root of document.querySelectorAll(candidates)) registerRoot(root);
   }
   function reset() {
     finish(true);
+    sizer.close();
     layout = { version: 1, windows: {} };
     for (const record of records.values()) restoreStyle(record);
     instrumentRoot?.removeAttribute('data-floating-raised');
@@ -432,17 +530,30 @@ export function installFloatingWindows() {
     notify();
   }
   discover();
-  // Known panels normally exist at boot. This observer only waits for any late
-  // registered panel (such as the main navball), then disconnects permanently.
-  if (records.size < definitions.length && typeof MutationObserver === 'function') {
+  // World views and native dialogs are mounted on demand and can be recreated.
+  if (typeof MutationObserver === 'function') {
     discovery = new MutationObserver((changes) => {
-      // Live readouts replace text nodes many times per second. Only structural
-      // additions can contain a late panel, and only a new panel needs layout.
-      if (
-        changes.some((change) => [...change.addedNodes].some((node) => node.nodeType === 1)) &&
-        discover()
-      )
-        schedule();
+      let changed = false;
+      for (const change of changes) {
+        for (const element of change.addedNodes) {
+          if (element.nodeType !== 1 || !element.isConnected) continue;
+          if (element.matches(candidates)) changed = registerRoot(element) || changed;
+          if (element.childElementCount)
+            for (const root of element.querySelectorAll(candidates))
+              changed = registerRoot(root) || changed;
+        }
+      }
+      for (const [id, record] of records) {
+        if (!record.root.isConnected) {
+          resize?.unobserve(record.root);
+          records.delete(id);
+          changed = true;
+        } else if (!record.sizeButton.isConnected) {
+          sizer.update(record);
+          changed = true;
+        }
+      }
+      if (changed) schedule();
     });
     discovery.observe(document.body, { childList: true, subtree: true });
   }
@@ -480,12 +591,13 @@ export function installFloatingWindows() {
   );
   resetButton?.addEventListener('click', reset, options);
   mutations?.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-  const unsubscribe = onLanguageChange(updateHandles);
+  const unsubscribe = onLanguageChange?.(updateHandles);
   updateHandles();
   schedule();
   return {
     refresh() {
       discover();
+      updateHandles();
       schedule();
     },
     reset,
@@ -504,10 +616,7 @@ export function installFloatingWindows() {
         left: anchor === 'right' ? before.right - after.width : before.left,
         top: before.top,
       });
-      layout.windows[id] = normalizeFloatingPosition(
-        record.root.getBoundingClientRect(),
-        viewport()
-      );
+      savePosition(record);
       save();
       notify();
     },
@@ -519,7 +628,8 @@ export function installFloatingWindows() {
       resize?.disconnect();
       mutations?.disconnect();
       discovery?.disconnect();
-      unsubscribe();
+      sizer.dispose();
+      unsubscribe?.();
       if (frame) cancelAnimationFrame(frame);
       for (const record of records.values()) {
         restoreStyle(record);
@@ -530,6 +640,7 @@ export function installFloatingWindows() {
             value === null ? handle.removeAttribute(key) : handle.setAttribute(key, value);
         }
         record.injected?.remove();
+        record.sizeButton?.remove();
       }
       document.body.classList.remove('floating-windows-locked');
       instrumentRoot?.removeAttribute('data-floating-raised');

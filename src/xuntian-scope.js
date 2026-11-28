@@ -1,9 +1,12 @@
+import { mountAimMarker } from './aim-marker.js';
 import { crosshairDistanceText } from './xuntian-distance.js';
+import { attachSkyTools } from './sky-tools.js';
 import { Quaternion } from 'three';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { shortClock } from './time-format.js';
 import { mountSurveyMission } from './survey-live-mission.js';
-import { SURVEY_FIELDS } from './survey-lab-math.js';
+import { SURVEY_FIELDS, resolveSurveyField } from './survey-lab-math.js';
+import { sunlightOutsideView } from './solar-observation-math.js';
 import { dot, unit } from './orbit.js';
 import {
   cityAnchor,
@@ -93,6 +96,11 @@ export function installXuntianScope(sim) {
   const panel = $('xuntianScope'),
     canvas = $('xtCanvas'),
     ocular = canvas.parentElement;
+  mountAimMarker({
+    marker: ocular.querySelector('.xt-reticle'),
+    host: $('xtAimMarker'),
+    profile: 'xuntian',
+  });
   let formation = null,
     guide = null,
     renderer = null,
@@ -129,6 +137,8 @@ export function installXuntianScope(sim) {
     exterior = 'near';
   const stats = { frames: 0, lastRenderMs: 0 };
   let surveyMission,
+    solarReturn = null,
+    hasUsedFinder = false,
     anchor = null,
     tracked = null,
     freePose = null,
@@ -145,6 +155,7 @@ export function installXuntianScope(sim) {
     $('xtPhotoNames').checked = !!prefs.photoNames;
     $('xtShowGuide').checked = prefs.guide !== false;
     $('xtSkyCompass').checked = prefs.compass !== false;
+    panel.classList.toggle('xt-sky-only', prefs.toolsVisible === false);
   } catch {}
   const prefs = () => {
     try {
@@ -159,6 +170,7 @@ export function installXuntianScope(sim) {
           photoNames: $('xtPhotoNames').checked,
           guide: $('xtShowGuide').checked,
           compass: $('xtSkyCompass').checked,
+          toolsVisible: !panel.classList.contains('xt-sky-only'),
         })
       );
     } catch {}
@@ -226,6 +238,7 @@ export function installXuntianScope(sim) {
     roll = 0;
     pose.copy(attitudeQuaternion(pilotAxes, true));
     axes = actualAxes();
+    exitSolarAfterSteering();
     $('xtRoll').value = '0';
     setText($('xtRollLabel'), '0°');
     if (sim.current) optics = formation.update(sim.current, axes);
@@ -473,6 +486,19 @@ export function installXuntianScope(sim) {
     if (mode === 'free') pinHere();
     else releasePin();
   }
+  function exitSolarAfterSteering() {
+    if (
+      solarControls.enabled &&
+      sunlightOutsideView(
+        axes,
+        field,
+        ASPECT,
+        bodyNow('Sun'),
+        solarControls.frame().solarObservation
+      )
+    )
+      solarControls.ordinary(true);
+  }
   function manual(x, y) {
     beginExternalSteering();
     const keepPinned = mode !== 'free';
@@ -484,6 +510,7 @@ export function installXuntianScope(sim) {
     locked = false;
     steerDetector(pose, x, y, roll);
     axes = actualAxes();
+    exitSolarAfterSteering();
     if (formation && sim.current) optics = formation.update(sim.current, axes);
     // Steering changes the fixed point, not the selected tracking behavior.
     // Re-sample after moving so a station edge can become a ground or sky lock.
@@ -518,12 +545,80 @@ export function installXuntianScope(sim) {
   });
   const solarControls = mountXuntianSolarControls(sim, {
     onFrame: () => observeSolar(),
+    onEnter() {
+      solarReturn = {
+        mode,
+        named,
+        fieldId,
+        overviewArtworkId,
+        anchor,
+        releaseNote,
+        roll,
+        field,
+        locked,
+        bookmark,
+        freePose: freePose?.clone(),
+        pose: pose.clone(),
+        desired: desired?.clone(),
+        query: $('xtSearch').value,
+        survey: surveyMission?.target,
+      };
+    },
+    onReturn: returnFromSolar,
     invalidate() {
       lastDraw = -Infinity;
       pausedFrame = '';
       if (active) hud();
     },
   });
+  function returnFromSolar() {
+    const saved = solarReturn;
+    solarReturn = null;
+    solarControls.ordinary();
+    if (!saved) {
+      restoreSky();
+      return;
+    }
+    if (saved.survey) {
+      const { fieldId, tile, field, detailSelection } = saved.survey;
+      surveyMission.select(fieldId, tile, field, detailSelection);
+    }
+    mode = saved.mode;
+    named = saved.named;
+    fieldId = saved.fieldId;
+    overviewArtworkId = saved.overviewArtworkId;
+    anchor = saved.anchor;
+    freePose = saved.freePose;
+    releaseNote = saved.releaseNote;
+    bookmark = saved.bookmark;
+    pose.copy(saved.pose);
+    desired = saved.desired || null;
+    locked = saved.locked;
+    tracked = null;
+    setRoll(saved.roll, false);
+    setLens(saved.field);
+    axes = actualAxes();
+    $('xtSearch').value = saved.query;
+    pausedFrame = '';
+    lastDraw = -Infinity;
+    if (active) {
+      if (sim.current) update(sim.current, performance.now());
+      hud();
+      canvas.focus({ preventScroll: true });
+    }
+  }
+  panel.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== 'Escape' || e.isComposing || !solarControls.enabled || !active) return;
+      if (e.target === $('xtSearch') && !$('xtResults').hidden) return;
+      if (panel.querySelector('dialog[open], [role=menu]:not([hidden])')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      returnFromSolar();
+    },
+    true
+  );
   function observeSolar({ channel = solarControls.channel } = {}) {
     if (sim.missionId !== 'tiangong') return false;
     open();
@@ -545,17 +640,9 @@ export function installXuntianScope(sim) {
     if (!active) return false;
     const target = skyDetailTarget(sim.environment);
     if (!target) return false;
-    sim.environment.settings.skyDetail = true;
-    sim.environment.settings.skyDetailSource = 'recent';
-    sim.environment.settings.stars = true;
-    sim.environment.settings.milky = true;
-    for (const id of ['showStars', 'showMilky', 'skyDetailEnabled']) $(id).checked = true;
-    for (const id of ['skyDetailSource', 'xtSkyDetailSource']) if ($(id)) $(id).value = 'recent';
-    sim.environment.skyDetail.setArtwork('jwst-carina-2022');
-    sim.environment.skyDetail.setSource('recent');
-    sim.environment.skyDetail.setEnabled(true);
-    sim.environment.save();
-    sim.environment.setSkyStyle();
+    sim.environment.skyDetailControls.setFinderSelection('recent', {
+      artworkId: 'jwst-carina-2022',
+    });
     selectStar(target);
     $('xtSearch').value = target.name;
     return true;
@@ -725,7 +812,13 @@ export function installXuntianScope(sim) {
       city?.name ||
       (mode === 'sky'
         ? named?.name ||
-          (fieldId ? t(SURVEY_FIELDS.find((f) => f.id === fieldId).name) : t('手动星野'))
+          (fieldId
+            ? t(
+                surveyMission?.target?.field?.name ||
+                  resolveSurveyField(fieldId)?.name ||
+                  '手动星野'
+              )
+            : t('手动星野'))
         : t(modes[mode]));
     setText($('xtTarget'), targetName);
     $('xtReturn').hidden = mode === 'sky' || mode === 'free';
@@ -799,7 +892,9 @@ export function installXuntianScope(sim) {
     }
     const env = sim.environment,
       source = earthMapSizes(env),
-      skySource = xuntianSkySource(env);
+      skySource = xuntianSkySource(env, {
+        detailSelection: env.skyDetailControls.finderSelection(),
+      });
     const earth = source.loading
       ? t('地表加载中')
       : source.day === source.night || !source.night
@@ -820,6 +915,9 @@ export function installXuntianScope(sim) {
               unsupported: '程序银河',
               ordinary: skySource.presentation === 'photo' ? '摄影弱星空' : '程序银河',
               catalog: '星表',
+              blank: '空白',
+              dss: 'DSS 光学',
+              panstarrs: 'Pan-STARRS 光学',
               off: '星空背景关闭',
             }[skySource.status] || '星表'
           );
@@ -933,6 +1031,7 @@ export function installXuntianScope(sim) {
       mountXuntianFormationPanel($('xtFormationPanel'), formation);
     }
     active = true;
+    hasUsedFinder = true;
     // 城市名、地面目标和城市搜索使用按需加载的地理图集；加载后刷新目标名和搜索结果。
     if (!sim.environment.geography.ready)
       sim.environment.geography.load().then(() => {
@@ -971,6 +1070,7 @@ export function installXuntianScope(sim) {
   }
   function close() {
     if (!active) return;
+    skyTools.release();
     active = false;
     surveyMission?.clear();
     search.close();
@@ -1066,6 +1166,7 @@ export function installXuntianScope(sim) {
     );
   }
   const frame = () => ({
+    detailSelection: sim.environment.skyDetailControls.finderSelection(),
     ...solarControls.frame(),
     language: getLanguage(),
     previewNames: $('xtNames').checked,
@@ -1091,6 +1192,50 @@ export function installXuntianScope(sim) {
     fillLight: $('fillLight').checked,
     aspect: ASPECT,
   });
+  const skyTools = attachSkyTools(sim, {
+    surface: canvas,
+    controls: $('xtSkyTools'),
+    label: 'scope',
+    detailSelection: () => sim.environment.skyDetailControls?.finderSelection?.(),
+    enabled: () => active && !!sim.current && !!optics,
+    view: () =>
+      active &&
+      optics && {
+        ...optics.axes,
+        fovY: field,
+        aspect: ASPECT,
+        culture: sim.environment.settings.skyCulture,
+        foreground: lastResult?.identification?.kind,
+      },
+    identify: (_view, _x, _y, direction, candidates) =>
+      renderer?.identifyAt(frame(), direction, candidates),
+    point(target, track) {
+      if (!active || !sim.current || !optics) return false;
+      const direction = target.body ? bodyNow(target.body)?.direction : target.direction;
+      if (!direction) return false;
+      if (track) {
+        const currentField = field;
+        selectStar(target);
+        setLens(currentField);
+        hud();
+        return true;
+      }
+      beginExternalSteering();
+      saveSky();
+      if (target.body !== 'Sun') solarControls.ordinary();
+      surveyMission?.clear();
+      discardAnchor();
+      mode = 'free';
+      named = null;
+      fieldId = null;
+      $('xtSearch').value = '';
+      aim(direction, true);
+      rememberFree();
+      lastDraw = -Infinity;
+      hud();
+      return true;
+    },
+  });
   function aimTile(target) {
     beginExternalSteering();
     solarControls.ordinary();
@@ -1105,10 +1250,13 @@ export function installXuntianScope(sim) {
     hud();
     canvas.focus({ preventScroll: true });
   }
-  function openSurveyTile({ fieldId, tile } = {}) {
+  function openSurveyTile({ fieldId, tile, field, detailSelection } = {}) {
     if (sim.missionId !== 'tiangong') return false;
     open();
-    return active && surveyMission.select(fieldId, tile);
+    if (!active || !surveyMission.select(fieldId, tile, field, detailSelection)) return false;
+    if (detailSelection)
+      sim.environment.skyDetailControls.setFinderSelection(detailSelection.source, detailSelection);
+    return true;
   }
   surveyMission = mountSurveyMission(sim, {
     aimTile,
@@ -1143,6 +1291,7 @@ export function installXuntianScope(sim) {
     )
       return;
     lastDraw = wall;
+    skyTools.compact(wall);
     const completed = canvas.dataset.xuntianFrame;
     if (completed && completed !== 'error' && completed !== completedFrame) {
       stats.frames++;
@@ -1163,6 +1312,10 @@ export function installXuntianScope(sim) {
             f.solarChannel,
             f.solarObservation?.id,
             f.solarRevision,
+            f.detailSelection.source,
+            f.detailSelection.background,
+            f.detailSelection.artworkId,
+            f.detailSelection.savedPyramidOrder,
             assemblyRevision,
             mode,
             f.constellationId,
@@ -1306,6 +1459,20 @@ export function installXuntianScope(sim) {
     const button = $('openXuntianMap');
     if (button.offsetWidth) button.focus({ preventScroll: true });
   };
+  function syncInstrumentLayout() {
+    const visible = !panel.classList.contains('xt-sky-only');
+    $('xtInstrument').hidden = !visible;
+    $('xtToolToggle').setAttribute('aria-expanded', String(visible));
+    setText($('xtToolToggle'), t(visible ? '收起设置' : '显示设置'));
+  }
+  syncInstrumentLayout();
+  $('xtToolToggle').onclick = () => {
+    panel.classList.toggle('xt-sky-only');
+    syncInstrumentLayout();
+    pausedFrame = '';
+    lastDraw = -Infinity;
+    prefs();
+  };
   $('xtExpand').onclick = () => {
     const large = panel.classList.toggle('expanded');
     $('xtExpand').setAttribute('aria-pressed', String(large));
@@ -1345,7 +1512,7 @@ export function installXuntianScope(sim) {
   $('xtShowGuide').onchange = prefs;
   $('xtCapture').onclick = capture;
   $('xtRecommend').onclick = () => recommend(false);
-  $('xtReturn').onclick = restoreSky;
+  $('xtReturn').onclick = () => (solarControls.enabled ? returnFromSolar() : restoreSky());
   panel
     .querySelectorAll('[data-xt-mode]')
     .forEach((b) => (b.onclick = () => observe(b.dataset.xtMode)));
@@ -1354,6 +1521,7 @@ export function installXuntianScope(sim) {
     if ($('xtMore').open) $('xtMore').scrollIntoView({ block: 'nearest' });
   });
   onLanguageChange(() => {
+    syncInstrumentLayout();
     if (named?.type === 'solar') {
       named.name = solarLabel(named.body, getLanguage());
       $('xtSearch').value = named.name;
@@ -1394,6 +1562,17 @@ export function installXuntianScope(sim) {
   return {
     open,
     close,
+    getSurveyPointing() {
+      if (!hasUsedFinder || !optics || sim.missionId !== 'tiangong') return null;
+      const direction = [...actualAxes().forward];
+      return {
+        direction,
+        ra: (Math.atan2(direction[1], direction[0]) / D + 360) % 360,
+        dec: Math.asin(clamp(direction[2], -1, 1)) / D,
+        name: mode === 'sky' && locked ? named?.name : undefined,
+        detailSelection: sim.environment.skyDetailControls.finderSelection(),
+      };
+    },
     checkpoint() {
       const wasActive = active,
         restoreFormation = formation?.checkpoint();
@@ -1416,6 +1595,7 @@ export function installXuntianScope(sim) {
         exterior,
         query: $('xtSearch').value,
         solar: solarControls.enabled,
+        solarReturn,
         channel: solarControls.channel,
         survey: surveyMission?.target,
         opened,
@@ -1426,8 +1606,14 @@ export function installXuntianScope(sim) {
         restoreFormation?.();
         if (saved.solar) solarControls.activate(saved.channel);
         else solarControls.ordinary();
+        solarReturn = saved.solarReturn;
         if (wasActive && saved.survey)
-          surveyMission.select(saved.survey.fieldId, saved.survey.tile);
+          surveyMission.select(
+            saved.survey.fieldId,
+            saved.survey.tile,
+            saved.survey.field,
+            saved.survey.detailSelection
+          );
         mode = saved.mode;
         named = saved.named;
         fieldId = saved.fieldId;
@@ -1565,6 +1751,7 @@ export function installXuntianScope(sim) {
     observeCity(city) {
       open();
       if (active) selectCity(city);
+      return active && mode === 'city';
     },
     update,
     draw,

@@ -52,7 +52,11 @@ import { SkyDetail } from './sky-detail.js';
 import { SkyDetailLayer } from './sky-detail-layer.js';
 import { mountSkyImageBrowser } from './sky-image-browser.js';
 import { mountSkyDetailControls } from './sky-detail-controls.js';
-import { normalizeWebbBackground, resolveSkyDetailSource } from './sky-detail-plan.js';
+import {
+  normalizeWebbBackground,
+  photographicSkyBase,
+  resolveSkyDetailSource,
+} from './sky-detail-plan.js';
 import { CityTerrain } from './city-terrain.js';
 import { ConstellationArt } from './constellation-art.js';
 import { chineseSkyArtProvider, loadChineseSkyArt } from './chinese-sky-art.js';
@@ -971,8 +975,11 @@ export class Environment {
     this.weather?.update(q);
     this.auroraCurtains.update(q?.t ?? this.sim.time, this.weather?.lowEffects);
     this.phenomena?.update(q, camera);
-    this.stars.visible = s.stars;
-    this.milky.visible = s.stars && s.milky;
+    const source = resolveSkyDetailSource(s);
+    const photographic = photographicSkyBase(source, s.webbBackground);
+    this.stars.visible = s.stars && !photographic;
+    this.milky.visible = s.stars && s.milky && !photographic;
+    this.backdrop.background.setHex(photographic ? 0x000000 : 0x000104);
     // The photographic option is an explicit display/exposure approximation.
     const cinematic = s.exposure === 'cinematic';
     this.milky.material.uniforms.textured.value = cinematic && this.galaxyTexture ? 1 : 0;
@@ -991,8 +998,10 @@ export class Environment {
     this.starCamera.zoom = camera.zoom;
     this.starCamera.updateProjectionMatrix();
     const rotation = this.starCamera.quaternion;
-    this.skyDetail.setSource(resolveSkyDetailSource(s), s.webbBackground);
-    this.skyDetail.setEnabled(s.skyDetail && s.stars && s.milky && s.starBrightness > 0);
+    this.skyDetail.setSource(source, s.webbBackground);
+    this.skyDetail.setEnabled(
+      !!(s.skyDetail && s.stars && (s.milky || photographic) && s.starBrightness > 0)
+    );
     const celestialView = {
       right: new THREE.Vector3(1, 0, 0).applyQuaternion(rotation).toArray(),
       up: new THREE.Vector3(0, 1, 0).applyQuaternion(rotation).toArray(),

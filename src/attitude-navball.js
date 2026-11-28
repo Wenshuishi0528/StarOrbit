@@ -2,6 +2,8 @@ import { Matrix4, Quaternion, Vector3 } from 'three';
 import { createFlightNavball, deriveFreeFlightInstruments } from './free-flight-instruments.js';
 import { onLanguageChange, t } from './i18n.js';
 import { PILOT_KEY_AXES, pilotAxes, pilotRotation, pilotTranslation } from './pilot-controls.js';
+import { mountPilotKeyGuide } from './pilot-key-guide.js';
+import { flightText } from './flight-controls-copy.js';
 
 const text = (node, value) => {
   if (node.textContent !== value) node.textContent = value;
@@ -117,7 +119,7 @@ export function installAttitudeNavball(sim) {
   root.setAttribute('aria-labelledby', 'attitudeNavballTitle');
   root.setAttribute('aria-describedby', 'attitudeKeyboardHelp');
   root.setAttribute('aria-keyshortcuts', 'W S A D Q E H N I J K L R T F CapsLock Escape');
-  root.innerHTML = `<div class="an-heading"><h3 id="attitudeNavballTitle"></h3><button type="button" class="an-layout"></button><button type="button" class="an-close">×</button></div>
+  root.innerHTML = `<div class="an-heading"><h3 id="attitudeNavballTitle"></h3><button type="button" class="an-key-guide"></button><button type="button" class="an-layout"></button><button type="button" class="an-close">×</button></div>
  <select class="an-craft"></select><div class="an-instrument"><div class="an-modes an-modes-left" role="group"></div><canvas class="an-ball" role="img"></canvas><div class="an-modes an-modes-right" role="group"></div></div>
  <div class="an-sas-state"><strong class="an-mode-name"></strong><span class="an-target-name"></span></div>
  <div class="an-attitude"></div><div class="an-orbit"><span class="an-altitude"></span><strong class="an-speed"></strong></div>
@@ -132,6 +134,23 @@ export function installAttitudeNavball(sim) {
     canvas = find('canvas'),
     ball = createFlightNavball(canvas);
   const layout = find('.an-layout');
+  const keyGuide = mountPilotKeyGuide({
+    mode: 'spacecraft',
+    takeControl: () => {
+      if (!sim.current || !sim.capabilities.manualAttitude || sim.freeFlight?.active) return;
+      if (!control.checked) {
+        control.checked = true;
+        control.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      takeControl();
+    },
+  });
+  keyGuide.bind(find('.an-key-guide'));
+  const sidebarGuide = document.createElement('button');
+  sidebarGuide.type = 'button';
+  sidebarGuide.id = 'openSpacecraftKeyGuide';
+  control.closest('label').after(sidebarGuide);
+  keyGuide.bind(sidebarGuide);
   let compact = false;
   try {
     compact = localStorage.getItem(COMPACT_KEY) === 'true';
@@ -168,20 +187,27 @@ export function installAttitudeNavball(sim) {
     attribute(layout, 'aria-pressed', compact);
   }
   function keyboardStatus() {
+    if (!keyGuide.root.hidden)
+      keyGuide.update({
+        ready: !!sim.current && !!sim.capabilities.manualAttitude && !sim.freeFlight?.active,
+        armed,
+        rcs: !!flight.state.rcs,
+      });
     attribute(root, 'data-keyboard', armed);
     text(
       note,
-      t(
+      flightText(
         !sim.capabilities.manualAttitude
           ? '随航天器姿态，不随观察视角。'
           : armed
             ? '键盘已接管 · Caps Lock 精调 · Esc 退出'
-            : '点击球面接管键盘 · 操作见左侧'
+            : '点击球面接管键盘，或打开「操控键」。'
       )
     );
   }
   function release() {
     keys.clear();
+    keyGuide.clear();
     armed = false;
     flight.clearInput();
     keyboardStatus();
@@ -514,6 +540,7 @@ export function installAttitudeNavball(sim) {
       }
       const toggle = toggles[event.code];
       if (toggle) {
+        keyGuide.press(event.code, true);
         event.preventDefault();
         event.stopPropagation();
         if (!event.repeat) {
@@ -529,6 +556,7 @@ export function installAttitudeNavball(sim) {
       if (flight.state.paused) return;
       if (!keys.has(event.code)) {
         keys.add(event.code);
+        keyGuide.press(event.code, true);
         command();
         changed();
       }
@@ -538,6 +566,7 @@ export function installAttitudeNavball(sim) {
   window.addEventListener(
     'keyup',
     (event) => {
+      keyGuide.press(event.code, false);
       if (keys.delete(event.code)) {
         event.preventDefault();
         event.stopPropagation();
@@ -616,6 +645,8 @@ export function installAttitudeNavball(sim) {
       disposed = true;
       abort.abort();
       removeLanguage();
+      keyGuide.dispose();
+      sidebarGuide.remove();
       root.remove();
     },
   };

@@ -72,3 +72,165 @@ body.floating-windows-locked [data-floating-handle],
 .floating-is-dragging [data-floating-handle] {
   cursor: grabbing;
 }
+
+[data-floating-window] .floating-size-button {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 25px;
+  min-width: 25px;
+  height: 25px;
+  min-height: 0;
+  padding: 0;
+  color: #c2e0e5;
+  background: #132332;
+  border: 1px solid #47626e;
+  border-radius: 5px;
+  font: 18px/1 system-ui;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.floating-size-button[aria-pressed='true'] {
+  outline: 2px solid #79d5cc;
+}
+.floating-size-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.floating-size-corner {
+  position: absolute;
+  inset: 5px 6px auto auto;
+  z-index: 4;
+}
+#telemetry > .floating-size-corner {
+  top: 3px;
+  right: 3px;
+}
+#telemetry .clock {
+  padding-right: 22px;
+}
+#musicWidget:not(:hover):not(:focus-within) > .floating-size-corner {
+  opacity: 0;
+}
+#musicWidget > .floating-size-corner {
+  right: -4px;
+  top: -6px;
+}
+[data-floating-window][data-user-width] {
+  box-sizing: border-box;
+  width: min(var(--floating-user-width), calc(100vw - 16px)) !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 16px) !important;
+}
+[data-floating-window][data-user-height] {
+  box-sizing: border-box;
+  height: min(var(--floating-user-height), calc(100dvh - 16px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 16px) !important;
+  overflow: auto;
+}
+#xuntianScope[data-user-width] .xt-ocular {
+  min-width: 0;
+}
+#xuntianScope[data-user-width] #xtCanvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8/5;
+}
+#helpPanel.guiding .floating-size-button {
+  display: none;
+}
+.floating-size-overlay {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 1px solid #80d9cc;
+  border-radius: 8px;
+}
+.floating-size-overlay > [data-size-edge] {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+}
+.floating-size-overlay > [data-size-edge='w'],
+.floating-size-overlay > [data-size-edge='e'] {
+  top: 8px;
+  bottom: 8px;
+  width: 12px;
+  cursor: ew-resize;
+}
+.floating-size-overlay > [data-size-edge='w'] {
+  left: -5px;
+}
+.floating-size-overlay > [data-size-edge='e'] {
+  right: -5px;
+}
+.floating-size-overlay > [data-size-edge='n'],
+.floating-size-overlay > [data-size-edge='s'] {
+  left: 8px;
+  right: 8px;
+  height: 12px;
+  cursor: ns-resize;
+}
+.floating-size-overlay > [data-size-edge='n'] {
+  top: -5px;
+}
+.floating-size-overlay > [data-size-edge='s'] {
+  bottom: -5px;
+}
+.floating-size-overlay > [data-size-edge='nw'],
+.floating-size-overlay > [data-size-edge='se'],
+.floating-size-overlay > [data-size-edge='ne'],
+.floating-size-overlay > [data-size-edge='sw'] {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #9be5d9;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.floating-size-overlay > [data-size-edge='nw'] {
+  top: -3px;
+  left: -3px;
+  cursor: nwse-resize;
+}
+.floating-size-overlay > [data-size-edge='ne'] {
+  top: -3px;
+  right: -3px;
+  cursor: nesw-resize;
+}
+.floating-size-overlay > [data-size-edge='sw'] {
+  bottom: -3px;
+  left: -3px;
+  cursor: nesw-resize;
+}
+.floating-size-overlay > [data-size-edge='se'] {
+  bottom: -3px;
+  right: -3px;
+  cursor: nwse-resize;
+}
+.floating-size-presets {
+  position: absolute;
+  right: 7px;
+  top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: calc(100vw - 32px);
+  padding: 4px;
+  pointer-events: auto;
+  background: #101e2b;
+  color: #eff8fa;
+  border: 1px solid #688b98;
+  border-radius: 7px;
+  box-shadow: 0 4px 14px #0007;
+}
+.floating-size-presets button {
+  font: 12px/1.4 system-ui;
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+@media (pointer: coarse) {
+  .floating-size-presets button {
+    min-height: 32px;
+  }
+}

@@ -20,6 +20,7 @@
 }
 #xuntianScope {
   --xt-ink: #9beddf;
+  container: xuntian / inline-size;
   position: absolute;
   right: 20px;
   bottom: 100px;
@@ -76,6 +77,61 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
   min-height: 0;
+}
+.xt-observing,
+.xt-instrument {
+  min-width: 0;
+}
+.xt-observing {
+  margin-bottom: 8px;
+}
+#xuntianScope #xtToolToggle {
+  color: #b2d0db;
+  margin-left: auto;
+}
+@container xuntian (min-width: 520px) and (max-width: 795px) {
+  .xt-observing .xt-ocular {
+    max-width: calc(396px + 20cqw);
+    margin-inline: auto;
+  }
+}
+@container xuntian (min-width: 796px) {
+  .xt-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(210px, 26cqw, 290px);
+    gap: 12px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .xt-observing,
+  .xt-instrument {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .xt-observing {
+    margin: 0;
+  }
+  .xt-instrument {
+    padding-inline: 10px 4px;
+    border-left: 1px solid #324957;
+  }
+  .xt-instrument > :first-child > details {
+    margin-top: 0;
+  }
+}
+#xuntianScope.xt-sky-only .xt-body {
+  display: block;
+  overflow-y: auto;
+}
+#xuntianScope.xt-sky-only .xt-observing {
+  overflow: visible;
+}
+#xuntianScope.xt-sky-only .xt-ocular {
+  width: 100%;
+  max-width: min(100%, calc(141dvh - 72px));
+  margin-inline: auto;
 }
 .xt-caption {
   display: block;
@@ -150,22 +206,6 @@
 }
 #xtCanvas.dragging {
   cursor: grabbing;
-}
-.xt-reticle {
-  pointer-events: none;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 23px;
-  height: 23px;
-  transform: translate(-50%, -50%);
-  opacity: 0.78;
-  background:
-    linear-gradient(#a8efdc, #a8efdc) left center/6px 1px,
-    linear-gradient(#a8efdc, #a8efdc) right center/6px 1px,
-    linear-gradient(#a8efdc, #a8efdc) center top/1px 6px,
-    linear-gradient(#a8efdc, #a8efdc) center bottom/1px 6px;
-  background-repeat: no-repeat;
 }
 .xt-field,
 .xt-coords {
@@ -406,26 +446,6 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
 @media (min-width: 1000px) {
   #xuntianScope.expanded {
     width: min(95vw, calc(160dvh + 60px));
-  }
-  #xuntianScope.expanded .xt-body {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
-    column-gap: 14px;
-    align-content: start;
-  }
-  #xuntianScope.expanded .xt-body > :not(.xt-ocular) {
-    grid-column: 2;
-    min-width: 0;
-  }
-  #xuntianScope.expanded .xt-ocular {
-    grid-column: 1;
-    grid-row: 1 / span 17;
-    align-self: start;
-    margin: 0;
-  }
-  #xuntianScope.expanded #xtMore {
-    margin: 6px 0 0;
-    padding-inline: 0;
   }
 }
 @media (max-width: 760px) {
@@ -695,4 +715,32 @@ body.xt-scope-open .station-tag:not([data-instance='TH']):not([data-instance='fr
     flex-direction: column;
     align-items: stretch;
   }
+}
+.xt-solar-banner {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 96%;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #101924e8;
+  color: #fff0c4;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.xt-solar-banner[hidden] {
+  display: none !important;
+}
+#xuntianScope .xt-solar-banner button {
+  padding: 3px 6px;
+  color: #fff6dc;
+  border-color: #c7a263;
+  background: #453b2a;
+  font-size: 11px;
 }

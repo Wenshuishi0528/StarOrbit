@@ -21,11 +21,12 @@ export function flightReference(seed) {
 
 export function createFlightBackdrop(sim) {
   const camera = new PerspectiveCamera(38, 1, 10, 1000000);
+  const previewStars = new PerspectiveCamera(52, 1, 0.1, 2000);
   const matrix = new Matrix4(),
     rotation = new Quaternion();
   const axes = [new Vector3(), new Vector3(), new Vector3()],
     origin = new Vector3();
-  return (q, localCamera) => {
+  return (q, localCamera, preview = false) => {
     for (let i = 0; i < 3; i++) axes[i].fromArray(q.basis[i]);
     rotation.setFromRotationMatrix(matrix.makeBasis(...axes));
     camera.position
@@ -43,6 +44,22 @@ export function createFlightBackdrop(sim) {
     sim.earth.quaternion.setFromRotationMatrix(matrix.makeBasis(...axes));
     sim.environment.uniforms.sun.value.fromArray(q.sun).normalize();
     sim.marker.visible = sim.orbitLine.visible = sim.sunArrow.visible = false;
+    if (preview) {
+      // A small, read-only pass through the existing sky/earth scenes. Streaming
+      // priorities and the full-resolution HDR postprocess belong to the main view.
+      const renderer = sim.api.renderer;
+      previewStars.quaternion.copy(camera.quaternion);
+      previewStars.fov = camera.fov;
+      previewStars.aspect = camera.aspect;
+      previewStars.updateProjectionMatrix();
+      renderer.autoClear = true;
+      renderer.render(sim.environment.backdrop, previewStars);
+      renderer.autoClear = false;
+      renderer.state.buffers.depth.setMask(true);
+      renderer.clearDepth();
+      renderer.render(sim.sky, camera);
+      return;
+    }
     sim.renderOrbitalSky(q, camera, true);
   };
 }

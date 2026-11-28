@@ -202,40 +202,7 @@
 }
 #freeFlightInstruments .ffi-sight {
   position: absolute;
-  width: 64px;
-  height: 64px;
-  transform: translate(-50%, -50%);
-  filter: drop-shadow(0 0 2px #04101a);
-}
-#freeFlightInstruments .ffi-sight::before,
-#freeFlightInstruments .ffi-sight::after {
-  content: '';
-  position: absolute;
-  background: #a9e9d6;
-}
-#freeFlightInstruments .ffi-sight::before {
-  left: 0;
-  top: 31px;
-  width: 64px;
-  height: 1px;
-}
-#freeFlightInstruments .ffi-sight::after {
-  left: 31px;
-  top: 0;
-  width: 1px;
-  height: 64px;
-}
-#freeFlightInstruments .ffi-sight i {
-  position: absolute;
-  inset: 20px;
-  border: 1px solid #a9e9d6;
-  border-radius: 50%;
-}
-#freeFlightInstruments .ffi-sight b {
-  position: absolute;
-  inset: 5px;
-  border: 1px solid #b9ead247;
-  border-radius: 50%;
+  pointer-events: none;
 }
 #freeFlightInstruments .ffi-target-marker {
   position: absolute;

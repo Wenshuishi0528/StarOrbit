@@ -42,6 +42,7 @@ export function identifyCelestialCrosshair({
   includeStar = () => true,
   outsideSky = () => false,
   blocked = () => false,
+  candidates = null,
 }) {
   const radius = crosshairTolerance(fovY, displayHeight) * DEG;
   const sky = { kind: 'sky', direction, toleranceDeg: radius / DEG };
@@ -50,16 +51,25 @@ export function identifyCelestialCrosshair({
   for (const body of bodies) {
     const angle = separation(direction, body.direction),
       edge = Math.max(0, angle - body.radiusRad);
-    if (edge > radius || edge >= bestDistance || (edge > 0 && blocked(body.direction))) continue;
-    best = {
+    if (
+      edge > radius ||
+      (!candidates && edge >= bestDistance) ||
+      (edge > 0 && blocked(body.direction))
+    )
+      continue;
+    const entry = {
       kind: 'solar',
       id: 'solar:' + body.id,
       body: body.id,
+      targetDirection: body.direction,
       distanceKm: body.distanceKm,
       name: solarLabel(body.id, language),
       angularDistanceDeg: angle / DEG,
       withinDisc: angle <= body.radiusRad,
     };
+    candidates?.push(entry);
+    if (edge >= bestDistance) continue;
+    best = entry;
     bestDistance = edge;
     // The nearest actual disc hides every more distant body and catalogue star.
     if (best.withinDisc) return { ...sky, ...best };
@@ -77,20 +87,25 @@ export function identifyCelestialCrosshair({
       )
         continue;
       const angle = separation(direction, star.direction);
-      if (angle > radius || angle >= bestDistance) continue;
+      if (angle > radius || (!candidates && angle >= bestDistance)) continue;
       const target = getXuntianTarget(star.id, language, settings?.skyCulture);
       if (!target) continue;
-      best = {
+      const entry = {
         kind: 'star',
         id: target.id,
         name: target.name,
         identifier: target.identifier,
+        targetDirection: star.direction,
         ...(target.asterisms?.length ? { asterisms: target.asterisms } : {}),
         magnitude: star.mag,
         ...stellarDistance(target.id),
         angularDistanceDeg: angle / DEG,
       };
-      bestDistance = angle;
+      candidates?.push(entry);
+      if (angle < bestDistance) {
+        best = entry;
+        bestDistance = angle;
+      }
     }
   }
   let region = null,
@@ -105,6 +120,7 @@ export function identifyCelestialCrosshair({
         kind: 'deep-sky',
         id: 'deep-sky:' + object.id.toLowerCase(),
         identifier: object.id,
+        targetDirection: object.direction,
         name:
           getXuntianTarget('deep-sky:' + object.id.toLowerCase(), language, settings?.skyCulture)
             ?.name || deepSkyName(object, language),
@@ -120,17 +136,20 @@ export function identifyCelestialCrosshair({
       // A nearby star is still a star, even when projected inside a galaxy. Only
       // compare POINT matches here; the extended-region context is kept below.
       const angle = match.angularDistanceDeg * DEG;
-      if (
-        !match.nearCenter ||
-        angle >= bestDistance ||
-        object.type === 'image-field' ||
-        outsideSky(object.direction) ||
-        bodies.some((body) => dot(object.direction, body.direction) > Math.cos(body.radiusRad)) ||
-        blocked(object.direction)
-      )
-        continue;
-      best = entry;
-      bestDistance = angle;
+      if (!candidates && angle >= bestDistance) continue;
+      const visibleCenter =
+        match.nearCenter &&
+        object.type !== 'image-field' &&
+        !outsideSky(object.direction) &&
+        !bodies.some((body) => dot(object.direction, body.direction) > Math.cos(body.radiusRad)) &&
+        !blocked(object.direction);
+      if (match.withinRegion) candidates?.push({ ...entry, regionOnly: !visibleCenter });
+      if (!visibleCenter) continue;
+      if (!match.withinRegion) candidates?.push(entry);
+      if (angle < bestDistance) {
+        best = entry;
+        bestDistance = angle;
+      }
     }
   if (best) return { ...sky, ...best, ...(region && region.id !== best.id ? { region } : {}) };
   return region ? { ...sky, ...region, regionOnly: true } : sky;

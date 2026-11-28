@@ -1,5 +1,15 @@
 # Changelog / 更新记录
 
+## v1.70 · 2026-11-28 · 本机版 / Local build
+
+巡天拍摄计划可按名称、编号或 J2000 坐标取景，拍单张或四格。主页与巡天各自保存图源，手选光学巡天可从广角查看，哈勃和韦伯可用空白底图。巡天与地面观星支持按实际位置认星、查看简介与对准目镜。新增天区定位、太阳观测退出、可拉宽的取景工作区与共用瞄准标记。
+
+自由飞行新增离站引导、键盘图与可开关的对接相机。星际穿梭默认显示键位。快速导览演示鼠标三键，帮助可离线查问操作与天球坐标。212 项默认回归通过，实测了广角巡天、离线启动与照片导出。[本机验收](docs/verification.md#v170-取景与操控)
+
+Plan a single exposure or a four-tile mosaic by name, catalogue ID or J2000 coordinates. The main view and Xuntian keep independent image sources. Explicit optical surveys work at wide angles, and a blank base isolates Hubble and Webb footprints. The finder and ground sky add point identification, object notes, telescope alignment and a sky locator. Resize the optical view, leave solar observation directly, and customize aiming markers across instruments.
+
+Free flight adds a guided undocking action, a keyboard diagram and a live docking camera. Interstellar flight opens with its controls visible. The quick tour illustrates all three mouse buttons, and offline help answers questions about controls and sky coordinates. All 212 default regressions passed, with browser checks for wide-field imagery, offline startup and photo export.
+
 ## v1.69 · 2026-11-27
 
 合并公开 v1.67 的按需加载和舱段标签避让，统一发布普通版与专业版。

@@ -1,6 +1,6 @@
 # 数据格式与本机接口
 
-适用版本 v1.69。作者 Wenshuishi。专业版接口核对日期为 2026-11-25。
+适用版本 v1.70。作者 Wenshuishi。专业版接口核对日期为 2026-11-25。
 
 ## 专业版任务与结果
 
@@ -99,6 +99,8 @@ node scripts/pro-mission.mjs lake.json lake-images.csv --images
 **电热耦合。** 每个 5 秒区间使用中点轨道环境。单面帆板按入射余弦与太阳可见比例受光，温度系数为 −0.003/K。光伏先供负载，多余容量用于充电；亏电时使用电池，达到能量下限零后记录未供电量。预留线只触发事件。外表面与帆板共用等效热节点，外表面直接吸收帆板投影上的日照；设备板接收实际负载与电池损耗。两节点以线性热导换热，外表面向 3 K 背景辐射。地球红外取 237 W/m²，反照率取 0.30，使用球体平均地球视因子和当地正太阳高度近似反照。不提取的光伏能量以外表面热量处理。均温节点、理想规定指向及瞬时供电未覆盖结构自遮挡、控制机构动力学、电池电压和倍率、器件热点或材料老化。参数需由实际卫星的数据表与热试验校准。相关工程背景见 [NASA 小卫星热控](https://www.nasa.gov/smallsat-institute/sst-soa/thermal-control/) 和 [Basilisk 姿态与供电算例](https://avslab.github.io/basilisk/examples/scenarioPowerDemo.html)。
 
 ## 普通版配置与交换
+
+**取景器和窗口偏好。** 主画面图源沿用环境设置。首次使用新版巡天时，以原图源初始化；之后巡天的图源、作品及背景保存在 `starorbit-xuntian-sky-v1`。局部作品的空白背景标识为 `blank`。瞄准标记存放于 `starorbit-aim-markers-v1`，按视图记录 `shape`、`size`（6–120 个 CSS 像素）、`color`（六位 RGB）及 `outline`。调整窗口的位置和尺寸沿用 `starorbit-floating-windows-v1`，尺寸按宽屏、窄屏和展开状态分别保存，旧的位置记录仍可读取。
 
 月面偏好 `starorbit-lunar-v1` 增加 `landings:boolean`（默认 true）和 `placeDensity:0..1`（默认 .45）；`labels` 只控制地形地名，`feature` 兼容原精选 ID、`usgs:ID` 与 `landing:ID`。着陆目录未知经纬度使用 `null`，不得按零值定位；`carriedVehicles` 表示同次部署载具，不代表现址。`layer` 接受 `natural/elevation/geology`；`geology` 规范化为 `atlas` 模式。地质图 manifest 保存原图、版式、处理和独立许可，`globe.webp` 是从主图生成的 RGBA 经纬栅格，alpha=0 表示无数据；`registration.json` 与 `outline-fit.json` 保存配准、独立控制点与边界拟合记录。共享星图设置 `chineseSymbolOpacity:0..1` 默认 .2，仅调整四象、三垣。
 

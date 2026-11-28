@@ -186,7 +186,7 @@ sky.update(camera, time + 2000, 1200, 800, {
 assert.equal(
   sky.detail.group.parent,
   points.parent,
-  'reference meshes render behind the live star overlay'
+  'the ground reference pass owns the registered image'
 );
 assert.notEqual(sky.detail.group.parent, sky.scene);
 sky.update(camera, time, 500, 300, {
@@ -205,7 +205,12 @@ sky.update(camera, time, 500, 300, {
   texturedGalaxy: false,
 });
 assert.equal(galaxy.material.uniforms.textured.value, 0);
-assert.equal(points.visible, true);
+assert.equal(points.visible, false, 'DSS supplies its own photographed stars');
+assert.equal(
+  galaxy.visible,
+  false,
+  'the original panorama is excluded from an explicit optical base'
+);
 assert.equal(requests.at(-1).enabled, true);
 assert.equal(requests.at(-1).view.detailSelection.source, 'hubble');
 assert.equal(manager.source, 'dss');
@@ -215,18 +220,23 @@ sky.update(camera, time + 2000, 1200, 800, {
   detailSelection: null,
 });
 assert.equal(sky.detail.group.parent, sky.detail.scene);
+assert.equal(points.visible, true, 'the natural view restores catalogue stars');
+assert.equal(galaxy.visible, true);
 assert.equal(requests.at(-1).enabled, false);
 assert.equal(manager.source, 'dss');
 sky.update(camera, time + 3000, 1200, 800, { showChart: false, showArt: false, showDetail: false });
 assert.equal(galaxy.material.uniforms.textured.value, 1);
 assert.equal(requests.at(-1).enabled, false, 'inactive imagery consumer releases demand');
 const baselineRange = { ...geometry.drawRange };
-const limited = sky.update(camera, time, 1200, 800, { starMagnitudeLimit: 3 });
+const limited = sky.update(camera, time, 1200, 800, { showDetail: false, starMagnitudeLimit: 3 });
 assert.equal(limited.starCount, 4);
 assert.notEqual(points.geometry, geometry);
 assert.equal(points.geometry.getAttribute('mag'), geometry.getAttribute('mag'));
 assert.deepEqual(geometry.drawRange, baselineRange);
-assert.equal(sky.update(camera, time, 1200, 800, { starMagnitudeLimit: 8 }).starCount, 6);
+assert.equal(
+  sky.update(camera, time, 1200, 800, { showDetail: false, starMagnitudeLimit: 8 }).starCount,
+  6
+);
 sky.update(camera, time, 1200, 800, {});
 assert.equal(points.geometry, geometry);
 sky.dispose();
@@ -292,15 +302,11 @@ const optics = {
 };
 const magnified = scope.update(site, noon, { azimuth: 128, elevation: 17 }, optics, 240, 200);
 assert.equal(magnified.starMagnitudeLimit, 3, 'a supplied optical cutoff is already compensated');
-assert.equal(magnified.starCount, 4);
+assert.equal(magnified.starCount, 0);
 assert.equal(magnified.view.pixelHeight, 250);
 assert.equal(magnified.view.aspect, 1.2);
 assert.equal(starMaterial(scope).uniforms.brightness.value, 8);
-assert.equal(
-  renderedGalaxy().material.uniforms.textured.value,
-  1,
-  'eyepiece retains the photographic Milky Way'
-);
+assert.equal(renderedGalaxy().visible, false, 'the eyepiece uses the selected photographic base');
 assert.equal(starMaterial(scope).uniforms.pixelRatio.value, 1.25);
 assert.equal(starMaterial(finder).uniforms.brightness.value, 1);
 const scopeRequest = requests.findLast((request) => request.id === 'ground-scope-detail');
@@ -325,22 +331,18 @@ for (const finderEnhanced of [false, true]) {
     assert.equal(status.night, 0);
     assert.deepEqual(status.sunDirection, natural.sunDirection);
     assert.equal(starMaterial(scope).uniforms.brightness.value, finderEnhanced ? 8 : 0);
-    const airDraw = draws.findIndex(({ scene }) =>
-      scene.children.some((o) => o.material?.uniforms?.airVisibility)
+    const airDraw = draws.findIndex(
+      ({ scene }) =>
+        scene.children.length === 1 && scene.children[0].material?.uniforms?.airVisibility
     );
-    const air = draws[airDraw].scene.children[0].material.uniforms;
-    assert.equal(air.natural.value, finderEnhanced ? 0.1 : 1);
     const request = requests.findLast((entry) => entry.id === 'ground-scope-detail');
     assert.equal(request.enabled, !!referenceSource);
     if (referenceSource) {
-      const archivalDraw = draws.findIndex(({ scene }) =>
-        scene.children.some((o) => o.isPoints && o.material.uniforms?.high)
-      );
-      assert(
-        archivalDraw > airDraw,
-        'the historical image and catalogue overlay are drawn after the local sky colour'
-      );
+      assert.equal(airDraw, -1, 'missing survey pixels retain the black photographic base');
       assert.equal(request.view.detailSelection.source, 'dss');
+    } else {
+      const air = draws[airDraw].scene.children[0].material.uniforms;
+      assert.equal(air.natural.value, finderEnhanced ? 0.1 : 1);
     }
   }
 }

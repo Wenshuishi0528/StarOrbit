@@ -131,6 +131,10 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
   const scene = new THREE.Scene();
   const external = new THREE.PerspectiveCamera(42, 1, 0.08, 20000);
   const onboard = new THREE.PerspectiveCamera(52, 1, 0.015, 20000);
+  const previewCamera = onboard.clone();
+  const previousViewport = new THREE.Vector4(),
+    previousScissor = new THREE.Vector4();
+  const previewTarget = new THREE.Vector3();
   external.up.copy(zenith);
   const touchAction = renderer.domElement.style.touchAction;
   const controls = createOrbitControls(external, renderer.domElement);
@@ -157,6 +161,7 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
   let usable = { left: 0.04, right: 0.96, top: 0.04, bottom: 0.96 };
   const panel = document.getElementById('freeFlightPanel');
   const instruments = document.getElementById('freeFlightInstruments');
+  const cameraWindow = document.getElementById('freeFlightCameraWindow');
   const instrumentStack = instruments?.querySelector('.ffi-stack');
   const instrumentCards = [...(instruments?.querySelectorAll?.('.ffi-card') ?? [])];
   let instrumentsVisible = null;
@@ -173,6 +178,7 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
   resizeObserver?.observe(stage);
   if (panel) resizeObserver?.observe(panel);
   if (instrumentStack) resizeObserver?.observe(instrumentStack);
+  if (cameraWindow) resizeObserver?.observe(cameraWindow);
   for (const card of instrumentCards) resizeObserver?.observe(card);
   const previousCenter = new THREE.Vector3();
   function eye() {
@@ -196,9 +202,11 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
     const rect = stage.getBoundingClientRect();
     const previousUsable = usable;
     const cards = shown ? instrumentCards.filter((el) => !el.hidden) : [];
-    const panels = [panel, ...(cards.length ? cards : shown ? [instrumentStack] : [])].filter(
-      Boolean
-    );
+    const panels = [
+      panel,
+      cameraWindow && !cameraWindow.hidden ? cameraWindow : null,
+      ...(cards.length ? cards : shown ? [instrumentStack] : []),
+    ].filter(Boolean);
     usable = freeFlightViewport(
       width,
       height,
@@ -237,16 +245,16 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
       usable.bottom !== previousUsable.bottom
     );
   }
-  function aimPortCamera() {
+  function aimPortCamera(camera = onboard) {
     if (!active) return;
     // This virtual centreline camera looks through the actual mating port.
     // It uses the ship orientation, so a missed alignment remains visible.
     const q = active.craft.quaternion;
-    onboard.position.copy(active.localPort).applyQuaternion(q).add(active.craft.position);
-    onboard.up.copy(zenith).applyQuaternion(q);
+    camera.position.copy(active.localPort).applyQuaternion(q).add(active.craft.position);
+    camera.up.copy(zenith).applyQuaternion(q);
     const gaze = new THREE.Vector3(-1, 0, 0).applyQuaternion(q);
-    onboard.lookAt(onboard.position.clone().add(gaze));
-    onboard.updateMatrixWorld(true);
+    camera.lookAt(camera.position.clone().add(gaze));
+    camera.updateMatrixWorld(true);
   }
   function focusShip() {
     return cameraTarget === 'active' ? active : assembly.ships.get(cameraTarget.slice(5));
@@ -418,6 +426,63 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
       renderer.autoClear = autoClear;
     }
   }
+  function drawPreview(canvas, drawBackground) {
+    if (disposed || !active || view !== 'external') return;
+    const ctx = canvas.getContext('2d'),
+      surface = renderer.domElement;
+    if (!ctx || !surface.width || !surface.height) return;
+    const fit = Math.min(1, surface.width / canvas.width, surface.height / canvas.height);
+    const w = Math.max(1, Math.floor(canvas.width * fit)),
+      h = Math.max(1, Math.floor(canvas.height * fit));
+    const ratio = renderer.getPixelRatio();
+    renderer.getViewport(previousViewport);
+    renderer.getScissor(previousScissor);
+    const originalTest = renderer.getScissorTest(),
+      originalClear = renderer.autoClear;
+    const visible = active.craft.visible;
+    try {
+      // Reuse the live geometry and GL context. Copy this independent port-axis
+      // view into the instrument canvas before the external view paints the frame.
+      renderer.setViewport(0, 0, w / ratio, h / ratio);
+      renderer.setScissor(0, 0, w / ratio, h / ratio);
+      renderer.setScissorTest(true);
+      previewCamera.aspect = w / h;
+      previewCamera.updateProjectionMatrix();
+      aimPortCamera(previewCamera);
+      active.craft.visible = false;
+      drawBackground(previewCamera);
+      renderer.autoClear = false;
+      renderer.state.buffers.depth.setMask(true);
+      renderer.clearDepth();
+      renderer.render(scene, previewCamera);
+      ctx.drawImage(surface, 0, surface.height - h, w, h, 0, 0, canvas.width, canvas.height);
+      previewTarget.copy(active.port).project(previewCamera);
+      if (
+        Math.abs(previewTarget.x) <= 1 &&
+        Math.abs(previewTarget.y) <= 1 &&
+        Math.abs(previewTarget.z) <= 1
+      ) {
+        const x = ((1 + previewTarget.x) * canvas.width) / 2,
+          y = ((1 - previewTarget.y) * canvas.height) / 2;
+        const r = Math.max(4, canvas.width / 52);
+        ctx.beginPath();
+        ctx.moveTo(x, y - r);
+        ctx.lineTo(x + r, y);
+        ctx.lineTo(x, y + r);
+        ctx.lineTo(x - r, y);
+        ctx.closePath();
+        ctx.strokeStyle = '#ffce86';
+        ctx.lineWidth = 1.75;
+        ctx.stroke();
+      }
+    } finally {
+      active.craft.visible = visible;
+      renderer.autoClear = originalClear;
+      renderer.setViewport(previousViewport);
+      renderer.setScissor(previousScissor);
+      renderer.setScissorTest(originalTest);
+    }
+  }
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -443,6 +508,7 @@ export function createFreeFlightScene(sim, { templates, meta }, snapshot) {
     setCameraTarget,
     fit,
     draw,
+    drawPreview,
     dispose,
     getDockingProjection,
     get cameraTarget() {

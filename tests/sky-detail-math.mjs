@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import {
+  maskPanStarrsPixels,
+  panstarrsDirectionCovered,
+  panstarrsTileCoverage,
+} from '../src/panstarrs-coverage.js';
+import {
   hipsDirection,
   hipsMaxPixelRadius,
   hipsOrderForView,
@@ -281,6 +286,24 @@ assert.throws(() => hipsDirection(0, 12), RangeError);
 assert.throws(() => hipsDirection(0, 4, -0.1), RangeError);
 assert.throws(() => hipsOrderForView(180, 700), RangeError);
 assert.throws(() => hipsTileMesh(0, 4, 0), RangeError);
+// Independent checks against the published PS1 sky fraction and the two
+// sides of the irregular survey boundary at the very same declination.
+assert(panstarrsDirectionCovered(direction(90, -32)));
+assert(!panstarrsDirectionCovered(direction(120, -32)));
+let covered = 0;
+for (let face = 0; face < 12; face++) {
+  const pixels = new Uint8Array(64 * 64 * 4).fill(255);
+  maskPanStarrsPixels(pixels, 64, 0, face);
+  for (let y = 0; y < 64; y++)
+    for (let x = 0; x < 64; x++) {
+      const alpha = pixels[4 * (y * 64 + x) + 3];
+      covered += alpha / 255;
+      const point = hipsDirection(0, face, (x + 0.5) / 64, (y + 0.5) / 64);
+      const state = panstarrsTileCoverage(6, hipsPixel(6, point).pixel);
+      if (state !== 'partial') assert.equal(alpha, state === 'full' ? 255 : 0);
+    }
+}
+close(covered / (12 * 64 * 64), 0.7639, 0.0001);
 console.log(
   'sky-detail-math: astropy reference, image UV, seam/pole coverage, LOD budgets and meshes passed'
 );

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { Quaternion, Vector3 } from 'three';
+import { Quaternion, Vector3, Vector4 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createFreeFlightScene, freeFlightViewport } from '../src/free-flight-scene.js';
 
@@ -173,6 +173,68 @@ assert(
 );
 assert.equal(rendered.getObjectByName(sz.id).visible, true);
 assert.equal(rendered.getObjectByName(tz.id).visible, true);
+// The auxiliary camera uses the pilot's port, never the exterior camera's
+// target, and leaves both shared GL state and the exterior ship intact.
+const viewport = new Vector4(5, 7, 720, 405);
+const scissor = new Vector4(11, 13, 360, 205);
+let scissorTest = false,
+  copied = 0;
+Object.assign(canvas, { width: 1440, height: 810 });
+const setRect = (target, x, y, w, h) => (x.isVector4 ? target.copy(x) : target.set(x, y, w, h));
+Object.assign(renderer, {
+  getViewport: (target) => target.copy(viewport),
+  setViewport: (...args) => setRect(viewport, ...args),
+  getScissor: (target) => target.copy(scissor),
+  setScissor: (...args) => setRect(scissor, ...args),
+  getScissorTest: () => scissorTest,
+  setScissorTest: (value) => {
+    scissorTest = value;
+  },
+  getPixelRatio: () => 2,
+});
+const imageContext = {
+  drawImage(source, x, y, w, h) {
+    assert.equal(source, canvas);
+    assert.deepEqual([x, y, w, h], [0, 690, 200, 120]);
+    copied++;
+  },
+  beginPath() {},
+  moveTo() {},
+  lineTo() {},
+  closePath() {},
+  stroke() {},
+};
+const preview = { width: 200, height: 120, getContext: () => imageContext };
+for (const pilot of [sz, tz]) {
+  flight.setCameraTarget('station');
+  flight.update(states, pilot.id);
+  const externalPose = flight.camera.position.clone();
+  flight.drawPreview(preview, (portCamera) => {
+    assert.notEqual(portCamera, flight.camera);
+    assert(Math.abs(portCamera.aspect - 5 / 3) < 1e-10);
+    assert(
+      portCamera.position
+        .clone()
+        .addScaledVector(
+          new Vector3(-1, 0, 0).applyQuaternion(new Quaternion(...pilot.quaternion)),
+          pilot === sz ? 10000 : 12
+        )
+        .distanceTo(new Vector3(...pilot.port)) < 1e-6
+    );
+    assert.equal(rendered.getObjectByName(pilot.id).visible, false);
+    assert.equal(scissorTest, true);
+  });
+  assert.equal(rendered.getObjectByName(pilot.id).visible, true);
+  assert(flight.camera.position.equals(externalPose));
+  assert.deepEqual(viewport.toArray(), [5, 7, 720, 405]);
+  assert.deepEqual(scissor.toArray(), [11, 13, 360, 205]);
+  assert.equal(scissorTest, false);
+}
+assert.equal(copied, 2);
+flight.setView('onboard');
+flight.drawPreview(preview, () => assert.fail('duplicate port view rendered'));
+flight.setView('external');
+flight.setCameraTarget('active');
 const shipScreen = new Vector3(...states[1].position).project(flight.camera);
 projection = flight.getDockingProjection();
 assert(

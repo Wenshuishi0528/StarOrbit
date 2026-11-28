@@ -1,0 +1,290 @@
+[
+  {
+    "id": "depart",
+    "section": "s3-5",
+    "zh": [
+      "自由飞行从哪里离站？",
+      "在工具栏打开「自由飞行」，选一艘神舟或天舟，点「进入驾驶舱」。飞船仍停靠时，点「离站，开始飞行」。",
+      "离站|离港|脱离空间站|开始飞行|怎么开飞船|如何开飞船|驾驶舱"
+    ],
+    "en": [
+      "How do I leave the station?",
+      "Open Free flight, select a Shenzhou or Tianzhou and enter the cockpit. While docked, choose Undock to start flying.",
+      "undock|leave+station|start+flight|cockpit"
+    ],
+    "fr": [
+      "Comment quitter la station ?",
+      "Ouvrez le vol libre, choisissez un Shenzhou ou un Tianzhou, puis entrez dans le poste de pilotage. À quai, activez le départ.",
+      "désamarr|quitter+station|démarrer+vol|poste de pilotage"
+    ],
+    "ru": [
+      "Как отстыковаться от станции?",
+      "Откройте свободный полёт, выберите Шэньчжоу или Тяньчжоу и войдите в кабину. Для начала полёта нажмите кнопку отстыковки.",
+      "отстык|покинуть+станци|начать+полёт|кабин"
+    ]
+  },
+  {
+    "id": "keys",
+    "section": "s3-4",
+    "zh": [
+      "飞船用哪些键操纵？",
+      "打开「操控键」看键盘图。W/S 低头和抬头，A/D 左右转向，Q/E 滚转。H/N 前后、J/L 左右、I/K 下上平移。平移需要 RCS，点驾驶区域接管键盘。",
+      "操控键|操作键|操纵键|飞船+键|航天器+键|键位|键盘|飞船+控制"
+    ],
+    "en": [
+      "Which keys fly the spacecraft?",
+      "Open the controls diagram. W/S pitch down/up, A/D yaw, Q/E roll. H/N move forward/back, J/L left/right and I/K down/up. Enable RCS for translation and focus the flight controls.",
+      "spacecraft+keys|flight+controls|keyboard|keybindings|keymap"
+    ],
+    "fr": [
+      "Quelles touches pilotent le vaisseau ?",
+      "Ouvrez le clavier de pilotage. W/S pour le tangage, A/D pour le lacet, Q/E pour le roulis. Les translations H/N, J/L et I/K demandent le RCS. Cliquez dans la zone de pilotage.",
+      "touches+vaisseau|clavier|commandes+vol"
+    ],
+    "ru": [
+      "Какие клавиши управляют кораблём?",
+      "Откройте схему управления. W/S управляют тангажом, A/D рысканием, Q/E креном. Для перемещения клавишами H/N, J/L и I/K включите RCS и передайте фокус управлению полётом.",
+      "клавиш|клавиатур|управлен+корабл"
+    ]
+  },
+  {
+    "id": "coords",
+    "section": "s4-5",
+    "zh": [
+      "赤经的 h 和 m 是什么意思？",
+      "赤经沿天赤道量方向。h 是时，m 是分，60 m 等于 1 h，24 h 绕满一圈。例如 6 h 30 m 等于 97.5°。赤纬用度，+30° 表示在天赤道以北 30°。",
+      "h+m|赤经|赤纬|天球坐标|球星坐标|小时+角度|j2000"
+    ],
+    "en": [
+      "What do h and m mean in sky coordinates?",
+      "Right ascension measures direction along the celestial equator. h means hours, m means minutes. 60 m make 1 h and 24 h span the sky. For example, 6 h 30 m equals 97.5°. Declination +30° is 30° north of the celestial equator.",
+      "h+m|right ascension|declination|sky coordinate|j2000"
+    ],
+    "fr": [
+      "Que signifient h et m en ascension droite ?",
+      "L’ascension droite se mesure le long de l’équateur céleste. h signifie heure et m minute. 60 m font 1 h et 24 h font un tour. 6 h 30 m correspondent à 97,5°. Une déclinaison de +30° est à 30° au nord de l’équateur céleste.",
+      "h+m|ascension droite|déclinaison|coordonnées célestes|j2000"
+    ],
+    "ru": [
+      "Что означают h и m в небесных координатах?",
+      "Прямое восхождение отсчитывается вдоль небесного экватора. h — часы, m — минуты. В часе 60 минут, полный круг — 24 часа. 6 h 30 m равны 97,5°. Склонение +30° означает 30° к северу от небесного экватора.",
+      "h+m|прямое восхождение|склонени|небесн+координат|j2000"
+    ]
+  },
+  {
+    "id": "solar",
+    "section": "s4-7",
+    "zh": [
+      "怎么退出太阳观测？",
+      "在巡天取景的太阳画面点「返回原视野」，或在画面中按 Esc。也可以手动把日面拖出视场，沿新方向继续看星空。",
+      "退出+太阳|太阳+返回|太阳+退出|离开+太阳|太阳+退|太阳+关|日面+返回"
+    ],
+    "en": [
+      "How do I exit solar observation?",
+      "Use the return control in the Sun view or press Esc with the view focused. Manually pan past the solar disk to continue observing the sky in the new direction.",
+      "exit+sun|leave+solar|exit+solar|sun+return"
+    ],
+    "fr": [
+      "Comment quitter l’observation solaire ?",
+      "Utilisez le retour dans la vue solaire, ou Échap dans le viseur. Déplacez manuellement le disque hors du champ pour observer le ciel dans la nouvelle direction.",
+      "quitter+sol|sortir+sol|soleil+retour"
+    ],
+    "ru": [
+      "Как выйти из наблюдения Солнца?",
+      "Нажмите кнопку возврата в солнечном виде или Esc в видоискателе. Сместите диск Солнца за пределы поля, чтобы наблюдать небо в новом направлении.",
+      "выйти+солн|выход+солн|солн+вернут"
+    ]
+  },
+  {
+    "id": "camera",
+    "section": "s3-5",
+    "zh": [
+      "怎样打开对接相机小窗？",
+      "进入自由飞行驾驶舱，在「飞船操纵键」附近打开对接相机小窗。它显示当前驾驶飞船沿接口轴线看到的画面。",
+      "对接相机|对接摄像|摄像头|相机小窗"
+    ],
+    "en": [
+      "Where is the docking camera?",
+      "Enter the free-flight cockpit and use the camera window toggle by the flight controls. The live view looks along the active ship’s docking port.",
+      "docking+camera|camera+window|camera+port"
+    ],
+    "fr": [
+      "Où est la caméra d’amarrage ?",
+      "Dans le poste de vol libre, activez la fenêtre de caméra près des commandes. Elle regarde dans l’axe du port du vaisseau piloté.",
+      "caméra+amarr|caméra+fenêtre"
+    ],
+    "ru": [
+      "Где стыковочная камера?",
+      "В кабине свободного полёта включите окно камеры рядом с управлением. Вид направлен вдоль стыковочного узла активного корабля.",
+      "стыков+камер|окно+камер"
+    ]
+  },
+  {
+    "id": "plan",
+    "section": "s8-5",
+    "zh": [
+      "怎样拍自己选的天区？",
+      "打开「任务实验室 → 巡天拍摄计划」，输入名称、编号或 J2000 赤经赤纬，也可使用当前取景中心。选好底图后，可在本圈可见时段导出一张 PNG、进入取景器按当前时钟拍摄，或自动排好四格。",
+      "拍摄计划|排程|拍+天区|拍+地方|四格|拼图|自己+拍|计划+底图"
+    ],
+    "en": [
+      "Can I photograph my own sky field?",
+      "Open the survey planner in the mission lab. Search a name, catalogue ID or J2000 RA/Dec, or use the current finder centre. Choose the imagery, then save a single exposure from a visible window, open the finder at the current clock time, or schedule a four-tile mosaic.",
+      "survey plan|mosaic|schedule+photo|photograph+field|photograph+own"
+    ],
+    "fr": [
+      "Comment photographier mon propre champ ?",
+      "Dans le laboratoire de mission, ouvrez le planificateur. Cherchez un nom, un numéro ou des coordonnées J2000, ou utilisez le centre du viseur. Choisissez le fond puis enregistrez une pose dans un créneau visible, ouvrez le viseur à l’heure courante ou programmez une mosaïque de quatre vues.",
+      "plan+relevé|mosaïque|photographier+champ"
+    ],
+    "ru": [
+      "Как снять выбранный участок неба?",
+      "Откройте планировщик съёмки в лаборатории миссий. Введите название, номер или координаты J2000 либо возьмите центр видоискателя. Выберите подложку, затем сохраните один кадр из окна видимости, откройте видоискатель на текущее время или запланируйте четыре снимка.",
+      "план+обзор|мозаик|снять+участок"
+    ]
+  },
+  {
+    "id": "window",
+    "section": "s1-3",
+    "zh": [
+      "怎样把取景窗拉宽？",
+      "点窗口右上角的「调整窗口大小」，拖动左右边缘改变宽度，拖角可同时调整宽和高。也可用方向键微调或点「复位」。",
+      "窗口+大小|窗口+宽|取景+拉宽|窗+缩放|调整大小|变窄|调宽"
+    ],
+    "en": [
+      "How do I widen a window?",
+      "Choose Resize window in the title area. Drag either side to change width or a corner to resize both axes. Use the arrow keys for small changes or Reset to restore the layout.",
+      "resize|widen|window+size|window+width"
+    ],
+    "fr": [
+      "Comment élargir une fenêtre ?",
+      "Activez le redimensionnement près du titre. Faites glisser un bord pour la largeur ou un angle pour les deux dimensions. Les flèches ajustent finement et Réinitialiser restaure la disposition.",
+      "redimension|élargir|taille+fenêtre"
+    ],
+    "ru": [
+      "Как изменить ширину окна?",
+      "Нажмите кнопку изменения размера в заголовке. Потяните за край или угол. Стрелки меняют размер небольшими шагами, а сброс восстанавливает исходный вид.",
+      "размер+окна|ширин+окн|расширить+окно"
+    ]
+  },
+  {
+    "id": "stellar",
+    "section": "s6-4",
+    "zh": [
+      "星际穿梭怎么前进、停下？",
+      "进入星际穿梭后点星空接管键盘，按 H 前进，按空格急停。点「操控键」可重新打开键位图。中央标记表示视线中心，可在画面设置里调整形状和颜色。",
+      "星际+键|星际+停|星际+前进|星际+操作|星际+怎么飞"
+    ],
+    "en": [
+      "How do I move and stop in interstellar flight?",
+      "Click the sky to take the controls, press H to move forward and Space to stop. Reopen the keyboard diagram from Controls. The centre marker shows your line of sight and can change shape and colour.",
+      "interstellar+key|interstellar+stop|interstellar+move"
+    ],
+    "fr": [
+      "Comment avancer et s’arrêter en vol interstellaire ?",
+      "Cliquez sur le ciel, avancez avec H et arrêtez-vous avec Espace. Le bouton des commandes rouvre le clavier. La forme et la couleur du repère central se règlent dans les options de vue.",
+      "interstellaire+touche|interstellaire+arrêt|interstellaire+avancer"
+    ],
+    "ru": [
+      "Как двигаться и тормозить в межзвёздном полёте?",
+      "Щёлкните по небу, нажмите H для движения вперёд и пробел для остановки. Схема клавиш открывается кнопкой управления. У метки центра взгляда можно изменить форму и цвет.",
+      "межзв+клавиш|межзв+тормоз|межзв+двиг"
+    ]
+  },
+  {
+    "id": "object",
+    "section": "s4-3",
+    "zh": [
+      "我点到的是哪颗星？",
+      "在巡天或地面观星画面右击天体，触屏可长按。「查看简介」显示目录资料，「对准」将望远镜转向该点。在没有目录匹配的位置仍可读坐标。",
+      "哪颗星|天体+简介|星+介绍|右键+星|右击|天体操作|辨认"
+    ],
+    "en": [
+      "Which star am I pointing at?",
+      "Right-click the object in the finder or ground sky, or long-press on touch. Open its description for catalogue information, or centre the telescope there. Unmatched positions still have coordinates.",
+      "which+star|right click|right-click|object+description|identify+star"
+    ],
+    "fr": [
+      "Quelle étoile est-ce ?",
+      "Faites un clic droit dans le viseur ou le ciel terrestre, ou un appui long sur écran tactile. Consultez la notice ou centrez le télescope. Une position sans objet identifié conserve ses coordonnées.",
+      "quelle+étoile|clic droit|notice+astre"
+    ],
+    "ru": [
+      "Что это за звезда?",
+      "Нажмите правой кнопкой на объект в видоискателе или на наземном небе, а на сенсорном экране удерживайте палец. Откройте описание или наведите телескоп. У точки без совпадения остаются координаты.",
+      "что+звезда|правой кнопк|описани+объект"
+    ]
+  },
+  {
+    "id": "mouse",
+    "section": "s1-2",
+    "zh": [
+      "鼠标三个键分别怎么用？",
+      "主页左键拖动绕航天器旋转，中键按住上下拖动或滚动滚轮缩放，右键拖动平移。双击航天器模型可重新居中。",
+      "鼠标|中键|左键|右键+拖|重新居中"
+    ],
+    "en": [
+      "What do the mouse buttons do?",
+      "In the main spacecraft view, left-drag to orbit, middle-drag vertically or scroll to zoom, and right-drag to pan. Double-click the spacecraft to centre it.",
+      "mouse|middle button|right drag|left drag"
+    ],
+    "fr": [
+      "À quoi servent les boutons de la souris ?",
+      "Dans la vue principale, glissez à gauche pour tourner, avec le bouton du milieu verticalement ou la molette pour zoomer, et à droite pour déplacer la vue. Double-cliquez sur le vaisseau pour le recentrer.",
+      "souris|bouton du milieu|recentrer"
+    ],
+    "ru": [
+      "Для чего нужны кнопки мыши?",
+      "В основном виде тяните левой кнопкой для вращения, средней вверх или вниз либо колёсиком для масштаба, правой для сдвига. Двойной щелчок по кораблю возвращает его в центр.",
+      "мыш|средняя кнопка|центрировать"
+    ]
+  },
+  {
+    "id": "imagery",
+    "section": "s6-1",
+    "zh": [
+      "怎样直接看 DSS，或只看哈勃拍过的地方？",
+      "在「星空影像」选择 DSS 光学即可从广角开始看。选择哈勃或韦伯后，把「底图」设为「空白」，已配准的照片以外会留黑。可从影像目录定位到一幅作品。",
+      "图源|底图|dss|哈勃|韦伯|空白背景|广角+星空"
+    ],
+    "en": [
+      "How can I see wide-field DSS or just the Hubble images?",
+      "Choose DSS optical in Sky imagery for a wide-field view. For Hubble or Webb choose Blank as the background. Areas outside their registered images stay black. Choose a work in the image catalogue to point at it.",
+      "dss|blank+sky|hubble|webb+background|image+source"
+    ],
+    "fr": [
+      "Comment voir DSS en grand champ ou uniquement les images de Hubble ?",
+      "Choisissez DSS optique pour le grand champ. Pour Hubble ou Webb, sélectionnez le fond vide. En dehors des images recalées, le ciel reste noir. Vous pouvez viser une image depuis le catalogue.",
+      "dss|hubble|fond+vide|source+image"
+    ],
+    "ru": [
+      "Как увидеть обзор DSS широким полем или только снимки «Хаббла»?",
+      "Выберите оптический DSS для широкого поля. Для снимков «Хаббла» или «Уэбба» выберите пустой фон. За пределами привязанных к небу снимков останется чёрное поле. Перейти к снимку можно из каталога.",
+      "dss|хаббл|пустой+фон|источник+снимк"
+    ]
+  },
+  {
+    "id": "aim",
+    "section": "s4-5",
+    "zh": [
+      "怎么改取景十字的大小和颜色？",
+      "在巡天取景或地面望远镜打开「瞄准标记」，在星际穿梭打开「视线中心标记」。可以改大小、颜色、形状和描边，或隐藏。要在别的视图也用这个样式，点「应用到所有瞄准标记」。",
+      "准星|瞄准|十字+大小|十字+颜色|十字+形状|十字线+颜色|中心标记|小圆圈|十字线+大小|星际+圆圈"
+    ],
+    "en": [
+      "How do I change the size or color of the crosshair?",
+      "Open Aiming marker in the finder or ground telescope, or View center marker in interstellar flight. Choose its shape, size, color and outline. Apply to all aiming markers copies the style to other views.",
+      "crosshair|reticle|aiming+marker|marker+size|crosshair+colour|reticle+size"
+    ],
+    "fr": [
+      "Comment régler la taille ou la couleur du réticule ?",
+      "Ouvrez Réticule de visée dans le viseur ou le télescope au sol, ou Repère central de visée en vol interstellaire. Réglez la forme, la taille, la couleur et le contour. Vous pouvez appliquer ce style à tous les réticules.",
+      "réticule|repère+visée|taille+croix|couleur+réticule"
+    ],
+    "ru": [
+      "Как изменить размер или цвет прицела?",
+      "Откройте настройки прицельной метки в видоискателе или наземном телескопе, а в межзвёздном полёте — настройки метки центра обзора. Выберите размер, форму, цвет и обводку. Стиль можно применить ко всем прицелам.",
+      "прицел|перекрестие|размер+метк|центральн+метк"
+    ]
+  }
+]

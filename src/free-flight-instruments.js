@@ -1,3 +1,4 @@
+import { mountAimMarker } from './aim-marker.js';
 import { Quaternion, Vector3 } from 'three';
 import { onLanguageChange, t } from './i18n.js';
 
@@ -396,7 +397,7 @@ export function mountFreeFlightInstruments({ host = document.body, onAction } = 
    </details>
   </section>
  </div>
- <div class="ffi-sight" aria-hidden="true"><i></i><b></b></div>
+ <div class="ffi-sight" aria-hidden="true"><i class="aim-marker-centered"></i></div>
  <div class="ffi-target-marker" aria-hidden="true"><i></i><span></span></div>`;
   host.append(root);
   const find = (s) => root.querySelector(s),
@@ -408,6 +409,11 @@ export function mountFreeFlightInstruments({ host = document.body, onAction } = 
     canvas = find('canvas'),
     sight = find('.ffi-sight'),
     target = find('.ffi-target-marker');
+  const aimMarker = mountAimMarker({
+    marker: sight.firstElementChild,
+    host: dockPanel,
+    profile: 'flight',
+  });
   const navball = createFlightNavball(canvas),
     modes = [...root.querySelectorAll('[data-attitude-mode]')],
     checkRows = {};
@@ -595,6 +601,7 @@ export function mountFreeFlightInstruments({ host = document.body, onAction } = 
       if (disposed) return;
       disposed = true;
       abort.abort();
+      aimMarker.dispose();
       removeLanguage();
       root.remove();
     },

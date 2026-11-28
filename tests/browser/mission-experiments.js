@@ -39,6 +39,7 @@ async (page) => {
   await page.locator('#surveyTab').click();
   const survey = page.locator('#surveyPanel'),
     play = survey.locator('[data-survey=play]');
+  await survey.locator('[data-survey=show-schedule]').click();
   await survey.locator('[data-survey=example]').click();
   const alternative = survey.locator('[data-survey=alternative]');
   if (await alternative.isVisible()) await alternative.click();

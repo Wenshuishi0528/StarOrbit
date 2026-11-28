@@ -6,6 +6,7 @@ import { WEBB_PLATE_PROVIDERS } from './webb-gallery.js';
 import { SkyOffline } from './sky-offline.js';
 import { createSkyTileCache } from './sky-detail-cache.js';
 import { hipsTileUrl } from './sky-detail-math.js';
+import { decodeSurveyTile } from './panstarrs-coverage.js';
 import {
   planSkyDetailSelection,
   normalizeSkyDetailSource,
@@ -82,8 +83,7 @@ export class SkyDetail {
       source = 'auto',
       wideField = false,
       webbGallery = false,
-      decode = (blob) =>
-        createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }),
+      decode = decodeSurveyTile,
     } = {}
   ) {
     this.cache = cache;
@@ -117,6 +117,7 @@ export class SkyDetail {
     this.lastError = null;
     this.allowed = new Map();
     this.source = normalizeSkyDetailSource(source);
+    this.wasOffline = globalThis.navigator?.onLine === false;
     this.wideField = wideField === true;
     this.enabled = true;
     this.disposed = false;
@@ -209,8 +210,13 @@ export class SkyDetail {
       artwork,
       choice ? choice.background : this.webbBackground,
       (id) =>
-        (this.artworkId === id ? this.savedPyramidOrder : undefined) ??
-        (this.offline.failedSources.has(id) ? Infinity : undefined)
+        (choice
+          ? choice.artworkId === id
+            ? choice.savedPyramidOrder
+            : undefined
+          : this.artworkId === id
+            ? this.savedPyramidOrder
+            : undefined) ?? (this.offline.failedSources.has(id) ? Infinity : undefined)
     );
   }
   replanViews(failedKey) {
@@ -230,9 +236,13 @@ export class SkyDetail {
       return this.status(id);
     }
     const photo = this.rank(id) === 0;
+    const offline = globalThis.navigator?.onLine === false;
+    // A genuine reconnection can retry previously uncached fields immediately.
+    if (this.wasOffline && !offline) this.failures.clear();
+    this.wasOffline = offline;
     const signature = [
       this.offline.planRevision(),
-      globalThis.navigator?.onLine === false ? 1 : 0,
+      offline ? 1 : 0,
       view.fovY,
       view.aspect,
       view.pixelHeight,
@@ -244,7 +254,9 @@ export class SkyDetail {
       .map((v) => (photo ? Number(v) : Number(v).toPrecision(10)))
       .join('/');
     const old = this.views.get(id);
-    const selection = choice ? [choice.source, choice.artworkId, choice.background].join('|') : '';
+    const selection = choice
+      ? [choice.source, choice.artworkId, choice.background, choice.savedPyramidOrder].join('|')
+      : '';
     // Re-evaluate at most ten times per second while dragging; texture completion
     // is immediate and does not need another geometric tile query.
     if (
@@ -272,17 +284,25 @@ export class SkyDetail {
     return this.status(id);
   }
   schedule() {
-    const ranked = [...this.views].sort(([a], [b]) => this.rank(a) - this.rank(b));
+    const ranked = [...this.views].flatMap(([id, view]) =>
+      view.tiles.map((tile) => ({ tile, rank: this.rank(id) }))
+    );
+    // A shutter keeps first choice. For live views, reserve the coarse image
+    // for each camera before spending the shared budget on sharper tiles.
+    ranked.sort(
+      (a, b) =>
+        Number(b.rank === 0) - Number(a.rank === 0) ||
+        a.tile.priority - b.tile.priority ||
+        a.rank - b.rank
+    );
     const wanted = new Map();
     let reserved = 0;
-    for (const [, view] of ranked) {
-      for (const t of [...view.tiles].sort((a, b) => a.priority - b.priority)) {
-        if (wanted.has(t.key)) continue;
-        const slots = textureSlots(t);
-        if (reserved + slots <= SKY_TILE_LIMIT) {
-          wanted.set(t.key, t);
-          reserved += slots;
-        }
+    for (const { tile: t } of ranked) {
+      if (wanted.has(t.key)) continue;
+      const slots = textureSlots(t);
+      if (reserved + slots <= SKY_TILE_LIMIT) {
+        wanted.set(t.key, t);
+        reserved += slots;
       }
     }
     this.allowed = wanted;
@@ -375,7 +395,7 @@ export class SkyDetail {
       if (!live()) return;
       if (blob) {
         try {
-          bitmap = await this.decode(blob);
+          bitmap = await this.decode(blob, t);
           if (!validSkyImageDimensions(t, bitmap.width, bitmap.height))
             throw Error('Invalid sky tile dimensions');
         } catch {
@@ -388,7 +408,7 @@ export class SkyDetail {
       }
       if (!live()) return;
       if (!bitmap) {
-        if (t.cacheOnly || (t.nativeImage && globalThis.navigator?.onLine === false))
+        if (t.cacheOnly || (!t.provider.tiles && globalThis.navigator?.onLine === false))
           throw Error('Sky image unavailable offline');
         const url =
           t.url ||
@@ -409,7 +429,7 @@ export class SkyDetail {
         blob = await boundedBlob(response);
         fetched = true;
         if (!live()) return;
-        bitmap = await this.decode(blob);
+        bitmap = await this.decode(blob, t);
         if (!validSkyImageDimensions(t, bitmap.width, bitmap.height))
           throw Error('Invalid sky tile dimensions');
       }
@@ -484,6 +504,7 @@ export class SkyDetail {
       ),
       hasHubbleTiles: tiles.some((t) => t.provider.source === 'hubble'),
       backgroundOutsideCoverage: !!entry?.backgroundOutsideCoverage,
+      opticalCoverage: entry?.opticalCoverage ?? null,
       fallback: archiveLoading
         ? null
         : entry?.fallback || (source === 'galaxy' ? 'background' : null),

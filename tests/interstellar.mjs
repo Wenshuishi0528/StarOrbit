@@ -117,6 +117,27 @@ console.log(
 
 // Shared pilot semantics, short taps, emergency stop and lifecycle ownership.
 const { createInterstellarInput } = await import('../src/interstellar-input.js');
+const { normalizeAimMarker } = await import('../src/aim-marker.js');
+const normalizeInterstellarMarker = (value) => normalizeAimMarker(value, 'interstellar');
+assert.deepEqual(normalizeInterstellarMarker(), {
+  shape: 'cross',
+  color: '#b6e7ec',
+  size: 21,
+  outline: true,
+});
+assert.deepEqual(
+  normalizeInterstellarMarker({ shape: 'hidden', color: '#88aadd', outline: false }),
+  {
+    shape: 'hidden',
+    color: '#88aadd',
+    size: 21,
+    outline: false,
+  }
+);
+assert.deepEqual(
+  normalizeInterstellarMarker({ shape: 'invalid', color: 'broken' }),
+  normalizeInterstellarMarker()
+);
 const THREE = await import('three');
 class Target extends EventTarget {}
 const win = new Target(),
@@ -145,17 +166,22 @@ const fire = (target, type, fields = {}) => {
 };
 const camera = new THREE.PerspectiveCamera();
 let brakes = 0;
+const lit = new Set();
 const input = createInterstellarInput({
   canvas,
   camera,
   preserveNavigationFocus: (target) => target?.isMap === true,
+  onKey: (code, down) => (down ? lit.add(code) : lit.delete(code)),
+  onClear: () => lit.clear(),
   onNavigate: (brake) => {
     if (brake) brakes++;
   },
 });
 canvas.focus();
 fire(canvas, 'keydown', { code: 'KeyH' });
+assert(lit.has('KeyH'), 'a real navigation key lights the guide');
 fire(win, 'keyup', { code: 'KeyH' });
+assert(!lit.has('KeyH'), 'key release removes the highlight');
 assert.deepEqual(input.update(1 / 60), [0, 0, -1], 'short tap survives one frame');
 assert.deepEqual(input.update(1 / 60), [0, 0, 0], 'tap never sticks');
 fire(canvas, 'keydown', { code: 'KeyH' });
@@ -165,6 +191,7 @@ assert(brakes > 0);
 fire(canvas, 'keydown', { code: 'KeyL' });
 const beforeMapFocus = brakes;
 fire(canvas, 'blur', { relatedTarget: { isMap: true } });
+assert.equal(lit.size, 0, 'focus change clears held-key hints');
 assert.equal(brakes, beforeMapFocus, 'map focus preserves navigation');
 assert.deepEqual(input.update(1 / 60), [0, 0, 0], 'map focus clears held keys');
 fire(win, 'blur');

@@ -17,14 +17,25 @@ const utc = (value) => {
 
 // The instrument owns only its display mode. Data, downloads and cached image
 // records belong to the same store used by the resource page and telescope finder.
-export function mountXuntianSolarControls(sim, { onFrame, invalidate }) {
+export function mountXuntianSolarControls(sim, { onFrame, onEnter, onReturn, invalidate }) {
   const details = $('xtSolarControls'),
     buttons = $('xtSolarChannels');
   let enabled = false,
+    returnToSun = false,
     boundStore = null,
     unsubscribe = null,
     context = {},
     wasSun = false;
+  const banner = document.createElement('div');
+  banner.className = 'xt-solar-banner';
+  banner.hidden = true;
+  const caption = document.createElement('span'),
+    leave = document.createElement('button');
+  leave.type = 'button';
+  leave.id = 'xtSolarExit';
+  leave.onclick = () => (enabled ? onReturn() : onFrame());
+  banner.append(caption, leave);
+  $('xtCanvas').parentElement.append(banner);
   for (const channel of SOLAR_CHANNELS) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -77,6 +88,8 @@ export function mountXuntianSolarControls(sim, { onFrame, invalidate }) {
   }
   function activate(channel = snapshot().channel) {
     if (!SOLAR_CHANNELS.some((item) => item.id === channel)) return false;
+    if (!enabled) onEnter?.();
+    returnToSun = false;
     enabled = true;
     details.open = true;
     store()?.setChannel(channel);
@@ -84,8 +97,12 @@ export function mountXuntianSolarControls(sim, { onFrame, invalidate }) {
     load();
     return true;
   }
-  function ordinary() {
-    if (!enabled) return;
+  function ordinary(manual = false) {
+    returnToSun = manual;
+    if (!enabled) {
+      banner.hidden = !manual;
+      return;
+    }
     enabled = false;
     changed();
   }
@@ -94,6 +111,13 @@ export function mountXuntianSolarControls(sim, { onFrame, invalidate }) {
     const state = snapshot(),
       record = observation(),
       sun = !!(context.targetingSun || context.crosshairSun);
+    banner.hidden = !(enabled || returnToSun);
+    caption.textContent = enabled
+      ? t('太阳观测') +
+        ' · ' +
+        t(SOLAR_CHANNELS.find((c) => c.id === state.channel)?.labelKey || 'SDO 观测影像')
+      : t('已回到普通星空');
+    leave.textContent = t(enabled ? '返回进入前的视野 · Esc' : '回到太阳');
     details.hidden = !(enabled || sun);
     if (sun && !wasSun) details.open = true;
     wasSun = sun;
@@ -161,7 +185,7 @@ export function mountXuntianSolarControls(sim, { onFrame, invalidate }) {
     $('xtSolarHint').hidden = !enabled;
   }
   $('xtSolarFrame').onclick = onFrame;
-  $('xtSolarOrdinary').onclick = ordinary;
+  $('xtSolarOrdinary').onclick = () => ordinary();
   $('xtSolarUpdate').onclick = () => load(true);
   $('xtSolarResources').onclick = () => sim.environment.weather?.resourcePanel?.open('solar');
   $('xtSolarResolution').onchange = () => {

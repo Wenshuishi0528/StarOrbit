@@ -1,3 +1,4 @@
+import { installFloatingWindows } from '../floating-windows.js';
 import {
   defaultMission,
   observationMission,
@@ -35,6 +36,7 @@ function readPref(k) {
 let lang = readPref('starorbit-pro-language') || readPref('tiangong-language-v1') || 'zh';
 if (!languages.includes(lang)) lang = 'zh';
 const t = (k) => translate(lang, k);
+const floating = installFloatingWindows({ t, storageKey: 'starorbit-pro-window-layout-v1' });
 const el = (tag, cls, txt) => {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -115,6 +117,7 @@ const orbitalElements = [
   'anomalyDeg',
 ];
 function translated() {
+  floating.refresh();
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
   for (const node of document.querySelectorAll('[data-t]')) node.textContent = t(node.dataset.t);
   for (const node of document.querySelectorAll('[data-aria]'))

@@ -1,9 +1,15 @@
 <section id="xuntianScope" hidden aria-label="巡天望远镜">
  <div class="xt-heading"><strong>巡天取景</strong><span class="xt-tag">CSST</span><button type="button" id="xtExpand" aria-label="切换大取景窗" title="切换大取景窗" aria-pressed="false"><span class="xt-expand-open">放大取景</span><span class="xt-expand-close">收起取景</span></button><button type="button" id="xtClose" aria-label="关闭巡天取景" title="关闭巡天取景">×</button></div>
  <div class="xt-body">
+  <div class="xt-observing">
   <div class="xt-search"><label for="xtSearch" class="xt-caption">搜索天体或城市</label><input id="xtSearch" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="xtResults" placeholder="火星、织女星、Orion、北京"><div id="xtResults" role="listbox" hidden></div></div>
-  <div class="xt-ocular"><canvas id="xtCanvas" width="480" height="300" tabindex="0" aria-label="巡天光学取景，拖动或用方向键转动，滚轮变焦"></canvas><canvas id="xtSurveyOverlay" aria-hidden="true"></canvas><i class="xt-reticle" aria-hidden="true"></i><span class="xt-field" id="xtField"></span><time id="xtClock"></time><span class="xt-coords" id="xtCoordinates"></span><span id="xtDepth" title="模拟极限星等越大，越暗的恒星也能显示。"></span><span class="xt-unavailable" id="xtUnavailable" hidden>当前时刻没有可用的轨道位置</span></div>
+  <div class="xt-ocular"><canvas id="xtCanvas" width="480" height="300" tabindex="0" aria-label="巡天光学取景，拖动或用方向键转动，滚轮变焦"></canvas><canvas id="xtSurveyOverlay" aria-hidden="true"></canvas><i class="xt-reticle aim-marker-centered" aria-hidden="true"></i><span class="xt-field" id="xtField"></span><time id="xtClock"></time><span class="xt-coords" id="xtCoordinates"></span><span id="xtDepth" title="模拟极限星等越大，越暗的恒星也能显示。"></span><span class="xt-unavailable" id="xtUnavailable" hidden>当前时刻没有可用的轨道位置</span></div>
   <div id="xtCrosshairReadout" class="xt-crosshair-readout" title="仅识别十字线当前所指，不改变固定跟踪。"><span>十字线所指</span><strong id="xtCrosshairName">—</strong><small id="xtCrosshairDetail"></small><small id="xtCrosshairDistance" hidden></small></div>
+  <div class="xt-actions"><button type="button" id="xtCapture" class="primary">拍摄 PNG</button><select id="xtPhotoWidth" aria-label="照片尺寸" title="照片尺寸"><option value="1440">1440 × 900</option><option value="2560">2560 × 1600</option><option value="3840">3840 × 2400</option></select><button type="button" id="xtRecommend">推荐星野</button><button type="button" id="xtReturn" hidden>返回星野</button><button id="xtToolToggle" type="button" aria-controls="xtInstrument" aria-expanded="true">收起设置</button></div>
+  </div>
+  <div class="xt-instrument" id="xtInstrument">
+  <div id="xtAimMarker"></div>
+  <div id="xtSkyTools"></div>
   <div class="xt-object"><strong id="xtTarget"></strong><span id="xtIllumination" hidden></span><span id="xtStatus" role="status"></span></div>
   <section id="xtLunarDiscovery" class="xt-lunar-discovery" hidden aria-label="月球观测"><div><strong>月球 · 观测与探索</strong><p>查看实时月相、三维月面、地名与着陆点，探索全月地质图。</p></div><button type="button" id="xtLunarExplore" class="primary">打开月球观测</button></section>
   <section id="xtMarsDiscovery" class="xt-lunar-discovery" hidden aria-label="火星观测"><div><strong>火星 · 观测与探索</strong><p>查看火星相位、三维地形、红外与地质图，寻找峡谷、火山和着陆点。</p></div><button type="button" id="xtMarsExplore" class="primary">打开火星观测</button></section>
@@ -11,8 +17,8 @@
   <div id="xtTrackingInfo" hidden></div>
   <div id="xtSources" title="当前载入的地表、银河和取景窗实际像素"></div>
   <div id="xtCityTerrain" class="xt-hint" hidden><span id="xtCityStatus"></span> <button id="xtCityLibrary" type="button">城市地景库…</button></div>
-  <div id="xtSkyDetailControls" class="sky-detail-row"><label for="xtSkyDetailSource">星空影像</label><select id="xtSkyDetailSource" title="主画面、巡天取景和照片共用此影像选择"><option value="auto">自动</option><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="recent">韦伯红外（JWST）</option><option value="hubble">哈勃望远镜</option></select></div>
-<div class="sky-detail-row" hidden><label for="xtWebbBackground">底图</label><select id="xtWebbBackground"><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option></select></div>
+  <div id="xtSkyDetailControls" class="sky-detail-row"><label for="xtSkyDetailSource">星空影像</label><select id="xtSkyDetailSource" title="巡天取景与巡天照片使用此图源"><option value="auto">自动</option><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="recent">韦伯红外（JWST）</option><option value="hubble">哈勃望远镜</option></select></div>
+<div class="sky-detail-row" hidden><label for="xtWebbBackground">底图</label><select id="xtWebbBackground"><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS 光学</option><option value="blank">空白</option></select></div>
   <div class="angle-actions"><button id="xtSkyImageBrowse" type="button">浏览星空影像</button><button id="xtSaveSkyField" type="button">下载当前天区</button></div>
   <div id="xtSkyDetailStatus" class="xt-hint" role="status"></div><a id="xtHubbleCredit" class="hubble-credit" target="_blank" rel="noopener noreferrer" hidden></a><details id="xtSkyDetailInfo" class="xt-hint sky-detail-info"><summary>影像来源与波段</summary><p id="xtSkyDetailCredits"></p><button id="xtSkyDetailTarget" type="button">查看宇宙悬崖</button></details>
   <details id="xtSolarControls" class="xt-solar-controls" hidden><summary>太阳观测<span id="xtSolarMode"></span></summary>
@@ -28,9 +34,9 @@
   <label for="xtRoll">画面旋转</label><input id="xtRoll" type="range" min="-180" max="180" step="1" value="0"><span class="xt-roll-value"><output id="xtRollLabel" for="xtRoll"></output><button type="button" id="xtRollReset" aria-label="旋转归零" title="旋转归零">↺</button></span></div>
   <div class="xt-presets"><label class="xt-guide"><input type="checkbox" id="xtNames" checked>取景天体标注</label><label class="xt-guide"><input type="checkbox" id="xtPhotoNames">照片包含标注</label></div>
   <div class="xt-hint">标注类别与密度沿用左侧星图设置；照片开关独立。</div>
-  <div class="xt-actions"><button type="button" id="xtCapture" class="primary">拍摄 PNG</button><select id="xtPhotoWidth" aria-label="照片尺寸" title="照片尺寸"><option value="1440">1440 × 900</option><option value="2560">2560 × 1600</option><option value="3840">3840 × 2400</option></select><button type="button" id="xtRecommend">推荐星野</button><button type="button" id="xtReturn" hidden>返回星野</button></div>
   <div class="xt-hint">点击取景窗后，W 低头 / S 抬头，A / D 左右转向，Q / E 左右滚转；拖动或方向键也可转向，滚轮或双指变焦。固定后移动会固定新落点；点击「随轨道转动」才解除。</div>
   <div class="xt-exterior" role="group" aria-label="外景构图"><span>外景</span><button type="button" id="xtFrameBoth" aria-pressed="false">两器同框</button><button type="button" id="xtNear" aria-pressed="true">近看巡天</button></div>
   <details id="xtMore"><summary>空间站、地球与伴飞位置</summary><label class="xt-guide"><input id="xtSkyCompass" type="checkbox" checked>显示天球方向尺</label><div class="xt-presets"><button type="button" data-xt-mode="station">看空间站</button><button type="button" data-xt-mode="horizon">看地平线</button><button type="button" data-xt-mode="nadir">看星下点</button><button type="button" data-xt-mode="sunlit">看日照地表</button></div><label class="xt-guide"><input id="xtShowGuide" type="checkbox" checked>外景显示望远镜视场</label><div id="xtFormationPanel"></div></details>
+  </div>
  </div>
 </section>

@@ -52,6 +52,14 @@ export function mountSkyImageBrowser(env) {
       if (sim.xuntian?.active) sim.xuntian.close();
       pointMainCameraAtSky(sim, direction, framing);
     }
+    if (context === 'xuntian') {
+      env.skyDetailControls.setFinderSelection(entry.source, {
+        artworkId: entry.providerId,
+        savedPyramidOrder: entry.savedPyramidOrder,
+      });
+      sim.dirty = true;
+      return true;
+    }
     if (entry.source === 'recent' || entry.source === 'hubble')
       skyDetail.setArtwork(entry.providerId, entry.savedPyramidOrder);
     env.settings.stars = true;
@@ -121,13 +129,16 @@ export function mountSkyImageBrowser(env) {
     ['skyImageBrowse', 'main'],
     ['skyChartBrowse', 'main'],
   ]) {
-    $(id).onclick = () =>
+    $(id).onclick = () => {
+      const chosen =
+        context === 'xuntian'
+          ? env.skyDetailControls.finderSelection().source
+          : env.settings.skyDetailSource;
       browser.open({
         context,
-        source: ['recent', 'hubble'].includes(env.settings.skyDetailSource)
-          ? env.settings.skyDetailSource
-          : undefined,
+        source: ['recent', 'hubble'].includes(chosen) ? chosen : undefined,
       });
+    };
   }
   $('xtSaveSkyField').onclick = (event) => {
     const id = sim.xuntian?.skyViewId;

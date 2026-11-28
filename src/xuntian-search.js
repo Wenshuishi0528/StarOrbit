@@ -6,6 +6,7 @@ import {
   xuntianCatalogComplete,
 } from './xuntian-catalog.js';
 import { searchSolarTargets } from './solar-targets.js';
+import { parseSkyCoordinates } from './sky-coordinate-input.js';
 
 const exampleGroups = [
   [
@@ -58,6 +59,8 @@ export function mountScopeSearch(
     solarVisible,
     extraTargets = () => [],
     skyCulture = () => 'western',
+    exampleTargets = null,
+    preservePlaceholder = false,
   }
 ) {
   let results = [],
@@ -70,7 +73,7 @@ export function mountScopeSearch(
   };
   const placeholder = () => {
     const rows = examples.targets(getLanguage(), skyCulture());
-    if (rows.length)
+    if (rows.length && !preservePlaceholder)
       input.placeholder = rows
         .map((target) => target.name)
         .join(getLanguage() === 'zh' ? '、' : ', ');
@@ -79,7 +82,7 @@ export function mountScopeSearch(
     Array.from(list.children).forEach((row, i) =>
       row.setAttribute('aria-selected', String(i === index))
     );
-    if (results.length) input.setAttribute('aria-activedescendant', 'xt-result-' + index);
+    if (results.length) input.setAttribute('aria-activedescendant', list.children[index].id);
     else input.removeAttribute('aria-activedescendant');
   }
   function render() {
@@ -92,12 +95,14 @@ export function mountScopeSearch(
       const stars = searchXuntianTargets(query, getLanguage(), 7, skyCulture()),
         cities = cityFinder.search(query, getLanguage());
       const bodies = searchSolarTargets(query, getLanguage());
+      const coordinates = parseSkyCoordinates(query);
       const exact = cities.filter((c) => c.score === 0),
         others = cities.filter((c) => c.score !== 0);
       // Exact city names come first. Preserve stellar results for HIP/name/IAU
       // searches, with space for city prefixes when both domains match.
       const cap = others.length ? 5 : 7;
       results = [
+        ...(coordinates ? [coordinates] : []),
         ...extraTargets(query),
         ...bodies.filter((b) => b.exact),
         ...exact,
@@ -107,7 +112,7 @@ export function mountScopeSearch(
         ...stars.slice(cap),
       ].slice(0, 7);
     } else {
-      results = examples.targets(getLanguage(), skyCulture());
+      results = exampleTargets?.() || examples.targets(getLanguage(), skyCulture());
       if (!results.length) {
         results = examples.next(getLanguage(), skyCulture());
         placeholder();
@@ -122,7 +127,7 @@ export function mountScopeSearch(
     results.forEach((r, i) => {
       const row = document.createElement('button');
       row.type = 'button';
-      row.id = 'xt-result-' + i;
+      row.id = (list.id === 'xtResults' ? 'xt' : list.id) + '-result-' + i;
       row.setAttribute('role', 'option');
       row.tabIndex = -1;
       row.dataset.target = r.id;
@@ -134,7 +139,7 @@ export function mountScopeSearch(
           ? cityVisible(r) === false
           : r.type === 'solar'
             ? solarVisible(r.body) === false
-            : isBlocked(r.direction);
+            : isBlocked?.(r.direction);
       info.textContent = [
         t(
           city
@@ -171,7 +176,9 @@ export function mountScopeSearch(
   input.addEventListener('keydown', (e) => {
     if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Escape') {
+      if (list.hidden) return;
       e.preventDefault();
+      e.stopPropagation();
       close();
       return;
     }

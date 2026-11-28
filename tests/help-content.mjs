@@ -314,3 +314,16 @@ try {
 }
 assert.equal(errors.length, 1);
 console.log('Help manuals load per language on demand; welcome, tour, search and retry passed');
+
+// A general reticle question should open appearance controls in each language.
+const { findHelpAnswers } = await import('../src/help-questions.js');
+for (const [lang, query, id] of [
+  ['zh', '巡天的小圆圈怎么调', 'aim'],
+  ['en', 'How do I change crosshair size?', 'aim'],
+  ['fr', 'la couleur du réticule', 'aim'],
+  ['ru', 'как изменить прицел', 'aim'],
+  ['zh', '星际穿梭怎么前进', 'stellar'],
+  ['zh', '哈勃底图', 'imagery'],
+  ['zh', '赤经的 h 和 m 怎样读', 'coords'],
+])
+  assert.equal(findHelpAnswers(query, lang)[0]?.id, id, query);

@@ -36,7 +36,7 @@ const anchors = [
   ['pegasus', '飞马座天区', 344, 15],
   ['virgo', '室女座天区', 186, 12],
 ];
-export const SURVEY_FIELDS = anchors.map(([id, name, ra, dec]) => {
+function makeSurveyField(id, name, ra, dec) {
   const center = equatorial(ra, dec),
     east = equatorial(ra + 90, 0),
     north = unit(cross(center, east));
@@ -45,7 +45,48 @@ export const SURVEY_FIELDS = anchors.map(([id, name, ra, dec]) => {
     unit(center.map((v, i) => v + offset * (e * east[i] + n * north[i])))
   );
   return { id, name, ra, dec, center, east, north, tiles };
-});
+}
+export const SURVEY_FIELDS = anchors.map((args) => makeSurveyField(...args));
+
+// Coordinates in the identifier make a saved custom field recoverable even if
+// its source catalogue or display language changes. Names are only labels.
+export function surveyFieldFromTarget(target) {
+  if (!target || ['city', 'solar'].includes(target.type)) return null;
+  let { ra, dec } = target;
+  if (!Number.isFinite(ra) || !Number.isFinite(dec)) {
+    const v = target.direction;
+    if (!Array.isArray(v) || v.length !== 3 || !v.every(Number.isFinite) || !Math.hypot(...v))
+      return null;
+    ra = Math.atan2(v[1], v[0]) / DEG;
+    dec = Math.asin(clamp(v[2] / Math.hypot(...v))) / DEG;
+  }
+  if (Math.abs(dec) > 90) return null;
+  ra = Number((((ra % 360) + 360) % 360).toFixed(8)) % 360;
+  dec = Number(dec.toFixed(8));
+  const part = (v) => v.toFixed(8).replace(/\.?0+$/, '') || '0';
+  const id = 'sky-' + part(ra) + '_' + part(dec);
+  const name =
+    typeof target.name === 'string' && target.name.trim()
+      ? target.name.trim().slice(0, 160)
+      : `RA ${ra.toFixed(4)}° · Dec ${dec.toFixed(4)}°`;
+  return makeSurveyField(id, name, ra, dec);
+}
+
+export function resolveSurveyField(id, fields = []) {
+  if (typeof id !== 'string') return null;
+  const known =
+    (Array.isArray(fields) && fields.find((field) => field?.id === id)) ||
+    SURVEY_FIELDS.find((field) => field.id === id);
+  if (known) return known;
+  const match = /^sky-(\d+(?:\.\d+)?)_(-?\d+(?:\.\d+)?)$/.exec(id);
+  if (!match || +match[1] >= 360) return null;
+  const field = surveyFieldFromTarget({ ra: +match[1], dec: +match[2] });
+  return field?.id === id ? field : null;
+}
+
+export function surveyFieldRecord(field) {
+  return { id: field.id, name: field.name, ra: field.ra, dec: field.dec };
+}
 
 export function makeSurveyOrbit(epoch, state) {
   // An independent circular teaching orbit starts in the station's radial/tangential frame.
@@ -98,8 +139,22 @@ export function surveySlew(from, to) {
   const angle = Math.acos(clamp(dot(from, to)));
   return angle < 1e-7 ? 0 : angle / (SURVEY_SLEW_RATE * DEG) + SURVEY_SETTLE;
 }
-export function surveyFieldsForOrbit(orbit) {
-  return SURVEY_FIELDS.map((field) => ({
+// A single frame covers the complete preview. Intersect all four footprint
+// windows so its corners obey the same Earth-limb and Sun limits as a mosaic.
+export function surveySingleWindow(orbit, field, duration = 60) {
+  if (field.visibility.some((v) => v.blockedBySun)) return { reason: 'sun' };
+  let windows = [[Math.ceil(surveySlew(orbit.park, field.center)), SURVEY_END]];
+  for (const tile of field.visibility) {
+    windows = windows.flatMap(([a, b]) =>
+      tile.windows
+        .map(([x, y]) => [Math.max(a, x), Math.min(b, y)])
+        .filter(([start, end]) => Math.ceil(start) + duration <= end)
+    );
+  }
+  return windows.length ? { start: Math.ceil(windows[0][0]), duration } : { reason: 'earth' };
+}
+export function surveyFieldsForOrbit(orbit, fields = SURVEY_FIELDS) {
+  return fields.map((field) => ({
     ...field,
     visibility: field.tiles.map((v) => surveyVisibility(orbit, v)),
   }));

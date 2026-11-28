@@ -21,6 +21,8 @@
 | Pan-STARRS DR1 i/r/g | 官方 HiPS 时间范围 2009-06-13 至 2015-02-09，约 76.39% 全天 | order 0–11，512² JPEG | [MAST/STScI 镜像元数据](https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/PanSTARRS/properties)，PS1 Science Consortium；HiPS: CNRS/Université de Strasbourg, ODbL-1.0 |
 | DSS2 Color | 较早摄影巡天，约 1975–1999，用于更广覆盖的后备 | order 0–9，512² JPEG | [MAST/STScI 镜像元数据](https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor/properties)，Digitized Sky Survey / STScI；按原始图像版权与使用条件 |
 
+手动选择任一巡天时，广角底图使用同源的 order 0 HiPS 实拍照片，放大时按视场加载更细层级，未到达的图块或未覆盖的部分留黑。Pan-STARRS 覆盖范围来自 [MAST 的官方天区表 Moc.fits](https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/PanSTARRS/Moc.fits)。StarOrbit 将其 22,221 个 ICRS 单元无损合并为 5,806 个 NESTED order 11 连续区间，随软件提供的 `panstarrs-moc.json` 仅包含覆盖元数据。来源为 Pan-STARRS1 Science Consortium 与 CDS, Strasbourg，依据该 HiPS 的 [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) 授权。运行 `node scripts/prepare-panstarrs-coverage.mjs` 可从原始 FITS 重建并核对 SHA-256。
+
 2026-11-06 实际连通检查：Pan-STARRS M31 方向 order 3/8/11 的 JPEG 均返回 200、512²、`Access-Control-Allow-Origin: *`，体积分别 165339、141203、24405 bytes，并检查了可见的星系和尘埃带。DSS 多个 order 9 瓦片也实际成功。新图片的发布日期、服务同步时间和本次下载时间均不代替观测日期。
 
 未将不可稳定访问的 CDS Euclid/JWST 服务宣布为可用来源。内置 JWST 区域采用上方的原片，离线可用。新增韦伯影像直接使用 ESA/Webb 的公开图像服务。

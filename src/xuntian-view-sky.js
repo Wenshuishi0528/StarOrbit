@@ -1,4 +1,5 @@
 import { DETECTOR_SIGMA } from './xuntian-view-math.js';
+import { photographicSkyBase } from './sky-detail-plan.js';
 
 // These are the same display choices as Environment.setSkyStyle/beginFrame.
 // The scope borrows the main scene's loaded cube. It never allocates a second
@@ -7,6 +8,10 @@ export function xuntianSkySource(env = {}, frame = {}) {
   const settings = env.settings || {};
   const showStars = frame.showStars ?? settings.stars !== false;
   const showGalaxy = frame.showGalaxy ?? settings.milky !== false;
+  const photographic = photographicSkyBase(
+    frame.detailSelection?.source,
+    frame.detailSelection?.background
+  );
   const mode = frame.skyExposure ?? settings.exposure ?? 'cinematic';
   const multiplier = frame.skyBrightness ?? settings.starBrightness ?? 1;
   const gain =
@@ -16,7 +21,8 @@ export function xuntianSkySource(env = {}, frame = {}) {
     faceSize = 0,
     level = null;
   if (showStars) {
-    if (!showGalaxy) status = 'catalog';
+    if (photographic) status = photographic;
+    else if (!showGalaxy) status = 'catalog';
     else if (mode !== 'cinematic') status = 'ordinary';
     else if (env.galaxyTexture) {
       status = 'panorama';
@@ -42,7 +48,7 @@ export function xuntianSkySource(env = {}, frame = {}) {
     faceSize,
     sourceWidth: faceSize * 4,
     gain,
-    showStars,
+    showStars: showStars && !photographic,
   };
 }
 

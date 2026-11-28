@@ -8,7 +8,7 @@ import {
   skyCultureArtEnabled,
   syncStarChartControls,
 } from './star-chart-settings.js';
-import { resolveSkyDetailSource } from './sky-detail-plan.js';
+import { photographicSkyBase, resolveSkyDetailSource } from './sky-detail-plan.js';
 import { t, onLanguageChange } from './i18n.js';
 import { earthAxes, sunPosition } from './orbit.js';
 
@@ -200,12 +200,18 @@ export function createSharedWorldSky({
         wideField: options.wideField === true,
       };
       if (options.detailSelection) view.detailSelection = options.detailSelection;
+      const photographic =
+        options.showDetail !== false &&
+        photographicSkyBase(
+          options.detailSelection?.source ?? resolveSkyDetailSource(s),
+          options.detailSelection?.background ?? s.webbBackground
+        );
       setStarLimit(options.starMagnitudeLimit);
-      stars.visible = options.showStars !== false && s.stars !== false;
+      stars.visible = !photographic && options.showStars !== false && s.stars !== false;
       stars.material.uniforms.brightness.value = brightness;
       stars.material.uniforms.pixelRatio.value = pixelRatio;
       stars.material.uniforms.high.value = s.exposure === 'cinematic' ? 1 : 0;
-      galaxy.visible = options.showGalaxy !== false && s.milky !== false;
+      galaxy.visible = !photographic && options.showGalaxy !== false && s.milky !== false;
       galaxy.material.uniforms.skyMap.value = environment.galaxyTexture || null;
       galaxy.material.uniforms.textured.value =
         options.texturedGalaxy !== false && environment.galaxyTexture ? 1 : 0;
@@ -259,10 +265,9 @@ export function createSharedWorldSky({
       });
       return {
         view,
-        starCount: Math.min(
-          stars.geometry.drawRange.count,
-          stars.geometry.attributes.mag?.count ?? 0
-        ),
+        starCount: stars.visible
+          ? Math.min(stars.geometry.drawRange.count, stars.geometry.attributes.mag?.count ?? 0)
+          : 0,
         labels: chart.shown,
         detail: environment.skyDetail.status(id + '-detail'),
       };

@@ -1,6 +1,6 @@
 import { onLanguageChange, t } from './i18n.js';
 import { clockText } from './time-format.js';
-import { SURVEY_FIELDS } from './survey-lab-math.js';
+import { resolveSurveyField } from './survey-lab-math.js';
 
 const LABELS = {
   balcony: '阳台观测',
@@ -24,7 +24,7 @@ function paragraph(parent, content, cls) {
   return el;
 }
 function description(record) {
-  const field = SURVEY_FIELDS.find((x) => x.id === record.fieldId);
+  const field = record.field || resolveSurveyField(record.fieldId, record.fields);
   const parts = [t(LABELS[record.kind]), record.observer?.name || record.groundTarget?.name || ''];
   if (field) parts.push(t(field.name));
   if (record.kind === 'survey-photo' && Number.isInteger(record.tile))

@@ -4,6 +4,11 @@ import { stateAt } from './orbit.js';
 import {
   makeSurveyOrbit,
   SURVEY_FIELDS,
+  surveyFieldFromTarget,
+  surveyFieldRecord,
+  resolveSurveyField,
+  arrangeSurveyField,
+  surveySingleWindow,
   surveyFieldsForOrbit,
   surveyStartingPlan,
   evaluateSurveyPlan,
@@ -20,6 +25,7 @@ import { mountSurveyOrbitOverview } from './survey-orbit-overview.js';
 import { mountSurveyScheduleEditor } from './survey-schedule-editor.js';
 import { surveyStyle } from './survey-lab-style.js';
 import { mountStationOrbitControl } from './station-orbit-control.js';
+import { mountSurveyTargetControls } from './survey-target-controls.js';
 
 const phaseNames = {
   invalid: '排程有冲突',
@@ -65,6 +71,13 @@ export function mountSurveyLab(container, sim, assets = {}) {
     return b;
   };
   const fieldName = (id) => t(fields.find((f) => f.id === id).name);
+  const customFields = new Map();
+  const definitions = () => [...SURVEY_FIELDS, ...customFields.values()];
+  function registerField(target) {
+    const field = surveyFieldFromTarget(target);
+    if (field) customFields.set(field.id, field);
+    return field;
+  }
   let orbit,
     fields,
     jobs,
@@ -104,14 +117,15 @@ export function mountSurveyLab(container, sim, assets = {}) {
     const reference = known && data ? stateAt(data, epoch) : null;
     referenceData = reference ? data : null;
     orbit = makeSurveyOrbit(epoch, reference);
-    fields = surveyFieldsForOrbit(orbit);
+    fields = surveyFieldsForOrbit(orbit, definitions());
     loadExample();
     plan = evaluateSurveyPlan(orbit, fields, jobs);
   }
   const head = element('div', root, 'survey-head'),
     intro = element('div', head);
   label(element('h3', intro), '巡天拍摄计划');
-  label(element('p', intro), '选一片天区，为 A–D 四格安排曝光，再执行这一圈并查看成片。');
+  label(element('p', intro), '选择天体或天球坐标，确认底图后拍一张，或把四格排进可见窗口。');
+  const targetHost = element('section', root);
   const sourceArea = element('div', root),
     orbitBar = mountStationOrbitControl(sourceArea, sim, () => {
       // Reading the station's cached orbit can complete after this panel is shown.
@@ -141,6 +155,7 @@ export function mountSurveyLab(container, sim, assets = {}) {
     toolbar,
     '看轨道与排程',
     () => {
+      advanced.open = true;
       work.scrollIntoView({ block: 'start' });
       overviewHostFocus();
     },
@@ -168,6 +183,7 @@ export function mountSurveyLab(container, sim, assets = {}) {
   label(element('h4', mosaicHead), '天区覆盖拼图');
   const displaySelect = element('select', mosaicHead);
   displaySelect.dataset.survey = 'coverage-field';
+  displaySelect.title = t('示例与已选天区');
   const mosaic = element('div', mosaicCard, 'survey-mosaic');
   const sky = element('canvas', mosaic);
   sky.setAttribute('aria-hidden', 'true');
@@ -201,6 +217,55 @@ export function mountSurveyLab(container, sim, assets = {}) {
     centerText = element('small', mosaicFoot);
   const productHost = element('div', mosaicCard),
     product = mountSurveySkyProduct(productHost, sky, sim);
+  const targetControls = mountSurveyTargetControls(targetHost, sim, {
+    select: selectTarget,
+    back() {
+      targetControls.setQuery(fieldName(displayField));
+      refreshEditor();
+    },
+    observe() {
+      const field = fields.find((f) => f.id === displayField);
+      return sim.flightLab.observeSurveyTarget(
+        { id: field.id, name: t(field.name), type: 'coordinate', direction: field.center, fov: 6 },
+        product.selection
+      );
+    },
+    async shoot() {
+      const field = fields.find((f) => f.id === displayField),
+        exposure = surveySingleWindow(orbit, field);
+      if (exposure.reason) {
+        targetControls.note(
+          exposure.reason === 'sun'
+            ? '本圈太阳过近，请换目标或日期。'
+            : '本圈没有覆盖整个构图的曝光窗口。'
+        );
+        return;
+      }
+      const done = await product.downloadSingle(exposure);
+      if (done)
+        targetControls.note('已导出单张模拟曝光 · {time} · {seconds} s', {
+          time: clockText(orbit.epoch + exposure.start * 1000) + ' UTC+8',
+          seconds: exposure.duration,
+        });
+    },
+    arrange() {
+      const result = arrangeSurveyField(orbit, fields, jobs, displayField);
+      if (result.ok) {
+        jobs = result.jobs;
+        changed();
+        targetControls.note('四格已就绪，点「执行一圈」开始拍摄。');
+        play.focus({ preventScroll: true });
+      } else {
+        advanced.open = true;
+        targetControls.note(
+          result.reason === 'sun'
+            ? '本圈太阳过近，请换目标或日期。'
+            : '本圈无法排满四格，可在手动排程中调整曝光。'
+        );
+      }
+    },
+  });
+  targetHost.querySelector('.survey-target-actions').before(product.sourcePicker);
   label(
     element('p', mosaicCard, 'survey-note survey-field-tip'),
     '右上角换天区会同步四行曝光；点击拼图格可查看对应排程。'
@@ -212,7 +277,14 @@ export function mountSurveyLab(container, sim, assets = {}) {
   function observeTile(fieldId, tile) {
     useCourse();
     stop();
-    sim.flightLab.observeSurveyTile({ fieldId, tile });
+    const definition = resolveSurveyField(fieldId, fields);
+    if (definition)
+      sim.flightLab.observeSurveyTile({
+        fieldId,
+        tile,
+        field: surveyFieldRecord(definition),
+        detailSelection: product.selection,
+      });
   }
   send.onclick = () => observeTile(displayField, jobs[selected].tile);
   action(sendArea, '我的在轨四格', () => wall.show(displayField), 'show-live-wall');
@@ -494,6 +566,35 @@ export function mountSurveyLab(container, sim, assets = {}) {
     '教学阈值：全视场避开太阳 50°，距地球边缘至少 5°。转向按 0.5°/s，另留 8 秒稳定。每格宽 3°；成片只拼接本次已完成的模拟曝光。'
   );
   const epochText = element('p', rules);
+  const advanced = element('details', root, 'survey-advanced');
+  label(element('summary', advanced), '手动排程、轨道与观测规则');
+  advanced.append(sourceArea, work, rules);
+  targetHost.after(toolbar);
+  function selectTarget(target) {
+    if (running) return false;
+    if (target && ['solar', 'city'].includes(target.type)) {
+      targetControls.selectMoving(target);
+      return true;
+    }
+    const preset = SURVEY_FIELDS.find((f) => f.id === target?.id);
+    const next = preset || registerField(target);
+    if (!next) return false;
+    targetControls.setQuery(t(next.name));
+    targetControls.reset();
+    fields = surveyFieldsForOrbit(orbit, definitions());
+    displayField = next.id;
+    selected = 0;
+    jobs = retargetSurveyJobs(jobs, displayField);
+    changed();
+    translate();
+    if (target?.detailSelection)
+      product.setMode(
+        target.detailSelection.source,
+        target.detailSelection.background,
+        target.detailSelection.artworkId
+      );
+    return true;
+  }
   function changed() {
     useCourse();
     stop();
@@ -501,10 +602,23 @@ export function mountSurveyLab(container, sim, assets = {}) {
     suggestedField = null;
     elapsed = 0;
     plan = evaluateSurveyPlan(orbit, fields, jobs);
+    targetControls.reset();
     refreshEditor();
     paint();
   }
   function refreshEditor() {
+    const currentField = fields.find((f) => f.id === displayField),
+      single = surveySingleWindow(orbit, currentField);
+    targetControls.update(
+      currentField,
+      {
+        ...single,
+        time: Number.isFinite(single.start)
+          ? clockText(orbit.epoch + single.start * 1000) + ' UTC+8'
+          : '',
+      },
+      running
+    );
     for (const [index, v] of rowViews.entries()) {
       const job = jobs[index],
         field = fields.find((f) => f.id === job.field),
@@ -600,7 +714,8 @@ export function mountSurveyLab(container, sim, assets = {}) {
     scrub.disabled = false;
     for (const v of rowViews) v.cursor.style.left = (elapsed / SURVEY_PERIOD) * 100 + '%';
     mosaicScore.textContent = t('已覆盖 {n}/4 格', { n: covered.size });
-    centerText.textContent = 'RA ' + field.ra.toFixed(1) + '°  Dec ' + field.dec.toFixed(1) + '°';
+    centerText.textContent =
+      '6° × 6°  ·  RA ' + field.ra.toFixed(3) + '°  Dec ' + field.dec.toFixed(3) + '°';
     for (const [i, { button, mark }] of tileButtons.entries()) {
       const observed = covered.has(i),
         exposing = current?.tile === i,
@@ -689,10 +804,13 @@ export function mountSurveyLab(container, sim, assets = {}) {
   displaySelect.onchange = () => {
     if (running) return;
     displayField = displaySelect.value;
+    targetControls.setQuery(fieldName(displayField));
     jobs = retargetSurveyJobs(jobs, displayField);
     changed();
   };
   function translate() {
+    targetControls.translate();
+    displaySelect.title = t('示例与已选天区');
     for (const fn of labels) fn();
     if (!exampleNote.hidden) showSuggestion();
     for (const select of [displaySelect, ...rowViews.map((v) => v.field)]) {
@@ -729,7 +847,11 @@ export function mountSurveyLab(container, sim, assets = {}) {
         kind: 'survey',
         time: clock,
         fieldId: displayField,
+        fields: [...customFields.values()]
+          .filter((f) => f.id === displayField || jobs.some((j) => j.field === f.id))
+          .map(surveyFieldRecord),
         skyLayer: product.mode,
+        detailSelection: product.selection,
         epoch: orbit.epoch,
         elapsed,
         selected,
@@ -754,18 +876,28 @@ export function mountSurveyLab(container, sim, assets = {}) {
       record.jobs.length !== 4
     )
       return false;
+    const savedDefinitions = new Map();
+    for (const value of Array.isArray(record.fields) ? record.fields : []) {
+      const field = surveyFieldFromTarget(value);
+      if (field && field.id === value.id) savedDefinitions.set(field.id, field);
+    }
     if (
       record.jobs.some(
         (job) =>
           !job ||
           !Number.isInteger(job.tile) ||
           !SURVEY_TILES[job.tile] ||
-          !SURVEY_FIELDS.some((f) => f.id === job.field) ||
+          !resolveSurveyField(job.field, [...savedDefinitions.values()]) ||
           !Number.isFinite(job.start) ||
           !Number.isFinite(job.duration)
       )
     )
       return false;
+    for (const [id, value] of savedDefinitions) customFields.set(id, value);
+    for (const job of record.jobs) {
+      if (!SURVEY_FIELDS.some((f) => f.id === job.field) && !customFields.has(job.field))
+        customFields.set(job.field, resolveSurveyField(job.field));
+    }
     useCourse();
     stop();
     newOrbit(record.epoch, data || null);
@@ -780,11 +912,12 @@ export function mountSurveyLab(container, sim, assets = {}) {
       )
     ) {
       orbit = { ...orbit, ...record.course };
-      fields = surveyFieldsForOrbit(orbit);
+      fields = surveyFieldsForOrbit(orbit, definitions());
     }
     jobs = record.jobs.map((job) => ({ ...job }));
     selected = Math.max(0, Math.min(3, Math.floor(record.selected) || 0));
     displayField = fields.find((f) => f.id === record.fieldId)?.id || jobs[selected].field;
+    targetControls.setQuery(fieldName(displayField));
     elapsed = Math.max(0, Math.min(SURVEY_END, Number(record.elapsed) || 0));
     plan = evaluateSurveyPlan(orbit, fields, jobs);
     restoredSource = record.source || referenceData?.source || t('教学默认圆轨道');
@@ -792,10 +925,14 @@ export function mountSurveyLab(container, sim, assets = {}) {
     pointing = createSurveyPointing(stage, assets.templates?.XT, orbit);
     exampleNote.hidden = true;
     translate();
-    product.setMode(record.skyLayer ?? 'dense');
+    product.setMode(
+      record.skyLayer ?? 'dense',
+      record.detailSelection?.background,
+      record.detailSelection?.artworkId
+    );
     return true;
   }
-  const wall = mountSurveyLiveWall(root, sim, observeTile);
+  const wall = mountSurveyLiveWall(root, sim, observeTile, definitions);
   const onHidden = () => {
     if (document.hidden) {
       stop();
@@ -815,9 +952,11 @@ export function mountSurveyLab(container, sim, assets = {}) {
     acceptInitialCache = false;
   });
   return {
+    selectTarget,
     getObservationRecord,
     restoreObservationRecord,
-    showLivePhotos(fieldId, recordId) {
+    showLivePhotos(fieldId, recordId, field) {
+      if (field && !SURVEY_FIELDS.some((f) => f.id === fieldId)) registerField(field);
       wall.show(fieldId, recordId);
     },
     pause() {
@@ -843,6 +982,7 @@ export function mountSurveyLab(container, sim, assets = {}) {
       visible = false;
       stop();
       wall.dispose();
+      targetControls.dispose();
       orbitBar.dispose();
       editor.dispose();
       overview.dispose();

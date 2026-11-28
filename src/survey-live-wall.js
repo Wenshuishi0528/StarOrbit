@@ -1,5 +1,5 @@
 import { t, onLanguageChange } from './i18n.js';
-import { SURVEY_FIELDS, SURVEY_TILES } from './survey-lab-math.js';
+import { SURVEY_FIELDS, SURVEY_TILES, resolveSurveyField } from './survey-lab-math.js';
 
 const el = (tag, parent, cls = '') => {
   const node = document.createElement(tag);
@@ -122,7 +122,7 @@ async function makeSheet(field, rows, store) {
   return blob;
 }
 
-export function mountSurveyLiveWall(parent, sim, observe) {
+export function mountSurveyLiveWall(parent, sim, observe, fields = () => SURVEY_FIELDS) {
   const root = el('section', parent, 'survey-live-wall');
   root.dataset.survey = 'live-wall';
   const header = el('div', root, 'survey-live-head'),
@@ -211,7 +211,7 @@ export function mountSurveyLiveWall(parent, sim, observe) {
       big.src = singleURL;
       big.alt = t('在轨原图');
       modalName.textContent =
-        t(SURVEY_FIELDS.find((f) => f.id === row.fieldId).name) +
+        t(row.field?.name || resolveSurveyField(row.fieldId, fields())?.name || row.fieldId) +
         ' ' +
         SURVEY_TILES[row.tile] +
         ' · ' +
@@ -313,7 +313,10 @@ export function mountSurveyLiveWall(parent, sim, observe) {
     }
   }
   function select(id, recordId = null) {
-    if (!SURVEY_FIELDS.some((f) => f.id === id)) return;
+    const definition = resolveSurveyField(id, fields());
+    if (!definition) return;
+    if (![...picker.options].some((option) => option.value === id))
+      picker.add(new Option(t(definition.name), id));
     if (id !== fieldId) {
       pinned = {};
       fieldId = id;
@@ -324,7 +327,7 @@ export function mountSurveyLiveWall(parent, sim, observe) {
   }
   function translate() {
     title.textContent = t('我的在轨四格');
-    picker.replaceChildren(...SURVEY_FIELDS.map((f) => new Option(t(f.name), f.id)));
+    picker.replaceChildren(...fields().map((f) => new Option(t(f.name), f.id)));
     if (fieldId) picker.value = fieldId;
     picker.setAttribute('aria-label', t('在轨四格天区'));
     note.textContent = t('主场景镜口单帧 · 各格保留实际构图和拍摄时刻');
@@ -338,7 +341,7 @@ export function mountSurveyLiveWall(parent, sim, observe) {
     if (exporting || !chosen.some(Boolean)) return;
     exporting = true;
     download.disabled = true;
-    const field = SURVEY_FIELDS.find((f) => f.id === fieldId),
+    const field = resolveSurveyField(fieldId, fields()),
       rows = chosen.slice();
     try {
       const blob = await makeSheet(field, rows, sim.observations);

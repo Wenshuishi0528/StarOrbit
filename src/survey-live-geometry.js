@@ -1,10 +1,16 @@
 import { dot, unit, cross } from './orbit.js';
-import { SURVEY_FIELDS, SURVEY_TILES, SURVEY_TILE_WIDTH } from './survey-lab-math.js';
+import {
+  resolveSurveyField,
+  surveyFieldFromTarget,
+  SURVEY_TILES,
+  SURVEY_TILE_WIDTH,
+} from './survey-lab-math.js';
 
 const DEG = Math.PI / 180;
 const halfSky = Math.tan(SURVEY_TILE_WIDTH * DEG);
-export function surveyTarget(fieldId, tile) {
-  const field = SURVEY_FIELDS.find((f) => f.id === fieldId),
+export function surveyTarget(fieldId, tile, definition) {
+  const custom = definition && surveyFieldFromTarget(definition);
+  const field = resolveSurveyField(fieldId, custom?.id === fieldId ? [custom] : []),
     i = typeof tile === 'string' ? SURVEY_TILES.indexOf(tile.toUpperCase()) : tile;
   if (!field || !Number.isInteger(i) || i < 0 || i > 3) return null;
   // Same tangent-plane halves used by the teaching mosaic: east is left,

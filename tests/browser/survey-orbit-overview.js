@@ -5,6 +5,7 @@ export async function inspectSurveyOrbitOverview(page) {
     panel = page.locator('#surveyPanel');
   if (!(await dialog.isVisible())) await page.locator('#openFlightLab').click();
   await page.locator('#surveyTab').click();
+  await panel.locator('[data-survey=show-schedule]').click();
   const map = panel.locator('[data-testid=survey-orbit-overview]'),
     canvas = map.locator('canvas'),
     clock = panel.locator('[data-survey=clock]');

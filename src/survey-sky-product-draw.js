@@ -62,17 +62,18 @@ export function createSkyPainter(geometry) {
       hue: hueForBV(s.bv),
     }));
     const record = { base, deep: [...faint, ...base].sort((a, b) => b.magnitude - a.magnitude) };
+    if (catalogs.size >= 12) catalogs.delete(catalogs.keys().next().value);
     catalogs.set(field.id, record);
     return record;
   }
-  function layer(field, mode, size, galaxy) {
-    const key = [field.id, mode, size, galaxy?.level || 0].join('|');
+  function layer(field, mode, size, galaxy, imagery) {
+    const key = [field.id, mode, size, galaxy?.level || 0, imagery?.key, imagery?.blank].join('|');
     if (layers.has(key)) return layers.get(key);
     const card = canvas(size),
       ctx = card.getContext('2d');
-    ctx.fillStyle = '#040a13';
+    ctx.fillStyle = imagery?.blank ? '#000' : '#040a13';
     ctx.fillRect(0, 0, size, size);
-    if (mode === 'galaxy' && galaxy) {
+    if (!imagery?.blank && !['catalog', 'dense'].includes(mode) && galaxy) {
       ctx.globalCompositeOperation = 'screen';
       ctx.globalAlpha = 0.55;
       ctx.imageSmoothingEnabled = true;
@@ -80,8 +81,8 @@ export function createSkyPainter(geometry) {
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
     }
-    const all = records(field),
-      stars = mode === 'catalog' ? all.base : all.deep;
+    const all = imagery?.blank ? null : records(field),
+      stars = !all ? [] : mode === 'catalog' ? all.base : all.deep;
     ctx.globalCompositeOperation = 'screen';
     const scale = clamp((size / 700) ** 0.47, 0.43, 1.45);
     for (const star of stars) {
@@ -103,6 +104,7 @@ export function createSkyPainter(geometry) {
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
+    if (imagery?.overlay) ctx.drawImage(imagery.overlay, 0, 0, size, size);
     if (layers.size >= 4) layers.delete(layers.keys().next().value);
     layers.set(key, card);
     return card;
@@ -117,7 +119,7 @@ export function createSkyPainter(geometry) {
   };
 }
 
-export function drawPlanner(canvas, layer, coverage, current, fraction) {
+export function drawPlanner(canvas, layer, coverage, current, fraction, preserveSkyPixels = false) {
   const width = canvas.clientWidth,
     height = canvas.clientHeight;
   if (!width || !height) return;
@@ -135,6 +137,7 @@ export function drawPlanner(canvas, layer, coverage, current, fraction) {
   ctx.fillStyle = '#06101b';
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(layer, left, top, side, side);
+  if (preserveSkyPixels) return;
   const half = side / 2;
   for (let i = 0; i < 4; i++) {
     const seen = coverage[i].count > 0,
@@ -165,12 +168,21 @@ function fit(
   }
   ctx.fillText(text, x, y, max);
 }
-const modeNames = { catalog: '内置亮星表', dense: '高密星点', galaxy: '银河背景（源图 16K）' };
+const modeNames = {
+  galaxy: '银河背景（源图 16K）',
+  auto: '自动',
+  dss: 'DSS 光学',
+  panstarrs: 'Pan-STARRS 光学',
+  hubble: '哈勃望远镜',
+  recent: '韦伯红外（JWST）',
+  catalog: '内置亮星表',
+  dense: '高密星点',
+};
 export { modeNames };
 export const PRODUCT_WIDTH = 1440,
   PRODUCT_SIDE = 1320,
   PRODUCT_HEIGHT = 1648;
-export function makeSurveyPlate({ field, coverage, epoch, mode, layer, galaxy }) {
+export function makeSurveyPlate({ field, coverage, epoch, mode, layer, galaxy, sourceCredit }) {
   const output = canvas(PRODUCT_WIDTH, PRODUCT_HEIGHT),
     ctx = output.getContext('2d'),
     left = 60,
@@ -227,7 +239,7 @@ export function makeSurveyPlate({ field, coverage, epoch, mode, layer, galaxy })
   fit(ctx, geometry, left, under + 43, 880, 21);
   fit(
     ctx,
-    mode === 'galaxy' ? t('银河背景与星点') + ` · ${galaxy.level}K` : t(modeNames[mode]),
+    mode === 'galaxy' && galaxy ? t('银河背景与星点') + ` · ${galaxy.level}K` : t(modeNames[mode]),
     output.width - left,
     under + 43,
     400,
@@ -247,6 +259,6 @@ export function makeSurveyPlate({ field, coverage, epoch, mode, layer, galaxy })
       : mode === 'dense'
         ? 'XHIP · d3-celestial · Tycho-2 (Høg et al., 2000) / NASA HEASARC'
         : 'XHIP · Tycho-2 · NASA/Goddard SVS, Ernie Wright · Gaia DR2: ESA/Gaia/DPAC';
-  fit(ctx, credits, left, under + 150, side, 16, { colour: '#8196a8' });
+  fit(ctx, sourceCredit || credits, left, under + 150, side, 16, { colour: '#8196a8' });
   return output;
 }

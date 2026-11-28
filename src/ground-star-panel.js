@@ -1,4 +1,7 @@
 import { nudgeGroundScope } from './ground-camera-pointing.js';
+import { mountAimMarker, drawAimMarker } from './aim-marker.js';
+import { projectRay, rayInView, skyAngles } from './sky-location-math.js';
+import { skyText } from './sky-tool-language.js';
 import { t, getLanguage } from './i18n.js';
 import { equatorial } from './environment-math.js';
 import { galleryCoordinates } from './sky-image-index.js';
@@ -6,7 +9,6 @@ import { skyDetailText, skyDetailCredits } from './sky-detail-controls.js';
 import { openSkyOfflineDownload } from './sky-offline-controls.js';
 import { normalizeWebbBackground } from './sky-detail-plan.js';
 import { SURVEY_FIELDS } from './survey-lab-math.js';
-import { dot } from './orbit.js';
 import { identifyCelestialCrosshair } from './celestial-crosshair.js';
 import { xuntianCatalogComplete } from './xuntian-catalog.js';
 import { crosshairDistanceText } from './xuntian-distance.js';
@@ -53,7 +55,7 @@ export const starPanelMarkup = `
   <label for="groundStarFov">视场</label><div class="star-angle"><input id="groundStarFov" type="range" min="0" max="1000" step="any"><output for="groundStarFov" data-star-fov-output></output></div>
   <label for="groundStarSource">参考图源</label>
   <div class="ground-star-pair"><select id="groundStarSource" data-star-source><option value="natural">仅星表与银河</option><option value="auto">自动</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS</option><option value="recent">韦伯红外（JWST）</option><option value="hubble">哈勃望远镜</option></select><button data-star-gallery>浏览星空影像</button></div>
-  <div data-star-background-row hidden><label for="groundStarBackground">底图</label><select id="groundStarBackground" data-star-background><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS</option></select></div>
+  <div data-star-background-row hidden><label for="groundStarBackground">底图</label><select id="groundStarBackground" data-star-background><option value="galaxy">原银河背景</option><option value="dss">DSS 光学</option><option value="panstarrs">Pan-STARRS</option><option value="blank">空白</option></select></div>
   <details class="star-options" data-star-imagery><summary>影像来源与波段</summary>
     <p data-star-source-status></p><p data-star-credit></p><div data-star-source-links></div>
     <button type="button" data-star-download>下载当前天区</button><p data-star-download-notice role="status"></p>
@@ -85,6 +87,7 @@ export const starPanelMarkup = `
     <div class="star-action-row"><button data-star-manual>转到此方向</button><button data-star-aim-main>对准主画面中心</button></div>
     <p class="star-crosshair"><span>十字线所指</span><strong data-star-crosshair></strong><small data-star-crosshair-detail></small></p>
   </details>
+  <div data-ground-marker-settings></div>
   <details class="star-options"><summary>目镜拍照</summary>
     <label for="groundStarPhotoWidth">照片宽度</label><select id="groundStarPhotoWidth" data-star-photo-width><option value="0">当前画面尺寸</option><option value="1280">1280 px</option><option value="1920">1920 px</option><option value="3840">3840 px</option></select>
     <label class="check"><input type="checkbox" data-star-photo-annotations> 包含标注</label><button type="button" data-star-photo>拍照</button>
@@ -117,6 +120,7 @@ export function mountGroundStarPanel({
 }) {
   const $ = (selector) => host.querySelector(selector);
   const control = createGroundStargazing();
+  let aimMarker = null;
   const date = () => sim.time;
   const culture = () => sim.environment.settings.skyCulture;
   const filterBox = $('[data-star-filters]');
@@ -864,6 +868,11 @@ export function mountGroundStarPanel({
     });
   }
   function sampleAnnotations(width, height, status, blocked, reserved) {
+    const mark = aimMarker?.settings;
+    const size = mark && mark.shape !== 'hidden' ? mark.size + 6 : 0;
+    const labelExclusions = size
+      ? [...reserved, { x: (width - size) / 2, y: (height - size) / 2, w: size, h: size }]
+      : reserved;
     const names = groundScopeBodyLabels({
       status,
       width,
@@ -871,16 +880,15 @@ export function mountGroundStarPanel({
       radius: opticsFor(width, height).eyeCircleDiameter / 2,
       bodies: reading?.sky.bodies || [],
       trackedBody: reading?.tracking && reading.target?.body,
-      reserved,
+      reserved: labelExclusions,
       hidden(row, x, y) {
         if (!blocked) return false;
         return blocked((2 * x) / width - 1, 1 - (2 * y) / height) !== false;
       },
     });
     const rows = sampleSatellites(width, height, status, blocked, [
-      ...reserved,
+      ...labelExclusions,
       ...names.map(({ rect }) => rect),
-      { x: width / 2 - 16, y: height / 2 - 16, w: 32, h: 32 },
     ]);
     return { names, rows };
   }
@@ -905,19 +913,6 @@ export function mountGroundStarPanel({
     if (annotations) {
       paintGroundScopeBodyLabels(context, annotations.names);
       paintGroundSatellites(context, annotations.rows);
-      context.strokeStyle = '#b4d7d2b8';
-      context.lineWidth = 1;
-      context.beginPath();
-      for (const [dx, dy] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ]) {
-        context.moveTo(x + dx * 7, y + dy * 7);
-        context.lineTo(x + dx * 16, y + dy * 16);
-      }
-      context.stroke();
     }
     context.restore();
   }
@@ -941,34 +936,50 @@ export function mountGroundStarPanel({
         )
       : null;
     drawOverlay(c, logicalW, logicalH, content);
+    if (content && aimMarker) drawAimMarker(c, logicalW / 2, logicalH / 2, aimMarker.settings);
     return output;
   }
-  function identifyCentre(status, width, height, rows, blocked) {
+  function identifyCentre(
+    status,
+    width,
+    height,
+    rows,
+    blocked,
+    x = 0,
+    y = 0,
+    candidates = null,
+    sample = reading
+  ) {
     const view = status.view;
-    const coordinates = 'J2000 · ' + galleryCoordinates(reading.raDeg, reading.decDeg);
+    const direction = view?.forward && (x || y ? rayInView(view, x, y) : view.forward);
+    const angles = direction ? skyAngles(direction) : { ra: sample.raDeg, dec: sample.decDeg };
+    const coordinates = 'J2000 · ' + galleryCoordinates(angles.ra, angles.dec);
     let hit, terrain;
     if (!view?.forward) hit = { kind: 'unavailable', name: '—' };
-    else if (blocked && (terrain = blocked(0, 0)) === null)
+    else if (blocked && (terrain = blocked(x, y)) === null)
       hit = { kind: 'unavailable', name: '—' };
     else if (terrain) hit = { kind: 'terrain', name: t('地形') };
     else {
       const sat = rows
-        .filter((row) => Math.hypot(row.x - width / 2, row.y - height / 2) <= 5)
-        .sort((a, b) => a.offCentre - b.offCentre)[0];
+        .map((row) => ({
+          row,
+          distance: Math.hypot(row.x - ((1 + x) * width) / 2, row.y - ((1 - y) * height) / 2),
+        }))
+        .filter((item) => item.distance <= 5)
+        .sort((a, b) => a.distance - b.distance)[0]?.row;
       if (sat) hit = { kind: 'satellite', id: sat.id, name: t(sat.name), detail: t(sat.status) };
       else {
-        const tangent = Math.tan((view.fovY * Math.PI) / 360);
         const terrainHides = (ray) => {
-          if (!blocked || ray === view.forward) return false;
-          const z = dot(ray, view.forward) * tangent;
-          return z > 0 && blocked(dot(ray, view.right) / (z * view.aspect), dot(ray, view.up) / z);
+          if (!blocked || ray === direction) return false;
+          const p = projectRay(view, ray);
+          return !p || blocked(...p) !== false;
         };
         const showStars = finderEnhanced || status.night > 0 || (status.dss?.ready || 0) > 0;
         hit = identifyCelestialCrosshair({
-          direction: view.forward,
+          direction,
           fovY: view.fovY,
           displayHeight: height,
-          bodies: [...reading.sky.bodies].sort((a, b) => a.distanceKm - b.distanceKm),
+          bodies: [...sample.sky.bodies].sort((a, b) => a.distanceKm - b.distanceKm),
           language: getLanguage(),
           settings: { skyCulture: culture(), deepSkyObjects: showStars, deepSkyScope: 'all' },
           showStars,
@@ -977,6 +988,7 @@ export function mountGroundStarPanel({
           // stars belong to the orbit instrument's separate detector.
           includeStar: (star) => star.source !== 'tycho',
           blocked: terrainHides,
+          candidates,
         });
       }
     }
@@ -1024,7 +1036,7 @@ export function mountGroundStarPanel({
     const content = annotations ? sampleAnnotations(width, height, status, blocked, rects) : null;
     const rows = content?.rows || [];
     drawOverlay(ctx, width, height, content);
-    lastFrame = { width, height, status, blocked, rects, time: date() };
+    lastFrame = { width, height, status, blocked, rows, rects, time: date(), sample: reading };
     updateMount();
     if (!refresh) return;
     lastRefresh = wall;
@@ -1127,6 +1139,51 @@ export function mountGroundStarPanel({
   }
   return {
     prefs,
+    mountMarkers(marker, projected) {
+      aimMarker = mountAimMarker({
+        marker,
+        mirrors: [projected],
+        host: $('[data-ground-marker-settings]'),
+        profile: 'ground',
+        title: '瞄准标记',
+      });
+    },
+    skyView(frame = lastFrame, inScope = true) {
+      if (!active || !frame?.status?.view || !frame.sample) return null;
+      const { width, height, status, sample } = frame;
+      return {
+        ...status.view,
+        width,
+        height,
+        culture: culture(),
+        zenith: sample.sky.frame.basis[2],
+        circleDiameter: inScope ? opticsFor(width, height).eyeCircleDiameter : 0,
+        foreground: inScope ? centerInfo?.kind : null,
+        opticalFov: inScope ? field() : status.view.fovY,
+      };
+    },
+    skyHit(x, y, candidates, frame = lastFrame, inScope = true) {
+      if (!active || !frame?.sample) return null;
+      const { width, height, rows, status, blocked, sample } = frame;
+      const diameter = inScope ? opticsFor(width, height).eyeCircleDiameter : 0;
+      if (diameter > 0 && Math.hypot(x * width, y * height) > diameter)
+        return { kind: 'outside', name: skyText('outside') };
+      const maskAt = blocked && ((px, py) => blocked(px, py, false));
+      return identifyCentre(status, width, height, rows || [], maskAt, x, y, candidates, sample);
+    },
+    canPointTarget(target) {
+      return active && !!control.observe(target, state.site, date())?.aboveHorizon;
+    },
+    pointTarget(target, track) {
+      if (!active || !control.observe(target, state.site, date())?.aboveHorizon) return false;
+      control.select(target);
+      if (!control.aim(state.site, date(), state, track)) return false;
+      setText(queryBox, '');
+      refreshReading();
+      onViewChange();
+      persist();
+      return true;
+    },
     setActive,
     canAim,
     aimImage,
@@ -1227,6 +1284,7 @@ export function mountGroundStarPanel({
     },
     dispose() {
       setActive(false);
+      aimMarker?.dispose();
       mask.remove();
     },
   };

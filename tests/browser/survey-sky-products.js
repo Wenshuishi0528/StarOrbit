@@ -28,6 +28,7 @@ async (page) => {
   if ((await mode.inputValue()) !== 'galaxy')
     throw Error('The first survey plan did not select the 16K galaxy layer');
   await field.selectOption('cygnus');
+  await root.locator('[data-survey=show-schedule]').click();
   await root.locator('[data-survey=example]').click();
   const target = await field.inputValue();
   await scrub.press('Home');
@@ -147,6 +148,48 @@ async (page) => {
   }, recipe);
   if ((await mode.inputValue()) !== 'dense')
     throw Error('A legacy survey must use its historical high-density default');
+  const restoredLayer = await mode.inputValue();
+  const pickerPrecedesShutter = await mode.evaluate((picker) => {
+    const find = (selector) => document.querySelector('#surveyPanel ' + selector);
+    return !!(
+      find('#surveyTargetSearch').compareDocumentPosition(picker) &
+        Node.DOCUMENT_POSITION_FOLLOWING &&
+      picker.compareDocumentPosition(find('[data-survey=single]')) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+  if (!pickerPrecedesShutter) throw Error('Imaging source is out of order for the first exposure');
+  await page.evaluate(async () => {
+    const sim = viewer.sim,
+      artwork = sim.environment.skyDetail.providers.find((p) => p.id === 'jwst-carina-2022');
+    await sim.flightLab.openSurveyPlan({
+      name: artwork.title,
+      ra: artwork.center.raDeg,
+      dec: artwork.center.decDeg,
+      detailSelection: { source: 'recent', background: 'blank', artworkId: artwork.id },
+    });
+  });
+  await page.waitForFunction(() => {
+    const status = viewer.sim.environment.skyDetail.status('survey-plan');
+    return status.ready && status.sources.some((s) => s.id === 'jwst-carina-2022');
+  });
+  const artworkOnly = await page.waitForFunction(() => {
+    const canvas = document.querySelector('#surveyPanel .survey-mosaic canvas'),
+      side = Math.min(canvas.width, canvas.height),
+      left = Math.floor((canvas.width - side) / 2),
+      top = Math.floor((canvas.height - side) / 2),
+      data = canvas.getContext('2d').getImageData(left, top, side, side).data;
+    let lit = 0;
+    for (let y = 0; y < side; y++)
+      for (let x = 0; x < side; x++) {
+        const i = 4 * (y * side + x);
+        if (!data[i] && !data[i + 1] && !data[i + 2]) continue;
+        if (Math.abs(x - side / 2) > side * 0.09 || Math.abs(y - side / 2) > side * 0.09)
+          return false;
+        lit++;
+      }
+    return lit > 0 ? { lit, skyPixels: side * side } : false;
+  });
   return {
     target,
     bright,
@@ -157,6 +200,7 @@ async (page) => {
     fullPNG,
     fullAt: ends.at(-1),
     orbitEnd: Number(await scrub.getAttribute('max')),
-    restoredLayer: await mode.inputValue(),
+    restoredLayer,
+    artworkOnly: await artworkOnly.jsonValue(),
   };
 };

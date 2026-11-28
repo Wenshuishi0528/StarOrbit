@@ -4,6 +4,7 @@ import { earthAxes, sunPosition, dot, sunlightFraction } from './orbit.js';
 import { enuFrame, WGS84_A, WGS84_F } from './ground-world-math.js';
 import { solarApparent } from './solar-system.js';
 import { createSharedWorldSky } from './shared-world-sky.js';
+import { photographicSkyBase } from './sky-detail-plan.js';
 import { createGroundPlanetLayer } from './ground-planets.js';
 import { getLanguage, t } from './i18n.js';
 
@@ -152,7 +153,8 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
   );
   atmosphere.add(air);
   let culture = '',
-    stargazing = false;
+    stargazing = false,
+    photographicReference = false;
   const disks = new Map();
   const moonUniforms = {
     surfaceMap: { value: environment.moon?.texture || environment.fallback },
@@ -240,6 +242,10 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
     night = illumination.night;
     stargazing = settings.stargazing === true;
     const reference = stargazing ? settings.referenceSource : null;
+    photographicReference = !!photographicSkyBase(
+      reference,
+      settings.referenceBackground ?? environment.settings.webbBackground
+    );
     const enhanced = stargazing
       ? settings.finderEnhanced === true
       : settings.appearance !== 'natural';
@@ -409,9 +415,9 @@ export function createGroundSky({ environment, renderer, id = 'ground-world' }) 
       renderer.getClearColor(clearColor);
       renderer.autoClear = false;
       try {
-        renderer.setClearColor(0x02050d, 1);
+        renderer.setClearColor(photographicReference ? 0x000000 : 0x02050d, 1);
         renderer.clear();
-        if (stargazing) shared.render(renderAtmosphere);
+        if (stargazing) shared.render(photographicReference ? undefined : renderAtmosphere);
         else {
           shared.render();
           renderAtmosphere();

@@ -1,9 +1,24 @@
 {
   "zh": {
     "view": {
-      "title": "转一转眼前的航天器",
-      "text": "按住鼠标左键拖动，绕着航天器看一圈；滚动滚轮可以拉近或拉远。双击模型，让它回到画面中央。想看清舱体外形，可以关掉「显示航天器名称」。",
-      "touchText": "单指拖动可以旋转，双指可以缩放或平移。想找回航天器，点「视角 → 重新居中」。关掉「显示航天器名称」，就能看清舱体外形。"
+      "title": "用鼠标观察航天器",
+      "text": "左键拖动绕航天器旋转。按住中键上下拖动或滚动滚轮可缩放。右键拖动平移画面。双击模型重新居中。",
+      "touchText": "单指拖动可以旋转，双指可以缩放或平移。想找回航天器，点「视角 → 重新居中」。关掉「显示航天器名称」，就能看清舱体外形。",
+      "mouse": [
+        [
+          "左键",
+          "按住拖动，旋转视角"
+        ],
+        [
+          "中键 / 滚轮",
+          "上下拖动或滚动，缩放"
+        ],
+        [
+          "右键",
+          "按住拖动，平移画面"
+        ]
+      ],
+      "exercise": "试一试：把航天器平移到旁边，再双击模型让它回到中央。"
     },
     "mission": {
       "title": "换一艘航天器，听听它的声音",
@@ -70,9 +85,24 @@
   },
   "en": {
     "view": {
-      "title": "Look around your spacecraft",
-      "text": "Drag with the left mouse button to orbit the spacecraft. Scroll to zoom. Double-click the model to center it. Turn off Spacecraft labels for a clear view of its shape.",
-      "touchText": "Drag with one finger to rotate. Use two fingers to pan or zoom. Choose Views → Recenter to find the spacecraft. Turn off Spacecraft labels for an unobstructed view."
+      "title": "Explore with the mouse",
+      "text": "Drag with the left button to orbit. Drag the middle button vertically or scroll to zoom. Drag with the right button to pan. Double-click the model to centre it.",
+      "touchText": "Drag with one finger to rotate. Use two fingers to pan or zoom. Choose Views → Recenter to find the spacecraft. Turn off Spacecraft labels for an unobstructed view.",
+      "mouse": [
+        [
+          "Left",
+          "Drag to orbit"
+        ],
+        [
+          "Middle / wheel",
+          "Drag up or down, or scroll, to zoom"
+        ],
+        [
+          "Right",
+          "Drag to pan"
+        ]
+      ],
+      "exercise": "Try panning the spacecraft to one side, then double-click it to centre it again."
     },
     "mission": {
       "title": "Switch spacecraft and listen",
@@ -139,9 +169,24 @@
   },
   "fr": {
     "view": {
-      "title": "Observer le véhicule sous tous les angles",
-      "text": "Faites glisser avec le bouton gauche pour tourner autour du véhicule. La molette règle le zoom. Un double-clic recentre la maquette. Décochez Noms des vaisseaux pour mieux voir les modules.",
-      "touchText": "Glissez un doigt pour tourner, deux doigts pour déplacer la vue ou zoomer. Retrouvez le véhicule avec Vues → Recentrer. Décochez Noms des vaisseaux pour observer sa forme."
+      "title": "Observer le vaisseau à la souris",
+      "text": "Glissez avec le bouton gauche pour tourner. Glissez verticalement avec le bouton du milieu ou tournez la molette pour zoomer. Glissez avec le bouton droit pour déplacer la vue. Double-cliquez sur le vaisseau pour le recentrer.",
+      "touchText": "Glissez un doigt pour tourner, deux doigts pour déplacer la vue ou zoomer. Retrouvez le véhicule avec Vues → Recentrer. Décochez Noms des vaisseaux pour observer sa forme.",
+      "mouse": [
+        [
+          "Gauche",
+          "Glisser pour tourner"
+        ],
+        [
+          "Milieu / molette",
+          "Glisser verticalement ou faire défiler pour zoomer"
+        ],
+        [
+          "Droit",
+          "Glisser pour déplacer la vue"
+        ]
+      ],
+      "exercise": "Essayez de déplacer le vaisseau sur le côté, puis double-cliquez dessus pour le recentrer."
     },
     "mission": {
       "title": "Changer de véhicule et écouter",
@@ -208,9 +253,24 @@
   },
   "ru": {
     "view": {
-      "title": "Осмотрите аппарат со всех сторон",
-      "text": "Вращайте камеру левой кнопкой мыши и меняйте масштаб колёсиком. Дважды щёлкните по модели, чтобы вернуть её в центр. Отключите Подписи аппаратов, чтобы лучше рассмотреть модули.",
-      "touchText": "Вращайте вид одним пальцем, перемещайте и масштабируйте двумя. Найти аппарат можно через Виды → В центр. Чтобы видеть форму модулей, отключите Подписи аппаратов."
+      "title": "Осмотрите корабль с помощью мыши",
+      "text": "Тяните левой кнопкой, чтобы облететь корабль. Тяните средней кнопкой вверх или вниз либо вращайте колёсико для изменения масштаба. Правая кнопка сдвигает вид. Дважды щёлкните по модели, чтобы вернуть её в центр.",
+      "touchText": "Вращайте вид одним пальцем, перемещайте и масштабируйте двумя. Найти аппарат можно через Виды → В центр. Чтобы видеть форму модулей, отключите Подписи аппаратов.",
+      "mouse": [
+        [
+          "Левая",
+          "Тянуть для вращения"
+        ],
+        [
+          "Средняя / колесо",
+          "Тянуть вверх-вниз или крутить для масштаба"
+        ],
+        [
+          "Правая",
+          "Тянуть для сдвига"
+        ]
+      ],
+      "exercise": "Сдвиньте корабль к краю, затем дважды щёлкните по нему, чтобы вернуть его в центр."
     },
     "mission": {
       "title": "Смените аппарат и послушайте его сигнал",

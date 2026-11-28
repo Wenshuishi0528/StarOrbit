@@ -134,6 +134,7 @@
   "tests/xuntian-catalog.mjs",
   "tests/xuntian-distance.mjs",
   "tests/xuntian-crosshair.mjs",
+  "tests/sky-tool-observing.mjs",
   "tests/xuntian-labels.mjs",
   "tests/xuntian-formation.mjs",
   "tests/xuntian-input.mjs",

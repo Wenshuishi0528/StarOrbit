@@ -3,6 +3,7 @@ import { restoreControlFocus } from './display-controls.js';
 import { getLanguage, onLanguageChange, t } from './i18n.js';
 import { helpTourPages, loadHelpContent, loadedHelpContent } from './help-content.js';
 import { manualLocations } from './help-locations.js';
+import { findHelpAnswers, suggestedQuestions } from './help-questions.js';
 import { runHelpExample, restoreHelpExample, hasHelpExample } from './help-examples.js';
 
 const WELCOME_KEY = 'tiangong-help-v1';
@@ -412,9 +413,54 @@ export function installHelp(music) {
     return item;
   }
   function home() {
-    contents.append(
-      node('p', t('第一次来，可以跟着简易导览边看边试。想查某项功能，打开详细手册。'))
-    );
+    const form = node('form', undefined, 'help-question-form');
+    const label = node('label', t('问使用问题'));
+    label.htmlFor = 'helpQuestion';
+    const input = node('input');
+    input.type = 'search';
+    input.id = 'helpQuestion';
+    input.placeholder = t('输入你的问题');
+    input.autocomplete = 'off';
+    const ask = node('button', t('查找答案'));
+    ask.type = 'submit';
+    const result = node('div', undefined, 'help-question-results');
+    result.setAttribute('aria-live', 'polite');
+    const samples = node('div', undefined, 'help-question-samples');
+    function answer() {
+      search = input.value.trim();
+      result.replaceChildren();
+      samples.hidden = !!search;
+      if (!search) return;
+      if (!answerCards(result, search)) {
+        const related = searchSections(search).slice(0, 3);
+        result.append(node('p', t('暂未收录这个问法。可换个关键词，或向项目反馈。')));
+        for (const section of related)
+          result.append(button(section.title, () => go('manual', section.id), 'help-inline-link'));
+        const feedback = node('a', t('向项目反馈'));
+        feedback.href = 'https://github.com/Wenshuishi0528/StarOrbit/issues/new';
+        feedback.target = '_blank';
+        feedback.rel = 'noopener noreferrer';
+        result.append(feedback);
+      }
+    }
+    for (const question of suggestedQuestions(getLanguage()))
+      samples.append(
+        button(
+          question,
+          () => {
+            input.value = question;
+            answer();
+          },
+          'help-inline-link'
+        )
+      );
+    input.oninput = answer;
+    form.onsubmit = (event) => {
+      event.preventDefault();
+      answer();
+    };
+    form.append(label, input, ask);
+    contents.append(form, samples, result);
     const modes = node('div', undefined, 'help-modes');
     const start = button(t('简易导览'), () => go('tour', data.tourPages[0].id), 'primary');
     start.id = 'replayTour';
@@ -423,7 +469,14 @@ export function installHelp(music) {
       go('manualIndex');
     });
     manual.id = 'helpManual';
-    modes.append(start, manual);
+    const keys = button(t('航天器操控键'), () => {
+      close();
+      document.dispatchEvent(
+        new CustomEvent('starorbit:open-controls', { detail: { mode: 'spacecraft' } })
+      );
+    });
+    keys.id = 'helpSpacecraftKeys';
+    modes.append(start, manual, keys);
     contents.append(modes);
     if (lastMode) {
       const isTour = lastMode === 'tour';
@@ -440,6 +493,28 @@ export function installHelp(music) {
       contents.append(resume);
     }
     contents.append(node('p', t(nightTip), 'help-night'));
+  }
+  function answerCards(parent, query) {
+    const matches = findHelpAnswers(query, getLanguage());
+    for (const match of matches) {
+      const card = node('article', undefined, 'help-answer-card');
+      card.append(node('strong', match.question), node('p', match.answer));
+      const target = manualLocations[match.section]?.find(availableLocation);
+      if (target)
+        card.append(
+          button(
+            t('带我去'),
+            () => {
+              sectionId = match.section;
+              go('location', sectionId, { location: target });
+            },
+            'help-inline-link'
+          )
+        );
+      card.append(button(t('查看详细说明'), () => go('manual', match.section), 'help-inline-link'));
+      parent.append(card);
+    }
+    return matches.length;
   }
   function searchSections(query) {
     if (!searchIndex) {
@@ -496,6 +571,7 @@ export function installHelp(music) {
     function showResults() {
       list.replaceChildren();
       if (search.trim()) {
+        answerCards(list, search);
         const results = searchSections(search);
         list.append(node('p', t('找到 {count} 个小节', { count: results.length }), 'help-count'));
         for (const section of results) addRow(list, section);
@@ -595,7 +671,19 @@ export function installHelp(music) {
     selector = page.target;
     const text =
       page.touchText && matchMedia('(pointer: coarse)').matches ? page.touchText : page.text;
-    for (const line of text.split('\n').filter(Boolean)) contents.append(node('p', line));
+    if (page.mouse && !matchMedia('(pointer: coarse)').matches) {
+      const gestures = node('div', undefined, 'help-mouse-guide');
+      for (const [index, [name, action]] of page.mouse.entries()) {
+        const card = node('div');
+        const mouse = node('span', undefined, 'help-mouse-figure');
+        mouse.dataset.part = ['left', 'middle', 'right'][index];
+        mouse.setAttribute('aria-hidden', 'true');
+        mouse.append(node('i'), node('i'), node('i'));
+        card.append(mouse, node('strong', name), node('span', action));
+        gestures.append(card);
+      }
+      contents.append(gestures, node('p', page.exercise));
+    } else for (const line of text.split('\n').filter(Boolean)) contents.append(node('p', line));
     if (page.practice) {
       const box = node('details', undefined, 'help-practice');
       box.open = practiceOpen;

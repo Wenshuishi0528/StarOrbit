@@ -1,5 +1,10 @@
 import { createSkyOfflineStore } from './sky-offline-store.js';
 import { hipsPixel, hipsTileUrl, selectHipsTiles } from './sky-detail-math.js';
+import {
+  panstarrsDirectionCovered,
+  panstarrsTileCoverage,
+  panstarrsViewCoverage,
+} from './panstarrs-coverage.js';
 import { skyTileKey } from './sky-detail-plan.js';
 import { deepSkyRegionMatch, DEEP_SKY_OBJECTS } from './deep-sky-catalog.js';
 import {
@@ -38,7 +43,7 @@ export function planSkyOfflineField(
   if (!view || !['auto', 'dss', 'panstarrs'].includes(source)) return null;
   const north = northernField(view);
   if (source === 'auto') source = north ? 'panstarrs' : 'dss';
-  if (source === 'panstarrs' && !north) return null;
+  if (source === 'panstarrs' && panstarrsViewCoverage(view) === 'none') return null;
   const provider = providers.find((p) => p.id === opticalId(source));
   if (!provider) return null;
   const selection = selectHipsTiles({
@@ -58,13 +63,15 @@ export function planSkyOfflineField(
       maxOrder: level,
       maxTiles: 150,
     });
-    for (const { order, pixel } of tiles)
+    for (const { order, pixel } of tiles) {
+      if (source === 'panstarrs' && panstarrsTileCoverage(order, pixel) === 'none') continue;
       items.push({
         key: skyTileKey(provider, order, pixel),
         url: hipsTileUrl(provider.baseUrl, order, pixel, provider.format),
         width: 512,
         height: 512,
       });
+    }
   }
   return {
     id: [
@@ -106,6 +113,7 @@ function coversReticle(tile, direction) {
     return !!deepSkyRegionMatch(footprint, direction)?.withinRegion;
   }
   if (hipsPixel(tile.order, direction).pixel !== tile.pixel) return false;
+  if (p.id === 'panstarrs') return panstarrsDirectionCovered(direction);
   if (!p.tiles) return true;
   const field = DEEP_SKY_OBJECTS.find((object) => object.providerId === p.id);
   return !!field && !!deepSkyRegionMatch(field, direction)?.withinRegion;
@@ -154,7 +162,7 @@ export class SkyOffline {
     if (
       artworkSource &&
       !(provider?.plate || provider?.tiles) &&
-      (!background || background === 'galaxy')
+      (!background || background === 'galaxy' || background === 'blank')
     ) {
       provider = entry.tiles?.find(
         (t) => (t.provider.plate || t.provider.tiles) && coversReticle(t, view.forward)

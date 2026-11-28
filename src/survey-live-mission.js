@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { SURVEY_TILES } from './survey-lab-math.js';
 import { surveyTarget } from './survey-live-geometry.js';
+import { surveyFieldRecord } from './survey-lab-math.js';
 import { mountSurveyOverlay } from './survey-live-overlay.js';
 
 export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instrument, refresh }) {
@@ -17,7 +18,7 @@ export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instru
     button.type = 'button';
     button.textContent = name;
     button.onclick = () => {
-      if (target && !busy) select(target.fieldId, i);
+      if (target && !busy) select(target.fieldId, i, target.field, target.detailSelection);
     };
     $('xtSurveyTiles').append(button);
   }
@@ -26,9 +27,10 @@ export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instru
     params = values;
     sync();
   }
-  function select(fieldId, tile) {
-    const next = surveyTarget(fieldId, tile);
+  function select(fieldId, tile, definition, detailSelection) {
+    const next = surveyTarget(fieldId, tile, definition);
     if (!next) return false;
+    next.detailSelection = detailSelection;
     target = next;
     epoch++;
     note = '金色框是计划天区。拍照使用主场景当前时刻和实际镜口。';
@@ -84,6 +86,8 @@ export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instru
             kind: 'survey-photo',
             missionId: 'tiangong',
             fieldId: requested.fieldId,
+            field: surveyFieldRecord(requested.field),
+            detailSelection: f.detailSelection || requested.detailSelection,
             tile: requested.tile,
             time: f.q.t,
             axes: Object.fromEntries(Object.entries(f.axes).map(([k, v]) => [k, [...v]])),
@@ -125,7 +129,7 @@ export function mountSurveyMission(sim, { aimTile, clearTarget, getFrame, instru
   $('xtSurveyWall').onclick = () => {
     if (target)
       sim.flightLab
-        .openSurveyPhotos({ fieldId: target.fieldId })
+        .openSurveyPhotos({ fieldId: target.fieldId, field: surveyFieldRecord(target.field) })
         .catch((error) => sim.api.toast('切换失败：{error}', { error: t(error.message) }));
   };
   $('xtSurveyExit').onclick = () => {

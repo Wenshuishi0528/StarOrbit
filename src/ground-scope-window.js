@@ -33,6 +33,20 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
     frame = node('.ground-scope-frame'),
     hud = node('[data-scope-hud]');
   frame.append(panel.overlay);
+  const center = document.createElement('span');
+  center.className = 'ground-aim-origin';
+  const marker = document.createElement('span');
+  center.setAttribute('aria-hidden', 'true');
+  center.append(marker);
+  frame.append(center);
+  const guideCenter = document.createElement('span');
+  guideCenter.className = 'ground-guide-aim-origin';
+  guideCenter.setAttribute('aria-hidden', 'true');
+  guideCenter.hidden = true;
+  const projected = document.createElement('span');
+  guideCenter.append(projected);
+  guide.after(guideCenter);
+  panel.mountMarkers(marker, projected);
   const input = mountScopeInput(frame, {
     nudge: (x, y) => panel.nudge(x, y),
     zoom: (delta) => panel.zoom(delta),
@@ -54,6 +68,7 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
   }
   const dir = new THREE.Vector3();
   function updateGuide(mainCamera, scopeCamera, diameter = 0) {
+    guideCenter.hidden = true;
     const w = stage.clientWidth,
       h = stage.clientHeight;
     const fw = frame.clientWidth,
@@ -87,7 +102,9 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
       if (Math.abs(dir.x) < 1 && Math.abs(dir.y) < 1) {
         const x = ((1 + dir.x) * w) / 2,
           y = ((1 - dir.y) * h) / 2;
-        path.push(`M${x - 7} ${y}h4m6 0h4M${x} ${y - 7}v4m0 6v4`);
+        guideCenter.style.left = x + 'px';
+        guideCenter.style.top = y + 'px';
+        guideCenter.hidden = false;
       }
     }
     const d = path.join(' ');
@@ -113,15 +130,18 @@ export function mountGroundScopeWindow({ stage, panel, onLayout, onClose, onAim,
         hud.textContent = '';
       }
       outline.removeAttribute('d');
+      guideCenter.hidden = true;
       refresh();
     },
     clearGuide() {
+      guideCenter.hidden = true;
       if (outline.hasAttribute('d')) outline.removeAttribute('d');
     },
     dispose() {
       input.dispose?.();
       root.remove();
       guide.remove();
+      guideCenter.remove();
     },
   };
 }

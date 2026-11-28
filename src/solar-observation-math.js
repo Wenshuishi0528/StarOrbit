@@ -22,6 +22,22 @@ export function solarImageFootprint(body, record) {
   if (!(fraction > 0 && fraction <= 1) || !body?.radiusRad) return null;
   return Math.atan(Math.tan(body.radiusRad) / fraction);
 }
+// Each frustum side is a plane through the observer. Leave the instrument
+// only after the whole image (with a small guard band for limb studies) lies
+// outside a side. A roll, zoom or orbit update alone never triggers this test.
+export function sunlightOutsideView(axes, fovY, aspect, sun, record) {
+  if (!sun?.direction || !axes || !(aspect > 0) || !(fovY > 0)) return false;
+  const z = dot(axes.forward, sun.direction);
+  const radius = (solarImageFootprint(sun, record) || sun.radiusRad || 0) * 1.1;
+  const tanY = Math.tan((fovY * Math.PI) / 360);
+  return [
+    [axes.right, tanY * aspect],
+    [axes.up, tanY],
+  ].some(
+    ([axis, tangent]) =>
+      (Math.abs(dot(axis, sun.direction)) - z * tangent) / Math.hypot(1, tangent) > Math.sin(radius)
+  );
+}
 // These bodies can pass in front of the Sun. The Moon may cover the entire
 // disk; inner planets retain their true apparent sizes during a transit.
 export function solarImageOccluders(sun, bodies) {

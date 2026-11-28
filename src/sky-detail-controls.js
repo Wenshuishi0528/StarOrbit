@@ -1,13 +1,21 @@
 import { t, setText, getLanguage } from './i18n.js';
 import { skyOfflineResourceList } from './sky-offline-controls.js';
 import { getXuntianTarget } from './xuntian-catalog.js';
-import { normalizeSkyDetailSource, resolveSkyDetailSource } from './sky-detail-plan.js';
+import {
+  normalizeSkyDetailSource,
+  normalizeWebbBackground,
+  photographicSkyBase,
+  resolveSkyDetailSource,
+} from './sky-detail-plan.js';
+import { pointMainCameraAtSky } from './sky-camera-pointing.js';
+import { cameraAxes, lookDirection } from './xuntian-pointing.js';
 
 const $ = (id) => document.getElementById(id);
 const artworkSource = (source) => source === 'recent' || source === 'hubble';
 const SOURCE_LABELS = {
   auto: '自动',
   galaxy: '原银河背景',
+  blank: '空白',
   dss: 'DSS 光学',
   panstarrs: 'Pan-STARRS 光学',
   recent: '韦伯红外（JWST）',
@@ -31,33 +39,42 @@ export function skyDetailText(status) {
   if (source === 'galaxy') return t('原银河背景 · 沿用当前星空显示');
   if (!status?.enabled) return t('高清星空已关闭');
   const hasArtwork = source === 'hubble' ? status.hasHubbleTiles : status.hasWebbTiles;
-  if (status.backgroundOutsideCoverage) {
-    const note = t('Pan-STARRS 未覆盖此天区，底图显示原银河');
+  const photographic = photographicSkyBase(source, status.webbBackground);
+  if (
+    status.backgroundOutsideCoverage ||
+    (source === 'panstarrs' && status.fallback === 'outside-coverage')
+  ) {
+    const note = t('Pan-STARRS 未覆盖此天区');
     if (!hasArtwork) return note;
     return skyDetailProgress(status, source) + ' · ' + note;
   }
-  if (source === 'hubble' && status.fallback === 'outside-coverage')
-    return t('此天区显示 {source} 底图', {
-      source: t(SOURCE_LABELS.galaxy),
-    });
-  if (status.fallback === 'outside-coverage')
-    return t(
-      source === 'recent'
-        ? '此天区没有韦伯影像，显示原银河背景'
-        : '此视场超出 Pan-STARRS 覆盖范围，显示原银河背景'
+  if (artworkSource(source) && status.fallback === 'outside-coverage')
+    return (
+      t('此天区没有已定位的作品') +
+      ' · ' +
+      t('此天区显示 {source} 底图', {
+        source: t(SOURCE_LABELS[status.webbBackground] || SOURCE_LABELS.galaxy),
+      })
     );
   if (
     status.fallback === 'unavailable' ||
     (status.requested && !status.ready && !status.loading && status.failed)
   )
-    return t('所选影像不可用，显示原银河背景');
+    return t(photographic ? '影像暂不可用，缺失区域留黑' : '所选影像不可用，显示原银河背景');
+  if (!status.requested && status.loading) return t('加载中');
+  if (!status.requested && photographic)
+    return t(SOURCE_LABELS[source]) + ' · ' + t('高清天区 {ready}/{total}', { ready: 0, total: 0 });
   if (!status.requested)
     return source === 'auto'
       ? t('放大后自动加载高清天区')
       : t('放大后加载 {source}，当前显示原银河背景', { source: t(SOURCE_LABELS[source]) });
-  if (artworkSource(source) && hasArtwork === false && status.ready)
-    return t('此天区显示 {source} 底图', { source: t(SOURCE_LABELS[status.webbBackground]) });
-  return skyDetailProgress(status, source);
+  const message =
+    artworkSource(source) && hasArtwork === false && status.ready
+      ? t('此天区显示 {source} 底图', { source: t(SOURCE_LABELS[status.webbBackground]) })
+      : skyDetailProgress(status, source);
+  return status.opticalCoverage === 'partial'
+    ? message + ' · ' + t('Pan-STARRS 仅覆盖部分视场')
+    : message;
 }
 function skyDetailProgress(status, source) {
   const progress = t('高清天区 {ready}/{total}', { ready: status.ready, total: status.requested });
@@ -96,7 +113,8 @@ export function applySkyDetailSource(env, value, { save = true } = {}) {
   env.skyDetail.setEnabled(
     env.settings.skyDetail &&
       env.settings.stars !== false &&
-      env.settings.milky !== false &&
+      (env.settings.milky !== false ||
+        !!photographicSkyBase(source, env.settings.webbBackground)) &&
       (env.settings.starBrightness ?? 1) > 0
   );
   if (save) env.save();
@@ -104,17 +122,66 @@ export function applySkyDetailSource(env, value, { save = true } = {}) {
 }
 
 export function mountSkyDetailControls(env) {
+  const finderKey = 'starorbit-xuntian-sky-v1';
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(finderKey));
+  } catch {}
+  const finder = {
+    source: normalizeSkyDetailSource(saved?.source ?? resolveSkyDetailSource(env.settings)),
+    background: normalizeWebbBackground(saved?.background ?? env.settings.webbBackground),
+    artworks: { ...(saved ? saved.artworks : env.skyDetail.artworkBySource) },
+    orders: { ...saved?.orders },
+  };
+  function saveFinder() {
+    try {
+      localStorage.setItem(finderKey, JSON.stringify(finder));
+    } catch {}
+  }
+  if (!saved) saveFinder();
+  function finderSelection() {
+    return {
+      source: finder.source,
+      background: finder.background,
+      artworkId: artworkSource(finder.source) ? finder.artworks[finder.source] || null : null,
+      savedPyramidOrder: finder.orders[finder.source],
+    };
+  }
+  function setFinderSelection(source, options = {}) {
+    finder.source = normalizeSkyDetailSource(source);
+    if (options.background !== undefined)
+      finder.background = normalizeWebbBackground(options.background);
+    if (artworkSource(finder.source) && options.artworkId !== undefined) {
+      finder.artworks[finder.source] = options.artworkId;
+      finder.orders[finder.source] = options.savedPyramidOrder;
+    }
+    saveFinder();
+    sync();
+    env.sim.dirty = true;
+  }
   const boxes = ['skyDetailEnabled'].map($).filter(Boolean),
-    backgrounds = ['webbBackground', 'xtWebbBackground'].map($).filter(Boolean),
-    selects = ['skyDetailSource', 'xtSkyDetailSource'].map($).filter(Boolean);
+    backgrounds = ['webbBackground'].map($).filter(Boolean),
+    selects = ['skyDetailSource'].map($).filter(Boolean);
   function sync() {
     const source = resolveSkyDetailSource(env.settings),
-      disabled = env.settings.stars === false || env.settings.milky === false;
+      disabled = env.settings.stars === false;
     env.settings.skyDetailSource = source;
     env.settings.skyDetail = source !== 'galaxy';
     env.skyDetail.setSource(source, env.settings.webbBackground);
-    for (const id of ['viewSkyDetail', 'xtSkyDetailTarget'])
-      if ($(id)) $(id).hidden = source === 'hubble';
+    if ($('viewSkyDetail')) $('viewSkyDetail').hidden = source === 'hubble';
+    if ($('xtSkyDetailTarget')) $('xtSkyDetailTarget').hidden = finder.source === 'hubble';
+    if ($('xtSkyDetailSource')) {
+      $('xtSkyDetailSource').value = finder.source;
+      $('xtSkyDetailSource').disabled = disabled;
+      $('xtSkyDetailSource').title = t(
+        disabled ? '开启星空后可切换影像' : '巡天取景与巡天照片使用此图源'
+      );
+    }
+    if ($('xtWebbBackground')) {
+      $('xtWebbBackground').parentElement.hidden = !artworkSource(finder.source);
+      $('xtWebbBackground').disabled = disabled;
+      $('xtWebbBackground').value = finder.background;
+    }
     for (const select of backgrounds) {
       select.parentElement.hidden = !artworkSource(source);
       select.value = env.settings.webbBackground ?? 'galaxy';
@@ -127,9 +194,7 @@ export function mountSkyDetailControls(env) {
     for (const select of selects) {
       select.value = source;
       select.disabled = disabled;
-      select.title = t(
-        disabled ? '开启星空与银河后可切换影像' : '主画面、巡天取景和照片共用此影像选择'
-      );
+      select.title = t(disabled ? '开启星空后可切换影像' : '主画面使用此图源');
     }
   }
   const choose = (source) => {
@@ -153,24 +218,39 @@ export function mountSkyDetailControls(env) {
       env.save();
       env.sim.dirty = true;
     };
-  const observe = () => {
-    choose('recent');
-    env.sim.xuntian?.observeSkyDetail?.();
-  };
-  for (const id of ['viewSkyDetail', 'xtSkyDetailTarget']) if ($(id)) $(id).onclick = observe;
+  if ($('xtSkyDetailSource'))
+    $('xtSkyDetailSource').onchange = () => setFinderSelection($('xtSkyDetailSource').value);
+  if ($('xtWebbBackground'))
+    $('xtWebbBackground').onchange = () =>
+      setFinderSelection(finder.source, { background: $('xtWebbBackground').value });
+  if ($('xtSkyDetailTarget'))
+    $('xtSkyDetailTarget').onclick = () => env.sim.xuntian?.observeSkyDetail?.();
+  if ($('viewSkyDetail'))
+    $('viewSkyDetail').onclick = () => {
+      const target = skyDetailTarget(env);
+      if (!target) return;
+      env.skyDetail.setArtwork('jwst-carina-2022');
+      choose('recent');
+      pointMainCameraAtSky(env.sim, target.direction, {
+        ...cameraAxes(lookDirection(target.direction)),
+        fovY: target.fov,
+      });
+    };
   sync();
   let last = -Infinity;
   return {
+    finderSelection,
+    setFinderSelection,
     update() {
       if (performance.now() - last < 500) return;
       last = performance.now();
       sync();
-      for (const id of ['viewSkyDetail', 'xtSkyDetailTarget'])
-        if ($(id)) $(id).disabled = env.sim.missionId !== 'tiangong';
+      if ($('xtSkyDetailTarget'))
+        $('xtSkyDetailTarget').disabled = env.sim.missionId !== 'tiangong';
       const status = env.skyDetail.status('main');
       const message =
-        env.settings.stars === false || env.settings.milky === false
-          ? t('开启星空与银河后可切换影像')
+        env.settings.stars === false
+          ? t('开启星空后可切换影像')
           : env.settings.starBrightness === 0
             ? t('星空亮度为零')
             : skyDetailText(status);
@@ -282,6 +362,7 @@ export function skyDetailCaptionLines(status) {
   const labels = {
     auto: 'Automatic',
     galaxy: 'Original Milky Way background',
+    blank: 'Blank sky',
     dss: 'DSS2 optical colour composite',
     panstarrs: 'Pan-STARRS i/r/g optical composite',
     recent: 'Webb infrared (JWST)',
@@ -296,12 +377,17 @@ export function skyDetailCaptionLines(status) {
     ...sources.map((p) => `${[p.id, p.observed, p.credit].filter(Boolean).join(' · ')}`),
   ];
   if (!sources.length) {
-    lines.push('Rendered: original Milky Way / catalogue background');
+    lines.push(
+      photographicSkyBase(source, status.webbBackground)
+        ? 'Rendered: blank sky in the absence of selected imagery'
+        : 'Rendered: original Milky Way / catalogue background'
+    );
     if (status.fallback === 'outside-coverage')
       lines.push('Selected image does not cover this field');
     else if (source !== 'galaxy')
       lines.push('Selected image unavailable or not loaded at this field of view');
   }
+  if (status.opticalCoverage === 'partial') lines.push('Pan-STARRS covers part of this field');
   for (const p of sources.filter((p) => p.tiles)) {
     lines.push('JWST NIRCam · Infrared colour composite · Reprojected by StarOrbit');
     lines.push(`${p.sourceUrl.replace(/^https?:\/\//, '')} · ${p.license}`);

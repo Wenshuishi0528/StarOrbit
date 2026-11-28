@@ -5,6 +5,7 @@ import {
   solarImageUV,
   solarImageFootprint,
   solarImageOccluders,
+  sunlightOutsideView,
 } from '../src/solar-observation-math.js';
 
 const body = { direction: [1, 0, 0], north: unit([0.2, 0, 1]), radiusRad: 0.00465 },
@@ -12,6 +13,21 @@ const body = { direction: [1, 0, 0], north: unit([0.2, 0, 1]), radiusRad: 0.0046
 const near = (a, b) => a.forEach((x, i) => assert(Math.abs(x - b[i]) < 1e-10));
 const axes = solarImageAxes(body),
   edge = Math.tan(body.radiusRad);
+assert.equal(sunlightOutsideView(axes, 0.06, 1.6, body, record), false);
+const shifted = (degrees) => {
+  const angle = (degrees * Math.PI) / 180;
+  return {
+    forward: [Math.cos(angle), Math.sin(angle), 0],
+    right: [-Math.sin(angle), Math.cos(angle), 0],
+    up: [0, 0, 1],
+  };
+};
+assert.equal(
+  sunlightOutsideView(shifted(0.24), 0.06, 1.6, body, record),
+  false,
+  'A zoomed-in limb remains in solar mode'
+);
+assert.equal(sunlightOutsideView(shifted(3), 0.9, 1.6, body, record), true);
 near(axes.up, [0, 0, 1]);
 near(axes.right, [0, -1, 0]);
 assert(Math.abs(dot(axes.up, axes.forward)) < 1e-12);

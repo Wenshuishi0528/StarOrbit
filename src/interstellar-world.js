@@ -26,6 +26,8 @@ import {
 import { createInterstellarSolar } from './interstellar-solar.js';
 import { createInterstellarMap } from './interstellar-map.js';
 import { createInterstellarInput } from './interstellar-input.js';
+import { mountPilotKeyGuide } from './pilot-key-guide.js';
+import { mountAimMarker } from './aim-marker.js';
 import { searchXuntianTargets, getXuntianTarget } from './xuntian-catalog.js';
 import { t, getLanguage, onLanguageChange } from './i18n.js';
 import { galaxyVertex, galaxyFragment } from './sky-shaders.js';
@@ -53,7 +55,7 @@ float light=exp(-r*r*9.)+.12*exp(-r*r*2.5)*(1.-smoothstep(.7,1.,r));
 gl_FragColor=vec4(tint*flux*light,1.);
 #include <colorspace_fragment>
 }`;
-const css = `.interstellar-panel{position:absolute;left:18px;top:18px;width:276px;box-sizing:border-box;max-height:calc(100% - 110px);overflow:auto;padding:20px;border:1px solid #748fa344;border-radius:15px;background:#091522e6;backdrop-filter:blur(14px);z-index:4;font:13px/1.65 system-ui;color:#cad9e7}.interstellar-panel h3{font-size:23px;letter-spacing:.1em;color:#f2dbad;margin:0 0 2px}.interstellar-panel small,.interstellar-panel p{color:#8fa8bd;font-size:11px}.interstellar-panel label{display:block;margin:10px 0 4px}.interstellar-panel input:not([type=checkbox]),.interstellar-panel select{box-sizing:border-box;width:100%;min-width:0}.interstellar-panel button{font-size:12px}.interstellar-actions{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.interstellar-results button{display:block;width:100%;text-align:left;margin:4px 0}.interstellar-selected{border-top:1px solid #738ca333;padding-top:10px;margin-top:12px;color:#efd9b4;white-space:pre-line}.interstellar-hud{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center;color:#bdcedf;background:#081320c9;padding:10px 24px;border:1px solid #7891ac33;border-radius:24px;z-index:3;font:12px/1.7 system-ui;white-space:pre-line;pointer-events:none;font-variant-numeric:tabular-nums}.interstellar-labels{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}.interstellar-labels span{position:absolute;font:12px system-ui;color:#c2d1e2;text-shadow:0 0 6px #000,0 1px 3px #000;transform:translate(9px,-50%);white-space:nowrap}.interstellar-labels .selected{color:#ffe1a2;font-weight:600}.interstellar-reticle{position:absolute;left:50%;top:50%;width:16px;height:16px;border:1px solid #bfd4e544;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:2}.interstellar-credit{position:absolute;right:12px;bottom:5px;color:#9fb2c4;font:10px system-ui;pointer-events:none}.interstellar-panel details{margin-top:12px}.interstellar-panel summary{cursor:pointer;color:#d7c39d}.interstellar-panel-toggle{position:absolute;right:18px;top:18px;z-index:5}.interstellar-panel[hidden]{display:none}@media(max-width:700px){.interstellar-panel{left:8px;top:8px;width:228px;padding:13px;max-height:calc(100% - 100px)}.interstellar-hud{bottom:20px;font-size:10px;width:max-content;max-width:85%;padding:7px 12px}.interstellar-panel h3{font-size:19px}}`;
+const css = `.interstellar-panel{position:absolute;left:18px;top:18px;width:276px;box-sizing:border-box;max-height:calc(100% - 110px);overflow:auto;padding:20px;border:1px solid #748fa344;border-radius:15px;background:#091522e6;backdrop-filter:blur(14px);z-index:4;font:13px/1.65 system-ui;color:#cad9e7}.interstellar-panel h3{font-size:23px;letter-spacing:.1em;color:#f2dbad;margin:0 0 2px}.interstellar-panel small,.interstellar-panel p{color:#8fa8bd;font-size:11px}.interstellar-panel label{display:block;margin:10px 0 4px}.interstellar-panel input:not([type=checkbox]),.interstellar-panel select{box-sizing:border-box;width:100%;min-width:0}.interstellar-panel button{font-size:12px}.interstellar-actions{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.interstellar-results button{display:block;width:100%;text-align:left;margin:4px 0}.interstellar-selected{border-top:1px solid #738ca333;padding-top:10px;margin-top:12px;color:#efd9b4;white-space:pre-line}.interstellar-hud{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center;color:#bdcedf;background:#081320c9;padding:10px 24px;border:1px solid #7891ac33;border-radius:24px;z-index:3;font:12px/1.7 system-ui;white-space:pre-line;pointer-events:none;font-variant-numeric:tabular-nums}.interstellar-labels{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}.interstellar-labels span{position:absolute;font:12px system-ui;color:#c2d1e2;text-shadow:0 0 6px #000,0 1px 3px #000;transform:translate(9px,-50%);white-space:nowrap}.interstellar-labels .selected{color:#ffe1a2;font-weight:600}.interstellar-reticle{z-index:2}.interstellar-credit{position:absolute;right:12px;bottom:5px;color:#9fb2c4;font:10px system-ui;pointer-events:none}.interstellar-panel details{margin-top:12px}.interstellar-panel summary{cursor:pointer;color:#d7c39d}.interstellar-panel-toggle{position:absolute;right:18px;top:18px;z-index:5}.interstellar-panel[hidden]{display:none}@media(max-width:700px){.interstellar-panel{left:8px;top:8px;width:228px;padding:13px;max-height:calc(100% - 100px)}.interstellar-hud{bottom:20px;font-size:10px;width:max-content;max-width:85%;padding:7px 12px}.interstellar-panel h3{font-size:19px}}`;
 
 export function createInterstellarWorld({
   renderer,
@@ -100,12 +102,16 @@ export function createInterstellarWorld({
   let bookmarks = [],
     lastPhotoCaption = '',
     exposure = 1;
+  let keysVisible = true,
+    initialMarker;
   try {
     const saved = JSON.parse(localStorage.getItem(STORE));
     bookmarks = (Array.isArray(saved?.bookmarks) ? saved.bookmarks : [])
       .filter(validPose)
       .slice(0, 12);
     if (Object.hasOwn(TRAVEL_SPEEDS, saved?.speed)) speed = saved.speed;
+    keysVisible = saved?.keysVisible !== false;
+    initialMarker = saved?.marker;
   } catch {}
   const panel = document.createElement('aside');
   panel.className = 'interstellar-panel';
@@ -117,7 +123,8 @@ export function createInterstellarWorld({
 <label><input type="checkbox" data-assist checked> <span data-text="接近恒星时自动减速"></span></label>
 <div class="interstellar-actions"><button data-home data-text="返回太阳附近"></button><button data-sun data-text="回望太阳"></button><button data-solar data-text="进入太阳系"></button><button data-ground data-text="地表对照"></button></div>
 <details open><summary data-text="星图与画面"></summary><label data-text="星空体系"></label><select data-culture><option value="chinese" data-text="中国星官"></option><option value="western" data-text="西方星座"></option></select><select data-formation aria-label="选择星图"></select><div class="interstellar-actions"><button data-side data-text="从侧面看"></button><button data-earth data-text="太阳附近视角"></button></div><label><input type="checkbox" data-lines checked> <span data-text="三维连线"></span></label><label><input type="checkbox" data-names checked> <span data-text="恒星名称"></span></label><label><input type="checkbox" data-auto-exposure checked> <span data-text="自动曝光"></span></label><label data-text="星空亮度"></label><input data-brightness aria-label="星空亮度" type="range" min="0.2" max="2.5" step="0.05" value="1"><label data-text="视场"></label><input data-fov aria-label="视场" type="range" min="0.006" max="100" step="0.001" value="65"></details>
-<details><summary data-text="航点与操作"></summary><input data-bookmark-name aria-label="航点名称" placeholder="航点名称" maxlength="40"><div class="interstellar-actions"><button data-save data-text="保存航点"></button><button data-remove data-text="删除航点"></button></div><select data-bookmarks aria-label="保存的航点"></select><p data-text="H / N 前后，J / L 左右，K / I 升降；W / S 俯仰，A / D 转向，Q / E 翻滚。拖动画面转向，滚轮缩放，空格停止。"></p></details>
+<div data-marker-host></div>
+<details><summary data-text="航点与操作"></summary><input data-bookmark-name aria-label="航点名称" placeholder="航点名称" maxlength="40"><div class="interstellar-actions"><button data-save data-text="保存航点"></button><button data-remove data-text="删除航点"></button></div><select data-bookmarks aria-label="保存的航点"></select><button type="button" data-bookmark-keys></button></details>
 <details><summary data-text="星表与空间数据"></summary><p data-statistics></p><p data-text="恒星位置：J2000 星表快照；移动观察者产生空间视差。模拟时钟与穿梭速度独立，恒星自行尚未外推。"></p><p data-text="三维连线只显示两端均有可靠距离的线段。银河影像作为太阳邻域背景，远离后逐渐淡出。"></p><p data-text="太阳与天狼星 A 使用实测半径的球面；其他恒星显示星点。颜色与曝光为观测可视化，球面不代表实拍纹理。"></p><p>Hipparcos / van Leeuwen 2007 · d3-celestial · Stellarium CC BY-SA 4.0 · Sirius A: Davis et al. 2011</p></details><small data-message role="status"></small>`;
   host.append(panel);
   const sharedSky = createSharedWorldSky({ environment, renderer, id: 'interstellar-world' });
@@ -140,15 +147,45 @@ export function createInterstellarWorld({
   const hud = document.createElement('div');
   hud.className = 'interstellar-hud';
   const reticle = document.createElement('div');
-  reticle.className = 'interstellar-reticle';
+  reticle.className = 'interstellar-reticle aim-marker-centered';
   const credit = document.createElement('div');
   credit.className = 'interstellar-credit';
   credit.textContent = 'StarOrbit · Hipparcos · J2000';
   const toggle = document.createElement('button');
   toggle.className = 'interstellar-panel-toggle';
-  host.append(labels, hud, reticle, credit, toggle);
+  const utility = document.createElement('div'),
+    guideButton = document.createElement('button');
+  utility.className = 'interstellar-utility';
+  guideButton.type = 'button';
+  utility.append(guideButton, toggle);
+  host.append(labels, hud, reticle, credit, utility);
+  const guide = mountPilotKeyGuide({
+    mode: 'interstellar',
+    host,
+    takeControl: () => renderer.domElement.focus({ preventScroll: true }),
+    onVisibility: (visible) => {
+      keysVisible = visible;
+      if (visible && host.clientWidth <= 760) panel.hidden = true;
+      persist();
+    },
+  });
+  guide.bind(guideButton);
+  guide.bind(panel.querySelector('[data-bookmark-keys]'));
+  guide.show(keysVisible, { remember: false });
+  if (keysVisible && host.clientWidth <= 760) panel.hidden = true;
+  const aimMarker = mountAimMarker({
+    marker: reticle,
+    host: panel.querySelector('[data-marker-host]'),
+    profile: 'interstellar',
+    title: '视线中心标记',
+    initial: initialMarker,
+  });
   toggle.onclick = () => {
     panel.hidden = !panel.hidden;
+    if (host.clientWidth <= 760) {
+      if (!panel.hidden) guide.show(false, { remember: false });
+      else if (keysVisible) guide.show(true, { remember: false });
+    }
   };
   const uniforms = {
     observerHigh: { value: new THREE.Vector3() },
@@ -286,7 +323,7 @@ export function createInterstellarWorld({
   }
   function persist() {
     try {
-      localStorage.setItem(STORE, JSON.stringify({ bookmarks, speed, culture }));
+      localStorage.setItem(STORE, JSON.stringify({ bookmarks, speed, culture, keysVisible }));
       return true;
     } catch {
       $('[data-message]').textContent = t('航点无法保存到浏览器');
@@ -309,7 +346,11 @@ export function createInterstellarWorld({
         currentSpeed = 0;
       }
     },
-    preserveNavigationFocus: (target) => !!target?.closest?.('.interstellar-map'),
+    preserveNavigationFocus: (target) =>
+      !!target?.closest?.('.interstellar-map,.pilot-key-guide,.interstellar-utility'),
+    onKey: (code, down) => guide.press(code, down),
+    onClear: () => guide.clear(),
+    onFocus: (armed) => guide.update({ ready: true, armed }),
     onWheel: (delta) => {
       camera.fov = THREE.MathUtils.clamp(camera.fov * Math.exp(delta * 0.001), 0.006, 100);
       $('[data-fov]').value = camera.fov;
@@ -458,6 +499,7 @@ export function createInterstellarWorld({
   function translate() {
     panel.querySelectorAll('[data-text]').forEach((n) => (n.textContent = t(n.dataset.text)));
     for (const n of panel.querySelectorAll('[aria-label]')) {
+      if (n.closest('.aim-marker-settings')) continue;
       n.dataset.label ||= n.getAttribute('aria-label');
       n.setAttribute('aria-label', t(n.dataset.label));
     }
@@ -983,6 +1025,8 @@ export function createInterstellarWorld({
       clearTimeout(searchTimer);
       persist();
       input.dispose();
+      guide.dispose();
+      aimMarker.dispose();
       offLanguage();
       geometry.dispose();
       points.material.dispose();
@@ -994,7 +1038,7 @@ export function createInterstellarWorld({
       milky.material.dispose();
       disk.geometry.dispose();
       diskMaterial.dispose();
-      for (const el of [panel, labels, hud, reticle, credit, toggle]) el.remove();
+      for (const el of [panel, labels, hud, reticle, credit, utility]) el.remove();
     },
   };
 }

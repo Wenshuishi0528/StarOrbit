@@ -233,10 +233,12 @@ export function offlinePlateField(provider, view, maxOrder = provider.maxOrder) 
 }
 
 const plateBuckets = new WeakMap();
+const plateById = new WeakMap();
 function indexPlates(providers) {
   let bins = plateBuckets.get(providers);
   if (bins) return bins;
-  const byCell = new Map();
+  const byCell = new Map(),
+    byId = new Map();
   for (const p of providers) {
     const plate = p.plate;
     if (!plate) continue;
@@ -263,43 +265,50 @@ function indexPlates(providers) {
     const width = Math.hypot(...plate.across),
       size = Math.max(width, Math.hypot(...plate.down));
     bin.size = Math.max(bin.size, size);
-    bin.items.push({ provider: p, width, size });
+    const item = { provider: p, width, size };
+    bin.items.push(item);
+    byId.set(p.id, item);
   }
   bins = [...byCell.values()];
   plateBuckets.set(providers, bins);
+  plateById.set(providers, byId);
   return bins;
 }
 
-export function planWebbPlate(providers, view, preferredId, savedPyramidOrder) {
+export function planWebbPlate(providers, view, preferredId, savedPyramidOrder, minimumPixels = 8) {
   const tangent = Math.tan((view.fovY * rad) / 2);
   const half = Math.atan(tangent * Math.hypot(view.aspect, 1));
   const pxPerRad = view.pixelHeight / (2 * tangent);
-  let best = null,
-    bestBounds = null,
+  const bins = indexPlates(providers);
+  // Preserve a selected edition at its real angular size, even when zoomed
+  // far enough out that only a pixel or a fraction of one covers its footprint.
+  const preferred = plateById.get(providers).get(preferredId);
+  let bestBounds = preferred && visiblePolygon(preferred.provider.plate, view, tangent),
+    best = bestBounds ? preferred : null,
     bestAlignment = -Infinity;
-  outer: for (const bin of indexPlates(providers)) {
-    if (
-      bin.size * pxPerRad < 8 ||
-      dot(bin.axis, view.forward) < Math.cos(Math.min(Math.PI, half + bin.radius))
-    )
-      continue;
-    for (const item of bin.items) {
-      if (item.size * pxPerRad < 8) continue;
-      const { plate, id } = item.provider,
-        alignment = dot(view.forward, plate.direction);
+  if (!best)
+    for (const bin of bins) {
       if (
-        alignment < Math.cos(Math.min(Math.PI, half + plate.radius)) ||
-        (id !== preferredId && alignment <= bestAlignment)
+        bin.size * pxPerRad < minimumPixels ||
+        dot(bin.axis, view.forward) < Math.cos(Math.min(Math.PI, half + bin.radius))
       )
         continue;
-      const bounds = visiblePolygon(plate, view, tangent);
-      if (!bounds) continue;
-      best = item;
-      bestAlignment = alignment;
-      bestBounds = bounds;
-      if (id === preferredId) break outer;
+      for (const item of bin.items) {
+        if (item.size * pxPerRad < minimumPixels) continue;
+        const { plate } = item.provider,
+          alignment = dot(view.forward, plate.direction);
+        if (
+          alignment < Math.cos(Math.min(Math.PI, half + plate.radius)) ||
+          alignment <= bestAlignment
+        )
+          continue;
+        const bounds = visiblePolygon(plate, view, tangent);
+        if (!bounds) continue;
+        best = item;
+        bestAlignment = alignment;
+        bestBounds = bounds;
+      }
     }
-  }
   if (!best) return [];
   const provider = best.provider,
     plate = provider.plate;

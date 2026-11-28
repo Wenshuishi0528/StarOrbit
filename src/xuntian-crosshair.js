@@ -19,6 +19,7 @@ export function identifyXuntianCrosshair(
     cityFinder = null,
     limitMagnitude = Infinity,
     blocked = () => false,
+    candidates = null,
   } = {}
 ) {
   const direction = normalized(frame?.axes?.forward),
@@ -58,6 +59,7 @@ export function identifyXuntianCrosshair(
     settings: frame.chartSettings,
     showStars: frame.showStars !== false,
     limitMagnitude,
+    candidates,
     outsideSky: (ray) => !!groundHit(eye, ray, frame.q.earthAxes),
     blocked,
   });

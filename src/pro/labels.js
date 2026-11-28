@@ -514,6 +514,28 @@ const labels = {
     'Интервал от 00:00 до 24:00, конец позже начала',
     'Plage entre 00:00 et 24:00 avec fin après début',
   ],
+  '调整窗口大小': [
+    '调整窗口大小',
+    'Resize window',
+    'Изменить размер окна',
+    'Redimensionner la fenêtre',
+  ],
+  '紧凑': ['紧凑', 'Compact', 'Компактно', 'Compact'],
+  '展开窗口': ['展开窗口', 'Expand window', 'Развернуть окно', 'Agrandir'],
+  '复位': ['复位', 'Reset view', 'Сбросить вид', 'Réinitialiser la vue'],
+  '完成': ['完成', 'Done', 'Готово', 'Terminer'],
+  '拖动边缘或角调整大小，方向键微调，Esc 完成。': [
+    '拖动边缘或角调整大小，方向键微调，Esc 完成。',
+    'Drag an edge or corner to resize. Use the arrow keys for small changes and Esc to finish.',
+    'Тяните край или угол. Стрелки меняют размер небольшими шагами. Esc завершает.',
+    'Glissez un bord ou un coin. Les flèches ajustent finement. Échap termine.',
+  ],
+  '完成调整大小': [
+    '完成调整大小',
+    'Finish resizing',
+    'Завершить изменение размера',
+    'Terminer le redimensionnement',
+  ],
 };
 export const languages = ['zh', 'en', 'ru', 'fr'];
 export function translate(lang, key) {

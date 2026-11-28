@@ -30,7 +30,9 @@ async function checkSkySourceSwitch(
         finder: document.querySelector('#xtSkyDetailSource').value,
         legacy: document.querySelector('#skyDetailEnabled').checked,
         status: status(s.xuntian.result?.skyDetail),
-        entries: [...m.entries.keys()],
+        entries: [...m.views.keys()]
+          .filter((id) => id.startsWith('scope-'))
+          .flatMap((id) => m.ready(id).map((tile) => tile.key)),
         activeLoads: m.activeLoads.size,
         text: document.querySelector('#xtSkyDetailStatus').textContent,
         center: s.xuntian.result?.center?.kind,
@@ -76,7 +78,7 @@ async function checkSkySourceSwitch(
       const s = viewer.sim;
       return (
         s.xuntian.result?.skyDetail?.source === source &&
-        document.querySelector('#skyDetailSource').value === source
+        document.querySelector('#xtSkyDetailSource').value === source
       );
     }, source);
     if (waitForTiles) {
@@ -125,6 +127,7 @@ async function checkSkySourceSwitch(
       m = env.skyDetail;
     const f = (window.__skySourceFixture = {
       settings: { ...env.settings },
+      finder: env.skyDetailControls.finderSelection(),
       update: m.update,
       fillText: CanvasRenderingContext2D.prototype.fillText,
       capture: null,
@@ -184,12 +187,14 @@ async function checkSkySourceSwitch(
         `${source}: source selection moved the telescope or changed its optics`
       );
       check(
-        selected.preference === source && selected.main === source && selected.finder === source,
-        `${source}: main/finder/global source are not synchronized`
+        selected.preference === baseline.preference &&
+          selected.main === baseline.main &&
+          selected.finder === source,
+        `${source}: finder selection altered the main sky preferences`
       );
       check(
-        selected.legacy === (source !== 'galaxy'),
-        `${source}: legacy checkbox contradicts the selector`
+        selected.legacy === baseline.legacy,
+        `${source}: finder selection altered the main HD switch`
       );
       check(
         selected.labels && selected.photoLabels,
@@ -231,10 +236,10 @@ async function checkSkySourceSwitch(
     }
     // This direction uses the main control's real change event as well.
     await page.locator('#skyDetailSource').selectOption('dss', { force: true });
-    await page.waitForFunction(() => document.querySelector('#xtSkyDetailSource').value === 'dss');
+    await page.waitForFunction(() => document.querySelector('#skyDetailSource').value === 'dss');
     check(
-      (await state()).preference === 'dss',
-      'Changing the main source did not reach the finder'
+      (await state()).preference === 'dss' && (await state()).finder === 'recent',
+      'Changing the main source overwrote the finder'
     );
     for (const source of ['panstarrs', 'dss', 'galaxy', 'auto', 'recent'])
       await page.locator('#xtSkyDetailSource').selectOption(source);
@@ -261,7 +266,7 @@ async function checkSkySourceSwitch(
         dss.status.skyVisible &&
         dss.status.sources.length === 1 &&
         dss.status.sources[0] === 'dss-color',
-      'DSS photo did not use the final shared source'
+      'DSS photo did not use the finder source'
     );
     check(
       dss.footers.some((s) => s.includes('DSS2 optical')) &&
@@ -288,7 +293,7 @@ async function checkSkySourceSwitch(
       'Recent photo failed to use the bundled JWST field'
     );
     check(
-      recent.footers.some((s) => s.includes('JWST infrared')) &&
+      recent.footers.some((s) => /Webb infrared \(JWST\)/i.test(s)) &&
         recent.footers.some((s) => s.startsWith('JWST NIRCam')),
       'Recent photo omitted its infrared attribution'
     );
@@ -435,6 +440,7 @@ async function checkSkySourceSwitch(
         s.notify();
       }
       Object.assign(env.settings, f.settings);
+      env.skyDetailControls.setFinderSelection(f.finder.source, f.finder);
       env.skyDetail.setSource(
         f.settings.skyDetail === false ? 'galaxy' : f.settings.skyDetailSource || 'auto'
       );

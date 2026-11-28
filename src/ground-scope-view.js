@@ -42,7 +42,7 @@ export function createGroundScopeView({
     lastPose,
     lastTime = -Infinity,
     interactiveUntil = -Infinity;
-  const blocked = (x, y) => earth.terrainBlocksScreen(x, y, true);
+  const blocked = (x, y, defer = true) => earth.terrainBlocksScreen(x, y, defer);
   const photoBlocked = (x, y) => earth.terrainBlocksScreen(x, y);
   Object.defineProperty(blocked, 'revision', { get: () => earth.maskRevision });
   function render(buffer, time, settings, observatory, sample, width, height, dpr) {

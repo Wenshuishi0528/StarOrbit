@@ -798,7 +798,7 @@ async function boot() {
     await sim.xuntian.restoreRoute();
     sim.cameraFocus.resetAnchor();
     sim.freeFlight = installFreeFlight(sim, { templates, meta });
-    sim.floatingWindows = installFloatingWindows();
+    sim.floatingWindows = installFloatingWindows({ t, onLanguageChange });
     sim.skyCultureControls = installSkyCultureControls(sim);
     sim.birthdayCard = installBirthdayCard(sim);
     sim.worldExplorer = installWorldExplorer(sim);

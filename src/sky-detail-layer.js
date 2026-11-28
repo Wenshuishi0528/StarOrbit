@@ -81,10 +81,11 @@ function hipsGeometry(entry) {
 // Geometry/materials belong to each view. The texture (and its decoded bitmap)
 // belongs to the one bounded manager, including during high-resolution export.
 export class SkyDetailLayer {
-  constructor(manager, id, scope = false, byteSensor = false) {
+  constructor(manager, id, scope = false, byteSensor = false, writeAlpha = false) {
     this.manager = manager;
     this.id = id;
     this.byteSensor = byteSensor;
+    this.writeAlpha = writeAlpha;
     this.group = new THREE.Group();
     this.scene = new THREE.Scene();
     this.scene.add(this.group);
@@ -165,8 +166,8 @@ export class SkyDetailLayer {
           blendSrc: THREE.SrcAlphaFactor,
           blendDst: THREE.OneMinusSrcAlphaFactor,
           // Scope alpha is reserved for solid foreground, never celestial light.
-          blendSrcAlpha: THREE.ZeroFactor,
-          blendDstAlpha: THREE.OneFactor,
+          blendSrcAlpha: this.writeAlpha ? THREE.OneFactor : THREE.ZeroFactor,
+          blendDstAlpha: this.writeAlpha ? THREE.OneMinusSrcAlphaFactor : THREE.OneFactor,
         });
         mesh = new THREE.Mesh(geometry, material);
         mesh.userData.skyOrigin = origin;

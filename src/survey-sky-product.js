@@ -1,6 +1,10 @@
 import { t, onLanguageChange, getLanguage } from './i18n.js';
 import { tileCoverage } from './survey-sky-product-math.js';
 import { loadSurveyGalaxy } from './survey-sky-product-galaxy.js';
+import { createSurveyImagery } from './survey-imagery.js';
+import { photographicSkyBase } from './sky-detail-plan.js';
+import { skyDetailCaptionLines, skyDetailText } from './sky-detail-controls.js';
+import { describeEyepiecePng } from './ground-scope-photo.js';
 import {
   createSkyPainter,
   drawPlanner,
@@ -14,14 +18,36 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
   const root = document.createElement('section');
   root.className = 'survey-product';
   host.append(root);
-  root.innerHTML = `<style>${css}</style><div class="survey-product-tools"><label><span data-sky-label="天空图层"></span><select data-sky-product="mode"></select></label>
+  root.innerHTML = `<style>${css}</style><div class="survey-product-tools"><div class="survey-source-picker"><label><span data-sky-label="星空影像"></span><select data-sky-product="mode"></select></label>
+    <label data-sky-product="background-row" hidden><span data-sky-label="底图"></span><select data-sky-product="background"></select></label></div>
     <button type="button" data-sky-product="open" data-sky-label="查看成片"></button><button type="button" data-sky-product="download" data-sky-label="下载拼图 PNG"></button>
-    <button type="button" data-sky-product="retry" data-sky-label="重试银河图层" hidden></button></div>
+    <button type="button" data-sky-product="retry" data-sky-label="重试" hidden></button></div>
     <small data-sky-product="count"></small><small data-sky-product="description"></small><small data-sky-product="status" role="status" aria-live="polite"></small>
     <dialog class="survey-product-dialog" data-sky-product="dialog"><div class="survey-product-head"><strong data-sky-label="巡天模拟成片"></strong><button type="button" data-sky-product="zoom" aria-pressed="false"></button><button type="button" data-sky-product="dialog-download" data-sky-label="下载拼图 PNG"></button><button type="button" data-sky-product="close" data-sky-label="关闭大图"></button></div><div class="survey-plate-stage" data-sky-product="stage" tabindex="0"></div></dialog>`;
-  const el = (key) => root.querySelector(`[data-sky-product="${key}"]`),
+  const controls = new Map(
+      Array.from(root.querySelectorAll('[data-sky-product]'), (node) => [
+        node.dataset.skyProduct,
+        node,
+      ])
+    ),
+    el = (key) => controls.get(key),
+    labels = root.querySelectorAll('[data-sky-label]'),
+    sourcePicker = root.querySelector('.survey-source-picker'),
     painter = createSkyPainter(sim.environment.stars.geometry),
-    galaxies = new Map();
+    galaxies = new Map(),
+    surveyImagery = createSurveyImagery(sim);
+  let background = 'galaxy',
+    detail = null,
+    detailTimer = 0,
+    artworkId = null;
+  const remote = () => !['galaxy', 'catalog', 'dense'].includes(mode);
+  const blank = () => ['hubble', 'recent'].includes(mode) && background === 'blank';
+  const photographic = () => photographicSkyBase(mode, background);
+  const skySelection = () => ({
+    source: ['catalog', 'dense'].includes(mode) ? 'galaxy' : mode,
+    background,
+    artworkId,
+  });
   let model = null,
     mode = 'galaxy',
     alive = true,
@@ -59,20 +85,32 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
     return model && galaxies.get(model.field.id);
   }
   function canExport() {
-    return model?.count > 0 && (mode !== 'galaxy' || !!galaxy());
+    return (
+      model?.count > 0 &&
+      !(detail?.status.loading && !detail?.status.ready) &&
+      (photographic() ||
+        ['catalog', 'dense'].includes(mode) ||
+        !!galaxy() ||
+        !!detail?.status.ready ||
+        !!galaxyError)
+    );
   }
   function syncControls() {
     const enabled = canExport();
     el('open').disabled = !enabled;
     el('download').disabled = el('dialog-download').disabled = !enabled || encoding;
-    el('retry').hidden = !(mode === 'galaxy' && galaxyError === model?.field.id);
+    el('retry').hidden = !(galaxyError === model?.field.id || (remote() && detail?.status.failed));
   }
   function refreshInfo() {
     if (!model) return;
     const count = painter.records(model.field),
       level = galaxy()?.level;
     const stars = mode === 'catalog' ? count.base.length : count.deep.length;
-    el('count').textContent = t('本天区有 {n} 颗目录星 · 北上，东左', { n: stars });
+    el('count').textContent = blank()
+      ? t('空白底图仅显示作品实际覆盖的区域。')
+      : photographic()
+        ? t('北上，东左')
+        : t('本天区有 {n} 颗目录星 · 北上，东左', { n: stars });
     const note =
       mode === 'catalog'
         ? 'XHIP 亮星，全天目录包含 41,411 颗恒星。'
@@ -81,12 +119,20 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
           : level
             ? 'NASA 银河全天源图宽 16K，本次采样 {level}K 档，每个立方体面 {face} 像素；目录星独立绘制。'
             : 'NASA 银河 16K 为全天背景图，目录星独立绘制。';
-    el('description').textContent = t(note, { level, face: level * 256 });
+    el('description').textContent =
+      remote() && detail
+        ? [skyDetailText(detail.status), ...detail.status.sources.map((p) => p.credit)]
+            .filter(Boolean)
+            .join(' · ')
+        : mode === 'dense' && model.field.id.startsWith('sky-')
+          ? t('此天区使用内置亮星目录。')
+          : t(note, { level, face: level * 256 });
   }
   function ensureGalaxy() {
     if (
       !visible ||
-      mode !== 'galaxy' ||
+      ['dense', 'catalog'].includes(mode) ||
+      photographic() ||
       !model ||
       galaxy() ||
       galaxyError === model.field.id ||
@@ -116,16 +162,45 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
         if (!alive || controller.signal.aborted || galaxyRequest !== request) return;
         galaxyRequest = null;
         galaxyError = field.id;
-        status('银河图源暂不可用。当前显示高密星点，可重试或改用高密星点导出。');
+        status('银河图源暂不可用，保留已载入的影像与星表。');
         syncControls();
       });
   }
+  function credits() {
+    const lines = [];
+    if (photographic()) {
+      const sources = detail?.status.sources || [];
+      return [
+        `Photographic sky: ${mode}; background: ${photographic()}; pixels without loaded imagery are black`,
+        ...sources.map((p) =>
+          [p.id, p.observed, p.bands, p.credit, p.sourceUrl].filter(Boolean).join(' · ')
+        ),
+      ];
+    }
+    if (!['catalog', 'dense'].includes(mode) && galaxy())
+      lines.push('Milky Way: NASA/Goddard SVS, Ernie Wright · ESA/Gaia/DPAC');
+    lines.push('XHIP · d3-celestial');
+    if (mode !== 'catalog' && !model?.field.id.startsWith('sky-'))
+      lines.push('Tycho-2 (Høg et al., 2000) / NASA HEASARC');
+    if (detail) lines.push(...skyDetailCaptionLines({ ...detail.status, skyVisible: true }));
+    return lines;
+  }
   function result() {
     if (!model || !canExport()) return null;
-    const key = [model.key, mode, galaxy()?.level, getLanguage()].join('|');
+    const key = [model.key, mode, galaxy()?.level, detail?.key, blank(), getLanguage()].join('|');
     if (key !== plateKey) {
-      const layer = painter.layer(model.field, mode, 1320, galaxy());
-      plate = makeSurveyPlate({ ...model, mode, layer, galaxy: galaxy() });
+      const layer = painter.layer(model.field, mode, 1320, galaxy(), detail);
+      const actual = detail?.status.sources
+        .map((p) => p.credit)
+        .filter(Boolean)
+        .join(' · ');
+      plate = makeSurveyPlate({
+        ...model,
+        mode,
+        layer,
+        galaxy: galaxy(),
+        sourceCredit: actual || credits().slice(0, 2).join(' · '),
+      });
       plateKey = key;
       plate.dataset.skyProduct = 'plate';
       plate.setAttribute('role', 'img');
@@ -135,13 +210,37 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
   }
   function paint() {
     if (!model || !alive || !visible) return;
+    if (remote()) {
+      try {
+        detail = surveyImagery.update(model.field, skySelection());
+      } catch {
+        detail = {
+          status: {
+            ...skySelection(),
+            enabled: true,
+            active: true,
+            fallback: 'unavailable',
+            sources: [],
+          },
+        };
+      }
+      detail.blank = !!photographic();
+      refreshInfo();
+      if (detail.status.loading && !detailTimer)
+        detailTimer = setTimeout(() => {
+          detailTimer = 0;
+          paint();
+        }, 220);
+    }
     const { field, coverage, current, fraction } = model,
       side = Math.min(skyCanvas.clientWidth, skyCanvas.clientHeight);
     const size = Math.max(96, Math.round(side * Math.min(2, window.devicePixelRatio || 1))),
-      layer = painter.layer(field, mode, size, galaxy());
+      layer = painter.layer(field, mode, size, galaxy(), detail);
     const key = [
       model.key,
       mode,
+      detail?.key,
+      blank(),
       galaxy()?.level,
       current,
       Math.round(fraction * 100),
@@ -150,7 +249,7 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
       size,
     ].join('|');
     if (key !== plannerKey) {
-      drawPlanner(skyCanvas, layer, coverage, current, fraction);
+      drawPlanner(skyCanvas, layer, coverage, current, fraction, !!photographic());
       plannerKey = key;
     }
     syncControls();
@@ -209,11 +308,20 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
     syncControls();
     status('正在生成拼图 PNG…');
     try {
+      const sources = credits(),
+        title = model.field.name,
+        description =
+          'J2000 RA ' +
+          model.field.ra +
+          '° Dec ' +
+          model.field.dec +
+          '° · ' +
+          new Date(epoch).toISOString();
       const out = result(),
         blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
       if (!alive || !visible || token !== downloadToken) return;
       if (!blob) throw Error('PNG');
-      const url = URL.createObjectURL(blob),
+      const url = URL.createObjectURL(describeEyepiecePng(blob, { title, description, sources })),
         a = document.createElement('a');
       a.href = url;
       a.download = `StarOrbit-Xuntian-${fieldId}-${exportMode}-${count}of4-${new Date(epoch).toISOString().replaceAll(':', '-')}.png`;
@@ -222,6 +330,56 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
       status('拼图 PNG 已导出 · 已覆盖 {n}/4 格', { n: count });
     } catch {
       if (alive && token === downloadToken) status('拼图 PNG 生成失败，请重试。');
+    } finally {
+      if (alive && token === downloadToken) {
+        encoding = false;
+        syncControls();
+      }
+    }
+  }
+  async function downloadSingle(exposure) {
+    if (!model || !visible || encoding || !Number.isFinite(exposure?.start)) return false;
+    const token = ++downloadToken,
+      { field, epoch } = model;
+    const shutterTime = new Date(epoch + exposure.start * 1000).toISOString();
+    encoding = true;
+    syncControls();
+    try {
+      const until = performance.now() + 8000;
+      const waiting = () =>
+        (detail?.status.loading && !detail.status.ready) ||
+        (!photographic() &&
+          !['catalog', 'dense'].includes(mode) &&
+          !galaxy() &&
+          !galaxyError &&
+          !detail?.status.ready);
+      if (waiting()) status('正在准备底图，请在影像载入后拍摄。');
+      while (alive && visible && token === downloadToken && waiting() && performance.now() < until)
+        await new Promise((done) => setTimeout(done, 100));
+      if (!alive || !visible || token !== downloadToken) return false;
+      const sources = credits();
+      const pixels = painter.layer(field, mode, 1320, galaxy(), detail);
+      const png = await new Promise((resolve) => pixels.toBlob(resolve, 'image/png'));
+      if (!alive || !visible || token !== downloadToken || !png) return false;
+      const result = describeEyepiecePng(png, {
+        title: field.name,
+        description: `Simulated sky exposure · ${shutterTime} · ${exposure.duration} s · J2000 RA ${field.ra}° Dec ${field.dec}° · 6° × 6°`,
+        sources,
+      });
+      const link = document.createElement('a'),
+        url = URL.createObjectURL(result);
+      link.href = url;
+      link.download = `StarOrbit-Xuntian-${field.id}-single-${shutterTime.replaceAll(':', '-')}.png`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      status('已导出单张模拟曝光 · {time} · {seconds} s', {
+        time: shutterTime,
+        seconds: exposure.duration,
+      });
+      return true;
+    } catch {
+      if (token === downloadToken) status('拼图 PNG 生成失败，请重试。');
+      return false;
     } finally {
       if (alive && token === downloadToken) {
         encoding = false;
@@ -239,22 +397,38 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
     stage.scrollTop = actual ? (stage.scrollHeight - stage.clientHeight) / 2 : 0;
   }
   function translate() {
-    for (const e of root.querySelectorAll('[data-sky-label]'))
-      e.textContent = t(e.dataset.skyLabel);
+    for (const e of labels) e.textContent = t(e.dataset.skyLabel);
     el('mode').replaceChildren(
       ...Object.entries(modeNames).map(([key, label]) => new Option(t(label), key))
     );
     el('mode').value = mode;
+    el('background').replaceChildren(
+      ...['galaxy', 'dss', 'panstarrs', 'blank'].map(
+        (key) => new Option(t(key === 'blank' ? '空白' : modeNames[key]), key)
+      )
+    );
+    el('background').value = background;
+    el('background-row').hidden = !['hubble', 'recent'].includes(mode);
     el('dialog').setAttribute('aria-label', t('巡天模拟成片'));
     el('zoom').textContent = t(el('dialog').dataset.zoom === 'actual' ? '适应窗口' : '原始尺寸');
     refreshInfo();
     status(statusKey, statusParams);
     paint();
   }
-  function setMode(next) {
-    if (!Object.hasOwn(modeNames, next) || next === mode) return;
+  function setMode(next, base = background, work = null) {
+    if (!Object.hasOwn(modeNames, next)) return;
+    if (!['galaxy', 'dss', 'panstarrs', 'blank'].includes(base)) base = 'galaxy';
+    if (next === mode && background === base && artworkId === work) return;
+    background = base;
+    artworkId = typeof work === 'string' ? work : null;
     mode = next;
     el('mode').value = next;
+    el('background').value = base;
+    el('background-row').hidden = !['hubble', 'recent'].includes(mode);
+    clearTimeout(detailTimer);
+    detailTimer = 0;
+    detail = null;
+    surveyImagery.release();
     cancelSky();
     galaxyError = null;
     invalidatePhoto(true);
@@ -265,6 +439,7 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
     paint();
   }
   el('mode').onchange = () => setMode(el('mode').value);
+  el('background').onchange = () => setMode(mode, el('background').value, artworkId);
   el('open').onclick = () => {
     if (!canExport()) return;
     try {
@@ -280,7 +455,11 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
   el('download').onclick = el('dialog-download').onclick = download;
   el('retry').onclick = () => {
     galaxyError = null;
+    if (remote()) surveyImagery.release();
+    detail = null;
+    plannerKey = '';
     ensureGalaxy();
+    paint();
   };
   el('close').onclick = () => el('dialog').close();
   el('dialog').addEventListener('close', () => {
@@ -295,8 +474,13 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
   translate();
   syncControls();
   return {
+    sourcePicker,
     update,
+    downloadSingle,
     setMode,
+    get selection() {
+      return skySelection();
+    },
     get mode() {
       return mode;
     },
@@ -305,6 +489,10 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
       downloadToken++;
       encoding = false;
       cancelSky();
+      clearTimeout(detailTimer);
+      detailTimer = 0;
+      surveyImagery.release();
+      detail = null;
       if (el('dialog').open) el('dialog').close();
     },
     resume() {
@@ -316,6 +504,8 @@ export function mountSurveySkyProduct(host, skyCanvas, sim) {
       alive = visible = false;
       downloadToken++;
       cancelSky();
+      clearTimeout(detailTimer);
+      surveyImagery.release();
       resize.disconnect();
       off();
       painter.clear();

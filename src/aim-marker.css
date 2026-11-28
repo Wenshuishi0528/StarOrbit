@@ -1,0 +1,104 @@
+.aim-marker-settings {
+  margin-block: 8px;
+  border-top: 1px solid #38505f;
+  padding-top: 6px;
+  color: #c5d9e2;
+  font:
+    12px/1.5 system-ui,
+    sans-serif;
+}
+.aim-marker-settings summary {
+  cursor: pointer;
+  color: #bce7df;
+}
+.aim-marker-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 46px;
+  align-items: end;
+  gap: 8px;
+  margin: 8px 0;
+}
+.aim-marker-settings .aim-marker-fields label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+}
+.aim-marker-fields select {
+  width: 100%;
+  min-width: 0;
+}
+.aim-marker-settings .aim-marker-fields input[type='color'] {
+  width: 40px;
+  height: 28px;
+  padding: 2px;
+}
+.aim-marker-preview {
+  display: grid;
+  place-items: center;
+  height: 43px;
+  overflow: hidden;
+  border: 1px solid #516270;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #14212e 49%, #a2afb4 50%);
+}
+.aim-marker-settings .aim-marker-fields .aim-marker-range {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(35px, 1fr) 46px;
+  align-items: center;
+  gap: 8px;
+}
+.aim-marker-range input {
+  min-width: 0;
+  width: 100%;
+}
+.aim-marker-range output {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.aim-marker-settings .aim-marker-outline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0;
+}
+.aim-marker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.aim-marker-status {
+  display: block;
+  color: #a9ded3;
+}
+.aim-marker-glyph {
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-size: 0;
+  line-height: 0;
+}
+.aim-marker-glyph[hidden] {
+  display: none !important;
+}
+.aim-marker-glyph canvas {
+  display: block;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
+  border: 0;
+  border-radius: 0;
+}
+.aim-marker-centered {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.ff-camera-marker {
+  padding: 0 7px;
+}
+.ff-camera-marker .aim-marker-settings {
+  margin-top: 0;
+}

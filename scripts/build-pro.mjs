@@ -20,7 +20,11 @@ export async function buildPro(directory, version, web = false) {
     .readFileSync('src/pro/workbench.html', 'utf8')
     .replace('__VERSION__', version)
     .replace('__MAIN_URL__', web ? './index.html' : './StarOrbit.html')
-    .replace('__PRO_CSS__', () => fs.readFileSync('src/pro/workbench.css', 'utf8'))
+    .replace('__PRO_CSS__', () =>
+      ['src/pro/workbench.css', 'src/floating-windows.css']
+        .map((file) => fs.readFileSync(file, 'utf8'))
+        .join('\n')
+    )
     .replace(
       '__EARTH_IMAGE__',
       () =>

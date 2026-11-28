@@ -1,5 +1,6 @@
 import { planWebbPlate } from './webb-plate.js';
 import { hipsDirection, hipsOrderForView, selectHipsTiles } from './sky-detail-math.js';
+import { panstarrsTileCoverage, panstarrsViewCoverage } from './panstarrs-coverage.js';
 
 export const SKY_GPU_BUDGET = 64 * 1024 * 1024;
 export const SKY_TILE_BYTES = ((4 * 512 * 512 - 1) / 3) * 4;
@@ -17,7 +18,14 @@ export const normalizeSkyDetailSource = (source) =>
 export const resolveSkyDetailSource = (settings = {}) =>
   settings?.skyDetail === false ? 'galaxy' : normalizeSkyDetailSource(settings?.skyDetailSource);
 export const normalizeWebbBackground = (value) =>
-  value === 'dss' || value === 'panstarrs' ? value : 'galaxy';
+  ['blank', 'dss', 'panstarrs'].includes(value) ? value : 'galaxy';
+// A deliberately selected survey owns its entire sky, including empty pixels
+// during loading or outside coverage. On a plate, this choice belongs to its base.
+export function photographicSkyBase(source, background) {
+  const base =
+    source === 'hubble' || source === 'recent' ? normalizeWebbBackground(background) : source;
+  return ['blank', 'dss', 'panstarrs'].includes(base) ? base : null;
+}
 export const skyTileKey = (provider, order, pixel) =>
   `${provider.id}@${provider.revision ?? 1}/${order}/${pixel}.${provider.format || 'jpg'}`;
 
@@ -42,8 +50,6 @@ function groupProviders(providers) {
   return groups.get(providers);
 }
 
-// The panorama remains the wide-angle background. Only magnified views need a
-// photographic survey; small recent patches can also appear in the main sky.
 export function planSkyDetailSelection(
   providers,
   view,
@@ -62,23 +68,19 @@ export function planSkyDetailSelection(
     ps1Covered = dec - half * (180 / Math.PI) > -28;
   const artworkSource = source === 'recent' || source === 'hubble';
   const optical = artworkSource ? normalizeWebbBackground(webbBackground) : source;
+  const explicitSurvey = optical === 'dss' || optical === 'panstarrs';
+  const opticalCoverage = optical === 'panstarrs' ? panstarrsViewCoverage(view) : null;
   const provider =
     optical === 'dss'
       ? dss
       : optical === 'panstarrs'
-        ? ps1Covered
-          ? ps1
-          : null
+        ? ps1
         : optical === 'auto'
           ? ps1 && ps1Covered
             ? ps1
             : dss
           : null;
-  if ((view.fovY <= 18 || (view.wideField === true && optical === 'dss')) && provider) {
-    // Stay clear of PS1's irregular southern boundary. DSS is a complete parent
-    // layer, including when an individual PS1 tile is missing or offline.
-    // An explicit choice uses that same survey at every level. Automatic mode
-    // retains the complete DSS fallback beneath the northern PS1 detail.
+  if (provider && opticalCoverage !== 'none' && (explicitSurvey || view.fovY <= 18)) {
     const parentProvider = source === 'auto' ? dss || provider : provider;
     const selection = selectHipsTiles({
       ...view,
@@ -86,17 +88,26 @@ export function planSkyDetailSelection(
       maxOrder: provider.maxOrder,
       maxTiles: 18,
     });
-    const parents = new Map();
-    for (const t of selection.tiles) {
+    const visible = selection.tiles.filter(
+      (t) => provider !== ps1 || panstarrsTileCoverage(t.order, t.pixel) !== 'none'
+    );
+    const parents = new Map(),
+      roots = new Map();
+    for (const t of visible) {
       const order = Math.max(
           parentProvider.minOrder || 0,
           Math.min(parentProvider.maxOrder, t.order - 2)
         ),
         pixel = Math.floor(t.pixel / 4 ** (t.order - order));
       parents.set(pixel, tile(parentProvider, order, pixel, 0));
+      if (explicitSurvey) {
+        const root = Math.floor(t.pixel / 4 ** t.order);
+        roots.set(root, tile(provider, 0, root, 0));
+      }
     }
-    plans.push(...parents.values());
-    plans.push(...selection.tiles.map((t) => tile(provider, t.order, t.pixel, 2)));
+    // Keep the same real low-order base while zoom changes detail levels.
+    plans.push(...roots.values(), ...parents.values());
+    plans.push(...visible.map((t) => tile(provider, t.order, t.pixel, 2)));
   }
   let localVisible = !!local;
   if (local?.center && local.fieldSizeArcmin?.length === 2) {
@@ -146,7 +157,13 @@ export function planSkyDetailSelection(
   if (source === 'auto' || artworkSource) {
     const hasLocal = plans.some((t) => t.provider === local);
     if (!hasLocal || (artworkId && artworkId !== local?.id)) {
-      const overlay = planWebbPlate(plates[family], view, artworkId, savedPyramidOrder);
+      const overlay = planWebbPlate(
+        plates[family],
+        view,
+        artworkId,
+        savedPyramidOrder,
+        optical === 'blank' ? 0.7 : 8
+      );
       if (overlay.length && (!hasLocal || overlay[0].provider.id === artworkId)) {
         // A chosen edition replaces the overlapping rendition in all shared views.
         if (hasLocal)
@@ -157,7 +174,9 @@ export function planSkyDetailSelection(
       }
     }
   }
-  const tiles = [...new Map(plans.map((t) => [t.key, t])).values()];
+  const unique = new Map();
+  for (const t of plans) if (!unique.has(t.key)) unique.set(t.key, t);
+  const tiles = [...unique.values()];
   let fallback = null;
   if (!tiles.length) {
     if (artworkSource)
@@ -165,7 +184,7 @@ export function planSkyDetailSelection(
         (family === 'recent' && local) || plates[family].length
           ? 'outside-coverage'
           : 'unavailable';
-    else if (source === 'panstarrs' && !ps1Covered) fallback = 'outside-coverage';
+    else if (source === 'panstarrs' && opticalCoverage === 'none') fallback = 'outside-coverage';
     else if (!provider) fallback = 'unavailable';
     else fallback = 'wide';
   }
@@ -173,7 +192,8 @@ export function planSkyDetailSelection(
     source,
     tiles,
     fallback,
-    backgroundOutsideCoverage: artworkSource && optical === 'panstarrs' && !ps1Covered,
+    opticalCoverage,
+    backgroundOutsideCoverage: artworkSource && opticalCoverage === 'none',
   };
 }
 
@@ -182,5 +202,11 @@ export function planSkyDetail(providers, view, source = 'auto') {
 }
 
 export function skyDetailView(frame, size) {
-  return { ...frame.axes, fovY: frame.fovY, aspect: size.aspect, pixelHeight: size.h };
+  return {
+    ...frame.axes,
+    fovY: frame.fovY,
+    aspect: size.aspect,
+    pixelHeight: size.h,
+    ...(frame.detailSelection && { detailSelection: frame.detailSelection }),
+  };
 }

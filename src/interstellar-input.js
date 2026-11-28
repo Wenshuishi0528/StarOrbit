@@ -7,6 +7,9 @@ export function createInterstellarInput({
   onNavigate = () => {},
   onWheel = () => {},
   preserveNavigationFocus = () => false,
+  onKey = () => {},
+  onClear = () => {},
+  onFocus = () => {},
 }) {
   const doc = canvas.ownerDocument,
     win = doc.defaultView,
@@ -25,23 +28,26 @@ export function createInterstellarInput({
   const stop = () => {
     keys.clear();
     taps.clear();
+    onClear();
     const id = pointer;
     pointer = null;
     if (id !== null && canvas.hasPointerCapture?.(id)) canvas.releasePointerCapture(id);
   };
   listen(canvas, 'keydown', (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
     if (PILOT_KEY_AXES[e.code] || e.code === 'Space') {
       e.preventDefault();
       e.stopPropagation();
       if (e.code === 'Space') {
         keys.clear();
         taps.clear();
+        onClear();
       } else {
         keys.add(e.code);
         if (!e.repeat) taps.add(e.code);
       }
       onNavigate(e.code === 'Space');
+      onKey(e.code, true);
     }
     if (e.code === 'Escape') {
       stop();
@@ -49,9 +55,14 @@ export function createInterstellarInput({
       canvas.blur();
     }
   });
-  listen(win, 'keyup', (e) => keys.delete(e.code));
+  listen(win, 'keyup', (e) => {
+    keys.delete(e.code);
+    onKey(e.code, false);
+  });
+  listen(canvas, 'focus', () => onFocus(true));
   listen(canvas, 'blur', (e) => {
     stop();
+    onFocus(false);
     if (!preserveNavigationFocus(e.relatedTarget)) onNavigate(true);
   });
   listen(win, 'blur', () => {

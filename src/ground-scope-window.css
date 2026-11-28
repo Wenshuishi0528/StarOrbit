@@ -64,6 +64,21 @@
   height: 100%;
   pointer-events: none;
 }
+.ground-aim-origin,
+.ground-guide-aim-origin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  display: grid;
+  place-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.ground-guide-aim-origin[hidden] {
+  display: none;
+}
 .ground-scope-window > footer {
   display: grid;
   padding: 5px 9px;

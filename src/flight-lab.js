@@ -351,11 +351,58 @@ export function installFlightLab(sim, assets) {
       handoffPending = false;
     }
   }
-  async function openSurveyPhotos({ fieldId, recordId } = {}) {
+  async function openSurveyPlan(target) {
+    const panel = await open('survey');
+    if (!panel?.selectTarget(target)) return false;
+    labRoute('#lab/survey');
+    return true;
+  }
+  async function observeSurveyTarget(target, detailSelection) {
+    if (
+      handoffPending ||
+      sim.sceneBusy ||
+      sim.missions?.busy ||
+      !dialog.open ||
+      activeTab !== 'survey'
+    )
+      return false;
+    handoffPending = true;
+    try {
+      if (sim.missionId !== 'tiangong') await sim.missions.switchTo('tiangong');
+      if (!dialog.open || activeTab !== 'survey') return false;
+      close();
+      const scope = sim.xuntian;
+      const ok =
+        target.type === 'city'
+          ? scope?.observeCity(target)
+          : target.type === 'solar'
+            ? target.body === 'Sun'
+              ? scope?.observeSolar()
+              : scope?.observeBody(target.body)
+            : scope?.observeTarget(target);
+      if (!ok) {
+        await open('survey');
+        return false;
+      }
+      if (detailSelection)
+        sim.environment.skyDetailControls.setFinderSelection(
+          detailSelection.source,
+          detailSelection
+        );
+      labRoute('#xuntian');
+      return true;
+    } catch {
+      await open('survey');
+      return false;
+    } finally {
+      handoffPending = false;
+    }
+  }
+  async function openSurveyPhotos({ fieldId, recordId, field } = {}) {
     const panel = await open('survey');
     if (!panel) return;
     labRoute('#lab/survey');
-    panel.showLivePhotos(fieldId, recordId);
+    panel.showLivePhotos(fieldId, recordId, field);
   }
   async function openGroundCapture(payload) {
     if (payload?.missionId !== 'tiangong' || !payload.observer) return false;
@@ -371,7 +418,7 @@ export function installFlightLab(sim, assets) {
   }
   async function restoreRecord(record, media) {
     if (record.kind === 'survey-photo') {
-      await openSurveyPhotos({ fieldId: record.fieldId, recordId: record.id });
+      await openSurveyPhotos({ fieldId: record.fieldId, recordId: record.id, field: record.field });
       return;
     }
     const panel = await open(record.kind);
@@ -431,6 +478,8 @@ export function installFlightLab(sim, assets) {
     open,
     close,
     observeSurveyTile,
+    openSurveyPlan,
+    observeSurveyTarget,
     observeCosmicTarget,
     observeLunarTarget,
     openSurveyPhotos,

@@ -193,6 +193,16 @@ export function hipsMaxPixelRadius(order) {
   return Math.atan2(Math.hypot(...cross), dot(a, b));
 }
 
+export function hipsViewPlanes({ forward, right, up, fovY, aspect = 1 }) {
+  const f = unit(forward),
+    r = unit(right),
+    u = unit(up);
+  const ty = Math.tan((fovY * DEG) / 2),
+    tx = ty * aspect;
+  const plane = (axis, tangent, sign) => unit(f.map((v, i) => v * tangent + axis[i] * sign));
+  return [plane(r, tx, 1), plane(r, tx, -1), plane(u, ty, 1), plane(u, ty, -1), f];
+}
+
 /**
  * Conservatively cover a perspective viewport, including seams and polar tiles.
  * Camera basis is ICRS, fovY is in degrees. The whole level is reduced to fit the
@@ -218,13 +228,8 @@ export function selectHipsTiles({
   }
   if (order !== undefined) checkOrder(order);
   const requestedOrder = order === undefined ? naturalOrder : clamp(order, minOrder, maxOrder);
-  const f = unit(forward);
-  const r = unit(right);
-  const u = unit(up);
-  const ty = Math.tan((fovY * DEG) / 2);
-  const tx = ty * aspect;
-  const plane = (axis, tangent, sign) => unit(f.map((v, i) => v * tangent + axis[i] * sign));
-  const planes = [plane(r, tx, 1), plane(r, tx, -1), plane(u, ty, 1), plane(u, ty, -1), f];
+  const planes = hipsViewPlanes({ forward, right, up, fovY, aspect });
+  const f = planes[4];
   const radii = Array.from(
     { length: requestedOrder + 1 },
     (_, level) => Math.sin(hipsMaxPixelRadius(level)) + 2e-14

@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {
   normalizeSkyDetailSource,
+  normalizeWebbBackground,
+  photographicSkyBase,
   resolveSkyDetailSource,
   planSkyDetailSelection,
 } from '../src/sky-detail-plan.js';
@@ -60,7 +62,8 @@ assert.ok(
     (tile) => tile.provider.id === 'dss-color'
   )
 );
-assert.equal(planSkyDetailSelection(providers, view(0, 0, 38), 'dss').fallback, 'wide');
+const wideDss = planSkyDetailSelection(providers, view(0, 0, 38), 'dss');
+assert(wideDss.tiles.some((tile) => tile.order === 0 && tile.provider.id === 'dss-color'));
 const autoIds = new Set(
   planSkyDetailSelection(providers, north, 'auto').tiles.map((tile) => tile.provider.id)
 );
@@ -156,11 +159,18 @@ const originalOptics = JSON.stringify({
   pointing: env.settings.pointing,
   focal: env.settings.focal,
 });
+const savedPreferences = new Map();
 const context = vm.createContext({
   document: { getElementById: (id) => nodes.get(id) || null },
   performance: { now: () => clock },
   normalizeSkyDetailSource,
+  normalizeWebbBackground,
+  photographicSkyBase,
   resolveSkyDetailSource,
+  localStorage: {
+    getItem: (key) => savedPreferences.get(key) ?? null,
+    setItem: (key, value) => savedPreferences.set(key, value),
+  },
   t: (key, params = {}) => key.replace(/\{(\w+)\}/g, (_, name) => params[name] ?? ''),
   setText: (id, value) => {
     nodes.get(id).textContent = value;
@@ -180,20 +190,22 @@ const controls = vm.runInContext(
   context
 );
 const mounted = controls.mountSkyDetailControls(env);
+assert.equal(mounted.finderSelection().source, 'auto', 'first use inherits the old shared setting');
 nodes.get('xtSkyDetailSource').value = 'dss';
 nodes.get('xtSkyDetailSource').onchange();
-assert.equal(nodes.get('skyDetailSource').value, 'dss');
-assert.equal(manager.source, 'dss');
+assert.equal(nodes.get('skyDetailSource').value, 'auto');
+assert.equal(manager.source, 'auto');
+assert.equal(mounted.finderSelection().source, 'dss');
 assert.equal(nodes.get('skyDetailEnabled').checked, true);
 nodes.get('skyDetailSource').value = 'galaxy';
 nodes.get('skyDetailSource').onchange();
-assert.equal(nodes.get('xtSkyDetailSource').value, 'galaxy');
+assert.equal(nodes.get('xtSkyDetailSource').value, 'dss');
 assert.equal(nodes.get('skyDetailEnabled').checked, false);
 assert.equal(env.settings.skyDetail, false);
 assert.equal(manager.enabled, false);
 nodes.get('skyDetailEnabled').checked = true;
 nodes.get('skyDetailEnabled').onchange();
-assert.equal(nodes.get('xtSkyDetailSource').value, 'auto');
+assert.equal(nodes.get('xtSkyDetailSource').value, 'dss');
 assert.equal(manager.enabled, true);
 env.settings.stars = false;
 clock += 600;
@@ -211,18 +223,25 @@ clock += 600;
 mounted.update();
 nodes.get('xtSkyDetailTarget').onclick();
 assert.equal(observed, 1);
-assert.equal(manager.source, 'recent');
+assert.equal(manager.source, 'auto');
+mounted.setFinderSelection('recent', { artworkId: 'jwst-carina-2022' });
 assert.equal(nodes.get('xtWebbBackground').parentElement.hidden, false);
 assert.equal(nodes.get('xtWebbBackground').value, 'galaxy');
 nodes.get('xtWebbBackground').value = 'dss';
 nodes.get('xtWebbBackground').onchange();
-assert.equal(nodes.get('webbBackground').value, 'dss');
+assert.equal(nodes.get('webbBackground').value, 'galaxy');
 nodes.get('skyDetailSource').value = 'auto';
 nodes.get('skyDetailSource').onchange();
-assert.equal(nodes.get('xtWebbBackground').parentElement.hidden, true);
+assert.equal(nodes.get('xtWebbBackground').parentElement.hidden, false);
 nodes.get('skyDetailSource').value = 'recent';
 nodes.get('skyDetailSource').onchange();
 assert.equal(nodes.get('xtWebbBackground').value, 'dss');
+const restored = controls.mountSkyDetailControls(env);
+assert.deepEqual(JSON.parse(JSON.stringify(restored.finderSelection())), {
+  source: 'recent',
+  background: 'dss',
+  artworkId: 'jwst-carina-2022',
+});
 assert.ok(saves > 0);
 
 // Export names the actual fallback and stacks above city captions; SDO has none.
@@ -236,7 +255,7 @@ const fallback = {
   complete: false,
 };
 const lines = controls.skyDetailCaptionLines(fallback);
-assert.ok(lines.some((line) => line.startsWith('Rendered: original Milky Way')));
+assert.ok(lines.some((line) => line.startsWith('Rendered: blank sky')));
 assert.ok(lines.some((line) => line.includes('does not cover')));
 assert.equal(controls.skyDetailCaptionLines({ ...fallback, skyVisible: false }).length, 0);
 assert.ok(controls.skyDetailCredits({ source: 'recent', sources: [] }).includes('红外'));
@@ -266,10 +285,10 @@ assert.ok(
   'target action belongs inside source details'
 );
 console.log(
-  'Sky imagery selection: same-source LOD, coverage fallback, shared controls, legacy master compatibility and honest stacked export credits passed'
+  'Sky imagery selection: same-source LOD, coverage fallback, independent main/finder preferences, restored artwork and export credits passed'
 );
 
-// A birthday postcard opts into full-field DSS; ordinary finder policy stays unchanged.
+// The birthday postcard and the finder both use real wide-field DSS tiles.
 const wideProviders = [{ id: 'dss-color', minOrder: 0, maxOrder: 9, format: 'jpg' }];
 const wideView = {
   forward: [1, 0, 0],
@@ -282,7 +301,7 @@ const wideView = {
 const widePlan = planSkyDetailSelection(wideProviders, { ...wideView, wideField: true }, 'dss');
 assert(widePlan.tiles.length > 0 && widePlan.tiles.length <= 36);
 assert(widePlan.tiles.every((t) => t.provider.id === 'dss-color'));
-assert.equal(planSkyDetailSelection(wideProviders, wideView, 'dss').fallback, 'wide');
+assert.deepEqual(planSkyDetailSelection(wideProviders, wideView, 'dss').tiles, widePlan.tiles);
 assert.equal(
   planSkyDetailSelection(wideProviders, { ...wideView, wideField: true }, 'galaxy').tiles.length,
   0

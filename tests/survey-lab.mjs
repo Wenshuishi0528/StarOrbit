@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dot, norm, stateAt } from '../src/orbit.js';
+import { parseSkyCoordinates } from '../src/sky-coordinate-input.js';
+import {
+  resolveSurveyField,
+  surveyFieldFromTarget,
+  surveyFieldRecord,
+  surveySingleWindow,
+} from '../src/survey-lab-math.js';
 import {
   makeSurveyOrbit,
   surveyRadius,
@@ -234,3 +241,29 @@ close(
 console.log(
   'Survey lab: analytic limb windows, solar exclusions, whole-exposure checks, slew conflicts, playback, viable examples and empty fallback passed.'
 );
+
+const custom = surveyFieldFromTarget(parseSkyCoordinates('12h 30m 12s −00° 30′ 00″'));
+close(custom.ra, 187.55);
+close(custom.dec, -0.5);
+for (const input of ['12:30:12, -00:30:00', '12 30 12 -00 30 00', '187.55°, -0.5°']) {
+  const field = surveyFieldFromTarget(parseSkyCoordinates(input));
+  assert.equal(field.id, custom.id);
+  assert.deepEqual(resolveSurveyField(field.id).center, field.center);
+}
+assert.equal(parseSkyCoordinates('M51'), null);
+assert.equal(parseSkyCoordinates('12:61:00, +10'), null);
+assert.equal(parseSkyCoordinates('23:59:59, +90:00:01'), null);
+assert.equal(parseSkyCoordinates('24h 00m, 90°').ra, 0);
+const polar = surveyFieldFromTarget({ ra: 359.99999999, dec: -90, name: 'Polar test' });
+assert(polar.tiles.every((v) => Math.abs(norm(v) - 1) < 1e-8));
+assert.equal(surveyFieldFromTarget(surveyFieldRecord(polar)).id, polar.id);
+assert.equal(surveyFieldFromTarget({ type: 'solar', direction: [1, 0, 0] }), null);
+const [customOrbitField] = surveyFieldsForOrbit(orbit, [custom]);
+const single = surveySingleWindow(orbit, customOrbitField);
+if (!single.reason)
+  assert(
+    customOrbitField.visibility.every((v) =>
+      v.windows.some(([lo, hi]) => lo <= single.start && single.start + single.duration <= hi)
+    )
+  );
+assert.equal(resolveSurveyField('sky-1_91'), null);

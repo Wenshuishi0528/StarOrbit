@@ -43,7 +43,7 @@ import {
 } from './star-chart-settings.js';
 import { paintSolarPhotoCaption } from './solar-photo-caption.js';
 import { SkyDetailLayer } from './sky-detail-layer.js';
-import { skyDetailView } from './sky-detail-plan.js';
+import { photographicSkyBase, skyDetailView } from './sky-detail-plan.js';
 import { paintSkyDetailCaption } from './sky-detail-controls.js';
 import { paintCityTerrainCaption } from './city-terrain-controls.js';
 import { paintElevationCaption } from './earth-elevation-controls.js';
@@ -130,7 +130,7 @@ function makeTargets(renderer, w, h) {
     },
   };
 }
-function withSharedRenderer(renderer, draw) {
+export function withSharedRenderer(renderer, draw) {
   const target = renderer.getRenderTarget(),
     face = renderer.getActiveCubeFace(),
     mip = renderer.getActiveMipmapLevel();
@@ -471,11 +471,17 @@ function stationView(sim) {
       api.fillLight.intensity = fillIntensity;
     }
   }
-  function hides(frame, dir) {
+  function surfaceAt(frame, dir, earth) {
     raycaster.set(camera.position, direction.fromArray(toLocal(frame.q.basis, dir)));
-    return inspectStationRay(sim, raycaster, { frustum }).center.kind === 'station';
+    return inspectStationRay(sim, raycaster, { frustum, earth }).center;
   }
-  return { prepare, inspect, draw, hides };
+  return {
+    prepare,
+    inspect,
+    draw,
+    surfaceAt,
+    hides: (frame, dir) => surfaceAt(frame, dir).kind === 'station',
+  };
 }
 
 function writeCanvas(canvas, image, bytes, w, h) {
@@ -522,11 +528,20 @@ export function createXuntianViewRenderer(
     skyCultureArtEnabled(normalizeStarChartSettings(frame.chartSettings ?? env.settings)) &&
     frame.showStars !== false &&
     wantsSkyDetail({ ...frame, showGalaxy: true }, size, true);
+  function selectionFor(frame) {
+    return (
+      frame.detailSelection || {
+        source: env.skyDetail?.source,
+        background: env.skyDetail?.webbBackground,
+      }
+    );
+  }
   function wantsSkyDetail(frame, size, includeBackground = false) {
+    const choice = selectionFor(frame);
     if (
-      (!includeBackground && !env.skyDetail?.enabled) ||
+      (!includeBackground && !env.skyDetail?.enabled && !frame.detailSelection) ||
       frame.showStars === false ||
-      frame.showGalaxy === false ||
+      (frame.showGalaxy === false && !photographicSkyBase(choice.source, choice.background)) ||
       (frame.solarChannel && frame.solarChannel !== 'none')
     )
       return false;
@@ -675,10 +690,13 @@ export function createXuntianViewRenderer(
     u.screen.value.set(w, h);
     const sky = solarImaging
         ? { status: 'off', gain: 0, showStars: false }
-        : xuntianSkySource(env, frame),
+        : xuntianSkySource(
+            env,
+            frame.detailSelection ? frame : { ...frame, detailSelection: selectionFor(frame) }
+          ),
       panorama = sky.status === 'panorama';
     u.galaxy.value = panorama ? env.galaxyTexture : null;
-    u.galaxyMode.value = panorama ? 2 : ['off', 'catalog'].includes(sky.status) ? 0 : 1;
+    u.galaxyMode.value = panorama ? 2 : sky.showStars && sky.status !== 'catalog' ? 1 : 0;
     u.skyGain.value = sky.gain;
     u.mainSkyHDR.value =
       env.quality === 'high' && renderer.extensions.has('EXT_color_buffer_float') && !env.hdr.failed
@@ -688,8 +706,11 @@ export function createXuntianViewRenderer(
     u.toneMappingExposure.value = renderer.toneMappingExposure;
     sensor.image.value = target.scene.texture;
     sensor.gain.value = optics.areaGain;
+    // The catalogue also identifies positions in real survey images. Its
+    // simulated sprites stay hidden, independently of the lookup limit.
+    const canIdentify = sky.status !== 'off' && (sky.status !== 'blank' || wantNames);
     const limit =
-      sky.showStars && sky.gain > 0 ? optics.limitMagnitude + 2.5 * Math.log10(sky.gain) : null;
+      canIdentify && sky.gain > 0 ? optics.limitMagnitude + 2.5 * Math.log10(sky.gain) : null;
     const count = stars.update(frame, optics, aspect, h, sky, limit);
     const detailLayer = annotations ? skyDetailLayer : skyPhotoLayer;
     const skyDetail = detailLayer?.update(skyDetailView(frame, size), wantsSkyDetail(frame, size), {
@@ -807,6 +828,34 @@ export function createXuntianViewRenderer(
     skyAppearanceKey: () => `${env.skyDetail?.revision}:${env.constellationArt?.key()}`,
     photoSkyStatus: () => lastPhotoStatus,
     photoCityStatus: () => lastCityPhotoStatus,
+    identifyAt(frame, direction, candidates) {
+      if (!valid(frame)) return { kind: 'unavailable' };
+      const rayFrame = { ...frame, axes: { ...frame.axes, forward: direction } };
+      const solarOnly = !!frame.solarChannel && frame.solarChannel !== 'none';
+      if (solarOnly) {
+        rayFrame.showStars = false;
+        rayFrame.chartSettings = { ...frame.chartSettings, deepSkyObjects: false };
+      }
+      const terrain = earthView.pick(rayFrame);
+      const ground =
+        terrain === undefined ? groundHit(frame.eyeKm, direction, frame.q.earthAxes) : terrain;
+      station?.prepare(frame, frame.aspect);
+      const surface =
+        frame.showStation !== false && station
+          ? station.surfaceAt(frame, direction, ground)
+          : ground;
+      return identifyXuntianCrosshair(rayFrame, {
+        surface,
+        groundSurface: ground,
+        cityFinder,
+        candidates,
+        displayHeight: canvas.clientHeight || 300,
+        limitMagnitude: lastStatus.limitMagnitude,
+        blocked: (ray) =>
+          earthView.hides(frame, ray) ||
+          (frame.showStation !== false && !!station?.hides(frame, ray)),
+      });
+    },
     identify(frame) {
       if (skyOnly) frame = geocentricSkyFrame(frame);
       if (!valid(frame)) return { kind: 'unavailable' };

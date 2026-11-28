@@ -7,6 +7,7 @@ import { createFlightBackdrop, flightReference } from './free-flight-backdrop.js
 import { readFlight, saveFlight } from './free-flight-store.js';
 import { createFlightInputBuffer } from './main-flight-input.js';
 import { pilotSas } from './pilot-controls.js';
+import { mountFlightCameraWindow } from './free-flight-camera-window.js';
 import {
   FREE_FLIGHT_STEP,
   createFreeFlight,
@@ -34,6 +35,7 @@ function displayOptions(saved) {
     } catch {}
   return {
     navball: options?.navball !== false,
+    preview: options?.preview !== false,
     trail: options?.trail !== false,
     fine: options?.fine === true,
     angularDamping: options?.angularDamping !== false,
@@ -92,6 +94,7 @@ export function installFreeFlight(sim, assets) {
     onAction: action,
   });
   const instruments = mountFreeFlightInstruments({ onAction: action });
+  const cameraWindow = mountFlightCameraWindow(action);
   const launcher = createFlightLauncher(sim, {
     start: (id) => start({ portId: id }),
     resume: (id) => start({ savedId: id }),
@@ -142,7 +145,9 @@ export function installFreeFlight(sim, assets) {
   }
   function readouts() {
     if (!run) return;
-    panel.update(panelState());
+    const state = panelState();
+    panel.update(state);
+    cameraWindow.update(state);
     const ship = current();
     instruments.update({
       ship,
@@ -319,6 +324,9 @@ export function installFreeFlight(sim, assets) {
       sunLocal: lastQ.sunLocal,
       illumination: lastQ.illumination,
     });
+    if (!clean && run.display.preview && view === 'external') {
+      cameraWindow.draw(scene, (camera) => sky(lastQ, camera, true));
+    }
     sky(lastQ, scene.camera);
     scene.draw();
   }
@@ -384,6 +392,7 @@ export function installFreeFlight(sim, assets) {
     const disk = save && persist();
     clearInputs();
     panel.hide();
+    cameraWindow.update(null);
     instruments.update(null);
     scene.dispose();
     scene = null;
@@ -454,6 +463,7 @@ export function installFreeFlight(sim, assets) {
           } catch {}
           break;
         case 'navball':
+        case 'preview':
         case 'trail':
         case 'fine': {
           const key = name;

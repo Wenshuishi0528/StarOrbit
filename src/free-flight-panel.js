@@ -2,6 +2,8 @@ import { onLanguageChange, t } from './i18n.js';
 import { FREE_FLIGHT_RCS_DEFAULTS, FREE_FLIGHT_RCS_RANGES } from './free-flight-vessels.js';
 import { FREE_FLIGHT_LIMITS, FREE_FLIGHT_DOCKING_RANGES } from './free-flight-physics.js';
 import { PILOT_CODES } from './pilot-controls.js';
+import { mountPilotKeyGuide } from './pilot-key-guide.js';
+import { flightText } from './flight-controls-copy.js';
 
 const groups = {
   translation: [
@@ -70,7 +72,7 @@ function instructions(state) {
   if (!state.crafts?.length) return t('当前组合没有可驾驶的飞船。');
   if (state.phase === 'collision') return t('可从安全点重试，或载入已保存的任务。');
   if (state.paused) return t('时间已暂停。继续后可操纵飞船。');
-  if (state.phase === 'docked') return t('选择停靠的飞船，点「离站」开始绕飞。');
+  if (state.phase === 'docked') return flightText('已停靠。离站后可操纵飞船。');
   if (state.phase === 'departing') return t('飞船正在沿接口轴退离。');
   if (state.approach) return t('正在辅助回接。手动操纵可接管飞船。');
   if (state.hold) return t('飞船正在保持相对位置。');
@@ -102,7 +104,7 @@ export function mountFreeFlightPanel({
     <div><dt data-ft="对准误差"></dt><dd data-flight-read="angle"></dd></div>
    </dl>
    <div class="ff-primary-actions">
-    <button type="button" class="ff-primary" data-flight-action="undock" data-ft="离站"></button>
+    <button type="button" class="ff-primary ff-prominent" data-flight-action="undock" data-ft="离站，开始飞行"></button>
     <button type="button" class="ff-primary" data-flight-action="dock"></button>
     <button type="button" data-flight-action="hold"></button>
     <button type="button" data-flight-action="pause"></button>
@@ -122,6 +124,13 @@ export function mountFreeFlightPanel({
     <button type="button" data-flight-action="damping" aria-keyshortcuts="T" data-ft="SAS 稳姿 · T"></button>
    </div>
    <p class="ff-tip" data-ft="SAS 只稳定姿态；平移制动需要 RCS。"></p>
+   <div class="ff-guide-tools"><button type="button" data-flight-keyguide></button>
+    <button type="button" data-flight-action="preview" aria-controls="freeFlightCameraWindow" data-ft="对接相机小窗"></button></div>
+   <details class="ff-inputs"><summary data-ft="飞船操纵键"></summary>
+    <div class="ff-thrusters" data-flight-group="translation"></div>
+    <div class="ff-thrusters" data-flight-group="rotation"></div>
+    <button type="button" class="ff-brake" data-flight-control="brake" data-ft="按住相对制动（需 RCS）"></button>
+   </details>
    <details class="ff-settings"><summary data-ft="RCS 推力设置"></summary>
     <p data-ft="只调整当前飞船，随飞行任务保存。精细操纵使用设定值的 20%。"></p>
     <form data-flight-rcs-form>
@@ -141,11 +150,6 @@ export function mountFreeFlightPanel({
      <label><span data-ft="最大接触转速"></span><input type="number" data-flight-limit="captureAngularSpeed" required><span>°/s</span></label>
      <div><button type="submit" data-ft="应用容差"></button><button type="button" data-flight-action="docking-reset" data-ft="恢复默认容差"></button></div>
     </form>
-   </details>
-   <details class="ff-inputs"><summary data-ft="飞船操纵键"></summary>
-    <div class="ff-thrusters" data-flight-group="translation"></div>
-    <div class="ff-thrusters" data-flight-group="rotation"></div>
-    <button type="button" class="ff-brake" data-flight-control="brake" data-ft="按住相对制动（需 RCS）"></button>
    </details>
    <div class="ff-storage">
     <button type="button" data-flight-action="save" data-ft="保存任务"></button>
@@ -215,6 +219,10 @@ export function mountFreeFlightPanel({
     limitSignature = '',
     cameraSignature = '';
   const focus = () => root.focus({ preventScroll: true });
+  const guide = mountPilotKeyGuide({ mode: 'free-flight', host, takeControl: focus });
+  guide.bind(find('[data-flight-keyguide]'));
+  const primaryActions = find('.ff-primary-actions'),
+    storage = find('.ff-storage');
   function sendInput({ clear = false } = {}) {
     const active = new Set([...keys.values(), ...pointers.values()]);
     const translation = [0, 0, 0],
@@ -224,7 +232,12 @@ export function mountFreeFlightPanel({
       if (def?.group && (def.group !== 'translation' || current?.rcsEnabled !== false))
         (def.group === 'translation' ? translation : rotation)[def.axis] += def.sign;
     }
-    for (const [id, el] of buttonsByKey) setPressed(el, active.has(id));
+    for (const [id, el] of buttonsByKey) {
+      setPressed(el, active.has(id));
+      const code = controls.get(id).code;
+      if (code) guide.press(code, active.has(id));
+    }
+    guide.press('KeyF', active.has('temporarySas'));
     const brake = active.has('brake') && current?.rcsEnabled !== false;
     const temporarySas = active.has('temporarySas'),
       signature = [...translation, ...rotation, Number(brake), Number(temporarySas)].join(',');
@@ -235,6 +248,7 @@ export function mountFreeFlightPanel({
   function clearInput() {
     keys.clear();
     pointers.clear();
+    guide.clear();
     sendInput({ clear: true });
   }
   const canFly = () =>
@@ -282,6 +296,11 @@ export function mountFreeFlightPanel({
     const flying = state.phase === 'departing' || state.phase === 'free',
       docked = state.phase === 'docked',
       paused = !!state.paused;
+    guide.update({
+      ready: canFly(),
+      armed: canFly() && root === document.activeElement,
+      rcs: state.rcsEnabled !== false,
+    });
     setText(status, t(phaseNames[state.phase] || '自由飞行'));
     setText(tip, instructions(state));
     setText(read.elapsed, formatTime(state.elapsed));
@@ -291,7 +310,7 @@ export function mountFreeFlightPanel({
       setText(read.closing, readValue(state.closing, 2, 'm/s'));
       setText(read.angle, readValue(state.angle, 1, '°'));
     }
-    visibility(buttons.undock, !docked);
+    visibility(buttons.undock, !docked || paused);
     disable(buttons.undock, !state.selectedId || paused);
     visibility(buttons.dock, !flying);
     visibility(buttons.hold, !flying);
@@ -305,6 +324,14 @@ export function mountFreeFlightPanel({
     setPressed(buttons.hold, state.hold);
     setText(buttons.hold, t(state.hold ? '解除保持' : '保持位置'));
     setText(buttons.pause, t(paused ? '继续飞行' : '暂停飞行'));
+    const collision = state.phase === 'collision';
+    visibility(buttons.pause, collision);
+    buttons.pause.classList.toggle('ff-prominent', paused && !collision);
+    buttons.restore.classList.toggle('ff-prominent', collision);
+    if (collision && buttons.restore.parentElement !== primaryActions)
+      primaryActions.prepend(buttons.restore);
+    else if (!collision && buttons.restore.parentElement !== storage)
+      storage.append(buttons.restore);
     setPressed(buttons.pause, paused);
     for (const button of views) {
       setPressed(button, button.dataset.flightView === state.view);
@@ -312,6 +339,13 @@ export function mountFreeFlightPanel({
     }
     setPressed(buttons.navball, state.navball !== false);
     setPressed(buttons.trail, state.trail !== false);
+    setPressed(buttons.preview, state.preview !== false);
+    disable(buttons.preview, state.view === 'port');
+    buttons.preview.title = state.view === 'port' ? flightText('对接相机已在主画面') : '';
+    buttons.preview.setAttribute(
+      'aria-expanded',
+      String(state.preview !== false && state.view !== 'port')
+    );
     setPressed(buttons.fine, state.fine);
     setPressed(buttons.damping, state.effectiveSas ?? state.angularDamping !== false);
     buttons.damping.title = t('F 按住临时切换 SAS，松开恢复。');
@@ -334,7 +368,6 @@ export function mountFreeFlightPanel({
     }
     disable(buttons.resume, !state.hasSave);
     disable(buttons.restore, !state.hasCheckpoint);
-    visibility(details, !flying);
     const manual = canFly(),
       manualSignature = String(manual) + ':' + String(state.rcsEnabled !== false);
     if (lastManual !== manualSignature) {
@@ -346,7 +379,7 @@ export function mountFreeFlightPanel({
     }
   }
   function translate() {
-    for (const el of root.querySelectorAll('[data-ft]')) setText(el, t(el.dataset.ft));
+    for (const el of root.querySelectorAll('[data-ft]')) setText(el, flightText(el.dataset.ft));
     if (current) update(current);
   }
   const unsubscribe = onLanguageChange(translate);
@@ -459,6 +492,7 @@ export function mountFreeFlightPanel({
       return;
     const action = keyToAction.get(event.code);
     if (action) {
+      guide.press(event.code, true);
       event.preventDefault();
       event.stopPropagation();
       if (!event.repeat) onAction(action);
@@ -483,6 +517,7 @@ export function mountFreeFlightPanel({
     }
   }
   function keyUp(event) {
+    guide.press(event.code, false);
     if (!keys.delete(event.code)) return;
     event.preventDefault();
     event.stopPropagation();
@@ -531,12 +566,14 @@ export function mountFreeFlightPanel({
     },
     hide() {
       clearInput();
+      guide.show(false);
       root.hidden = true;
     },
     dispose() {
       clearInput();
       abort.abort();
       unsubscribe();
+      guide.dispose();
       root.remove();
     },
   };

@@ -121,6 +121,31 @@ const settle = (manager) =>
 const tileUrl = (tile) =>
   hipsTileUrl(tile.provider.baseUrl, tile.order, tile.pixel, tile.provider.format);
 
+// Keep the same active camera throughout a real disconnect/reconnect cycle.
+// A missing disk entry must retry on reconnect without a pan or a 60 s wait.
+{
+  const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  const network = { onLine: false };
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: network });
+  const h = harness({ source: 'dss' });
+  try {
+    const pointing = view(91, 5, 60, 512);
+    h.manager.update('held-scope', pointing);
+    await until(
+      () => h.manager.status('held-scope').failed === h.manager.status('held-scope').requested
+    );
+    assert.equal(h.calls.length, 0);
+    network.onLine = true;
+    h.manager.update('held-scope', pointing);
+    await until(() => h.manager.status('held-scope').complete);
+    assert(h.calls.length > 0);
+  } finally {
+    h.manager.dispose();
+    if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);
+    else delete globalThis.navigator;
+  }
+}
+
 // A surface eyepiece owns only its pointing and source choice. Main/scope
 // controls, in-flight requests, and manually saved survey data stay shared.
 {

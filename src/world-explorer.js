@@ -1,4 +1,5 @@
 import { createGroundFinderBackdrop } from './ground-finder-backdrop.js';
+import { attachSkyTools } from './sky-tools.js';
 import { resizeRenderSurface } from './render-surface.js';
 import * as THREE from 'three';
 import { Equator, Horizon, Observer } from 'astronomy-engine';
@@ -247,6 +248,52 @@ export function installWorldExplorer(sim) {
     onLayout: (layout) => switchGroundMode(true, layout),
     onPhoto: () => takePhoto(),
   });
+  const mainSkyActions = document.createElement('div');
+  mainSkyActions.className = 'sky-main-actions';
+  stage.append(mainSkyActions);
+  let mainSkyFrame = null;
+  const rigRay = new THREE.Raycaster();
+  function rigAt(x, y) {
+    if (!rig || !groundCamera) return false;
+    rigRay.setFromCamera({ x, y }, groundCamera);
+    return rigRay.intersectObject(rig.root, true).length > 0;
+  }
+  const groundMainTools = attachSkyTools(sim, {
+    surface: canvas,
+    controls: mainSkyActions,
+    label: 'ground',
+    detailSelection: () => ({
+      source: settings.source,
+      background: sim.environment.settings.webbBackground,
+      artworkId: sim.environment.skyDetail.artworkBySource?.[settings.source] || null,
+    }),
+    enabled: () =>
+      mode === 'ground' &&
+      starPanel.active &&
+      scopeWindow.layout === 'dock' &&
+      !locationMap.pickerOpen,
+    view: () => starPanel.skyView(mainSkyFrame, false),
+    identify: (_view, x, y, _ray, candidates) =>
+      rigAt(x, y) ? { kind: 'rig' } : starPanel.skyHit(x, y, candidates, mainSkyFrame, false),
+    canPoint: starPanel.canPointTarget,
+    point: starPanel.pointTarget,
+  });
+  const groundScopeTools = attachSkyTools(sim, {
+    surface: scopeWindow.frame,
+    controls: $('.ground-scope-actions'),
+    label: 'ocular',
+    detailSelection: () => ({
+      source: starPanel.prefs.source === 'natural' ? 'galaxy' : starPanel.prefs.source,
+      background: starPanel.prefs.background,
+      artworkId: starPanel.prefs.artworkBySource[starPanel.prefs.source] || null,
+    }),
+    enabled: () =>
+      mode === 'ground' && starPanel.active && !!scopeWindow.layout && !locationMap.pickerOpen,
+    view: () => starPanel.skyView(),
+    identify: (_view, x, y, _ray, candidates) => starPanel.skyHit(x, y, candidates),
+    canPoint: starPanel.canPointTarget,
+    point: starPanel.pointTarget,
+  });
   function aimFromMain() {
     if (!starPanel.active) return;
     starPanel.manual();
@@ -299,6 +346,7 @@ export function installWorldExplorer(sim) {
     persist();
   };
   function setScopeLayout(layout) {
+    if (layout === 'expanded') groundMainTools.release();
     scopeWindow.setLayout(layout);
     if (window.matchMedia('(max-width:800px)').matches) panel.hidden = true;
     else if (layout === 'expanded') panel.hidden = false;
@@ -369,6 +417,9 @@ export function installWorldExplorer(sim) {
       $('[data-star-site-toggle]').parentElement.after(siteTools);
       setScopeLayout(layout);
     } else {
+      groundScopeTools.release();
+      groundMainTools.release();
+      mainSkyFrame = null;
       starPanel.setActive(false);
       scopeWindow.setLayout('');
       finderBackdrop?.dispose();
@@ -1141,6 +1192,13 @@ export function installWorldExplorer(sim) {
             if (shareFrame) finderBackdrop.capture(poseKey, sim.time, wall, status);
           }
           if (observing) {
+            mainSkyFrame = {
+              status,
+              sample: reading,
+              width: w,
+              height: h,
+              blocked: (x, y) => rigAt(x, y) || groundEarth.terrainBlocksScreen(x, y),
+            };
             rig.root.position.z =
               surface.heightAt(state.site.latitude, state.site.longitude) ??
               state.site.height - state.eyeHeight;
@@ -1157,6 +1215,8 @@ export function installWorldExplorer(sim) {
         } else renderer.clear();
         if (observing) {
           scopeView.update(wall, sim.time, settings, observatory, reading);
+          if (!expanded) groundMainTools.compact(wall);
+          groundScopeTools.compact(wall);
           if (!expanded && observatory.showGuide && scopeView.view)
             scopeWindow.updateGuide(
               sky.camera,
@@ -1504,6 +1564,8 @@ export function installWorldExplorer(sim) {
       skyControls.dispose();
       earthControls.dispose();
       locationMap.dispose();
+      groundMainTools.dispose();
+      groundScopeTools.dispose();
       scopeWindow.dispose();
       starPanel.dispose();
       canvas.removeEventListener('webglcontextlost', graphicsInterrupted);

@@ -282,3 +282,279 @@ body.immersive #freeFlightPanel {
     min-height: 38px;
   }
 }
+
+/* Shared interaction instruments used in orbital and interstellar views. */
+.pilot-key-guide,
+#freeFlightCameraWindow {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: #d9e8ef;
+  background: #0b1826f5;
+  border: 1px solid #446071;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px #0005;
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+}
+.pilot-key-guide {
+  position: fixed;
+  bottom: 22px;
+  right: clamp(16px, 22vw, 326px);
+  z-index: 42;
+  width: min(370px, calc(100% - 16px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  scrollbar-width: thin;
+  container-type: inline-size;
+}
+.pilot-key-guide[hidden],
+#freeFlightCameraWindow[hidden],
+#freeFlightCameraWindow [hidden],
+body.free-flight-active #spacecraftKeyGuide {
+  display: none !important;
+}
+.pilot-guide-heading,
+.ff-camera-heading {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid #324b5c;
+}
+.pilot-guide-heading h3,
+.ff-camera-heading h3 {
+  flex: 1;
+  margin: 0;
+  font: 600 14px/1.4 system-ui;
+  color: #deecee;
+}
+.pilot-key-guide button,
+#freeFlightCameraWindow button {
+  color: #dcf2ef;
+  background: #19313f;
+  border: 1px solid #3d5a68;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font: inherit;
+}
+.pilot-key-guide button:focus-visible,
+#freeFlightCameraWindow button:focus-visible {
+  outline: 2px solid #9be4d6;
+  outline-offset: 2px;
+}
+.pilot-key-guide button:disabled,
+#freeFlightCameraWindow button:disabled {
+  opacity: 0.55;
+}
+.pilot-guide-content {
+  padding: 9px 11px;
+}
+.pilot-guide-groups {
+  display: grid;
+  grid-template-columns: 3fr 4fr;
+  gap: 10px;
+}
+.pilot-guide-groups h4 {
+  margin: 0 0 5px;
+  color: #afe6d9;
+  font: 600 11px/1.4 system-ui;
+}
+.pilot-guide-groups > :nth-child(2) h4 {
+  color: #e9cca1;
+}
+.pilot-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+.pilot-guide-groups > :nth-child(2) .pilot-guide-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.pilot-guide-key {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+.pilot-guide-key kbd {
+  display: block;
+  min-width: 1em;
+  border-radius: 4px;
+  background: #1b3342;
+  border: 1px solid #466170;
+  border-bottom: 2px solid #587484;
+  font:
+    600 12px/1.5 ui-monospace,
+    monospace;
+  color: #edf6f6;
+}
+.pilot-guide-key > span {
+  font-size: 10px;
+  color: #bed1de;
+  overflow-wrap: anywhere;
+}
+.pilot-guide-key.is-pressed kbd {
+  background: #a3e4d4;
+  color: #0d2929;
+  border-color: #d9ffee;
+}
+.pilot-guide-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 11px;
+  margin-top: 7px;
+}
+.pilot-guide-switches .pilot-guide-key {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.pilot-guide-switches kbd {
+  padding: 0 3px;
+}
+.pilot-guide-tip {
+  margin: 7px 0;
+  color: #c6d4de;
+  font: 11px/1.45 system-ui;
+}
+.pilot-key-guide[data-translation='false'] .pilot-guide-groups > :nth-child(2) kbd {
+  border-style: dashed;
+}
+.interstellar-utility {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 4px;
+  right: 14px;
+  top: 12px;
+  z-index: 5;
+  max-width: 65%;
+}
+.interstellar-utility .interstellar-panel-toggle {
+  position: static;
+}
+.world-stage #interstellarKeyGuide {
+  position: absolute;
+  top: 12px;
+  right: min(260px, 28%);
+  bottom: auto;
+  width: min(340px, 45%);
+  max-height: calc(100% - 70px);
+  z-index: 7;
+}
+@container (max-width: 260px) {
+  .pilot-guide-groups {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .pilot-guide-grid {
+    max-width: 80%;
+  }
+  .pilot-guide-groups > :nth-child(2) .pilot-guide-grid {
+    max-width: 100%;
+  }
+}
+#freeFlightPanel .ff-guide-tools {
+  display: flex;
+  gap: 6px;
+}
+#freeFlightPanel .ff-guide-tools button {
+  flex: 1;
+}
+#freeFlightPanel button.ff-prominent {
+  flex: 1 0 100%;
+  min-height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  border-color: #78c8b9;
+  background: #205448;
+  color: #f3fff9;
+}
+#freeFlightCameraWindow {
+  position: fixed;
+  right: 16px;
+  top: 16px;
+  width: min(232px, 30vw);
+  z-index: 4;
+  overflow: auto;
+  max-height: 70dvh;
+}
+.ff-camera-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: #07121d;
+}
+.ff-camera-frame > canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ff-camera-frame p {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  margin: 0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #091725dc;
+  font: 11px/1.5 system-ui;
+  color: #d4e4e9;
+}
+.ff-camera-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 5px 7px;
+  font-size: 10px;
+  color: #aac3cd;
+}
+.ff-camera-footer button {
+  flex: none;
+}
+@media (max-width: 760px) {
+  #freeFlightCameraWindow {
+    left: 8px;
+    top: 8px;
+    right: auto;
+    width: min(45vw, 220px);
+    max-height: 40dvh;
+  }
+  .ff-camera-footer {
+    flex-wrap: wrap;
+  }
+  .world-stage #interstellarKeyGuide {
+    top: 8px;
+    left: 6px;
+    right: auto;
+    width: min(47%, 250px);
+    max-height: calc(100% - 24px);
+  }
+  .world-stage:has(#interstellarKeyGuide:not([hidden])) .interstellar-map.simple:not(.collapsed) {
+    width: min(47%, 230px);
+  }
+  .interstellar-utility {
+    right: 6px;
+    top: 8px;
+  }
+  .pilot-key-guide {
+    right: 8px;
+    bottom: 8px;
+    max-height: 65dvh;
+  }
+  #freeFlightKeyGuide {
+    top: 8px;
+    bottom: auto;
+    max-height: 54dvh;
+  }
+}

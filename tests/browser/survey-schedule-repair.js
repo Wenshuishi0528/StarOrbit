@@ -12,6 +12,7 @@ async (page) => {
   await page.locator('#openFlightLab').click();
   await page.locator('#surveyTab').click();
   const lab = page.locator('#surveyPanel');
+  await lab.locator('[data-survey=show-schedule]').click();
   await lab.locator('[data-survey=new-orbit]').click();
   await page.waitForFunction(() =>
     document.querySelector('#surveyPanel .survey-schedule-time')?.textContent.includes('2026-11-06')
@@ -82,6 +83,37 @@ async (page) => {
     !rowText.some((text) => text.includes('太阳角距'))
   )
     throw Error('Missing absolute time or pointing reason');
+  const search = lab.locator('#surveyTargetSearch');
+  await search.fill('02h 30m +80°');
+  await search.press('Enter');
+  const customId = 'sky-37.5_80';
+  if (
+    (await display.inputValue()) !== customId ||
+    !(await snapshot()).every((job) => job.field === customId)
+  )
+    throw Error('Custom coordinates did not reach all four schedule rows');
+  const record = await page.evaluate(
+    () => viewer.sim.flightLab.panels.survey.getObservationRecord().record
+  );
+  if (record.fields[0]?.ra !== 37.5 || record.fields[0]?.dec !== 80)
+    throw Error('Missing custom field geometry in the saved recipe');
+  await display.selectOption(clear);
+  const restored = await page.evaluate(
+    (recipe) => viewer.sim.flightLab.panels.survey.restoreObservationRecord(recipe),
+    record
+  );
+  if (!restored || (await display.inputValue()) !== customId)
+    throw Error('Custom mosaic did not survive restoration');
+  await search.fill('火星');
+  await search.press('Enter');
+  if (
+    (await lab.locator('[data-survey=single]').isVisible()) ||
+    !(await lab.locator('[data-survey=dynamic]').isVisible())
+  )
+    throw Error('A moving target offered a fixed sky exposure');
+  await lab.locator('[data-survey=back-static]').click();
+  if ((await display.inputValue()) !== customId)
+    throw Error('Leaving a moving target lost the previous plan');
   await page.locator('#closeFlightLab').click();
   return { clear, blocked, retargeted: 4, individualEdit: true, failedPlanPreserved: true };
 };

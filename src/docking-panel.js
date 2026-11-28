@@ -1,3 +1,4 @@
+import { mountAimMarker } from './aim-marker.js';
 import * as THREE from 'three';
 import { createOrbitControls } from './camera-controls.js';
 import { t, onLanguageChange } from './i18n.js';
@@ -101,6 +102,11 @@ export function mountDockingPanel(container, sim, { templates, meta }) {
   const $ = (selector) => panel.querySelector(selector),
     get = (role) => $(`[data-role="${role}"]`),
     viewport = $('.dock-viewport');
+  const aimMarker = mountAimMarker({
+    marker: $('.dock-crosshair i'),
+    host: $('.dock-marker-host'),
+    profile: 'docking',
+  });
   for (const scenario of DOCKING_SCENARIOS) {
     const option = document.createElement('option');
     option.value = scenario.id;
@@ -1061,6 +1067,7 @@ export function mountDockingPanel(container, sim, { templates, meta }) {
       disposed = true;
       cancelAnimationFrame(frameId);
       pause();
+      aimMarker.dispose();
       display.dispose();
       resizeObserver.disconnect();
       unsubscribe();

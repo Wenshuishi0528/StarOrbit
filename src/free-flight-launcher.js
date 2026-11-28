@@ -2,6 +2,7 @@ import { flightVessel } from './free-flight-vessels.js';
 import { onLanguageChange, t } from './i18n.js';
 import { clockText } from './time-format.js';
 import { savedFlights } from './free-flight-store.js';
+import { flightText } from './flight-controls-copy.js';
 
 export const portNames = {
   TH_FORWARD: '节点前端',
@@ -30,7 +31,7 @@ export function createFlightLauncher(sim, { start, resume }) {
   document.body.append(dialog);
   dialog.innerHTML = `<div class="ff-launch-head"><h2 id="freeFlightTitle" data-launch-text="自由飞行"></h2><button type="button" data-close data-launch-text="关闭"></button></div>
   <p data-info></p><label><span data-launch-text="从当前组合出发"></span><select data-launch-craft></select></label>
-  <button type="button" class="primary" data-start data-launch-text="开始飞行"></button>
+  <button type="button" class="primary" data-start data-launch-text="进入驾驶舱"></button>
   <div data-saves><label><span data-launch-text="已保存的飞行"></span><select data-launch-save></select></label>
    <button type="button" data-resume data-launch-text="继续选中的飞行"></button></div>`;
   const find = (s) => dialog.querySelector(s),
@@ -39,7 +40,7 @@ export function createFlightLauncher(sim, { start, resume }) {
   function refresh() {
     trigger.textContent = t('自由飞行');
     for (const el of dialog.querySelectorAll('[data-launch-text]'))
-      el.textContent = t(el.dataset.launchText);
+      el.textContent = flightText(el.dataset.launchText);
     const previous = crafts.value,
       previousSave = saves.value;
     const slots = Object.entries(sim.api.state.slots).filter(([, type]) => flightVessel(type));

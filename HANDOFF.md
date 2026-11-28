@@ -1,5 +1,7 @@
 # 星轨维护与交接 / StarOrbit handoff
 
+v1.70 的现行操作见[使用手册](使用说明.md)，覆盖驾驶舱引导、巡天计划、天区定位和分视图图源。Windows 本地构建的验证范围见[验证记录](docs/verification.md)。
+
 v1.69 本机专业版入口为 StarOrbitPro.html。浏览器和命令行共用轨道、电热与影像调度模型。用湖泊示例比较同一颗星的原图直传和在轨筛选，或用归档空间站 OEM 回放并比较轨道。工程接口和当前验收分别见[数据格式](docs/formats.md#专业版任务与结果)与[验证记录](docs/verification.md#v169-观测与数传)。
 
 v1.67 主画面默认开启星图标注，舱段名称自动避让。网页版与本机版的 ES 模块入口及静态依赖合计约 7.33 MB。默认地理标注还会请求约 4.30 MB 的图集。大型数据与功能页按需加载，单文件版内联全部内容。`npm test` 并行运行 `tests/suite.json` 并汇总失败；`npm run lint` 为 ESLint；Python 测试优先使用 `.venv`（`npm run setup:python`）。
